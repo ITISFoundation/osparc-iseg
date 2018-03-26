@@ -7,8 +7,8 @@
 FIND_PACKAGE(VTK 7.1 REQUIRED 
 	COMPONENTS 
 	vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
-	vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling vtkFiltersFlowPaths vtkFiltersVerdict
-	vtkIOCore vtkIOLegacy vtkIOXML vtkIOParallel vtkIOImage vtkIOGeometry
+	vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
+	vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
 	vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
 	vtkRenderingCore vtkRenderingOpenGL vtkInteractionWidgets
 	vtksys
