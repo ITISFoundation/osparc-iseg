@@ -1,0 +1,43 @@
+<!--
+ * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * 
+ * This file is part of iSEG
+ * (see https://github.com/ITISFoundation/osparc-iseg).
+ * 
+ * This software is released under the MIT License.
+ *  https://opensource.org/licenses/MIT
+ -->
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>images/contour.png</file>
+	<file>images/edge.png</file>
+	<file>images/feature.png</file>
+	<file>images/filenew.png</file>
+	<file>images/fileopen.png</file>
+	<file>images/filesave.png</file>
+	<file>images/folderlock1.png</file>
+	<file>images/folderlock2.png</file>
+	<file>images/fuzzy.png</file>
+	<file>images/growing.png</file>
+	<file>images/help.png</file>
+	<file>images/histo.png</file>
+	<file>images/iftrg.png</file>
+	<file>images/interpolate.png</file>
+	<file>images/lock.png</file>
+	<file>images/measurement.png</file>
+	<file>images/morphology.png</file>
+	<file>images/next.png</file>
+	<file>images/olc.png</file>
+	<file>images/previous.png</file>
+	<file>images/redo.png</file>
+	<file>images/smoothing.png</file>
+	<file>images/swap.png</file>
+	<file>images/thresholding.png</file>
+	<file>images/undo.png</file>
+	<file>images/unzoom.png</file>
+	<file>images/vessel.png</file>
+	<file>images/watershed.png</file>
+	<file>images/zoomin.png</file>
+	<file>images/zoomout.png</file>
+</qresource>
+</RCC>

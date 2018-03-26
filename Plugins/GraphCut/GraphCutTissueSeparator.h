@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * 
+ * This file is part of iSEG
+ * (see https://github.com/ITISFoundation/osparc-iseg).
+ * 
+ * This software is released under the MIT License.
+ *  https://opensource.org/licenses/MIT
+ */
+#pragma once
+
+#include "Addon/qwidget1.h"
+#include "Addon/SlicesHandlerInterface.h"
+
+#include <q3vbox.h>
+#include <qlabel.h>
+#include <qpushbutton.h>
+#include <qspinbox.h>
+#include <qcombobox.h>
+#include <qcheckbox.h>
+
+
+class CGraphCutTissueSeparator : public QWidget1
+{
+	Q_OBJECT
+public:
+	CGraphCutTissueSeparator(iseg::CSliceHandlerInterface *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	~CGraphCutTissueSeparator();
+	QSize sizeHint() const;
+	void init();
+	void newloaded();
+	std::string GetName() {return std::string("Separate Tissue");};
+	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());};
+
+private:
+	iseg::CSliceHandlerInterface *m_Handler3D;
+	unsigned short m_CurrentSlice;
+	Q3VBox *m_VerticalGrid;
+	Q3HBox *m_Horizontal1;
+	Q3HBox *m_Horizontal2;
+	Q3HBox *m_Horizontal3;
+	Q3HBox *m_Horizontal4;
+	Q3HBox *m_Horizontal5;
+	QLabel *m_LabelForeground;
+	QLabel *m_LabelBackground;
+	QLabel *m_LabelMaxFlowAlgorithm;
+	QLabel *m_LabelStart;
+	QLabel *m_LabelEnd;
+	QSpinBox *m_ForegroundValue;
+	QSpinBox *m_BackgroundValue;
+	QCheckBox* USE_FB; // ?
+	QCheckBox *m_UseIntensity;
+	QComboBox *m_MaxFlowAlgorithm;
+	QCheckBox *m_6Connectivity;
+	QCheckBox *m_UseSliceRange;
+	QSpinBox *m_Start;
+	QSpinBox *m_End;
+	QPushButton *m_Execute;
+
+	public slots:
+		void slicenr_changed();
+
+	private slots:
+		void do_work();
+		void showsliders();
+};
+
