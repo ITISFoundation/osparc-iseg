@@ -13,24 +13,18 @@
 
 namespace iseg { namespace plugin {
 
-namespace
-{
-	CLevelsetAddon _register_addon;
+namespace {
+CLevelsetAddon _register_addon;
 }
 
-CLevelsetAddon::CLevelsetAddon()
-{
+CLevelsetAddon::CLevelsetAddon() {}
 
-}
+CLevelsetAddon::~CLevelsetAddon() {}
 
-CLevelsetAddon::~CLevelsetAddon()
-{
-
-}
-
-QWidget1* CLevelsetAddon::CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const
+QWidget1 *CLevelsetAddon::CreateWidget(QWidget *parent, const char *name,
+																			 Qt::WindowFlags wFlags) const
 {
 	return new CLevelset(SliceHandler(), parent, name, wFlags);
 }
 
-}}
+}} // namespace iseg::plugin

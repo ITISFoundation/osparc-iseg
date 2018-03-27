@@ -7,7 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "coef.h"
+#include "Precompiled.h"
 
-bool operator!=(coef c,unsigned short f) {return c.a!=f;}
+bool operator!=(coef c, unsigned short f) { return c.a != f; }

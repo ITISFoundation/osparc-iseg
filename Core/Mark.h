@@ -17,7 +17,7 @@
 typedef struct SMark
 {
 	SMark() {}
-	SMark(const SMark& r) : p(r.p), mark(r.mark), name(r.name) {}
+	SMark(const SMark &r) : p(r.p), mark(r.mark), name(r.name) {}
 
 	Point p;
 	unsigned mark;
@@ -32,4 +32,4 @@ typedef struct
 	std::string name;
 } augmentedmark;
 
-iSegCore_API bool operator!=(augmentedmark a,augmentedmark b);
+iSegCore_API bool operator!=(augmentedmark a, augmentedmark b);

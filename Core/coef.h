@@ -11,10 +11,11 @@
 
 #include "iSegCore.h"
 
-struct coef {
+struct coef
+{
 	unsigned short a;
 	float b;
 	float c;
 };
 
-iSegCore_API bool operator!=(coef c,unsigned short f);
+iSegCore_API bool operator!=(coef c, unsigned short f);

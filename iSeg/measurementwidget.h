@@ -11,26 +11,27 @@
 #define MEASUREWIDGET_12DEZ07
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
 #include <q3vbox.h>
+#include <qbuttongroup.h>
 #include <qcombobox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class measure_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    measure_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	measure_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~measure_widget();
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
@@ -41,8 +42,11 @@ public:
 	void getlabels();
 	float calculate();
 	float calculatevec(unsigned short orient);
-	std::string GetName() {return std::string("Measurement");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("measurement.png")).ascii());};
+	std::string GetName() { return std::string("Measurement"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("measurement.png")).ascii());
+	};
 
 private:
 	bmphandler *bmphand;
@@ -80,12 +84,13 @@ private:
 	std::vector<Point> established;
 	std::vector<Point> dynamic;
 	Point p1;
-	void set_coord(unsigned short posit,Point p,unsigned short slicenr);
+	void set_coord(unsigned short posit, Point p, unsigned short slicenr);
 
 signals:
 	void vp1_changed(std::vector<Point> *vp1);
 	void vpdyn_changed(std::vector<Point> *vpdyn);
-	void vp1dyn_changed(std::vector<Point> *vp1,std::vector<Point> *vpdyn, bool also_points = false);
+	void vp1dyn_changed(std::vector<Point> *vp1, std::vector<Point> *vpdyn,
+											bool also_points = false);
 
 private slots:
 	void marks_changed();

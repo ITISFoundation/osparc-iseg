@@ -10,12 +10,12 @@
 #pragma once
 
 #if defined(WIN32)
-#  if defined(HDF5IO_EXPORTS)
-#    define HDF5_EXPORT __declspec( dllexport ) 
-#  else
-#    define HDF5_EXPORT __declspec( dllimport ) 
-#  endif
-#  pragma warning( disable : 4251 )
+#	if defined(HDF5IO_EXPORTS)
+#		define HDF5_EXPORT __declspec(dllexport)
+#	else
+#		define HDF5_EXPORT __declspec(dllimport)
+#	endif
+#	pragma warning(disable : 4251)
 #else
-#  define HDF5_EXPORT
+#	define HDF5_EXPORT
 #endif

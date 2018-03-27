@@ -10,10 +10,10 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <QGLWidget>
-#include <QGLShaderProgram>
-#include <QGLFunctions>
 #include "window.h"
+#include <QGLFunctions>
+#include <QGLShaderProgram>
+#include <QGLWidget>
 
 class GPUMC;
 //class Window;
@@ -22,36 +22,33 @@ class GLWidget : public QGLWidget, protected QGLFunctions
 {
 	Q_OBJECT
 public:
-	GLWidget(Window *mainwin,QWidget *parent = 0);
+	GLWidget(Window *mainwin, QWidget *parent = 0);
 	~GLWidget();
 
-	bool loadData(const char* filename, int dims[3], float spacing[3]);
+	bool loadData(const char *filename, int dims[3], float spacing[3]);
 
 	QSize minimumSizeHint() const;
 	QSize sizeHint() const;
 	void initializeGL();
-	
 
-	public slots:
-		void setXRotation(int angle);
-		void setYRotation(int angle);
-		void setZRotation(int angle);
-		void setOpacity(int);
-		void setSlider(int);
+public slots:
+	void setXRotation(int angle);
+	void setYRotation(int angle);
+	void setZRotation(int angle);
+	void setOpacity(int);
+	void setSlider(int);
 
 signals:
-		void xRotationChanged(int angle);
-		void yRotationChanged(int angle);
-		void zRotationChanged(int angle);
+	void xRotationChanged(int angle);
+	void yRotationChanged(int angle);
+	void zRotationChanged(int angle);
 
 protected:
-	
 	void paintGL();
 	void resizeGL(int width, int height);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent *event);
-	
 
 private:
 	int xRot;
@@ -61,7 +58,7 @@ private:
 	QPoint lastPos;
 	QColor qtGreen;
 	QColor qtPurple;
-	Window* mainwin;
+	Window *mainwin;
 
 	std::vector<int> opacityvalues;
 	std::vector<unsigned char *> m_Voxels;
@@ -69,7 +66,7 @@ private:
 	int m_Dims[3];
 	float m_Spacing[3];
 	//GPUMC* gpumc;
-	std::vector<GPUMC*> gpumc;
+	std::vector<GPUMC *> gpumc;
 };
 
 #endif

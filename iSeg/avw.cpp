@@ -7,21 +7,22 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "avw.h"
-#include <iostream>
+#include "Precompiled.h"
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdlib.h>
 
 #ifndef _WINDOWS
 // #include <linux/types.h>
-#include <stdint.h>
+#	include <stdint.h>
 #else
-#define uint64_t __int64
+#	define uint64_t __int64
 #endif
 
-std::ifstream& ReadLineIntoIStringStream(std::ifstream& file, std::istringstream& line)
+std::ifstream &ReadLineIntoIStringStream(std::ifstream &file,
+																				 std::istringstream &line)
 {
 	// Read a line from file into stream. Consider
 	// the following possibilities for newline:
@@ -49,7 +50,7 @@ std::ifstream& ReadLineIntoIStringStream(std::ifstream& file, std::istringstream
 			break;
 		}
 	}
-	
+
 	//	Skip line feed in case of DOS file.
 	//
 	if (backslash_r == true)
@@ -59,7 +60,7 @@ std::ifstream& ReadLineIntoIStringStream(std::ifstream& file, std::istringstream
 		{
 			file.get();
 		}
-	}	
+	}
 	line.str(buffer);
 	line.seekg(0, std::ios::beg);
 	line.clear();
@@ -67,19 +68,21 @@ std::ifstream& ReadLineIntoIStringStream(std::ifstream& file, std::istringstream
 	return file;
 }
 
-
-bool avw::ReadHeader(const char *filename,unsigned short &w,unsigned short &h,unsigned short &nrofslices,float &dx1,float &dy1,float &thickness1,datatype &type)
+bool avw::ReadHeader(const char *filename, unsigned short &w, unsigned short &h,
+										 unsigned short &nrofslices, float &dx1, float &dy1,
+										 float &thickness1, datatype &type)
 {
-	bool ok=false;
+	bool ok = false;
 
 	w = h = nrofslices = 0;
-	dx1=dy1=thickness1=1.0f;
-	type=uchar;
+	dx1 = dy1 = thickness1 = 1.0f;
+	type = uchar;
 	std::ifstream file;
 	file.open(filename, std::ios::binary);
-	if (file.good()) {
+	if (file.good())
+	{
 		std::istringstream line;
-   		std::string dummy_str;
+		std::string dummy_str;
 
 		file.seekg(0, std::ios::beg);
 		ReadLineIntoIStringStream(file, line);
@@ -91,17 +94,20 @@ bool avw::ReadHeader(const char *filename,unsigned short &w,unsigned short &h,un
 
 			if (dummy_str == "AVW_UNSIGNED_CHAR")
 			{
-				type=uchar;
-			} else if (dummy_str == "AVW_SIGNED_CHAR")
+				type = uchar;
+			}
+			else if (dummy_str == "AVW_SIGNED_CHAR")
 			{
-				type=schar;
-			} else if (dummy_str == "AVW_UNSIGNED_SHORT")
+				type = schar;
+			}
+			else if (dummy_str == "AVW_UNSIGNED_SHORT")
 			{
-				type=ushort;
-			} else if (dummy_str == "AVW_SIGNED_SHORT")
+				type = ushort;
+			}
+			else if (dummy_str == "AVW_SIGNED_SHORT")
 			{
-				type=sshort;
-			}  
+				type = sshort;
+			}
 
 			//	Find width, length, height...
 			//
@@ -114,10 +120,14 @@ bool avw::ReadHeader(const char *filename,unsigned short &w,unsigned short &h,un
 
 			ReadLineIntoIStringStream(file, line);
 			std::string name;
-			while((name=ReadNameFromLine(line.str(),'='))!="EndInformation") {
-				if(name=="VoxelDepth") thickness1 = ReadValueFromLine<float>(line.str(), '=');
-				if(name=="VoxelWidth") dx1 = ReadValueFromLine<float>(line.str(), '=');
-				if(name=="VoxelHeight") dy1 = ReadValueFromLine<float>(line.str(), '=');
+			while ((name = ReadNameFromLine(line.str(), '=')) != "EndInformation")
+			{
+				if (name == "VoxelDepth")
+					thickness1 = ReadValueFromLine<float>(line.str(), '=');
+				if (name == "VoxelWidth")
+					dx1 = ReadValueFromLine<float>(line.str(), '=');
+				if (name == "VoxelHeight")
+					dy1 = ReadValueFromLine<float>(line.str(), '=');
 				ReadLineIntoIStringStream(file, line);
 			}
 
@@ -125,45 +135,51 @@ bool avw::ReadHeader(const char *filename,unsigned short &w,unsigned short &h,un
 		}
 		file.close();
 	}
-	
+
 	return ok;
 }
 
-void *avw::ReadData(const char *filename,unsigned short slicenr,unsigned short &w,unsigned short &h,datatype &type)
+void *avw::ReadData(const char *filename, unsigned short slicenr,
+										unsigned short &w, unsigned short &h, datatype &type)
 {
-	void *returnval=NULL;
+	void *returnval = NULL;
 
 	w = h = 0;
-	type=uchar;
+	type = uchar;
 	std::ifstream file;
 	file.open(filename, std::ios::binary);
-	if (file.good()) {
+	if (file.good())
+	{
 		std::istringstream line;
-   		std::string dummy_str;
+		std::string dummy_str;
 
 		file.seekg(0, std::ios::beg);
 		ReadLineIntoIStringStream(file, line);
 		line >> dummy_str;
 		if (dummy_str == "AVW_ImageFile")
 		{
-			uint64_t data_section_start = ReadValueFromLine<uint64_t>(line.str(), ' ');
+			uint64_t data_section_start =
+					ReadValueFromLine<uint64_t>(line.str(), ' ');
 
 			ReadLineIntoIStringStream(file, line);
 			dummy_str = ReadValueFromLine<std::string>(line.str(), '=');
 
 			if (dummy_str == "AVW_UNSIGNED_CHAR")
 			{
-				type=uchar;
-			} else if (dummy_str == "AVW_SIGNED_CHAR")
+				type = uchar;
+			}
+			else if (dummy_str == "AVW_SIGNED_CHAR")
 			{
-				type=schar;
-			} else if (dummy_str == "AVW_UNSIGNED_SHORT")
+				type = schar;
+			}
+			else if (dummy_str == "AVW_UNSIGNED_SHORT")
 			{
-				type=ushort;
-			} else if (dummy_str == "AVW_SIGNED_SHORT")
+				type = ushort;
+			}
+			else if (dummy_str == "AVW_SIGNED_SHORT")
 			{
-				type=sshort;
-			}  
+				type = sshort;
+			}
 
 			//	Find width, length, height...
 			//
@@ -172,30 +188,34 @@ void *avw::ReadData(const char *filename,unsigned short slicenr,unsigned short &
 			ReadLineIntoIStringStream(file, line);
 			h = ReadValueFromLine<int>(line.str(), '=');
 
-			unsigned slicedim=0;
-			if(type==uchar||type==schar) {
-				slicedim=(unsigned)w*h*sizeof(char);
-			} else if(type==ushort||type==sshort) {
-				slicedim=(unsigned)w*h*sizeof(short);
+			unsigned slicedim = 0;
+			if (type == uchar || type == schar)
+			{
+				slicedim = (unsigned)w * h * sizeof(char);
 			}
-			
-			returnval=malloc(slicedim+1);
-			data_section_start+=slicedim*slicenr;
+			else if (type == ushort || type == sshort)
+			{
+				slicedim = (unsigned)w * h * sizeof(short);
+			}
+
+			returnval = malloc(slicedim + 1);
+			data_section_start += slicedim * slicenr;
 
 			file.seekg(data_section_start);
 
-			if(returnval!=NULL) {
-				char *data=(char *)returnval;
-				file.read(data,slicedim);
-				if(file.fail()) {
+			if (returnval != NULL)
+			{
+				char *data = (char *)returnval;
+				file.read(data, slicedim);
+				if (file.fail())
+				{
 					free(returnval);
-					returnval=NULL;
+					returnval = NULL;
 				}
 			}
-			
 		}
 		file.close();
 	}
-	
+
 	return returnval;
 }

@@ -11,37 +11,38 @@
 #define LWWIDGET_17March05
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qdatetime.h>
 #include <qdialog.h>
 #include <qimage.h>
-#include <qpainter.h>
-#include <qslider.h>
-#include <q3listbox.h>
 #include <qinputdialog.h>
-#include <q3vbox.h>
-#include <qdatetime.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "Core/IFT2.h"
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
+#include "Core/IFT2.h"
 #include "Core/common.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class livewire_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    livewire_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	livewire_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+									const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~livewire_widget();
 	void init();
 	void newloaded();
@@ -52,12 +53,15 @@ public:
 	QSize sizeHint() const;
 	IFT_livewire *lw;
 	IFT_livewire *lwfirst;
-	std::string GetName() {return std::string("Contour");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("contour.png")).ascii());};
+	std::string GetName() { return std::string("Contour"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("contour.png")).ascii());
+	};
 
 private:
 	void init1();
-//	bool isactive;
+	//	bool isactive;
 	bool drawing;
 	std::vector<Point> clicks;
 	std::vector<Point> established;
@@ -87,22 +91,24 @@ private:
 	QRadioButton *straight;
 	QRadioButton *freedraw;
 	QButtonGroup *drawmode;
-	Point p1,p2;
+	Point p1, p2;
 	std::vector<int> establishedlengths;
 
 signals:
 	void vp1_changed(std::vector<Point> *vp1);
 	void vpdyn_changed(std::vector<Point> *vpdyn);
-	void vp1dyn_changed(std::vector<Point> *vp1,std::vector<Point> *vpdyn);
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void vp1dyn_changed(std::vector<Point> *vp1, std::vector<Point> *vpdyn);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
 	void bmphand_changed(bmphandler *bmph);
-//	void bmphand_changed(bmphandler *bmph);
+	//	void bmphand_changed(bmphandler *bmph);
 	void pt_clicked(Point p);
 	void pt_doubleclicked(Point p);
 	void pt_midclicked(Point p);

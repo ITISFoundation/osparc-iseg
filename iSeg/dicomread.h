@@ -13,10 +13,10 @@
 #include "Core/Pair.h"
 #include "Core/Point.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include <cerrno>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 const unsigned length = 1000; // Arbitrary buffer size
 
@@ -31,7 +31,8 @@ public:
 	bool load_pictureGDCM(const char *filename, float *bits);
 	bool load_picture(float *bits, float center, float contrast);
 	bool load_picture(float *bits, Point p, unsigned short dx, unsigned short dy);
-	bool load_picture(float *bits, float center, float contrast, Point p, unsigned short dx, unsigned short dy);
+	bool load_picture(float *bits, float center, float contrast, Point p,
+										unsigned short dx, unsigned short dy);
 	float slicepos();
 	unsigned seriesnr();
 	float thickness();

@@ -10,6 +10,11 @@
 #ifndef rgbs_250108
 #define rgbs_250108
 
-typedef struct {float r; float g; float b;} rgbs;
+typedef struct
+{
+	float r;
+	float g;
+	float b;
+} rgbs;
 
 #endif

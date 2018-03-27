@@ -11,9 +11,9 @@
 
 #include "iSegCore.h"
 
-#include "common.h"
-#include "Point.h"
 #include "Mark.h"
+#include "Point.h"
+#include "common.h"
 
 #include <vector>
 
@@ -25,14 +25,14 @@ public:
 	float *bmp_old;
 	float *work_old;
 	tissues_size_t *tissue_old;
-	std::vector<std::vector<mark> > vvm_old;
-	std::vector<std::vector<Point> > limits_old;
+	std::vector<std::vector<mark>> vvm_old;
+	std::vector<std::vector<Point>> limits_old;
 	std::vector<mark> marks_old;
 	float *bmp_new;
 	float *work_new;
 	tissues_size_t *tissue_new;
-	std::vector<std::vector<mark> > vvm_new;
-	std::vector<std::vector<Point> > limits_new;
+	std::vector<std::vector<mark>> vvm_new;
+	std::vector<std::vector<Point>> limits_new;
 	std::vector<mark> marks_new;
 	unsigned char mode1_old;
 	unsigned char mode1_new;
@@ -52,15 +52,15 @@ public:
 	std::vector<float *> vbmp_old;
 	std::vector<float *> vwork_old;
 	std::vector<tissues_size_t *> vtissue_old;
-	std::vector<std::vector<std::vector<mark> > > vvvm_old;
-	std::vector<std::vector<std::vector<Point> > > vlimits_old;
-	std::vector<std::vector<mark> > vmarks_old;
+	std::vector<std::vector<std::vector<mark>>> vvvm_old;
+	std::vector<std::vector<std::vector<Point>>> vlimits_old;
+	std::vector<std::vector<mark>> vmarks_old;
 	std::vector<float *> vbmp_new;
 	std::vector<float *> vwork_new;
 	std::vector<tissues_size_t *> vtissue_new;
-	std::vector<std::vector<std::vector<mark> > > vvvm_new;
-	std::vector<std::vector<std::vector<Point> > > vlimits_new;
-	std::vector<std::vector<mark> > vmarks_new;
+	std::vector<std::vector<std::vector<mark>>> vvvm_new;
+	std::vector<std::vector<std::vector<Point>>> vlimits_new;
+	std::vector<std::vector<mark>> vmarks_new;
 	std::vector<unsigned char> vmode1_old;
 	std::vector<unsigned char> vmode1_new;
 	std::vector<unsigned char> vmode2_old;

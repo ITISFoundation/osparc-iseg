@@ -13,10 +13,8 @@
 
 #include <string>
 
+namespace iseg { namespace plugin {
+iSegCore_API bool LoadPlugin(const std::string &plugin_file_path);
 
-namespace iseg { namespace plugin
-{
-	iSegCore_API bool LoadPlugin(const std::string& plugin_file_path);
-	
-	iSegCore_API bool LoadPlugins(const std::string& directory_path);
-}}
+iSegCore_API bool LoadPlugins(const std::string &directory_path);
+}} // namespace iseg::plugin

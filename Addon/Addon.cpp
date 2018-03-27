@@ -11,27 +11,14 @@
 
 namespace iseg { namespace plugin {
 
-namespace
-{
-	std::vector<CAddon*> _addons;
+namespace {
+std::vector<CAddon *> _addons;
 }
 
-std::vector<CAddon*> CAddonRegistry::GetAllAddons()
-{
-	return _addons;
-}
+std::vector<CAddon *> CAddonRegistry::GetAllAddons() { return _addons; }
 
+CAddon::CAddon() { _addons.push_back(this); }
 
-CAddon::CAddon()
-{
-	_addons.push_back(this);
-}
+CAddon::~CAddon() {}
 
-CAddon::~CAddon()
-{
-
-}
-
-
-
-}}
+}} // namespace iseg::plugin

@@ -7,21 +7,21 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "InitializeITKFactory.h"
+#include "Precompiled.h"
 
 #include <itkImageIOFactory.h>
 
-#include <itkObjectFactoryBase.h>
 #include <itkMetaImageIOFactory.h>
 #include <itkNiftiImageIOFactory.h>
 #include <itkNrrdImageIOFactory.h>
+#include <itkObjectFactoryBase.h>
 #include <itkVTKImageIOFactory.h>
 
 #include <itkGDCMImageIOFactory.h>
 
-#include <itkPNGImageIOFactory.h>
 #include <itkJPEGImageIOFactory.h>
+#include <itkPNGImageIOFactory.h>
 #include <itkTIFFImageIOFactory.h>
 
 #include <boost/thread/once.hpp>

@@ -21,8 +21,10 @@ public:
 	k_means();
 	~k_means();
 
-	void init(short unsigned w, short unsigned h, short nrclass, short dimension, float **bit, float *weight);
-	void init(short unsigned w, short unsigned h, short nrclass, short dimension, float **bit, float *weight, float *center);
+	void init(short unsigned w, short unsigned h, short nrclass, short dimension,
+						float **bit, float *weight);
+	void init(short unsigned w, short unsigned h, short nrclass, short dimension,
+						float **bit, float *weight, float *center);
 	unsigned make_iter(unsigned maxiter, unsigned converged);
 	void return_m(float *result_bits);
 	void apply_to(float **sources, float *result_bits);
@@ -30,7 +32,8 @@ public:
 	void init_centers();
 	void init_centers_rand();
 	/// BL TODO allocates centers using malloc -> probably never freed
-	bool get_centers_from_file(const std::string &fileName, float* &centers, int &dimensions, int &classes);
+	bool get_centers_from_file(const std::string &fileName, float *&centers,
+														 int &dimensions, int &classes);
 	float *return_centers();
 
 private:

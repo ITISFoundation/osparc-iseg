@@ -7,14 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "feature_extractor.h"
+#include "Precompiled.h"
 
 #include <algorithm>
 
 using namespace std;
 
-void feature_extractor::init(float *bit, Point p1, Point p2, short unsigned w, short unsigned h)
+void feature_extractor::init(float *bit, Point p1, Point p2, short unsigned w,
+														 short unsigned h)
 {
 	width = w;
 	height = h;
@@ -36,15 +37,17 @@ void feature_extractor::set_window(Point p1, Point p2)
 	xmax = max(p1.px, p2.px);
 	ymin = min(p1.py, p2.py);
 	ymax = max(p1.py, p2.py);
-	area = unsigned(ymax - ymin + 1)*(xmax - xmin + 1);
-	valmin = valmax = bits[unsigned(ymin)*width + xmin];
+	area = unsigned(ymax - ymin + 1) * (xmax - xmin + 1);
+	valmin = valmax = bits[unsigned(ymin) * width + xmin];
 
 	average = 0;
-	for (short i = xmin; i <= xmax; i++) {
-		for (short j = ymin; j <= ymax; j++) {
-			average += bits[unsigned(j)*width + i];
-			valmin = min(valmin, bits[unsigned(j)*width + i]);
-			valmax = max(valmax, bits[unsigned(j)*width + i]);
+	for (short i = xmin; i <= xmax; i++)
+	{
+		for (short j = ymin; j <= ymax; j++)
+		{
+			average += bits[unsigned(j) * width + i];
+			valmin = min(valmin, bits[unsigned(j) * width + i]);
+			valmax = max(valmax, bits[unsigned(j) * width + i]);
 		}
 	}
 
@@ -53,23 +56,25 @@ void feature_extractor::set_window(Point p1, Point p2)
 	return;
 }
 
-float feature_extractor::return_average()
-{
-	return average;
-}
+float feature_extractor::return_average() { return average; }
 
 float feature_extractor::return_stddev()
 {
-	if (area != 1) {
+	if (area != 1)
+	{
 		float stddev = 0;
-		for (short i = xmin; i <= xmax; i++) {
-			for (short j = ymin; j <= ymax; j++) {
-				stddev += (bits[unsigned(j)*width + i] - average)*(bits[unsigned(j)*width + i] - average);
+		for (short i = xmin; i <= xmax; i++)
+		{
+			for (short j = ymin; j <= ymax; j++)
+			{
+				stddev += (bits[unsigned(j) * width + i] - average) *
+									(bits[unsigned(j) * width + i] - average);
 			}
 		}
 		return sqrt(stddev / (area - 1));
 	}
-	else return 1E10;
+	else
+		return 1E10;
 }
 
 void feature_extractor::return_extrema(Pair *p)
@@ -82,7 +87,8 @@ void feature_extractor::return_extrema(Pair *p)
 class feature_extractor_mask
 {
 public:
-	void init(float *bit, float *mask1, short unsigned w, short unsigned h, float f1);
+	void init(float *bit, float *mask1, short unsigned w, short unsigned h,
+						float f1);
 	void set_bits(float *bit);
 	void set_mask(float *mask1);
 	void set_f(float f1);
@@ -102,8 +108,8 @@ private:
 	float *mask;
 };
 
-
-void feature_extractor_mask::init(float *bit, float *mask1, short unsigned w, short unsigned h, float f1)
+void feature_extractor_mask::init(float *bit, float *mask1, short unsigned w,
+																	short unsigned h, float f1)
 {
 	width = w;
 	height = h;
@@ -125,12 +131,16 @@ void feature_extractor_mask::set_mask(float *mask1)
 	area = 0;
 	unsigned pos = 0;
 	mask = mask1;
-	while (mask[pos] == 0 && pos<unsigned(width)*height) pos++;
-	if (pos<unsigned(width)*height) {
+	while (mask[pos] == 0 && pos < unsigned(width) * height)
+		pos++;
+	if (pos < unsigned(width) * height)
+	{
 		valmin = valmax = bits[pos];
 		average = 0;
-		for (; pos<unsigned(width)*height; pos++) {
-			if (mask[pos] != 0) {
+		for (; pos < unsigned(width) * height; pos++)
+		{
+			if (mask[pos] != 0)
+			{
 				area++;
 				average += bits[pos];
 				valmin = min(valmin, bits[pos]);
@@ -140,7 +150,8 @@ void feature_extractor_mask::set_mask(float *mask1)
 
 		average /= area;
 	}
-	else {
+	else
+	{
 		average = 0;
 		area = 0;
 	}
@@ -156,24 +167,25 @@ void feature_extractor_mask::set_f(float f1)
 	return;
 }
 
-float feature_extractor_mask::return_average()
-{
-	return average;
-}
+float feature_extractor_mask::return_average() { return average; }
 
 float feature_extractor_mask::return_stddev()
 {
-	if (area > 1) {
+	if (area > 1)
+	{
 		float stddev = 0;
-		for (unsigned pos = 0; pos<unsigned(width)*height; pos++) {
-			if (mask[pos] != 0) {
-				stddev += (bits[pos] - average)*(bits[pos] - average);
+		for (unsigned pos = 0; pos < unsigned(width) * height; pos++)
+		{
+			if (mask[pos] != 0)
+			{
+				stddev += (bits[pos] - average) * (bits[pos] - average);
 			}
 		}
 
 		return sqrt(stddev / (area - 1));
 	}
-	else return 1E10;
+	else
+		return 1E10;
 }
 
 void feature_extractor_mask::return_extrema(Pair *p)

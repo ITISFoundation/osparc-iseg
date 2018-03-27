@@ -1,4 +1,4 @@
-# iSEG
+#iSEG
 
 ![iSEG logo](iSeg/images/isegicon.png)
 

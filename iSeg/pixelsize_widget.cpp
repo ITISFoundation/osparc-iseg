@@ -7,25 +7,26 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "pixelsize_widget.h"
+#include "Precompiled.h"
 #include "SlicesHandler.h"
 
 #include "Core/common.h"
 
-#include <qpushbutton.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qwidget.h>
-#include <qstring.h>
-#include <qlayout.h>
-#include <qlabel.h>
 #include <qapplication.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qstring.h>
+#include <qwidget.h>
 
 using namespace std;
 
-PixelResize::PixelResize(SlicesHandler *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+PixelResize::PixelResize(SlicesHandler *hand3D, QWidget *parent,
+												 const char *name, Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -44,8 +45,10 @@ PixelResize::PixelResize(SlicesHandler *hand3D, QWidget *parent, const char *nam
 	dy = p1.low;
 	le_dx = new QLineEdit(QString::number(p1.high), vbox3);
 	le_dy = new QLineEdit(QString::number(p1.low), vbox3);
-	le_lx = new QLineEdit(QString::number(p1.high * handler3D->return_width()), vbox3);
-	le_ly = new QLineEdit(QString::number(p1.low * handler3D->return_height()), vbox3);
+	le_lx = new QLineEdit(QString::number(p1.high * handler3D->return_width()),
+												vbox3);
+	le_ly = new QLineEdit(QString::number(p1.low * handler3D->return_height()),
+												vbox3);
 
 	pb_resize = new QPushButton("Resize", hbox2);
 	pb_close = new QPushButton("Close", hbox2);
@@ -61,18 +64,19 @@ PixelResize::PixelResize(SlicesHandler *hand3D, QWidget *parent, const char *nam
 
 	QObject::connect(pb_resize, SIGNAL(clicked()), this, SLOT(resize_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dx, SIGNAL(textChanged(const QString &)), this, SLOT(dx_changed()));
-	QObject::connect(le_dy, SIGNAL(textChanged(const QString &)), this, SLOT(dy_changed()));
-	QObject::connect(le_lx, SIGNAL(textChanged(const QString &)), this, SLOT(lx_changed()));
-	QObject::connect(le_ly, SIGNAL(textChanged(const QString &)), this, SLOT(ly_changed()));
+	QObject::connect(le_dx, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dx_changed()));
+	QObject::connect(le_dy, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dy_changed()));
+	QObject::connect(le_lx, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(lx_changed()));
+	QObject::connect(le_ly, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(ly_changed()));
 
 	return;
 }
 
-PixelResize::~PixelResize()
-{
-	delete vbox1;
-}
+PixelResize::~PixelResize() { delete vbox1; }
 
 void PixelResize::dx_changed()
 {
@@ -171,9 +175,9 @@ Pair PixelResize::return_pixelsize()
 	return p1;
 }
 
-
-DisplacementDialog::DisplacementDialog(SlicesHandler *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+DisplacementDialog::DisplacementDialog(SlicesHandler *hand3D, QWidget *parent,
+																			 const char *name, Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -204,17 +208,17 @@ DisplacementDialog::DisplacementDialog(SlicesHandler *hand3D, QWidget *parent, c
 
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dispx, SIGNAL(textChanged(const QString &)), this, SLOT(dispx_changed()));
-	QObject::connect(le_dispy, SIGNAL(textChanged(const QString &)), this, SLOT(dispy_changed()));
-	QObject::connect(le_dispz, SIGNAL(textChanged(const QString &)), this, SLOT(dispz_changed()));
+	QObject::connect(le_dispx, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dispx_changed()));
+	QObject::connect(le_dispy, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dispy_changed()));
+	QObject::connect(le_dispz, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dispz_changed()));
 
 	return;
 }
 
-DisplacementDialog::~DisplacementDialog()
-{
-	delete vbox1;
-}
+DisplacementDialog::~DisplacementDialog() { delete vbox1; }
 
 void DisplacementDialog::dispx_changed()
 {
@@ -288,8 +292,9 @@ void DisplacementDialog::return_displacement(float disp[3])
 	return;
 }
 
-RotationDialog::RotationDialog(SlicesHandler *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+RotationDialog::RotationDialog(SlicesHandler *hand3D, QWidget *parent,
+															 const char *name, Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	handler3D->get_direction_cosines(directionCosines);
 
@@ -299,7 +304,10 @@ RotationDialog::RotationDialog(SlicesHandler *hand3D, QWidget *parent, const cha
 	// Description
 	hbox1 = new Q3HBox(vbox1);
 	hbox1->setMargin(5);
-	lb_descr = new QLabel(QString("Direction cosines of the first row and first column\nof the data set w.r.t. the world coordinate system."), hbox1);
+	lb_descr = new QLabel(
+			QString("Direction cosines of the first row and first column\nof the "
+							"data set w.r.t. the world coordinate system."),
+			hbox1);
 
 	// Values
 	hbox2 = new Q3HBox(vbox1);
@@ -328,24 +336,27 @@ RotationDialog::RotationDialog(SlicesHandler *hand3D, QWidget *parent, const cha
 
 	vbox1->setFixedSize(vbox1->sizeHint());
 
-	QObject::connect(pb_orthonorm, SIGNAL(clicked()), this, SLOT(orthonorm_pressed()));
+	QObject::connect(pb_orthonorm, SIGNAL(clicked()), this,
+									 SLOT(orthonorm_pressed()));
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dca, SIGNAL(textChanged(const QString &)), this, SLOT(dca_changed()));
-	QObject::connect(le_dcb, SIGNAL(textChanged(const QString &)), this, SLOT(dcb_changed()));
-	QObject::connect(le_dcc, SIGNAL(textChanged(const QString &)), this, SLOT(dcc_changed()));
-	QObject::connect(le_dcx, SIGNAL(textChanged(const QString &)), this, SLOT(dcx_changed()));
-	QObject::connect(le_dcy, SIGNAL(textChanged(const QString &)), this, SLOT(dcy_changed()));
-	QObject::connect(le_dcz, SIGNAL(textChanged(const QString &)), this, SLOT(dcz_changed()));
+	QObject::connect(le_dca, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dca_changed()));
+	QObject::connect(le_dcb, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dcb_changed()));
+	QObject::connect(le_dcc, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dcc_changed()));
+	QObject::connect(le_dcx, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dcx_changed()));
+	QObject::connect(le_dcy, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dcy_changed()));
+	QObject::connect(le_dcz, SIGNAL(textChanged(const QString &)), this,
+									 SLOT(dcz_changed()));
 
 	return;
 }
 
-RotationDialog::~RotationDialog()
-{
-	delete vbox1;
-}
-
+RotationDialog::~RotationDialog() { delete vbox1; }
 
 void RotationDialog::ParseValue(QLineEdit *le, unsigned short dcIndex)
 {
@@ -449,9 +460,10 @@ void RotationDialog::return_direction_cosines(float dc[6])
 	return;
 }
 
-ResizeDialog::ResizeDialog(SlicesHandler *hand3D, eResizeType type1, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
-	, resizetype(type1)
+ResizeDialog::ResizeDialog(SlicesHandler *hand3D, eResizeType type1,
+													 QWidget *parent, const char *name,
+													 Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D), resizetype(type1)
 {
 	mainBox = new Q3HBox(this);
 	vbox1 = new Q3VBox(mainBox);
@@ -464,7 +476,6 @@ ResizeDialog::ResizeDialog(SlicesHandler *hand3D, eResizeType type1, QWidget *pa
 
 	vImagebox1 = new Q3VBox(mainBox);
 	vImagebox1->setFixedSize(QSize(400, 400));
-
 
 	m_ImageSourceLabel = new ImagePVLabel(vImagebox1);
 	m_ImageSourceLabel->setFixedSize(vImagebox1->size());
@@ -596,10 +607,14 @@ ResizeDialog::ResizeDialog(SlicesHandler *hand3D, eResizeType type1, QWidget *pa
 
 	vbox1->setFixedSize(vbox1->sizeHint());
 
-	QObject::connect(sb_dxm, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetXMin(int)));
-	QObject::connect(sb_dxp, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetXMax(int)));
-	QObject::connect(sb_dym, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetYMax(int)));
-	QObject::connect(sb_dyp, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetYMin(int)));
+	QObject::connect(sb_dxm, SIGNAL(valueChanged(int)), m_ImageSourceLabel,
+									 SLOT(SetXMin(int)));
+	QObject::connect(sb_dxp, SIGNAL(valueChanged(int)), m_ImageSourceLabel,
+									 SLOT(SetXMax(int)));
+	QObject::connect(sb_dym, SIGNAL(valueChanged(int)), m_ImageSourceLabel,
+									 SLOT(SetYMax(int)));
+	QObject::connect(sb_dyp, SIGNAL(valueChanged(int)), m_ImageSourceLabel,
+									 SLOT(SetYMin(int)));
 
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
@@ -607,10 +622,7 @@ ResizeDialog::ResizeDialog(SlicesHandler *hand3D, eResizeType type1, QWidget *pa
 	return;
 }
 
-ResizeDialog::~ResizeDialog()
-{
-	delete vbox1;
-}
+ResizeDialog::~ResizeDialog() { delete vbox1; }
 
 void ResizeDialog::set_pressed()
 {
@@ -623,7 +635,8 @@ void ResizeDialog::set_pressed()
 	accept();
 }
 
-void ResizeDialog::return_padding(int &dxm, int &dxp, int &dym, int &dyp, int &dzm, int &dzp)
+void ResizeDialog::return_padding(int &dxm, int &dxp, int &dym, int &dyp,
+																	int &dzm, int &dzp)
 {
 	if (resizetype == kCrop)
 	{
@@ -646,9 +659,8 @@ void ResizeDialog::return_padding(int &dxm, int &dxp, int &dym, int &dyp, int &d
 	return;
 }
 
-
 ImagePVLabel::ImagePVLabel(QWidget *parent, Qt::WindowFlags f)
-	: QLabel(parent, f)
+		: QLabel(parent, f)
 {
 	m_XMin = 0;
 	m_XMax = 0;
@@ -703,12 +715,10 @@ void ImagePVLabel::paintEvent(QPaintEvent *e)
 	else
 		widthOffset = (m_Height - m_Width) / 2;
 
-
 	QPainterPath square;
-	square.addRect(
-		(m_XMin + widthOffset) / m_Scale,
-		(m_YMin + heightOffset) / m_Scale,
-		(m_Width - 1 - m_XMax - m_XMin) / m_Scale,
-		(m_Height - 1 - m_YMax - m_YMin) / m_Scale);
+	square.addRect((m_XMin + widthOffset) / m_Scale,
+								 (m_YMin + heightOffset) / m_Scale,
+								 (m_Width - 1 - m_XMax - m_XMin) / m_Scale,
+								 (m_Height - 1 - m_YMax - m_YMin) / m_Scale);
 	painter.drawPath(square);
 }

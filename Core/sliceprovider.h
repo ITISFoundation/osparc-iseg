@@ -12,10 +12,9 @@
 
 #include "iSegCore.h"
 
-#include <stack>
-#include <list>
 #include <cstdlib>
-
+#include <list>
+#include <stack>
 
 class iSegCore_API sliceprovider
 {
@@ -57,17 +56,19 @@ private:
 	static unsigned short counter;
 	std::list<spobj> splist;
 	bool delete_unused = true;
-	sliceprovider_installer() {};
+	sliceprovider_installer(){};
 	sliceprovider_installer(sliceprovider_installer const &);
-	sliceprovider_installer & operator=(sliceprovider_installer const & rhs);
-	class Waechter {
-	public: ~Waechter() {
-		if (sliceprovider_installer::inst != NULL)
-			delete sliceprovider_installer::inst;
-	}
+	sliceprovider_installer &operator=(sliceprovider_installer const &rhs);
+	class Waechter
+	{
+	public:
+		~Waechter()
+		{
+			if (sliceprovider_installer::inst != NULL)
+				delete sliceprovider_installer::inst;
+		}
 	};
 	friend class Waechter;
 };
-
 
 #endif

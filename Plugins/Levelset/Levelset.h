@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "Addon/qwidget1.h"
 #include "Addon/SlicesHandlerInterface.h"
+#include "Addon/qwidget1.h"
 
 #include <q3vbox.h>
 #include <qlabel.h>
@@ -21,13 +21,17 @@ class CLevelset : public QWidget1
 {
 	Q_OBJECT
 public:
-	CLevelset(iseg::CSliceHandlerInterface *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	CLevelset(iseg::CSliceHandlerInterface *hand3D, QWidget *parent = 0,
+						const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~CLevelset();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
-	std::string GetName() {return std::string("LevelSet");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("LevelSet.png")).ascii());};
+	std::string GetName() { return std::string("LevelSet"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("LevelSet.png")).ascii());
+	};
 
 private:
 	unsigned int *usp;
@@ -49,9 +53,9 @@ private:
 	QLabel *txt_h5;
 	QSpinBox *sl_h5;
 
-	public slots:
-		void slicenr_changed();
+public slots:
+	void slicenr_changed();
 
-	private slots:
-		void do_work();
+private slots:
+	void do_work();
 };

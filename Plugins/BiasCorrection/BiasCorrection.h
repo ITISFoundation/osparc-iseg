@@ -11,23 +11,26 @@
 
 #include <vector>
 
-#include "Addon/qwidget1.h"
 #include "Addon/SlicesHandlerInterface.h"
+#include "Addon/qwidget1.h"
 
 #include <q3vbox.h>
+#include <qcheckbox.h>
 #include <qlabel.h>
+#include <qlineedit.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
-#include <qlineedit.h>
-#include <qcheckbox.h>
 
-namespace itk { class ProcessObject; }
+namespace itk {
+class ProcessObject;
+}
 
 class CBiasCorrection : public QWidget1
 {
 	Q_OBJECT
 public:
-	CBiasCorrection(iseg::CSliceHandlerInterface *hand3D, QWidget *parent = 0, const char *name = 0, Qt::WindowFlags wFlags = 0);
+	CBiasCorrection(iseg::CSliceHandlerInterface *hand3D, QWidget *parent = 0,
+									const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~CBiasCorrection();
 
 	QSize sizeHint() const override;
@@ -39,7 +42,8 @@ public:
 protected:
 	template<typename ImagePointer>
 	ImagePointer DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
-		const std::vector<unsigned int> &numIters, int shrinkFactor, double convergenceThreshold);
+																const std::vector<unsigned int> &numIters,
+																int shrinkFactor, double convergenceThreshold);
 
 private:
 	iseg::CSliceHandlerInterface *handler3D;

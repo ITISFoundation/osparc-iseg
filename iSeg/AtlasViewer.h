@@ -11,33 +11,36 @@
 #define ATLAS_VIEWER
 
 #include "widgetcollection.h"
-#include <qevent.h> 
-#include <qwidget.h>
-#include <qimage.h>
-#include <qpoint.h>
+#include <QScrollArea>
 #include <q3action.h>
-#include <qcheckbox.h>
 #include <q3vbox.h>
+#include <qcheckbox.h>
+#include <qevent.h>
+#include <qimage.h>
 #include <qlabel.h>
+#include <qpoint.h>
 #include <qpushbutton.h>
 #include <qslider.h>
-#include <QScrollArea>
+#include <qwidget.h>
 //Added by qt3to4:
+#include "Core/Pair.h"
+#include "Core/Point.h"
+#include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <QCloseEvent>
 #include <vector>
-#include "Core/Point.h"
-#include "Core/Pair.h"
 
 class AtlasViewer : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasViewer(float *bmpbits1, tissues_size_t *tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1,
-		float dx1, float dy1, float dz1, std::vector<float> *r, std::vector<float> *g, 	std::vector<float> *b, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	AtlasViewer(float *bmpbits1, tissues_size_t *tissue1, unsigned char orient1,
+							unsigned short dimx1, unsigned short dimy1, unsigned short dimz1,
+							float dx1, float dy1, float dz1, std::vector<float> *r,
+							std::vector<float> *g, std::vector<float> *b, QWidget *parent = 0,
+							const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasViewer();
 	void init();
 	void update();
@@ -63,7 +66,7 @@ private:
 
 	unsigned short width, height, slicenr;
 	unsigned short dimx, dimy, dimz;
-	float dx,dy,dz;
+	float dx, dy, dz;
 	float tissueopac;
 	float *bmpbits;
 	tissues_size_t *tissue;
@@ -86,7 +89,6 @@ public slots:
 	void orient_changed(unsigned char orient1);
 	void set_tissueopac(float tissueopac1);
 	void pixelsize_changed(Pair pixelsize1);
-
 };
 
 #endif //ATLAS_VIEWER

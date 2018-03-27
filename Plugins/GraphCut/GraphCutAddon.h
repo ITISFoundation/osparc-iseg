@@ -11,33 +11,39 @@
 
 #include "Addon/Addon.h"
 
-namespace iseg { namespace plugin
+namespace iseg { namespace plugin {
+
+class CGCBoneSegmentationAddon : public CAddon
 {
+public:
+	CGCBoneSegmentationAddon();
+	~CGCBoneSegmentationAddon();
 
+	virtual std::string Name() const { return "CT Auto-Bone"; }
 
-	class CGCBoneSegmentationAddon : public CAddon
+	virtual std::string Description() const
 	{
-	public:
-		CGCBoneSegmentationAddon();
-		~CGCBoneSegmentationAddon();
+		return "Automatic bone segmentation in CT images using graph-cut method.";
+	}
 
-		virtual std::string Name() const { return "CT Auto-Bone";  }
+	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
+																 Qt::WindowFlags wFlags) const;
+};
 
-		virtual std::string Description() const { return "Automatic bone segmentation in CT images using graph-cut method.";  }
+class CGCTissueSeparatorAddon : public CAddon
+{
+public:
+	CGCTissueSeparatorAddon();
+	~CGCTissueSeparatorAddon();
 
-		virtual QWidget1* CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const;
-	};
+	virtual std::string Name() const { return "Tissue Separator"; }
 
-	class CGCTissueSeparatorAddon : public CAddon
+	virtual std::string Description() const
 	{
-	public:
-		CGCTissueSeparatorAddon();
-		~CGCTissueSeparatorAddon();
+		return "Separate tissue using only minor user-input.";
+	}
 
-		virtual std::string Name() const { return "Tissue Separator"; }
-
-		virtual std::string Description() const { return "Separate tissue using only minor user-input."; }
-
-		virtual QWidget1* CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const;
-	};
-}}
+	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
+																 Qt::WindowFlags wFlags) const;
+};
+}} // namespace iseg::plugin

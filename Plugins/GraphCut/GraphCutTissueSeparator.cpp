@@ -14,15 +14,17 @@
 
 #include "ImageGraphCut3DFilter.h"
 
-#include <itkImage.h>
-#include <itkGrayscaleErodeImageFilter.h>
-#include <itkFlatStructuringElement.h>
 #include <itkConnectedComponentImageFilter.h>
+#include <itkFlatStructuringElement.h>
+#include <itkGrayscaleErodeImageFilter.h>
+#include <itkImage.h>
 #include <itkLabelShapeKeepNObjectsImageFilter.h>
 #include <itksys/SystemTools.hxx>
 
-CGraphCutTissueSeparator::CGraphCutTissueSeparator(iseg::CSliceHandlerInterface *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), m_Handler3D(hand3D)
+CGraphCutTissueSeparator::CGraphCutTissueSeparator(
+		iseg::CSliceHandlerInterface *hand3D, QWidget *parent, const char *name,
+		Qt::WindowFlags wFlags)
+		: QWidget1(parent, name, wFlags), m_Handler3D(hand3D)
 {
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 
@@ -51,7 +53,7 @@ CGraphCutTissueSeparator::CGraphCutTissueSeparator(iseg::CSliceHandlerInterface 
 
 	m_6Connectivity = new QCheckBox(QString("6-Connectivity"), m_VerticalGrid);
 
-	// TODO: this should re-use active-slices 
+	// TODO: this should re-use active-slices
 	m_UseSliceRange = new QCheckBox(QString("Slice Range:"), m_VerticalGrid);
 
 	m_Horizontal4 = new Q3HBox(m_VerticalGrid);
@@ -72,7 +74,8 @@ CGraphCutTissueSeparator::CGraphCutTissueSeparator(iseg::CSliceHandlerInterface 
 	m_VerticalGrid->setFixedHeight(m_VerticalGrid->sizeHint().height());
 
 	QObject::connect(m_Execute, SIGNAL(clicked()), this, SLOT(do_work()));
-	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this, SLOT(showsliders()));
+	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this,
+									 SLOT(showsliders()));
 	/*
 	activeslice = handler3D->get_activeslice();
 
@@ -128,22 +131,20 @@ CGraphCutTissueSeparator::CGraphCutTissueSeparator(iseg::CSliceHandlerInterface 
 
 void CGraphCutTissueSeparator::showsliders()
 {
-	if (m_UseSliceRange->isChecked() == true)
-	{
+	if (m_UseSliceRange->isChecked() == true) {
 		m_Start->setMaximum(m_Handler3D->return_endslice());
 		m_Start->setEnabled(true);
 		m_End->setMaximum(m_Handler3D->return_endslice());
 		m_End->setValue(m_Handler3D->return_endslice());
 		m_End->setEnabled(true);
 	}
-	else
-	{
+	else {
 		m_Start->setEnabled(false);
 		m_End->setEnabled(false);
 	}
 }
 
-void CGraphCutTissueSeparator::do_work()//Code for special GC for division
+void CGraphCutTissueSeparator::do_work() //Code for special GC for division
 {
 	typedef itk::Image<float, 3> TInput;
 	typedef itk::Image<float, 3> TMask;
@@ -151,7 +152,8 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 	typedef TInput TBackground;
 	typedef TMask TOutput;
 	typedef itk::Image<int, 3> TIntImage;
-	typedef itk::ImageGraphCut3DFilter<TInput, TForeground, TBackground, TOutput> GraphCutFilterType;
+	typedef itk::ImageGraphCut3DFilter<TInput, TForeground, TBackground, TOutput>
+			GraphCutFilterType;
 	auto graphCutFilter = GraphCutFilterType::New();
 
 	auto input = TInput::New();
@@ -166,13 +168,13 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 	background = input;
 	if (USE_FB) // ?
 	{
-		if (m_UseSliceRange->isChecked() == true)
-		{
-			m_Handler3D->GetITKImageFB(foreground, m_Start->value() - 1, m_End->value());
-			m_Handler3D->GetITKImageFB(background, m_Start->value() - 1, m_End->value());
+		if (m_UseSliceRange->isChecked() == true) {
+			m_Handler3D->GetITKImageFB(foreground, m_Start->value() - 1,
+																 m_End->value());
+			m_Handler3D->GetITKImageFB(background, m_Start->value() - 1,
+																 m_End->value());
 		}
-		else
-		{
+		else {
 			m_Handler3D->GetITKImageFB(foreground);
 			m_Handler3D->GetITKImageFB(background);
 		}
@@ -182,7 +184,9 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 	graphCutFilter->SetForegroundImage(foreground);
 	graphCutFilter->SetBackgroundImage(background);
 	// set parameters
-	graphCutFilter->SetMaxFlowAlgorithm(static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(m_MaxFlowAlgorithm->currentItem()));
+	graphCutFilter->SetMaxFlowAlgorithm(
+			static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
+					m_MaxFlowAlgorithm->currentItem()));
 	graphCutFilter->SetForegroundPixelValue(255);
 	graphCutFilter->SetBackgroundPixelValue(-255);
 	graphCutFilter->SetSigma(0.2);
@@ -195,8 +199,7 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 	if (m_6Connectivity->isChecked())
 		graphCutFilter->SetConnectivity(true);
 
-	if (input->GetLargestPossibleRegion().GetSize(2) > 1)
-	{
+	if (input->GetLargestPossibleRegion().GetSize(2) > 1) {
 		graphCutFilter->Update();
 		TOutput *output;
 		output = graphCutFilter->GetOutput();
@@ -205,29 +208,27 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 		rad.Fill(1);
 
 		typedef itk::ShapedNeighborhoodIterator<TOutput> IteratorType;
-		IteratorType::OffsetType center = { {0, 0, 0} };
+		IteratorType::OffsetType center = {{0, 0, 0}};
 		typedef itk::ShapedNeighborhoodIterator<TInput> IteratorType2;
-		IteratorType2::OffsetType center2 = { {0, 0, 0} };
+		IteratorType2::OffsetType center2 = {{0, 0, 0}};
 
 		IteratorType iterator(rad, output, output->GetLargestPossibleRegion());
-		IteratorType2 iterator2(rad, foreground, foreground->GetLargestPossibleRegion());
+		IteratorType2 iterator2(rad, foreground,
+														foreground->GetLargestPossibleRegion());
 		iterator.ClearActiveList();
 		iterator.ActivateOffset(center);
 		iterator2.ClearActiveList();
 		iterator2.ActivateOffset(center2);
 
 		iterator2.GoToBegin();
-		for (iterator.GoToBegin(); !iterator.IsAtEnd(); ++iterator)
-		{
+		for (iterator.GoToBegin(); !iterator.IsAtEnd(); ++iterator) {
 			bool pixelIsValid;
 			TInput::PixelType centerPixel = iterator.GetPixel(center, pixelIsValid);
-			if (!pixelIsValid)
-			{
+			if (!pixelIsValid) {
 				continue;
 			}
 			TOutput::PixelType centerPixeloutput = iterator2.GetPixel(center2);
-			if (centerPixeloutput == 0)
-			{
+			if (centerPixeloutput == 0) {
 				iterator.SetCenterPixel(0);
 			}
 			++iterator2;
@@ -235,7 +236,8 @@ void CGraphCutTissueSeparator::do_work()//Code for special GC for division
 
 		output->Update();
 		if (m_UseSliceRange->isChecked() == true)
-			m_Handler3D->ModifyWorkFloat(output, m_Start->value() - 1, m_End->value());
+			m_Handler3D->ModifyWorkFloat(output, m_Start->value() - 1,
+																	 m_End->value());
 		else
 			m_Handler3D->ModifyWorkFloat(output);
 	}
@@ -246,10 +248,7 @@ QSize CGraphCutTissueSeparator::sizeHint() const
 	return m_VerticalGrid->sizeHint();
 }
 
-CGraphCutTissueSeparator::~CGraphCutTissueSeparator()
-{
-	delete m_VerticalGrid;
-}
+CGraphCutTissueSeparator::~CGraphCutTissueSeparator() { delete m_VerticalGrid; }
 
 void CGraphCutTissueSeparator::slicenr_changed()
 {
@@ -266,5 +265,3 @@ void CGraphCutTissueSeparator::newloaded()
 {
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 }
-
-

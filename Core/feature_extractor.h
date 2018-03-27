@@ -11,8 +11,8 @@
 
 #include "iSegCore.h"
 
-#include "Point.h"
 #include "Pair.h"
+#include "Point.h"
 
 class iSegCore_API feature_extractor
 {

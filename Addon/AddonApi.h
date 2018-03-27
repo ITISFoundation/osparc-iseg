@@ -11,6 +11,6 @@
 
 #ifdef Addon_EXPORTS
 #	define ADDON_API __declspec(dllexport)
-#else 
+#else
 #	define ADDON_API __declspec(dllimport)
 #endif

@@ -14,19 +14,19 @@
 
 #include "Core/common.h"
 
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
-#include <qslider.h>
 #include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qsize.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
 #include <q3mimefactory.h>
+#include <qpixmap.h>
 
 #include <algorithm>
 
@@ -35,9 +35,10 @@ class bmphandler;
 
 class watershed_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-	watershed_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	watershed_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+									 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~watershed_widget();
 	QSize sizeHint() const;
 	void init();
@@ -45,8 +46,11 @@ public:
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
 	void hideparams_changed();
-	std::string GetName() {return std::string("Watershed");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("watershed.png")).ascii());};
+	std::string GetName() { return std::string("Watershed"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("watershed.png")).ascii());
+	};
 
 private:
 	unsigned int *usp;
@@ -66,8 +70,10 @@ private:
 	void recalc1();
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -82,6 +88,5 @@ private slots:
 	void execute();
 	void recalc();
 };
-
 
 #endif

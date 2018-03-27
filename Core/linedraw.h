@@ -9,10 +9,9 @@
  */
 #pragma once
 
-#include "iSegCore.h"
 #include "Point.h"
+#include "iSegCore.h"
 
 #include <vector>
 
-iSegCore_API void addLine(std::vector<Point> *vP,Point p1,Point p2);
-
+iSegCore_API void addLine(std::vector<Point> *vP, Point p1, Point p2);

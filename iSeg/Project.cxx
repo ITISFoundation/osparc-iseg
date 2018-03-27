@@ -7,15 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
+#include "Project.h"
 #include "Precompiled.h"
 #include <QString>
-#include "Project.h"
 
 Project::Project()
 {
-	m_loadprojfilename1=QString("");
-	m_loadprojfilename2=QString("");
-	m_loadprojfilename3=QString("");
-	m_loadprojfilename4=QString("");
-	m_filename=QString("");
+	m_loadprojfilename1 = QString("");
+	m_loadprojfilename2 = QString("");
+	m_loadprojfilename3 = QString("");
+	m_loadprojfilename4 = QString("");
+	m_filename = QString("");
 }

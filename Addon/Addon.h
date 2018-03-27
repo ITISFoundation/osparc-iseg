@@ -12,41 +12,42 @@
 #include <string>
 #include <vector>
 
-#include "qwidget1.h"
-#include "SlicesHandlerInterface.h"
 #include "AddonApi.h"
+#include "SlicesHandlerInterface.h"
+#include "qwidget1.h"
 
-namespace iseg 
-{
-	class CSliceHandlerInterface;
+namespace iseg {
+class CSliceHandlerInterface;
 }
 
-namespace iseg { namespace plugin
+namespace iseg { namespace plugin {
+
+class ADDON_API CAddon
 {
+public:
+	CAddon();
+	~CAddon();
 
-	class ADDON_API CAddon
+	void SetSliceHandler(CSliceHandlerInterface *slice_handler)
 	{
-	public:
-		CAddon();
-		~CAddon();
+		_slice_handler = slice_handler;
+	}
+	CSliceHandlerInterface *SliceHandler() const { return _slice_handler; }
 
-		void SetSliceHandler(CSliceHandlerInterface* slice_handler) { _slice_handler = slice_handler; }
-		CSliceHandlerInterface* SliceHandler() const { return _slice_handler; }
+	virtual std::string Name() const = 0;
 
-		virtual std::string Name() const = 0;
+	virtual std::string Description() const = 0;
 
-		virtual std::string Description() const = 0;
+	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
+																 Qt::WindowFlags wFlags) const = 0;
 
-		virtual QWidget1* CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const = 0;
+private:
+	CSliceHandlerInterface *_slice_handler;
+};
 
-	private:
-		CSliceHandlerInterface* _slice_handler;
-	};
-
-
-	class ADDON_API CAddonRegistry
-	{
-	public:
-		static std::vector<CAddon*> GetAllAddons();
-	};
-}}
+class ADDON_API CAddonRegistry
+{
+public:
+	static std::vector<CAddon *> GetAllAddons();
+};
+}} // namespace iseg::plugin

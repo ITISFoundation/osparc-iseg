@@ -7,27 +7,29 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include <algorithm>
 #include "Levelset.h"
+#include <algorithm>
 
 #include <itkImage.h>
 
-#include <itkThresholdSegmentationLevelSetImageFilter.h>
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkFastMarchingImageFilter.h>
+#include <itkThresholdSegmentationLevelSetImageFilter.h>
 
 #include <sstream>
 
-
-CLevelset::CLevelset(iseg::CSliceHandlerInterface *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+CLevelset::CLevelset(iseg::CSliceHandlerInterface *hand3D, QWidget *parent,
+										 const char *name, Qt::WindowFlags wFlags)
+		: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->get_activeslice();
 
 	usp = NULL;
 
 	vbox1 = new Q3VBox(this);
-	bias_header = new QLabel("LevelSetSegmentation: (Pick with OLC Foreground 1 pixel to start)", vbox1);
+	bias_header = new QLabel(
+			"LevelSetSegmentation: (Pick with OLC Foreground 1 pixel to start)",
+			vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
 	hbox4 = new Q3HBox(vbox1);
@@ -55,13 +57,13 @@ void CLevelset::do_work()
 	typedef itk::Image<float, 3> TInput;
 	typedef itk::Image<float, 3> TMask;
 	typedef TMask TOutput;
-	typedef  itk::ThresholdSegmentationLevelSetImageFilter<TInput, TInput > ThresholdSegmentationLevelSetImageFilterType;
+	typedef itk::ThresholdSegmentationLevelSetImageFilter<TInput, TInput>
+			ThresholdSegmentationLevelSetImageFilterType;
 	ThresholdSegmentationLevelSetImageFilterType::Pointer thresholdSegmentation;
 	thresholdSegmentation = ThresholdSegmentationLevelSetImageFilterType::New();
 
-
-	typedef  itk::FastMarchingImageFilter< TInput, TInput >FastMarchingFilterType;
-	FastMarchingFilterType::Pointer  fastMarching;
+	typedef itk::FastMarchingImageFilter<TInput, TInput> FastMarchingFilterType;
+	FastMarchingFilterType::Pointer fastMarching;
 	fastMarching = FastMarchingFilterType::New();
 
 	typedef FastMarchingFilterType::NodeContainer NodeContainer;
@@ -90,17 +92,14 @@ void CLevelset::do_work()
 	fastMarching->SetOutputOrigin(input->GetOrigin());
 	fastMarching->SetOutputDirection(input->GetDirection());
 
-
-	typedef itk::BinaryThresholdImageFilter<TInput, TOutput> ThresholdingFilterType;
+	typedef itk::BinaryThresholdImageFilter<TInput, TOutput>
+			ThresholdingFilterType;
 	ThresholdingFilterType::Pointer thresholder;
 	thresholder = ThresholdingFilterType::New();
 	thresholder->SetLowerThreshold(-5000.0);
 	thresholder->SetUpperThreshold(0);
 	thresholder->SetOutsideValue(0);
 	thresholder->SetInsideValue(255);
-
-
-
 
 	thresholdSegmentation->SetPropagationScaling(1.0);
 	thresholdSegmentation->SetCurvatureScaling(1.0);
@@ -109,7 +108,6 @@ void CLevelset::do_work()
 	thresholdSegmentation->SetUpperThreshold(sl_h3->value());
 	thresholdSegmentation->SetLowerThreshold(sl_h2->value());
 	thresholdSegmentation->SetIsoSurfaceValue(0.0);
-
 
 	//Ensure that it is a 3D image for the 3D image filter ! Else it does nothing
 	TOutput *output;
@@ -121,10 +119,7 @@ void CLevelset::do_work()
 	handler3D->ModifyWorkFloat(output);
 }
 
-QSize CLevelset::sizeHint() const
-{
-	return vbox1->sizeHint();
-}
+QSize CLevelset::sizeHint() const { return vbox1->sizeHint(); }
 
 CLevelset::~CLevelset()
 {
@@ -153,5 +148,3 @@ void CLevelset::newloaded()
 
 	activeslice = handler3D->get_activeslice();
 }
-
-

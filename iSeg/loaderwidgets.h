@@ -10,34 +10,35 @@
 #ifndef LOADERWIDGET
 #define LOADERWIDGET
 
-#include <qpushbutton.h>
+#include "Core/Point.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3boxlayout.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <q3boxlayout.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
 #include <qbuttongroup.h>
-#include <qdialog.h>
-#include <qstringlist.h>
+#include <qcheckbox.h>
 #include <qcombobox.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
-#include "Core/Point.h"
-
+#include <qdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qspinbox.h>
+#include <qstringlist.h>
+#include <qwidget.h>
 
 class LoaderDicom : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    LoaderDicom(SlicesHandler *hand3D, QStringList *lname, bool breload,QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderDicom(SlicesHandler *hand3D, QStringList *lname, bool breload,
+							QWidget *parent = 0, const char *name = 0,
+							Qt::WindowFlags wFlags = 0);
 	~LoaderDicom();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -87,12 +88,13 @@ private slots:
 
 class LoaderBmp : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    LoaderBmp(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderBmp(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+						Qt::WindowFlags wFlags = 0);
 	~LoaderBmp();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -130,7 +132,6 @@ private:
 	QLabel *lb_slicenr;
 	QLabel *lb_nrslices;
 
-
 private slots:
 	void subsect_toggled(bool isset);
 	void subsect_toggled();
@@ -142,13 +143,15 @@ class LoaderBmp2 : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderBmp2(SlicesHandler *hand3D, std::vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderBmp2(SlicesHandler *hand3D, std::vector<const char *> filenames,
+						 QWidget *parent = 0, const char *name = 0,
+						 Qt::WindowFlags wFlags = 0);
 	~LoaderBmp2();
 	//	void update();
 	//protected:
 
 private:
-	std::vector<const char *>m_filenames;
+	std::vector<const char *> m_filenames;
 	SlicesHandler *handler3D;
 	short unsigned w;
 	short unsigned h;
@@ -173,7 +176,6 @@ private:
 	QLabel *yoffs;
 	QLabel *xl;
 	QLabel *yl;
-
 
 private slots:
 	void subsect_toggled(bool isset);
@@ -185,13 +187,15 @@ class LoaderPng : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderPng(SlicesHandler *hand3D, std::vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderPng(SlicesHandler *hand3D, std::vector<const char *> filenames,
+						QWidget *parent = 0, const char *name = 0,
+						Qt::WindowFlags wFlags = 0);
 	~LoaderPng();
 	//	void update();
 	//protected:
 
 private:
-	std::vector<const char *>m_filenames;
+	std::vector<const char *> m_filenames;
 	SlicesHandler *handler3D;
 	short unsigned w;
 	short unsigned h;
@@ -217,11 +221,10 @@ private:
 	QLabel *xl;
 	QLabel *yl;
 
-
-	private slots:
-		void subsect_toggled(bool isset);
-		void subsect_toggled();
-		void load_pushed();
+private slots:
+	void subsect_toggled(bool isset);
+	void subsect_toggled();
+	void load_pushed();
 };
 
 class ClickablaLabel : public QLabel
@@ -229,12 +232,13 @@ class ClickablaLabel : public QLabel
 	Q_OBJECT
 
 public:
-	ClickablaLabel( QWidget* parent = 0, Qt::WindowFlags f = 0 );
-	ClickablaLabel( const QString& text, QWidget* parent = 0, Qt::WindowFlags f = 0 );
+	ClickablaLabel(QWidget *parent = 0, Qt::WindowFlags f = 0);
+	ClickablaLabel(const QString &text, QWidget *parent = 0,
+								 Qt::WindowFlags f = 0);
 
-	void SetSquareWidth( int width );
-	void SetSquareHeight( int height );
-	void SetCenter( QPoint newCenter );
+	void SetSquareWidth(int width);
+	void SetSquareHeight(int height);
+	void SetCenter(QPoint newCenter);
 
 private:
 	int centerX;
@@ -243,11 +247,11 @@ private:
 	int squareHeight;
 
 signals:
-	void newCenterPreview( QPoint point );
+	void newCenterPreview(QPoint point);
 
 private slots:
-	void mousePressEvent( QMouseEvent* ev );
-	void paintEvent(QPaintEvent * e);
+	void mousePressEvent(QMouseEvent *ev);
+	void paintEvent(QPaintEvent *e);
 };
 
 class ChannelMixer : public QDialog
@@ -255,7 +259,8 @@ class ChannelMixer : public QDialog
 	Q_OBJECT
 public:
 	//ChannelMixer(SlicesHandler *hand3D, vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
-	ChannelMixer(std::vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	ChannelMixer(std::vector<const char *> filenames, QWidget *parent = 0,
+							 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~ChannelMixer();
 
 	int GetRedFactor();
@@ -263,54 +268,54 @@ public:
 	int GetBlueFactor();
 
 private:
-	std::vector<const char *>m_filenames;
+	std::vector<const char *> m_filenames;
 	SlicesHandler *handler3D;
-	
-	Q3VBox* vboxMain;
 
-	Q3HBox* hboxImageAndControl;
-	
-	Q3VBox* hboxControl;
-	Q3HBox* hboxButtons;
+	Q3VBox *vboxMain;
 
-	Q3HBox* hboxImageSource;
+	Q3HBox *hboxImageAndControl;
+
+	Q3VBox *hboxControl;
+	Q3HBox *hboxButtons;
+
+	Q3HBox *hboxImageSource;
 	ClickablaLabel *imageSourceLabel;
 
-	Q3HBox* hboxImage;
+	Q3HBox *hboxImage;
 	QLabel *imageLabel;
-	
-	Q3HBox* vboxRed;
-	Q3HBox* vboxBlue;
-	Q3HBox* vboxGreen;
-	Q3HBox* vboxSlice;
 
-	QLabel* labelRed;
-	QSlider* sliderRed;
-	QLineEdit* labelRedValue;
-	QRadioButton* buttonRed;
+	Q3HBox *vboxRed;
+	Q3HBox *vboxBlue;
+	Q3HBox *vboxGreen;
+	Q3HBox *vboxSlice;
 
-	QLabel* labelGreen;
-	QSlider* sliderGreen;
-	QLineEdit* labelGreenValue;
-	QRadioButton* buttonGreen;
+	QLabel *labelRed;
+	QSlider *sliderRed;
+	QLineEdit *labelRedValue;
+	QRadioButton *buttonRed;
 
-	QLabel* labelBlue;
-	QSlider* sliderBlue;
-	QLineEdit* labelBlueValue;
-	QRadioButton* buttonBlue;
+	QLabel *labelGreen;
+	QSlider *sliderGreen;
+	QLineEdit *labelGreenValue;
+	QRadioButton *buttonGreen;
 
-	QLabel* labelPreviewAlgorithm;
+	QLabel *labelBlue;
+	QSlider *sliderBlue;
+	QLineEdit *labelBlueValue;
+	QRadioButton *buttonBlue;
 
-	QSpinBox* spinSlice;
-	QLabel* labelSliceValue;
+	QLabel *labelPreviewAlgorithm;
 
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
+	QSpinBox *spinSlice;
+	QLabel *labelSliceValue;
+
+	QPushButton *loadFile;
+	QPushButton *cancelBut;
 
 	int redFactor;
 	int greenFactor;
 	int blueFactor;
-	
+
 	int redFactorPV;
 	int greenFactorPV;
 	int blueFactorPV;
@@ -331,13 +336,12 @@ public slots:
 	void RefreshImage();
 
 protected:
-
 	QImage ConvertImageTo8BitBMP(QImage image, int width, int height);
 	void ChangePreview();
 	void UpdateText();
 
 protected slots:
-	void NewCenterPreview( QPoint newCenter );
+	void NewCenterPreview(QPoint newCenter);
 
 private slots:
 
@@ -363,13 +367,15 @@ class LoaderJpg : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderJpg(SlicesHandler *hand3D, std::vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderJpg(SlicesHandler *hand3D, std::vector<const char *> filenames,
+						QWidget *parent = 0, const char *name = 0,
+						Qt::WindowFlags wFlags = 0);
 	~LoaderJpg();
 	//	void update();
 	//protected:
 
 private:
-	std::vector<const char *>m_filenames;
+	std::vector<const char *> m_filenames;
 	SlicesHandler *handler3D;
 	short unsigned w;
 	short unsigned h;
@@ -395,23 +401,23 @@ private:
 	QLabel *xl;
 	QLabel *yl;
 
-
-	private slots:
-		void subsect_toggled(bool isset);
-		void subsect_toggled();
-		void load_pushed();
+private slots:
+	void subsect_toggled(bool isset);
+	void subsect_toggled();
+	void load_pushed();
 };
 
 class LoaderRaw : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    LoaderRaw(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	LoaderRaw(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+						Qt::WindowFlags wFlags = 0);
 	~LoaderRaw();
 
 	QString GetFileName();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -467,12 +473,13 @@ private slots:
 
 class SaverImg : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    SaverImg(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	SaverImg(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+					 Qt::WindowFlags wFlags = 0);
 	~SaverImg();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -506,7 +513,6 @@ private:
 	QRadioButton *single1;
 	QRadioButton *all1;
 
-
 private slots:
 	void save_pushed();
 	void select_pushed();
@@ -515,12 +521,13 @@ private slots:
 
 class ReloaderBmp : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    ReloaderBmp(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	ReloaderBmp(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+							Qt::WindowFlags wFlags = 0);
 	~ReloaderBmp();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -549,12 +556,13 @@ private slots:
 	void select_pushed();
 };
 
-
 class ReloaderBmp2 : public QDialog
 {
 	Q_OBJECT
 public:
-	ReloaderBmp2(SlicesHandler *hand3D, std::vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	ReloaderBmp2(SlicesHandler *hand3D, std::vector<const char *> filenames,
+							 QWidget *parent = 0, const char *name = 0,
+							 Qt::WindowFlags wFlags = 0);
 	~ReloaderBmp2();
 	//	void update();
 	//protected:
@@ -583,12 +591,13 @@ private slots:
 
 class ReloaderRaw : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    ReloaderRaw(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	ReloaderRaw(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+							Qt::WindowFlags wFlags = 0);
 	~ReloaderRaw();
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -599,7 +608,7 @@ private:
 	Q3HBox *hbox4;
 	Q3HBox *hbox5;
 	Q3HBox *hbox6;
-//	QHBox *hbox7;
+	//	QHBox *hbox7;
 	Q3VBox *vbox1;
 	Q3VBox *vbox2;
 	QPushButton *selectFile;
@@ -610,7 +619,7 @@ private:
 	QSpinBox *xlength1;
 	QSpinBox *ylength1;
 	QSpinBox *slicenrbox;
-//	QSpinBox *sb_startnr;
+	//	QSpinBox *sb_startnr;
 	QCheckBox *subsect;
 	QLineEdit *nameEdit;
 	QLabel *fileName;
@@ -622,7 +631,7 @@ private:
 	QLabel *yoffs;
 	QLabel *xl1;
 	QLabel *yl1;
-//	QLabel *lb_startnr;
+	//	QLabel *lb_startnr;
 
 private slots:
 	void subsect_toggled();
@@ -632,14 +641,15 @@ private slots:
 
 class NewImg : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    NewImg(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	NewImg(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+				 Qt::WindowFlags wFlags = 0);
 	~NewImg();
 
 	bool new_pressed() const;
-//	void update();
-//protected:
+	//	void update();
+	//protected:
 
 private:
 	SlicesHandler *handler3D;
@@ -666,11 +676,11 @@ class EditText : public QDialog
 {
 	Q_OBJECT
 public:
-
-	void set_editable_text( QString editable_text );
+	void set_editable_text(QString editable_text);
 	QString get_editable_text();
 
-	EditText(QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	EditText(QWidget *parent = 0, const char *name = 0,
+					 Qt::WindowFlags wFlags = 0);
 	~EditText();
 
 private:
@@ -688,40 +698,32 @@ class SupportedMultiDatasetTypes : public QDialog
 {
 	Q_OBJECT
 public:
-
-	enum supportedTypes
-	{
-		bmp,
-		dcm,
-		nifti,
-		raw,
-		vtk,
-		nrSupportedTypes
-	};
+	enum supportedTypes { bmp, dcm, nifti, raw, vtk, nrSupportedTypes };
 
 	inline QString ToQString(supportedTypes v)
 	{
 		switch (v)
 		{
-			case bmp:   return "BMP";
-			case dcm:   return "DICOM";
-			case nifti: return "NIfTI";
-			case raw:   return "RAW";
-			case vtk:   return "VTK";
-			default:    return "[unsupported]";
+		case bmp: return "BMP";
+		case dcm: return "DICOM";
+		case nifti: return "NIfTI";
+		case raw: return "RAW";
+		case vtk: return "VTK";
+		default: return "[unsupported]";
 		}
 	}
 
 	int GetSelectedType();
 
-	SupportedMultiDatasetTypes(QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	SupportedMultiDatasetTypes(QWidget *parent = 0, const char *name = 0,
+														 Qt::WindowFlags wFlags = 0);
 	~SupportedMultiDatasetTypes();
 
 private:
 	Q3HBoxLayout *hboxoverall;
 	Q3VBoxLayout *vboxoverall;
 
-	std::vector<QRadioButton*> m_RadioButs;
+	std::vector<QRadioButton *> m_RadioButs;
 
 	QPushButton *selectBut;
 	QPushButton *cancelBut;

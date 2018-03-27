@@ -34,12 +34,13 @@ class vtkEdgeTable;
 class vtkTemplateTriangulator : public vtkObject
 {
 public:
-	vtkTypeMacro(vtkTemplateTriangulator,vtkObject);
-	void PrintSelf(ostream& os, vtkIndent indent);
+	vtkTypeMacro(vtkTemplateTriangulator, vtkObject);
+	void PrintSelf(ostream &os, vtkIndent indent);
 
 	/// Divide tetrahedron given domain labels at corners
 	/// \note does not support nodes on interface (with more than one label)
-	void AddMultipleDomainTetrahedron(const vtkIdType currentTetra[4], const int domain[4]);
+	void AddMultipleDomainTetrahedron(const vtkIdType currentTetra[4],
+																		const int domain[4]);
 
 protected:
 	vtkTemplateTriangulator();
@@ -53,35 +54,32 @@ protected:
 	vtkIdType AddPoint(double p[3]) { return AddPoint(p[0], p[1], p[2]); }
 
 	/// Add tetrahedron to mesh
-	virtual void AddTetrahedron(vtkIdType v0,vtkIdType v1,vtkIdType v2,vtkIdType v3, 
-		int domain) = 0;
+	virtual void AddTetrahedron(vtkIdType v0, vtkIdType v1, vtkIdType v2,
+															vtkIdType v3, int domain) = 0;
 
 	/// Subdivide pyramid: the quad is defined by nodes 1-4, the tip by node 5
-	int AddPyramid(vtkIdType v0,vtkIdType v1,vtkIdType v2,vtkIdType v3,
-		vtkIdType v4, 
-		int domain);
+	int AddPyramid(vtkIdType v0, vtkIdType v1, vtkIdType v2, vtkIdType v3,
+								 vtkIdType v4, int domain);
 
 	/// Subdivide prism: nodes 1-3 bottom triangle, 4-6 top triangle
-	int AddPrism(vtkIdType v0,vtkIdType v1,vtkIdType v2,
-		vtkIdType v3,vtkIdType v4,vtkIdType v5, 
-		int domain);
+	int AddPrism(vtkIdType v0, vtkIdType v1, vtkIdType v2, vtkIdType v3,
+							 vtkIdType v4, vtkIdType v5, int domain);
 
 	/// Subdivide hexahedron: nodes 1-4 bottom quad, 5-8 top quad, single domain
 	/// \note The convention corresponds to VTK_HEXAHEDRON (not VTK_VOXEL)
-	int AddHexahedron(vtkIdType v0,vtkIdType v1,vtkIdType v2,vtkIdType v3,
-		vtkIdType v4,vtkIdType v5,vtkIdType v6,vtkIdType v7, 
-		int domain);
+	int AddHexahedron(vtkIdType v0, vtkIdType v1, vtkIdType v2, vtkIdType v3,
+										vtkIdType v4, vtkIdType v5, vtkIdType v6, vtkIdType v7,
+										int domain);
 
 	/// Determine subdivision case from lookup table
-	short DetermineTetraSubdivisionCase(short code[6], short edgeMap[6] = NULL, 
-		short vertexMap[4] = NULL, short triangleMap[4] = NULL);
-
+	short DetermineTetraSubdivisionCase(short code[6], short edgeMap[6] = NULL,
+																			short vertexMap[4] = NULL,
+																			short triangleMap[4] = NULL);
 
 	class vtkPimple;
-	vtkPimple* Pimple;
+	vtkPimple *Pimple;
 
 private:
-	vtkTemplateTriangulator(const vtkTemplateTriangulator&);  // Not implemented.
-	void operator=(const vtkTemplateTriangulator&);  // Not implemented.
-
+	vtkTemplateTriangulator(const vtkTemplateTriangulator &); // Not implemented.
+	void operator=(const vtkTemplateTriangulator &);					// Not implemented.
 };

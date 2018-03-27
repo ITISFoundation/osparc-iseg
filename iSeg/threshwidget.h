@@ -11,34 +11,35 @@
 #define THRESHWIDGET_24Feb05
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qdialog.h>
 #include <qimage.h>
-#include <qpainter.h>
-#include <qslider.h>
-#include <q3listbox.h>
 #include <qinputdialog.h>
-#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class thresh_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    thresh_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	thresh_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~thresh_widget();
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
@@ -46,8 +47,11 @@ public:
 	void init();
 	void newloaded();
 	void hideparams_changed();
-	std::string GetName() {return std::string("Threshold");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("thresholding.png")).ascii());};
+	std::string GetName() { return std::string("Threshold"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("thresholding.png")).ascii());
+	};
 
 private:
 	bmphandler *bmphand;
@@ -63,7 +67,7 @@ private:
 	Q3HBox *hbox3;
 	Q3HBox *hbox4;
 	Q3HBox *hbox5;
-//	Q3HBox *hbox6;
+	//	Q3HBox *hbox6;
 	Q3HBox *hbox7;
 	Q3HBox *hbox8;
 	Q3HBox *hboxfilenames;
@@ -102,7 +106,7 @@ private:
 	QSpinBox *sb_minpix;
 	QPushButton *pushexec;
 	QPushButton *pushfilename;
-//	QPushButton *pushrange;
+	//	QPushButton *pushrange;
 	QCheckBox *subsect;
 	QRadioButton *rb_manual;
 	QRadioButton *rb_histo;
@@ -110,7 +114,7 @@ private:
 	QRadioButton *rb_EM;
 	QButtonGroup *modegroup;
 	QCheckBox *allslices;
-	float lower,upper;
+	float lower, upper;
 	float threshs[21];
 	float weights[20];
 	float *bits[20];
@@ -126,13 +130,15 @@ private:
 	QCheckBox *buttonB;
 	QCheckBox *buttonA;
 	QCheckBox *cb_useCenterFile;
-	QLineEdit* le_centerFilename;
-	QPushButton* pushcenterFilename;
+	QLineEdit *le_centerFilename;
+	QPushButton *pushcenterFilename;
 	QString centerFilename;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -154,8 +160,8 @@ private slots:
 	void loadborders_execute();
 	void le_borderval_returnpressed();
 	void select_pushed();
-	void RGBA_changed( int change );
-	void useCenterFile_changed( int change );
+	void RGBA_changed(int change);
+	void useCenterFile_changed(int change);
 	void selectCenterFile_pushed();
 };
 

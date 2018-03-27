@@ -33,8 +33,10 @@ public:
 
 	void Translate(int offsetX, int offsetY, bool apply = true);
 	void Rotate(double angle, int centerX, int centerY, bool apply = true);
-	void Scale(double factorX, double factorY, int centerX, int centerY, bool apply = true);
-	void Shear(double angle, bool shearXAxis, int axisPosition, bool apply = true);
+	void Scale(double factorX, double factorY, int centerX, int centerY,
+						 bool apply = true);
+	void Shear(double angle, bool shearXAxis, int axisPosition,
+						 bool apply = true);
 	void Flip(bool flipXAxis, int axisPosition, bool apply = true);
 	void Matrix(double *inverseMatrix, bool apply = true);
 
@@ -63,7 +65,7 @@ private:
 	tissues_size_t *originalTissues;
 
 	// Transformation
-	double transformMatrix[3*3];
+	double transformMatrix[3 * 3];
 	bool transformSource;
 	bool transformTarget;
 	bool transformTissues;

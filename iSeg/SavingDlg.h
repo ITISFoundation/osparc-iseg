@@ -10,17 +10,17 @@
 #include <qmessagebox.h>
 #include <qwidget.h>
 
-class SavingDlg: public QMessageBox
+class SavingDlg : public QMessageBox
 {
 	Q_OBJECT
 
 public:
-	SavingDlg(QWidget *parent=0);
+	SavingDlg(QWidget *parent = 0);
 
 	int exec();
-	
+
 public slots:
 	void accept();
-	void OKButtonClicked(QAbstractButton* button);
+	void OKButtonClicked(QAbstractButton *button);
 	//void savingFinished();
 };

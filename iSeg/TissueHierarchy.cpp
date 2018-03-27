@@ -7,8 +7,8 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "TissueHierarchy.h"
+#include "Precompiled.h"
 
 #include <QDir>
 #include <QFile>
@@ -19,125 +19,110 @@
 
 namespace {
 
-	class TissueHierarchySaxHandler : public QXmlDefaultHandler
+class TissueHierarchySaxHandler : public QXmlDefaultHandler
+{
+public:
+	TissueHierarchySaxHandler(TissueHierarchyItem *root);
+
+	bool startElement(const QString &namespaceURI, const QString &localName,
+										const QString &qName, const QXmlAttributes &attributes);
+
+	bool endElement(const QString &namespaceURI, const QString &localName,
+									const QString &qName);
+
+	bool fatalError(const QXmlParseException &exception);
+
+	QString getHierarchyName();
+
+private:
+	TissueHierarchyItem *currentFolder;
+	QString currentText;
+	QString loadedHierarchyName;
+};
+
+TissueHierarchySaxHandler::TissueHierarchySaxHandler(TissueHierarchyItem *root)
+{
+	currentFolder = root;
+	loadedHierarchyName = QString();
+}
+
+bool TissueHierarchySaxHandler::startElement(const QString & /* namespaceURI */,
+																						 const QString & /* localName */,
+																						 const QString &qName,
+																						 const QXmlAttributes &attributes)
+{
+	if (qName == "hierarchy")
 	{
-	public:
-		TissueHierarchySaxHandler(TissueHierarchyItem *root);
-
-		bool startElement(const QString &namespaceURI,
-			const QString &localName,
-			const QString &qName,
-			const QXmlAttributes &attributes);
-
-		bool endElement(const QString &namespaceURI,
-			const QString &localName,
-			const QString &qName);
-
-		bool fatalError(const QXmlParseException &exception);
-
-		QString getHierarchyName();
-
-	private:
-		TissueHierarchyItem *currentFolder;
-		QString currentText;
-		QString loadedHierarchyName;
-	};
-
-
-	TissueHierarchySaxHandler::TissueHierarchySaxHandler(TissueHierarchyItem *root)
-	{
-		currentFolder = root;
-		loadedHierarchyName = QString();
+		loadedHierarchyName = attributes.value("name");
 	}
-
-	bool TissueHierarchySaxHandler::startElement(const QString & /* namespaceURI */,
-		const QString & /* localName */,
-		const QString &qName,
-		const QXmlAttributes &attributes)
+	else if (qName == "tissue")
 	{
-		if (qName == "hierarchy")
-		{
-			loadedHierarchyName = attributes.value("name");
-		}
-		else if (qName == "tissue")
-		{
-			// Add tissue with given name
-			QString tissueName(attributes.value("name"));
-			currentFolder->AddChild(new TissueHierarchyItem(false, tissueName));
-		}
-		else if (qName == "folder")
-		{
-			// Add as subfolder to last folder
-			QString folderName(attributes.value("name"));
-			TissueHierarchyItem *lastFolder = currentFolder;
-			currentFolder = new TissueHierarchyItem(true, folderName);
-			lastFolder->AddChild(currentFolder);
-		}
-		return true;
+		// Add tissue with given name
+		QString tissueName(attributes.value("name"));
+		currentFolder->AddChild(new TissueHierarchyItem(false, tissueName));
 	}
-
-	bool TissueHierarchySaxHandler::endElement(const QString & /* namespaceURI */,
-		const QString & /* localName */,
-		const QString &qName)
+	else if (qName == "folder")
 	{
-		if (qName == "folder")
-		{
-			// Set current folder to parent
-			currentFolder = currentFolder->GetParent();
-		}
-		return true;
+		// Add as subfolder to last folder
+		QString folderName(attributes.value("name"));
+		TissueHierarchyItem *lastFolder = currentFolder;
+		currentFolder = new TissueHierarchyItem(true, folderName);
+		lastFolder->AddChild(currentFolder);
 	}
+	return true;
+}
 
-	bool TissueHierarchySaxHandler::fatalError(const QXmlParseException &exception)
+bool TissueHierarchySaxHandler::endElement(const QString & /* namespaceURI */,
+																					 const QString & /* localName */,
+																					 const QString &qName)
+{
+	if (qName == "folder")
 	{
-		// TODO: Handle error
-		/*QMessageBox::warning(	0, QObject::tr("SAX Handler"),
+		// Set current folder to parent
+		currentFolder = currentFolder->GetParent();
+	}
+	return true;
+}
+
+bool TissueHierarchySaxHandler::fatalError(const QXmlParseException &exception)
+{
+	// TODO: Handle error
+	/*QMessageBox::warning(	0, QObject::tr("SAX Handler"),
 		QObject::tr("Parse error at line %1, column %2:\n%3.")
 		.arg(exception.lineNumber())
 		.arg(exception.columnNumber())
 		.arg(exception.message()));*/
-		return false;
-	}
-
-	QString TissueHierarchySaxHandler::getHierarchyName()
-	{
-		return loadedHierarchyName;
-	}
+	return false;
 }
+
+QString TissueHierarchySaxHandler::getHierarchyName()
+{
+	return loadedHierarchyName;
+}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 
-TissueHierarchyItem::TissueHierarchyItem(bool folderItem, const QString &itemName)
+TissueHierarchyItem::TissueHierarchyItem(bool folderItem,
+																				 const QString &itemName)
 {
 	isFolder = folderItem;
 	name = itemName;
 	parent = 0;
 }
 
-TissueHierarchyItem::~TissueHierarchyItem()
-{
-	children.clear();
-}
+TissueHierarchyItem::~TissueHierarchyItem() { children.clear(); }
 
-bool TissueHierarchyItem::GetIsFolder()
-{
-	return isFolder;
-}
+bool TissueHierarchyItem::GetIsFolder() { return isFolder; }
 
-QString TissueHierarchyItem::GetName()
-{
-	return name;
-}
+QString TissueHierarchyItem::GetName() { return name; }
 
 unsigned int TissueHierarchyItem::GetChildCount()
 {
 	return static_cast<unsigned int>(children.size());
 }
 
-TissueHierarchyItem *TissueHierarchyItem::GetParent()
-{
-	return parent;
-}
+TissueHierarchyItem *TissueHierarchyItem::GetParent() { return parent; }
 
 std::vector<TissueHierarchyItem *> *TissueHierarchyItem::GetChildren()
 {
@@ -153,7 +138,8 @@ void TissueHierarchyItem::AddChild(TissueHierarchyItem *child)
 void TissueHierarchyItem::UpdateTissuesRecursively()
 {
 	// Remove tissues which have been deleted from the tissue list
-	for (std::vector<TissueHierarchyItem *>::iterator iter = children.begin(); iter != children.end(); )
+	for (std::vector<TissueHierarchyItem *>::iterator iter = children.begin();
+			 iter != children.end();)
 	{
 		TissueHierarchyItem *currChild = *iter;
 		if (currChild->GetIsFolder())
@@ -174,7 +160,8 @@ void TissueHierarchyItem::UpdateTissuesRecursively()
 	}
 }
 
-void TissueHierarchyItem::UpdateTissueNameRecursively(const QString &oldName, const QString &newName)
+void TissueHierarchyItem::UpdateTissueNameRecursively(const QString &oldName,
+																											const QString &newName)
 {
 	// Update tissue name
 	if (!isFolder && name.compare(oldName) == 0)
@@ -183,7 +170,8 @@ void TissueHierarchyItem::UpdateTissueNameRecursively(const QString &oldName, co
 	}
 
 	// Recursion with children
-	for (std::vector<TissueHierarchyItem *>::iterator iter = children.begin(); iter != children.end(); ++iter)
+	for (std::vector<TissueHierarchyItem *>::iterator iter = children.begin();
+			 iter != children.end(); ++iter)
 	{
 		(*iter)->UpdateTissueNameRecursively(oldName, newName);
 	}
@@ -293,7 +281,8 @@ void TissueHiearchy::add_new_hierarchy(const QString &name)
 	add_new_hierarchy(name, create_default_hierarchy());
 }
 
-void TissueHiearchy::add_new_hierarchy(const QString &name, TissueHierarchyItem *hierarchy)
+void TissueHiearchy::add_new_hierarchy(const QString &name,
+																			 TissueHierarchyItem *hierarchy)
 {
 	// Create and select default hierarchy
 	hierarchyNames.push_back(name);
@@ -357,7 +346,8 @@ bool TissueHiearchy::save_hierarchy_as(const QString &name, const QString &path)
 	xmlStream.writeStartDocument();
 	xmlStream.writeStartElement("hierarchy");
 	xmlStream.writeAttribute("name", name);
-	std::vector<TissueHierarchyItem *> *topLevelChildren = hierarchyTrees[selectedHierarchy]->GetChildren();
+	std::vector<TissueHierarchyItem *> *topLevelChildren =
+			hierarchyTrees[selectedHierarchy]->GetChildren();
 	for (auto item : *topLevelChildren)
 	{
 		write_children_recursively(item, &xmlStream);
@@ -368,7 +358,8 @@ bool TissueHiearchy::save_hierarchy_as(const QString &name, const QString &path)
 	return true;
 }
 
-void TissueHiearchy::write_children_recursively(TissueHierarchyItem *parent, QXmlStreamWriter *xmlStream)
+void TissueHiearchy::write_children_recursively(TissueHierarchyItem *parent,
+																								QXmlStreamWriter *xmlStream)
 {
 	if (parent->GetIsFolder())
 	{
@@ -379,7 +370,7 @@ void TissueHiearchy::write_children_recursively(TissueHierarchyItem *parent, QXm
 		// Write children
 		std::vector<TissueHierarchyItem *> *children = parent->GetChildren();
 		for (std::vector<TissueHierarchyItem *>::iterator iter = children->begin();
-			iter != children->end(); ++iter)
+				 iter != children->end(); ++iter)
 		{
 			write_children_recursively(*iter, xmlStream);
 		}
@@ -395,7 +386,6 @@ void TissueHiearchy::write_children_recursively(TissueHierarchyItem *parent, QXm
 		xmlStream->writeEndElement(); // tissue
 	}
 }
-
 
 FILE *TissueHiearchy::SaveParams(FILE *fp, int version)
 {
@@ -571,5 +561,3 @@ FILE *TissueHiearchy::load_hierarchy_item(FILE *fp, TissueHierarchyItem *parent)
 
 	return fp;
 }
-
-

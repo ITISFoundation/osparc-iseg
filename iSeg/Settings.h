@@ -15,24 +15,24 @@
 class MainWindow;
 
 namespace Ui {
-    class Settings;
+class Settings;
 }
 
 class Settings : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit Settings(QWidget *parent = 0);
-    ~Settings();
+	explicit Settings(QWidget *parent = 0);
+	~Settings();
 
 public slots:
-   virtual void accept();
-   virtual void reject();
+	virtual void accept();
+	virtual void reject();
 
 private:
-    Ui::Settings *ui;
-    MainWindow* mainWindow;
+	Ui::Settings *ui;
+	MainWindow *mainWindow;
 };
 
 #endif // SETTINGS_H

@@ -10,22 +10,22 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
-class QString;
+#include <QString>
 
 class Project
 {
 public:
     Project();
-	 QString m_loadprojfilename1;
-	 QString m_loadprojfilename2;
-	 QString m_loadprojfilename3;
-	 QString m_loadprojfilename4;
-	 QString m_filename;
-	 int lpf1nr;
-	 int lpf2nr;
-	 int lpf3nr;
-	 int lpf4nr;
-	 int separatornr;
+	QString m_loadprojfilename1;
+	QString m_loadprojfilename2;
+	QString m_loadprojfilename3;
+	QString m_loadprojfilename4;
+	QString m_filename;
+	int lpf1nr;
+	int lpf2nr;
+	int lpf3nr;
+	int lpf4nr;
+	int separatornr;
 };
 
 #endif // PROJECT_H

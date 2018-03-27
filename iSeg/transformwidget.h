@@ -10,35 +10,36 @@
 #ifndef TRANSFORM_17NOV11
 #define TRANSFORM_17NOV11
 
-#include "Core/common.h"
 #include "Core/Point.h"
+#include "Core/common.h"
 
 #include "Addon/qwidget1.h"
 #include "slicetransform.h"
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
-#include <qslider.h>
-#include <qlineedit.h>
 #include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qsize.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
 #include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class TransformWidget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-	TransformWidget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	TransformWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+									const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~TransformWidget();
 
 	void init();
@@ -50,8 +51,11 @@ public:
 	void GetDataSelection(bool &source, bool &target, bool &tissues);
 
 	QSize sizeHint() const;
-	std::string GetName() {return std::string("Transform");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("transform.png")).ascii());};
+	std::string GetName() { return std::string("Transform"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("transform.png")).ascii());
+	};
 
 private:
 	struct TransformParametersStruct
@@ -95,7 +99,7 @@ private:
 	QCheckBox *allSlicesCheckBox;
 	QPushButton *executePushButton;
 	QPushButton *cancelPushButton;
-	
+
 	QRadioButton *translateRadioButton;
 	QRadioButton *rotateRadioButton;
 	QRadioButton *scaleRadioButton;
@@ -128,8 +132,10 @@ private:
 	TransformParametersStruct transformParameters;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -151,6 +157,5 @@ private slots:
 	void SelectTissuesChanged(int state);
 	void FlipPushButtonClicked();
 };
-
 
 #endif

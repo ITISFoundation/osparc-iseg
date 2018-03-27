@@ -10,43 +10,45 @@
 #pragma once
 
 #include "Addon/qwidget1.h"
-#include "bmp_read_1.h"
 #include "SlicesHandler.h"
+#include "bmp_read_1.h"
 
 #include "Core/IFT2.h"
 
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qdialog.h>
 #include <qimage.h>
-#include <qpainter.h>
-#include <qslider.h>
-#include <q3listbox.h>
 #include <qinputdialog.h>
-#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
 #include <q3mimefactory.h>
-
+#include <qpixmap.h>
 
 class featurewidget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    featurewidget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	featurewidget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	void init();
 	void newloaded();
 	QSize sizeHint() const;
-	std::string GetName() {return std::string("Feature");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("feature.png")).ascii());};
-
+	std::string GetName() { return std::string("Feature"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("feature.png")).ascii());
+	};
 
 private:
 	bool selecting;
@@ -94,5 +96,4 @@ private slots:
 	void pt_clicked(Point p);
 	void pt_moved(Point p);
 	void pt_released(Point p);
-
 };

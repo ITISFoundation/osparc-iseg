@@ -8,15 +8,15 @@
  *  https://opensource.org/licenses/MIT
  */
 
-#include <iostream>
-#include <fstream>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <vector>
-#include <algorithm>
-#include <cmath>
+#include <fstream>
+#include <iostream>
 #include <string>
-#include <cassert>
+#include <vector>
 
 #include "HDF5Reader.h"
 #include "HDF5Writer.h"
@@ -24,17 +24,17 @@
 using namespace std;
 using namespace HDF5;
 
-int main(int argc, char **argv){
-	
+int main(int argc, char **argv)
+{
 	int is = HDF5Reader::existsValidHdf5(argv[1]);
-	
-	if(!is){
+
+	if (!is)
+	{
 		cerr << argv[1] << " does not exist or is not a valid hdf5 file" << endl;
 		return 0;
 	}
-	else 
+	else
 		cerr << argv[1] << " exists and is a valid hdf5 file" << endl;
-	
+
 	return 1;
-	
 }

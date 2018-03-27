@@ -7,8 +7,8 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "RTDoseIODModule.h"
+#include "Precompiled.h"
 #include "gdcmAttribute.h"
 #include "gdcmUIDGenerator.h"
 #include <string>
@@ -61,9 +61,7 @@ RTDoseIODModule::RTDoseIODModule()
 	SOPInstanceUID = GenerateUID();
 }
 
-RTDoseIODModule::~RTDoseIODModule()
-{
-}
+RTDoseIODModule::~RTDoseIODModule() {}
 
 std::string RTDoseIODModule::GenerateUID()
 {
@@ -75,13 +73,17 @@ double RTDoseIODModule::GetDoseGridScaling()
 {
 	float maxVal = 0.0f;
 	float *ptr = &PixelData[0];
-	for (unsigned long i = 0; i < Rows*Columns*NumberOfFrames; ++i) {
+	for (unsigned long i = 0; i < Rows * Columns * NumberOfFrames; ++i)
+	{
 		maxVal = std::max(maxVal, *ptr++);
 	}
 
-	if (BitsAllocated == 16) {
+	if (BitsAllocated == 16)
+	{
 		return maxVal / UINT16_MAX;
-	} else { // BitsAllocated == 32
+	}
+	else
+	{ // BitsAllocated == 32
 		return maxVal / UINT32_MAX;
 	}
 }

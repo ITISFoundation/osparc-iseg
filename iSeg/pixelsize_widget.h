@@ -12,24 +12,25 @@
 
 #include "Core/Pair.h"
 
-#include <qpushbutton.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qwidget.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
 #include <qdialog.h>
-#include <qspinbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
 #include <qpainter.h>
+#include <qpushbutton.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 
 class SlicesHandler;
 
 class PixelResize : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    PixelResize(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	PixelResize(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+							Qt::WindowFlags wFlags = 0);
 	~PixelResize();
 	Pair return_pixelsize();
 
@@ -66,9 +67,10 @@ private slots:
 
 class DisplacementDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    DisplacementDialog(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	DisplacementDialog(SlicesHandler *hand3D, QWidget *parent = 0,
+										 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~DisplacementDialog();
 	void return_displacement(float disp[3]);
 
@@ -98,9 +100,10 @@ private slots:
 
 class RotationDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    RotationDialog(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	RotationDialog(SlicesHandler *hand3D, QWidget *parent = 0,
+								 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~RotationDialog();
 	void return_direction_cosines(float dc[6]);
 
@@ -140,29 +143,27 @@ private slots:
 	void orthonorm_pressed();
 };
 
-
 class ImagePVLabel : public QLabel
 {
 	Q_OBJECT
 
 public:
-	ImagePVLabel( QWidget* parent = 0, Qt::WindowFlags f = 0 );
+	ImagePVLabel(QWidget *parent = 0, Qt::WindowFlags f = 0);
 
-	void SetWidth( int value ) {m_Width=value;}
-	void SetHeight( int value ) {m_Height=value;}
-	void SetScaledValue( float value ) {m_Scale=value;}
+	void SetWidth(int value) { m_Width = value; }
+	void SetHeight(int value) { m_Height = value; }
+	void SetScaledValue(float value) { m_Scale = value; }
 
 public slots:
-	void SetXMin( int value );
-	void SetXMax( int value );
-	void SetYMin( int value );
-	void SetYMax( int value );
+	void SetXMin(int value);
+	void SetXMax(int value);
+	void SetYMin(int value);
+	void SetYMax(int value);
 
 private slots:
-	void paintEvent(QPaintEvent * e);
+	void paintEvent(QPaintEvent *e);
 
 protected:
-
 	int m_XMin;
 	int m_XMax;
 	int m_YMin;
@@ -174,18 +175,18 @@ protected:
 	float m_Scale;
 };
 
-
 class ResizeDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-	enum eResizeType {
-		kOther = 0, kPad = 1, kCrop = 2
-	};
+	enum eResizeType { kOther = 0, kPad = 1, kCrop = 2 };
 
-    ResizeDialog(SlicesHandler *hand3D, eResizeType type1= kOther, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	ResizeDialog(SlicesHandler *hand3D, eResizeType type1 = kOther,
+							 QWidget *parent = 0, const char *name = 0,
+							 Qt::WindowFlags wFlags = 0);
 	~ResizeDialog();
-	void return_padding(int &dxm,int &dxp,int &dym,int &dyp,int &dzm,int &dzp);
+	void return_padding(int &dxm, int &dxp, int &dym, int &dyp, int &dzm,
+											int &dzp);
 
 private:
 	int d[6];
@@ -219,6 +220,5 @@ private:
 private slots:
 	void set_pressed();
 };
-
 
 #endif

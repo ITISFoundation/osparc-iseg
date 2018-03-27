@@ -11,20 +11,19 @@
 
 #include "Addon/Addon.h"
 
-namespace iseg { namespace plugin
+namespace iseg { namespace plugin {
+
+class CLevelsetAddon : public CAddon
 {
+public:
+	CLevelsetAddon();
+	~CLevelsetAddon();
 
+	virtual std::string Name() const { return "Levelset"; }
 
-	class CLevelsetAddon : public CAddon
-	{
-	public:
-		CLevelsetAddon();
-		~CLevelsetAddon();
+	virtual std::string Description() const { return "LevelSet Plugin"; }
 
-		virtual std::string Name() const { return "Levelset";  }
-
-		virtual std::string Description() const { return "LevelSet Plugin";  }
-
-		virtual QWidget1* CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const;
-	};
-}}
+	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
+																 Qt::WindowFlags wFlags) const;
+};
+}} // namespace iseg::plugin

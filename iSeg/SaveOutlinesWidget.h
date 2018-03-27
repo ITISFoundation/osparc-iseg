@@ -10,36 +10,37 @@
 #ifndef SOW_19April05
 #define SOW_19April05
 
-#include <qpushbutton.h>
+#include "Core/Point.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
 #include <q3hbox.h>
+#include <q3listbox.h>
 #include <q3vbox.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qcombobox.h>
 #include <qdialog.h>
 #include <qimage.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qslider.h>
-#include <qcombobox.h>
-#include <q3listbox.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
-#include "Core/Point.h"
+#include <qspinbox.h>
+#include <qwidget.h>
 
 class SaveOutlinesWidget : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    SaveOutlinesWidget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	SaveOutlinesWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+										 const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~SaveOutlinesWidget();
 
 private:
 	SlicesHandler *handler3D;
-//	char *filename;
+	//	char *filename;
 	Q3HBox *hbox1;
 	Q3HBox *hbox2;
 	Q3HBox *hbox3;
@@ -84,7 +85,7 @@ private:
 
 private slots:
 	void mode_changed();
-	void simplif_changed();	
+	void simplif_changed();
 	void file_pushed();
 	void save_pushed();
 };

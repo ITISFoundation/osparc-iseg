@@ -9,7 +9,6 @@
  */
 #pragma once
 
-
 #define TISSUES_SIZE_TYPEDEF // TODO: Used to mark file IO where change of tissues size type still needs to be handled.
 
 /*
@@ -17,16 +16,15 @@
 */
 #ifdef TISSUES_SIZE_TYPEDEF
 
-#define TISSUES_SIZE_MAX 65535
+#	define TISSUES_SIZE_MAX 65535
 typedef unsigned short tissues_size_t;
 
 #else // TISSUES_SIZE_TYPEDEF
 
-#define TISSUES_SIZE_MAX 255
+#	define TISSUES_SIZE_MAX 255
 typedef unsigned char tissues_size_t; // Original tissues size type
 
 #endif // TISSUES_SIZE_TYPEDEF
-
 
 /*
 * Tissue layers size type

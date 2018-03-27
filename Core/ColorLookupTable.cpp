@@ -13,23 +13,13 @@
 
 #include "ColorLookupTable.h"
 
-namespace
-{
-	inline double clamp(double v)
-	{
-		return (v > 255) ? 255 : (v < 0 ? 0 : v);
-	}
-}
+namespace {
+inline double clamp(double v) { return (v > 255) ? 255 : (v < 0 ? 0 : v); }
+} // namespace
 
-ColorLookupTable::ColorLookupTable()
-{
-	m_Lut = vtkLookupTable::New();
-}
+ColorLookupTable::ColorLookupTable() { m_Lut = vtkLookupTable::New(); }
 
-ColorLookupTable::~ColorLookupTable()
-{
-	m_Lut->Delete();
-}
+ColorLookupTable::~ColorLookupTable() { m_Lut->Delete(); }
 
 void ColorLookupTable::SetNumberOfColors(size_t N)
 {
@@ -45,7 +35,8 @@ size_t ColorLookupTable::NumberOfColors() const
 
 void ColorLookupTable::SetColor(size_t idx, unsigned char rgb[3])
 {
-	m_Lut->SetTableValue(idx, rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0, 1.0);
+	m_Lut->SetTableValue(idx, rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0,
+											 1.0);
 }
 
 void ColorLookupTable::GetColor(double v, unsigned char uchar_rgb[3]) const
@@ -58,7 +49,8 @@ void ColorLookupTable::GetColor(double v, unsigned char uchar_rgb[3]) const
 	uchar_rgb[2] = static_cast<unsigned char>(clamp(rgb[2] * 255.0));
 }
 
-void ColorLookupTable::GetColor(double v, unsigned char &r, unsigned char &g, unsigned char &b) const
+void ColorLookupTable::GetColor(double v, unsigned char &r, unsigned char &g,
+																unsigned char &b) const
 {
 	double rgb[3];
 	m_Lut->GetColor(v, rgb);

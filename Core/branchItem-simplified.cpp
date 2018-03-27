@@ -7,13 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "branchItem-simplified.h"
+#include "Precompiled.h"
 
 std::vector<unsigned> BranchItem::availablelabels(0);
 void BranchItem::init_availablelabels()
 {
 	availablelabels.clear();
-	for(unsigned i=60000;i>0;i--)
+	for (unsigned i = 60000; i > 0; i--)
 		availablelabels.push_back(i);
 }
