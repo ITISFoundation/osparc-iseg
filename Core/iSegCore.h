@@ -11,10 +11,10 @@
 
 #if defined(WIN32)
 #	if defined(iSegCore_EXPORTS)
-#		define iSegCore_API __declspec( dllexport ) 
-#		define iSegCore_TEMPLATE 
+#		define iSegCore_API __declspec(dllexport)
+#		define iSegCore_TEMPLATE
 #	else
-#		define iSegCore_API __declspec( dllimport ) 
+#		define iSegCore_API __declspec(dllimport)
 #		define iSegCore_TEMPLATE extern
 #	endif
 #else
@@ -23,5 +23,5 @@
 
 #if defined(WIN32)
 // Disable needs to have dll-interface to be used by clients warning
-#  pragma warning( disable : 4251 )
+#	pragma warning(disable : 4251)
 #endif

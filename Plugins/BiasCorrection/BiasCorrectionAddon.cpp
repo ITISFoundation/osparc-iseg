@@ -13,24 +13,18 @@
 
 namespace iseg { namespace plugin {
 
-namespace
-{
-	CBiasCorrectionAddon _register_addon;
+namespace {
+CBiasCorrectionAddon _register_addon;
 }
 
-CBiasCorrectionAddon::CBiasCorrectionAddon()
-{
+CBiasCorrectionAddon::CBiasCorrectionAddon() {}
 
-}
+CBiasCorrectionAddon::~CBiasCorrectionAddon() {}
 
-CBiasCorrectionAddon::~CBiasCorrectionAddon()
-{
-
-}
-
-QWidget1* CBiasCorrectionAddon::CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const
+QWidget1 *CBiasCorrectionAddon::CreateWidget(QWidget *parent, const char *name,
+																						 Qt::WindowFlags wFlags) const
 {
 	return new CBiasCorrection(SliceHandler(), parent, name, wFlags);
 }
 
-}}
+}} // namespace iseg::plugin

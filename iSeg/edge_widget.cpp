@@ -9,29 +9,31 @@
  */
 #include "Precompiled.h"
 
-#include "edge_widget.h"
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "FormatTooltip.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include "edge_widget.h"
 
 #include "Core/Point.h"
 
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>
-#include <qslider.h>
-#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qsize.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 
-edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent,
+												 const char *name, Qt::WindowFlags wFlags)
+		: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(Format("Various edge extraction routines. These are mostly useful as part of other segmentation techniques."));
+	setToolTip(Format("Various edge extraction routines. These are mostly useful "
+										"as part of other segmentation techniques."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -56,7 +58,8 @@ edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent, const char *nam
 	sl_thresh1->setValue(20);
 	txt_thresh12 = new QLabel(" 150", hbox2);
 
-	txt_thresh21 = new QLabel("Thresh high: 0 ", hbox3);;
+	txt_thresh21 = new QLabel("Thresh high: 0 ", hbox3);
+	;
 	sl_thresh2 = new QSlider(Qt::Horizontal, hbox3);
 	sl_thresh2->setRange(1, 100);
 	sl_thresh2->setValue(80);
@@ -93,14 +96,17 @@ edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent, const char *nam
 	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());
 	//	setFixedSize(vbox1->size());
 
-
 	method_changed(0);
 
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
+	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
+									 SLOT(method_changed(int)));
 	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
-	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-	QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-	QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
+	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
+									 SLOT(slider_changed(int)));
+	QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
+									 SLOT(slider_changed(int)));
+	QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
+									 SLOT(slider_changed(int)));
 
 	return;
 }
@@ -132,26 +138,35 @@ void edge_widget::execute()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_sobel->isOn()) {
+	if (rb_sobel->isOn())
+	{
 		bmphand->sobel();
 	}
-	else if (rb_laplacian->isOn()) {
+	else if (rb_laplacian->isOn())
+	{
 		bmphand->laplacian1();
 	}
-	else if (rb_interquartile->isOn()) {
+	else if (rb_interquartile->isOn())
+	{
 		bmphand->median_interquartile(false);
 	}
-	else if (rb_momentline->isOn()) {
+	else if (rb_momentline->isOn())
+	{
 		bmphand->moment_line();
 	}
-	else if (rb_gaussline->isOn()) {
-		bmphand->gauss_line(sl_sigma->value()*0.05f);
+	else if (rb_gaussline->isOn())
+	{
+		bmphand->gauss_line(sl_sigma->value() * 0.05f);
 	}
-	else if (rb_canny->isOn()) {
-		bmphand->canny_line(sl_sigma->value()*0.05f, sl_thresh1->value()*1.5f, sl_thresh2->value()*1.5f);
+	else if (rb_canny->isOn())
+	{
+		bmphand->canny_line(sl_sigma->value() * 0.05f, sl_thresh1->value() * 1.5f,
+												sl_thresh2->value() * 1.5f);
 	}
-	else {
-		bmphand->laplacian_zero(sl_sigma->value()*0.05f, sl_thresh1->value()*0.5f, false);
+	else
+	{
+		bmphand->laplacian_zero(sl_sigma->value() * 0.05f,
+														sl_thresh1->value() * 0.5f, false);
 	}
 
 	emit end_datachange(this);
@@ -159,24 +174,31 @@ void edge_widget::execute()
 
 void edge_widget::method_changed(int)
 {
-	if (hideparams) {
-		if (!rb_laplacian->isOn()) {
+	if (hideparams)
+	{
+		if (!rb_laplacian->isOn())
+		{
 			rb_laplacian->hide();
 		}
-		if (!rb_interquartile->isOn()) {
+		if (!rb_interquartile->isOn())
+		{
 			rb_interquartile->hide();
 		}
-		if (!rb_momentline->isOn()) {
+		if (!rb_momentline->isOn())
+		{
 			rb_momentline->hide();
 		}
-		if (!rb_gaussline->isOn()) {
+		if (!rb_gaussline->isOn())
+		{
 			rb_gaussline->hide();
 		}
-		if (!rb_gaussline->isOn()) {
+		if (!rb_gaussline->isOn())
+		{
 			rb_laplacianzero->hide();
 		}
 	}
-	else {
+	else
+	{
 		rb_laplacian->show();
 		rb_interquartile->show();
 		rb_momentline->show();
@@ -184,31 +206,36 @@ void edge_widget::method_changed(int)
 		rb_laplacianzero->show();
 	}
 
-	if (rb_sobel->isOn()) {
+	if (rb_sobel->isOn())
+	{
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
 		btn_exec->show();
 	}
-	else if (rb_laplacian->isOn()) {
+	else if (rb_laplacian->isOn())
+	{
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
 		btn_exec->show();
 	}
-	else if (rb_interquartile->isOn()) {
+	else if (rb_interquartile->isOn())
+	{
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
 		btn_exec->show();
 	}
-	else if (rb_momentline->isOn()) {
+	else if (rb_momentline->isOn())
+	{
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
 		btn_exec->show();
 	}
-	else if (rb_gaussline->isOn()) {
+	else if (rb_gaussline->isOn())
+	{
 		if (hideparams)
 			hbox1->hide();
 		else
@@ -217,7 +244,8 @@ void edge_widget::method_changed(int)
 		hbox3->hide();
 		btn_exec->show();
 	}
-	else if (rb_canny->isOn()) {
+	else if (rb_canny->isOn())
+	{
 		txt_thresh11->setText("Thresh low:  0 ");
 		txt_thresh12->setText(" 150");
 		if (hideparams)
@@ -234,7 +262,8 @@ void edge_widget::method_changed(int)
 			hbox3->show();
 		btn_exec->show();
 	}
-	else {
+	else
+	{
 		txt_thresh11->setText("Thresh: 0 ");
 		txt_thresh12->setText(" 50");
 		if (hideparams)
@@ -258,10 +287,7 @@ void edge_widget::slider_changed(int newval)
 	return;
 }
 
-QSize edge_widget::sizeHint() const
-{
-	return vbox1->sizeHint();
-}
+QSize edge_widget::sizeHint() const { return vbox1->sizeHint(); }
 
 void edge_widget::newloaded()
 {
@@ -275,10 +301,10 @@ void edge_widget::init()
 	hideparams_changed();
 }
 
-
 FILE *edge_widget::SaveParams(FILE *fp, int version)
 {
-	if (version >= 2) {
+	if (version >= 2)
+	{
 		int dummy;
 		dummy = sl_sigma->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -307,12 +333,16 @@ FILE *edge_widget::SaveParams(FILE *fp, int version)
 
 FILE *edge_widget::LoadParams(FILE *fp, int version)
 {
-	if (version >= 2) {
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
-		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-		QObject::disconnect(sl_thresh1, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-		QObject::disconnect(sl_thresh2, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-
+	if (version >= 2)
+	{
+		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
+												SLOT(method_changed(int)));
+		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
+												SLOT(slider_changed(int)));
+		QObject::disconnect(sl_thresh1, SIGNAL(valueChanged(int)), this,
+												SLOT(slider_changed(int)));
+		QObject::disconnect(sl_thresh2, SIGNAL(valueChanged(int)), this,
+												SLOT(slider_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -338,15 +368,16 @@ FILE *edge_widget::LoadParams(FILE *fp, int version)
 
 		method_changed(0);
 
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
-		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-		QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
-		QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this, SLOT(slider_changed(int)));
+		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
+										 SLOT(method_changed(int)));
+		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
+										 SLOT(slider_changed(int)));
+		QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
+										 SLOT(slider_changed(int)));
+		QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
+										 SLOT(slider_changed(int)));
 	}
 	return fp;
 }
 
-void edge_widget::hideparams_changed()
-{
-	method_changed(0);
-}
+void edge_widget::hideparams_changed() { method_changed(0); }

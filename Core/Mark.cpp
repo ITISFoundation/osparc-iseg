@@ -7,11 +7,11 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "Mark.h"
+#include "Precompiled.h"
 
-bool operator!=(augmentedmark a,augmentedmark b) {
-	return (a.p.px!=b.p.px)||(a.p.py!=b.p.py)||
-		(a.slicenr!=b.slicenr)||(a.mark!=b.mark)||
-		(a.name!=b.name);
+bool operator!=(augmentedmark a, augmentedmark b)
+{
+	return (a.p.px != b.p.px) || (a.p.py != b.p.py) || (a.slicenr != b.slicenr) ||
+				 (a.mark != b.mark) || (a.name != b.name);
 };

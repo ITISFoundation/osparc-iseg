@@ -15,7 +15,9 @@ class iSegCore_API multidimgamma
 {
 public:
 	multidimgamma();
-	void init(short unsigned w, short unsigned h, short nrclass, short dimension, float **bit, float *weight, float **centers1, float *tol_f1, float *tol_d1, float dx1, float dy1);
+	void init(short unsigned w, short unsigned h, short nrclass, short dimension,
+						float **bit, float *weight, float **centers1, float *tol_f1,
+						float *tol_d1, float dx1, float dy1);
 	void execute();
 	void return_image(float *result_bits);
 	~multidimgamma();

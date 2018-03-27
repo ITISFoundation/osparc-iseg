@@ -26,24 +26,23 @@ public:
 	GetMacro(Width, unsigned);
 	SetMacro(Height, unsigned);
 	GetMacro(Height, unsigned);
-	SetMacro(PixelSize, float*);
-	GetMacro(PixelSize, float*);
-	SetMacro(Offset, float*);
-	GetMacro(Offset, float*);
-	SetMacro(Quaternion, float*);
-	GetMacro(Quaternion, float*);
+	SetMacro(PixelSize, float *);
+	GetMacro(PixelSize, float *);
+	SetMacro(Offset, float *);
+	GetMacro(Offset, float *);
+	SetMacro(Quaternion, float *);
+	GetMacro(Quaternion, float *);
 
-	template <typename T> int Write(T **data, bool labelfield = false);
+	template<typename T> int Write(T **data, bool labelfield = false);
 
 protected:
-	char* FileName;
+	char *FileName;
 	unsigned NumberOfSlices;
 	unsigned Width;
 	unsigned Height;
-	float* PixelSize;
-	float* Offset;
-	float* Quaternion;
-
+	float *PixelSize;
+	float *Offset;
+	float *Quaternion;
 };
 
 #endif // NIFTIIMAGEWRITER_H

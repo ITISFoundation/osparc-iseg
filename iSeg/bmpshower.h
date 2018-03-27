@@ -10,33 +10,33 @@
 #ifndef BMPSHOWER
 #define BMPSHOWER
 
-#include "Core/Types.h"
-#include "Core/Point.h"
 #include "Core/Mark.h"
 #include "Core/Pair.h"
+#include "Core/Point.h"
+#include "Core/Types.h"
 
-#include <qevent.h> // BL TODO
-#include <qwidget.h>
-#include <qimage.h>
-#include <qpoint.h>
 #include <q3action.h>
-#include <qcheckbox.h>
 #include <q3vbox.h>
+#include <qcheckbox.h>
+#include <qevent.h> // BL TODO
+#include <qimage.h>
 #include <qlabel.h>
+#include <qpoint.h>
 #include <qpushbutton.h>
 #include <qslider.h>
+#include <qwidget.h>
 //Added by qt3to4:
+#include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <QCloseEvent>
 
-#include <vtkSmartPointer.h>
-#include <vtkPlane.h> // for custom command
+#include <vtkCommand.h>
 #include <vtkCutter.h>
 #include <vtkImplicitPlaneWidget.h>
-#include <vtkCommand.h>
+#include <vtkPlane.h> // for custom command
+#include <vtkSmartPointer.h>
 
 #include <vector>
 
@@ -45,7 +45,8 @@ class SlicesHandler;
 class QVTKWidget;
 class QVTKInteractor;
 
-class vtkImageData;;
+class vtkImageData;
+;
 class vtkDataSet;
 class vtkDataArray;
 class vtkLookupTable;
@@ -78,19 +79,22 @@ class vtkDataSetMapper;
 class vtkPolyDataMapper;
 class vtkRenderer;
 class vtkRenderWindow;
-class vtkXMLImageDataReader;;
+class vtkXMLImageDataReader;
+;
 class vtkDataSetReader;
 
 class bmpshower : public QWidget
 {
 	Q_OBJECT
 public:
-	bmpshower( QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0 );
+	bmpshower(QWidget *parent = 0, const char *name = 0,
+						Qt::WindowFlags wFlags = 0);
 	void init(float **bmpbits1, unsigned short w, unsigned short h);
 	void update();
 	void update(unsigned short w, unsigned short h);
+
 protected:
-	void paintEvent( QPaintEvent *e );
+	void paintEvent(QPaintEvent *e);
 
 private:
 	void reload_bits();
@@ -99,23 +103,26 @@ private:
 	unsigned short width, height;
 	float **bmpbits;
 
-	private slots:
-		void bmp_changed();
-		void size_changed(unsigned short w, unsigned short h);
+private slots:
+	void bmp_changed();
+	void size_changed(unsigned short w, unsigned short h);
 };
 
 class bmptissueshower : public QWidget
 {
 	Q_OBJECT
 public:
-	bmptissueshower( QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0 );
-	void init(float **bmpbits1, tissues_size_t **tissue1, unsigned short w, unsigned short h);
+	bmptissueshower(QWidget *parent = 0, const char *name = 0,
+									Qt::WindowFlags wFlags = 0);
+	void init(float **bmpbits1, tissues_size_t **tissue1, unsigned short w,
+						unsigned short h);
 	void update();
 	void update(unsigned short w, unsigned short h);
 	bool toggle_tissuevisible();
 	void set_tissuevisible(bool on);
+
 protected:
-	void paintEvent( QPaintEvent *e );
+	void paintEvent(QPaintEvent *e);
 
 private:
 	void reload_bits();
@@ -126,18 +133,18 @@ private:
 	tissues_size_t **tissue;
 	bool tissuevisible;
 
-	private slots:
-		void bmp_changed();
-		void size_changed(unsigned short w, unsigned short h);
-		void tissue_changed();
-
+private slots:
+	void bmp_changed();
+	void size_changed(unsigned short w, unsigned short h);
+	void tissue_changed();
 };
 
 class bmptissuemarkshower : public QWidget
 {
 	Q_OBJECT
 public:
-	bmptissuemarkshower(QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0 );
+	bmptissuemarkshower(QWidget *parent = 0, const char *name = 0,
+											Qt::WindowFlags wFlags = 0);
 	~bmptissuemarkshower();
 	void init(bmphandler *bmph1, tissuelayers_size_t layeridx, bool bmporwork1);
 	void update();
@@ -145,21 +152,21 @@ public:
 	bool toggle_markvisible();
 	void set_tissuevisible(bool on);
 	void set_markvisible(bool on);
+
 protected:
-	void paintEvent( QPaintEvent *e );
-	void contextMenuEvent( QContextMenuEvent *event);
+	void paintEvent(QPaintEvent *e);
+	void contextMenuEvent(QContextMenuEvent *event);
 
 signals:
 	//	void marks_changed();
 	//	void tissues_changed();
 	void addmark_sign(Point p);
-	void addlabel_sign(Point p,std::string str);
+	void addlabel_sign(Point p, std::string str);
 	void removemark_sign(Point p);
 	void addtissue_sign(Point p);
 	void addtissueconnected_sign(Point p);
 	void addtissuelarger_sign(Point p);
 	void subtissue_sign(Point p);
-
 
 private:
 	void reload_bits();
@@ -173,7 +180,7 @@ private:
 	bool markvisible;
 	bool bmporwork;
 	std::vector<mark> *marks;
-	int eventx,eventy;
+	int eventx, eventy;
 	Q3Action *addmark;
 	Q3Action *addlabel;
 	Q3Action *removemark;
@@ -182,19 +189,18 @@ private:
 	Q3Action *addtissueconnected;
 	Q3Action *addtissuelarger;
 
-	private slots:
-		void add_mark();
-		void add_label();
-		//	void clear_marks();
-		void remove_mark();
-		void add_tissue();
-		void sub_tissue();
-		void add_tissue_connected();
-		void add_tissuelarger();
-		void mark_changed();
-		void bmp_changed();
-		void tissue_changed();
-
+private slots:
+	void add_mark();
+	void add_label();
+	//	void clear_marks();
+	void remove_mark();
+	void add_tissue();
+	void sub_tissue();
+	void add_tissue_connected();
+	void add_tissuelarger();
+	void mark_changed();
+	void bmp_changed();
+	void tissue_changed();
 };
 
 /*class hpcalc : public QWidget
@@ -208,7 +214,8 @@ class bmptissuemarklineshower : public QWidget
 {
 	Q_OBJECT
 public:
-	bmptissuemarklineshower(QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0 );
+	bmptissuemarklineshower(QWidget *parent = 0, const char *name = 0,
+													Qt::WindowFlags wFlags = 0);
 	~bmptissuemarklineshower();
 	void init(SlicesHandler *hand3D, bool bmporwork1);
 	void update();
@@ -222,7 +229,7 @@ public:
 	bool toggle_workbordervisible();
 	void set_crosshairxvisible(bool on);
 	void set_crosshairyvisible(bool on);
-	void get_scaleoffsetfactor(float &offset1,float &factor1);
+	void get_scaleoffsetfactor(float &offset1, float &factor1);
 	/*	void set_tissuevisible(bool on);
 	void set_markvisible(bool on);
 	void set_workbordervisible(bool on);*/
@@ -246,7 +253,7 @@ signals:
 	//	void marks_changed();
 	//	void tissues_changed();
 	void addmark_sign(Point p);
-	void addlabel_sign(Point p,std::string str);
+	void addlabel_sign(Point p, std::string str);
 	void clearmarks_sign();
 	void removemark_sign(Point p);
 	void addtissue_sign(Point p);
@@ -263,7 +270,8 @@ signals:
 	void mousemoved_sign(Point p);
 	void wheelrotated_sign(int delta);
 	void wheelrotatedctrl_sign(int delta);
-	void scaleoffsetfactor_changed(float scaleoffset1,float scalefactor1, bool bmporwork1);
+	void scaleoffsetfactor_changed(float scaleoffset1, float scalefactor1,
+																 bool bmporwork1);
 	void setcenter_sign(int x, int y);
 	void mousePosZoom_sign(QPoint mousePosZoom);
 
@@ -312,7 +320,7 @@ private:
 	QPoint mousePosZoom;
 	//	bool showvp;
 	std::vector<mark> *marks;
-	int eventx,eventy;
+	int eventx, eventy;
 	Q3Action *addmark;
 	Q3Action *addlabel;
 	Q3Action *clearmarks;
@@ -333,75 +341,77 @@ private:
 	std::vector<mark> vm;
 	std::vector<mark> vm_old;
 
-	public slots:
-		void set_brightnesscontrast(float bright, float contr, bool paint=true);
-		void set_tissuevisible(bool on);
-		void set_picturevisible(bool on);
-		void set_markvisible(bool on);
-		void set_overlayvisible(bool on);
-		void set_overlayalpha(float alpha);
-		void set_workbordervisible(bool on);
-		void slicenr_changed();
-		void tissue_changed();
-		void tissue_changed(QRect rect);
-		void zoom_in();
-		void zoom_out();
-		void unzoom();
-		double return_zoom();
-		void set_zoom(double z);
-		void pixelsize_changed(Pair pixelsize1);
+public slots:
+	void set_brightnesscontrast(float bright, float contr, bool paint = true);
+	void set_tissuevisible(bool on);
+	void set_picturevisible(bool on);
+	void set_markvisible(bool on);
+	void set_overlayvisible(bool on);
+	void set_overlayalpha(float alpha);
+	void set_workbordervisible(bool on);
+	void slicenr_changed();
+	void tissue_changed();
+	void tissue_changed(QRect rect);
+	void zoom_in();
+	void zoom_out();
+	void unzoom();
+	double return_zoom();
+	void set_zoom(double z);
+	void pixelsize_changed(Pair pixelsize1);
 
-		private slots:
-			void bmphand_changed(bmphandler *bmph);
-			void add_mark();
-			void add_label();
-			void clear_marks();
-			void remove_mark();
-			void add_tissue();
-			void add_tissue_connected();
-			void sub_tissue();
-			void add_tissue_3D();
-			void add_tissuelarger();
-			void select_tissue();
-			void mark_changed();
-			void bmp_changed();
-			void overlay_changed();
-			void overlay_changed(QRect rect);
-			void workborder_changed();
-			void workborder_changed(QRect rect);
-			void recompute_workborder();
-			void set_vp1(std::vector<Point> *vp1_arg);
-			void clear_vp1();
-			void set_vm(std::vector<mark> *vm_arg);
-			void clear_vm();
-			void set_vpdyn(std::vector<Point> *vpdyn_arg);
-			void set_vp1_dyn(std::vector<Point> *vp1_arg,std::vector<Point> *vpdyn_arg, const bool also_points = false);
-			void clear_vpdyn();
+private slots:
+	void bmphand_changed(bmphandler *bmph);
+	void add_mark();
+	void add_label();
+	void clear_marks();
+	void remove_mark();
+	void add_tissue();
+	void add_tissue_connected();
+	void sub_tissue();
+	void add_tissue_3D();
+	void add_tissuelarger();
+	void select_tissue();
+	void mark_changed();
+	void bmp_changed();
+	void overlay_changed();
+	void overlay_changed(QRect rect);
+	void workborder_changed();
+	void workborder_changed(QRect rect);
+	void recompute_workborder();
+	void set_vp1(std::vector<Point> *vp1_arg);
+	void clear_vp1();
+	void set_vm(std::vector<mark> *vm_arg);
+	void clear_vm();
+	void set_vpdyn(std::vector<Point> *vpdyn_arg);
+	void set_vp1_dyn(std::vector<Point> *vp1_arg, std::vector<Point> *vpdyn_arg,
+									 const bool also_points = false);
+	void clear_vpdyn();
 
-			public slots:
-				void color_changed(int tissue);
-				void crosshairx_changed(int i);
-				void crosshairy_changed(int i);
+public slots:
+	void color_changed(int tissue);
+	void crosshairx_changed(int i);
+	void crosshairy_changed(int i);
 };
-
 
 class surfaceviewer3D : public QWidget
 {
 	Q_OBJECT
 public:
-	surfaceviewer3D(SlicesHandler *hand3D1,bool bmportissue1=true, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1 = true,
+									QWidget *parent = 0, const char *name = 0,
+									Qt::WindowFlags wFlags = 0);
 	~surfaceviewer3D();
 	std::string fnamei;
-	QVTKWidget* vtkWidget;
+	QVTKWidget *vtkWidget;
 	bool bmportissue;
-	Q3VBox* vbox1;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	QPushButton* bt_update;
-	QSlider* sl_trans;
-	QLabel* lb_trans;
-	QSlider* sl_thresh;
-	QLabel* lb_thresh;
+	Q3VBox *vbox1;
+	Q3HBox *hbox1;
+	Q3HBox *hbox2;
+	QPushButton *bt_update;
+	QSlider *sl_trans;
+	QLabel *lb_trans;
+	QSlider *sl_thresh;
+	QLabel *lb_thresh;
 
 public slots:
 	void tissue_changed();
@@ -410,8 +420,8 @@ public slots:
 	void reload();
 
 protected:
-	void closeEvent(QCloseEvent*);
-	void resizeEvent(QResizeEvent*);
+	void closeEvent(QCloseEvent *);
+	void resizeEvent(QResizeEvent *);
 
 protected slots:
 	void transp_changed();
@@ -436,11 +446,11 @@ private:
 	vtkSmartPointer<vtkDiscreteMarchingCubes> discreteCubes;
 	vtkSmartPointer<vtkMarchingCubes> cubes;
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother;
-	std::vector<vtkSmartPointer<vtkThreshold> > selector;
+	std::vector<vtkSmartPointer<vtkThreshold>> selector;
 	vtkSmartPointer<vtkMaskFields> scalarsOff;
-	std::vector<vtkSmartPointer<vtkGeometryFilter> > geometry;
-	std::vector<vtkSmartPointer<vtkPolyDataMapper> > PolyDataMapper;
-	std::vector<vtkSmartPointer<vtkActor> > Actor;
+	std::vector<vtkSmartPointer<vtkGeometryFilter>> geometry;
+	std::vector<vtkSmartPointer<vtkPolyDataMapper>> PolyDataMapper;
+	std::vector<vtkSmartPointer<vtkActor>> Actor;
 
 	int plotOutline;
 	double lineWidth;
@@ -453,49 +463,52 @@ class volumeviewer3D : public QWidget
 {
 	Q_OBJECT
 public:
-	volumeviewer3D(SlicesHandler *hand3D1,bool bmportissue1=true, bool raytraceortexturemap1=true, bool shade1=true, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1 = true,
+								 bool raytraceortexturemap1 = true, bool shade1 = true,
+								 QWidget *parent = 0, const char *name = 0,
+								 Qt::WindowFlags wFlags = 0);
 	~volumeviewer3D();
 	std::string fnamei;
-	QVTKWidget* vtkWidget;
+	QVTKWidget *vtkWidget;
 	bool bmportissue;
-	Q3VBox* vbox1;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	QCheckBox* cb_shade;
-	QCheckBox* cb_raytraceortexturemap;
-	QCheckBox* cb_showslices;
-	QCheckBox* cb_showslice1;
-	QCheckBox* cb_showslice2;
-	QCheckBox* cb_showvolume;
-	QSlider* sl_contr;
-	QSlider* sl_bright;
-	QSlider* sl_trans;
-	QLabel* lb_contr;
-	QLabel* lb_bright;
-	QLabel* lb_trans;
-	QPushButton* bt_update;
+	Q3VBox *vbox1;
+	Q3HBox *hbox1;
+	Q3HBox *hbox2;
+	Q3HBox *hbox3;
+	QCheckBox *cb_shade;
+	QCheckBox *cb_raytraceortexturemap;
+	QCheckBox *cb_showslices;
+	QCheckBox *cb_showslice1;
+	QCheckBox *cb_showslice2;
+	QCheckBox *cb_showvolume;
+	QSlider *sl_contr;
+	QSlider *sl_bright;
+	QSlider *sl_trans;
+	QLabel *lb_contr;
+	QLabel *lb_bright;
+	QLabel *lb_trans;
+	QPushButton *bt_update;
 
-	public slots:
-		void tissue_changed();
-		void pixelsize_changed(Pair p);
-		void thickness_changed(float thick);
-		void reload();
+public slots:
+	void tissue_changed();
+	void pixelsize_changed(Pair p);
+	void thickness_changed(float thick);
+	void reload();
 
 protected:
-	void closeEvent(QCloseEvent*);
-	void resizeEvent(QResizeEvent*);
+	void closeEvent(QCloseEvent *);
+	void resizeEvent(QResizeEvent *);
 
-	protected slots:
-		void shade_changed();
-		void raytraceortexturemap_changed();
-		void showslices_changed();
-		void showvolume_changed();
-		void contrbright_changed();
-		void transp_changed();
+protected slots:
+	void shade_changed();
+	void raytraceortexturemap_changed();
+	void showslices_changed();
+	void showvolume_changed();
+	void contrbright_changed();
+	void transp_changed();
 
 signals:
-		void hasbeenclosed();
+	void hasbeenclosed();
 
 private:
 	SlicesHandler *hand3D;
@@ -533,21 +546,19 @@ private:
 	class vtkMySliceCallbackY : public vtkCommand
 	{
 	public:
-		static vtkMySliceCallbackY *New(){
-			return new vtkMySliceCallbackY;
-		}
-		void Delete(){
-			delete this;
-		}
-		virtual void Execute(vtkObject *caller, unsigned long, void*){
+		static vtkMySliceCallbackY *New() { return new vtkMySliceCallbackY; }
+		void Delete() { delete this; }
+		virtual void Execute(vtkObject *caller, unsigned long, void *)
+		{
 			cerr << "ExecuteY\n";
 			//
 			// The plane has moved, update the sampled data values.
 			//
-			vtkImplicitPlaneWidget *planeWidget = reinterpret_cast<vtkImplicitPlaneWidget*>(caller);
+			vtkImplicitPlaneWidget *planeWidget =
+					reinterpret_cast<vtkImplicitPlaneWidget *>(caller);
 			//planeWidget->GetPolyData( plane );
-			planeWidget->GetPlane( slicePlaneY1 );
-			sliceCutterY1->SetCutFunction( slicePlaneY1 );
+			planeWidget->GetPlane(slicePlaneY1);
+			sliceCutterY1->SetCutFunction(slicePlaneY1);
 		}
 		vtkSmartPointer<vtkPlane> slicePlaneY1;
 		vtkSmartPointer<vtkCutter> sliceCutterY1;
@@ -556,21 +567,19 @@ private:
 	class vtkMySliceCallbackZ : public vtkCommand
 	{
 	public:
-		static vtkMySliceCallbackZ *New(){
-			return new vtkMySliceCallbackZ;
-		}
-		void Delete(){
-			delete this;
-		}
-		virtual void Execute(vtkObject *caller, unsigned long, void*){
+		static vtkMySliceCallbackZ *New() { return new vtkMySliceCallbackZ; }
+		void Delete() { delete this; }
+		virtual void Execute(vtkObject *caller, unsigned long, void *)
+		{
 			cerr << "ExecuteZ\n";
 			//
 			// The plane has moved, update the sampled data values.
 			//
-			vtkImplicitPlaneWidget *planeWidget = reinterpret_cast<vtkImplicitPlaneWidget*>(caller);
+			vtkImplicitPlaneWidget *planeWidget =
+					reinterpret_cast<vtkImplicitPlaneWidget *>(caller);
 			//planeWidget->GetPolyData( plane );
-			planeWidget->GetPlane( slicePlaneZ1 );
-			sliceCutterZ1->SetCutFunction( slicePlaneZ1 );
+			planeWidget->GetPlane(slicePlaneZ1);
+			sliceCutterZ1->SetCutFunction(slicePlaneZ1);
 		}
 		vtkSmartPointer<vtkPlane> slicePlaneZ1;
 		vtkSmartPointer<vtkCutter> sliceCutterZ1;
@@ -580,9 +589,11 @@ private:
 	vtkSmartPointer<volumeviewer3D::vtkMySliceCallbackZ> my_sliceDataZ;
 };
 
-class iSAR_ShepInterpolate {
+class iSAR_ShepInterpolate
+{
 public:
-	void interpolate(int nx, int ny, double dx, double dy, double offset, float *valin, float *valout);
+	void interpolate(int nx, int ny, double dx, double dy, double offset,
+									 float *valin, float *valout);
 };
 
 #endif

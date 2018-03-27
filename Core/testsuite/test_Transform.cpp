@@ -9,29 +9,28 @@
  */
 #include <boost/test/unit_test.hpp>
 
-#include "../vec3.h"
 #include "../Transform.h"
+#include "../vec3.h"
 
 namespace iseg {
 
-namespace
+namespace {
+void makeTransform(Transform &tr)
 {
-	void makeTransform(Transform& tr)
-	{
-		tr.setIdentity();
+	tr.setIdentity();
 
-		vec3 d0(0.1f, 0.9f, 0.1f);
-		d0.normalize();
-		vec3 d1(0.9f, -0.1f, 0.1f);
-		d1.normalize();
-		vec3 d2(d0 ^ d1);
-		d2.normalize();
-		tr.setRotation(d0, d1, d2);
+	vec3 d0(0.1f, 0.9f, 0.1f);
+	d0.normalize();
+	vec3 d1(0.9f, -0.1f, 0.1f);
+	d1.normalize();
+	vec3 d2(d0 ^ d1);
+	d2.normalize();
+	tr.setRotation(d0, d1, d2);
 
-		float offset[3] = { 3.4f, -10.f, 2.5f };
-		tr.setOffset(offset);
-	}
+	float offset[3] = {3.4f, -10.f, 2.5f};
+	tr.setOffset(offset);
 }
+} // namespace
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
 BOOST_AUTO_TEST_SUITE(Transform_suite);
@@ -40,7 +39,7 @@ BOOST_AUTO_TEST_CASE(vec3_api)
 {
 	vec3 x(1, 0, 0);
 	vec3 y(0, 1, 0);
-	vec3 z(x^y);
+	vec3 z(x ^ y);
 	BOOST_CHECK_CLOSE(z[2], 1.f, 1e-2f);
 }
 
@@ -54,7 +53,7 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 	dc[0] = dc[4] = 1.f;
 
 	tr.setTransform(offset, dc);
-	for (int r=0; r<4; r++)
+	for (int r = 0; r < 4; r++)
 	{
 		for (int c = 0; c < 4; c++)
 		{
@@ -64,7 +63,7 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 			}
 			else
 			{
-				BOOST_CHECK_CLOSE(tr[r][c], c==3 ? 3.f : 0.f, 1e-2f);
+				BOOST_CHECK_CLOSE(tr[r][c], c == 3 ? 3.f : 0.f, 1e-2f);
 			}
 		}
 	}
@@ -83,14 +82,14 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 		Transform tr2(tr);
 
 		// do padding
-		float spacing[3] = { 1.f, 2.f, 3.f };
+		float spacing[3] = {1.f, 2.f, 3.f};
 		{
 			// negative padding
-			int plo[3] = { -1,-2,-3 };
+			int plo[3] = {-1, -2, -3};
 			tr2.paddingUpdateTransform(plo, spacing);
 
 			// revert padding
-			for (int k=0; k<3; k++)
+			for (int k = 0; k < 3; k++)
 			{
 				plo[k] = -plo[k];
 			}
@@ -115,4 +114,4 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 BOOST_AUTO_TEST_SUITE_END();
 BOOST_AUTO_TEST_SUITE_END();
 
-}
+} // namespace iseg

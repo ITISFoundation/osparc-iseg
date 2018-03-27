@@ -11,35 +11,35 @@
 #define THRESHWIDGET_14March05
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qdialog.h>
 #include <qimage.h>
-#include <qpainter.h>
-#include <qslider.h>
-#include <q3listbox.h>
 #include <qinputdialog.h>
-#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
-
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class hyster_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    hyster_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	hyster_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~hyster_widget();
 	void init();
 	void newloaded();
@@ -48,8 +48,11 @@ public:
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
 	void hideparams_changed();
-	std::string GetName() {return std::string("Growing");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("growing.png")).ascii());};
+	std::string GetName() { return std::string("Growing"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("growing.png")).ascii());
+	};
 
 private:
 	void init1();
@@ -71,12 +74,12 @@ private:
 	Q3VBox *vbox5;
 	Q3VBox *vbox6;
 	Q3VBox *vbox7;
-	QLabel *txt_lower;	
+	QLabel *txt_lower;
 	QLabel *txt_upper;
 	QLabel *txt_lowerhyster;
 	QLabel *txt_upperhyster;
 	QSlider *sl_lower;
-	QSlider *sl_upper;	
+	QSlider *sl_upper;
 	QSlider *sl_lowerhyster;
 	QSlider *sl_upperhyster;
 	QPushButton *pushexec;
@@ -86,7 +89,7 @@ private:
 	QCheckBox *autoseed;
 	QCheckBox *allslices;
 	void getrange();
-	void getrange_sub(float ll,float uu,float ul,float lu);
+	void getrange_sub(float ll, float uu, float ul, float lu);
 	std::vector<Point> vp1;
 	std::vector<Point> vpdyn;
 	void execute1();
@@ -101,9 +104,12 @@ private:
 signals:
 	void vpdyn_changed(std::vector<Point> *vpdyn_arg);
 	void vp1_changed(std::vector<Point> *vp1_arg);
-	void vp1dyn_changed(std::vector<Point> *vp1_arg,std::vector<Point> *vpdyn_arg);
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void vp1dyn_changed(std::vector<Point> *vp1_arg,
+											std::vector<Point> *vpdyn_arg);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();

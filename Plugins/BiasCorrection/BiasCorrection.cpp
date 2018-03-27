@@ -9,110 +9,115 @@
  */
 #include "BiasCorrection.h"
 
-#include <itkImage.h>
-#include <itkTimeProbe.h>
+#include <itkBSplineControlPointImageFilter.h>
 #include <itkCommand.h>
-#include <itkShrinkImageFilter.h>
 #include <itkDivideImageFilter.h>
 #include <itkExpImageFilter.h>
+#include <itkImage.h>
 #include <itkImageRegionIterator.h>
-#include <itkBSplineControlPointImageFilter.h>
 #include <itkN4BiasFieldCorrectionImageFilter.h>
+#include <itkShrinkImageFilter.h>
+#include <itkTimeProbe.h>
 
 #include <qprogressdialog.h>
 
 #include <algorithm>
-#include <sstream>
 #include <functional>
+#include <sstream>
 
-
-namespace 
+namespace {
+template<class TFilter> class CommandIterationUpdate : public itk::Command
 {
-	template <class TFilter>
-	class CommandIterationUpdate : public itk::Command
+public:
+	typedef CommandIterationUpdate Self;
+	typedef itk::Command Superclass;
+	typedef itk::SmartPointer<Self> Pointer;
+	itkNewMacro(Self);
+
+protected:
+	CommandIterationUpdate(){};
+
+public:
+	void SetProgressObject(QProgressDialog *progress,
+												 const std::vector<unsigned int> &num_iterations)
 	{
-	public:
-		typedef CommandIterationUpdate  Self;
-		typedef itk::Command            Superclass;
-		typedef itk::SmartPointer<Self> Pointer;
-		itkNewMacro(Self);
-	protected:
-		CommandIterationUpdate()
-		{
-		};
-	public:
-		void SetProgressObject(QProgressDialog *progress, const std::vector<unsigned int> &num_iterations)
-		{
-			m_NumberOfIterations = num_iterations;
-			m_Progress = progress;
-		}
-
-		void Execute(itk::Object *caller, const itk::EventObject &event) ITK_OVERRIDE
-		{
-			Execute((const itk::Object *) caller, event);
-		}
-
-		void Execute(const itk::Object *object, const itk::EventObject &event) ITK_OVERRIDE
-		{
-			const TFilter *filter =
-				dynamic_cast<const TFilter *>(object);
-
-			if (typeid(event) != typeid(itk::IterationEvent))
-			{
-				return;
-			}
-
-			double current_level = filter->GetCurrentLevel();
-			double current_iteration = filter->GetElapsedIterations();
-			int percent = static_cast<int>((current_level + current_iteration / m_NumberOfIterations.at(current_level)) * 100.0 / m_NumberOfIterations.size());
-			m_Progress->setValue(std::min(percent, 100));
-
-			if (m_Progress->wasCanceled())
-			{
-				// hack to stop filter from executing
-				throw itk::ProcessAborted();
-			}
-		}
-
-	private:
-		std::vector<unsigned int> m_NumberOfIterations;
-		QProgressDialog *m_Progress;
-	};
-
-	template <typename ImageType>
-	typename ImageType::Pointer AllocImage(const typename itk::ImageBase<ImageType::ImageDimension> *exemplar)
-	{
-		typename ImageType::Pointer rval = ImageType::New();
-		// it may be the case that the output image might have a different
-		// number of PixelComponents than the exemplar, so only copy this
-		// information.
-		// rval->CopyInformation(exemplar);
-		rval->SetLargestPossibleRegion(exemplar->GetLargestPossibleRegion());
-		rval->SetBufferedRegion(exemplar->GetBufferedRegion());
-		rval->SetRequestedRegion(exemplar->GetRequestedRegion());
-		rval->SetSpacing(exemplar->GetSpacing());
-		rval->SetOrigin(exemplar->GetOrigin());
-		rval->SetDirection(exemplar->GetDirection());
-		rval->Allocate();
-		return rval;
+		m_NumberOfIterations = num_iterations;
+		m_Progress = progress;
 	}
 
-	inline QString Format(const char* tooltip)
+	void Execute(itk::Object *caller, const itk::EventObject &event) ITK_OVERRIDE
 	{
-		QString fmt = "<html>\n";
-		fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
-		fmt += "</html>";
-		return fmt;
+		Execute((const itk::Object *)caller, event);
 	}
+
+	void Execute(const itk::Object *object,
+							 const itk::EventObject &event) ITK_OVERRIDE
+	{
+		const TFilter *filter = dynamic_cast<const TFilter *>(object);
+
+		if (typeid(event) != typeid(itk::IterationEvent)) {
+			return;
+		}
+
+		double current_level = filter->GetCurrentLevel();
+		double current_iteration = filter->GetElapsedIterations();
+		int percent = static_cast<int>(
+				(current_level +
+				 current_iteration / m_NumberOfIterations.at(current_level)) *
+				100.0 / m_NumberOfIterations.size());
+		m_Progress->setValue(std::min(percent, 100));
+
+		if (m_Progress->wasCanceled()) {
+			// hack to stop filter from executing
+			throw itk::ProcessAborted();
+		}
+	}
+
+private:
+	std::vector<unsigned int> m_NumberOfIterations;
+	QProgressDialog *m_Progress;
+};
+
+template<typename ImageType>
+typename ImageType::Pointer AllocImage(
+		const typename itk::ImageBase<ImageType::ImageDimension> *exemplar)
+{
+	typename ImageType::Pointer rval = ImageType::New();
+	// it may be the case that the output image might have a different
+	// number of PixelComponents than the exemplar, so only copy this
+	// information.
+	// rval->CopyInformation(exemplar);
+	rval->SetLargestPossibleRegion(exemplar->GetLargestPossibleRegion());
+	rval->SetBufferedRegion(exemplar->GetBufferedRegion());
+	rval->SetRequestedRegion(exemplar->GetRequestedRegion());
+	rval->SetSpacing(exemplar->GetSpacing());
+	rval->SetOrigin(exemplar->GetOrigin());
+	rval->SetDirection(exemplar->GetDirection());
+	rval->Allocate();
+	return rval;
 }
 
-CBiasCorrection::CBiasCorrection(iseg::CSliceHandlerInterface *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
-	, m_CurrentFilter(nullptr)
+inline QString Format(const char *tooltip)
 {
-	setToolTip(Format("Correct non-uniformity (especially in MRI) using the N4 Bias Correction algorithm by "
-		"<br>"
-		"Tustison et al., 'N4ITK: Improved N3 Bias Correction', IEEE Transactions on Medical Imaging, 29(6) : 1310 - 1320, June 2010"));
+	QString fmt = "<html>\n";
+	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
+	fmt += "</html>";
+	return fmt;
+}
+} // namespace
+
+CBiasCorrection::CBiasCorrection(iseg::CSliceHandlerInterface *hand3D,
+																 QWidget *parent, const char *name,
+																 Qt::WindowFlags wFlags)
+		: QWidget1(parent, name, wFlags), handler3D(hand3D),
+			m_CurrentFilter(nullptr)
+{
+	setToolTip(Format(
+			"Correct non-uniformity (especially in MRI) using the N4 Bias Correction "
+			"algorithm by "
+			"<br>"
+			"Tustison et al., 'N4ITK: Improved N3 Bias Correction', IEEE "
+			"Transactions on Medical Imaging, 29(6) : 1310 - 1320, June 2010"));
 
 	activeslice = handler3D->get_activeslice();
 
@@ -152,29 +157,27 @@ void CBiasCorrection::do_work()
 	handler3D->GetITKImage(input); //BL: todo
 
 	//Ensure that it is a 3D image for the 3D image filter ! Else it does nothing
-	if (input->GetLargestPossibleRegion().GetSize(2) > 1)
-	{
+	if (input->GetLargestPossibleRegion().GetSize(2) > 1) {
 		int num_levels = edit_num_levels->value();
 		int num_iterations = edit_num_iterations->value();
 		int shrink_factor = edit_shrink_factor->value();
 		double conv_threshold = 0.0;
 
-		try
-		{
-			auto output = DoBiasCorrection<InputImageType::Pointer>(input, ITK_NULLPTR, std::vector<unsigned int>(num_levels, num_iterations), shrink_factor, conv_threshold);
+		try {
+			auto output = DoBiasCorrection<InputImageType::Pointer>(
+					input, ITK_NULLPTR,
+					std::vector<unsigned int>(num_levels, num_iterations), shrink_factor,
+					conv_threshold);
 
-			if (output)
-			{
+			if (output) {
 				handler3D->ModifyWorkFloat(output); // BL: todo
 
 				// BL: todo signal to 2D view to refresh display
 			}
 		}
-		catch (itk::ExceptionObject &)
-		{
+		catch (itk::ExceptionObject &) {
 		}
-		catch (...)
-		{
+		catch (...) {
 			// itk calls 'throw' with no exception
 		}
 	}
@@ -182,28 +185,20 @@ void CBiasCorrection::do_work()
 
 void CBiasCorrection::cancel()
 {
-	if (m_CurrentFilter)
-	{
+	if (m_CurrentFilter) {
 		m_CurrentFilter->SetAbortGenerateData(true);
 		m_CurrentFilter = nullptr;
 	}
 }
 
-QSize CBiasCorrection::sizeHint() const
-{
-	return vbox1->sizeHint();
-}
+QSize CBiasCorrection::sizeHint() const { return vbox1->sizeHint(); }
 
-CBiasCorrection::~CBiasCorrection()
-{
-	delete vbox1;
-}
+CBiasCorrection::~CBiasCorrection() { delete vbox1; }
 
 void CBiasCorrection::slicenr_changed()
 {
 	activeslice = handler3D->get_activeslice();
 }
-
 
 void CBiasCorrection::init()
 {
@@ -228,8 +223,9 @@ QIcon CBiasCorrection::GetIcon(QDir picdir)
 
 template<typename ImagePointer>
 ImagePointer CBiasCorrection::DoBiasCorrection(
-	ImagePointer inputImage, ImagePointer maskImage,
-	const std::vector<unsigned int> &numIters, int shrinkFactor, double convergenceThreshold)
+		ImagePointer inputImage, ImagePointer maskImage,
+		const std::vector<unsigned int> &numIters, int shrinkFactor,
+		double convergenceThreshold)
 {
 	bool verbose = false;
 
@@ -237,11 +233,14 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	typedef typename ImagePointer::ObjectType MaskImageType;
 	static const int ImageDimension = ImageType::ImageDimension;
 
-	typedef itk::N4BiasFieldCorrectionImageFilter<ImageType, MaskImageType, ImageType> CorrecterType;
+	typedef itk::N4BiasFieldCorrectionImageFilter<ImageType, MaskImageType,
+																								ImageType>
+			CorrecterType;
 	typename CorrecterType::Pointer correcter = CorrecterType::New();
 	m_CurrentFilter = correcter;
 
-	QProgressDialog progress("Performing bias correction...", "Cancel", 0, 101, this);
+	QProgressDialog progress("Performing bias correction...", "Cancel", 0, 101,
+													 this);
 	progress.setWindowModality(Qt::WindowModal);
 	progress.setModal(true);
 	progress.show();
@@ -253,26 +252,26 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	* handle the mask image
 	*/
 	bool isMaskImageSpecified = (maskImage.IsNotNull());
-	if (!maskImage)
-	{
-		if (verbose)
-		{
-			std::cout << "Mask not read.  Using the entire image as the mask." << std::endl << std::endl;
+	if (!maskImage) {
+		if (verbose) {
+			std::cout << "Mask not read.  Using the entire image as the mask."
+								<< std::endl
+								<< std::endl;
 		}
 		maskImage = MaskImageType::New();
 		maskImage->CopyInformation(inputImage);
 		maskImage->SetRegions(inputImage->GetRequestedRegion());
 		maskImage->Allocate(false);
-		maskImage->FillBuffer(itk::NumericTraits<typename MaskImageType::PixelType>::OneValue());
+		maskImage->FillBuffer(
+				itk::NumericTraits<typename MaskImageType::PixelType>::OneValue());
 	}
-
 
 	/**
 	* convergence options
 	*/
-	typename CorrecterType::VariableSizeArrayType maximumNumberOfIterations(numIters.size());
-	for (unsigned int d = 0; d < numIters.size(); d++)
-	{
+	typename CorrecterType::VariableSizeArrayType maximumNumberOfIterations(
+			numIters.size());
+	for (unsigned int d = 0; d < numIters.size(); d++) {
 		maximumNumberOfIterations[d] = numIters[d];
 	}
 	correcter->SetMaximumNumberOfIterations(maximumNumberOfIterations);
@@ -313,15 +312,12 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	//correcter->SetWienerFilterNoise(0.01);
 	//correcter->SetNumberOfHistogramBins(200);
 
-	try
-	{
+	try {
 		// correcter->DebugOn();
 		correcter->Update();
 	}
-	catch (itk::ExceptionObject &e)
-	{
-		if (verbose)
-		{
+	catch (itk::ExceptionObject &e) {
+		if (verbose) {
 			std::cerr << "Exception caught: " << e << std::endl;
 		}
 		m_CurrentFilter = ITK_NULLPTR;
@@ -330,14 +326,12 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 
 	m_CurrentFilter = ITK_NULLPTR;
 
-	if (verbose)
-	{
+	if (verbose) {
 		correcter->Print(std::cout, 3);
 	}
 
 	timer.Stop();
-	if (verbose)
-	{
+	if (verbose) {
 		std::cout << "Elapsed time: " << timer.GetMean() << std::endl;
 	}
 
@@ -348,9 +342,10 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	* the original input image by the bias field to get the final
 	* corrected image.
 	*/
-	typedef itk::BSplineControlPointImageFilter<typename
-		CorrecterType::BiasFieldControlPointLatticeType, typename
-		CorrecterType::ScalarImageType> BSplinerType;
+	typedef itk::BSplineControlPointImageFilter<
+			typename CorrecterType::BiasFieldControlPointLatticeType,
+			typename CorrecterType::ScalarImageType>
+			BSplinerType;
 	typename BSplinerType::Pointer bspliner = BSplinerType::New();
 	bspliner->SetInput(correcter->GetLogBiasFieldControlPointLattice());
 	bspliner->SetSplineOrder(correcter->GetSplineOrder());
@@ -363,13 +358,10 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	typename ImageType::Pointer logField = AllocImage<ImageType>(inputImage);
 
 	itk::ImageRegionIterator<typename CorrecterType::ScalarImageType> ItB(
-		bspliner->GetOutput(),
-		bspliner->GetOutput()->GetLargestPossibleRegion());
-	itk::ImageRegionIterator<ImageType> ItF(
-		logField,
-		logField->GetLargestPossibleRegion());
-	for (ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF)
-	{
+			bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
+	itk::ImageRegionIterator<ImageType> ItF(logField,
+																					logField->GetLargestPossibleRegion());
+	for (ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF) {
 		ItF.Set(ItB.Get()[0]);
 	}
 
@@ -384,16 +376,14 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 	divider->SetInput2(expFilter->GetOutput());
 	divider->Update();
 
-	if (isMaskImageSpecified)
-	{
-		itk::ImageRegionIteratorWithIndex<ImageType> ItD(divider->GetOutput(),
-			divider->GetOutput()->GetLargestPossibleRegion());
-		itk::ImageRegionIterator<ImageType> ItI(inputImage,
-			inputImage->GetLargestPossibleRegion());
-		for (ItD.GoToBegin(), ItI.GoToBegin(); !ItD.IsAtEnd(); ++ItD, ++ItI)
-		{
-			if (maskImage->GetPixel(ItD.GetIndex()) == itk::NumericTraits<typename MaskImageType::PixelType>::ZeroValue())
-			{
+	if (isMaskImageSpecified) {
+		itk::ImageRegionIteratorWithIndex<ImageType> ItD(
+				divider->GetOutput(), divider->GetOutput()->GetLargestPossibleRegion());
+		itk::ImageRegionIterator<ImageType> ItI(
+				inputImage, inputImage->GetLargestPossibleRegion());
+		for (ItD.GoToBegin(), ItI.GoToBegin(); !ItD.IsAtEnd(); ++ItD, ++ItI) {
+			if (maskImage->GetPixel(ItD.GetIndex()) ==
+					itk::NumericTraits<typename MaskImageType::PixelType>::ZeroValue()) {
 				ItD.Set(ItI.Get());
 			}
 		}
@@ -401,5 +391,3 @@ ImagePointer CBiasCorrection::DoBiasCorrection(
 
 	return divider->GetOutput();
 }
-
-

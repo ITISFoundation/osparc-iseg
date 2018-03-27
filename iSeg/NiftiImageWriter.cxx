@@ -7,17 +7,17 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
-#include <QString>
-#include <QFile>
-#include <QFileInfo>
 #include <QDir>
-#include <QTextStream>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomText>
+#include <QFile>
+#include <QFileInfo>
+#include <QString>
+#include <QTextStream>
 
 #include <vtkSmartPointer.h>
 
@@ -40,16 +40,9 @@ NiftiImageWriter::NiftiImageWriter()
 	this->FileName = 0;
 }
 
+NiftiImageWriter::~NiftiImageWriter() { delete[] this->FileName; }
 
-
-NiftiImageWriter::~NiftiImageWriter()
-{
-   delete [] this->FileName;
-}
-
-
-template <typename T>
-int NiftiImageWriter::Write(T **data, bool labelfield)
+template<typename T> int NiftiImageWriter::Write(T **data, bool labelfield)
 {
 	cerr << "NiftiImageWriter::Write()" << endl;
 
@@ -60,39 +53,53 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 	int datatype;
 	if (typeid(T) == typeid(unsigned char)) { /* unsigned char (8 bits/voxel) */
 		datatype = DT_UINT8;
-	} else if (typeid(T) == typeid(short)) {	/* signed short (16 bits/voxel) */
+	}
+	else if (typeid(T) == typeid(short)) { /* signed short (16 bits/voxel) */
 		datatype = DT_INT16;
-	} else if (typeid(T) == typeid(int)) { /* signed int (32 bits/voxel)   */
+	}
+	else if (typeid(T) == typeid(int)) { /* signed int (32 bits/voxel)   */
 		datatype = DT_INT32;
-	} else if (typeid(T) == typeid(float)) { /* float (32 bits/voxel)        */
+	}
+	else if (typeid(T) == typeid(float)) { /* float (32 bits/voxel)        */
 		datatype = DT_FLOAT32;
-	} else if (typeid(T) == typeid(double)) { /* double (64 bits/voxel)       */
+	}
+	else if (typeid(T) == typeid(double)) { /* double (64 bits/voxel)       */
 		datatype = DT_FLOAT64;
-	} else if (typeid(T) == typeid(char)) { /* signed char (8 bits)         */
+	}
+	else if (typeid(T) == typeid(char)) { /* signed char (8 bits)         */
 		datatype = DT_INT8;
-	} else if (typeid(T) == typeid(unsigned short)) { /* unsigned short (16 bits)     */
+	}
+	else if (typeid(T) ==
+					 typeid(unsigned short)) { /* unsigned short (16 bits)     */
 		datatype = DT_UINT16;
-	} else if (typeid(T) == typeid(unsigned int)) { /* unsigned int (32 bits)       */
+	}
+	else if (typeid(T) ==
+					 typeid(unsigned int)) { /* unsigned int (32 bits)       */
 		datatype = DT_UINT32;
-	} else if (typeid(T) == typeid(long long)) { /* long long (64 bits)          */
+	}
+	else if (typeid(T) == typeid(long long)) { /* long long (64 bits)          */
 		datatype = DT_INT64;
-	} else if (typeid(T) == typeid(unsigned long long)) { /* unsigned long long (64 bits) */
+	}
+	else if (typeid(T) ==
+					 typeid(unsigned long long)) { /* unsigned long long (64 bits) */
 		datatype = DT_UINT64;
-	} else {
+	}
+	else {
 		cerr << "error, unsupported grid type: " << typeid(T).name() << endl;
 		return 0;
 	}
 
-	int dims[8] = {3, this->Width, this->Height,this->NumberOfSlices, 1, 1, 1, 1};
+	int dims[8] = {3, this->Width, this->Height, this->NumberOfSlices, 1, 1, 1,
+								 1};
 	nifti_image *im = nifti_make_new_nim(dims, datatype, 1);
-	if( !im ) {
+	if (!im) {
 		cerr << "error, failed to alloc nifti_image" << endl;
 		return 0;
 	}
 
 	// TODO: tissue list in im->aux_file
 
-  strcpy(im->descrip, "iSeg");
+	strcpy(im->descrip, "iSeg");
 	im->xyz_units = NIFTI_UNITS_MM;
 	im->time_units = NIFTI_UNITS_SEC;
 
@@ -111,10 +118,11 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 	// Datafield intent
 	if (labelfield) {
 		im->intent_code = NIFTI_INTENT_LABEL;
-	} else {
+	}
+	else {
 		im->intent_code = NIFTI_INTENT_NONE;
 	}
-	
+
 	// Dataset transform
 	im->sform_code = NIFTI_XFORM_UNKNOWN;
 	im->qform_code = NIFTI_XFORM_SCANNER_ANAT;
@@ -124,7 +132,10 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 	im->qoffset_z = this->Offset[2];
 
 	// Normalize quaternion
-	float tmp = sqrt(this->Quaternion[0]*this->Quaternion[0] + this->Quaternion[1]*this->Quaternion[1] + this->Quaternion[2]*this->Quaternion[2] + this->Quaternion[3]*this->Quaternion[3]);
+	float tmp = sqrt(this->Quaternion[0] * this->Quaternion[0] +
+									 this->Quaternion[1] * this->Quaternion[1] +
+									 this->Quaternion[2] * this->Quaternion[2] +
+									 this->Quaternion[3] * this->Quaternion[3]);
 	for (unsigned short i = 0; i < 4; ++i) {
 		this->Quaternion[i] /= tmp;
 	}
@@ -139,10 +150,9 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 
 	// Copy pixel data
 	// Warning: This assumes that im->data has the same data type as the input data.
-	T *copyTo = (T*) im->data;
+	T *copyTo = (T *)im->data;
 	size_t N = this->Width * this->Height;
-	for(int k=0; k<this->NumberOfSlices; k++)
-	{
+	for (int k = 0; k < this->NumberOfSlices; k++) {
 		T *copyFrom = data[k];
 		for (size_t i = 0; i < N; ++i) {
 			*copyTo++ = *copyFrom++;
@@ -153,7 +163,7 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 	cerr << this->FileName << endl;
 
 	nifti_image_write(im);
-	
+
 	cerr << "done.\n" << endl;
 
 	nifti_image_free(im);
@@ -161,6 +171,6 @@ int NiftiImageWriter::Write(T **data, bool labelfield)
 	return 1;
 }
 
-
 template int NiftiImageWriter::Write<float>(float **data, bool labelfield);
-template int NiftiImageWriter::Write<tissues_size_t>(tissues_size_t **data, bool labelfield);
+template int NiftiImageWriter::Write<tissues_size_t>(tissues_size_t **data,
+																										 bool labelfield);

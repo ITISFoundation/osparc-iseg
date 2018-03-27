@@ -7,21 +7,23 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Precompiled.h"
 #include "ChannelExtractor.h"
+#include "Precompiled.h"
 
-#include <QImage>
 #include <QColor>
+#include <QImage>
 
 using namespace ChannelExtractor;
 
-bool ChannelExtractor::getSlice(const char *filename, float *slice, int channel, unsigned slicenr, unsigned width, unsigned height)
+bool ChannelExtractor::getSlice(const char *filename, float *slice, int channel,
+																unsigned slicenr, unsigned width,
+																unsigned height)
 {
 	QImage loadedImage(filename);
 
-	if(loadedImage.height()!=(int)height)
+	if (loadedImage.height() != (int)height)
 		return false;
-	if(loadedImage.width()!=(int)width)
+	if (loadedImage.width() != (int)width)
 		return false;
 
 	int redFactor = 0;
@@ -31,28 +33,23 @@ bool ChannelExtractor::getSlice(const char *filename, float *slice, int channel,
 
 	switch (channel)
 	{
-		case ChannelEnum::kRed:
-			redFactor = 1;
-			break;
-		case ChannelEnum::kGreen:
-			greenFactor = 1;
-			break;
-		case ChannelEnum::kBlue:
-			blueFactor = 1;
-			break;
-		case ChannelEnum::kAlpha:
-			alphaFactor = 1;
-			break;
+	case ChannelEnum::kRed: redFactor = 1; break;
+	case ChannelEnum::kGreen: greenFactor = 1; break;
+	case ChannelEnum::kBlue: blueFactor = 1; break;
+	case ChannelEnum::kAlpha: alphaFactor = 1; break;
 	}
 
-	unsigned int counter=0;
+	unsigned int counter = 0;
 	QColor oldColor;
-	for(int y = loadedImage.height()-1; y>=0; y--)
+	for (int y = loadedImage.height() - 1; y >= 0; y--)
 	{
-		for(int x = 0; x<loadedImage.width(); x++)
+		for (int x = 0; x < loadedImage.width(); x++)
 		{
-			oldColor = QColor(loadedImage.pixel(x,y));
-			slice[counter] = (unsigned char)(redFactor*oldColor.red()+greenFactor*oldColor.green()+blueFactor*oldColor.blue()+alphaFactor*oldColor.alpha());
+			oldColor = QColor(loadedImage.pixel(x, y));
+			slice[counter] = (unsigned char)(redFactor * oldColor.red() +
+																			 greenFactor * oldColor.green() +
+																			 blueFactor * oldColor.blue() +
+																			 alphaFactor * oldColor.alpha());
 			counter++;
 		}
 	}

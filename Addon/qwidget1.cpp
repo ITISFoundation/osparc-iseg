@@ -8,4 +8,4 @@
  *  https://opensource.org/licenses/MIT
  */
 #include "qwidget1.h"
-bool QWidget1::hideparams=false;
+bool QWidget1::hideparams = false;

@@ -11,28 +11,29 @@
 #define PICKERWIDGET_15DEZ08
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
 #include <q3vbox.h>
+#include <qbuttongroup.h>
 #include <qcombobox.h>
-#include <qevent.h> 
+#include <qevent.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
 #include "Core/common.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class picker_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    picker_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	picker_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~picker_widget();
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
@@ -40,8 +41,11 @@ public:
 	void init();
 	void cleanup();
 	void newloaded();
-	std::string GetName() {return std::string("Picker");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("picker.png")).ascii());};
+	std::string GetName() { return std::string("Picker"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("picker.png")).ascii());
+	};
 
 public slots:
 	void slicenr_changed();
@@ -78,8 +82,10 @@ private:
 
 signals:
 	void vp1_changed(std::vector<Point> *vp1);
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 private slots:
 	void copy_pressed();

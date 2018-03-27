@@ -9,28 +9,32 @@
  */
 #pragma once
 
-#include "Addon/qwidget1.h"
 #include "Addon/SlicesHandlerInterface.h"
+#include "Addon/qwidget1.h"
 
 #include <q3vbox.h>
+#include <qcheckbox.h>
+#include <qcombobox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
-
 
 class CGraphCutTissueSeparator : public QWidget1
 {
 	Q_OBJECT
 public:
-	CGraphCutTissueSeparator(iseg::CSliceHandlerInterface *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	CGraphCutTissueSeparator(iseg::CSliceHandlerInterface *hand3D,
+													 QWidget *parent = 0, const char *name = 0,
+													 Qt::WindowFlags wFlags = 0);
 	~CGraphCutTissueSeparator();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
-	std::string GetName() {return std::string("Separate Tissue");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());};
+	std::string GetName() { return std::string("Separate Tissue"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());
+	};
 
 private:
 	iseg::CSliceHandlerInterface *m_Handler3D;
@@ -48,7 +52,7 @@ private:
 	QLabel *m_LabelEnd;
 	QSpinBox *m_ForegroundValue;
 	QSpinBox *m_BackgroundValue;
-	QCheckBox* USE_FB; // ?
+	QCheckBox *USE_FB; // ?
 	QCheckBox *m_UseIntensity;
 	QComboBox *m_MaxFlowAlgorithm;
 	QCheckBox *m_6Connectivity;
@@ -57,11 +61,10 @@ private:
 	QSpinBox *m_End;
 	QPushButton *m_Execute;
 
-	public slots:
-		void slicenr_changed();
+public slots:
+	void slicenr_changed();
 
-	private slots:
-		void do_work();
-		void showsliders();
+private slots:
+	void do_work();
+	void showsliders();
 };
-

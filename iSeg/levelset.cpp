@@ -7,97 +7,106 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
+#include "levelset.h"
 #include "Precompiled.h"
 #include "bmp_read_1.h"
-#include "levelset.h"
 
 using namespace std;
 
 levelset::levelset()
 {
-	loaded=false;
-	image=new bmphandler;
-//	ownlvlset=false;
+	loaded = false;
+	image = new bmphandler;
+	//	ownlvlset=false;
 	return;
 }
 
-void levelset::init(unsigned short h, unsigned short w, float *levlset,float *kbit,float *Pbit,float balloon,float epsilon1,float step_size)
+void levelset::init(unsigned short h, unsigned short w, float *levlset,
+										float *kbit, float *Pbit, float balloon, float epsilon1,
+										float step_size)
 {
-	width=w;
-	height=h;
-	area=unsigned(width)*height;
-		
-	if(!image->isloaded()) image->newbmp(w,h);
-	
-	sliceprovide_installer=sliceprovider_installer::getinst();
-	sliceprovide=sliceprovide_installer->install(area);
+	width = w;
+	height = h;
+	area = unsigned(width) * height;
 
-//	levset=levlset;
-	image->set_work(levlset,1);
-//	image.SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump.bmp");
+	if (!image->isloaded())
+		image->newbmp(w, h);
 
-	devx=sliceprovide->give_me();
-	devy=sliceprovide->give_me();
-	devxx=sliceprovide->give_me();
-	devxy=sliceprovide->give_me();
-	devyy=sliceprovide->give_me();
+	sliceprovide_installer = sliceprovider_installer::getinst();
+	sliceprovide = sliceprovide_installer->install(area);
 
-	for(unsigned i=0;i<area;++i) {
-//		devxx[i]=devxy[i]=devyy[i]=0;
-		devx[i]=devy[i]=devxx[i]=devxy[i]=devyy[i]=0;
+	//	levset=levlset;
+	image->set_work(levlset, 1);
+	//	image.SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump.bmp");
+
+	devx = sliceprovide->give_me();
+	devy = sliceprovide->give_me();
+	devxx = sliceprovide->give_me();
+	devxy = sliceprovide->give_me();
+	devyy = sliceprovide->give_me();
+
+	for (unsigned i = 0; i < area; ++i)
+	{
+		//		devxx[i]=devxy[i]=devyy[i]=0;
+		devx[i] = devy[i] = devxx[i] = devxy[i] = devyy[i] = 0;
 	}
-/*	kbits=sliceprovide->give_me();
+	/*	kbits=sliceprovide->give_me();
 	Pbits=sliceprovide->give_me();*/
-	Px=sliceprovide->give_me();
-	Py=sliceprovide->give_me();
+	Px = sliceprovide->give_me();
+	Py = sliceprovide->give_me();
 	set_k(kbit);
 	set_P(Pbit);
-	epsilon=epsilon1;
-	balloon1=balloon;
-	stepsize=step_size;
-	loaded=true;
+	epsilon = epsilon1;
+	balloon1 = balloon;
+	stepsize = step_size;
+	loaded = true;
 
 	return;
 }
 
-void levelset::init(unsigned short h,unsigned short w,float *initial,float f,float *kbit,float *Pbit,float balloon,float epsilon1,float step_size)
+void levelset::init(unsigned short h, unsigned short w, float *initial, float f,
+										float *kbit, float *Pbit, float balloon, float epsilon1,
+										float step_size)
 {
-	width=w;
-	height=h;
-	area=unsigned(width)*height;
-	
-	image->newbmp(w,h);
-	image->copy2bmp(initial,1);
+	width = w;
+	height = h;
+	area = unsigned(width) * height;
+
+	image->newbmp(w, h);
+	image->copy2bmp(initial, 1);
 	image->dead_reckoning(f);
 
-//	float *dummy=image->copy_work();
-//	ownlvlset=true;
-//	init(h, w, dummy, kbit, Pbit, balloon, epsilon1, step_size);
+	//	float *dummy=image->copy_work();
+	//	ownlvlset=true;
+	//	init(h, w, dummy, kbit, Pbit, balloon, epsilon1, step_size);
 	init(h, w, image->return_work(), kbit, Pbit, balloon, epsilon1, step_size);
 
 	return;
 }
 
-void levelset::init(unsigned short h, unsigned short w, Point p, float *kbit,float *Pbit,float balloon,float epsilon1,float step_size)
+void levelset::init(unsigned short h, unsigned short w, Point p, float *kbit,
+										float *Pbit, float balloon, float epsilon1, float step_size)
 {
-	width=w;
-	height=h;
-	area=unsigned(width)*height;
-	float px=p.px;
-	float py=p.py;
+	width = w;
+	height = h;
+	area = unsigned(width) * height;
+	float px = p.px;
+	float py = p.py;
 
-	float *levlset=(float *)malloc(sizeof(float)*area);
-//	ownlvlset=true;
-	unsigned n=0;
-	for(short i=0;i<height;i++){
-		for(short j=0;j<width;j++){
-			levlset[n]=-sqrt((px-j)*(px-j)+(py-i)*(py-i))+1;
+	float *levlset = (float *)malloc(sizeof(float) * area);
+	//	ownlvlset=true;
+	unsigned n = 0;
+	for (short i = 0; i < height; i++)
+	{
+		for (short j = 0; j < width; j++)
+		{
+			levlset[n] = -sqrt((px - j) * (px - j) + (py - i) * (py - i)) + 1;
 			n++;
 		}
 	}
-	
+
 	init(h, w, levlset, kbit, Pbit, balloon, epsilon1, step_size);
-/*	Pair p1;
+	/*	Pair p1;
 	image->copy2work(levlset);
 	image->get_range(&p1);
 	image->scale_colors(p1);
@@ -108,11 +117,13 @@ void levelset::init(unsigned short h, unsigned short w, Point p, float *kbit,flo
 
 void levelset::iterate(unsigned nrsteps, unsigned updatefreq)
 {
-	for(unsigned i=1;i<=nrsteps;++i){
+	for (unsigned i = 1; i <= nrsteps; ++i)
+	{
 		make_step();
-//		cout << i;
-		if(i%updatefreq==0&&updatefreq>0) reinitialize();
-//		cout << ".";
+		//		cout << i;
+		if (i % updatefreq == 0 && updatefreq > 0)
+			reinitialize();
+		//		cout << ".";
 	}
 
 	return;
@@ -120,17 +131,17 @@ void levelset::iterate(unsigned nrsteps, unsigned updatefreq)
 
 void levelset::set_k(float *kbit)
 {
-	kbits=kbit;
+	kbits = kbit;
 	return;
 }
 
 void levelset::set_P(float *Pbit)
 {
-	Pbits=Pbit;
+	Pbits = Pbit;
 	diffx(Pbits, Px);
 	diffy(Pbits, Py);
 
-/*	bmphandler image2;
+	/*	bmphandler image2;
 	Pair p;
 	image2.newbmp(512,512);
 	image2.copy2work(Pbits);
@@ -151,16 +162,16 @@ void levelset::set_P(float *Pbit)
 void levelset::reinitialize()
 {
 	float thresh[2];
-	thresh[0]=1;
-	thresh[1]=0;
+	thresh[0] = 1;
+	thresh[1] = 0;
 	image->swap_bmpwork();
-//	image.copy2bmp(levset);
+	//	image.copy2bmp(levset);
 
 	image->threshold(thresh);
 	image->swap_bmpwork();
 	image->dead_reckoning(255);
-//	image->IFT_distance1(255);
-/*	Pair p,p1;
+	//	image->IFT_distance1(255);
+	/*	Pair p,p1;
 	image->get_range(&p);
 //	image->bmp_add(200);
 //	image->swap_bmpwork();
@@ -173,10 +184,10 @@ void levelset::reinitialize()
 	p1.high=265*25.5f;
 	image->scale_colors(p1);
 //	image->bmp_add(-200);*/
-//	levset=image->return_work();
-//	image->copy_work(levset);
-//	levset=image->return_work();
-/*	image->bmp_add(250);
+	//	levset=image->return_work();
+	//	image->copy_work(levset);
+	//	levset=image->return_work();
+	/*	image->bmp_add(250);
 	image->SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testt.bmp");
 	image->bmp_add(-250);*/
 
@@ -186,22 +197,32 @@ void levelset::reinitialize()
 void levelset::make_step()
 {
 	float *levset;
-	levset=image->return_work();
+	levset = image->return_work();
 	diffx(levset, devx);
 	diffy(levset, devy);
-	if(epsilon!=0){
+	if (epsilon != 0)
+	{
 		diffxx(levset, devxx);
 		diffxy(levset, devxy);
 		diffyy(levset, devyy);
 	}
 
-	float dummy,dummy1;
+	float dummy, dummy1;
 
-	for(unsigned i=0;i<area;i++){
-		dummy=devx[i]*devx[i]+devy[i]*devy[i];
-		if(dummy!=0){
-			dummy1=sqrt(dummy);
-			levset[i]+=stepsize*(kbits[i]*(dummy1*balloon1+epsilon*(devyy[i]*devx[i]*devx[i]-2*devx[i]*devy[i]*devxy[i]+devxx[i]*devy[i]*devy[i])/dummy)-Px[i]*devx[i]-Py[i]*devy[i]);
+	for (unsigned i = 0; i < area; i++)
+	{
+		dummy = devx[i] * devx[i] + devy[i] * devy[i];
+		if (dummy != 0)
+		{
+			dummy1 = sqrt(dummy);
+			levset[i] +=
+					stepsize * (kbits[i] * (dummy1 * balloon1 +
+																	epsilon *
+																			(devyy[i] * devx[i] * devx[i] -
+																			 2 * devx[i] * devy[i] * devxy[i] +
+																			 devxx[i] * devy[i] * devy[i]) /
+																			dummy) -
+											Px[i] * devx[i] - Py[i] * devy[i]);
 		}
 	}
 
@@ -210,96 +231,119 @@ void levelset::make_step()
 
 void levelset::diffx(float *input, float *output)
 {
-	unsigned k=1;
+	unsigned k = 1;
 
-	for(unsigned short j=0;j<height;++j){
-		for(unsigned short i=1;i<width-1;++i){
-			output[k]=(input[k+1]-input[k-1])/2;
+	for (unsigned short j = 0; j < height; ++j)
+	{
+		for (unsigned short i = 1; i < width - 1; ++i)
+		{
+			output[k] = (input[k + 1] - input[k - 1]) / 2;
 			++k;
 		}
-		k+=2;
+		k += 2;
 	}
 
-	for(unsigned k=0;k<area;k+=width) output[k]=input[k+1]-input[k];
-	for(unsigned k=width-1;k<area;k+=width) output[k]=input[k]-input[k-1];
+	for (unsigned k = 0; k < area; k += width)
+		output[k] = input[k + 1] - input[k];
+	for (unsigned k = width - 1; k < area; k += width)
+		output[k] = input[k] - input[k - 1];
 
 	return;
 }
 
 void levelset::diffy(float *input, float *output)
 {
-	unsigned k=width;
-	for(unsigned short j=1;j<height-1;++j){
-		for(unsigned short i=0;i<width;++i){
-			output[k]=(input[k+width]-input[k-width])/2;
+	unsigned k = width;
+	for (unsigned short j = 1; j < height - 1; ++j)
+	{
+		for (unsigned short i = 0; i < width; ++i)
+		{
+			output[k] = (input[k + width] - input[k - width]) / 2;
 			++k;
 		}
 	}
 
-	for(unsigned k=0;k<width;k++) output[k]=input[k+width]-input[k];
-	for(unsigned k=area-width;k<area;k++) output[k]=input[k]-input[k-width];
+	for (unsigned k = 0; k < width; k++)
+		output[k] = input[k + width] - input[k];
+	for (unsigned k = area - width; k < area; k++)
+		output[k] = input[k] - input[k - width];
 
 	return;
 }
 
 void levelset::diffxx(float *input, float *output)
 {
-	unsigned k=1;
-	for(unsigned short j=0;j<height;++j){
-		for(unsigned short i=1;i<width-1;++i){
-			output[k]=input[k+1]-input[k]+input[k-1];
+	unsigned k = 1;
+	for (unsigned short j = 0; j < height; ++j)
+	{
+		for (unsigned short i = 1; i < width - 1; ++i)
+		{
+			output[k] = input[k + 1] - input[k] + input[k - 1];
 			++k;
 		}
-		k+=2;
+		k += 2;
 	}
 
-	for(unsigned k=0;k<area;k+=width) output[k]=0;
-	for(unsigned k=width-1;k<area;k+=width) output[k]=0;
+	for (unsigned k = 0; k < area; k += width)
+		output[k] = 0;
+	for (unsigned k = width - 1; k < area; k += width)
+		output[k] = 0;
 
 	return;
 }
 
 void levelset::diffxy(float *input, float *output)
-{	
-	unsigned k=width+1;
-	for(unsigned short j=1;j<height-1;++j){
-		for(unsigned short i=1;i<width-1;++i){
-			output[k]=(input[k+1+width]-input[k-1+width]-input[k+1-width]+input[k-width-1])/2;
+{
+	unsigned k = width + 1;
+	for (unsigned short j = 1; j < height - 1; ++j)
+	{
+		for (unsigned short i = 1; i < width - 1; ++i)
+		{
+			output[k] = (input[k + 1 + width] - input[k - 1 + width] -
+									 input[k + 1 - width] + input[k - width - 1]) /
+									2;
 			++k;
 		}
-		k+=2;
+		k += 2;
 	}
 
-	for(unsigned k=0;k<area;k+=width) output[k]=0;
-	for(unsigned k=width-1;k<area;k+=width) output[k]=0;
-	for(unsigned k=1;k<width;k++) output[k]=0;
-	for(unsigned k=area-width+1;k<area;k++) output[k]=0;
+	for (unsigned k = 0; k < area; k += width)
+		output[k] = 0;
+	for (unsigned k = width - 1; k < area; k += width)
+		output[k] = 0;
+	for (unsigned k = 1; k < width; k++)
+		output[k] = 0;
+	for (unsigned k = area - width + 1; k < area; k++)
+		output[k] = 0;
 
 	return;
 }
 
 void levelset::diffyy(float *input, float *output)
 {
-	unsigned k=width;
-	for(unsigned short j=1;j<height-1;++j){
-		for(unsigned short i=0;i<width;++i){
-			output[k]=input[k+width]-input[k]+input[k-width];
+	unsigned k = width;
+	for (unsigned short j = 1; j < height - 1; ++j)
+	{
+		for (unsigned short i = 0; i < width; ++i)
+		{
+			output[k] = input[k + width] - input[k] + input[k - width];
 			++k;
 		}
 	}
 
-	for(unsigned k=0;k<width;k++) output[k]=0;
-	for(unsigned k=area-width;k<area;k++) output[k]=0;
+	for (unsigned k = 0; k < width; k++)
+		output[k] = 0;
+	for (unsigned k = area - width; k < area; k++)
+		output[k] = 0;
 
 	return;
 }
 
-
 void levelset::return_levelset(float *output)
 {
-//	image->SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump.bmp");
+	//	image->SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump.bmp");
 
-/*	bmphandler image2;
+	/*	bmphandler image2;
 	Pair p;
 	float *bbmmpp=(float *)malloc(sizeof(float)*area);
 	image2.newbmp(512,512);
@@ -333,21 +377,23 @@ void levelset::return_levelset(float *output)
 	image2.SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\teststeps.bmp");	
 	free(bbmmpp);*/
 
-	float *levset=image->return_work();
-	for(unsigned i=0;i<area;++i) output[i]=levset[i];
+	float *levset = image->return_work();
+	for (unsigned i = 0; i < area; ++i)
+		output[i] = levset[i];
 	return;
 }
 
-void levelset::return_zerolevelset(vector<vector<Point> > *v1, vector<vector<Point> > *v2, int minsize)
+void levelset::return_zerolevelset(vector<vector<Point>> *v1,
+																	 vector<vector<Point>> *v2, int minsize)
 {
 	image->swap_bmpwork();
-//	image->swap_workhelp();
-//	image->set_bmp(levset);
-//	image->copy2bmp(levset);
+	//	image->swap_workhelp();
+	//	image->set_bmp(levset);
+	//	image->copy2bmp(levset);
 
 	float thresh[2];
-	thresh[0]=1;
-	thresh[1]=0;
+	thresh[0] = 1;
+	thresh[1] = 0;
 	image->threshold(thresh);
 
 	v1->clear();
@@ -355,15 +401,16 @@ void levelset::return_zerolevelset(vector<vector<Point> > *v1, vector<vector<Poi
 
 	image->get_contours(255.0f, v1, v2, minsize);
 	image->swap_bmpwork();
-//	image->swap_workhelp();
+	//	image->swap_workhelp();
 
 	return;
 }
 
 levelset::~levelset()
 {
-	if(loaded){
-//		sliceprovide->take_back(levset);
+	if (loaded)
+	{
+		//		sliceprovide->take_back(levset);
 		sliceprovide->take_back(devx);
 		sliceprovide->take_back(devy);
 		sliceprovide->take_back(devxx);
@@ -371,18 +418,18 @@ levelset::~levelset()
 		sliceprovide->take_back(devyy);
 		sliceprovide->take_back(Px);
 		sliceprovide->take_back(Py);
-//		if(ownlvlset)
-//			sliceprovide->take_back(levset);
+		//		if(ownlvlset)
+		//			sliceprovide->take_back(levset);
 
-//		if(ownsliceprovider)
-			sliceprovide_installer->uninstall(sliceprovide);
-//		free(bmpinfo);
+		//		if(ownsliceprovider)
+		sliceprovide_installer->uninstall(sliceprovide);
+		//		free(bmpinfo);
 	}
 
 	sliceprovide_installer->return_instance();
-	if(sliceprovide_installer->unused())
+	if (sliceprovide_installer->unused())
 		delete sliceprovide_installer;
-	
+
 	delete image;
 
 	return;

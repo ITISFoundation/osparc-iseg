@@ -8,19 +8,19 @@
  *  https://opensource.org/licenses/MIT
  */
 #include "Precompiled.h"
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include <boost/format.hpp>
 
-#include <QString>
-#include <QFile>
-#include <QFileInfo>
 #include <QDir>
-#include <QTextStream>
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomText>
+#include <QFile>
+#include <QFileInfo>
+#include <QString>
+#include <QTextStream>
 
 #include <vtkSmartPointer.h>
 
@@ -47,26 +47,23 @@ XdmfImageWriter::XdmfImageWriter()
 	this->CopyToContiguousMemory = false;
 }
 
-XdmfImageWriter::XdmfImageWriter(const char* filepath)
-	: XdmfImageWriter()
+XdmfImageWriter::XdmfImageWriter(const char *filepath) : XdmfImageWriter()
 {
-	if (filepath && strlen(filepath) > 0)
-	{
+	if (filepath && strlen(filepath) > 0) {
 		SetFileName(filepath);
 	}
 }
 
-XdmfImageWriter::~XdmfImageWriter()
-{
-	delete[] this->FileName;
-}
+XdmfImageWriter::~XdmfImageWriter() { delete[] this->FileName; }
 
 bool XdmfImageWriter::Write(bool naked)
 {
-	return this->InternalWrite(FileName, ImageSlices, WorkSlices, TissueSlices, NumberOfSlices, Width, Height, PixelSize, ImageTransform, Compression, naked);
+	return this->InternalWrite(FileName, ImageSlices, WorkSlices, TissueSlices,
+														 NumberOfSlices, Width, Height, PixelSize,
+														 ImageTransform, Compression, naked);
 }
 
-bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
+bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable *lut, bool naked)
 {
 	if (lut == nullptr)
 		return 1;
@@ -86,8 +83,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 		fname = basename + "." + suffix;
 	else
 		fname = basename + ".h5";
-	if (!writer.open(fname.toAscii().data(), "append"))
-	{
+	if (!writer.open(fname.toAscii().data(), "append")) {
 		cerr << "error opening " << fname.toAscii().data() << endl;
 		return false;
 	}
@@ -99,29 +95,27 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	// write size and version
 	std::vector<HDF5Writer::size_type> dim_scalar(1, 1);
 	int version = 1;
-	if (!writer.write(&version, dim_scalar, "/Lut/version"))
-	{
+	if (!writer.write(&version, dim_scalar, "/Lut/version")) {
 		cerr << "error writing LUT version" << endl;
 		return false;
 	}
 	int num_colors = lut->NumberOfColors();
-	if (!writer.write(&num_colors, dim_scalar, "/Lut/size"))
-	{
+	if (!writer.write(&num_colors, dim_scalar, "/Lut/size")) {
 		cerr << "error writing LUT size" << endl;
 		return false;
 	}
 
 	// write colors
 	std::vector<HDF5Writer::size_type> dim_rgb(1, 3);
-	for (int i = 0; i < num_colors; ++i)
-	{
+	for (int i = 0; i < num_colors; ++i) {
 		// group name
-		std::string const folder_name = "/Lut/" + (boost::format("color%05d") % i).str();;
+		std::string const folder_name =
+				"/Lut/" + (boost::format("color%05d") % i).str();
+		;
 		writer.createGroup(folder_name);
 
 		// write color index
-		if (!writer.write(&i, dim_scalar, folder_name + "/index"))
-		{
+		if (!writer.write(&i, dim_scalar, folder_name + "/index")) {
 			cerr << "error writing index" << endl;
 			return false;
 		}
@@ -129,14 +123,8 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 		// write rgb
 		unsigned char rgb[3];
 		lut->GetColor(i, rgb);
-		float float_rgb[3] = 
-		{ 
-			rgb[0] / 255.0f, 
-			rgb[1] / 255.0f , 
-			rgb[2] / 255.0f 
-		};
-		if (!writer.write(float_rgb, dim_rgb, folder_name + "/rgb"))
-		{
+		float float_rgb[3] = {rgb[0] / 255.0f, rgb[1] / 255.0f, rgb[2] / 255.0f};
+		if (!writer.write(float_rgb, dim_rgb, folder_name + "/rgb")) {
 			cerr << "error writing color" << endl;
 			return false;
 		}
@@ -149,7 +137,13 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	return true;
 }
 
-int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, float **sliceswork, tissues_size_t **slicestissue, unsigned nrslices, unsigned width, unsigned height, float *pixelsize, Transform& transform, int compression, bool naked)
+int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp,
+																	 float **sliceswork,
+																	 tissues_size_t **slicestissue,
+																	 unsigned nrslices, unsigned width,
+																	 unsigned height, float *pixelsize,
+																	 Transform &transform, int compression,
+																	 bool naked)
 {
 	QString qFileName(filename);
 	QFileInfo fileInfo(qFileName);
@@ -158,15 +152,17 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data() << endl;
+	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
+			 << endl;
 
 	std::string abc(fileInfo.absolutePath().toAscii().data());
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to " << fileInfo.absolutePath().toAscii().data() << endl;
+	cerr << "changing current folder to "
+			 << fileInfo.absolutePath().toAscii().data() << endl;
 
-	const size_t N = (size_t)width*(size_t)height*(size_t)nrslices;
+	const size_t N = (size_t)width * (size_t)height * (size_t)nrslices;
 
 	vector<HDF5Writer::size_type> dims(3);
 	dims[0] = width;
@@ -180,71 +176,60 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 	cerr << "Total size = " << N << endl;
 
 	HDF5Writer writer;
-	writer.chunkSize.resize(1, width*height);
+	writer.chunkSize.resize(1, width * height);
 	QString fname;
 	if (naked)
 		fname = basename + "." + suffix;
 	else
 		fname = basename + ".h5";
-	if (!writer.open(fname.toAscii().data()))
-	{
+	if (!writer.open(fname.toAscii().data())) {
 		cerr << "error opening " << fname.toAscii().data() << endl;
 	}
 	writer.compression = compression;
 
 	// The slices are not contiguous in memory so we need to copy.
-	if (this->CopyToContiguousMemory)
-	{
+	if (this->CopyToContiguousMemory) {
 		// Source
 		vector<float> bufferFloat;
-		try
-		{
+		try {
 			// vector throws a length_error if resized above max_size
-			cerr << "N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size() << endl;
+			cerr << "N = " << N
+					 << ", bufferFloat.max_size() = " << bufferFloat.max_size() << endl;
 			bufferFloat.resize(N);
 		}
-		catch (length_error& le)
-		{
+		catch (length_error &le) {
 			cerr << "bufferFloat length error: " << le.what() << endl;
 			return 0;
 		}
 
 		size_t n = 0;
-		for (int k = 0; k < nrslices; k++)
-		{
+		for (int k = 0; k < nrslices; k++) {
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
-			{
-				for (int i = 0; i < width; i++, pos++)
-				{
+			for (int j = 0; j < height; j++) {
+				for (int i = 0; i < width; i++, pos++) {
 					bufferFloat[n] = slicesbmp[k][pos];
 					n++;
 				}
 			}
 		}
 
-		if (!writer.write(bufferFloat, "Source"))
-		{
+		if (!writer.write(bufferFloat, "Source")) {
 			cerr << "error writing Source" << endl;
 		}
 
 		// Target
 		n = 0;
-		for (int k = 0; k < nrslices; k++)
-		{
+		for (int k = 0; k < nrslices; k++) {
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
-			{
-				for (int i = 0; i < width; i++, pos++)
-				{
+			for (int j = 0; j < height; j++) {
+				for (int i = 0; i < width; i++, pos++) {
 					bufferFloat[n] = sliceswork[k][pos];
 					n++;
 				}
 			}
 		}
 
-		if (!writer.write(bufferFloat, "Target"))
-		{
+		if (!writer.write(bufferFloat, "Target")) {
 			cerr << "error writing Target" << endl;
 		}
 
@@ -252,65 +237,55 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 
 		// Tissue
 		vector<tissues_size_t> bufferTissuesSizeT;
-		try
-		{
+		try {
 			// vector throws a length_error if resized above max_size
-			cerr << "N = " << N << ", bufferTissuesSizeT.max_size() = " << bufferTissuesSizeT.max_size() << endl;
+			cerr << "N = " << N << ", bufferTissuesSizeT.max_size() = "
+					 << bufferTissuesSizeT.max_size() << endl;
 			bufferTissuesSizeT.resize(N);
 		}
-		catch (length_error& le)
-		{
+		catch (length_error &le) {
 			cerr << "bufferTissuesSizeT length error: " << le.what() << endl;
 			return 0;
 		}
 
 		n = 0;
-		for (int k = 0; k < nrslices; k++)
-		{
+		for (int k = 0; k < nrslices; k++) {
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
-			{
-				for (int i = 0; i < width; i++, pos++)
-				{
+			for (int j = 0; j < height; j++) {
+				for (int i = 0; i < width; i++, pos++) {
 					bufferTissuesSizeT[n] = slicestissue[k][pos];
 					n++;
 				}
 			}
 		}
 
-		if (!writer.write(bufferTissuesSizeT, "Tissue"))
-		{
+		if (!writer.write(bufferTissuesSizeT, "Tissue")) {
 			cerr << "error writing Tissue" << endl;
 		}
 	}
 	else // write slice-by-slice
 	{
-		if (!writer.write(slicesbmp, nrslices, dims[0] * dims[1], "Source"))
-		{
+		if (!writer.write(slicesbmp, nrslices, dims[0] * dims[1], "Source")) {
 			cerr << "error writing Source" << endl;
 		}
-		if (!writer.write(sliceswork, nrslices, dims[0] * dims[1], "Target"))
-		{
+		if (!writer.write(sliceswork, nrslices, dims[0] * dims[1], "Target")) {
 			cerr << "error writing Target" << endl;
 		}
-		if (!writer.write(slicestissue, nrslices, dims[0] * dims[1], "Tissue"))
-		{
+		if (!writer.write(slicestissue, nrslices, dims[0] * dims[1], "Tissue")) {
 			cerr << "error writing Tissue" << endl;
 		}
 	}
 
-
 	float offset[3], dc[6];
 	transform.getOffset(offset);
-	for (unsigned short i = 0; i < 3; i++)
-	{
+	for (unsigned short i = 0; i < 3; i++) {
 		dc[i] = transform[i][0];
 		dc[i + 3] = transform[i][1];
 	}
 
 	//if(naked)
 	{
-		//write dimensions, pixelsize, offset, dc, 
+		//write dimensions, pixelsize, offset, dc,
 		std::vector<HDF5Writer::size_type> dim1;
 		dim1.resize(1);
 		int dimension[3];
@@ -318,35 +293,29 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 		dimension[1] = dims[1];
 		dimension[2] = dims[2];
 		dim1[0] = 3;
-		if (!writer.write(dimension, dim1, std::string("/dimensions")))
-		{
+		if (!writer.write(dimension, dim1, std::string("/dimensions"))) {
 			cerr << "error writing dimensions" << endl;
 		}
-		if (!writer.write(offset, dim1, std::string("/offset")))
-		{
+		if (!writer.write(offset, dim1, std::string("/offset"))) {
 			cerr << "error writing offset" << endl;
 		}
-		if (!writer.write(pixelsize, dim1, std::string("/pixelsize")))
-		{
+		if (!writer.write(pixelsize, dim1, std::string("/pixelsize"))) {
 			cerr << "error writing pixelsize" << endl;
 		}
 		dim1[0] = 6;
 
-		if (!writer.write(dc, dim1, std::string("/dc")))
-		{
+		if (!writer.write(dc, dim1, std::string("/dc"))) {
 			cerr << "error writing dc" << endl;
 		}
 
 		float rotation[9];
-		for (int k = 0; k < 3; ++k)
-		{
+		for (int k = 0; k < 3; ++k) {
 			rotation[k * 3 + 0] = ImageTransform[k][0];
 			rotation[k * 3 + 1] = ImageTransform[k][1];
 			rotation[k * 3 + 2] = ImageTransform[k][2];
 		}
 		dim1[0] = 9;
-		if (!writer.write(rotation, dim1, std::string("/rotation")))
-		{
+		if (!writer.write(rotation, dim1, std::string("/rotation"))) {
 			cerr << "error writing rotation" << endl;
 		}
 	}
@@ -372,15 +341,18 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 		QDomElement geometry = doc.createElement("Geometry");
 		geometry.setAttribute("Type", "ORIGIN_DXDYDZ");
 
-
-
 		dataitem = doc.createElement("DataItem");
 		dataitem.setAttribute("Name", "Origin");
 		dataitem.setAttribute("Format", "XML");
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Dimensions", 3);
-		text = doc.createTextNode(QString("%1 %2 %3").arg(offset[2]).arg(offset[1]).arg(offset[0]).toAscii().data());
+		text = doc.createTextNode(QString("%1 %2 %3")
+																	.arg(offset[2])
+																	.arg(offset[1])
+																	.arg(offset[0])
+																	.toAscii()
+																	.data());
 		dataitem.appendChild(text);
 		geometry.appendChild(dataitem);
 
@@ -390,15 +362,23 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Dimensions", 3);
-		text = doc.createTextNode(QString("%1 %2 %3").arg(pixelsize[2]).arg(pixelsize[1]).arg(pixelsize[0]).toAscii().data());
+		text = doc.createTextNode(QString("%1 %2 %3")
+																	.arg(pixelsize[2])
+																	.arg(pixelsize[1])
+																	.arg(pixelsize[0])
+																	.toAscii()
+																	.data());
 		dataitem.appendChild(text);
 		geometry.appendChild(dataitem);
 
 		grid.appendChild(geometry);
 
-
-
-		QString qdims = QString("%1 %2 %3").arg(nrslices).arg(height).arg(width).toAscii().data();
+		QString qdims = QString("%1 %2 %3")
+												.arg(nrslices)
+												.arg(height)
+												.arg(width)
+												.toAscii()
+												.data();
 
 		QString realName = basename;
 		if (basename.right(4) == QString("Temp"))
@@ -451,9 +431,7 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 			dataitem.setAttribute("NumberType", "UInt");
 			dataitem.setAttribute("Precision", 4);
 			break;
-		default:
-			cerr << "tissues_size_t not supported!" << endl;
-			return 0;
+		default: cerr << "tissues_size_t not supported!" << endl; return 0;
 		}
 		dataitem.setAttribute("Format", "HDF");
 		dataitem.setAttribute("Dimensions", qdims.toAscii().data());
@@ -473,8 +451,8 @@ int XdmfImageWriter::InternalWrite(const char *filename, float **slicesbmp, floa
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	cerr << "restored current folder " << QDir::current().absolutePath().toAscii().data() << endl;
+	cerr << "restored current folder "
+			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return 1;
 }
-

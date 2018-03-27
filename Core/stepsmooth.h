@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "iSegCore.h"
 #include "Types.h"
+#include "iSegCore.h"
 
 class iSegCore_API stepsmooth
 {
@@ -18,8 +18,11 @@ public:
 	stepsmooth();
 	~stepsmooth();
 	void dostepsmooth(tissues_size_t *line);
-	void init(float *mask1, unsigned short masklength1, unsigned short linelength1, tissues_size_t nrtissues1);
-	void init(unsigned short masklength1, unsigned short linelength1, tissues_size_t nrtissues1);
+	void init(float *mask1, unsigned short masklength1,
+						unsigned short linelength1, tissues_size_t nrtissues1);
+	void init(unsigned short masklength1, unsigned short linelength1,
+						tissues_size_t nrtissues1);
+
 private:
 	float *mask;
 	unsigned short masklength;

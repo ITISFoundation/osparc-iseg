@@ -11,29 +11,17 @@
 
 #include "iSegCore.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#pragma warning( push )  
-#pragma warning( disable : 4267 )
+#pragma warning(push)
+#pragma warning(disable : 4267)
 
-enum PatientSexEnum {
-	Male,
-	Female,
-	Other,
-	Unspecified
-};
+enum PatientSexEnum { Male, Female, Other, Unspecified };
 
-enum DoseUnitsEnum {
-	Gray,
-	Relative
-};
+enum DoseUnitsEnum { Gray, Relative };
 
-enum DoseTypeEnum {
-	Physical,
-	Effective,
-	Error
-};
+enum DoseTypeEnum { Physical, Effective, Error };
 
 enum DoseSummationTypeEnum {
 	Plan,
@@ -70,12 +58,14 @@ public:
 	std::string GetPatientID() { return PatientID; };
 	// Issuer of Patient ID Macro (Table 10-18)
 	// Patient's Birth Date (Type = 2, VM = 1)
-	void SetPatientBirthDate(const unsigned short* values) {
-		for (unsigned short i = 0; i < 3; ++i) {
+	void SetPatientBirthDate(const unsigned short *values)
+	{
+		for (unsigned short i = 0; i < 3; ++i)
+		{
 			PatientBirthDate[i] = values[i];
 		}
 	};
-	unsigned short* GetPatientBirthDate() { return PatientBirthDate; };
+	unsigned short *GetPatientBirthDate() { return PatientBirthDate; };
 	// Patient's Sex (Type = 2, VM = 1)
 	void SetPatientSex(PatientSexEnum value) { PatientSex = value; };
 	PatientSexEnum GetPatientSex() { return PatientSex; };
@@ -115,21 +105,28 @@ public:
 	void SetStudyInstanceUID(std::string value) { StudyInstanceUID = value; };
 	std::string GetStudyInstanceUID() { return StudyInstanceUID; };
 	// Study Date (Type = 2, VM = 1)
-	void SetStudyDate(const unsigned short* values) {
-		for (unsigned short i = 0; i < 3; ++i) {
+	void SetStudyDate(const unsigned short *values)
+	{
+		for (unsigned short i = 0; i < 3; ++i)
+		{
 			StudyDate[i] = values[i];
 		}
 	};
-	unsigned short* GetStudyDate() { return StudyDate; };
+	unsigned short *GetStudyDate() { return StudyDate; };
 	// Study Time (Type = 2, VM = 1)
-	void SetStudyTime(const unsigned short* values) {
-		for (unsigned short i = 0; i < 3; ++i) {
+	void SetStudyTime(const unsigned short *values)
+	{
+		for (unsigned short i = 0; i < 3; ++i)
+		{
 			StudyTime[i] = values[i];
 		}
 	};
-	unsigned short* GetStudyTime() { return StudyTime; };
+	unsigned short *GetStudyTime() { return StudyTime; };
 	// Referring Physician's Name (Type = 2, VM = 1)
-	void SetReferringPhysicianName(std::string value) { ReferringPhysicianName = value; };
+	void SetReferringPhysicianName(std::string value)
+	{
+		ReferringPhysicianName = value;
+	};
 	std::string GetReferringPhysicianName() { return ReferringPhysicianName; };
 	// Referring Physician Identification Sequence (Type = 3, VM = ?)
 	// > Person Identification Macro (Table 10-1)
@@ -159,7 +156,7 @@ public:
 
 	// RT Series Module (C8.8.1)
 	// --------------------------------------------------------------
-	
+
 	// Modality (Type = 1, VM = 1) // Fixed value "RTDOSE"
 	std::string GetModality() { return std::string("RTDOSE"); };
 	// Series Instance UID (Type = 1, VM = 1)
@@ -172,9 +169,15 @@ public:
 	// Series Description Code Sequence (Type = 3, VM = ?)
 	// > Code Sequence Macro (Table 8.8-1)
 	// Operators' Name (Type = 2, VM = 1-n)
-	void SetOperatorsName(unsigned short idx, std::string value) { OperatorsName[idx] = value; };
+	void SetOperatorsName(unsigned short idx, std::string value)
+	{
+		OperatorsName[idx] = value;
+	};
 	void AddOperatorsName(std::string value) { OperatorsName.push_back(value); };
-	std::string GetOperatorsName(unsigned short idx) { return OperatorsName[idx]; };
+	std::string GetOperatorsName(unsigned short idx)
+	{
+		return OperatorsName[idx];
+	};
 	unsigned short GetOperatorsNameCount() { return OperatorsName.size(); };
 	// Referenced Performed Procedure Step Sequence (Type = 3, VM = ?)
 	// > SOP Instance Reference Macro (Table 10-11)
@@ -185,11 +188,20 @@ public:
 	// --------------------------------------------------------------
 
 	// Frame of Reference UID (Type = 1, VM = 1)
-	void SetFrameOfReferenceUID(std::string value) { FrameOfReferenceUID = value; };
+	void SetFrameOfReferenceUID(std::string value)
+	{
+		FrameOfReferenceUID = value;
+	};
 	std::string GetFrameOfReferenceUID() { return FrameOfReferenceUID; };
 	// Position Reference Indicator (Type = 2, VM = 1)
-	void SetPositionReferenceIndicator(std::string value) { PositionReferenceIndicator = value; };
-	std::string GetPositionReferenceIndicator() { return PositionReferenceIndicator; };
+	void SetPositionReferenceIndicator(std::string value)
+	{
+		PositionReferenceIndicator = value;
+	};
+	std::string GetPositionReferenceIndicator()
+	{
+		return PositionReferenceIndicator;
+	};
 
 	// General Equipment Module (C7.5.1)
 	// --------------------------------------------------------------
@@ -257,26 +269,32 @@ public:
 	// --------------------------------------------------------------
 
 	// Pixel Spacing (Type = 1, VM = 2) // TODO
-	void SetPixelSpacing(const double* values) {
-		for (unsigned short i = 0; i < 2; ++i) {
+	void SetPixelSpacing(const double *values)
+	{
+		for (unsigned short i = 0; i < 2; ++i)
+		{
 			PixelSpacing[i] = values[i];
 		}
 	};
-	double* GetPixelSpacing() { return PixelSpacing; };
+	double *GetPixelSpacing() { return PixelSpacing; };
 	// Image Orientation (Patient) (Type = 1, VM = 6) // TODO
-	void SetImageOrientationPatient(const double* values) {
-		for (unsigned short i = 0; i < 6; ++i) {
+	void SetImageOrientationPatient(const double *values)
+	{
+		for (unsigned short i = 0; i < 6; ++i)
+		{
 			ImageOrientationPatient[i] = values[i];
 		}
 	};
-	double* GetImageOrientationPatient() { return ImageOrientationPatient; };
+	double *GetImageOrientationPatient() { return ImageOrientationPatient; };
 	// Image Position (Patient) (Type = 1, VM = 3) // TODO
-	void SetImagePositionPatient(const double* values) {
-		for (unsigned short i = 0; i < 3; ++i) {
+	void SetImagePositionPatient(const double *values)
+	{
+		for (unsigned short i = 0; i < 3; ++i)
+		{
 			ImagePositionPatient[i] = values[i];
 		}
 	};
-	double* GetImagePositionPatient() { return ImagePositionPatient; };
+	double *GetImagePositionPatient() { return ImagePositionPatient; };
 	// Slice Thickness (Type = 2, VM = 1)
 	void SetSliceThickness(double value) { SliceThickness = value; };
 	double GetSliceThickness() { return SliceThickness; };
@@ -284,11 +302,14 @@ public:
 
 	// Image Pixel Module (C7.6.3)
 	// --------------------------------------------------------------
-	
+
 	// Samples per Pixel (Type = 1, VM = 1) // Fixed value 1 (monochrome)
 	unsigned short GetSamplesPerPixel() { return 1; };
 	// Photometric Interpretation (Type = 1, VM = 1) // Fixed value "MONOCHROME2"
-	std::string GetPhotometricInterpretation() { return std::string("MONOCHROME2"); };
+	std::string GetPhotometricInterpretation()
+	{
+		return std::string("MONOCHROME2");
+	};
 	// Rows (Type = 1, VM = 1)
 	void SetRows(unsigned int value) { Rows = value; };
 	unsigned int GetRows() { return Rows; };
@@ -301,18 +322,22 @@ public:
 	// Bits Stored (Type = 1, VM = 1)
 	unsigned short GetBitsStored() { return BitsAllocated; };
 	// High Bit (Type = 1, VM = 1)
-	unsigned short GetHighBit() { return BitsAllocated-1; };
+	unsigned short GetHighBit() { return BitsAllocated - 1; };
 	// Pixel Representation (Type = 1, VM = 1)
-	unsigned short GetPixelRepresentation() {
-		if(DoseType == Error) {
+	unsigned short GetPixelRepresentation()
+	{
+		if (DoseType == Error)
+		{
 			return 1;
-		} else {
+		}
+		else
+		{
 			return 0;
 		}
 	};
 	// Pixel Data (Type = 1C, VM = 1)
-	void SetPixelData(float* values) { PixelData = values; };
-	float* GetPixelData() { return PixelData; };
+	void SetPixelData(float *values) { PixelData = values; };
+	float *GetPixelData() { return PixelData; };
 	// Planar Configuration (Type = 1C, VM = 1)
 	// Pixel Aspect Ratio (Type = 1C, VM = 1)
 	// Smallest Image Pixel Value (Type = 3, VM = ?)
@@ -329,12 +354,13 @@ public:
 
 	// Multi-Frame Module (C7.6.6)
 	// --------------------------------------------------------------
-	
+
 	// Number Of Frames (Type = 1, VM = 1)
 	void SetNumberOfFrames(unsigned int value) { NumberOfFrames = value; };
 	unsigned int GetNumberOfFrames() { return NumberOfFrames; };
 	// Frame Increment Pointer (Type = 1, VM = 1) // Fixed value Tag(3004,000c)
-	std::string GetFrameIncrementPointer() {
+	std::string GetFrameIncrementPointer()
+	{
 		unsigned short group = 0x3004;
 		unsigned short element = 0x000c;
 		char buffer[4];
@@ -364,15 +390,33 @@ public:
 	// Dose Comment (Type = 3, VM = ?)
 	// Normalization Point (Type = 3, VM = ?)
 	// Dose Summation Type (Type = 1, VM = 1)
-	void SetDoseSummationType(DoseSummationTypeEnum value) { DoseSummationType = value; };
+	void SetDoseSummationType(DoseSummationTypeEnum value)
+	{
+		DoseSummationType = value;
+	};
 	DoseSummationTypeEnum GetDoseSummationType() { return DoseSummationType; };
 	// Referenced RT Plan Sequence (Type = 1C, VM = 1-n)
 	// > SOP Instance Reference Macro (Table 10-11)
-	std::string GetReferencedRTPlanClassUID() { return std::string("1.2.840.10008.5.1.4.1.1.481.5"); }; // Radiation Therapy Plan Storage
-	void SetReferencedRTPlanInstanceUID(unsigned short idx, std::string value) { ReferencedRTPlanSequence[idx] = value; };
-	void AddReferencedRTPlanInstanceUID(std::string value) { ReferencedRTPlanSequence.push_back(value); };
-	std::string GetReferencedRTPlanInstanceUID(unsigned short idx) { return ReferencedRTPlanSequence[idx]; };
-	unsigned short GetReferencedRTPlanInstanceUIDCount() { return ReferencedRTPlanSequence.size(); };
+	std::string GetReferencedRTPlanClassUID()
+	{
+		return std::string("1.2.840.10008.5.1.4.1.1.481.5");
+	}; // Radiation Therapy Plan Storage
+	void SetReferencedRTPlanInstanceUID(unsigned short idx, std::string value)
+	{
+		ReferencedRTPlanSequence[idx] = value;
+	};
+	void AddReferencedRTPlanInstanceUID(std::string value)
+	{
+		ReferencedRTPlanSequence.push_back(value);
+	};
+	std::string GetReferencedRTPlanInstanceUID(unsigned short idx)
+	{
+		return ReferencedRTPlanSequence[idx];
+	};
+	unsigned short GetReferencedRTPlanInstanceUIDCount()
+	{
+		return ReferencedRTPlanSequence.size();
+	};
 	// > Referenced Fraction Group Sequence (Type = 1C, VM = ?) // TODO
 	// >> Referenced Fraction Group Number (Type = 1, VM = ?) // TODO
 	// >> Referenced Beam Sequence (Type = 1C, VM = ?) // TODO
@@ -383,8 +427,11 @@ public:
 	// >> Referenced Brachy Application Setup Sequence (Type = 1C, VM = ?) // TODO
 	// >>> Referenced Brachy Application Setup Number (Type = 1, VM = ?) // TODO
 	// Grid Frame Offset Vector (Type = 1C, VM = 2-n)
-	void SetGridFrameOffsetVector(double* values) { GridFrameOffsetVector = values; };
-	double* GetGridFrameOffsetVector() { return GridFrameOffsetVector; };
+	void SetGridFrameOffsetVector(double *values)
+	{
+		GridFrameOffsetVector = values;
+	};
+	double *GetGridFrameOffsetVector() { return GridFrameOffsetVector; };
 	// Dose Grid Scaling (Type = 1C, VM = 1)
 	double GetDoseGridScaling();
 	// Tissue Heterogeneity Correction (Type = 3, VM = ?)
@@ -393,15 +440,30 @@ public:
 	// --------------------------------------------------------------
 
 	// SOP Class UID (Type = 1, VM = 1) // Radiation Therapy Dose Storage
-	std::string GetSOPClassUID() { return std::string("1.2.840.10008.5.1.4.1.1.481.2"); };
+	std::string GetSOPClassUID()
+	{
+		return std::string("1.2.840.10008.5.1.4.1.1.481.2");
+	};
 	// SOP Instance UID (Type = 1, VM = 1)
 	void SetSOPInstanceUID(std::string value) { SOPInstanceUID = value; };
 	std::string GetSOPInstanceUID() { return SOPInstanceUID; };
 	// Specific Character Set (Type = 1C, VM = 1-n)
-	void SetSpecificCharacterSet(unsigned short idx, CharacterSetEnum value) { SpecificCharacterSet[idx] = value; };
-	void AddSpecificCharacterSet(CharacterSetEnum value) { SpecificCharacterSet.push_back(value); };
-	CharacterSetEnum GetSpecificCharacterSet(unsigned short idx) { return SpecificCharacterSet[idx]; };
-	unsigned short GetSpecificCharacterSetCount() { return SpecificCharacterSet.size(); };
+	void SetSpecificCharacterSet(unsigned short idx, CharacterSetEnum value)
+	{
+		SpecificCharacterSet[idx] = value;
+	};
+	void AddSpecificCharacterSet(CharacterSetEnum value)
+	{
+		SpecificCharacterSet.push_back(value);
+	};
+	CharacterSetEnum GetSpecificCharacterSet(unsigned short idx)
+	{
+		return SpecificCharacterSet[idx];
+	};
+	unsigned short GetSpecificCharacterSetCount()
+	{
+		return SpecificCharacterSet.size();
+	};
 	// Instance Creation Date (Type = 3, VM = ?)
 	// Instance Creation Time (Type = 3, VM = ?)
 	// Instance Creator UID (Type = 3, VM = ?)
@@ -482,16 +544,16 @@ protected:
 	unsigned short Rows;
 	unsigned short Columns;
 	unsigned short BitsAllocated;
-	float* PixelData;
+	float *PixelData;
 	unsigned int NumberOfFrames;
 	DoseUnitsEnum DoseUnits;
 	DoseTypeEnum DoseType;
 	DoseSummationTypeEnum DoseSummationType;
 	std::vector<std::string> ReferencedRTPlanSequence;
-	double* GridFrameOffsetVector;
+	double *GridFrameOffsetVector;
 	std::string SOPClassUID;
 	std::string SOPInstanceUID;
 	std::vector<CharacterSetEnum> SpecificCharacterSet;
 };
 
-#pragma warning( pop )  
+#pragma warning(pop)

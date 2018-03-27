@@ -14,7 +14,7 @@
 //{
 //    FILE             *fp;          /* Open file pointer */
 //    int              bitsize;      /* Size of bitmap */
-// 
+//
 //    if ((fp = fopen(filename, "rb")) == NULL)
 //        return (NULL);
 //
@@ -81,7 +81,7 @@
 //
 //		for(int i=0;i<nrofslices*bitsize;i++){
 //			work_bits[i]=bmp_bits[i]=(float) bits_tmp[i];
-//		} 
+//		}
 //
 //		free(bits_tmp);
 //	}
@@ -119,7 +119,7 @@
 //
 //		for(int i=0;i<bitsize;i++){
 //			work_bits[i]=bmp_bits[i]=(float) bits_tmp[i];
-//		} 
+//		}
 //
 //		free(bits_tmp);
 //	}
@@ -139,7 +139,7 @@
 //{
 //    FILE             *fp;          /* Open file pointer */
 //    int              bitsize;      /* Size of bitmap */
-// 
+//
 //    if ((fp = fopen(filename, "rb")) == NULL)
 //        return (NULL);
 //
@@ -172,7 +172,7 @@
 //
 //		for(int i=0;i<bitsize;i++){
 //			bmp_bits[i]=(float) bits_tmp[i];
-//		} 
+//		}
 //
 //		free(bits_tmp);
 //	}
@@ -201,7 +201,7 @@
 //
 //		for(int i=0;i<bitsize;i++){
 //			bmp_bits[i]=(float) bits_tmp[i];
-//		} 
+//		}
 //
 //		free(bits_tmp);
 //	}
@@ -226,7 +226,7 @@
 //
 //int 3Dhandler::SaveRaw(const char *filename, float *p_bits)
 //{
-//	FILE             *fp;   
+//	FILE             *fp;
 //	unsigned char *	 bits_tmp;
 //
 //	bits_tmp=(unsigned char *)malloc(area);

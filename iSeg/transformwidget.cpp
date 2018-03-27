@@ -9,32 +9,31 @@
  */
 #include "Precompiled.h"
 
-#include "transformwidget.h"
-#include "SlicesHandler.h"
 #include "FormatTooltip.h"
+#include "SlicesHandler.h"
+#include "transformwidget.h"
 
 #include "Core/Point.h"
 
+#include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
 #include <qmessagebox.h>
 #include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qlayout.h> 
-#include <qlabel.h>
 #include <qradiobutton.h>
-#include <qcheckbox.h>
-#include <qbuttongroup.h>
-#include <qdialog.h>
-#include <qslider.h>
-#include <q3vbox.h>
 #include <qsize.h>
-
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 
 using namespace std;
 
-TransformWidget::TransformWidget(SlicesHandler *hand3D, QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-	: QWidget1( parent, name, wFlags )
-	, handler3D(hand3D)
+TransformWidget::TransformWidget(SlicesHandler *hand3D, QWidget *parent,
+																 const char *name, Qt::WindowFlags wFlags)
+		: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Shift/rotate/scale the Source, Target or Tissue."));
 
@@ -63,7 +62,7 @@ TransformWidget::TransformWidget(SlicesHandler *hand3D, QWidget *parent, const c
 	//matrixRadioButton = new QRadioButton(QString("Matrix"), vBoxTransforms);
 	transformButtonGroup = new QButtonGroup(vBoxTransforms);
 	transformButtonGroup->insert(translateRadioButton);
-	transformButtonGroup->insert(rotateRadioButton);	
+	transformButtonGroup->insert(rotateRadioButton);
 	transformButtonGroup->insert(scaleRadioButton);
 	transformButtonGroup->insert(shearRadioButton);
 	transformButtonGroup->insert(flipRadioButton);
@@ -109,7 +108,8 @@ TransformWidget::TransformWidget(SlicesHandler *hand3D, QWidget *parent, const c
 	// Common widgets
 	hBoxExecute = new Q3HBox(vBoxParams);
 	executePushButton = new QPushButton("Execute", hBoxExecute);
-	allSlicesCheckBox = new QCheckBox(QString("Apply to all slices"), hBoxExecute);
+	allSlicesCheckBox =
+			new QCheckBox(QString("Apply to all slices"), hBoxExecute);
 	allSlicesCheckBox->setLayoutDirection(Qt::RightToLeft);
 	cancelPushButton = new QPushButton("Cancel", vBoxParams);
 
@@ -147,27 +147,35 @@ TransformWidget::TransformWidget(SlicesHandler *hand3D, QWidget *parent, const c
 	hBoxCenter->hide();
 
 	// Signals
-	QObject::connect(transformButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(TransformChanged(int)));
+	QObject::connect(transformButtonGroup, SIGNAL(buttonClicked(int)), this,
+									 SLOT(TransformChanged(int)));
 
-	QObject::connect(transformSourceCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectSourceChanged(int)));
-	QObject::connect(transformTargetCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectTargetChanged(int)));
-	QObject::connect(transformTissuesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectTissuesChanged(int)));
+	QObject::connect(transformSourceCheckBox, SIGNAL(stateChanged(int)), this,
+									 SLOT(SelectSourceChanged(int)));
+	QObject::connect(transformTargetCheckBox, SIGNAL(stateChanged(int)), this,
+									 SLOT(SelectTargetChanged(int)));
+	QObject::connect(transformTissuesCheckBox, SIGNAL(stateChanged(int)), this,
+									 SLOT(SelectTissuesChanged(int)));
 
-	QObject::connect(slider1, SIGNAL(valueChanged(int)), this, SLOT(Slider1Changed(int)));
-	QObject::connect(slider2, SIGNAL(valueChanged(int)), this, SLOT(Slider2Changed(int)));
+	QObject::connect(slider1, SIGNAL(valueChanged(int)), this,
+									 SLOT(Slider1Changed(int)));
+	QObject::connect(slider2, SIGNAL(valueChanged(int)), this,
+									 SLOT(Slider2Changed(int)));
 
-	QObject::connect(lineEdit1, SIGNAL(editingFinished()), this, SLOT(LineEdit1Edited()));
-	QObject::connect(lineEdit2, SIGNAL(editingFinished()), this, SLOT(LineEdit2Edited()));
+	QObject::connect(lineEdit1, SIGNAL(editingFinished()), this,
+									 SLOT(LineEdit1Edited()));
+	QObject::connect(lineEdit2, SIGNAL(editingFinished()), this,
+									 SLOT(LineEdit2Edited()));
 
-	QObject::connect(flipPushButton, SIGNAL(clicked()), this, SLOT(FlipPushButtonClicked()));
-	QObject::connect(executePushButton, SIGNAL(clicked()), this, SLOT(ExecutePushButtonClicked()));
-	QObject::connect(cancelPushButton, SIGNAL(clicked()), this, SLOT(CancelPushButtonClicked()));
+	QObject::connect(flipPushButton, SIGNAL(clicked()), this,
+									 SLOT(FlipPushButtonClicked()));
+	QObject::connect(executePushButton, SIGNAL(clicked()), this,
+									 SLOT(ExecutePushButtonClicked()));
+	QObject::connect(cancelPushButton, SIGNAL(clicked()), this,
+									 SLOT(CancelPushButtonClicked()));
 }
 
-TransformWidget::~TransformWidget()
-{
-	delete sliceTransform;
-}
+TransformWidget::~TransformWidget() { delete sliceTransform; }
 
 void TransformWidget::Slider1Changed(int value)
 {
@@ -175,28 +183,33 @@ void TransformWidget::Slider1Changed(int value)
 	slider1->blockSignals(true);
 
 	// Update parameter and label values
-	if (translateRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked())
+	{
 		// Translate: Linear scale: y = x, x in [-width, width]
 		updateParameter1 = value;
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
-
-	} else if (rotateRadioButton->isChecked()) {
+	}
+	else if (rotateRadioButton->isChecked())
+	{
 		// Rotate: Linear scale: y = x, x in [-180, 180]
 		updateParameter1 = value;
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
-
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter1 = std::pow(10, value/50.0 - 1.0);
-		updateParameter1 = std::floor(updateParameter1*100)/100.0; // Round to two fractional digits
+		updateParameter1 = std::pow(10, value / 50.0 - 1.0);
+		updateParameter1 = std::floor(updateParameter1 * 100) /
+											 100.0; // Round to two fractional digits
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
-
-	} else if (shearRadioButton->isChecked()) {
+	}
+	else if (shearRadioButton->isChecked())
+	{
 		// Shear: Linear scale: y = x, x in [-45, 45]
 		updateParameter1 = value;
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
 	}
-	
+
 	// Update transformation preview
 	UpdatePreview();
 
@@ -209,17 +222,20 @@ void TransformWidget::Slider2Changed(int value)
 	lineEdit2->blockSignals(true);
 	slider2->blockSignals(true);
 
-	if (translateRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked())
+	{
 		// Translate: Linear scale: y = x, x in [-height, height]
 		updateParameter2 = value;
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
-
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter2 = std::pow(10, value/50.0 - 1.0);
-		updateParameter2 = std::floor(updateParameter2*100)/100.0; // Round to two fractional digits
+		updateParameter2 = std::pow(10, value / 50.0 - 1.0);
+		updateParameter2 = std::floor(updateParameter2 * 100) /
+											 100.0; // Round to two fractional digits
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
-	} 
+	}
 
 	// Update transformation preview
 	UpdatePreview();
@@ -234,18 +250,23 @@ void TransformWidget::LineEdit1Edited()
 	slider1->blockSignals(true);
 
 	double value = lineEdit1->text().toDouble();
-	if (translateRadioButton->isChecked() || rotateRadioButton->isChecked() || shearRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked() || rotateRadioButton->isChecked() ||
+			shearRadioButton->isChecked())
+	{
 		// Translate: Linear scale: y = x, x in [-width, width]
 		// Rotate: Linear scale: y = x, x in [-180, 180]
 		// Shear: Linear scale: y = x, x in [-45, 45]
-		updateParameter1 = max((double)slider1->minimum(), min(value, (double)slider1->maximum()));
+		updateParameter1 =
+				max((double)slider1->minimum(), min(value, (double)slider1->maximum()));
 		slider1->setValue(std::floor(updateParameter1 + 0.5));
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
-
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
 		updateParameter1 = max(0.1, min(value, 10.0));
-		slider1->setValue(std::floor((std::log10(updateParameter1)+1)*50.0 + 0.5));
+		slider1->setValue(
+				std::floor((std::log10(updateParameter1) + 1) * 50.0 + 0.5));
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
 	}
 
@@ -262,16 +283,20 @@ void TransformWidget::LineEdit2Edited()
 	slider2->blockSignals(true);
 
 	double value = lineEdit2->text().toDouble();
-	if (translateRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked())
+	{
 		// Translate: Linear scale: y = x, x in [-height, height]
-		updateParameter2 = max((double)slider2->minimum(), min(value, (double)slider2->maximum()));
+		updateParameter2 =
+				max((double)slider2->minimum(), min(value, (double)slider2->maximum()));
 		slider2->setValue(std::floor(updateParameter2 + 0.5));
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
-
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
 		updateParameter2 = max(0.1, min(value, 10.0));
-		slider2->setValue(std::floor((std::log10(updateParameter2)+1)*50.0 + 0.5));
+		slider2->setValue(
+				std::floor((std::log10(updateParameter2) + 1) * 50.0 + 0.5));
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
 	}
 
@@ -284,7 +309,8 @@ void TransformWidget::LineEdit2Edited()
 
 void TransformWidget::UpdatePreview()
 {
-	if (disableUpdatePreview) {
+	if (disableUpdatePreview)
+	{
 		return;
 	}
 
@@ -295,41 +321,60 @@ void TransformWidget::UpdatePreview()
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();
 	emit begin_datachange(dataSelection, this, false);
 
-	if (translateRadioButton->isOn()) {
+	if (translateRadioButton->isOn())
+	{
 		// Translate
-		sliceTransform->Translate(	updateParameter1 - transformParameters.translationOffset[0],
-									updateParameter2 - transformParameters.translationOffset[1]);
+		sliceTransform->Translate(
+				updateParameter1 - transformParameters.translationOffset[0],
+				updateParameter2 - transformParameters.translationOffset[1]);
 		transformParameters.translationOffset[0] = updateParameter1;
 		transformParameters.translationOffset[1] = updateParameter2;
-	} else if (rotateRadioButton->isOn()) {
+	}
+	else if (rotateRadioButton->isOn())
+	{
 		// Rotate
-		sliceTransform->Rotate(	updateParameter1 - transformParameters.rotationAngle,
-								transformParameters.transformCenter[0],
-								transformParameters.transformCenter[1]);
+		sliceTransform->Rotate(updateParameter1 - transformParameters.rotationAngle,
+													 transformParameters.transformCenter[0],
+													 transformParameters.transformCenter[1]);
 		transformParameters.rotationAngle = updateParameter1;
-	} else if (scaleRadioButton->isOn()) {
+	}
+	else if (scaleRadioButton->isOn())
+	{
 		// Scale
-		sliceTransform->Scale(	updateParameter1 / transformParameters.scalingFactor[0],
-								updateParameter2 / transformParameters.scalingFactor[1],
-								transformParameters.transformCenter[0],
-								transformParameters.transformCenter[1]);
+		sliceTransform->Scale(
+				updateParameter1 / transformParameters.scalingFactor[0],
+				updateParameter2 / transformParameters.scalingFactor[1],
+				transformParameters.transformCenter[0],
+				transformParameters.transformCenter[1]);
 		transformParameters.scalingFactor[0] = updateParameter1;
 		transformParameters.scalingFactor[1] = updateParameter2;
-	} else if (shearRadioButton->isOn()) {
+	}
+	else if (shearRadioButton->isOn())
+	{
 		// Shear
-		if (xAxisRadioButton->isChecked()) {
-			sliceTransform->Shear(	updateParameter1 - transformParameters.shearingAngle,
-									true, transformParameters.transformCenter[0]);
-		} else {
-			sliceTransform->Shear(	updateParameter1 - transformParameters.shearingAngle,
-									false, transformParameters.transformCenter[1]);
+		if (xAxisRadioButton->isChecked())
+		{
+			sliceTransform->Shear(updateParameter1 -
+																transformParameters.shearingAngle,
+														true, transformParameters.transformCenter[0]);
+		}
+		else
+		{
+			sliceTransform->Shear(updateParameter1 -
+																transformParameters.shearingAngle,
+														false, transformParameters.transformCenter[1]);
 		}
 		transformParameters.shearingAngle = updateParameter1;
-	} else if (flipRadioButton->isChecked()) {
+	}
+	else if (flipRadioButton->isChecked())
+	{
 		// Update flipping
-		if (xAxisRadioButton->isChecked()) {
+		if (xAxisRadioButton->isChecked())
+		{
 			sliceTransform->Flip(true, transformParameters.transformCenter[0]);
-		} else {
+		}
+		else
+		{
 			sliceTransform->Flip(false, transformParameters.transformCenter[1]);
 		}
 	}
@@ -344,7 +389,8 @@ void TransformWidget::TransformChanged(int index)
 	ResetWidgets();
 
 	// Show the corresponding widgets
-	if (translateRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked())
+	{
 		// Translate
 		slider1Label->setText("Offset x ");
 		slider2Label->setText("Offset y ");
@@ -353,7 +399,9 @@ void TransformWidget::TransformChanged(int index)
 		hBoxFlip->hide();
 		hBoxAxisSelection->hide();
 		hBoxCenter->hide();
-	} else if (rotateRadioButton->isChecked()) {
+	}
+	else if (rotateRadioButton->isChecked())
+	{
 		// Rotate
 		slider1Label->setText("Angle ");
 		hBoxSlider1->show();
@@ -361,7 +409,9 @@ void TransformWidget::TransformChanged(int index)
 		hBoxFlip->hide();
 		hBoxAxisSelection->hide();
 		hBoxCenter->show();
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale
 		slider1Label->setText("Factor x ");
 		slider2Label->setText("Factor y ");
@@ -370,7 +420,9 @@ void TransformWidget::TransformChanged(int index)
 		hBoxFlip->hide();
 		hBoxAxisSelection->hide();
 		hBoxCenter->show();
-	} else if (shearRadioButton->isChecked()) {
+	}
+	else if (shearRadioButton->isChecked())
+	{
 		// Shear
 		slider1Label->setText("Angle ");
 		hBoxSlider1->show();
@@ -379,7 +431,9 @@ void TransformWidget::TransformChanged(int index)
 		hBoxAxisSelection->show();
 		hBoxCenter->show();
 		xAxisRadioButton->setChecked(true);
-	} else if (flipRadioButton->isChecked()) {
+	}
+	else if (flipRadioButton->isChecked())
+	{
 		// Flip
 		hBoxSlider1->hide();
 		hBoxSlider2->hide();
@@ -406,8 +460,8 @@ void TransformWidget::SelectSourceChanged(int state)
 
 	// Set data to be transformed
 	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-										transformTargetCheckBox->isChecked(),
-										transformTissuesCheckBox->isChecked());
+																			transformTargetCheckBox->isChecked(),
+																			transformTissuesCheckBox->isChecked());
 
 	// Signal data change
 	emit end_datachange(this, common::NoUndo);
@@ -422,8 +476,8 @@ void TransformWidget::SelectTargetChanged(int state)
 
 	// Set data to be transformed
 	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-										transformTargetCheckBox->isChecked(),
-										transformTissuesCheckBox->isChecked());
+																			transformTargetCheckBox->isChecked(),
+																			transformTissuesCheckBox->isChecked());
 
 	// Signal data change
 	emit end_datachange(this, common::NoUndo);
@@ -438,17 +492,14 @@ void TransformWidget::SelectTissuesChanged(int state)
 
 	// Set data to be transformed
 	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-										transformTargetCheckBox->isChecked(),
-										transformTissuesCheckBox->isChecked());
+																			transformTargetCheckBox->isChecked(),
+																			transformTissuesCheckBox->isChecked());
 
 	// Signal data change
 	emit end_datachange(this, common::NoUndo);
 }
 
-QSize TransformWidget::sizeHint() const
-{
-	return hBoxOverall->sizeHint();
-}
+QSize TransformWidget::sizeHint() const { return hBoxOverall->sizeHint(); }
 
 void TransformWidget::slicenr_changed()
 {
@@ -498,9 +549,12 @@ void TransformWidget::newloaded()
 
 void TransformWidget::hideparams_changed()
 {
-	if(hideparams) {
+	if (hideparams)
+	{
 		vBoxParams->hide();
-	} else {
+	}
+	else
+	{
 		ResetWidgets();
 		SetCenterDefault();
 		vBoxParams->show();
@@ -512,7 +566,8 @@ bool TransformWidget::GetIsIdentityTransform()
 	return sliceTransform->GetIsIdentityTransform();
 }
 
-void TransformWidget::GetDataSelection(bool &source, bool &target, bool &tissues)
+void TransformWidget::GetDataSelection(bool &source, bool &target,
+																			 bool &tissues)
 {
 	source = transformSourceCheckBox->isChecked();
 	target = transformTargetCheckBox->isChecked();
@@ -521,32 +576,21 @@ void TransformWidget::GetDataSelection(bool &source, bool &target, bool &tissues
 
 void TransformWidget::pt_clicked(Point p)
 {
-	if (centerSelectPushButton->isChecked()) {
+	if (centerSelectPushButton->isChecked())
+	{
 		ResetWidgets();
 		SetCenter(p.px, p.py);
 		centerSelectPushButton->setChecked(false);
 	}
 }
 
-void TransformWidget::BitsChanged()
-{
-	newloaded();
-}
+void TransformWidget::BitsChanged() { newloaded(); }
 
-void TransformWidget::bmp_changed()
-{
-	BitsChanged();
-}
+void TransformWidget::bmp_changed() { BitsChanged(); }
 
-void TransformWidget::work_changed()
-{
-	BitsChanged();
-}
+void TransformWidget::work_changed() { BitsChanged(); }
 
-void TransformWidget::tissues_changed()
-{
-	BitsChanged();
-}
+void TransformWidget::tissues_changed() { BitsChanged(); }
 
 void TransformWidget::SetCenter(int x, int y)
 {
@@ -554,12 +598,12 @@ void TransformWidget::SetCenter(int x, int y)
 	transformParameters.transformCenter[1] = y;
 
 	// Display center coordinates
-	centerCoordsLabel->setText( QString("(%1, %2)").arg(x).arg(y));
+	centerCoordsLabel->setText(QString("(%1, %2)").arg(x).arg(y));
 }
 
 void TransformWidget::SetCenterDefault()
 {
-	SetCenter(handler3D->return_width()/2, handler3D->return_height()/2);
+	SetCenter(handler3D->return_width() / 2, handler3D->return_height() / 2);
 }
 
 void TransformWidget::ResetWidgets()
@@ -567,29 +611,38 @@ void TransformWidget::ResetWidgets()
 	disableUpdatePreview = true;
 
 	// Reset transform parameters
-	transformParameters.translationOffset[0] = transformParameters.translationOffset[1] = 0;
+	transformParameters.translationOffset[0] =
+			transformParameters.translationOffset[1] = 0;
 	transformParameters.rotationAngle = 0.0;
-	transformParameters.scalingFactor[0] = transformParameters.scalingFactor[1] = 1.0;
+	transformParameters.scalingFactor[0] = transformParameters.scalingFactor[1] =
+			1.0;
 	transformParameters.shearingAngle = 0.0;
 
 	// Reset sliders
-	if (translateRadioButton->isChecked()) {
+	if (translateRadioButton->isChecked())
+	{
 		// Translate: Range = [-width, width], value = 0
-		slider1->setRange(-(int)handler3D->return_width(), handler3D->return_width());
+		slider1->setRange(-(int)handler3D->return_width(),
+											handler3D->return_width());
 		slider1->setSteps(1, 10);
 		slider1->setValue(0);
 		Slider1Changed(slider1->value());
-		slider2->setRange(-(int)handler3D->return_height(), handler3D->return_height());
+		slider2->setRange(-(int)handler3D->return_height(),
+											handler3D->return_height());
 		slider2->setSteps(1, 10);
 		slider2->setValue(0);
 		Slider2Changed(slider2->value());
-	} else if (rotateRadioButton->isChecked()) {
+	}
+	else if (rotateRadioButton->isChecked())
+	{
 		// Rotate: Range = [-180, 180], value = 0
 		slider1->setRange(-180, 180);
 		slider1->setSteps(1, 10);
 		slider1->setValue(0);
 		Slider1Changed(slider1->value());
-	} else if (scaleRadioButton->isChecked()) {
+	}
+	else if (scaleRadioButton->isChecked())
+	{
 		// Scale: Range = [0, 100], value = 50
 		slider1->setRange(0, 100);
 		slider1->setSteps(1, 10);
@@ -599,7 +652,9 @@ void TransformWidget::ResetWidgets()
 		slider2->setSteps(1, 10);
 		slider2->setValue(50);
 		Slider2Changed(slider2->value());
-	} else if (shearRadioButton->isChecked()) {
+	}
+	else if (shearRadioButton->isChecked())
+	{
 		// Shear: Range = [-45, 45], value = 0
 		slider1->setRange(-45, 45);
 		slider1->setSteps(1, 10);

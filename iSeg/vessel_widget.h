@@ -10,25 +10,26 @@
 #ifndef VESSELWIDGET_19DEZ07
 #define VESSELWIDGET_19DEZ07
 
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qlayout.h> 
-#include <qlabel.h>
 #include <q3vbox.h>
 #include <qcombobox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
 #include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
+#include "Addon/qwidget1.h"
 #include "SlicesHandler.h"
 #include "world.h"
-#include "Addon/qwidget1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class vessel_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    vessel_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	vessel_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~vessel_widget();
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
@@ -36,8 +37,11 @@ public:
 	void init();
 	void newloaded();
 	void slicenr_changed();
-	std::string GetName() {return std::string("Vessel");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("vessel.png")).ascii());};
+	std::string GetName() { return std::string("Vessel"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("vessel.png")).ascii());
+	};
 	void clean_up();
 
 private:

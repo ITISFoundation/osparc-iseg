@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_SUITE(Addon_suite);
 BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 {
 	size_t slice_shape[2] = {12, 24};
-	std::vector<float*> slices(12, nullptr);
+	std::vector<float *> slices(12, nullptr);
 
 	typedef itk::SliceContiguousImage<float> ImageType;
 
@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 	ImageType::IndexType start;
 	start.Fill(0);
 	ImageType::SizeType size;
-	size[0] = slice_shape[0]; 
-	size[1] = slice_shape[1]; 
+	size[0] = slice_shape[0];
+	size[1] = slice_shape[1];
 	size[2] = slices.size();
 	ImageType::RegionType region(start, size);
 	image->SetRegions(region);
@@ -40,12 +40,14 @@ BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 	// Set slice pointers
 	bool container_manage_memory = false;
 	ImageType::PixelContainerPointer container = ImageType::PixelContainer::New();
-	container->SetImportPointersForSlices(slices, size[0] * size[1], container_manage_memory);
+	container->SetImportPointersForSlices(slices, size[0] * size[1],
+																				container_manage_memory);
 	image->SetPixelContainer(container);
 
 	{
 		typedef itk::Image<float, 3> OutputImageType;
-		typedef itk::RecursiveGaussianImageFilter<ImageType, OutputImageType> GaussianFilterType;
+		typedef itk::RecursiveGaussianImageFilter<ImageType, OutputImageType>
+				GaussianFilterType;
 		auto gaussian = GaussianFilterType::New();
 		gaussian->SetSigma(1.0);
 		gaussian->SetInput(image);

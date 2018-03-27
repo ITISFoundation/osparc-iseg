@@ -13,24 +13,18 @@
 
 namespace iseg { namespace plugin {
 
-namespace
-{
-	CConfidenceAddon _register_addon;
+namespace {
+CConfidenceAddon _register_addon;
 }
 
-CConfidenceAddon::CConfidenceAddon()
-{
+CConfidenceAddon::CConfidenceAddon() {}
 
-}
+CConfidenceAddon::~CConfidenceAddon() {}
 
-CConfidenceAddon::~CConfidenceAddon()
-{
-
-}
-
-QWidget1* CConfidenceAddon::CreateWidget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const
+QWidget1 *CConfidenceAddon::CreateWidget(QWidget *parent, const char *name,
+																				 Qt::WindowFlags wFlags) const
 {
 	return new CConfidence(SliceHandler(), parent, name, wFlags);
 }
 
-}}
+}} // namespace iseg::plugin

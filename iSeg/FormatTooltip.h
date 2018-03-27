@@ -11,7 +11,7 @@
 
 #pragma once
 
-inline QString Format(const char* tooltip)
+inline QString Format(const char *tooltip)
 {
 	QString fmt = "<html>\n";
 	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";

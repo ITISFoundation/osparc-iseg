@@ -12,14 +12,14 @@
 SavingDlg::SavingDlg(QWidget *parent) : QMessageBox(parent)
 {
 	setModal(true);
-	setIcon( QMessageBox::Critical );
+	setIcon(QMessageBox::Critical);
 	setWindowTitle("Saving");
 	setText("Wait until the project is saved...");
 	setWindowFlags(Qt::WindowStaysOnTopHint);
 
 	//addButton("accept", QMessageBox::AcceptRole);
 	//QObject::connect(parent,SIGNAL(buttonClicked(QAbstractButton)),this,SLOT(OKButtonClicked(QAbstractButton)));
-	
+
 	return;
 }
 
@@ -34,7 +34,7 @@ void SavingDlg::accept()
 	//do nothing
 }
 
-void SavingDlg::OKButtonClicked(QAbstractButton* button)
+void SavingDlg::OKButtonClicked(QAbstractButton *button)
 {
 	//do nothing
 }

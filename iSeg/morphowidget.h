@@ -10,31 +10,31 @@
 #ifndef MORPHO_4MARCH05
 #define MORPHO_4MARCH05
 
-
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qbuttongroup.h>
-#include <qslider.h>
 #include <q3vbox.h>
+#include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
 #include <qsize.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class morpho_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    morpho_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	morpho_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+								const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~morpho_widget();
 	QSize sizeHint() const;
 	void init();
@@ -42,8 +42,11 @@ public:
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
 	void hideparams_changed();
-	std::string GetName() {return std::string("Morpho");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("morphology.png")).ascii());};
+	std::string GetName() { return std::string("Morpho"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("morphology.png")).ascii());
+	};
 
 private:
 	bmphandler *bmphand;
@@ -68,8 +71,10 @@ private:
 	QCheckBox *allslices;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -78,6 +83,5 @@ private slots:
 	void bmphand_changed(bmphandler *bmph);
 	void execute();
 };
-
 
 #endif

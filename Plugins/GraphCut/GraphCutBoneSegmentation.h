@@ -9,28 +9,32 @@
  */
 #pragma once
 
-#include "Addon/qwidget1.h"
 #include "Addon/SlicesHandlerInterface.h"
+#include "Addon/qwidget1.h"
 
 #include <q3vbox.h>
+#include <qcheckbox.h>
+#include <qcombobox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
-
 
 class CGraphCutBoneSegmentation : public QWidget1
 {
 	Q_OBJECT
 public:
-	CGraphCutBoneSegmentation(iseg::CSliceHandlerInterface *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	CGraphCutBoneSegmentation(iseg::CSliceHandlerInterface *hand3D,
+														QWidget *parent = 0, const char *name = 0,
+														Qt::WindowFlags wFlags = 0);
 	~CGraphCutBoneSegmentation();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
-	std::string GetName() {return std::string("CT Auto-Bone");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());};
+	std::string GetName() { return std::string("CT Auto-Bone"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());
+	};
 
 private:
 	iseg::CSliceHandlerInterface *m_Handler3D;
@@ -51,12 +55,11 @@ private:
 
 	itk::ProcessObject *m_CurrentFilter;
 
-	public slots:
-		void slicenr_changed();
+public slots:
+	void slicenr_changed();
 
-	private slots:
-		void do_work();
-		void cancel();
-		void showsliders();
+private slots:
+	void do_work();
+	void cancel();
+	void showsliders();
 };
-

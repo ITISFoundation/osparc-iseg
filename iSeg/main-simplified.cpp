@@ -7,9 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include <vector>
-#include "world.h"
 #include "vec3.h"
+#include "world.h"
+#include <vector>
 
 void test()
 {
@@ -21,10 +21,10 @@ void test()
 	vec3 end;
 	vec3 DISTALPOINT1;
 	vec3 DISTALPOINT2;
-	
-	std::vector<vec3> seeds; // only distal seeds
+
+	std::vector<vec3> seeds;		// only distal seeds
 	std::vector<vec3> allSeeds; // seeds + end point
-				
+
 	// save all start seeds in s
 	seeds.push_back(DISTALPOINT1);
 	seeds.push_back(DISTALPOINT2);
@@ -33,14 +33,13 @@ void test()
 	allSeeds.push_back(end);
 
 	SlicesHandler h3ds;
-	
+
 	vec3 tmpbbStart;
 	vec3 tmpbbEnd;
 	// TODO compute bounding box for algorithm
 	// otherwise the memory consumption is too large
 	_world.setBBStart(tmpbbStart);
 	_world.setBBEnd(tmpbbEnd);
-	_world.init(tmpbbStart,tmpbbEnd,&h3ds);
-	_world.dijkstra(seeds,end, &_branchTree);  
+	_world.init(tmpbbStart, tmpbbEnd, &h3ds);
+	_world.dijkstra(seeds, end, &_branchTree);
 }
-

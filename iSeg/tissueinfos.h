@@ -11,12 +11,12 @@
 #define TISSUEINFOS
 
 #include "Core/Types.h"
-#include <vector>
 #include <map>
-#include <set>
 #include <qstring.h> // BL TODO get rid of this
+#include <set>
+#include <vector>
 
-class SlicesHandler; // BL TODO get rid of this?
+class SlicesHandler;			 // BL TODO get rid of this?
 class TissueHierarchyItem; // BL TODO get rid of this?
 
 struct TissueInfoStruct
@@ -60,16 +60,17 @@ struct TissueInfoStruct
 
 	void GetColorRGB(unsigned char &r, unsigned char &g, unsigned char &b)
 	{
-		r = (unsigned char)(255.0f*color[0]);
-		g = (unsigned char)(255.0f*color[1]);
-		b = (unsigned char)(255.0f*color[2]);
+		r = (unsigned char)(255.0f * color[0]);
+		g = (unsigned char)(255.0f * color[1]);
+		b = (unsigned char)(255.0f * color[2]);
 	};
 
-	void GetColorBlendedRGB(unsigned char &r, unsigned char &g, unsigned char &b, unsigned char offset = 0)
+	void GetColorBlendedRGB(unsigned char &r, unsigned char &g, unsigned char &b,
+													unsigned char offset = 0)
 	{
-		r = (unsigned char)(offset + opac*(255.0f*color[0] - offset));
-		g = (unsigned char)(offset + opac*(255.0f*color[1] - offset));
-		b = (unsigned char)(offset + opac*(255.0f*color[2] - offset));
+		r = (unsigned char)(offset + opac * (255.0f * color[0] - offset));
+		g = (unsigned char)(offset + opac * (255.0f * color[1] - offset));
+		b = (unsigned char)(offset + opac * (255.0f * color[2] - offset));
 	};
 
 	float color[3];
@@ -84,20 +85,24 @@ typedef std::pair<QString, tissues_size_t> TissueTypeMapEntryType;
 
 class TissueInfos
 {
-
 public:
 	static tissues_size_t GetTissueCount();
 	static TissueInfoStruct *GetTissueInfo(tissues_size_t tissuetype);
 
 	static float *GetTissueColor(tissues_size_t tissuetype);
-	static void GetTissueColorRGB(tissues_size_t tissuetype, unsigned char &r, unsigned char &g, unsigned char &b);
-	static void GetTissueColorBlendedRGB(tissues_size_t tissuetype, unsigned char &r, unsigned char &g, unsigned char &b, unsigned char offset = 0);
+	static void GetTissueColorRGB(tissues_size_t tissuetype, unsigned char &r,
+																unsigned char &g, unsigned char &b);
+	static void GetTissueColorBlendedRGB(tissues_size_t tissuetype,
+																			 unsigned char &r, unsigned char &g,
+																			 unsigned char &b,
+																			 unsigned char offset = 0);
 	static float GetTissueOpac(tissues_size_t tissuetype);
 	static QString GetTissueName(tissues_size_t tissuetype);
 	static tissues_size_t GetTissueType(QString tissuename);
 	static bool GetTissueLocked(tissues_size_t tissuetype);
 
-	static void SetTissueColor(tissues_size_t tissuetype, float r, float g, float b);
+	static void SetTissueColor(tissues_size_t tissuetype, float r, float g,
+														 float b);
 	static void SetTissueOpac(tissues_size_t tissuetype, float val);
 	static void SetTissueName(tissues_size_t tissuetype, QString val);
 	static void SetTissueLocked(tissues_size_t tissuetype, bool val);
@@ -116,10 +121,14 @@ public:
 	static FILE *SaveTissueLocks(FILE *fp);
 	static FILE *LoadTissueLocks(FILE *fp);
 
-	static bool SaveTissuesHDF(const char *filename, TissueHierarchyItem* hiearchy, bool naked, unsigned short version);
+	static bool SaveTissuesHDF(const char *filename,
+														 TissueHierarchyItem *hiearchy, bool naked,
+														 unsigned short version);
 
 	static bool SaveTissuesReadable(const char *filename, unsigned short version);
-	static bool LoadTissuesReadable(const char *filename, SlicesHandler *handler3D, tissues_size_t &removeTissuesRange);
+	static bool LoadTissuesReadable(const char *filename,
+																	SlicesHandler *handler3D,
+																	tissues_size_t &removeTissuesRange);
 
 	static bool SaveDefaultTissueList(const char *filename);
 	static bool LoadDefaultTissueList(const char *filename);

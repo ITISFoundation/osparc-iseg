@@ -16,8 +16,10 @@ class iSegCore_API EM
 {
 public:
 	~EM();
-	void init(short unsigned wi, short unsigned h, short nrclass, short dimension, float **bit, float *weight);
-	void init(short unsigned wi, short unsigned h, short nrclass, short dimension, float **bit, float *weight, float *center, float *dev, float *ampl);
+	void init(short unsigned wi, short unsigned h, short nrclass, short dimension,
+						float **bit, float *weight);
+	void init(short unsigned wi, short unsigned h, short nrclass, short dimension,
+						float **bit, float *weight, float *center, float *dev, float *ampl);
 	unsigned make_iter(unsigned maxiter, unsigned converged);
 	void classify(float *result_bits);
 	void apply_to(float **sources, float *result_bits);

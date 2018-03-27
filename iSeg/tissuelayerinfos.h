@@ -11,10 +11,10 @@
 
 #include "Core/Types.h"
 
-#include <vector>
 #include <map>
-#include <set>
 #include <qstring.h>
+#include <set>
+#include <vector>
 
 enum TissueLayerOverlayMode {
 	Normal,
@@ -31,7 +31,7 @@ struct TissueLayerInfoStruct
 		mode = Normal;
 	};
 
-	TissueLayerInfoStruct(const TissueLayerInfoStruct& other)
+	TissueLayerInfoStruct(const TissueLayerInfoStruct &other)
 	{
 		name = other.name;
 		visible = other.visible;
@@ -39,7 +39,7 @@ struct TissueLayerInfoStruct
 		mode = other.mode;
 	};
 
-	TissueLayerInfoStruct& operator=(const TissueLayerInfoStruct& other)
+	TissueLayerInfoStruct &operator=(const TissueLayerInfoStruct &other)
 	{
 		name = other.name;
 		visible = other.visible;
@@ -58,24 +58,26 @@ typedef std::vector<TissueLayerInfoStruct> TissueLayerInfosVecType;
 typedef std::map<QString, tissuelayers_size_t> TissueLayerIndexMapType;
 typedef std::pair<QString, tissuelayers_size_t> TissueLayerIndexMapEntryType;
 
-
 class TissueLayerInfos
 {
 public:
 	static tissuelayers_size_t GetTissueLayerCount();
-	static TissueLayerInfoStruct *GetTissueLayerInfo(tissuelayers_size_t layerIdx);
+	static TissueLayerInfoStruct *
+			GetTissueLayerInfo(tissuelayers_size_t layerIdx);
 
 	static tissuelayers_size_t GetTissueLayerIndex(QString layerName);
 	static QString GetTissueLayerName(tissuelayers_size_t layerIdx);
 	static bool GetTissueLayerVisible(tissuelayers_size_t layerIdx);
 	static float GetTissueLayerOpac(tissuelayers_size_t layerIdx);
-	static TissueLayerOverlayMode GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx);
+	static TissueLayerOverlayMode
+			GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx);
 
 	static void SetTissueLayerName(tissuelayers_size_t layerIdx, QString val);
 	static void SetTissueLayerVisible(tissuelayers_size_t layerIdx, bool val);
 	static void SetTissueLayersVisible(bool val);
 	static void SetTissueLayerOpac(tissuelayers_size_t layerIdx, float val);
-	static void SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx, TissueLayerOverlayMode val);
+	static void SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx,
+																				TissueLayerOverlayMode val);
 
 	static void AddTissueLayer(TissueLayerInfoStruct &layer);
 	static void RemoveTissueLayer(tissuelayers_size_t layerIdx);
@@ -88,4 +90,3 @@ protected:
 	static TissueLayerInfosVecType tissueLayerInfosVector;
 	static TissueLayerIndexMapType tissueLayerIndexMap;
 };
-

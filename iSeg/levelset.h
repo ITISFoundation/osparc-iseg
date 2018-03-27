@@ -12,20 +12,27 @@
 #include "Core/Point.h"
 #include "Core/sliceprovider.h"
 
+#include <vector>
+
 class bmphandler;
 
 class levelset
 {
 public:
 	levelset();
-	void init(unsigned short h, unsigned short w, Point p, float *kbit, float *Pbit, float balloon, float epsilon1, float step_size);
-	void init(unsigned short h, unsigned short w, float *initial, float f, float *kbit, float *Pbit, float balloon, float epsilon1, float step_size);
-	void init(unsigned short h, unsigned short w, float *levlset, float *kbit, float *Pbit, float balloon, float epsilon1, float step_size);
+	void init(unsigned short h, unsigned short w, Point p, float *kbit,
+						float *Pbit, float balloon, float epsilon1, float step_size);
+	void init(unsigned short h, unsigned short w, float *initial, float f,
+						float *kbit, float *Pbit, float balloon, float epsilon1,
+						float step_size);
+	void init(unsigned short h, unsigned short w, float *levlset, float *kbit,
+						float *Pbit, float balloon, float epsilon1, float step_size);
 	void iterate(unsigned nrsteps, unsigned updatefreq);
 	void set_k(float *kbit);
 	void set_P(float *Pbit);
 	void return_levelset(float *output);
-	void return_zerolevelset(std::vector<std::vector<Point> > *v1, std::vector<std::vector<Point> > *v2, int minsize);
+	void return_zerolevelset(std::vector<std::vector<Point>> *v1,
+													 std::vector<std::vector<Point>> *v2, int minsize);
 	~levelset();
 
 private:

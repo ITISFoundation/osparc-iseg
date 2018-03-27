@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "iSegCore.h"
 #include "UndoElem.h"
+#include "iSegCore.h"
 
 class iSegCore_API UndoQueue
 {
@@ -36,7 +36,7 @@ private:
 	unsigned nrundoarraysmax;
 	void sub_add_undo(UndoElem *ue);
 	unsigned nrundoarrays;
-	std::vector<UndoElem *>undos;
+	std::vector<UndoElem *> undos;
 	unsigned first;
 	unsigned nrnow;
 	unsigned nrin;

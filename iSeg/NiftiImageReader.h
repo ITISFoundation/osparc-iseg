@@ -11,9 +11,9 @@
 #define NIFTIIMAGEREADER_H
 
 #include "common.h"
-#include <SetGetMacros.h>
-#include <QStringList>
 #include <QMap>
+#include <QStringList>
+#include <SetGetMacros.h>
 
 //class QStringList;
 
@@ -30,44 +30,47 @@ public:
 	GetMacro(Width, unsigned);
 	GetMacro(Height, unsigned);
 	GetMacro(Compression, int);
-	GetMacro(PixelSize, float*);
-	GetMacro(Offset, float*);
-	GetMacro(Quaternion, float*);
-	SetMacro(ImageSlices, float**);
-	GetMacro(ImageSlices, float**);
-	SetMacro(WorkSlices, float**);
-	GetMacro(WorkSlices, float**);
-	SetMacro(TissueSlices, tissues_size_t**);
-	GetMacro(TissueSlices, tissues_size_t**);
-	QStringList GetArrayNames() const {return this->ArrayNames;};
-	QMap<QString, QString> GetMapArrayNames() const {return this->mapArrayNames;};
+	GetMacro(PixelSize, float *);
+	GetMacro(Offset, float *);
+	GetMacro(Quaternion, float *);
+	SetMacro(ImageSlices, float **);
+	GetMacro(ImageSlices, float **);
+	SetMacro(WorkSlices, float **);
+	GetMacro(WorkSlices, float **);
+	SetMacro(TissueSlices, tissues_size_t **);
+	GetMacro(TissueSlices, tissues_size_t **);
+	QStringList GetArrayNames() const { return this->ArrayNames; };
+	QMap<QString, QString> GetMapArrayNames() const
+	{
+		return this->mapArrayNames;
+	};
 	int Read();
 	int Read(unsigned short startslice, unsigned short nrslices);
 	int ReadHeader();
 
 private:
-	template <typename InType, typename OutType>
+	template<typename InType, typename OutType>
 	void ReadData(const InType *in, OutType **out);
-	
+
 	void ReadDataRGB(const unsigned char *in, float **out);
 
 private:
 	bool HeaderNotRead;
-	char* FileName;
+	char *FileName;
 	unsigned ReadSliceStart;
 	unsigned ReadSliceCount;
 	unsigned NumberOfSlices;
 	unsigned Width;
 	unsigned Height;
 	int Compression;
-	float* PixelSize;
-	float* Offset;
-	float* Quaternion;
-	float** ImageSlices;
-	float** WorkSlices;
-	tissues_size_t** TissueSlices;
+	float *PixelSize;
+	float *Offset;
+	float *Quaternion;
+	float **ImageSlices;
+	float **WorkSlices;
+	tissues_size_t **TissueSlices;
 	QStringList ArrayNames;
-    QMap<QString, QString> mapArrayNames;
+	QMap<QString, QString> mapArrayNames;
 };
 
 #endif // NIFTIIMAGEREADER_H

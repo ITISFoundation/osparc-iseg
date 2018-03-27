@@ -11,42 +11,46 @@
 #define Interpolate_20April05
 
 #include <algorithm>
-#include <qpushbutton.h>
-#include <qwidget.h>
-#include <qspinbox.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qradiobutton.h>
+#include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qdialog.h>
 #include <qimage.h>
-#include <qpainter.h>
-#include <qslider.h>
-#include <q3listbox.h>
 #include <qinputdialog.h>
-#include <q3vbox.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qslider.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 //Added by qt3to4:
-#include <qpixmap.h>
-#include <q3mimefactory.h>
-#include "bmp_read_1.h"
-#include "SlicesHandler.h"
 #include "Addon/qwidget1.h"
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+#include <q3mimefactory.h>
+#include <qpixmap.h>
 
 class interpol_widget : public QWidget1
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    interpol_widget(SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	interpol_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+									const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~interpol_widget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
 	FILE *SaveParams(FILE *fp, int version);
 	FILE *LoadParams(FILE *fp, int version);
-	std::string GetName() {return std::string("Interpol");};
-	virtual QIcon GetIcon(QDir picdir) {return QIcon(picdir.absFilePath(QString("interpolate.png")).ascii());};
+	std::string GetName() { return std::string("Interpol"); };
+	virtual QIcon GetIcon(QDir picdir)
+	{
+		return QIcon(picdir.absFilePath(QString("interpolate.png")).ascii());
+	};
 
 private:
 	SlicesHandler *handler3D;
@@ -68,7 +72,7 @@ private:
 	QRadioButton *rb_work;
 	QButtonGroup *sourcegroup;
 	QRadioButton *rb_inter;
-//	QRadioButton *rb_intergrey;
+	//	QRadioButton *rb_intergrey;
 	QRadioButton *rb_extra;
 	QRadioButton *rb_batchinter;
 	QButtonGroup *modegroup;
@@ -81,8 +85,10 @@ private:
 	unsigned short tissuenr;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(common::DataSelection &dataSelection,
+												QWidget *sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget *sender = NULL,
+											common::EndUndoAction undoAction = common::EndUndo);
 
 public slots:
 	void slicenr_changed();

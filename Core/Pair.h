@@ -10,7 +10,6 @@
 #ifndef PAIRH
 #define PAIRH
 
-
 typedef struct
 {
 	float low;
