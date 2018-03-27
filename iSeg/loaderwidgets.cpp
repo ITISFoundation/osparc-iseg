@@ -9,6 +9,7 @@
  */
 #include "Precompiled.h"
 
+#define cimg_display 0
 #include "CImg.h"
 #include "loaderwidgets.h"
 

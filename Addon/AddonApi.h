@@ -9,8 +9,12 @@
  */
 #pragma once
 
-#ifdef Addon_EXPORTS
-#	define ADDON_API __declspec(dllexport)
+#if defined(WIN32)
+#   ifdef Addon_EXPORTS
+#   	define ADDON_API __declspec(dllexport)
+#   else
+#   	define ADDON_API __declspec(dllimport)
+#   endif
 #else
-#	define ADDON_API __declspec(dllimport)
+#	define ADDON_API
 #endif

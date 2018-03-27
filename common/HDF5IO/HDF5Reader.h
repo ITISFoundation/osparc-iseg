@@ -15,8 +15,10 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace HDF5 {
+
 class HDF5_EXPORT HDF5Reader
 {
 public:
@@ -70,14 +72,12 @@ public:
 		if (!reader.open(filename))
 		{
 			std::cerr << "error opening " + filename << std::endl;
-			;
 			return 0;
 		}
 
 		if (!reader.read(array, dataset))
 		{
 			std::cerr << "error reading " + dataset << std::endl;
-			;
 			return 0;
 		}
 

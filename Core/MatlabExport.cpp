@@ -45,7 +45,7 @@ bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
 	}
 
 	fwrite(header, 128, 1, fp);
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 	int namefieldlength = varnamelength;
 	if (varnamelength % 8 != 0)
@@ -146,7 +146,7 @@ bool matexport::print_matslices(const char* filename, float** matrix, int nx,
 	}
 
 	fwrite(header, 128, 1, fp);
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 	int namefieldlength = varnamelength;
 	if (varnamelength % 8 != 0)
@@ -249,7 +249,7 @@ bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
 	}
 
 	fwrite(header, 128, 1, fp);
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 	int namefieldlength = varnamelength;
 	if (varnamelength % 8 != 0)
@@ -340,7 +340,7 @@ bool matexport::print_matslices(const char* filename, unsigned char** matrix,
 	}
 
 	fwrite(header, 128, 1, fp);
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 	int namefieldlength = varnamelength;
 	if (varnamelength % 8 != 0)
@@ -431,7 +431,7 @@ bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
 	fwrite(header, 128, 1, fp);
 
 	// Data type: miMATRIX
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 
 	// Number of bytes
@@ -549,7 +549,7 @@ bool matexport::print_matslices(const char* filename, tissues_size_t** matrix,
 	fwrite(header, 128, 1, fp);
 
 	// Data type: miMATRIX
-	__int32 val = 14;
+	std::int32_t val = 14;
 	fwrite(&val, 4, 1, fp);
 
 	// Number of bytes

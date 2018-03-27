@@ -10,7 +10,7 @@
 #ifndef avw_19Feb08
 #define avw_19Feb08
 
-#include <string>
+#include <sstream>
 
 namespace iseg { namespace avw {
 
@@ -29,7 +29,7 @@ static T ReadValueFromLine(const std::string& line, const char separator)
 	std::stringstream T_stream(line.substr(pos, line.size()));
 	T_stream >> result;
 	return result;
-};
+}
 static std::string ReadNameFromLine(const std::string& line,
 									const char separator)
 {
@@ -40,7 +40,7 @@ static std::string ReadNameFromLine(const std::string& line,
 		return line;
 	}
 	return line.substr(0, pos);
-};
+}
 
 }} // namespace iseg::avw
 

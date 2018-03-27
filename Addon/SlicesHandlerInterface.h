@@ -9,11 +9,7 @@
  */
 #pragma once
 
-#ifdef Addon_EXPORTS
-#	define ADDON_API __declspec(dllexport)
-#else
-#	define ADDON_API __declspec(dllimport)
-#endif
+#include "AddonApi.h"
 
 #include "itkSliceContiguousImage.h"
 #include <itkImage.h> // BL TODO get rid of this

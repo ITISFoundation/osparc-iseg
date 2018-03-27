@@ -9,12 +9,12 @@
  */
 #pragma once
 
+#include "AddonApi.h"
+
 #include <qcursor.h>
 #include <qdir.h>
 #include <qicon.h>
 #include <qwidget.h>
-
-#include "AddonApi.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 

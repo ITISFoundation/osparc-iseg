@@ -38,7 +38,7 @@ bool ImageWriter::writeVolume(const char* filename, const T** data,
 	typedef itk::Image<T, 3> image_type;
 	typedef itk::ImageFileWriter<image_type> writer_type;
 
-	image_type::Pointer image =
+	typename image_type::Pointer image =
 		ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
 
 	if (image)
@@ -71,7 +71,7 @@ bool ImageWriter::writeVolume(const char* filename, const T** data,
 			}
 		}
 
-		writer_type::Pointer writer = writer_type::New();
+		auto writer = writer_type::New();
 		writer->SetInput(image);
 		writer->SetFileName(filename);
 		try

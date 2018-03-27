@@ -10,13 +10,14 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 #include "HDF5IOApi.h"
 
 class HDF5_EXPORT HDF5IO
 {
 public:
-	typedef int handle_id_type;
+	typedef std::int64_t handle_id_type;
 
 	int chunk_size = 0;
 

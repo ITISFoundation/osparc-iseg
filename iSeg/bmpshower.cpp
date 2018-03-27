@@ -36,8 +36,13 @@
 #include <qwidget.h>
 
 #include "vtkAutoInit.h"
+#ifdef ISEG_VTK_OPENGL2
+VTK_MODULE_INIT(vtkRenderingOpenGL2);
+VTK_MODULE_INIT(vtkRenderingVolumeOpenGL2);
+#else
 VTK_MODULE_INIT(vtkRenderingOpenGL); // VTK was built with vtkRenderingOpenGL
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL);
+#endif
 VTK_MODULE_INIT(vtkInteractionStyle);
 
 #include <QVTKWidget.h>

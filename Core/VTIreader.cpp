@@ -115,7 +115,7 @@ float* VTIreader::getSliceInfo(const char* filename, unsigned slicenr,
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 	reader->SetFileName(filename);
 	reader->Update();
@@ -130,7 +130,7 @@ float* VTIreader::getSliceInfo(const char* filename, unsigned slicenr,
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
 
 	if (slicenr < 0 || slicenr > ext[5] - ext[4])
-		return false;
+		return nullptr;
 	height = (unsigned)ext[3] - ext[2] + 1;
 	width = (unsigned)ext[1] - ext[0] + 1;
 

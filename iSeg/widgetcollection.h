@@ -922,7 +922,7 @@ class CheckBoneConnectivityDialog : public QWidget
 			}
 		}
 
-		bool operator==(const BoneConnectionInfo& a)
+		bool operator==(const BoneConnectionInfo& a) const
 		{
 			return (SliceNumber == a.SliceNumber &&
 					((TissueID1 == a.TissueID1 && TissueID2 == a.TissueID2) ||

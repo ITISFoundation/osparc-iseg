@@ -14,8 +14,6 @@
 This class wraps up several useful geometrical tests, which use the 
 predicates by Jonathan Shewchuk.
 
-Original author: Bryn Lloyd, Sept. 2011
-
 TODO: use return codes for inside function
 */
 namespace GeometricPredicates {

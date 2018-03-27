@@ -35,20 +35,20 @@ public:
 	{
 		typedef itk::Image<T, 3> ImageType;
 
-		ImageType::IndexType start;
+		typename ImageType::IndexType start;
 		start[0] = 0;		   // first index on X
 		start[1] = 0;		   // first index on Y
 		start[2] = startslice; // first index on Z
-		ImageType::SizeType size;
+		typename ImageType::SizeType size;
 		size[0] = width;	// size along X
 		size[1] = height;   // size along Y
 		size[2] = nrslices; // size along Z
-		ImageType::RegionType region;
+		typename ImageType::RegionType region;
 		region.SetSize(size);
 		region.SetIndex(start);
 
-		ImageType::PointType origin;
-		ImageType::DirectionType direction;
+		typename ImageType::PointType origin;
+		typename ImageType::DirectionType direction;
 		ImageToITK::copy(transform, origin, direction);
 
 		image->SetRegions(region);
