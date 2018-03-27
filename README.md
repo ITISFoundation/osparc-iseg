@@ -25,7 +25,7 @@ The libraries below are required to be compiled and installed on the system in o
 
 - Boost, [Boost license](http://www.boost.org/users/license.html)
 - HDF5, [BSD-like license](https://support.hdfgroup.org/products/licenses.html)
-- zlib, [license](http://zlib.net/zlib_license.html)
+- zlib, [ZLIB license](http://zlib.net/zlib_license.html)
 - ITK, [Apache 2.0 license](https://itk.org/ITK/project/licenseversion1.html)
 - VTK, [BSD license](https://www.vtk.org/licensing/)
 - Qt 4.8, [GPL3 and LGPL2.1 license](https://www1.qt.io/licensing/)
