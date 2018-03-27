@@ -1,0 +1,49 @@
+Language:        Cpp
+# BasedOnStyle:  LLVM
+AccessModifierOffset: -2
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlignEscapedNewlines: Right
+AlignAfterOpenBracket: Align
+AlwaysBreakAfterReturnType: None
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterStruct: true
+  AfterFunction: true
+  AfterNamespace: false
+  AfterEnum: false
+  AfterUnion: false
+  AfterControlStatement: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+BreakBeforeInheritanceComma: false
+CompactNamespaces: true
+Cpp11BracedListStyle: true
+FixNamespaceComments: true
+IncludeBlocks: Preserve
+SortIncludes: true
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+NamespaceIndentation: None
+ReflowComments: false
+IndentWidth: 2
+UseTab: Always
+TabWidth: 2
+SpaceAfterTemplateKeyword: false
+#SpaceBeforeCtorInitializerColon: true
+SpaceBeforeAssignmentOperators: true
+#SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+#SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+MaxEmptyLinesToKeep: 1
