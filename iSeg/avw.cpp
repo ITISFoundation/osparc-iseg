@@ -7,8 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "avw.h"
 #include "Precompiled.h"
+
+#include "avw.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -21,8 +23,8 @@
 #	define uint64_t __int64
 #endif
 
-std::ifstream &ReadLineIntoIStringStream(std::ifstream &file,
-																				 std::istringstream &line)
+std::ifstream& ReadLineIntoIStringStream(std::ifstream& file,
+										 std::istringstream& line)
 {
 	// Read a line from file into stream. Consider
 	// the following possibilities for newline:
@@ -68,9 +70,10 @@ std::ifstream &ReadLineIntoIStringStream(std::ifstream &file,
 	return file;
 }
 
-bool avw::ReadHeader(const char *filename, unsigned short &w, unsigned short &h,
-										 unsigned short &nrofslices, float &dx1, float &dy1,
-										 float &thickness1, datatype &type)
+bool iseg::avw::ReadHeader(const char* filename, unsigned short& w,
+						   unsigned short& h, unsigned short& nrofslices,
+						   float& dx1, float& dy1, float& thickness1,
+						   datatype& type)
 {
 	bool ok = false;
 
@@ -120,7 +123,8 @@ bool avw::ReadHeader(const char *filename, unsigned short &w, unsigned short &h,
 
 			ReadLineIntoIStringStream(file, line);
 			std::string name;
-			while ((name = ReadNameFromLine(line.str(), '=')) != "EndInformation")
+			while ((name = ReadNameFromLine(line.str(), '=')) !=
+				   "EndInformation")
 			{
 				if (name == "VoxelDepth")
 					thickness1 = ReadValueFromLine<float>(line.str(), '=');
@@ -139,10 +143,10 @@ bool avw::ReadHeader(const char *filename, unsigned short &w, unsigned short &h,
 	return ok;
 }
 
-void *avw::ReadData(const char *filename, unsigned short slicenr,
-										unsigned short &w, unsigned short &h, datatype &type)
+void* iseg::avw::ReadData(const char* filename, unsigned short slicenr,
+						  unsigned short& w, unsigned short& h, datatype& type)
 {
-	void *returnval = NULL;
+	void* returnval = NULL;
 
 	w = h = 0;
 	type = uchar;
@@ -159,7 +163,7 @@ void *avw::ReadData(const char *filename, unsigned short slicenr,
 		if (dummy_str == "AVW_ImageFile")
 		{
 			uint64_t data_section_start =
-					ReadValueFromLine<uint64_t>(line.str(), ' ');
+				ReadValueFromLine<uint64_t>(line.str(), ' ');
 
 			ReadLineIntoIStringStream(file, line);
 			dummy_str = ReadValueFromLine<std::string>(line.str(), '=');
@@ -205,7 +209,7 @@ void *avw::ReadData(const char *filename, unsigned short slicenr,
 
 			if (returnval != NULL)
 			{
-				char *data = (char *)returnval;
+				char* data = (char*)returnval;
 				file.read(data, slicedim);
 				if (file.fail())
 				{

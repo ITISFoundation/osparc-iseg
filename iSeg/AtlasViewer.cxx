@@ -7,36 +7,39 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "AtlasViewer.h"
 #include "Precompiled.h"
-#include <q3popupmenu.h>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qwidget.h>
-//Added by qt3to4:
+
+#include "AtlasViewer.h"
+
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <algorithm>
+#include <q3popupmenu.h>
+#include <qapplication.h>
+#include <qcolor.h>
+#include <qevent.h>
+#include <qimage.h>
 #include <qinputdialog.h>
 #include <qlineedit.h>
+#include <qpainter.h>
+#include <qpen.h>
+#include <qwidget.h>
+
+#include <algorithm>
 
 using namespace std;
+using namespace iseg;
 
-AtlasViewer::AtlasViewer(float *bmpbits1, tissues_size_t *tissue1,
-												 unsigned char orient1, unsigned short dimx1,
-												 unsigned short dimy1, unsigned short dimz1, float dx1,
-												 float dy1, float dz1, std::vector<float> *r,
-												 std::vector<float> *g, std::vector<float> *b,
-												 QWidget *parent, const char *name,
-												 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+AtlasViewer::AtlasViewer(float* bmpbits1, tissues_size_t* tissue1,
+						 unsigned char orient1, unsigned short dimx1,
+						 unsigned short dimy1, unsigned short dimz1, float dx1,
+						 float dy1, float dz1, std::vector<float>* r,
+						 std::vector<float>* g, std::vector<float>* b,
+						 QWidget* parent, const char* name,
+						 Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags)
 {
 	setCursor(Qt::CrossCursor);
 	scalefactor = 1.0f;
@@ -79,17 +82,19 @@ AtlasViewer::~AtlasViewer()
 
 void AtlasViewer::set_zoom(double z)
 {
-	if (z != zoom) {
+	if (z != zoom)
+	{
 		zoom = z;
 		setFixedSize((int)width * (zoom * pixelsize.high),
-								 (int)height * (zoom * pixelsize.low));
+					 (int)height * (zoom * pixelsize.low));
 		repaint();
 	}
 }
 
-void AtlasViewer::paintEvent(QPaintEvent *e)
+void AtlasViewer::paintEvent(QPaintEvent* e)
 {
-	if (image.size() != QSize(0, 0)) { // is an image loaded?
+	if (image.size() != QSize(0, 0))
+	{ // is an image loaded?
 		{
 			QPainter painter(this);
 			painter.setClipRect(e->rect());
@@ -114,19 +119,22 @@ void AtlasViewer::update(QRect rect)
 {
 	unsigned short newwidth, newheight;
 	float newdx, newdy;
-	if (orient == 0) {
+	if (orient == 0)
+	{
 		newwidth = dimy;
 		newheight = dimz;
 		newdx = dy;
 		newdy = dz;
 	}
-	else if (orient == 1) {
+	else if (orient == 1)
+	{
 		newwidth = dimx;
 		newheight = dimz;
 		newdx = dx;
 		newdy = dz;
 	}
-	else if (orient == 2) {
+	else if (orient == 2)
+	{
 		newwidth = dimx;
 		newheight = dimy;
 		newdx = dx;
@@ -134,7 +142,8 @@ void AtlasViewer::update(QRect rect)
 	}
 
 	if (newwidth != width || newheight != height || newdx != pixelsize.high ||
-			newdy != pixelsize.low) {
+		newdy != pixelsize.low)
+	{
 		width = newwidth;
 		height = newheight;
 		pixelsize.high = newdx;
@@ -145,33 +154,36 @@ void AtlasViewer::update(QRect rect)
 		current_tissue = new tissues_size_t[height * (unsigned)(width)];
 		image.create(int(width), int(height), 32);
 		setFixedSize((int)width * zoom * pixelsize.high,
-								 (int)height * zoom * pixelsize.low);
+					 (int)height * zoom * pixelsize.low);
 	}
 
 	get_slice();
 
 	reload_bits();
 	repaint((int)(rect.left() * zoom * pixelsize.high),
-					(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-					(int)ceil(rect.width() * zoom * pixelsize.high),
-					(int)ceil(rect.height() * zoom * pixelsize.low));
+			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
+			(int)ceil(rect.width() * zoom * pixelsize.high),
+			(int)ceil(rect.height() * zoom * pixelsize.low));
 }
 
 void AtlasViewer::init()
 {
-	if (orient == 0) {
+	if (orient == 0)
+	{
 		width = dimy;
 		height = dimz;
 		pixelsize.high = dy;
 		pixelsize.low = dz;
 	}
-	else if (orient == 1) {
+	else if (orient == 1)
+	{
 		width = dimx;
 		height = dimz;
 		pixelsize.high = dx;
 		pixelsize.low = dz;
 	}
-	else if (orient == 2) {
+	else if (orient == 2)
+	{
 		width = dimx;
 		height = dimy;
 		pixelsize.high = dx;
@@ -185,7 +197,7 @@ void AtlasViewer::init()
 	current_tissue = new tissues_size_t[height * (unsigned)(width)];
 
 	setFixedSize((int)width * zoom * pixelsize.high,
-							 (int)height * zoom * pixelsize.low);
+				 (int)height * zoom * pixelsize.low);
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
 	get_slice();
@@ -198,38 +210,47 @@ void AtlasViewer::init()
 
 void AtlasViewer::get_slice()
 {
-	if (orient == 0) {
+	if (orient == 0)
+	{
 		if (slicenr >= dimx)
 			slicenr = dimx - 1;
 		unsigned pos = 0;
 		unsigned pos1 = unsigned(slicenr);
-		for (unsigned short i = 0; i < height; i++) {
-			for (unsigned short j = 0; j < width; j++, pos++, pos1 += dimx) {
+		for (unsigned short i = 0; i < height; i++)
+		{
+			for (unsigned short j = 0; j < width; j++, pos++, pos1 += dimx)
+			{
 				current_tissue[pos] = tissue[pos1];
 				current_bmpbits[pos] = bmpbits[pos1];
 			}
 		}
 	}
-	else if (orient == 1) {
+	else if (orient == 1)
+	{
 		if (slicenr >= dimy)
 			slicenr = dimy - 1;
 		unsigned pos = 0;
 		unsigned pos1 = unsigned(slicenr) * width;
 		for (unsigned short i = 0; i < height;
-				 i++, pos1 += unsigned(dimy - 1) * dimx) {
-			for (unsigned short j = 0; j < width; j++, pos++, pos1++) {
+			 i++, pos1 += unsigned(dimy - 1) * dimx)
+		{
+			for (unsigned short j = 0; j < width; j++, pos++, pos1++)
+			{
 				current_tissue[pos] = tissue[pos1];
 				current_bmpbits[pos] = bmpbits[pos1];
 			}
 		}
 	}
-	else if (orient == 2) {
+	else if (orient == 2)
+	{
 		if (slicenr >= dimz)
 			slicenr = dimz - 1;
 		unsigned pos = 0;
 		unsigned pos1 = unsigned(slicenr) * unsigned(dimy) * dimx;
-		for (unsigned short i = 0; i < height; i++) {
-			for (unsigned short j = 0; j < width; j++, pos++, pos1++) {
+		for (unsigned short i = 0; i < height; i++)
+		{
+			for (unsigned short j = 0; j < width; j++, pos++, pos1++)
+			{
 				current_tissue[pos] = tissue[pos1];
 				current_bmpbits[pos] = bmpbits[pos1];
 			}
@@ -241,24 +262,31 @@ void AtlasViewer::reload_bits()
 {
 	unsigned pos = 0;
 	int f;
-	for (int y = height - 1; y >= 0; y--) {
-		for (int x = 0; x < width; x++) {
-			f = (int)max(0.0f, min(255.0f, scaleoffset +
-																				 scalefactor * (current_bmpbits)[pos]));
+	for (int y = height - 1; y >= 0; y--)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			f = (int)max(0.0f,
+						 min(255.0f, scaleoffset +
+										 scalefactor * (current_bmpbits)[pos]));
 			if (current_tissue[pos] == 0)
 				image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
 			else
 				image.setPixel(
-						x, y,
-						qRgb(int(f +
-										 tissueopac *
-												 (255.0f * ((*color_r)[current_tissue[pos] - 1]) - f)),
-								 int(f +
-										 tissueopac *
-												 (255.0f * ((*color_g)[current_tissue[pos] - 1]) - f)),
-								 int(f + tissueopac *
-														 (255.0f * ((*color_b)[current_tissue[pos] - 1]) -
-															f))));
+					x, y,
+					qRgb(
+						int(f + tissueopac *
+									(255.0f *
+										 ((*color_r)[current_tissue[pos] - 1]) -
+									 f)),
+						int(f + tissueopac *
+									(255.0f *
+										 ((*color_g)[current_tissue[pos] - 1]) -
+									 f)),
+						int(f + tissueopac *
+									(255.0f *
+										 ((*color_b)[current_tissue[pos] - 1]) -
+									 f))));
 			pos++;
 		}
 	}
@@ -268,10 +296,11 @@ void AtlasViewer::reload_bits()
 
 void AtlasViewer::pixelsize_changed(Pair pixelsize1)
 {
-	if (pixelsize1.high != pixelsize.high || pixelsize1.low != pixelsize.low) {
+	if (pixelsize1.high != pixelsize.high || pixelsize1.low != pixelsize.low)
+	{
 		pixelsize = pixelsize1;
 		setFixedSize((int)width * zoom * pixelsize.high,
-								 (int)height * zoom * pixelsize.low);
+					 (int)height * zoom * pixelsize.low);
 		repaint();
 	}
 }
@@ -309,13 +338,14 @@ void AtlasViewer::set_scalefactor(float factor1)
 	repaint();
 }
 
-void AtlasViewer::mouseMoveEvent(QMouseEvent *e)
+void AtlasViewer::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
 	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
 	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
+		0.0);
 
 	unsigned pos = p.px + p.py * width;
 	emit mousemoved_sign(current_tissue[pos]);

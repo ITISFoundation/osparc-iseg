@@ -7,10 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "loaderwidgets.h"
-#include "CImg.h"
-#include "Core/Point.h"
 #include "Precompiled.h"
+
+#include "CImg.h"
+#include "loaderwidgets.h"
+
+#include "Core/Point.h"
 
 #include <q3filedialog.h>
 #include <q3hbox.h>
@@ -31,12 +33,13 @@
 #include <boost/filesystem.hpp>
 
 using namespace std;
+using namespace iseg;
 
-LoaderDicom::LoaderDicom(SlicesHandler *hand3D, QStringList *lname,
-												 bool breload, QWidget *parent, const char *name,
-												 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D), reload(breload),
-			lnames(lname)
+LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
+						 bool breload, QWidget* parent, const char* name,
+						 Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D), reload(breload),
+	  lnames(lname)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -99,13 +102,15 @@ LoaderDicom::LoaderDicom(SlicesHandler *hand3D, QStringList *lname,
 
 	if (!lnames->empty())
 	{
-		vector<const char *> vnames;
-		for (QStringList::iterator it = lnames->begin(); it != lnames->end(); it++)
+		vector<const char*> vnames;
+		for (QStringList::iterator it = lnames->begin(); it != lnames->end();
+			 it++)
 		{
 			vnames.push_back((*it).ascii());
 		}
 		dicomseriesnr.clear();
-		handler3D->GetDICOMseriesnr(&vnames, &dicomseriesnr, &dicomseriesnrlist);
+		handler3D->GetDICOMseriesnr(&vnames, &dicomseriesnr,
+									&dicomseriesnrlist);
 		if (dicomseriesnr.size() > 1)
 		{
 			hbox6 = new Q3HBox(vbox1);
@@ -115,8 +120,8 @@ LoaderDicom::LoaderDicom(SlicesHandler *hand3D, QStringList *lname,
 			for (unsigned i = 0; i < (unsigned)dicomseriesnr.size(); i++)
 			{
 				QString str;
-				seriesnrselection->insertItem(str =
-																					str.setNum((int)dicomseriesnr.at(i)));
+				seriesnrselection->insertItem(
+					str = str.setNum((int)dicomseriesnr.at(i)));
 			}
 			seriesnrselection->setCurrentItem(0);
 			hbox6->show();
@@ -145,7 +150,7 @@ LoaderDicom::LoaderDicom(SlicesHandler *hand3D, QStringList *lname,
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(cb_subsect, SIGNAL(clicked()), this,
-									 SLOT(subsect_toggled()));
+					 SLOT(subsect_toggled()));
 	QObject::connect(cb_ct, SIGNAL(clicked()), this, SLOT(ct_toggled()));
 
 	return;
@@ -189,16 +194,16 @@ void LoaderDicom::load_pushed()
 {
 	if (!lnames->empty())
 	{
-		vector<const char *> vnames;
+		vector<const char*> vnames;
 		unsigned pos = 0;
 
 		if (dicomseriesnr.size() > 1)
 		{
-			for (QStringList::iterator it = lnames->begin(); it != lnames->end();
-					 it++)
+			for (QStringList::iterator it = lnames->begin();
+				 it != lnames->end(); it++)
 			{
 				if (dicomseriesnrlist[pos] ==
-						dicomseriesnr[seriesnrselection->currentItem()])
+					dicomseriesnr[seriesnrselection->currentItem()])
 				{
 					vnames.push_back((*it).ascii());
 				}
@@ -207,8 +212,8 @@ void LoaderDicom::load_pushed()
 		}
 		else
 		{
-			for (QStringList::iterator it = lnames->begin(); it != lnames->end();
-					 it++)
+			for (QStringList::iterator it = lnames->begin();
+				 it != lnames->end(); it++)
 				vnames.push_back((*it).ascii());
 		}
 
@@ -220,7 +225,8 @@ void LoaderDicom::load_pushed()
 			if (reload)
 				handler3D->ReloadDICOM(vnames, p);
 			else
-				handler3D->LoadDICOM(vnames, p, xlength->value(), ylength->value());
+				handler3D->LoadDICOM(vnames, p, xlength->value(),
+									 ylength->value());
 		}
 		else
 		{
@@ -263,9 +269,9 @@ void LoaderDicom::load_pushed()
 	}
 }
 
-LoaderBmp::LoaderBmp(SlicesHandler *hand3D, QWidget *parent, const char *name,
-										 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+LoaderBmp::LoaderBmp(SlicesHandler* hand3D, QWidget* parent, const char* name,
+					 Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -332,7 +338,8 @@ LoaderBmp::LoaderBmp(SlicesHandler *hand3D, QWidget *parent, const char *name,
 
 	subsect_toggled(subsect->isChecked());
 
-	QObject::connect(selectFile, SIGNAL(clicked()), this, SLOT(select_pushed()));
+	QObject::connect(selectFile, SIGNAL(clicked()), this,
+					 SLOT(select_pushed()));
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),this,SLOT(subsect_toggled(bool on)));
@@ -392,15 +399,15 @@ void LoaderBmp::load_pushed()
 			p.px = xoffset->value();
 			p.py = yoffset->value();
 			handler3D->LoadDIBitmap(nameEdit->text().ascii(),
-															(unsigned short)(sb_slicenr->value()),
-															(unsigned short)(sb_nrslices->value()), p,
-															xlength->value(), ylength->value());
+									(unsigned short)(sb_slicenr->value()),
+									(unsigned short)(sb_nrslices->value()), p,
+									xlength->value(), ylength->value());
 		}
 		else
 		{
 			handler3D->LoadDIBitmap(nameEdit->text().ascii(),
-															(unsigned short)(sb_slicenr->value()),
-															(unsigned short)(sb_nrslices->value()));
+									(unsigned short)(sb_slicenr->value()),
+									(unsigned short)(sb_nrslices->value()));
 		}
 		close();
 		return;
@@ -414,17 +421,17 @@ void LoaderBmp::load_pushed()
 void LoaderBmp::select_pushed()
 {
 	QString loadfilename = Q3FileDialog::getOpenFileName(
-			QString::null,
-			"Images (*.bmp)\n"
-			"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
-			this);			//, filename);
+		QString::null,
+		"Images (*.bmp)\n"
+		"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
+		this);		//, filename);
 	nameEdit->setText(loadfilename);
 	return;
 }
 
-LoaderRaw::LoaderRaw(SlicesHandler *hand3D, QWidget *parent, const char *name,
-										 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name,
+					 Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -518,7 +525,8 @@ LoaderRaw::LoaderRaw(SlicesHandler *hand3D, QWidget *parent, const char *name,
 
 	vbox1->setFixedSize(vbox1->sizeHint());
 
-	QObject::connect(selectFile, SIGNAL(clicked()), this, SLOT(select_pushed()));
+	QObject::connect(selectFile, SIGNAL(clicked()), this,
+					 SLOT(select_pushed()));
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),this,SLOT(subsect_toggled(bool on)));
@@ -574,19 +582,20 @@ void LoaderRaw::load_pushed()
 			p.px = xoffset->value();
 			p.py = yoffset->value();
 			handler3D->ReadRaw(
-					nameEdit->text().ascii(), (unsigned short)xlength1->value(),
-					(unsigned short)ylength1->value(), (unsigned)bitdepth,
-					(unsigned short)slicenrbox->value(),
-					(unsigned short)sb_nrslices->value(), p,
-					(unsigned short)xlength->value(), (unsigned short)ylength->value());
+				nameEdit->text().ascii(), (unsigned short)xlength1->value(),
+				(unsigned short)ylength1->value(), (unsigned)bitdepth,
+				(unsigned short)slicenrbox->value(),
+				(unsigned short)sb_nrslices->value(), p,
+				(unsigned short)xlength->value(),
+				(unsigned short)ylength->value());
 		}
 		else
 		{
-			handler3D->ReadRaw(nameEdit->text().ascii(),
-												 (unsigned short)xlength1->value(),
-												 (unsigned short)ylength1->value(), (unsigned)bitdepth,
-												 (unsigned short)slicenrbox->value(),
-												 (unsigned short)sb_nrslices->value());
+			handler3D->ReadRaw(
+				nameEdit->text().ascii(), (unsigned short)xlength1->value(),
+				(unsigned short)ylength1->value(), (unsigned)bitdepth,
+				(unsigned short)slicenrbox->value(),
+				(unsigned short)sb_nrslices->value());
 		}
 		close();
 		return;
@@ -600,15 +609,15 @@ void LoaderRaw::load_pushed()
 void LoaderRaw::select_pushed()
 {
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null, QString::null,
-																		this); //, filename);
+		Q3FileDialog::getOpenFileName(QString::null, QString::null,
+									  this); //, filename);
 	nameEdit->setText(loadfilename);
 	return;
 }
 
-SaverImg::SaverImg(SlicesHandler *hand3D, QWidget *parent, const char *name,
-									 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+SaverImg::SaverImg(SlicesHandler* hand3D, QWidget* parent, const char* name,
+				   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	handler3D = hand3D;
 
@@ -685,11 +694,12 @@ SaverImg::SaverImg(SlicesHandler *hand3D, QWidget *parent, const char *name,
 
 	type_changed(0);
 
-	QObject::connect(selectFile, SIGNAL(clicked()), this, SLOT(select_pushed()));
+	QObject::connect(selectFile, SIGNAL(clicked()), this,
+					 SLOT(select_pushed()));
 	QObject::connect(saveFile, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(typeselect, SIGNAL(buttonClicked(int)), this,
-									 SLOT(type_changed(int)));
+					 SLOT(type_changed(int)));
 
 	return;
 }
@@ -704,7 +714,8 @@ SaverImg::~SaverImg()
 
 void SaverImg::type_changed(int)
 {
-	if (typevti->isOn() || typevtk->isOn() || typemat->isOn() || typenii->isOn())
+	if (typevti->isOn() || typevtk->isOn() || typemat->isOn() ||
+		typenii->isOn())
 	{
 		all1->setChecked(TRUE);
 		vbox5->setEnabled(false);
@@ -735,8 +746,8 @@ void SaverImg::save_pushed()
 					QString s = nameEdit->text();
 					if (s.length() > 4 && !s.endsWith(QString(".bmp")))
 						s.append(".bmp");
-					res =
-							(handler3D->get_activebmphandler()->SaveDIBitmap(s.ascii()) == 0);
+					res = (handler3D->get_activebmphandler()->SaveDIBitmap(
+							   s.ascii()) == 0);
 				}
 			}
 			else if (pictwork->isOn())
@@ -751,8 +762,8 @@ void SaverImg::save_pushed()
 					if (s.length() > 4 && !s.endsWith(QString(".bmp")))
 						s.append(".bmp");
 
-					res = (handler3D->get_activebmphandler()->SaveWorkBitmap(s.ascii()) ==
-								 0);
+					res = (handler3D->get_activebmphandler()->SaveWorkBitmap(
+							   s.ascii()) == 0);
 				}
 			}
 			else if (picttissue->isOn())
@@ -768,7 +779,8 @@ void SaverImg::save_pushed()
 						s.append(".bmp");
 
 					res = (handler3D->get_activebmphandler()->SaveTissueBitmap(
-										 handler3D->get_active_tissuelayer(), s.ascii()) == 0);
+							   handler3D->get_active_tissuelayer(),
+							   s.ascii()) == 0);
 				}
 			}
 		}
@@ -776,8 +788,9 @@ void SaverImg::save_pushed()
 		{
 			if (!file_path.has_extension())
 			{
-				file_path.append(typevtk->isOn() ? ".vtk"
-																				 : (typevti->isOn() ? ".vti" : ".nii"));
+				file_path.append(typevtk->isOn()
+									 ? ".vtk"
+									 : (typevti->isOn() ? ".vti" : ".nii"));
 			}
 
 			bool binary = true;
@@ -787,11 +800,13 @@ void SaverImg::save_pushed()
 			}
 			else if (picttissue->isOn())
 			{
-				res = handler3D->export_tissue(file_path.string().c_str(), binary);
+				res = handler3D->export_tissue(file_path.string().c_str(),
+											   binary);
 			}
 			else if (pictwork->isOn())
 			{
-				res = handler3D->export_work(file_path.string().c_str(), binary);
+				res =
+					handler3D->export_work(file_path.string().c_str(), binary);
 			}
 		}
 		else if (typemat->isOn())
@@ -824,37 +839,40 @@ void SaverImg::save_pushed()
 			{
 				if (all1->isOn())
 				{
-					res = (handler3D->SaveBmpRaw(nameEdit->text().ascii()) == 0);
+					res =
+						(handler3D->SaveBmpRaw(nameEdit->text().ascii()) == 0);
 				}
 				else
 				{
 					res = (handler3D->get_activebmphandler()->SaveBmpRaw(
-										 nameEdit->text().ascii()) == 0);
+							   nameEdit->text().ascii()) == 0);
 				}
 			}
 			else if (pictwork->isOn())
 			{
 				if (all1->isOn())
 				{
-					res = (handler3D->SaveWorkRaw(nameEdit->text().ascii()) == 0);
+					res =
+						(handler3D->SaveWorkRaw(nameEdit->text().ascii()) == 0);
 				}
 				else
 				{
 					res = (handler3D->get_activebmphandler()->SaveWorkRaw(
-										 nameEdit->text().ascii()) == 0);
+							   nameEdit->text().ascii()) == 0);
 				}
 			}
 			else if (picttissue->isOn())
 			{
 				if (all1->isOn())
 				{
-					res = (handler3D->SaveTissueRaw(nameEdit->text().ascii()) == 0);
+					res = (handler3D->SaveTissueRaw(nameEdit->text().ascii()) ==
+						   0);
 				}
 				else
 				{
 					res = (handler3D->get_activebmphandler()->SaveTissueRaw(
-										 handler3D->get_active_tissuelayer(),
-										 nameEdit->text().ascii()) == 0);
+							   handler3D->get_active_tissuelayer(),
+							   nameEdit->text().ascii()) == 0);
 				}
 			}
 		}
@@ -863,9 +881,9 @@ void SaverImg::save_pushed()
 		if (!res)
 		{
 			QMessageBox::warning(this, "iSeg",
-													 "Error: Could not export file\n" + nameEdit->text() +
-															 "\n",
-													 QMessageBox::Ok | QMessageBox::Default);
+								 "Error: Could not export file\n" +
+									 nameEdit->text() + "\n",
+								 QMessageBox::Ok | QMessageBox::Default);
 		}
 		return;
 	}
@@ -878,15 +896,15 @@ void SaverImg::save_pushed()
 void SaverImg::select_pushed()
 {
 	QString savefilename =
-			Q3FileDialog::getSaveFileName(QString::null, QString::null,
-																		this); //, filename);
+		Q3FileDialog::getSaveFileName(QString::null, QString::null,
+									  this); //, filename);
 	nameEdit->setText(savefilename);
 	return;
 }
 
-ReloaderBmp::ReloaderBmp(SlicesHandler *hand3D, QWidget *parent,
-												 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+ReloaderBmp::ReloaderBmp(SlicesHandler* hand3D, QWidget* parent,
+						 const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	handler3D = hand3D;
 
@@ -936,7 +954,8 @@ ReloaderBmp::ReloaderBmp(SlicesHandler *hand3D, QWidget *parent,
 
 	subsect_toggled();
 
-	QObject::connect(selectFile, SIGNAL(clicked()), this, SLOT(select_pushed()));
+	QObject::connect(selectFile, SIGNAL(clicked()), this,
+					 SLOT(select_pushed()));
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
@@ -978,12 +997,12 @@ void ReloaderBmp::load_pushed()
 			p.px = xoffset->value();
 			p.py = yoffset->value();
 			handler3D->ReloadDIBitmap(nameEdit->text().ascii(), p,
-																(unsigned short)sb_startnr->value());
+									  (unsigned short)sb_startnr->value());
 		}
 		else
 		{
 			handler3D->ReloadDIBitmap(nameEdit->text().ascii(),
-																(unsigned short)sb_startnr->value());
+									  (unsigned short)sb_startnr->value());
 		}
 		close();
 		return;
@@ -997,16 +1016,16 @@ void ReloaderBmp::load_pushed()
 void ReloaderBmp::select_pushed()
 {
 	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
-																											 "Images (*.bmp)\n"
-																											 "All(*.*)",
-																											 this); //, filename);
+														 "Images (*.bmp)\n"
+														 "All(*.*)",
+														 this); //, filename);
 	nameEdit->setText(loadfilename);
 	return;
 }
 
-ReloaderRaw::ReloaderRaw(SlicesHandler *hand3D, QWidget *parent,
-												 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+ReloaderRaw::ReloaderRaw(SlicesHandler* hand3D, QWidget* parent,
+						 const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	handler3D = hand3D;
 
@@ -1090,7 +1109,8 @@ ReloaderRaw::ReloaderRaw(SlicesHandler *hand3D, QWidget *parent,
 
 	subsect_toggled();
 
-	QObject::connect(selectFile, SIGNAL(clicked()), this, SLOT(select_pushed()));
+	QObject::connect(selectFile, SIGNAL(clicked()), this,
+					 SLOT(select_pushed()));
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
@@ -1140,12 +1160,13 @@ void ReloaderRaw::load_pushed()
 			p.px = xoffset->value();
 			p.py = yoffset->value();
 			handler3D->ReloadRaw(nameEdit->text().ascii(), xlength1->value(),
-													 ylength1->value(), bitdepth, slicenrbox->value(), p);
+								 ylength1->value(), bitdepth,
+								 slicenrbox->value(), p);
 		}
 		else
 		{
 			handler3D->ReloadRaw(nameEdit->text().ascii(), bitdepth,
-													 slicenrbox->value());
+								 slicenrbox->value());
 		}
 		close();
 		return;
@@ -1159,15 +1180,15 @@ void ReloaderRaw::load_pushed()
 void ReloaderRaw::select_pushed()
 {
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null, QString::null,
-																		this); //, filename);
+		Q3FileDialog::getOpenFileName(QString::null, QString::null,
+									  this); //, filename);
 	nameEdit->setText(loadfilename);
 	return;
 }
 
-NewImg::NewImg(SlicesHandler *hand3D, QWidget *parent, const char *name,
-							 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+NewImg::NewImg(SlicesHandler* hand3D, QWidget* parent, const char* name,
+			   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	handler3D = hand3D;
 
@@ -1213,8 +1234,8 @@ bool NewImg::new_pressed() const { return newPressed; }
 void NewImg::new_pushed()
 {
 	handler3D->newbmp((unsigned short)xlength->value(),
-										(unsigned short)ylength->value(),
-										(unsigned short)sb_nrslices->value());
+					  (unsigned short)ylength->value(),
+					  (unsigned short)sb_nrslices->value());
 	newPressed = true;
 	close();
 	return;
@@ -1226,11 +1247,11 @@ void NewImg::on_close()
 	close();
 }
 
-LoaderBmp2::LoaderBmp2(SlicesHandler *hand3D, vector<const char *> filenames,
-											 QWidget *parent, const char *name,
-											 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
-			m_filenames(filenames)
+LoaderBmp2::LoaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,
+					   QWidget* parent, const char* name,
+					   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
+	  m_filenames(filenames)
 {
 	vbox1 = new Q3VBox(this);
 	hbox2 = new Q3HBox(vbox1);
@@ -1335,7 +1356,8 @@ void LoaderBmp2::load_pushed()
 		Point p;
 		p.px = xoffset->value();
 		p.py = yoffset->value();
-		handler3D->LoadDIBitmap(m_filenames, p, xlength->value(), ylength->value());
+		handler3D->LoadDIBitmap(m_filenames, p, xlength->value(),
+								ylength->value());
 	}
 	else
 	{
@@ -1345,10 +1367,10 @@ void LoaderBmp2::load_pushed()
 	return;
 }
 
-LoaderPng::LoaderPng(SlicesHandler *hand3D, vector<const char *> filenames,
-										 QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
-			m_filenames(filenames)
+LoaderPng::LoaderPng(SlicesHandler* hand3D, vector<const char*> filenames,
+					 QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
+	  m_filenames(filenames)
 {
 	vbox1 = new Q3VBox(this);
 	hbox2 = new Q3HBox(vbox1);
@@ -1446,8 +1468,8 @@ void LoaderPng::load_pushed()
 	return;
 }
 
-ClickablaLabel::ClickablaLabel(QWidget *parent, Qt::WindowFlags f)
-		: QLabel(parent, f)
+ClickablaLabel::ClickablaLabel(QWidget* parent, Qt::WindowFlags f)
+	: QLabel(parent, f)
 {
 	centerX = width() / 2;
 	;
@@ -1457,9 +1479,9 @@ ClickablaLabel::ClickablaLabel(QWidget *parent, Qt::WindowFlags f)
 	squareHeight = 24;
 }
 
-ClickablaLabel::ClickablaLabel(const QString &text, QWidget *parent,
-															 Qt::WindowFlags f)
-		: QLabel(text, parent, f)
+ClickablaLabel::ClickablaLabel(const QString& text, QWidget* parent,
+							   Qt::WindowFlags f)
+	: QLabel(text, parent, f)
 {
 }
 
@@ -1474,14 +1496,14 @@ void ClickablaLabel::SetCenter(QPoint newCenter)
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::mousePressEvent(QMouseEvent *ev)
+void ClickablaLabel::mousePressEvent(QMouseEvent* ev)
 {
 	centerX = ev->pos().x();
 	centerY = ev->pos().y();
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::paintEvent(QPaintEvent *e)
+void ClickablaLabel::paintEvent(QPaintEvent* e)
 {
 	QLabel::paintEvent(e);
 
@@ -1493,13 +1515,13 @@ void ClickablaLabel::paintEvent(QPaintEvent *e)
 
 	QPainterPath square;
 	square.addRect(centerX - squareHeight / 2, centerY - squareHeight / 2,
-								 squareWidth, squareHeight);
+				   squareWidth, squareHeight);
 	painter.drawPath(square);
 }
 
-ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
-													 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_filenames(filenames)
+ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
+						   const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), m_filenames(filenames)
 {
 	previewCenter.setX(0);
 	previewCenter.setY(0);
@@ -1510,7 +1532,7 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 		if (sourceImage.isNull())
 		{
 			QMessageBox::information(this, tr("Image Viewer"),
-															 tr("Cannot load %1.").arg(fileName));
+									 tr("Cannot load %1.").arg(fileName));
 			return;
 		}
 		previewCenter.setX(sourceImage.width());
@@ -1574,7 +1596,7 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 	labelRedValue = new QLineEdit(vboxRed);
 	labelRedValue->setText(QString::number(sliderRed->value()));
 	labelRedValue->setFixedWidth(30);
-	QLabel *labelPureRed = new QLabel(vboxRed);
+	QLabel* labelPureRed = new QLabel(vboxRed);
 	labelPureRed->setText(" Pure");
 	labelPureRed->setFixedWidth(30);
 	buttonRed = new QRadioButton(vboxRed);
@@ -1591,7 +1613,7 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 	labelGreenValue = new QLineEdit(vboxGreen);
 	labelGreenValue->setText(QString::number(sliderGreen->value()));
 	labelGreenValue->setFixedWidth(30);
-	QLabel *labelPureGreen = new QLabel(vboxGreen);
+	QLabel* labelPureGreen = new QLabel(vboxGreen);
 	labelPureGreen->setText(" Pure");
 	labelPureGreen->setFixedWidth(30);
 	buttonGreen = new QRadioButton(vboxGreen);
@@ -1608,7 +1630,7 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 	labelBlueValue = new QLineEdit(vboxBlue);
 	labelBlueValue->setText(QString::number(sliderBlue->value()));
 	labelBlueValue->setFixedWidth(30);
-	QLabel *labelPureBlue = new QLabel(vboxBlue);
+	QLabel* labelPureBlue = new QLabel(vboxBlue);
 	labelPureBlue->setText(" Pure");
 	labelPureBlue->setFixedWidth(30);
 	buttonBlue = new QRadioButton(vboxBlue);
@@ -1635,28 +1657,28 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 	vboxMain->setFixedSize(vboxMain->sizeHint());
 
 	QObject::connect(sliderRed, SIGNAL(valueChanged(int)), this,
-									 SLOT(sliderRedValueChanged(int)));
+					 SLOT(sliderRedValueChanged(int)));
 	QObject::connect(sliderGreen, SIGNAL(valueChanged(int)), this,
-									 SLOT(sliderGreenValueChanged(int)));
+					 SLOT(sliderGreenValueChanged(int)));
 	QObject::connect(sliderBlue, SIGNAL(valueChanged(int)), this,
-									 SLOT(sliderBlueValueChanged(int)));
+					 SLOT(sliderBlueValueChanged(int)));
 
 	QObject::connect(labelRedValue, SIGNAL(textEdited(QString)), this,
-									 SLOT(labelRedValueChanged(QString)));
+					 SLOT(labelRedValueChanged(QString)));
 	QObject::connect(labelGreenValue, SIGNAL(textEdited(QString)), this,
-									 SLOT(labelGreenValueChanged(QString)));
+					 SLOT(labelGreenValueChanged(QString)));
 	QObject::connect(labelBlueValue, SIGNAL(textEdited(QString)), this,
-									 SLOT(labelBlueValueChanged(QString)));
+					 SLOT(labelBlueValueChanged(QString)));
 
 	QObject::connect(buttonRed, SIGNAL(toggled(bool)), this,
-									 SLOT(buttonRedPushed(bool)));
+					 SLOT(buttonRedPushed(bool)));
 	QObject::connect(buttonGreen, SIGNAL(toggled(bool)), this,
-									 SLOT(buttonGreenPushed(bool)));
+					 SLOT(buttonGreenPushed(bool)));
 	QObject::connect(buttonBlue, SIGNAL(toggled(bool)), this,
-									 SLOT(buttonBluePushed(bool)));
+					 SLOT(buttonBluePushed(bool)));
 
 	QObject::connect(spinSlice, SIGNAL(valueChanged(int)), this,
-									 SLOT(sliceValueChanged(int)));
+					 SLOT(sliceValueChanged(int)));
 
 	//QObject::connect(updateImage,SIGNAL(clicked()),this,SLOT(RefreshImage()));
 
@@ -1664,7 +1686,7 @@ ChannelMixer::ChannelMixer(vector<const char *> filenames, QWidget *parent,
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 
 	QObject::connect(imageSourceLabel, SIGNAL(newCenterPreview(QPoint)), this,
-									 SLOT(NewCenterPreview(QPoint)));
+					 SLOT(NewCenterPreview(QPoint)));
 
 	firstTime = true;
 
@@ -1795,7 +1817,7 @@ void ChannelMixer::NewCenterPreview(QPoint newCenter)
 
 	previewCenter.setX(scaledFactor * newCenter.x() + correctionX);
 	previewCenter.setY(imageHeight -
-										 (scaledFactor * newCenter.y() - correctionY));
+					   (scaledFactor * newCenter.y() - correctionY));
 
 	RefreshSourceImage();
 	//RefreshImage();
@@ -1840,7 +1862,7 @@ void ChannelMixer::RefreshSourceImage()
 		if (sourceImage.isNull())
 		{
 			QMessageBox::information(this, tr("Image Viewer"),
-															 tr("Cannot load %1.").arg(fileName));
+									 tr("Cannot load %1.").arg(fileName));
 			return;
 		}
 
@@ -1891,8 +1913,9 @@ void ChannelMixer::RefreshSourceImage()
 		int smallImageCenterY = smallImageHeight / 2;
 		int smallImageCenterSquareHalfSide = squareWidth / scaledFactor / 2;
 		smallImageCenterSquareHalfSide = 0;
-		imageSourceLabel->SetCenter(QPoint(
-				smallImageCenterX, smallImageCenterY + smallImageCenterSquareHalfSide));
+		imageSourceLabel->SetCenter(
+			QPoint(smallImageCenterX,
+				   smallImageCenterY + smallImageCenterSquareHalfSide));
 	}
 
 	RefreshImage();
@@ -1907,14 +1930,14 @@ void ChannelMixer::RefreshImage()
 		if (image.isNull())
 		{
 			QMessageBox::information(this, tr("Image Viewer"),
-															 tr("Cannot load %1.").arg(fileName));
+									 tr("Cannot load %1.").arg(fileName));
 			return;
 		}
 
 		QImage converted = ConvertImageTo8BitBMP(image, widthPV, heightPV);
 		imageLabel->clear();
 		imageLabel->setPixmap(QPixmap::fromImage(
-				converted.scaled(scaleX, scaleY, Qt::KeepAspectRatio)));
+			converted.scaled(scaleX, scaleY, Qt::KeepAspectRatio)));
 		imageLabel->update();
 	}
 	hboxImage->update();
@@ -1944,8 +1967,8 @@ QImage ChannelMixer::ConvertImageTo8BitBMP(QImage image, int width, int height)
 		{
 			QRgb rgb = cropped.pixel(i, j);
 			int grayValue = qRed(rgb) * (redFactorPV / 100.00) +
-											qGreen(rgb) * (greenFactorPV / 100.00) +
-											qBlue(rgb) * (blueFactorPV / 100.00);
+							qGreen(rgb) * (greenFactorPV / 100.00) +
+							qBlue(rgb) * (blueFactorPV / 100.00);
 			convertedImage.setPixel(i, j, grayValue);
 		}
 	}
@@ -1955,10 +1978,10 @@ QImage ChannelMixer::ConvertImageTo8BitBMP(QImage image, int width, int height)
 
 void ChannelMixer::UpdateText()
 {
-	labelPreviewAlgorithm->setText("GrayScale = " + QString::number(redFactorPV) +
-																 "*R + " + QString::number(greenFactorPV) +
-																 "*G + " + QString::number(blueFactorPV) +
-																 "*B");
+	labelPreviewAlgorithm->setText(
+		"GrayScale = " + QString::number(redFactorPV) + "*R + " +
+		QString::number(greenFactorPV) + "*G + " +
+		QString::number(blueFactorPV) + "*B");
 }
 
 void ChannelMixer::cancel_toggled()
@@ -1984,10 +2007,10 @@ void ChannelMixer::load_pushed()
 	return;
 }
 
-LoaderJpg::LoaderJpg(SlicesHandler *hand3D, vector<const char *> filenames,
-										 QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
-			m_filenames(filenames)
+LoaderJpg::LoaderJpg(SlicesHandler* hand3D, vector<const char*> filenames,
+					 QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D),
+	  m_filenames(filenames)
 {
 	vbox1 = new Q3VBox(this);
 	hbox2 = new Q3HBox(vbox1);
@@ -2075,7 +2098,8 @@ void LoaderJpg::load_pushed()
 		Point p;
 		p.px = xoffset->value();
 		p.py = yoffset->value();
-		handler3D->LoadDIJpg(m_filenames, p, xlength->value(), ylength->value());
+		handler3D->LoadDIJpg(m_filenames, p, xlength->value(),
+							 ylength->value());
 	}
 	else
 	{
@@ -2085,10 +2109,10 @@ void LoaderJpg::load_pushed()
 	return;
 }
 
-ReloaderBmp2::ReloaderBmp2(SlicesHandler *hand3D,
-													 vector<const char *> filenames, QWidget *parent,
-													 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,
+						   QWidget* parent, const char* name,
+						   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	handler3D = hand3D;
 	m_filenames = filenames;
@@ -2174,8 +2198,8 @@ void ReloaderBmp2::load_pushed()
 	return;
 }
 
-EditText::EditText(QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+EditText::EditText(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	vbox1 = new Q3VBox(this);
 
@@ -2205,22 +2229,22 @@ void EditText::set_editable_text(QString editable_text)
 
 QString EditText::get_editable_text() { return text_edit->text(); }
 
-SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget *parent,
-																											 const char *name,
-																											 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget* parent,
+													   const char* name,
+													   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags)
 {
 	hboxoverall = new Q3HBoxLayout(this);
 	vboxoverall = new Q3VBoxLayout(this);
 	hboxoverall->addLayout(vboxoverall);
 
 	// Dataset selection group box
-	QGroupBox *radioGroupBox = new QGroupBox("Supported types");
-	Q3VBoxLayout *radioLayout = new Q3VBoxLayout(this);
+	QGroupBox* radioGroupBox = new QGroupBox("Supported types");
+	Q3VBoxLayout* radioLayout = new Q3VBoxLayout(this);
 	for (int i = 0; i < supportedTypes::nrSupportedTypes; i++)
 	{
 		QString texted = ToQString(supportedTypes(i));
-		QRadioButton *radioBut = new QRadioButton(texted);
+		QRadioButton* radioBut = new QRadioButton(texted);
 		radioLayout->addWidget(radioBut);
 
 		m_RadioButs.push_back(radioBut);
@@ -2228,7 +2252,7 @@ SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget *parent,
 	radioGroupBox->setLayout(radioLayout);
 	vboxoverall->addWidget(radioGroupBox);
 
-	QHBoxLayout *buttonsLayout = new QHBoxLayout();
+	QHBoxLayout* buttonsLayout = new QHBoxLayout();
 	selectBut = new QPushButton("Select", this);
 	cancelBut = new QPushButton("Cancel", this);
 	buttonsLayout->addWidget(selectBut);

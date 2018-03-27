@@ -7,24 +7,37 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "common.h"
 #include "Precompiled.h"
+
+#include "common.h"
+
 #include <vtkMath.h>
 
-int common::CombineTissuesVersion(const int version, const int tissuesVersion)
+void iseg::DataSelection::CombineSelection(DataSelection& other)
+{
+	bmp = bmp || other.bmp;
+	work = work || other.work;
+	tissues = tissues || other.tissues;
+	vvm = vvm || other.vvm;
+	limits = limits || other.limits;
+	marks = marks || other.marks;
+	tissueHierarchy = tissueHierarchy || other.tissueHierarchy;
+}
+
+int iseg::CombineTissuesVersion(const int version, const int tissuesVersion)
 {
 	return (tissuesVersion << 8) + version;
 }
 
-void common::ExtractTissuesVersion(const int combinedVersion, int &version,
-																	 int &tissuesVersion)
+void iseg::ExtractTissuesVersion(const int combinedVersion, int& version,
+								 int& tissuesVersion)
 {
 	tissuesVersion = combinedVersion >> 8;
 	version = combinedVersion & 0xFF;
 }
 
-void common::QuaternionToDirectionCosines(const float *quaternion,
-																					float *directionCosines)
+void iseg::QuaternionToDirectionCosines(const float* quaternion,
+										float* directionCosines)
 {
 	float A[3][3];
 	vtkMath::QuaternionToMatrix3x3(quaternion, A);
@@ -36,17 +49,17 @@ void common::QuaternionToDirectionCosines(const float *quaternion,
 	directionCosines[5] = A[1][2];
 
 	// TODO: Necessary to orthonormalize???
-	common::Orthonormalize(&directionCosines[0], &directionCosines[3]);
+	iseg::Orthonormalize(&directionCosines[0], &directionCosines[3]);
 }
 
 #define SWAP(X, Y)                                                             \
-	{                                                                            \
-		double temp = X;                                                           \
-		X = Y;                                                                     \
-		Y = temp;                                                                  \
+	{                                                                          \
+		double temp = X;                                                       \
+		X = Y;                                                                 \
+		Y = temp;                                                              \
 	}
-void common::DirectionCosinesToQuaternion(const float *directionCosines,
-																					float *quaternion)
+void iseg::DirectionCosinesToQuaternion(const float* directionCosines,
+										float* quaternion)
 {
 	// TODO: Necessary to orthonormalize direction cosines???
 	// Construct direction cosine matrix
@@ -64,7 +77,7 @@ void common::DirectionCosinesToQuaternion(const float *directionCosines,
 	vtkMath::Matrix3x3ToQuaternion(A, quaternion);
 }
 
-bool common::Orthonormalize(float *vecA, float *vecB)
+bool iseg::Orthonormalize(float* vecA, float* vecB)
 {
 	// Check whether input valid
 	bool ok = true;
@@ -109,7 +122,7 @@ bool common::Orthonormalize(float *vecA, float *vecB)
 	return true;
 }
 
-bool common::Normalize(float *vec)
+bool iseg::Normalize(float* vec)
 {
 	if (vtkMath::Dot(vec, vec) == 0.0f)
 	{
@@ -119,7 +132,7 @@ bool common::Normalize(float *vec)
 	return true;
 }
 
-bool common::Cross(float *vecA, float *vecB, float *vecOut)
+bool iseg::Cross(float* vecA, float* vecB, float* vecOut)
 {
 	bool ok = true;
 

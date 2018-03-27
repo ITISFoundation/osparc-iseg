@@ -7,10 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "ImageWriter.h"
 #include "Precompiled.h"
 
 #include "ImageToITK.h"
+#include "ImageWriter.h"
 #include "InitializeITKFactory.h"
 #include "Transform.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
@@ -25,11 +25,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
+using namespace iseg;
+
 template<typename T>
-bool ImageWriter::writeVolume(const char *filename, const T **data,
-															unsigned width, unsigned height,
-															unsigned nrslices, const float spacing[3],
-															const Transform &transform)
+bool ImageWriter::writeVolume(const char* filename, const T** data,
+							  unsigned width, unsigned height,
+							  unsigned nrslices, const float spacing[3],
+							  const Transform& transform)
 {
 	initializeITKFactory();
 
@@ -37,13 +39,13 @@ bool ImageWriter::writeVolume(const char *filename, const T **data,
 	typedef itk::ImageFileWriter<image_type> writer_type;
 
 	image_type::Pointer image =
-			ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
+		ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
 
 	if (image)
 	{
 		boost::filesystem::path path(filename);
 		std::string extension = boost::algorithm::to_lower_copy(
-				path.has_extension() ? path.extension().string() : "");
+			path.has_extension() ? path.extension().string() : "");
 		if (extension == ".vti" || extension == ".vtk")
 		{
 			typedef itk::ImageToVTKImageFilter<image_type> connector_type;
@@ -77,7 +79,7 @@ bool ImageWriter::writeVolume(const char *filename, const T **data,
 			writer->Update();
 			return true;
 		}
-		catch (const itk::ExceptionObject &e)
+		catch (const itk::ExceptionObject& e)
 		{
 			std::string msg = e.GetDescription();
 			auto file = e.GetFile();

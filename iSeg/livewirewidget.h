@@ -37,22 +37,24 @@
 #include <q3mimefactory.h>
 #include <qpixmap.h>
 
+namespace iseg {
+
 class livewire_widget : public QWidget1
 {
 	Q_OBJECT
 public:
-	livewire_widget(SlicesHandler *hand3D, QWidget *parent = 0,
-									const char *name = 0, Qt::WindowFlags wFlags = 0);
+	livewire_widget(SlicesHandler* hand3D, QWidget* parent = 0,
+					const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~livewire_widget();
 	void init();
 	void newloaded();
 	void cleanup();
-	FILE *SaveParams(FILE *fp, int version);
-	FILE *LoadParams(FILE *fp, int version);
+	FILE* SaveParams(FILE* fp, int version);
+	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
 	QSize sizeHint() const;
-	IFT_livewire *lw;
-	IFT_livewire *lwfirst;
+	IFT_livewire* lw;
+	IFT_livewire* lwfirst;
 	std::string GetName() { return std::string("Contour"); };
 	virtual QIcon GetIcon(QDir picdir)
 	{
@@ -72,42 +74,42 @@ private:
 	int tlimit1;
 	int tlimit2;
 	bool cooling;
-	bmphandler *bmphand;
-	SlicesHandler *handler3D;
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	Q3HBox *hboxoverall;
-	Q3VBox *vboxmethods;
-	Q3VBox *vbox1;
-	Q3HBox *hbox2;
-	Q3HBox *hbox3;
-	QCheckBox *cb_freezing;
-	QCheckBox *cb_closing;
-	QSpinBox *sb_freezing;
-	QLabel *lb_freezing1;
-	QLabel *lb_freezing2;
-	QPushButton *pushexec;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3VBox* vbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	QCheckBox* cb_freezing;
+	QCheckBox* cb_closing;
+	QSpinBox* sb_freezing;
+	QLabel* lb_freezing1;
+	QLabel* lb_freezing2;
+	QPushButton* pushexec;
 	bool straightmode;
-	QRadioButton *autotrace;
-	QRadioButton *straight;
-	QRadioButton *freedraw;
-	QButtonGroup *drawmode;
+	QRadioButton* autotrace;
+	QRadioButton* straight;
+	QRadioButton* freedraw;
+	QButtonGroup* drawmode;
 	Point p1, p2;
 	std::vector<int> establishedlengths;
 
 signals:
-	void vp1_changed(std::vector<Point> *vp1);
-	void vpdyn_changed(std::vector<Point> *vpdyn);
-	void vp1dyn_changed(std::vector<Point> *vp1, std::vector<Point> *vpdyn);
-	void begin_datachange(common::DataSelection &dataSelection,
-												QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL,
-											common::EndUndoAction undoAction = common::EndUndo);
+	void vp1_changed(std::vector<Point>* vp1);
+	void vpdyn_changed(std::vector<Point>* vpdyn);
+	void vp1dyn_changed(std::vector<Point>* vp1, std::vector<Point>* vpdyn);
+	void begin_datachange(iseg::DataSelection& dataSelection,
+						  QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
+						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
-	void bmphand_changed(bmphandler *bmph);
+	void bmphand_changed(bmphandler* bmph);
 	//	void bmphand_changed(bmphandler *bmph);
 	void pt_clicked(Point p);
 	void pt_doubleclicked(Point p);
@@ -120,5 +122,7 @@ private slots:
 	void freezing_changed();
 	void sbfreezing_changed(int i);
 };
+
+} // namespace iseg
 
 #endif

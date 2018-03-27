@@ -8,4 +8,8 @@
  *  https://opensource.org/licenses/MIT
  */
 #include "qwidget1.h"
+
+namespace iseg {
+
 bool QWidget1::hideparams = false;
+}

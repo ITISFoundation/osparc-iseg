@@ -19,13 +19,13 @@
 #include <qpushbutton.h>
 #include <qspinbox.h>
 
-class CGraphCutBoneSegmentation : public QWidget1
+class CGraphCutBoneSegmentation : public iseg::QWidget1
 {
 	Q_OBJECT
 public:
-	CGraphCutBoneSegmentation(iseg::CSliceHandlerInterface *hand3D,
-														QWidget *parent = 0, const char *name = 0,
-														Qt::WindowFlags wFlags = 0);
+	CGraphCutBoneSegmentation(iseg::CSliceHandlerInterface* hand3D,
+							  QWidget* parent = 0, const char* name = 0,
+							  Qt::WindowFlags wFlags = 0);
 	~CGraphCutBoneSegmentation();
 	QSize sizeHint() const;
 	void init();
@@ -37,23 +37,23 @@ public:
 	};
 
 private:
-	iseg::CSliceHandlerInterface *m_Handler3D;
+	iseg::CSliceHandlerInterface* m_Handler3D;
 	unsigned short m_CurrentSlice;
-	Q3VBox *m_VGrid;
-	Q3HBox *m_HGrid1;
-	Q3HBox *m_HGrid2;
-	Q3HBox *m_HGrid3;
-	QLabel *m_LabelMaxFlowAlgorithm;
-	QLabel *m_LabelStart;
-	QLabel *m_LabelEnd;
-	QComboBox *m_MaxFlowAlgorithm;
-	QPushButton *m_Execute;
-	QCheckBox *m_6Connectivity;
-	QCheckBox *m_UseSliceRange;
-	QSpinBox *m_Start;
-	QSpinBox *m_End;
+	Q3VBox* m_VGrid;
+	Q3HBox* m_HGrid1;
+	Q3HBox* m_HGrid2;
+	Q3HBox* m_HGrid3;
+	QLabel* m_LabelMaxFlowAlgorithm;
+	QLabel* m_LabelStart;
+	QLabel* m_LabelEnd;
+	QComboBox* m_MaxFlowAlgorithm;
+	QPushButton* m_Execute;
+	QCheckBox* m_6Connectivity;
+	QCheckBox* m_UseSliceRange;
+	QSpinBox* m_Start;
+	QSpinBox* m_End;
 
-	itk::ProcessObject *m_CurrentFilter;
+	itk::ProcessObject* m_CurrentFilter;
 
 public slots:
 	void slicenr_changed();

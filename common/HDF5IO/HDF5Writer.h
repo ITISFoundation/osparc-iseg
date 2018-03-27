@@ -25,34 +25,33 @@ public:
 	HDF5Writer();
 	~HDF5Writer();
 
-	static std::vector<std::string> tokenize(std::string &, char = '/');
-	int createGroup(const std::string &);
-	int open(const std::string &, const std::string & = "overwrite");
-	int open(const char *fn, const std::string & = "overwrite");
+	static std::vector<std::string> tokenize(std::string&, char = '/');
+	int createGroup(const std::string&);
+	int open(const std::string&, const std::string& = "overwrite");
+	int open(const char* fn, const std::string& = "overwrite");
 	int close();
-	int write(const double *, const std::vector<size_type> &,
-						const std::string &);
-	int write(const float *, const std::vector<size_type> &, const std::string &);
-	int write(const int *, const std::vector<size_type> &, const std::string &);
-	int write(const unsigned int *, const std::vector<size_type> &,
-						const std::string &);
-	int write(const long *, const std::vector<size_type> &, const std::string &);
-	int write(const unsigned char *, const std::vector<size_type> &,
-						const std::string &);
-	int write(const unsigned short *, const std::vector<size_type> &,
-						const std::string &);
-	int write(const std::vector<int> &, const std::string &);
-	int write(const std::vector<unsigned int> &, const std::string &);
-	int write(const std::vector<long> &, const std::string &);
-	int write(const std::vector<double> &, const std::string &);
-	int write(const std::vector<float> &, const std::string &);
-	int write(const std::vector<unsigned char> &, const std::string &);
-	int write(const std::vector<unsigned short> &, const std::string &);
-	int write_attribute(const std::string &, const std::string &);
-	int write(float **const slices, size_type num_slices, size_type slice_size,
-						const std::string &name, size_t offset = 0);
-	int write(unsigned short **const slices, size_type num_slices,
-						size_type slice_size, const std::string &name, size_t offset = 0);
+	int write(const double*, const std::vector<size_type>&, const std::string&);
+	int write(const float*, const std::vector<size_type>&, const std::string&);
+	int write(const int*, const std::vector<size_type>&, const std::string&);
+	int write(const unsigned int*, const std::vector<size_type>&,
+			  const std::string&);
+	int write(const long*, const std::vector<size_type>&, const std::string&);
+	int write(const unsigned char*, const std::vector<size_type>&,
+			  const std::string&);
+	int write(const unsigned short*, const std::vector<size_type>&,
+			  const std::string&);
+	int write(const std::vector<int>&, const std::string&);
+	int write(const std::vector<unsigned int>&, const std::string&);
+	int write(const std::vector<long>&, const std::string&);
+	int write(const std::vector<double>&, const std::string&);
+	int write(const std::vector<float>&, const std::string&);
+	int write(const std::vector<unsigned char>&, const std::string&);
+	int write(const std::vector<unsigned short>&, const std::string&);
+	int write_attribute(const std::string&, const std::string&);
+	int write(float** const slices, size_type num_slices, size_type slice_size,
+			  const std::string& name, size_t offset = 0);
+	int write(unsigned short** const slices, size_type num_slices,
+			  size_type slice_size, const std::string& name, size_t offset = 0);
 	int flush();
 
 	int compression;
@@ -61,8 +60,8 @@ public:
 	std::vector<int> chunkSize;
 
 private:
-	int writeData(const void *, const std::string &,
-								const std::vector<size_type> &, const std::string &) const;
+	int writeData(const void*, const std::string&,
+				  const std::vector<size_type>&, const std::string&) const;
 	hid_type file;
 	size_type bufsize;
 };

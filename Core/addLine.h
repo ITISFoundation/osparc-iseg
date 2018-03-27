@@ -7,7 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "coef.h"
-#include "Precompiled.h"
+#pragma once
 
-bool operator!=(coef c, unsigned short f) { return c.a != f; }
+#include "iSegCore.h"
+
+#include "Point.h"
+
+#include <vector>
+
+namespace iseg {
+
+iSegCore_API void addLine(std::vector<Point>* vP, Point p1, Point p2);
+}

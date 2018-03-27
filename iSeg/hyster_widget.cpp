@@ -7,15 +7,16 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "hyster_widget.h"
-#include "FormatTooltip.h"
 #include "Precompiled.h"
+
+#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
+#include "hyster_widget.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"
-#include "Core/linedraw.h"
+#include "Core/addLine.h"
 
 #include <q3filedialog.h>
 #include <q3listbox.h>
@@ -37,13 +38,14 @@
 #include <qwidget.h>
 
 using namespace std;
+using namespace iseg;
 
-hyster_widget::hyster_widget(SlicesHandler *hand3D, QWidget *parent,
-														 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+hyster_widget::hyster_widget(SlicesHandler* hand3D, QWidget* parent,
+							 const char* name, Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
-										"neighboring pixels with similar intensities."));
+					  "neighboring pixels with similar intensities."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -120,43 +122,43 @@ hyster_widget::hyster_widget(SlicesHandler *hand3D, QWidget *parent,
 	QObject::connect(clearlimit, SIGNAL(clicked()), this, SLOT(clearpressed()));
 	QObject::connect(autoseed, SIGNAL(clicked()), this, SLOT(auto_toggled()));
 	QObject::connect(sl_lower, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_upper, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_lowerhyster, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_upperhyster, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_lower, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_upper, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_lowerhyster, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_upperhyster, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_lower, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 	QObject::connect(sl_upper, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 	QObject::connect(sl_lowerhyster, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 	QObject::connect(sl_upperhyster, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 
 	QObject::connect(le_bordervall, SIGNAL(returnPressed()), this,
-									 SLOT(le_bordervall_returnpressed()));
+					 SLOT(le_bordervall_returnpressed()));
 	QObject::connect(le_bordervalu, SIGNAL(returnPressed()), this,
-									 SLOT(le_bordervalu_returnpressed()));
+					 SLOT(le_bordervalu_returnpressed()));
 	QObject::connect(le_bordervallh, SIGNAL(returnPressed()), this,
-									 SLOT(le_bordervallh_returnpressed()));
+					 SLOT(le_bordervallh_returnpressed()));
 	QObject::connect(le_bordervaluh, SIGNAL(returnPressed()), this,
-									 SLOT(le_bordervaluh_returnpressed()));
+					 SLOT(le_bordervaluh_returnpressed()));
 
 	QObject::connect(pb_saveborders, SIGNAL(clicked()), this,
-									 SLOT(saveborders_execute()));
+					 SLOT(saveborders_execute()));
 	QObject::connect(pb_loadborders, SIGNAL(clicked()), this,
-									 SLOT(loadborders_execute()));
+					 SLOT(loadborders_execute()));
 
 	update_visible();
 	getrange();
@@ -173,7 +175,7 @@ void hyster_widget::slicenr_changed()
 	//	}
 }
 
-void hyster_widget::bmphand_changed(bmphandler *bmph)
+void hyster_widget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -236,7 +238,7 @@ void hyster_widget::auto_toggled()
 
 void hyster_widget::execute()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -251,35 +253,36 @@ void hyster_widget::execute1()
 {
 	if (autoseed->isOn())
 	{
-		float ll =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
-		float uu =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		float ll = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		float uu = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 		float ul = ll + (uu - ll) * 0.005f * sl_lowerhyster->value();
 		float lu = ll + (uu - ll) * 0.005f * sl_upperhyster->value();
 		if (allslices->isChecked())
-			handler3D->double_hysteretic_allslices(ll, ul, lu, uu, false, 255.0f);
+			handler3D->double_hysteretic_allslices(ll, ul, lu, uu, false,
+												   255.0f);
 		else
 			bmphand->double_hysteretic(ll, ul, lu, uu, false, 255.0f);
 
 		le_bordervall->setText(QString::number(ll, 'g', 3));
 		le_bordervalu->setText(QString::number(uu, 'g', 3));
 		le_bordervallh->setText(
-				QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
+			QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
 		le_bordervaluh->setText(
-				QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
+			QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
 	}
 	else
 	{
-		float ll =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
-		float uu =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		float ll = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		float uu = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 		//		bmphand->thresholded_growing(p1,ll,uu,false,255.f);
 		if (allslices->isChecked())
 		{
-			handler3D->thresholded_growing(handler3D->get_activeslice(), p1, ll, uu,
-																		 255.f);
+			handler3D->thresholded_growing(handler3D->get_activeslice(), p1, ll,
+										   uu, 255.f);
 		}
 		else
 		{
@@ -294,9 +297,9 @@ void hyster_widget::execute1()
 void hyster_widget::getrange()
 {
 	float ll =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
 	float uu =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 	float ul = ll + (uu - ll) * 0.005f * sl_lowerhyster->value();
 	float lu = ll + (uu - ll) * 0.005f * sl_upperhyster->value();
 
@@ -325,8 +328,8 @@ void hyster_widget::getrange_sub(float ll, float uu, float ul, float lu)
 		if (upper_limit == lower_limit)
 			sl_lower->setValue(100);
 		else
-			sl_lower->setValue(
-					int(0.5f + (ll - lower_limit) / (upper_limit - lower_limit) * 200));
+			sl_lower->setValue(int(
+				0.5f + (ll - lower_limit) / (upper_limit - lower_limit) * 200));
 	}
 
 	if (uu < lower_limit)
@@ -344,8 +347,8 @@ void hyster_widget::getrange_sub(float ll, float uu, float ul, float lu)
 		if (upper_limit == lower_limit)
 			sl_upper->setValue(100);
 		else
-			sl_upper->setValue(
-					int(0.5f + (uu - lower_limit) / (upper_limit - lower_limit) * 200));
+			sl_upper->setValue(int(
+				0.5f + (uu - lower_limit) / (upper_limit - lower_limit) * 200));
 	}
 
 	if (ul < ll)
@@ -387,9 +390,9 @@ void hyster_widget::getrange_sub(float ll, float uu, float ul, float lu)
 	le_bordervall->setText(QString::number(ll, 'g', 3));
 	le_bordervalu->setText(QString::number(uu, 'g', 3));
 	le_bordervallh->setText(
-			QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
+		QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
 	le_bordervaluh->setText(
-			QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
+		QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
 
 	return;
 }
@@ -423,10 +426,10 @@ void hyster_widget::newloaded()
 	bmphand = handler3D->get_activebmphandler();
 	getrange();
 
-	vector<vector<Point>> *vvp = bmphand->return_limits();
+	vector<vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
 	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
-			 it++)
+		 it++)
 	{
 		vp1.insert(vp1.end(), it->begin(), it->end());
 		;
@@ -438,10 +441,10 @@ void hyster_widget::init1()
 	limitdrawing = false;
 	drawlimit->setDown(false);
 
-	vector<vector<Point>> *vvp = bmphand->return_limits();
+	vector<vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
 	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
-			 it++)
+		 it++)
 	{
 		vp1.insert(vp1.end(), it->begin(), it->end());
 		;
@@ -477,7 +480,7 @@ void hyster_widget::pt_released(Point p)
 		limitdrawing = false;
 		vp1.insert(vp1.end(), vpdyn.begin(), vpdyn.end());
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.limits = true;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		emit begin_datachange(dataSelection, this);
@@ -505,7 +508,7 @@ void hyster_widget::clearpressed()
 	limitdrawing = false;
 	drawlimit->setDown(false);
 
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.limits = true;
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	emit begin_datachange(dataSelection, this);
@@ -521,7 +524,7 @@ void hyster_widget::clearpressed()
 
 void hyster_widget::slider_pressed()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -533,20 +536,20 @@ void hyster_widget::slider_released() { emit end_datachange(this); }
 void hyster_widget::saveborders_execute()
 {
 	QString savefilename = Q3FileDialog::getSaveFileName(
-			QString::null, "Thresholds (*.txt)\n", this); //, filename);
+		QString::null, "Thresholds (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
 
 	if (!savefilename.isEmpty())
 	{
-		float ll =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
-		float uu =
-				lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		float ll = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		float uu = lower_limit +
+				   (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 		float ul = ll + (uu - ll) * 0.005f * sl_lowerhyster->value();
 		float lu = ll + (uu - ll) * 0.005f * sl_upperhyster->value();
-		FILE *fp = fopen(savefilename.ascii(), "w");
+		FILE* fp = fopen(savefilename.ascii(), "w");
 		fprintf(fp, "%f %f %f %f \n", ll, ul, lu, uu);
 		fclose(fp);
 	}
@@ -555,13 +558,13 @@ void hyster_widget::saveborders_execute()
 void hyster_widget::loadborders_execute()
 {
 	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
-																											 "Borders (*.txt)\n"
-																											 "All(*.*)",
-																											 this);
+														 "Borders (*.txt)\n"
+														 "All(*.*)",
+														 this);
 
 	if (!loadfilename.isEmpty())
 	{
-		FILE *fp = fopen(loadfilename.ascii(), "r");
+		FILE* fp = fopen(loadfilename.ascii(), "r");
 		if (fp != NULL)
 		{
 			float ll, uu, lu, ul;
@@ -579,7 +582,7 @@ void hyster_widget::le_bordervall_returnpressed()
 	bool b1;
 	float val = le_bordervall->text().toFloat(&b1);
 	float ll =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
 	if (b1)
 	{
 		if (val < lower_limit)
@@ -604,7 +607,8 @@ void hyster_widget::le_bordervall_returnpressed()
 			}
 			else
 				sl_lower->setValue(int(0.5f + (val - lower_limit) /
-																					(upper_limit - lower_limit) * 200));
+												  (upper_limit - lower_limit) *
+												  200));
 		}
 
 		execute();
@@ -621,7 +625,7 @@ void hyster_widget::le_bordervalu_returnpressed()
 	bool b1;
 	float val = le_bordervalu->text().toFloat(&b1);
 	float uu =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 	if (b1)
 	{
 		if (val < lower_limit)
@@ -646,7 +650,8 @@ void hyster_widget::le_bordervalu_returnpressed()
 			}
 			else
 				sl_upper->setValue(int(0.5f + (val - lower_limit) /
-																					(upper_limit - lower_limit) * 200));
+												  (upper_limit - lower_limit) *
+												  200));
 		}
 
 		execute();
@@ -663,9 +668,9 @@ void hyster_widget::le_bordervallh_returnpressed()
 	bool b1;
 	float val = le_bordervallh->text().toFloat(&b1);
 	float ll =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
 	float uu =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 	float ul = ll + (uu - ll) * 0.005f * sl_lowerhyster->value();
 	if (b1)
 	{
@@ -674,14 +679,14 @@ void hyster_widget::le_bordervallh_returnpressed()
 			ul = ll;
 			sl_lowerhyster->setValue(0);
 			le_bordervallh->setText(
-					QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
+				QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
 		}
 		else if (val > 100)
 		{
 			ul = uu;
 			sl_lowerhyster->setValue(200);
 			le_bordervallh->setText(
-					QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
+				QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
 		}
 		else
 		{
@@ -690,7 +695,7 @@ void hyster_widget::le_bordervallh_returnpressed()
 				ul = uu;
 				sl_lowerhyster->setValue(100);
 				le_bordervallh->setText(
-						QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
+					QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
 			}
 			else
 				sl_lowerhyster->setValue(int(0.5f + val / 100 * 200));
@@ -702,7 +707,7 @@ void hyster_widget::le_bordervallh_returnpressed()
 	{
 		QApplication::beep();
 		le_bordervallh->setText(
-				QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
+			QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
 	}
 }
 
@@ -711,9 +716,9 @@ void hyster_widget::le_bordervaluh_returnpressed()
 	bool b1;
 	float val = le_bordervaluh->text().toFloat(&b1);
 	float ll =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
 	float uu =
-			lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
+		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 	float lu = ll + (uu - ll) * 0.005f * sl_upperhyster->value();
 	if (b1)
 	{
@@ -722,14 +727,14 @@ void hyster_widget::le_bordervaluh_returnpressed()
 			lu = ll;
 			sl_upperhyster->setValue(0);
 			le_bordervaluh->setText(
-					QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
+				QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
 		}
 		else if (val > 100)
 		{
 			lu = uu;
 			sl_upperhyster->setValue(200);
 			le_bordervaluh->setText(
-					QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
+				QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
 		}
 		else
 		{
@@ -738,7 +743,7 @@ void hyster_widget::le_bordervaluh_returnpressed()
 				lu = uu;
 				sl_upperhyster->setValue(100);
 				le_bordervaluh->setText(
-						QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
+					QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
 			}
 			else
 				sl_upperhyster->setValue(int(0.5f + val / 100 * 200));
@@ -750,11 +755,11 @@ void hyster_widget::le_bordervaluh_returnpressed()
 	{
 		QApplication::beep();
 		le_bordervaluh->setText(
-				QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
+			QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
 	}
 }
 
-FILE *hyster_widget::SaveParams(FILE *fp, int version)
+FILE* hyster_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -779,20 +784,20 @@ FILE *hyster_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *hyster_widget::LoadParams(FILE *fp, int version)
+FILE* hyster_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(autoseed, SIGNAL(clicked()), this,
-												SLOT(auto_toggled()));
+							SLOT(auto_toggled()));
 		QObject::disconnect(sl_lower, SIGNAL(sliderMoved(int)), this,
-												SLOT(slider_changed()));
+							SLOT(slider_changed()));
 		QObject::disconnect(sl_upper, SIGNAL(sliderMoved(int)), this,
-												SLOT(slider_changed()));
+							SLOT(slider_changed()));
 		QObject::disconnect(sl_lowerhyster, SIGNAL(sliderMoved(int)), this,
-												SLOT(slider_changed()));
+							SLOT(slider_changed()));
 		QObject::disconnect(sl_upperhyster, SIGNAL(sliderMoved(int)), this,
-												SLOT(slider_changed()));
+							SLOT(slider_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -815,15 +820,16 @@ FILE *hyster_widget::LoadParams(FILE *fp, int version)
 		fread(&upper_limit, sizeof(float), 1, fp);
 		fread(&lower_limit, sizeof(float), 1, fp);
 
-		QObject::connect(autoseed, SIGNAL(clicked()), this, SLOT(auto_toggled()));
+		QObject::connect(autoseed, SIGNAL(clicked()), this,
+						 SLOT(auto_toggled()));
 		QObject::connect(sl_lower, SIGNAL(sliderMoved(int)), this,
-										 SLOT(slider_changed()));
+						 SLOT(slider_changed()));
 		QObject::connect(sl_upper, SIGNAL(sliderMoved(int)), this,
-										 SLOT(slider_changed()));
+						 SLOT(slider_changed()));
 		QObject::connect(sl_lowerhyster, SIGNAL(sliderMoved(int)), this,
-										 SLOT(slider_changed()));
+						 SLOT(slider_changed()));
 		QObject::connect(sl_upperhyster, SIGNAL(sliderMoved(int)), this,
-										 SLOT(slider_changed()));
+						 SLOT(slider_changed()));
 	}
 	return fp;
 }

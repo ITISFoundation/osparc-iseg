@@ -7,17 +7,21 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "undoconfig_widget.h"
 #include "Precompiled.h"
+
+#include "undoconfig_widget.h"
+
 #include <q3vbox.h>
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qwidget.h>
 
-UndoConfig::UndoConfig(SlicesHandler *hand3D, QWidget *parent, const char *name,
-											 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+UndoConfig::UndoConfig(SlicesHandler* hand3D, QWidget* parent, const char* name,
+					   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 

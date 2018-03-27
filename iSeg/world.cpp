@@ -7,14 +7,16 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "world.h"
 #include "Precompiled.h"
 
+#include "world.h"
+
 #include "Core/branchItem-simplified.h"
-#include "Core/branchTree-simplified.h"
 
 #include <cmath>
 #include <math.h>
+
+using namespace iseg;
 
 World::World()
 {
@@ -39,7 +41,7 @@ void World::clear()
 //! Initializes volume.
 //----------------------------------------------------------------------------------
 //void World::init(vec3 bbStart, vec3 bbEnd, ml::TVirtualVolume<MLuint16>* vInVol, ml::TVirtualVolume<MLuint16>* vOutVol){
-bool World::init(vec3 bbStart, vec3 bbEnd, SlicesHandler *handler3D)
+bool World::init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D)
 {
 	clear();
 
@@ -70,12 +72,12 @@ bool World::init(vec3 bbStart, vec3 bbEnd, SlicesHandler *handler3D)
 	height = (int)(bbEnd[1] - bbStart[1] + 1);
 	length = (int)(bbEnd[2] - bbStart[2] + 1);
 
-	std::cout << "Width:" << width << " Height:" << height << " Length:" << length
-						<< std::endl;
+	std::cout << "Width:" << width << " Height:" << height
+			  << " Length:" << length << std::endl;
 
 	unsigned total = width * height * length;
 
-	Node *nodes2 = NULL;
+	Node* nodes2 = NULL;
 	try
 	{
 		nodes2 = new Node[total];
@@ -164,7 +166,7 @@ bool World::init(vec3 bbStart, vec3 bbEnd, SlicesHandler *handler3D)
 //----------------------------------------------------------------------------------
 //! Modified livewire algorithm.
 //----------------------------------------------------------------------------------
-void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
+void World::dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree)
 {
 	if (!_isValid)
 	{
@@ -179,7 +181,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 	unsigned short int n_y = (unsigned short)(seeds[0][1] - offy);
 	unsigned short int n_z = (unsigned short)(seeds[0][2] - offz);
 
-	vec3 endpoint;
+	Vec3 endpoint;
 
 	endpoint[0] = end[0] - offx;
 	endpoint[1] = end[1] - offy;
@@ -190,14 +192,14 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 	unsigned short int cross_y;
 	unsigned short int cross_z;
 
-	std::vector<vec3> cross(seeds.size() - 1);
+	std::vector<Vec3> cross(seeds.size() - 1);
 
 	//Declaring BranchItems
 
 	// ESRA
-	BranchItem *rootOne = _branchTree->addNewBranch();
+	BranchItem* rootOne = _branchTree->addNewBranch();
 	rootOne->setParent(NULL);
-	std::vector<BranchItem *> children;
+	std::vector<BranchItem*> children;
 
 	//Declaring variables
 
@@ -211,7 +213,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 	int counter = 0;
 	bool largearea = false;
 	int largeareatimes = 0;
-	typedef std::list<Node *>::iterator li;
+	typedef std::list<Node*>::iterator li;
 	float tmp;
 	bool alreadyinlist, alreadyinlistlowint;
 	int parentintens;
@@ -247,7 +249,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 		if (counter > 150000)
 		{
 			std::cerr << "Troubles finding the path for seed "
-								<< seeds.size() - seedsleft + 1 << std::endl;
+					  << seeds.size() - seedsleft + 1 << std::endl;
 			seedsfailed.push_back(seeds.size() - seedsleft + 1);
 			seedsleft = seedsleft - 1;
 			if (seedsleft > 0)
@@ -269,7 +271,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 				n_z = (unsigned short)(seeds[pos][2] - offz);
 
 				unsigned off5 = n_x + n_y * width + n_z * width * height;
-				std::list<Node *> activelist2;
+				std::list<Node*> activelist2;
 				activelist = activelist2;
 				activelist.push_back(&nodes[off5]);
 
@@ -308,7 +310,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 			if (parent == 4000 - rootOneintens)
 			{
 				// ESRA
-				BranchItem *child = new BranchItem(rootOne);
+				BranchItem* child = new BranchItem(rootOne);
 				child->setStartVox(seeds[pos - 1]);
 				child->setEndVox(cross[pos - 2]);
 				rootOne->addChild(child);
@@ -327,8 +329,8 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 				}
 
 				// ESRA
-				BranchItem *child =
-						new BranchItem(children.at(parent - 1 - prevfailed));
+				BranchItem* child =
+					new BranchItem(children.at(parent - 1 - prevfailed));
 				//unsigned label= children.at(parent-1-prevfailed)->getLabel();
 				//std::cout << "Parentlabel: " << label << std::endl;
 				child->setStartVox(seeds[pos - 1]);
@@ -357,7 +359,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 			n_z = (unsigned short)(seeds[pos][2] - offz);
 
 			unsigned off5 = n_x + n_y * width + n_z * width * height;
-			std::list<Node *> activelist2;
+			std::list<Node*> activelist2;
 			activelist = activelist2;
 			activelistlowint = activelist2;
 			activelist.push_back(&nodes[off5]);
@@ -402,7 +404,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 			n_z = (unsigned short)(seeds[pos][2] - offz);
 
 			unsigned off5 = n_x + n_y * width + n_z * width * height;
-			std::list<Node *> activelist2;
+			std::list<Node*> activelist2;
 			activelist = activelist2;
 			activelist.push_back(&nodes[off5]);
 
@@ -445,7 +447,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 		{
 			for (li ii = activelist.begin(); ii != activelist.end(); ++ii)
 			{
-				Node *e = *ii;
+				Node* e = *ii;
 				if (min == -1 || min > e->cost)
 				{
 					min = (int)e->cost;
@@ -510,15 +512,16 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 			{
 				for (i = n_x - 1; i < n_x + 2; i++)
 				{
-					unsigned o =
-							i + j * width + k * width * height; //offset of the neighbor
+					unsigned o = i + j * width +
+								 k * width * height; //offset of the neighbor
 					unsigned o2 =
-							n_x + n_y * width +
-							n_z * width * height; //offset of the node that is being expanded
+						n_x + n_y * width +
+						n_z * width *
+							height; //offset of the node that is being expanded
 					//std::cout << "Node to expand: " << "x:" << i << " y:" << j << " z:" << k << " o: " << o << " o2: " << o2 << std::endl;
 
 					if (i > -1 && j > -1 && k > -1 && i < width && j < height &&
-							k < length && !nodes[o].computed)
+						k < length && !nodes[o].computed)
 					{
 						if (nodes[o].intens > 3900 && !endt && !redfound)
 						{ //if the node belongs to a previously painted path
@@ -534,21 +537,23 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 							else
 							{
 								redfound = true;
-								std::cout << "Red node found (path tracked)" << std::endl;
+								std::cout << "Red node found (path tracked)"
+										  << std::endl;
 							}
 							cross_z = o / (width * height);
 							cross_y = (o - (cross_z * width * height)) / width;
-							cross_x = o - (cross_y * width) - (cross_z * width * height);
+							cross_x = o - (cross_y * width) -
+									  (cross_z * width * height);
 							int pos = seeds.size() - seedsleft;
 							cross[pos - 2][2] = cross_z;
 							cross[pos - 2][1] = cross_y;
 							cross[pos - 2][0] = cross_x;
 
 							std::cout << "Cross node: "
-												<< "x:" << cross[pos - 2][0] + offx
-												<< " y:" << cross[pos - 2][1] + offy
-												<< " z:" << cross[pos - 2][2] + offz << " o:" << o
-												<< std::endl;
+									  << "x:" << cross[pos - 2][0] + offx
+									  << " y:" << cross[pos - 2][1] + offy
+									  << " z:" << cross[pos - 2][2] + offz
+									  << " o:" << o << std::endl;
 						}
 
 						//Dealing with large structures...
@@ -579,7 +584,8 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 
 						if (!firstseedexpanded)
 						{
-							if (i == endpoint[0] && j == endpoint[1] && k == endpoint[2])
+							if (i == endpoint[0] && j == endpoint[1] &&
+								k == endpoint[2])
 							{
 								seedsleft = seedsleft - 1;
 								if (seedsleft == 0)
@@ -591,8 +597,9 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 								else
 								{
 									ends = true;
-									std::cout << "First seed expanded (first path tracked)"
-														<< std::endl;
+									std::cout << "First seed expanded (first "
+												 "path tracked)"
+											  << std::endl;
 								}
 							}
 						}
@@ -602,9 +609,10 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 						li p = activelistlowint.begin();
 						if (solvingarea == true)
 						{
-							while (!alreadyinlistlowint && p != activelistlowint.end())
+							while (!alreadyinlistlowint &&
+								   p != activelistlowint.end())
 							{
-								Node *e = *p;
+								Node* e = *p;
 								if (e->offset == o)
 								{
 									alreadyinlistlowint = true;
@@ -619,7 +627,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 						li l = activelist.begin();
 						while (!alreadyinlist && l != activelist.end())
 						{
-							Node *e = *l;
+							Node* e = *l;
 							if (e->offset == o)
 							{
 								alreadyinlist = true;
@@ -665,7 +673,7 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 		if (parent == 4000 - rootOneintens)
 		{
 			// ESRA
-			BranchItem *child = new BranchItem(rootOne);
+			BranchItem* child = new BranchItem(rootOne);
 			child->setStartVox(seeds[pos - 1]);
 			child->setEndVox(cross[pos - 2]);
 			rootOne->addChild(child);
@@ -682,7 +690,8 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 				}
 			}
 			// ESRA
-			BranchItem *child = new BranchItem(children.at(parent - 1 - prevfailed));
+			BranchItem* child =
+				new BranchItem(children.at(parent - 1 - prevfailed));
 			child->setStartVox(seeds[pos - 1]);
 			child->setEndVox(cross[pos - 2]);
 			children.at(parent - 1 - prevfailed)->addChild(child);
@@ -711,8 +720,8 @@ void World::dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree *_branchTree)
 //----------------------------------------------------------------------------------
 //! Paints path from seed when it is found.
 //----------------------------------------------------------------------------------
-void World::paint(std::vector<vec3> seeds, vec3 cross,
-									unsigned short int seedsleft)
+void World::paint(std::vector<Vec3> seeds, Vec3 cross,
+				  unsigned short int seedsleft)
 {
 	bool endp2 = false;
 	int n_x = (int)(cross[0]);
@@ -726,7 +735,7 @@ void World::paint(std::vector<vec3> seeds, vec3 cross,
 	//painting the path
 
 	std::cout << "Painting path " << pos + 1 << ": x: " << n_x << " y: " << n_y
-						<< " z: " << n_z << std::endl;
+			  << " z: " << n_z << std::endl;
 	std::cout << "Activelistsize: " << activelist.size() << std::endl;
 	std::cout << "Seedsleft: " << seedsleft << std::endl;
 	int counter = 0;
@@ -735,7 +744,7 @@ void World::paint(std::vector<vec3> seeds, vec3 cross,
 	while (!endp2)
 	{
 		if (n_x == seeds[pos][0] - offx && n_y == seeds[pos][1] - offy &&
-				n_z == seeds[pos][2] - offz)
+			n_z == seeds[pos][2] - offz)
 		{
 			endp2 = true;
 			nodes[o2].intens = (float)(4000 - pos);
@@ -797,7 +806,7 @@ void World::paint(std::vector<vec3> seeds, vec3 cross,
 // (When the execution of the main algorithm finishes, there is only one BranchItem for each tracked path;
 //  from that information this function creates the right BranchTree.)
 //----------------------------------------------------------------------------------
-void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
+void World::storingtree(std::vector<BranchItem*> children, BranchItem* rootOne)
 {
 	//Matrix with the cross points of each path
 
@@ -821,8 +830,8 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 	bool dup = false;
 	int pathcrosses = 0;
 	// ESRA
-	std::vector<std::vector<BranchItem *>> stretches;
-	std::vector<BranchItem *> pathstretches;
+	std::vector<std::vector<BranchItem*>> stretches;
+	std::vector<BranchItem*> pathstretches;
 	stretches.push_back(pathstretches);
 
 	for (size_t j = 0; j < paths[i].size(); j++)
@@ -831,7 +840,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 		{
 			pathcrosses++;
 			unsigned o = paths[i][j].offset;
-			vec3 cross;
+			Vec3 cross;
 			int crossz = o / (width * height);
 			int crossy = (o - (crossz * width * height)) / width;
 			int crossx = o - (crossy * width) - (crossz * width * height);
@@ -844,7 +853,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				//std::cout << "First duplicate branch for path 1: " << pathcrosses << std::endl;
 
 				// ESRA
-				BranchItem *dupchild = new BranchItem(rootOne);
+				BranchItem* dupchild = new BranchItem(rootOne);
 				//unsigned label=dupchild->getLabel();
 				//std::cout << "Newbranchlabel: " << label << std::endl;
 				rootOne->setStartVox(cross);
@@ -854,10 +863,11 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				{
 					unsigned off = allcrosses[i][pathcrosses];
 					int nextcrossz = off / (width * height);
-					int nextcrossy = (off - (nextcrossz * width * height)) / width;
-					int nextcrossx =
-							off - (nextcrossy * width) - (nextcrossz * width * height);
-					vec3 nextcross;
+					int nextcrossy =
+						(off - (nextcrossz * width * height)) / width;
+					int nextcrossx = off - (nextcrossy * width) -
+									 (nextcrossz * width * height);
+					Vec3 nextcross;
 					nextcross[2] = (float)nextcrossz;
 					nextcross[1] = (float)nextcrossy;
 					nextcross[0] = (float)nextcrossx;
@@ -870,7 +880,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 					int seedz = o / (width * height);
 					int seedy = (o - (seedz * width * height)) / width;
 					int seedx = o - (seedy * width) - (seedz * width * height);
-					vec3 seed;
+					Vec3 seed;
 					seed[2] = (float)seedz;
 					seed[1] = (float)seedy;
 					seed[0] = (float)seedx;
@@ -886,7 +896,8 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 			{
 				//std::cout << "Duplicate branch for path 1: " << pathcrosses << std::endl;
 
-				BranchItem *dupchild = new BranchItem(stretches[i].at(pathcrosses - 2));
+				BranchItem* dupchild =
+					new BranchItem(stretches[i].at(pathcrosses - 2));
 				//unsigned label=dupchild->getLabel();
 				//std::cout << "Newbranchlabel: " << label << std::endl;
 				stretches[i].at(pathcrosses - 2)->setStartVox(cross);
@@ -894,10 +905,11 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				for (size_t k = 1; k < paths.size(); k++)
 				{
 					unsigned off = paths[k][0].offset;
-					vec3 first;
+					Vec3 first;
 					int firstz = off / (width * height);
 					int firsty = (off - (firstz * width * height)) / width;
-					int firstx = off - (firsty * width) - (firstz * width * height);
+					int firstx =
+						off - (firsty * width) - (firstz * width * height);
 					first[2] = (float)firstz;
 					first[1] = (float)firsty;
 					first[0] = (float)firstx;
@@ -906,7 +918,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 					{
 						// ESRA
 						unsigned childlabel = children[k - 1]->getLabel();
-						BranchItem *prevparent = children[k - 1]->getParent();
+						BranchItem* prevparent = children[k - 1]->getParent();
 						unsigned prevparentlabel = prevparent->getLabel();
 
 						if (rootOne->getLabel() == prevparentlabel)
@@ -927,7 +939,8 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 						{
 							for (size_t j = 0; j < stretches[p].size(); j++)
 							{
-								if (stretches[p][j]->getLabel() == prevparentlabel)
+								if (stretches[p][j]->getLabel() ==
+									prevparentlabel)
 								{
 									stretches[p][j]->removeChild(childlabel);
 									//std::cout << "Removedchild: " << childlabel << " Prevparent: " << prevparentlabel << std::endl;
@@ -935,9 +948,12 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 							}
 						}
 
-						stretches[i].at(pathcrosses - 2)->addChild(children[k - 1]);
+						stretches[i]
+							.at(pathcrosses - 2)
+							->addChild(children[k - 1]);
 						//std::cout << "Newparent: " << stretches[i].at(pathcrosses-2)->getLabel() << std::endl;
-						children[k - 1]->setParent(stretches[i].at(pathcrosses - 2));
+						children[k - 1]->setParent(
+							stretches[i].at(pathcrosses - 2));
 					}
 				}
 
@@ -947,10 +963,11 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				{
 					unsigned off = allcrosses[i][pathcrosses];
 					int nextcrossz = off / (width * height);
-					int nextcrossy = (off - (nextcrossz * width * height)) / width;
-					int nextcrossx =
-							off - (nextcrossy * width) - (nextcrossz * width * height);
-					vec3 nextcross;
+					int nextcrossy =
+						(off - (nextcrossz * width * height)) / width;
+					int nextcrossx = off - (nextcrossy * width) -
+									 (nextcrossz * width * height);
+					Vec3 nextcross;
 					nextcross[2] = (float)nextcrossz;
 					nextcross[1] = (float)nextcrossy;
 					nextcross[0] = (float)nextcrossx;
@@ -962,7 +979,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 					int seedz = o / (width * height);
 					int seedy = (o - (seedz * width * height)) / width;
 					int seedx = o - (seedy * width) - (seedz * width * height);
-					vec3 seed;
+					Vec3 seed;
 					seed[2] = (float)seedz;
 					seed[1] = (float)seedy;
 					seed[0] = (float)seedx;
@@ -974,7 +991,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 			}
 		}
 
-		vec3 node;
+		Vec3 node;
 		unsigned off = paths[i][j].offset;
 		int nodez = off / (width * height);
 		int nodey = (off - (nodez * width * height)) / width;
@@ -1005,7 +1022,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 	for (size_t i = 1; i < paths.size(); i++)
 	{
 		// ESRA
-		std::vector<BranchItem *> pathstretches;
+		std::vector<BranchItem*> pathstretches;
 		stretches.push_back(pathstretches);
 		pathcrosses = 0;
 		dup = false;
@@ -1016,7 +1033,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 			{
 				pathcrosses++;
 				unsigned o = paths[i][j].offset;
-				vec3 cross;
+				Vec3 cross;
 				int crossz = o / (width * height);
 				int crossy = (o - (crossz * width * height)) / width;
 				int crossx = o - (crossy * width) - (crossz * width * height);
@@ -1028,7 +1045,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				if (!dup)
 				{
 					// ESRA
-					BranchItem *dupchild = new BranchItem(children.at(i - 1));
+					BranchItem* dupchild = new BranchItem(children.at(i - 1));
 					//unsigned label=dupchild->getLabel();
 					//std::cout << "Newbranchlabel: " << label << std::endl;
 					children.at(i - 1)->setStartVox(cross);
@@ -1037,10 +1054,11 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 					{
 						unsigned off = allcrosses[i][pathcrosses];
 						int nextcrossz = off / (width * height);
-						int nextcrossy = (off - (nextcrossz * width * height)) / width;
-						int nextcrossx =
-								off - (nextcrossy * width) - (nextcrossz * width * height);
-						vec3 nextcross;
+						int nextcrossy =
+							(off - (nextcrossz * width * height)) / width;
+						int nextcrossx = off - (nextcrossy * width) -
+										 (nextcrossz * width * height);
+						Vec3 nextcross;
 						nextcross[2] = (float)nextcrossz;
 						nextcross[1] = (float)nextcrossy;
 						nextcross[0] = (float)nextcrossx;
@@ -1051,8 +1069,9 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 						unsigned o = paths[i][j].offset;
 						int seedz = o / (width * height);
 						int seedy = (o - (seedz * width * height)) / width;
-						int seedx = o - (seedy * width) - (seedz * width * height);
-						vec3 seed;
+						int seedx =
+							o - (seedy * width) - (seedz * width * height);
+						Vec3 seed;
 						seed[2] = (float)seedz;
 						seed[1] = (float)seedy;
 						seed[0] = (float)seedx;
@@ -1068,25 +1087,27 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				else
 				{
 					// ESRA
-					BranchItem *dupchild =
-							new BranchItem(stretches[i].at(pathcrosses - 2));
+					BranchItem* dupchild =
+						new BranchItem(stretches[i].at(pathcrosses - 2));
 					//unsigned label=dupchild->getLabel();
 					//std::cout << "Newbranchlabel: " << label << std::endl;
 					stretches[i].at(pathcrosses - 2)->setStartVox(cross);
 					for (size_t k = 1; k < paths.size(); k++)
 					{
 						unsigned off = paths[k][0].offset;
-						vec3 first;
+						Vec3 first;
 						int firstz = off / (width * height);
 						int firsty = (off - (firstz * width * height)) / width;
-						int firstx = off - (firsty * width) - (crossz * width * height);
+						int firstx =
+							off - (firsty * width) - (crossz * width * height);
 						first[2] = (float)firstz;
 						first[1] = (float)firsty;
 						first[0] = (float)firstx;
 						if (first == cross)
 						{
 							unsigned childlabel = children[k - 1]->getLabel();
-							BranchItem *prevparent = children[k - 1]->getParent();
+							BranchItem* prevparent =
+								children[k - 1]->getParent();
 							unsigned prevparentlabel = prevparent->getLabel();
 
 							if (rootOne->getLabel() == prevparentlabel)
@@ -1106,17 +1127,22 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 							{
 								for (size_t j = 0; j < stretches[p].size(); j++)
 								{
-									if (stretches[p][j]->getLabel() == prevparentlabel)
+									if (stretches[p][j]->getLabel() ==
+										prevparentlabel)
 									{
-										stretches[p][j]->removeChild(childlabel);
+										stretches[p][j]->removeChild(
+											childlabel);
 										//std::cout << "Removedchild: " << childlabel << " Prevparent: " << prevparentlabel << std::endl;
 									}
 								}
 							}
 
-							stretches[i].at(pathcrosses - 2)->addChild(children[k - 1]);
+							stretches[i]
+								.at(pathcrosses - 2)
+								->addChild(children[k - 1]);
 							//std::cout << "Newparent: " << stretches[i].at(pathcrosses-2)->getLabel() << std::endl;
-							children[k - 1]->setParent(stretches[i].at(pathcrosses - 2));
+							children[k - 1]->setParent(
+								stretches[i].at(pathcrosses - 2));
 						}
 					}
 
@@ -1126,10 +1152,11 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 					{
 						unsigned off = allcrosses[i][pathcrosses];
 						int nextcrossz = off / (width * height);
-						int nextcrossy = (off - (nextcrossz * width * height)) / width;
-						int nextcrossx =
-								off - (nextcrossy * width) - (nextcrossz * width * height);
-						vec3 nextcross;
+						int nextcrossy =
+							(off - (nextcrossz * width * height)) / width;
+						int nextcrossx = off - (nextcrossy * width) -
+										 (nextcrossz * width * height);
+						Vec3 nextcross;
 						nextcross[2] = (float)nextcrossz;
 						nextcross[1] = (float)nextcrossy;
 						nextcross[0] = (float)nextcrossx;
@@ -1140,8 +1167,9 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 						unsigned o = paths[i][j].offset;
 						int seedz = o / (width * height);
 						int seedy = (o - (seedz * width * height)) / width;
-						int seedx = o - (seedy * width) - (seedz * width * height);
-						vec3 seed;
+						int seedx =
+							o - (seedy * width) - (seedz * width * height);
+						Vec3 seed;
 						seed[2] = (float)seedz;
 						seed[1] = (float)seedy;
 						seed[0] = (float)seedx;
@@ -1153,7 +1181,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 				}
 			}
 
-			vec3 node;
+			Vec3 node;
 			unsigned off = paths[i][j].offset;
 			int nodez = off / (width * height);
 			int nodey = (off - (nodez * width * height)) / width;
@@ -1183,7 +1211,7 @@ void World::storingtree(std::vector<BranchItem *> children, BranchItem *rootOne)
 //----------------------------------------------------------------------------------
 //! Says who is the parent branch (where is located its startpoint in the vector "seeds")
 //----------------------------------------------------------------------------------
-int World::whoistheparent(std::vector<vec3> seeds, int parentintens)
+int World::whoistheparent(std::vector<Vec3> seeds, int parentintens)
 {
 	int parent = -1;
 
@@ -1205,9 +1233,9 @@ int World::whoistheparent(std::vector<vec3> seeds, int parentintens)
 //----------------------------------------------------------------------------------
 void World::reduceactivelist()
 {
-	typedef std::list<Node *>::iterator li;
-	std::list<Node *> activelistempty;
-	Node *e;
+	typedef std::list<Node*>::iterator li;
+	std::list<Node*> activelistempty;
+	Node* e;
 	unsigned off;
 
 	int par = 0;
@@ -1357,7 +1385,7 @@ bool World::checkdiameter(unsigned coff, unsigned poff)
 	{
 		unsigned o = nx + ny * width + nz * width * height;
 		if (nx > -1 && ny > -1 && nz > -1 && nx < width && ny < height &&
-				nz < length)
+			nz < length)
 		{
 			//std::cout << "Diameter node: " << "x:" << nx << " y:" << ny << " z:" << nz << " o: " << o << std::endl;
 			if (nodes[o].intens > 1150)
@@ -1385,7 +1413,7 @@ bool World::checkdiameter(unsigned coff, unsigned poff)
 	{
 		unsigned o = nx + ny * width + nz * width * height;
 		if (nx > -1 && ny > -1 && nz > -1 && nx < width && ny < height &&
-				nz < length)
+			nz < length)
 		{
 			//std::cout << "Diameter node: " << "x:" << nx << " y:" << ny << " z:" << nz << " o: " << o << std::endl;
 			if (nodes[o].intens > 1150)
@@ -1429,7 +1457,7 @@ bool World::checkdiameter(unsigned coff, unsigned poff)
 		{
 			unsigned o2 = nx + ny * width + nz * width * height;
 			if (nx > -1 && ny > -1 && nz > -1 && nx < width && ny < height &&
-					nz < length)
+				nz < length)
 			{
 				//std::cout << "Diameter node: " << "x:" << nx << " y:" << ny << " z:" << nz << " o: " << o << std::endl;
 				if (nodes[o2].intens > 1150)
@@ -1457,7 +1485,7 @@ bool World::checkdiameter(unsigned coff, unsigned poff)
 		{
 			unsigned o2 = nx + ny * width + nz * width * height;
 			if (nx > -1 && ny > -1 && nz > -1 && nx < width && ny < height &&
-					nz < length)
+				nz < length)
 			{
 				//std::cout << "Diameter node: " << "x:" << nx << " y:" << ny << " z:" << nz << " o: " << o << std::endl;
 				if (nodes[o2].intens > 1150)
@@ -1522,10 +1550,10 @@ bool World::checkdiameter(unsigned coff, unsigned poff)
 //----------------------------------------------------------------------------------
 unsigned World::solvelargearea2()
 {
-	typedef std::list<Node *>::iterator li;
+	typedef std::list<Node*>::iterator li;
 	unsigned newoff;
 	unsigned off;
-	Node *e;
+	Node* e;
 	li ie, todel;
 	int min = -1;
 
@@ -1594,9 +1622,10 @@ unsigned World::solvelargearea2()
 		activelist.clear();
 		activelistlowintsize = activelistlowint.size();
 
-		for (li ii = activelistlowint.begin(); ii != activelistlowint.end(); ++ii)
+		for (li ii = activelistlowint.begin(); ii != activelistlowint.end();
+			 ++ii)
 		{
-			Node *e = *ii;
+			Node* e = *ii;
 			if (min == -1 || min > e->cost)
 			{
 				min = (int)e->cost;
@@ -1617,7 +1646,8 @@ unsigned World::solvelargearea2()
 			std::cout << "Activelistlowint empty" << std::endl;
 		}
 
-		for (li ii = activelistlowint.begin(); ii != activelistlowint.end(); ++ii)
+		for (li ii = activelistlowint.begin(); ii != activelistlowint.end();
+			 ++ii)
 		{
 			e = *ii;
 			//unsigned o8=e->offset;
@@ -1642,7 +1672,7 @@ unsigned World::solvelargearea2()
 		li p = activelist.begin();
 		while (!found && p != activelist.end())
 		{
-			Node *e = *p;
+			Node* e = *p;
 			if (e->offset == newoff)
 			{
 				found = true;
@@ -1681,8 +1711,8 @@ void World::solvelargearea()
 //! Prints the hierarchical information of the tree
 //----------------------------------------------------------------------------------
 // ESRA
-void World::outputBranchTree(BranchItem *branchItem, std::string prefix,
-														 FILE *&fp)
+void World::outputBranchTree(BranchItem* branchItem, std::string prefix,
+							 FILE*& fp)
 
 {
 	fprintf(fp, "%s%u ( ", prefix.c_str(), branchItem->getLabel());
@@ -1701,8 +1731,8 @@ void World::outputBranchTree(BranchItem *branchItem, std::string prefix,
 		//std::cout << branchItem->getParent()->getLabel() << " )" << std::endl;
 	}
 
-	std::vector<vec3> *center = branchItem->getCenterList();
-	std::vector<vec3>::iterator iter1;
+	std::vector<Vec3>* center = branchItem->getCenterList();
+	std::vector<Vec3>::iterator iter1;
 
 	fprintf(fp, "size(%i):", center->size());
 	for (iter1 = center->begin(); iter1 != center->end(); iter1++)
@@ -1711,17 +1741,17 @@ void World::outputBranchTree(BranchItem *branchItem, std::string prefix,
 	}
 	fprintf(fp, "\n");
 
-	std::list<BranchItem *> *children = branchItem->getChildren();
-	std::list<BranchItem *>::iterator iter;
+	std::list<BranchItem*>* children = branchItem->getChildren();
+	std::list<BranchItem*>::iterator iter;
 
 	for (iter = children->begin(); iter != children->end(); iter++)
 	{
-		BranchItem *item = *iter;
+		BranchItem* item = *iter;
 		outputBranchTree(item, prefix, fp);
 	}
 }
 
-void World::set3dslicehandler(SlicesHandler *handler3D)
+void World::set3dslicehandler(SlicesHandler* handler3D)
 {
 	_handler3D = handler3D;
 }
@@ -1745,19 +1775,19 @@ PathElement::PathElement(unsigned offset)
 }
 PathElement::~PathElement() {}
 
-void World::getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart,
-															 vec3 &bbEnd, SlicesHandler *handler3D)
+void World::getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
+							   Vec3& bbEnd, SlicesHandler* handler3D)
 {
 	const long MEMORY_MAX_VOXELS = 18060000;
-	bbStart = vec3(10000, 10000, 10000);
-	bbEnd = vec3(0, 0, 0);
+	bbStart = Vec3(10000, 10000, 10000);
+	bbEnd = Vec3(0, 0, 0);
 	int incVOI = 2;
 	int margin = 15;
 
 	// compute bounding box for seeds
 	for (size_t i = 0; i < seeds->size(); i++)
 	{
-		vec3 posVox = seeds->at(i);
+		Vec3 posVox = seeds->at(i);
 		for (int j = 0; j < 3; j++)
 		{
 			if (posVox[j] < bbStart[j])
@@ -1772,9 +1802,9 @@ void World::getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart,
 	}
 
 	// add margin
-	vec3 imgExt((float)handler3D->return_width(),
-							(float)handler3D->return_height(),
-							(float)handler3D->return_nrslices());
+	Vec3 imgExt((float)handler3D->return_width(),
+				(float)handler3D->return_height(),
+				(float)handler3D->return_nrslices());
 	//	Vector imgExt = getInImg(0)->getImgExt();
 
 	for (int j = 0; j < 3; j++)
@@ -1799,7 +1829,7 @@ void World::getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart,
 	}
 
 	int remaining = int((bbEnd[2] - bbStart[2]) * (bbEnd[1] - bbStart[1]) *
-											(bbEnd[0] - bbStart[0]));
+						(bbEnd[0] - bbStart[0]));
 	remaining = MEMORY_MAX_VOXELS - remaining;
 	remaining /= int(bbEnd[2] - bbStart[2] + 1);
 
@@ -1838,11 +1868,11 @@ void World::getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart,
 		remaining -= (2 * (bbEnd[1]-bbStart[1]));
 		remaining += 4;*/
 		remaining = int((bbEnd[2] - bbStart[2]) * (bbEnd[1] - bbStart[1]) *
-										(bbEnd[0] - bbStart[0]));
+						(bbEnd[0] - bbStart[0]));
 		remaining = MEMORY_MAX_VOXELS - remaining;
 
-		if ((bbStart[0] == 0) && (bbStart[1] == 0) && (bbEnd[0] == imgExt[0] - 1) &&
-				(bbEnd[1] == imgExt[1] - 1))
+		if ((bbStart[0] == 0) && (bbStart[1] == 0) &&
+			(bbEnd[0] == imgExt[0] - 1) && (bbEnd[1] == imgExt[1] - 1))
 		{
 			isStop = true;
 		}
@@ -1861,7 +1891,8 @@ void World::getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart,
 	// check if extension in z-direction is possible with remaining number of voxels
 	if (remaining > 0)
 	{
-		int numPerSlice = int((bbEnd[0] - bbStart[0]) * (bbEnd[1] - bbStart[1]));
+		int numPerSlice =
+			int((bbEnd[0] - bbStart[0]) * (bbEnd[1] - bbStart[1]));
 		int numSlices = remaining / numPerSlice;
 
 		// do not consider the fact, that numSlices might be odd

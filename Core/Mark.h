@@ -14,22 +14,30 @@
 #include "Point.h"
 #include <string>
 
-typedef struct SMark
+namespace iseg {
+
+struct Mark
 {
-	SMark() {}
-	SMark(const SMark &r) : p(r.p), mark(r.mark), name(r.name) {}
+	Mark() {}
+	Mark(const Mark& r) : p(r.p), mark(r.mark), name(r.name) {}
 
 	Point p;
 	unsigned mark;
 	std::string name;
-} mark;
+};
 
-typedef struct
+struct augmentedmark
 {
 	Point p;
 	unsigned short slicenr;
 	unsigned mark;
 	std::string name;
-} augmentedmark;
+};
 
-iSegCore_API bool operator!=(augmentedmark a, augmentedmark b);
+inline bool operator!=(augmentedmark a, augmentedmark b)
+{
+	return (a.p.px != b.p.px) || (a.p.py != b.p.py) ||
+		   (a.slicenr != b.slicenr) || (a.mark != b.mark) || (a.name != b.name);
+}
+
+} // namespace iseg

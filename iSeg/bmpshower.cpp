@@ -7,42 +7,33 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "bmpshower.h"
 #include "Precompiled.h"
+
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
+#include "bmpshower.h"
+#include "tissueinfos.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/Point.h"
 
-#include <q3popupmenu.h>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qwidget.h>
-//Added by qt3to4:
-#include "tissueinfos.h"
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
 #include <algorithm>
+#include <q3filedialog.h>
+#include <q3popupmenu.h>
+#include <qapplication.h>
+#include <qcolor.h>
+#include <qevent.h>
+#include <qimage.h>
 #include <qinputdialog.h>
 #include <qlineedit.h>
-
-//vtkwidget related xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-#include <cassert>
-#include <cmath>
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include <q3filedialog.h>
-#include <qapplication.h>
+#include <qpainter.h>
+#include <qpen.h>
+#include <qwidget.h>
 
 #include "vtkAutoInit.h"
 VTK_MODULE_INIT(vtkRenderingOpenGL); // VTK was built with vtkRenderingOpenGL
@@ -54,54 +45,47 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkActor2D.h>
 #include <vtkCamera.h>
 #include <vtkCellPicker.h>
+#include <vtkColorTransferFunction.h>
 #include <vtkCommand.h>
 #include <vtkCutter.h>
 #include <vtkDataSetMapper.h>
+#include <vtkDiscreteMarchingCubes.h>
+#include <vtkFloatArray.h>
+#include <vtkGeometryFilter.h>
+#include <vtkImageAccumulate.h>
+#include <vtkImageCast.h>
+#include <vtkImageData.h>
+#include <vtkImageMapToColors.h>
+#include <vtkImageShiftScale.h>
 #include <vtkImplicitPlaneWidget.h>
+#include <vtkInformation.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkLODActor.h>
+#include <vtkLookupTable.h>
+#include <vtkMaskFields.h>
+#include <vtkOutlineFilter.h>
+#include <vtkPiecewiseFunction.h>
 #include <vtkPlane.h>
 #include <vtkPlaneWidget.h>
+#include <vtkPointData.h>
 #include <vtkPointPicker.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+#include <vtkRectilinearGrid.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkScalarBarActor.h>
 #include <vtkSmartPointer.h>
+#include <vtkSmartVolumeMapper.h>
+#include <vtkTextMapper.h>
 #include <vtkTextProperty.h>
+#include <vtkThreshold.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkUnstructuredGridReader.h>
 #include <vtkUnstructuredGridWriter.h>
-//#include <vtkPlaneWidget.h>
-//#include <vtkPlane.h>
-#include <vtkOutlineFilter.h>
-//#include <vtkContourFilter.h>
-#include <vtkFloatArray.h>
-#include <vtkPointData.h>
-#include <vtkRectilinearGrid.h>
 #include <vtkVectorNorm.h>
-//#include <vtkCutter.h>
-//#include <vtkImplicitPlaneWidget.h>
-#include <vtkImageData.h>
-#include <vtkLookupTable.h>
-#include <vtkScalarBarActor.h>
-#include <vtkTextMapper.h>
-//#include <vtkStructuredPointsReader.h>
-#include <vtkColorTransferFunction.h>
-#include <vtkDiscreteMarchingCubes.h>
-#include <vtkGeometryFilter.h>
-#include <vtkImageAccumulate.h>
-#include <vtkImageCast.h>
-#include <vtkImageMapToColors.h>
-#include <vtkImageShiftScale.h>
-#include <vtkInformation.h>
-#include <vtkMaskFields.h>
-#include <vtkPiecewiseFunction.h>
-#include <vtkSmartVolumeMapper.h>
-#include <vtkThreshold.h>
 #include <vtkVolume.h>
 #include <vtkVolumeProperty.h>
 #include <vtkWindowedSincPolyDataFilter.h>
@@ -145,17 +129,24 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 
 #include <vtksys/SystemTools.hxx>
 
+#include <cassert>
+#include <cmath>
+#include <sstream>
+#include <string>
+#include <vector>
+
 using namespace std;
+using namespace iseg;
 
 /*float tissuecolor[15][3]=
 {{1,1,1},{0,0,1},{0,1,0},{1,0,0},{1,1,0}};*/
 
-bmpshower::bmpshower(QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+bmpshower::bmpshower(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags)
 {
 }
 
-void bmpshower::init(float **bmpbits1, unsigned short w, unsigned short h)
+void bmpshower::init(float** bmpbits1, unsigned short w, unsigned short h)
 {
 	bmpbits = bmpbits1;
 	width = w;
@@ -177,7 +168,7 @@ void bmpshower::init(float **bmpbits1, unsigned short w, unsigned short h)
 
 void bmpshower::reload_bits()
 {
-	float *bmpbits1 = *bmpbits;
+	float* bmpbits1 = *bmpbits;
 	unsigned pos = 0;
 	int f;
 
@@ -199,7 +190,7 @@ void bmpshower::reload_bits()
 	return;
 }
 
-void bmpshower::paintEvent(QPaintEvent *e)
+void bmpshower::paintEvent(QPaintEvent* e)
 {
 	if (image.size() != QSize(0, 0)) // is an image loaded?
 	{
@@ -235,13 +226,13 @@ void bmpshower::update(unsigned short w, unsigned short h)
 	repaint();
 }
 
-bmptissueshower::bmptissueshower(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(true)
+bmptissueshower::bmptissueshower(QWidget* parent, const char* name,
+								 Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags), tissuevisible(true)
 {
 }
 
-void bmptissueshower::paintEvent(QPaintEvent *e)
+void bmptissueshower::paintEvent(QPaintEvent* e)
 {
 	if (image.size() != QSize(0, 0)) // is an image loaded?
 	{
@@ -277,8 +268,8 @@ void bmptissueshower::update(unsigned short w, unsigned short h)
 	repaint();
 }
 
-void bmptissueshower::init(float **bmpbits1, tissues_size_t **tissue1,
-													 unsigned short w, unsigned short h)
+void bmptissueshower::init(float** bmpbits1, tissues_size_t** tissue1,
+						   unsigned short w, unsigned short h)
 {
 	bmpbits = bmpbits1;
 	tissue = tissue1;
@@ -301,8 +292,8 @@ void bmptissueshower::init(float **bmpbits1, tissues_size_t **tissue1,
 
 void bmptissueshower::reload_bits()
 {
-	float *bmpbits1 = *bmpbits;
-	tissues_size_t *tissue1 = *tissue;
+	float* bmpbits1 = *bmpbits;
+	tissues_size_t* tissue1 = *tissue;
 	unsigned pos = 0;
 	int f;
 	unsigned char r, g, b;
@@ -319,7 +310,8 @@ void bmptissueshower::reload_bits()
 				}
 				else
 				{
-					TissueInfos::GetTissueColorBlendedRGB(tissue1[pos], r, g, b, f);
+					TissueInfos::GetTissueColorBlendedRGB(tissue1[pos], r, g, b,
+														  f);
 					image.setPixel(x, y, qRgb(r, g, b));
 				}
 				pos++;
@@ -362,9 +354,9 @@ void bmptissueshower::set_tissuevisible(bool on)
 	return;
 }
 
-bmptissuemarkshower::bmptissuemarkshower(QWidget *parent, const char *name,
-																				 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(true), markvisible(true)
+bmptissuemarkshower::bmptissuemarkshower(QWidget* parent, const char* name,
+										 Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags), tissuevisible(true), markvisible(true)
 {
 	addmark = new Q3Action("&Add Mark", 0, this);
 	addlabel = new Q3Action("Add &Label", 0, this);
@@ -378,9 +370,10 @@ bmptissuemarkshower::bmptissuemarkshower(QWidget *parent, const char *name,
 	connect(removemark, SIGNAL(activated()), this, SLOT(remove_mark()));
 	connect(addtissue, SIGNAL(activated()), this, SLOT(add_tissue()));
 	connect(addtissueconnected, SIGNAL(activated()), this,
-					SLOT(add_tissue_connected()));
+			SLOT(add_tissue_connected()));
 	connect(subtissue, SIGNAL(activated()), this, SLOT(sub_tissue()));
-	connect(addtissuelarger, SIGNAL(activated()), this, SLOT(add_tissuelarger()));
+	connect(addtissuelarger, SIGNAL(activated()), this,
+			SLOT(add_tissuelarger()));
 
 	return;
 }
@@ -396,7 +389,7 @@ bmptissuemarkshower::~bmptissuemarkshower()
 	delete addtissuelarger;
 }
 
-void bmptissuemarkshower::paintEvent(QPaintEvent *e)
+void bmptissuemarkshower::paintEvent(QPaintEvent* e)
 {
 	if (image.size() != QSize(0, 0)) // is an image loaded?
 	{
@@ -405,7 +398,8 @@ void bmptissuemarkshower::paintEvent(QPaintEvent *e)
 		painter.drawImage(0, 0, image);
 		QPen pen1;
 		unsigned char r, g, b;
-		for (vector<mark>::iterator it = marks->begin(); it != marks->end(); it++)
+		for (vector<Mark>::iterator it = marks->begin(); it != marks->end();
+			 it++)
 		{
 			TissueInfos::GetTissueColorRGB(it->mark, r, g, b);
 			QColor qc(r, g, b);
@@ -415,13 +409,13 @@ void bmptissuemarkshower::paintEvent(QPaintEvent *e)
 			pen1.setWidth(1);
 			painter.setPen(pen1);*/
 			painter.drawLine(int(it->p.px) - 2, int(height - it->p.py) - 3,
-											 int(it->p.px) + 2, int(height - it->p.py) + 1);
+							 int(it->p.px) + 2, int(height - it->p.py) + 1);
 			painter.drawLine(int(it->p.px) - 2, int(height - it->p.py) + 1,
-											 int(it->p.px) + 2, int(height - it->p.py) - 3);
+							 int(it->p.px) + 2, int(height - it->p.py) - 3);
 			if (it->name != std::string(""))
 			{
 				painter.drawText(int(it->p.px) + 3, int(height - it->p.py) + 1,
-												 QString(it->name.c_str()));
+								 QString(it->name.c_str()));
 			}
 		}
 	}
@@ -442,8 +436,8 @@ void bmptissuemarkshower::update()
 	repaint();
 }
 
-void bmptissuemarkshower::init(bmphandler *bmph1, tissuelayers_size_t layeridx,
-															 bool bmporwork1)
+void bmptissuemarkshower::init(bmphandler* bmph1, tissuelayers_size_t layeridx,
+							   bool bmporwork1)
 {
 	bmphand = bmph1;
 	bmporwork = bmporwork1;
@@ -473,8 +467,8 @@ void bmptissuemarkshower::init(bmphandler *bmph1, tissuelayers_size_t layeridx,
 
 void bmptissuemarkshower::reload_bits()
 {
-	float *bmpbits1 = *bmpbits;
-	tissues_size_t *tissue1 = *tissue;
+	float* bmpbits1 = *bmpbits;
+	tissues_size_t* tissue1 = *tissue;
 	unsigned pos = 0;
 	int f;
 	unsigned char r, g, b;
@@ -493,7 +487,8 @@ void bmptissuemarkshower::reload_bits()
 				else
 				{
 					//image.setPixel(x,y,qRgb(int(f/2+127.5f*(tissuecolor[tissue1[pos]][0])),int(f/2+127.5f*tissuecolor[tissue1[pos]][1]),int(f/2+127.5f*tissuecolor[tissue1[pos]][2])));
-					TissueInfos::GetTissueColorBlendedRGB(tissue1[pos], r, g, b, f);
+					TissueInfos::GetTissueColorBlendedRGB(tissue1[pos], r, g, b,
+														  f);
 					image.setPixel(x, y, qRgb(r, g, b));
 				}
 				pos++;
@@ -568,7 +563,8 @@ void bmptissuemarkshower::add_label()
 {
 	bool ok;
 	QString newText = QInputDialog::getText(
-			"Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok, this);
+		"Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok,
+		this);
 	if (ok)
 	{
 		Point p;
@@ -618,7 +614,7 @@ void bmptissuemarkshower::add_tissuelarger()
 	emit addtissuelarger_sign(p);
 }
 
-void bmptissuemarkshower::contextMenuEvent(QContextMenuEvent *event)
+void bmptissuemarkshower::contextMenuEvent(QContextMenuEvent* event)
 {
 	eventx = event->x();
 	eventy = height - 1 - event->y();
@@ -636,12 +632,12 @@ void bmptissuemarkshower::contextMenuEvent(QContextMenuEvent *event)
 	contextMenu.exec(event->globalPos());
 }
 
-bmptissuemarklineshower::bmptissuemarklineshower(QWidget *parent,
-																								 const char *name,
-																								 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(true), picturevisible(true),
-			markvisible(true), overlayvisible(false), workborder(false),
-			crosshairxvisible(false), crosshairyvisible(false) //,showvp(false)
+bmptissuemarklineshower::bmptissuemarklineshower(QWidget* parent,
+												 const char* name,
+												 Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags), tissuevisible(true), picturevisible(true),
+	  markvisible(true), overlayvisible(false), workborder(false),
+	  crosshairxvisible(false), crosshairyvisible(false) //,showvp(false)
 {
 	brightness = scaleoffset = 0.0f;
 	contrast = scalefactor = 1.0f;
@@ -672,10 +668,11 @@ bmptissuemarklineshower::bmptissuemarklineshower(QWidget *parent,
 	connect(removemark, SIGNAL(activated()), this, SLOT(remove_mark()));
 	connect(addtissue, SIGNAL(activated()), this, SLOT(add_tissue()));
 	connect(addtissueconnected, SIGNAL(activated()), this,
-					SLOT(add_tissue_connected()));
+			SLOT(add_tissue_connected()));
 	connect(subtissue, SIGNAL(activated()), this, SLOT(sub_tissue()));
 	connect(addtissue3D, SIGNAL(activated()), this, SLOT(add_tissue_3D()));
-	connect(addtissuelarger, SIGNAL(activated()), this, SLOT(add_tissuelarger()));
+	connect(addtissuelarger, SIGNAL(activated()), this,
+			SLOT(add_tissuelarger()));
 	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
 
 	return;
@@ -696,7 +693,7 @@ bmptissuemarklineshower::~bmptissuemarklineshower()
 }
 
 void bmptissuemarklineshower::mode_changed(unsigned char newmode,
-																					 bool updatescale)
+										   bool updatescale)
 {
 	if (newmode != 0 && mode != newmode)
 	{
@@ -708,8 +705,8 @@ void bmptissuemarklineshower::mode_changed(unsigned char newmode,
 	}
 }
 
-void bmptissuemarklineshower::get_scaleoffsetfactor(float &offset1,
-																										float &factor1)
+void bmptissuemarklineshower::get_scaleoffsetfactor(float& offset1,
+													float& factor1)
 {
 	offset1 = scaleoffset;
 	factor1 = scalefactor;
@@ -723,7 +720,8 @@ void bmptissuemarklineshower::set_zoom(double z)
 
 		QPoint newCenter;
 		if (mousePosZoom.x() == 0 && mousePosZoom.y() == 0)
-			newCenter = QPoint(z * oldCenter.x() / zoom, z * oldCenter.y() / zoom);
+			newCenter =
+				QPoint(z * oldCenter.x() / zoom, z * oldCenter.y() / zoom);
 		else
 		{
 			QPoint oldDiff;
@@ -747,12 +745,12 @@ void bmptissuemarklineshower::pixelsize_changed(Pair pixelsize1)
 	{
 		pixelsize = pixelsize1;
 		setFixedSize((int)width * zoom * pixelsize.high,
-								 (int)height * zoom * pixelsize.low);
+					 (int)height * zoom * pixelsize.low);
 		repaint();
 	}
 }
 
-void bmptissuemarklineshower::paintEvent(QPaintEvent *e)
+void bmptissuemarklineshower::paintEvent(QPaintEvent* e)
 {
 	marks = handler3D->get_activebmphandler()->return_marks();
 	if (image.size() != QSize(0, 0)) // is an image loaded?
@@ -776,8 +774,8 @@ void bmptissuemarklineshower::paintEvent(QPaintEvent *e)
 			{
 				//		int d=(int)(2.0/zoom+0.5);
 				unsigned char r, g, b;
-				for (vector<mark>::iterator it = marks->begin(); it != marks->end();
-						 it++)
+				for (vector<Mark>::iterator it = marks->begin();
+					 it != marks->end(); it++)
 				{
 					TissueInfos::GetTissueColorRGB(it->mark, r, g, b);
 					QColor qc1(r, g, b);
@@ -786,14 +784,17 @@ void bmptissuemarklineshower::paintEvent(QPaintEvent *e)
 					/*			pen1.setColor(qc);
 					pen1.setWidth(1);
 					painter.setPen(pen1);*/
-					painter.drawLine(int(it->p.px) - 2, int(height - it->p.py) - 3,
-													 int(it->p.px) + 2, int(height - it->p.py) + 1);
-					painter.drawLine(int(it->p.px) - 2, int(height - it->p.py) + 1,
-													 int(it->p.px) + 2, int(height - it->p.py) - 3);
+					painter.drawLine(
+						int(it->p.px) - 2, int(height - it->p.py) - 3,
+						int(it->p.px) + 2, int(height - it->p.py) + 1);
+					painter.drawLine(
+						int(it->p.px) - 2, int(height - it->p.py) + 1,
+						int(it->p.px) + 2, int(height - it->p.py) - 3);
 					if (it->name != std::string(""))
 					{
-						painter.drawText(int(it->p.px) + 3, int(height - it->p.py) + 1,
-														 QString(it->name.c_str()));
+						painter.drawText(int(it->p.px) + 3,
+										 int(height - it->p.py) + 1,
+										 QString(it->name.c_str()));
 					}
 
 					//			painter.drawLine( int(it->p.px)-d,int(height-it->p.py-1)-d,int(it->p.px)+d,int(height-it->p.py-1)+d);
@@ -807,12 +808,14 @@ void bmptissuemarklineshower::paintEvent(QPaintEvent *e)
 			float dx = zoom * pixelsize.high;
 			float dy = zoom * pixelsize.low;
 
-			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end(); it++)
+			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end();
+				 it++)
 			{
 				//			painter.drawPoint(int(it->px),int(height-it->py-1));
 				//			painter.fillRect(int(it->px),int(height-it->py-1),2,2,actual_color);
-				painter1.fillRect(int(dx * it->px), int(dy * (height - it->py - 1)),
-													int(dx + 0.999f), int(dy + 0.999f), actual_color);
+				painter1.fillRect(
+					int(dx * it->px), int(dy * (height - it->py - 1)),
+					int(dx + 0.999f), int(dy + 0.999f), actual_color);
 				/*			int x1=int(dx*it->px);
 				do {
 				int y1=int(height-it->py-1);
@@ -847,7 +850,7 @@ void bmptissuemarklineshower::slicenr_changed()
 	//	}
 }
 
-void bmptissuemarklineshower::bmphand_changed(bmphandler *bmph)
+void bmptissuemarklineshower::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	if (bmporwork)
@@ -881,9 +884,9 @@ void bmptissuemarklineshower::overlay_changed(QRect rect)
 {
 	reload_bits();
 	repaint((int)(rect.left() * zoom * pixelsize.high),
-					(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-					(int)ceil(rect.width() * zoom * pixelsize.high),
-					(int)ceil(rect.height() * zoom * pixelsize.low));
+			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
+			(int)ceil(rect.width() * zoom * pixelsize.high),
+			(int)ceil(rect.height() * zoom * pixelsize.low));
 }
 
 void bmptissuemarklineshower::update()
@@ -925,7 +928,7 @@ void bmptissuemarklineshower::update(QRect rect)
 		image.create(int(width), int(height), 32);
 		image_decorated.create(int(width), int(height), 32);
 		setFixedSize((int)width * zoom * pixelsize.high,
-								 (int)height * zoom * pixelsize.low);
+					 (int)height * zoom * pixelsize.low);
 
 		if (bmporwork && workborder)
 		{
@@ -938,12 +941,12 @@ void bmptissuemarklineshower::update(QRect rect)
 
 	reload_bits();
 	repaint((int)(rect.left() * zoom * pixelsize.high),
-					(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-					(int)ceil(rect.width() * zoom * pixelsize.high),
-					(int)ceil(rect.height() * zoom * pixelsize.low));
+			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
+			(int)ceil(rect.width() * zoom * pixelsize.high),
+			(int)ceil(rect.height() * zoom * pixelsize.low));
 }
 
-void bmptissuemarklineshower::init(SlicesHandler *hand3D, bool bmporwork1)
+void bmptissuemarklineshower::init(SlicesHandler* hand3D, bool bmporwork1)
 {
 	handler3D = hand3D;
 	activeslice = handler3D->get_activeslice();
@@ -967,7 +970,7 @@ void bmptissuemarklineshower::init(SlicesHandler *hand3D, bool bmporwork1)
 	}*/
 
 	setFixedSize((int)width * zoom * pixelsize.high,
-							 (int)height * zoom * pixelsize.low);
+				 (int)height * zoom * pixelsize.low);
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
 	mode_changed(bmphand->return_mode(bmporwork), false);
@@ -1014,8 +1017,8 @@ void bmptissuemarklineshower::reload_bits()
 {
 	auto color_lut = handler3D->GetColorLookupTable();
 
-	float *bmpbits1 = *bmpbits;
-	tissues_size_t *tissue1 = *tissue;
+	float* bmpbits1 = *bmpbits;
+	tissues_size_t* tissue1 = *tissue;
 	unsigned pos = 0;
 	int f;
 	unsigned char r, g, b;
@@ -1035,14 +1038,16 @@ void bmptissuemarklineshower::reload_bits()
 				else
 				{
 					r = g = b = (int)max(
-							0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
+						0.0f, min(255.0f,
+								  scaleoffset + scalefactor * (bmpbits1)[pos]));
 				}
 
 				// overlay only visible if picture is visible
 				if (overlayvisible)
 				{
 					f = max(0.0f,
-									min(255.0f, scaleoffset + scalefactor * (overlaybits)[pos]));
+							min(255.0f, scaleoffset +
+											scalefactor * (overlaybits)[pos]));
 
 					r = (1.0f - overlayalpha) * r + overlayalpha * f;
 					g = (1.0f - overlayalpha) * g + overlayalpha * f;
@@ -1057,11 +1062,14 @@ void bmptissuemarklineshower::reload_bits()
 			if (tissuevisible && tissue1[pos] != 0)
 			{
 				// blend with tissue color
-				float *rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
+				float* rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
 				float alpha = 0.5f; // rgbo[3];
-				r = static_cast<unsigned char>(r + alpha * (255.0f * rgbo[0] - r));
-				g = static_cast<unsigned char>(g + alpha * (255.0f * rgbo[1] - g));
-				b = static_cast<unsigned char>(b + alpha * (255.0f * rgbo[2] - b));
+				r = static_cast<unsigned char>(r +
+											   alpha * (255.0f * rgbo[0] - r));
+				g = static_cast<unsigned char>(g +
+											   alpha * (255.0f * rgbo[1] - g));
+				b = static_cast<unsigned char>(b +
+											   alpha * (255.0f * rgbo[2] - b));
 				image.setPixel(x, y, qRgb(r, g, b));
 			}
 			else // no tissue
@@ -1080,33 +1088,35 @@ void bmptissuemarklineshower::reload_bits()
 	QRgb color_dim = (actual_color.light(30)).rgb();
 
 	if (workborder && bmporwork &&
-			((!workborderlimit) ||
-			 (unsigned)vp.size() < unsigned(width) * height / 5))
+		((!workborderlimit) ||
+		 (unsigned)vp.size() < unsigned(width) * height / 5))
 	{
 		for (vector<Point>::iterator it = vp.begin(); it != vp.end(); it++)
 		{
 			image_decorated.setPixel(int(it->px), int(height - it->py - 1),
-															 color_dim);
+									 color_dim);
 		}
 	}
 
 	for (vector<Point>::iterator it = vp1.begin(); it != vp1.end(); it++)
 	{
-		image_decorated.setPixel(int(it->px), int(height - it->py - 1), color_used);
+		image_decorated.setPixel(int(it->px), int(height - it->py - 1),
+								 color_used);
 	}
 
-	for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		TissueInfos::GetTissueColorRGB(it->mark, r, g, b);
 		image_decorated.setPixel(int(it->p.px), int(height - it->p.py - 1),
-														 qRgb(r, g, b));
+								 qRgb(r, g, b));
 	}
 
 	if (crosshairxvisible)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			image_decorated.setPixel(x, height - 1 - crosshairxpos, qRgb(0, 255, 0));
+			image_decorated.setPixel(x, height - 1 - crosshairxpos,
+									 qRgb(0, 255, 0));
 			image.setPixel(x, height - 1 - crosshairxpos, qRgb(0, 255, 0));
 		}
 	}
@@ -1133,9 +1143,9 @@ void bmptissuemarklineshower::tissue_changed(QRect rect)
 {
 	reload_bits();
 	repaint((int)(rect.left() * zoom * pixelsize.high),
-					(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-					(int)ceil(rect.width() * zoom * pixelsize.high),
-					(int)ceil(rect.height() * zoom * pixelsize.low));
+			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
+			(int)ceil(rect.width() * zoom * pixelsize.high),
+			(int)ceil(rect.height() * zoom * pixelsize.low));
 }
 
 void bmptissuemarklineshower::mark_changed()
@@ -1229,7 +1239,8 @@ void bmptissuemarklineshower::add_label()
 {
 	bool ok;
 	QString newText = QInputDialog::getText(
-			"Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok, this);
+		"Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok,
+		this);
 	if (ok)
 	{
 		Point p;
@@ -1305,15 +1316,15 @@ void bmptissuemarklineshower::unzoom() { set_zoom(1.0); }
 
 double bmptissuemarklineshower::return_zoom() { return zoom; }
 
-void bmptissuemarklineshower::contextMenuEvent(QContextMenuEvent *event)
+void bmptissuemarklineshower::contextMenuEvent(QContextMenuEvent* event)
 {
 	//	eventx=(event->x()/(zoom*pixelsize.high));
 	//	eventy=height-1-(event->y()/(zoom*pixelsize.low));
 	eventx =
-			(int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
+		(int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
 	eventy = (int)max(
-			min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))),
-			0.0);
+		min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))),
+		0.0);
 
 	Q3PopupMenu contextMenu(this);
 	addmark->addTo(&contextMenu);
@@ -1334,7 +1345,7 @@ void bmptissuemarklineshower::contextMenuEvent(QContextMenuEvent *event)
 }
 
 void bmptissuemarklineshower::set_brightnesscontrast(float bright, float contr,
-																										 bool paint)
+													 bool paint)
 {
 	brightness = bright;
 	contrast = contr;
@@ -1348,7 +1359,7 @@ void bmptissuemarklineshower::set_brightnesscontrast(float bright, float contr,
 
 void bmptissuemarklineshower::update_scaleoffsetfactor()
 {
-	bmphandler *bmphand = handler3D->get_activebmphandler();
+	bmphandler* bmphand = handler3D->get_activebmphandler();
 	if (bmporwork && handler3D->GetColorLookupTable())
 	{
 		// Disable scaling/offset for color mapped images, since it would break the lookup table
@@ -1360,7 +1371,7 @@ void bmptissuemarklineshower::update_scaleoffsetfactor()
 		// Mode 2 assumes the range [0, 255]
 		scalefactor = contrast;
 		scaleoffset = (127.5f - 255 * scalefactor) * (1.0f - brightness) +
-									127.5f * brightness;
+					  127.5f * brightness;
 	}
 	else if (bmphand->return_mode(bmporwork) == 1)
 	{
@@ -1373,7 +1384,7 @@ void bmptissuemarklineshower::update_scaleoffsetfactor()
 		}
 		scalefactor = 255.0f * contrast / (r.high - r.low);
 		scaleoffset = (127.5f - r.high * scalefactor) * (1.0f - brightness) +
-									(127.5f - r.low * scalefactor) * brightness;
+					  (127.5f - r.low * scalefactor) * brightness;
 	}
 	emit scaleoffsetfactor_changed(scaleoffset, scalefactor, bmporwork);
 }
@@ -1384,15 +1395,16 @@ e;
 return;
 }*/
 
-void bmptissuemarklineshower::mousePressEvent(QMouseEvent *e)
+void bmptissuemarklineshower::mousePressEvent(QMouseEvent* e)
 {
 	Point p;
 	//	p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 	//	p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
 	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
 	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
+		0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
@@ -1404,7 +1416,7 @@ void bmptissuemarklineshower::mousePressEvent(QMouseEvent *e)
 	}
 }
 
-void bmptissuemarklineshower::mouseReleaseEvent(QMouseEvent *e)
+void bmptissuemarklineshower::mouseReleaseEvent(QMouseEvent* e)
 {
 	if (e->button() == Qt::LeftButton)
 	{
@@ -1412,25 +1424,26 @@ void bmptissuemarklineshower::mouseReleaseEvent(QMouseEvent *e)
 		//		p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 		//		p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
 		p.px = (unsigned short)max(
-				min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
 		p.py = (unsigned short)max(
-				min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-				0.0);
+			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
+			0.0);
 
 		emit mousereleased_sign(p);
 	}
 }
 
-void bmptissuemarklineshower::mouseDoubleClickEvent(QMouseEvent *e)
+void bmptissuemarklineshower::mouseDoubleClickEvent(QMouseEvent* e)
 {
 	//	if(e->button() == Qt::LeftButton){
 	Point p;
 	//		p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 	//		p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
 	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
 	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
+		0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
@@ -1443,18 +1456,19 @@ void bmptissuemarklineshower::mouseDoubleClickEvent(QMouseEvent *e)
 	//	}
 }
 
-void bmptissuemarklineshower::mouseMoveEvent(QMouseEvent *e)
+void bmptissuemarklineshower::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
 	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
 	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
+		0.0);
 
 	emit mousemoved_sign(p);
 }
 
-void bmptissuemarklineshower::wheelEvent(QWheelEvent *e)
+void bmptissuemarklineshower::wheelEvent(QWheelEvent* e)
 {
 	int delta = e->delta();
 
@@ -1474,7 +1488,7 @@ void bmptissuemarklineshower::recompute_workborder()
 	vp.clear();
 	Point p;
 
-	float *bits = bmphand->return_work();
+	float* bits = bmphand->return_work();
 	unsigned pos = 0;
 
 	if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width])
@@ -1488,7 +1502,7 @@ void bmptissuemarklineshower::recompute_workborder()
 	for (unsigned short j = 1; j + 1 < width; j++)
 	{
 		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos + width])
+			bits[pos] != bits[pos + width])
 		{
 			p.px = j;
 			p.py = 0;
@@ -1509,7 +1523,7 @@ void bmptissuemarklineshower::recompute_workborder()
 	for (unsigned short i = 1; i + 1 < height; i++)
 	{
 		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
+			bits[pos] != bits[pos - width])
 		{
 			p.px = 0;
 			p.py = i;
@@ -1520,7 +1534,8 @@ void bmptissuemarklineshower::recompute_workborder()
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
 			if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-					bits[pos] != bits[pos + width] || bits[pos] != bits[pos - width])
+				bits[pos] != bits[pos + width] ||
+				bits[pos] != bits[pos - width])
 			{
 				p.px = j;
 				p.py = i;
@@ -1530,7 +1545,7 @@ void bmptissuemarklineshower::recompute_workborder()
 			pos++;
 		}
 		if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
+			bits[pos] != bits[pos - width])
 		{
 			p.px = width - 1;
 			p.py = i;
@@ -1550,7 +1565,7 @@ void bmptissuemarklineshower::recompute_workborder()
 	for (unsigned short j = 1; j + 1 < width; j++)
 	{
 		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos - width])
+			bits[pos] != bits[pos - width])
 		{
 			p.px = j;
 			p.py = height - 1;
@@ -1589,53 +1604,56 @@ void bmptissuemarklineshower::workborder_changed(QRect rect)
 void bmptissuemarklineshower::vp_to_image_decorator()
 {
 	if ((!workborderlimit) ||
-			((unsigned)vp_old.size() < unsigned(width) * height / 5))
+		((unsigned)vp_old.size() < unsigned(width) * height / 5))
 	{
-		for (vector<Point>::iterator it = vp_old.begin(); it != vp_old.end(); it++)
+		for (vector<Point>::iterator it = vp_old.begin(); it != vp_old.end();
+			 it++)
 		{
 			image_decorated.setPixel(
-					int(it->px), int(height - it->py - 1),
-					image.pixel(int(it->px), int(height - it->py - 1)));
+				int(it->px), int(height - it->py - 1),
+				image.pixel(int(it->px), int(height - it->py - 1)));
 		}
 	}
 
 	QRgb color_used = actual_color.rgb();
 	QRgb color_dim = (actual_color.light(30)).rgb();
 	if ((!workborderlimit) ||
-			((unsigned)vp.size() < unsigned(width) * height / 5))
+		((unsigned)vp.size() < unsigned(width) * height / 5))
 	{
 		for (vector<Point>::iterator it = vp.begin(); it != vp.end(); it++)
 		{
 			image_decorated.setPixel(int(it->px), int(height - it->py - 1),
-															 color_dim);
+									 color_dim);
 		}
 	}
 
-	for (vector<Point>::iterator it = vp1_old.begin(); it != vp1_old.end(); it++)
+	for (vector<Point>::iterator it = vp1_old.begin(); it != vp1_old.end();
+		 it++)
 	{
 		image_decorated.setPixel(
-				int(it->px), int(height - it->py - 1),
-				image.pixel(int(it->px), int(height - it->py - 1)));
+			int(it->px), int(height - it->py - 1),
+			image.pixel(int(it->px), int(height - it->py - 1)));
 	}
 
 	for (vector<Point>::iterator it = vp1.begin(); it != vp1.end(); it++)
 	{
-		image_decorated.setPixel(int(it->px), int(height - it->py - 1), color_used);
+		image_decorated.setPixel(int(it->px), int(height - it->py - 1),
+								 color_used);
 	}
 
-	for (vector<mark>::iterator it = vm_old.begin(); it != vm_old.end(); it++)
+	for (vector<Mark>::iterator it = vm_old.begin(); it != vm_old.end(); it++)
 	{
 		image_decorated.setPixel(
-				int(it->p.px), int(height - it->p.py - 1),
-				image.pixel(int(it->p.px), int(height - it->p.py - 1)));
+			int(it->p.px), int(height - it->p.py - 1),
+			image.pixel(int(it->p.px), int(height - it->p.py - 1)));
 	}
 
 	unsigned char r, g, b;
-	for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		TissueInfos::GetTissueColorRGB(it->mark, r, g, b);
 		image_decorated.setPixel(int(it->p.px), int(height - it->p.py - 1),
-														 qRgb(r, g, b));
+								 qRgb(r, g, b));
 	}
 }
 
@@ -1668,9 +1686,9 @@ void bmptissuemarklineshower::vp_changed(QRect rect)
 	if (rect.bottom() + 1 < height)
 		rect.setBottom(rect.bottom() + 1);
 	repaint((int)(rect.left() * zoom * pixelsize.high),
-					(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-					(int)ceil(rect.width() * zoom * pixelsize.high),
-					(int)ceil(rect.height() * zoom * pixelsize.low));
+			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
+			(int)ceil(rect.width() * zoom * pixelsize.high),
+			(int)ceil(rect.height() * zoom * pixelsize.low));
 
 	vp_old.clear();
 	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
@@ -1685,13 +1703,14 @@ void bmptissuemarklineshower::vp_changed(QRect rect)
 void bmptissuemarklineshower::vp1dyn_changed()
 {
 	if ((!workborderlimit) ||
-			((unsigned)vp_old.size() < unsigned(width) * height / 5))
+		((unsigned)vp_old.size() < unsigned(width) * height / 5))
 	{
-		for (vector<Point>::iterator it = vp_old.begin(); it != vp_old.end(); it++)
+		for (vector<Point>::iterator it = vp_old.begin(); it != vp_old.end();
+			 it++)
 		{
 			image_decorated.setPixel(
-					int(it->px), int(height - it->py - 1),
-					image.pixel(int(it->px), int(height - it->py - 1)));
+				int(it->px), int(height - it->py - 1),
+				image.pixel(int(it->px), int(height - it->py - 1)));
 		}
 	}
 
@@ -1699,47 +1718,49 @@ void bmptissuemarklineshower::vp1dyn_changed()
 	QRgb color_dim = (actual_color.light(30)).rgb();
 	QRgb color_highlight = (actual_color.lighter(60)).rgb();
 	if ((!workborderlimit) ||
-			((unsigned)vp.size() < unsigned(width) * height / 5))
+		((unsigned)vp.size() < unsigned(width) * height / 5))
 	{
 		for (vector<Point>::iterator it = vp.begin(); it != vp.end(); it++)
 		{
 			image_decorated.setPixel(int(it->px), int(height - it->py - 1),
-															 color_dim);
+									 color_dim);
 		}
 	}
 
-	for (vector<Point>::iterator it = vp1_old.begin(); it != vp1_old.end(); it++)
+	for (vector<Point>::iterator it = vp1_old.begin(); it != vp1_old.end();
+		 it++)
 	{
 		image_decorated.setPixel(
-				int(it->px), int(height - it->py - 1),
-				image.pixel(int(it->px), int(height - it->py - 1)));
+			int(it->px), int(height - it->py - 1),
+			image.pixel(int(it->px), int(height - it->py - 1)));
 	}
 
 	for (vector<Point>::iterator it = vp1.begin(); it != vp1.end(); it++)
 	{
-		image_decorated.setPixel(int(it->px), int(height - it->py - 1), color_used);
+		image_decorated.setPixel(int(it->px), int(height - it->py - 1),
+								 color_used);
 	}
 
 	for (vector<Point>::iterator it = limit_points.begin();
-			 it != limit_points.end(); it++)
+		 it != limit_points.end(); it++)
 	{
 		image_decorated.setPixel(int(it->px), int(height - it->py - 1),
-														 color_highlight);
+								 color_highlight);
 	}
 
-	for (vector<mark>::iterator it = vm_old.begin(); it != vm_old.end(); it++)
+	for (vector<Mark>::iterator it = vm_old.begin(); it != vm_old.end(); it++)
 	{
 		image_decorated.setPixel(
-				int(it->p.px), int(height - it->p.py - 1),
-				image.pixel(int(it->p.px), int(height - it->p.py - 1)));
+			int(it->p.px), int(height - it->p.py - 1),
+			image.pixel(int(it->p.px), int(height - it->p.py - 1)));
 	}
 
 	unsigned char r, g, b;
-	for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		TissueInfos::GetTissueColorRGB(it->mark, r, g, b);
 		image_decorated.setPixel(int(it->p.px), int(height - it->p.py - 1),
-														 qRgb(r, g, b));
+								 qRgb(r, g, b));
 	}
 
 	repaint();
@@ -1770,32 +1791,40 @@ void bmptissuemarklineshower::vpdyn_changed()
 		if (dx >= 1.002f || dy >= 1.002f)
 		{
 			for (vector<Point>::iterator it = vpdyn_old.begin();
-					 it != vpdyn_old.end(); it++)
+				 it != vpdyn_old.end(); it++)
 			{
-				QColor qc(image_decorated.pixel(int(it->px), int(height - it->py - 1)));
-				painter1.fillRect(int(dx * it->px), int(dy * (height - it->py - 1)),
-													int(dx + 0.999f), int(dy + 0.999f), qc);
+				QColor qc(image_decorated.pixel(int(it->px),
+												int(height - it->py - 1)));
+				painter1.fillRect(int(dx * it->px),
+								  int(dy * (height - it->py - 1)),
+								  int(dx + 0.999f), int(dy + 0.999f), qc);
 			}
 
-			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end(); it++)
+			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end();
+				 it++)
 			{
-				painter1.fillRect(int(dx * it->px), int(dy * (height - it->py - 1)),
-													int(dx + 0.999f), int(dy + 0.999f), actual_color);
+				painter1.fillRect(
+					int(dx * it->px), int(dy * (height - it->py - 1)),
+					int(dx + 0.999f), int(dy + 0.999f), actual_color);
 			}
 		}
 		else
 		{
 			for (vector<Point>::iterator it = vpdyn_old.begin();
-					 it != vpdyn_old.end(); it++)
+				 it != vpdyn_old.end(); it++)
 			{
-				QColor qc(image_decorated.pixel(int(it->px), int(height - it->py - 1)));
+				QColor qc(image_decorated.pixel(int(it->px),
+												int(height - it->py - 1)));
 				painter1.setPen(QPen(qc));
-				painter1.drawPoint(int(dx * it->px), int(dy * (height - it->py - 1)));
+				painter1.drawPoint(int(dx * it->px),
+								   int(dy * (height - it->py - 1)));
 			}
 			painter1.setPen(QPen(actual_color));
-			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end(); it++)
+			for (vector<Point>::iterator it = vpdyn.begin(); it != vpdyn.end();
+				 it++)
 			{
-				painter1.drawPoint(int(dx * it->px), int(dy * (height - it->py - 1)));
+				painter1.drawPoint(int(dx * it->px),
+								   int(dy * (height - it->py - 1)));
 			}
 		}
 	}
@@ -1852,7 +1881,7 @@ bool bmptissuemarklineshower::toggle_workbordervisible()
 
 bool bmptissuemarklineshower::return_workbordervisible() { return workborder; }
 
-void bmptissuemarklineshower::set_vp1(vector<Point> *vp1_arg)
+void bmptissuemarklineshower::set_vp1(vector<Point>* vp1_arg)
 {
 	vp1.clear();
 	vp1.insert(vp1.begin(), vp1_arg->begin(), vp1_arg->end());
@@ -1865,7 +1894,7 @@ void bmptissuemarklineshower::clear_vp1()
 	vp_changed();
 }
 
-void bmptissuemarklineshower::set_vm(vector<mark> *vm_arg)
+void bmptissuemarklineshower::set_vm(vector<Mark>* vm_arg)
 {
 	vm.clear();
 	vm.insert(vm.begin(), vm_arg->begin(), vm_arg->end());
@@ -1878,7 +1907,7 @@ void bmptissuemarklineshower::clear_vm()
 	vp_changed();
 }
 
-void bmptissuemarklineshower::set_vpdyn(vector<Point> *vpdyn_arg)
+void bmptissuemarklineshower::set_vpdyn(vector<Point>* vpdyn_arg)
 {
 	vpdyn.clear();
 	vpdyn.insert(vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
@@ -1891,9 +1920,9 @@ void bmptissuemarklineshower::clear_vpdyn()
 	vpdyn_changed();
 }
 
-void bmptissuemarklineshower::set_vp1_dyn(vector<Point> *vp1_arg,
-																					vector<Point> *vpdyn_arg,
-																					const bool also_points /*= false*/)
+void bmptissuemarklineshower::set_vp1_dyn(vector<Point>* vp1_arg,
+										  vector<Point>* vpdyn_arg,
+										  const bool also_points /*= false*/)
 {
 	vp1.clear();
 	vp1.insert(vp1.begin(), vp1_arg->begin(), vp1_arg->end());
@@ -1966,11 +1995,11 @@ void bmptissuemarklineshower::set_crosshairyvisible(bool on)
 	}
 }
 
-volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
-															 bool gpu_or_raycast, bool shade1,
-															 QWidget *parent, const char *name,
-															 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+volumeviewer3D::volumeviewer3D(SlicesHandler* hand3D1, bool bmportissue1,
+							   bool gpu_or_raycast, bool shade1,
+							   QWidget* parent, const char* name,
+							   Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags)
 {
 	bmportissue = bmportissue1;
 	hand3D = hand3D1;
@@ -2042,23 +2071,23 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 
 	QObject::connect(cb_shade, SIGNAL(clicked()), this, SLOT(shade_changed()));
 	QObject::connect(cb_raytraceortexturemap, SIGNAL(clicked()), this,
-									 SLOT(raytraceortexturemap_changed()));
+					 SLOT(raytraceortexturemap_changed()));
 	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
 	QObject::connect(cb_showslices, SIGNAL(clicked()), this,
-									 SLOT(showslices_changed()));
+					 SLOT(showslices_changed()));
 	QObject::connect(cb_showslice1, SIGNAL(clicked()), this,
-									 SLOT(showslices_changed()));
+					 SLOT(showslices_changed()));
 	QObject::connect(cb_showslice2, SIGNAL(clicked()), this,
-									 SLOT(showslices_changed()));
+					 SLOT(showslices_changed()));
 	QObject::connect(cb_showvolume, SIGNAL(clicked()), this,
-									 SLOT(showvolume_changed()));
+					 SLOT(showvolume_changed()));
 
 	QObject::connect(sl_bright, SIGNAL(sliderReleased()), this,
-									 SLOT(contrbright_changed()));
+					 SLOT(contrbright_changed()));
 	QObject::connect(sl_contr, SIGNAL(sliderReleased()), this,
-									 SLOT(contrbright_changed()));
+					 SLOT(contrbright_changed()));
 	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this,
-									 SLOT(transp_changed()));
+					 SLOT(transp_changed()));
 
 	//   vtkStructuredPointsReader* reader = vtkStructuredPointsReader::New();
 	//  reader= vtkSmartPointer<vtkXMLImageDataReader>::New();
@@ -2070,18 +2099,18 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 
 	input = vtkSmartPointer<vtkImageData>::New();
 	input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-									 (int)hand3D->return_height() - 1, 0,
-									 (int)hand3D->return_nrslices() - 1);
+					 (int)hand3D->return_height() - 1, 0,
+					 (int)hand3D->return_nrslices() - 1);
 	Pair ps = hand3D->get_pixelsize();
 	if (bmportissue)
 	{
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 		input->AllocateScalars(VTK_FLOAT, 1);
-		float *field = (float *)input->GetScalarPointer(0, 0, 0);
+		float* field = (float*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 	else
@@ -2091,15 +2120,17 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		case 1: input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
 		case 2: input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
 		default:
-			cerr << "volumeviewer3D::volumeviewer3D: tissues_size_t not implemented."
-					 << endl;
+			cerr << "volumeviewer3D::volumeviewer3D: tissues_size_t not "
+					"implemented."
+				 << endl;
 		}
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-		tissues_size_t *field = (tissues_size_t *)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field =
+			(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 
@@ -2182,12 +2213,12 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		lut->SetNumberOfColors(tissuecount + 1);
 		lut->Build();
 		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
-		float *tissuecolor;
+		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			tissuecolor = TissueInfos::GetTissueColor(i);
-			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2],
-												 1.0);
+			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1],
+							   tissuecolor[2], 1.0);
 		}
 	}
 	//
@@ -2233,26 +2264,28 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 			opacityTransferFunction->AddPoint(i, opac1);
 		}
 
-		colorTransferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+		colorTransferFunction =
+			vtkSmartPointer<vtkColorTransferFunction>::New();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-		float *tissuecolor;
+		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			tissuecolor = TissueInfos::GetTissueColor(i);
 			colorTransferFunction->AddRGBPoint((double)i - 0.1, tissuecolor[0],
-																				 tissuecolor[1], tissuecolor[2]);
+											   tissuecolor[1], tissuecolor[2]);
 		}
 		tissuecolor = TissueInfos::GetTissueColor(tissuecount);
 		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1,
-																			 tissuecolor[0], tissuecolor[1],
-																			 tissuecolor[2]);
+										   tissuecolor[0], tissuecolor[1],
+										   tissuecolor[2]);
 	}
 	else
 	{
 		opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
 		opacityTransferFunction->AddPoint(level - window / 2, 0.0);
 		opacityTransferFunction->AddPoint(level + window / 2, 1.0);
-		colorTransferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+		colorTransferFunction =
+			vtkSmartPointer<vtkColorTransferFunction>::New();
 		colorTransferFunction->AddRGBPoint(level - window / 2, 0.0, 0.0, 0.0);
 		colorTransferFunction->AddRGBPoint(level + window / 2, 1.0, 1.0, 1.0);
 	}
@@ -2357,7 +2390,7 @@ volumeviewer3D::volumeviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 	vtkWidget->GetRenderWindow()->Render();
 }
 
-void volumeviewer3D::resizeEvent(QResizeEvent *RE)
+void volumeviewer3D::resizeEvent(QResizeEvent* RE)
 {
 	QWidget::resizeEvent(RE);
 	QSize size1 = RE->size();
@@ -2371,7 +2404,7 @@ void volumeviewer3D::resizeEvent(QResizeEvent *RE)
 	vtkWidget->GetRenderWindow()->Render();
 }
 
-void volumeviewer3D::closeEvent(QCloseEvent *qce)
+void volumeviewer3D::closeEvent(QCloseEvent* qce)
 {
 	emit hasbeenclosed();
 	QWidget::closeEvent(qce);
@@ -2473,12 +2506,12 @@ void volumeviewer3D::tissue_changed()
 		colorTransferFunction->RemoveAllPoints();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
-		float *tissuecolor;
+		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1],
-																				 tissuecolor[2]);
+			colorTransferFunction->AddRGBPoint(i, tissuecolor[0],
+											   tissuecolor[1], tissuecolor[2]);
 		}
 
 		opacityTransferFunction->RemoveAllPoints();
@@ -2523,7 +2556,7 @@ void volumeviewer3D::contrbright_changed()
 	if (bmportissue)
 	{
 		double level =
-				range[0] + (sl_bright->value() * (range[1] - range[0]) / 100);
+			range[0] + (sl_bright->value() * (range[1] - range[0]) / 100);
 		double window = (range[1] - range[0]) / (sl_contr->value() + 1);
 
 		level = range[0] + (sl_bright->value() * (range[1] - range[0]) / 100);
@@ -2635,20 +2668,20 @@ void volumeviewer3D::thickness_changed(float thick)
 
 void volumeviewer3D::reload()
 {
-	int xm, xp, ym, yp, zm, zp;								//xxxa
+	int xm, xp, ym, yp, zm, zp;				  //xxxa
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
 	int size1[3];
 	input->GetDimensions(size1);
 	int w = hand3D->return_width(); //xxxa
 	if ((hand3D->return_width() != size1[0]) ||
-			(hand3D->return_height() != size1[1]) ||
-			(hand3D->return_nrslices() != size1[2]))
+		(hand3D->return_height() != size1[1]) ||
+		(hand3D->return_nrslices() != size1[2]))
 	{
 		input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-										 (int)hand3D->return_height() - 1, 0,
-										 (int)hand3D->return_nrslices() - 1);
+						 (int)hand3D->return_height() - 1, 0,
+						 (int)hand3D->return_nrslices() - 1);
 		input->AllocateScalars(input->GetScalarType(),
-													 input->GetNumberOfScalarComponents());
+							   input->GetNumberOfScalarComponents());
 		outlineGrid->SetInputData(input);
 		planeWidgetY->SetInputData(input);
 		sliceCutterY->SetInputData(input);
@@ -2673,26 +2706,27 @@ void volumeviewer3D::reload()
 		}
 	}
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
-	input->GetDimensions(size1);							//xxxa
+	input->GetDimensions(size1);			  //xxxa
 	Pair ps = hand3D->get_pixelsize();
 	input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 
 	if (bmportissue)
 	{
-		float *field = (float *)input->GetScalarPointer(0, 0, 0);
+		float* field = (float*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 	else
 	{
-		tissues_size_t *field = (tissues_size_t *)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field =
+			(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 
@@ -2726,17 +2760,17 @@ void volumeviewer3D::reload()
 		lut->SetNumberOfColors(tissuecount + 1);
 		lut->Build();
 		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
-		float *tissuecolor;
+		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
 			tissuecolor = TissueInfos::GetTissueColor(i);
 			lut->SetTableValue((double)i - 0.1, tissuecolor[0], tissuecolor[1],
-												 tissuecolor[2], 1.0);
+							   tissuecolor[2], 1.0);
 		}
 		tissuecolor = TissueInfos::GetTissueColor(tissuecount + 1);
 		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1,
-																			 tissuecolor[0], tissuecolor[1],
-																			 tissuecolor[2]);
+										   tissuecolor[0], tissuecolor[1],
+										   tissuecolor[2]);
 	}
 	sliceY->SetScalarRange(range);
 	sliceY->SetLookupTable(lut);
@@ -2768,12 +2802,12 @@ void volumeviewer3D::reload()
 
 		colorTransferFunction->RemoveAllPoints();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-		float *tissuecolor;
+		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
 			tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1],
-																				 tissuecolor[2]);
+			colorTransferFunction->AddRGBPoint(i, tissuecolor[0],
+											   tissuecolor[1], tissuecolor[2]);
 		}
 	}
 
@@ -2994,8 +3028,8 @@ void volumeviewer3D::reload()
 //}
 
 void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
-																			 double offset, float *valin,
-																			 float *valout)
+									   double offset, float* valin,
+									   float* valout)
 {
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	{
@@ -3019,7 +3053,7 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 	}
 
 	vtkSmartPointer<vtkDoubleArray> scalars =
-			vtkSmartPointer<vtkDoubleArray>::New();
+		vtkSmartPointer<vtkDoubleArray>::New();
 	{
 		for (int pos = 0; pos < nx * ny; pos++)
 		{
@@ -3036,9 +3070,10 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 	profile->GetPointData()->SetScalars(scalars);
 
 	vtkSmartPointer<vtkShepardMethod> shepard =
-			vtkSmartPointer<vtkShepardMethod>::New();
+		vtkSmartPointer<vtkShepardMethod>::New();
 	shepard->SetInputData(profile);
-	shepard->SetModelBounds(0, (nx - 1) * dx + offset, 0, (ny - 1) * dy, 0, 0.2);
+	shepard->SetModelBounds(0, (nx - 1) * dx + offset, 0, (ny - 1) * dy, 0,
+							0.2);
 	//	shepard->SetMaximumDistance(0.2);
 	shepard->SetNullValue(1.5);
 	shepard->SetSampleDimensions(2 * nx, ny, 2);
@@ -3046,15 +3081,15 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 
 	vtkSmartPointer<vtkImageData> output = vtkSmartPointer<vtkImageData>::New();
 	output->ShallowCopy(shepard->GetOutput());
-	double *field = (double *)output->GetScalarPointer(0, 0, 0);
+	double* field = (double*)output->GetScalarPointer(0, 0, 0);
 
 	{
-		FILE *fp3 =
-				fopen("D:\\Development\\segmentation\\sample images\\test100.txt", "a");
+		FILE* fp3 = fopen(
+			"D:\\Development\\segmentation\\sample images\\test100.txt", "a");
 
 		{
-			vtkDoubleArray *myarray =
-					(vtkDoubleArray *)profile->GetPointData()->GetScalars();
+			vtkDoubleArray* myarray =
+				(vtkDoubleArray*)profile->GetPointData()->GetScalars();
 			unsigned long long pos = 0;
 			for (int j = 0; j < nx; j++)
 			{
@@ -3064,7 +3099,7 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 					profile->GetPoint(pos, pt);
 					myarray->GetValue(pos);
 					fprintf(fp3, "%f %f %f %f \n", pt[0], pt[1], pt[2],
-									myarray->GetValue(pos));
+							myarray->GetValue(pos));
 					pos++;
 				}
 			}
@@ -3077,7 +3112,7 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 					profile->GetPoint(pos, pt);
 					myarray->GetValue(pos);
 					fprintf(fp3, "%f %f %f %f \n", pt[0], pt[1], pt[2],
-									myarray->GetValue(pos));
+							myarray->GetValue(pos));
 					pos++;
 				}
 			}
@@ -3088,7 +3123,8 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 		{
 			for (int j = 0; j < nx * 2; j++)
 			{
-				fprintf(fp3, "%f ", *((double *)output->GetScalarPointer(j, i, 0)));
+				fprintf(fp3, "%f ",
+						*((double*)output->GetScalarPointer(j, i, 0)));
 				pos++;
 			}
 			fprintf(fp3, "\n");
@@ -3099,7 +3135,8 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 		{
 			for (int j = 0; j < nx * 2; j++)
 			{
-				fprintf(fp3, "%f ", *((double *)output->GetScalarPointer(j, i, 1)));
+				fprintf(fp3, "%f ",
+						*((double*)output->GetScalarPointer(j, i, 1)));
 				pos++;
 			}
 			fprintf(fp3, "\n");
@@ -3110,10 +3147,10 @@ void iSAR_ShepInterpolate::interpolate(int nx, int ny, double dx, double dy,
 	}
 }
 
-surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
-																 QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+surfaceviewer3D::surfaceviewer3D(SlicesHandler* hand3D1, bool bmportissue1,
+								 QWidget* parent, const char* name,
+								 Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags)
 {
 	bmportissue = bmportissue1;
 	hand3D = hand3D1;
@@ -3130,7 +3167,7 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 	hbox1->setFixedHeight(hbox1->sizeHint().height());
 
 	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this,
-									 SLOT(transp_changed()));
+					 SLOT(transp_changed()));
 
 	if (bmportissue)
 	{
@@ -3142,7 +3179,7 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		hbox2->setFixedHeight(hbox2->sizeHint().height());
 
 		QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this,
-										 SLOT(thresh_changed()));
+						 SLOT(thresh_changed()));
 	}
 
 	bt_update = new QPushButton("Update", vbox1);
@@ -3158,18 +3195,18 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 
 	input = vtkSmartPointer<vtkImageData>::New();
 	input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-									 (int)hand3D->return_height() - 1, 0,
-									 (int)hand3D->return_nrslices() - 1);
+					 (int)hand3D->return_height() - 1, 0,
+					 (int)hand3D->return_nrslices() - 1);
 	Pair ps = hand3D->get_pixelsize();
 	if (bmportissue)
 	{
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 		input->AllocateScalars(VTK_FLOAT, 1);
-		float *field = (float *)input->GetScalarPointer(0, 0, 0);
+		float* field = (float*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 	else
@@ -3179,16 +3216,17 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		case 1: input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
 		case 2: input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
 		default:
-			cerr
-					<< "surfaceviewer3D::surfaceviewer3D: tissues_size_t not implemented."
-					<< endl;
+			cerr << "surfaceviewer3D::surfaceviewer3D: tissues_size_t not "
+					"implemented."
+				 << endl;
 		}
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-		tissues_size_t *field = (tissues_size_t *)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field =
+			(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 
@@ -3224,8 +3262,8 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 	if (bmportissue)
 	{
 		cubes = vtkSmartPointer<vtkMarchingCubes>::New();
-		cubes->SetValue(0, range[0] +
-													 0.01 * (range[01] - range[0]) * sl_thresh->value());
+		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) *
+										  sl_thresh->value());
 		cubes->SetInputData(input);
 
 		PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
@@ -3235,8 +3273,8 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		Actor.push_back(vtkSmartPointer<vtkActor>::New());
 		(*Actor.rbegin())->SetMapper((*PolyDataMapper.rbegin()));
 		(*Actor.rbegin())
-				->GetProperty()
-				->SetOpacity(1.0 - 0.01 * sl_trans->value());
+			->GetProperty()
+			->SetOpacity(1.0 - 0.01 * sl_trans->value());
 		//		(*Actor.rbegin())->GetProperty()->SetColor(1.0,1.0,1.0);
 		ren3D->AddActor((*Actor.rbegin()));
 	}
@@ -3253,15 +3291,16 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 		histogram->Update();
 
 		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel,
-																	endLabel);
+									  endLabel);
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
-			cerr << "surfaceviewer3D::surfaceviewer3D: Out of range tissues_size_t."
-					 << endl;
+			cerr << "surfaceviewer3D::surfaceviewer3D: Out of range "
+					"tissues_size_t."
+				 << endl;
 		}
 #endif // TISSUES_SIZE_TYPEDEF
-		float *tissuecolor;
+		float* tissuecolor;
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
 			geometry.push_back(vtkSmartPointer<vtkGeometryFilter>::New());
@@ -3269,7 +3308,8 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 			selector.push_back(vtkSmartPointer<vtkThreshold>::New());
 
 			//selector->SetInput(smoother->GetOutput());
-			(*selector.rbegin())->SetInputConnection(discreteCubes->GetOutputPort());
+			(*selector.rbegin())
+				->SetInputConnection(discreteCubes->GetOutputPort());
 			//selector->SetInputArrayToProcess(0, 0, 0,
 			//	vtkDataObject::FIELD_ASSOCIATION_CELLS,
 			//	vtkDataSetAttributes::SCALARS);
@@ -3283,11 +3323,12 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 
 			//geometry->SetInput(scalarsOff->GetOutput());
 			(*geometry.rbegin())
-					->SetInputConnection((*selector.rbegin())->GetOutputPort());
+				->SetInputConnection((*selector.rbegin())->GetOutputPort());
 
 			// see if the label exists, if not skip it
 			double frequency =
-					histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(i);
+				histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(
+					i);
 			if (frequency == 0.0)
 			{
 				continue;
@@ -3300,7 +3341,7 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 
 			PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
 			(*PolyDataMapper.rbegin())
-					->SetInputConnection((*geometry.rbegin())->GetOutputPort());
+				->SetInputConnection((*geometry.rbegin())->GetOutputPort());
 			(*PolyDataMapper.rbegin())->ScalarVisibilityOff();
 
 			Actor.push_back(vtkSmartPointer<vtkActor>::New());
@@ -3313,8 +3354,8 @@ surfaceviewer3D::surfaceviewer3D(SlicesHandler *hand3D1, bool bmportissue1,
 			(*Actor.rbegin())->GetProperty()->SetOpacity(opac1);
 			tissuecolor = TissueInfos::GetTissueColor(i);
 			(*Actor.rbegin())
-					->GetProperty()
-					->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+				->GetProperty()
+				->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 			ren3D->AddActor((*Actor.rbegin()));
 		}
 	}
@@ -3360,11 +3401,12 @@ void surfaceviewer3D::tissue_changed()
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
-			cerr << "surfaceviewer3D::tissue_changed: Out of range tissues_size_t."
-					 << endl;
+			cerr << "surfaceviewer3D::tissue_changed: Out of range "
+					"tissues_size_t."
+				 << endl;
 		}
 #endif // TISSUES_SIZE_TYPEDEF
-		float *tissuecolor;
+		float* tissuecolor;
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
 			size_t j = 0;
@@ -3380,7 +3422,7 @@ void surfaceviewer3D::tissue_changed()
 			Actor[j]->GetProperty()->SetOpacity(opac1);
 			tissuecolor = TissueInfos::GetTissueColor(i);
 			Actor[j]->GetProperty()->SetColor(tissuecolor[0], tissuecolor[1],
-																				tissuecolor[2]);
+											  tissuecolor[2]);
 		}
 
 		vtkWidget->GetRenderWindow()->Render();
@@ -3427,20 +3469,20 @@ void surfaceviewer3D::reload()
 		Actor.clear();
 	}
 
-	int xm, xp, ym, yp, zm, zp;								//xxxa
+	int xm, xp, ym, yp, zm, zp;				  //xxxa
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
 	int size1[3];
 	input->GetDimensions(size1);
 	int w = hand3D->return_width(); //xxxa
 	if ((hand3D->return_width() != size1[0]) ||
-			(hand3D->return_height() != size1[1]) ||
-			(hand3D->return_nrslices() != size1[2]))
+		(hand3D->return_height() != size1[1]) ||
+		(hand3D->return_nrslices() != size1[2]))
 	{
 		input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-										 (int)hand3D->return_height() - 1, 0,
-										 (int)hand3D->return_nrslices() - 1);
+						 (int)hand3D->return_height() - 1, 0,
+						 (int)hand3D->return_nrslices() - 1);
 		input->AllocateScalars(input->GetScalarType(),
-													 input->GetNumberOfScalarComponents());
+							   input->GetNumberOfScalarComponents());
 		if (bmportissue)
 		{
 			cubes->SetInputData(input);
@@ -3451,26 +3493,27 @@ void surfaceviewer3D::reload()
 		}
 	}
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
-	input->GetDimensions(size1);							//xxxa
+	input->GetDimensions(size1);			  //xxxa
 	Pair ps = hand3D->get_pixelsize();
 	input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 
 	if (bmportissue)
 	{
-		float *field = (float *)input->GetScalarPointer(0, 0, 0);
+		float* field = (float*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 	else
 	{
-		tissues_size_t *field = (tissues_size_t *)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field =
+			(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
 		{
 			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+				i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 
@@ -3493,8 +3536,8 @@ void surfaceviewer3D::reload()
 
 	if (bmportissue)
 	{
-		cubes->SetValue(0, range[0] +
-													 0.01 * (range[01] - range[0]) * sl_thresh->value());
+		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) *
+										  sl_thresh->value());
 	}
 	else
 	{
@@ -3503,22 +3546,24 @@ void surfaceviewer3D::reload()
 		histogram->Update();
 
 		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel,
-																	endLabel);
+									  endLabel);
 
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
-			cerr << "surfaceviewer3D::reload: Out of range tissues_size_t." << endl;
+			cerr << "surfaceviewer3D::reload: Out of range tissues_size_t."
+				 << endl;
 		}
 #endif // TISSUES_SIZE_TYPEDEF
-		float *tissuecolor;
+		float* tissuecolor;
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
 			geometry.push_back(vtkSmartPointer<vtkGeometryFilter>::New());
 			selector.push_back(vtkSmartPointer<vtkThreshold>::New());
 
 			//selector->SetInput(smoother->GetOutput());
-			(*selector.rbegin())->SetInputConnection(discreteCubes->GetOutputPort());
+			(*selector.rbegin())
+				->SetInputConnection(discreteCubes->GetOutputPort());
 			//selector->SetInputArrayToProcess(0, 0, 0,
 			//	vtkDataObject::FIELD_ASSOCIATION_CELLS,
 			//	vtkDataSetAttributes::SCALARS);
@@ -3532,11 +3577,12 @@ void surfaceviewer3D::reload()
 
 			//geometry->SetInput(scalarsOff->GetOutput());
 			(*geometry.rbegin())
-					->SetInputConnection((*selector.rbegin())->GetOutputPort());
+				->SetInputConnection((*selector.rbegin())->GetOutputPort());
 
 			// see if the label exists, if not skip it
 			double frequency =
-					histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(i);
+				histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(
+					i);
 			if (frequency == 0.0)
 			{
 				continue;
@@ -3549,7 +3595,7 @@ void surfaceviewer3D::reload()
 
 			PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
 			(*PolyDataMapper.rbegin())
-					->SetInputConnection((*geometry.rbegin())->GetOutputPort());
+				->SetInputConnection((*geometry.rbegin())->GetOutputPort());
 			(*PolyDataMapper.rbegin())->ScalarVisibilityOff();
 
 			Actor.push_back(vtkSmartPointer<vtkActor>::New());
@@ -3562,8 +3608,8 @@ void surfaceviewer3D::reload()
 			(*Actor.rbegin())->GetProperty()->SetOpacity(opac1);
 			tissuecolor = TissueInfos::GetTissueColor(i);
 			(*Actor.rbegin())
-					->GetProperty()
-					->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+				->GetProperty()
+				->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 			ren3D->AddActor((*Actor.rbegin()));
 		}
 	}
@@ -3573,13 +3619,13 @@ void surfaceviewer3D::reload()
 	vtkWidget->GetRenderWindow()->Render();
 }
 
-void surfaceviewer3D::closeEvent(QCloseEvent *qce)
+void surfaceviewer3D::closeEvent(QCloseEvent* qce)
 {
 	emit hasbeenclosed();
 	QWidget::closeEvent(qce);
 }
 
-void surfaceviewer3D::resizeEvent(QResizeEvent *RE)
+void surfaceviewer3D::resizeEvent(QResizeEvent* RE)
 {
 	QWidget::resizeEvent(RE);
 	QSize size1 = RE->size();
@@ -3596,16 +3642,17 @@ void surfaceviewer3D::transp_changed()
 	if (bmportissue)
 	{
 		(*Actor.rbegin())
-				->GetProperty()
-				->SetOpacity(1.0 - 0.01 * sl_trans->value());
+			->GetProperty()
+			->SetOpacity(1.0 - 0.01 * sl_trans->value());
 	}
 	else
 	{
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
-			cerr << "surfaceviewer3D::transp_changed: Out of range tissues_size_t."
-					 << endl;
+			cerr << "surfaceviewer3D::transp_changed: Out of range "
+					"tissues_size_t."
+				 << endl;
 		}
 #endif // TISSUES_SIZE_TYPEDEF
 		for (unsigned int i = startLabel; i <= endLabel; i++)
@@ -3630,8 +3677,8 @@ void surfaceviewer3D::thresh_changed()
 {
 	if (bmportissue)
 	{
-		cubes->SetValue(0, range[0] +
-													 0.01 * (range[01] - range[0]) * sl_thresh->value());
+		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) *
+										  sl_thresh->value());
 
 		vtkWidget->GetRenderWindow()->Render();
 	}

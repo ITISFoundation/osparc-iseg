@@ -14,18 +14,21 @@
 #include "Pair.h"
 #include "Point.h"
 
-class iSegCore_API feature_extractor
+namespace iseg {
+
+class iSegCore_API FeatureExtractor
 {
 public:
-	void init(float *bit, Point p1, Point p2, short unsigned w, short unsigned h);
-	void set_bits(float *bit);
+	void init(float* bit, Point p1, Point p2, short unsigned w,
+			  short unsigned h);
+	void set_bits(float* bit);
 	void set_window(Point p1, Point p2);
 	float return_average();
 	float return_stddev();
-	void return_extrema(Pair *p);
+	void return_extrema(Pair* p);
 
 private:
-	float *bits;
+	float* bits;
 	short xmin;
 	short xmax;
 	short ymin;
@@ -36,5 +39,6 @@ private:
 	short unsigned width;
 	short unsigned height;
 	unsigned area;
-	float *mask;
+	float* mask;
 };
+} // namespace iseg

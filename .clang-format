@@ -1,6 +1,6 @@
 Language:        Cpp
 # BasedOnStyle:  LLVM
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: true
@@ -35,9 +35,9 @@ IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 NamespaceIndentation: None
 ReflowComments: false
-IndentWidth: 2
+IndentWidth: 4
 UseTab: Always
-TabWidth: 2
+TabWidth: 4
 SpaceAfterTemplateKeyword: false
 #SpaceBeforeCtorInitializerColon: true
 SpaceBeforeAssignmentOperators: true
@@ -47,3 +47,5 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInAngles: false
 MaxEmptyLinesToKeep: 1
+DerivePointerAlignment: false
+PointerAlignment: Left

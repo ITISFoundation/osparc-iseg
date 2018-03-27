@@ -7,10 +7,11 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef ATLAS_H
-#define ATLAS_H
+#pragma once
 
 #include <qdir.h>
+
+namespace iseg {
 
 class Atlas
 {
@@ -24,4 +25,4 @@ public:
 	int nratlases;
 };
 
-#endif // ATLAS_H
+} // namespace iseg

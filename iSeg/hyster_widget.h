@@ -34,19 +34,21 @@
 #include <q3mimefactory.h>
 #include <qpixmap.h>
 
+namespace iseg {
+
 class hyster_widget : public QWidget1
 {
 	Q_OBJECT
 public:
-	hyster_widget(SlicesHandler *hand3D, QWidget *parent = 0,
-								const char *name = 0, Qt::WindowFlags wFlags = 0);
+	hyster_widget(SlicesHandler* hand3D, QWidget* parent = 0,
+				  const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~hyster_widget();
 	void init();
 	void newloaded();
 	void clean_up();
 	QSize sizeHint() const;
-	FILE *SaveParams(FILE *fp, int version);
-	FILE *LoadParams(FILE *fp, int version);
+	FILE* SaveParams(FILE* fp, int version);
+	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
 	std::string GetName() { return std::string("Growing"); };
 	virtual QIcon GetIcon(QDir picdir)
@@ -58,64 +60,64 @@ private:
 	void init1();
 	Point p1;
 	Point last_pt;
-	bmphandler *bmphand;
-	SlicesHandler *handler3D;
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
 	unsigned short activeslice;
 	float upper_limit;
 	float lower_limit;
-	Q3HBox *hbox1;
-	Q3HBox *hbox2;
-	Q3HBox *hbox2a;
-	Q3HBox *hbox3;
-	Q3VBox *vbox1;
-	Q3VBox *vbox2;
-	Q3VBox *vbox3;
-	Q3VBox *vbox4;
-	Q3VBox *vbox5;
-	Q3VBox *vbox6;
-	Q3VBox *vbox7;
-	QLabel *txt_lower;
-	QLabel *txt_upper;
-	QLabel *txt_lowerhyster;
-	QLabel *txt_upperhyster;
-	QSlider *sl_lower;
-	QSlider *sl_upper;
-	QSlider *sl_lowerhyster;
-	QSlider *sl_upperhyster;
-	QPushButton *pushexec;
-	QPushButton *drawlimit;
-	QPushButton *clearlimit;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox2a;
+	Q3HBox* hbox3;
+	Q3VBox* vbox1;
+	Q3VBox* vbox2;
+	Q3VBox* vbox3;
+	Q3VBox* vbox4;
+	Q3VBox* vbox5;
+	Q3VBox* vbox6;
+	Q3VBox* vbox7;
+	QLabel* txt_lower;
+	QLabel* txt_upper;
+	QLabel* txt_lowerhyster;
+	QLabel* txt_upperhyster;
+	QSlider* sl_lower;
+	QSlider* sl_upper;
+	QSlider* sl_lowerhyster;
+	QSlider* sl_upperhyster;
+	QPushButton* pushexec;
+	QPushButton* drawlimit;
+	QPushButton* clearlimit;
 	bool limitdrawing;
-	QCheckBox *autoseed;
-	QCheckBox *allslices;
+	QCheckBox* autoseed;
+	QCheckBox* allslices;
 	void getrange();
 	void getrange_sub(float ll, float uu, float ul, float lu);
 	std::vector<Point> vp1;
 	std::vector<Point> vpdyn;
 	void execute1();
 	bool dontundo;
-	QLineEdit *le_bordervall;
-	QLineEdit *le_bordervalu;
-	QLineEdit *le_bordervallh;
-	QLineEdit *le_bordervaluh;
-	QPushButton *pb_saveborders;
-	QPushButton *pb_loadborders;
+	QLineEdit* le_bordervall;
+	QLineEdit* le_bordervalu;
+	QLineEdit* le_bordervallh;
+	QLineEdit* le_bordervaluh;
+	QPushButton* pb_saveborders;
+	QPushButton* pb_loadborders;
 
 signals:
-	void vpdyn_changed(std::vector<Point> *vpdyn_arg);
-	void vp1_changed(std::vector<Point> *vp1_arg);
-	void vp1dyn_changed(std::vector<Point> *vp1_arg,
-											std::vector<Point> *vpdyn_arg);
-	void begin_datachange(common::DataSelection &dataSelection,
-												QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL,
-											common::EndUndoAction undoAction = common::EndUndo);
+	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
+	void vp1_changed(std::vector<Point>* vp1_arg);
+	void vp1dyn_changed(std::vector<Point>* vp1_arg,
+						std::vector<Point>* vpdyn_arg);
+	void begin_datachange(iseg::DataSelection& dataSelection,
+						  QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
+						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
-	void bmphand_changed(bmphandler *bmph);
+	void bmphand_changed(bmphandler* bmph);
 	void pt_clicked(Point p);
 	void pt_moved(Point p);
 	void pt_released(Point p);
@@ -135,5 +137,7 @@ private slots:
 	void le_bordervallh_returnpressed();
 	void le_bordervaluh_returnpressed();
 };
+
+} // namespace iseg
 
 #endif

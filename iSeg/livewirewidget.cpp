@@ -7,16 +7,17 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "livewirewidget.h"
-#include "FormatTooltip.h"
 #include "Precompiled.h"
+
+#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
+#include "livewirewidget.h"
 
 #include "Core/IFT2.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
-#include "Core/linedraw.h"
+#include "Core/addLine.h"
 
 #include <q3listbox.h>
 #include <q3vbox.h>
@@ -36,13 +37,14 @@
 #include <qwidget.h>
 
 using namespace std;
+using namespace iseg;
 
-livewire_widget::livewire_widget(SlicesHandler *hand3D, QWidget *parent,
-																 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+livewire_widget::livewire_widget(SlicesHandler* hand3D, QWidget* parent,
+								 const char* name, Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Use the Auto Trace to follow ideal contour path or draw "
-										"contours around a tissue to segment it."));
+					  "contours around a tissue to segment it."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -59,24 +61,24 @@ livewire_widget::livewire_widget(SlicesHandler *hand3D, QWidget *parent,
 	straight = new QRadioButton(QString("Straight"), vboxmethods);
 	autotrace = new QRadioButton(QString("Auto Trace"), vboxmethods);
 	autotrace->setToolTip(Format(
-			"The Livewire (intelligent scissors) algorithm "
-			"to automatically identify the ideal contour path.This algorithm uses "
-			"information "
-			"about the strength and orientation of the(smoothed) image gradient, "
-			"the zero - crossing of the Laplacian (for fine tuning) together with "
-			"some weighting "
-			"to favor straighter lines to determine the most likely contour path. "
-			"The "
-			"contouring is started by clicking the left mouse button. Each "
-			"subsequent left "
-			"button click fixes another point and the suggested contour line in "
-			"between. "
-			"<br>"
-			"Successive removing of unwanted points is achieved by clicking the "
-			"middle "
-			"mouse button. A double left click closes the contour while a double "
-			"middle "
-			"click aborts the line drawing process."));
+		"The Livewire (intelligent scissors) algorithm "
+		"to automatically identify the ideal contour path.This algorithm uses "
+		"information "
+		"about the strength and orientation of the(smoothed) image gradient, "
+		"the zero - crossing of the Laplacian (for fine tuning) together with "
+		"some weighting "
+		"to favor straighter lines to determine the most likely contour path. "
+		"The "
+		"contouring is started by clicking the left mouse button. Each "
+		"subsequent left "
+		"button click fixes another point and the suggested contour line in "
+		"between. "
+		"<br>"
+		"Successive removing of unwanted points is achieved by clicking the "
+		"middle "
+		"mouse button. A double left click closes the contour while a double "
+		"middle "
+		"click aborts the line drawing process."));
 	freedraw = new QRadioButton(QString("Free"), vboxmethods);
 	drawmode->insert(straight);
 	drawmode->insert(autotrace);
@@ -86,8 +88,8 @@ livewire_widget::livewire_widget(SlicesHandler *hand3D, QWidget *parent,
 	hbox2 = new Q3HBox(vbox1);
 	cb_freezing = new QCheckBox("Freezing", hbox2);
 	cb_freezing->setToolTip(
-			Format("Specify the number of seconds after which a line segment is "
-						 "frozen even without mouse click if it has not changed."));
+		Format("Specify the number of seconds after which a line segment is "
+			   "frozen even without mouse click if it has not changed."));
 	lb_freezing1 = new QLabel("Delay: ", hbox2);
 	sb_freezing = new QSpinBox(1, 10, 1, hbox2);
 	sb_freezing->setValue(3);
@@ -113,11 +115,11 @@ livewire_widget::livewire_widget(SlicesHandler *hand3D, QWidget *parent,
 	mode_changed();
 
 	QObject::connect(drawmode, SIGNAL(buttonClicked(int)), this,
-									 SLOT(mode_changed()));
+					 SLOT(mode_changed()));
 	QObject::connect(cb_freezing, SIGNAL(clicked()), this,
-									 SLOT(freezing_changed()));
+					 SLOT(freezing_changed()));
 	QObject::connect(sb_freezing, SIGNAL(valueChanged(int)), this,
-									 SLOT(sbfreezing_changed(int)));
+					 SLOT(sbfreezing_changed(int)));
 
 	return;
 }
@@ -178,7 +180,8 @@ void livewire_widget::pt_clicked(Point p)
 		else
 		{
 			lw->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(), dynamic.end());
+			established.insert(established.end(), dynamic.begin(),
+							   dynamic.end());
 			if (cb_closing->isChecked())
 				lwfirst->return_path(p, &dynamic);
 			else
@@ -210,12 +213,14 @@ void livewire_widget::pt_doubleclicked(Point p)
 		else if (autotrace->isOn())
 		{
 			lw->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(), dynamic.end());
+			established.insert(established.end(), dynamic.begin(),
+							   dynamic.end());
 			lwfirst->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(), dynamic.end());
+			established.insert(established.end(), dynamic.begin(),
+							   dynamic.end());
 		}
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
@@ -335,7 +340,7 @@ void livewire_widget::pt_released(Point p)
 		addLine(&dynamic, p1, p);
 		addLine(&dynamic, p2, p);
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
@@ -392,7 +397,7 @@ void livewire_widget::pt_moved(Point p)
 				times.resize(dynamic.size());
 				vector<QTime>::iterator tit = times.begin();
 				while (rit != dynamic.rend() && ritold != dynamicold.rend() &&
-							 (*rit).px == (*ritold).px && (*rit).py == (*ritold).py)
+					   (*rit).px == (*ritold).px && (*rit).py == (*ritold).py)
 				{
 					rit++;
 					ritold++;
@@ -407,7 +412,8 @@ void livewire_widget::pt_moved(Point p)
 				}
 
 				dynamicold.clear();
-				dynamicold.insert(dynamicold.begin(), dynamic.begin(), dynamic.end());
+				dynamicold.insert(dynamicold.begin(), dynamic.begin(),
+								  dynamic.end());
 
 				/*FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
 				for(tit=times.begin();tit!=times.end();tit++)
@@ -428,25 +434,29 @@ void livewire_widget::pt_moved(Point p)
 					rit--;
 					lw->change_pt(*rit);
 					rit++;
-					established.insert(established.end(), dynamic.rbegin(), rit);
+					established.insert(established.end(), dynamic.rbegin(),
+									   rit);
 					times.erase(times.begin(), tit);
 					//					dynamic.erase(dynamic.rbegin(),rit);
 
 					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
+						dynamic.insert(dynamic.end(), dynamic1.begin(),
+									   dynamic1.end());
 					emit vp1dyn_changed(&established, &dynamic);
 				}
 				else
 				{
 					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
+						dynamic.insert(dynamic.end(), dynamic1.begin(),
+									   dynamic1.end());
 					emit vpdyn_changed(&dynamic);
 				}
 			}
 			else
 			{
 				if (cb_closing->isChecked())
-					dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
+					dynamic.insert(dynamic.end(), dynamic1.begin(),
+								   dynamic1.end());
 				emit vpdyn_changed(&dynamic);
 			}
 		}
@@ -576,7 +586,7 @@ void livewire_widget::slicenr_changed()
 	//	}
 }
 
-void livewire_widget::bmphand_changed(bmphandler *bmph)
+void livewire_widget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -652,7 +662,7 @@ void livewire_widget::sbfreezing_changed(int i)
 	tlimit2 = (float(i) + 0.5f) * 1000;
 }
 
-FILE *livewire_widget::SaveParams(FILE *fp, int version)
+FILE* livewire_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -674,16 +684,16 @@ FILE *livewire_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *livewire_widget::LoadParams(FILE *fp, int version)
+FILE* livewire_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(drawmode, SIGNAL(buttonClicked(int)), this,
-												SLOT(mode_changed()));
+							SLOT(mode_changed()));
 		QObject::disconnect(cb_freezing, SIGNAL(clicked()), this,
-												SLOT(freezing_changed()));
+							SLOT(freezing_changed()));
 		QObject::disconnect(sb_freezing, SIGNAL(valueChanged(int)), this,
-												SLOT(sbfreezing_changed(int)));
+							SLOT(sbfreezing_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -704,11 +714,11 @@ FILE *livewire_widget::LoadParams(FILE *fp, int version)
 		mode_changed();
 
 		QObject::connect(drawmode, SIGNAL(buttonClicked(int)), this,
-										 SLOT(mode_changed()));
+						 SLOT(mode_changed()));
 		QObject::connect(cb_freezing, SIGNAL(clicked()), this,
-										 SLOT(freezing_changed()));
+						 SLOT(freezing_changed()));
 		QObject::connect(sb_freezing, SIGNAL(valueChanged(int)), this,
-										 SLOT(sbfreezing_changed(int)));
+						 SLOT(sbfreezing_changed(int)));
 	}
 	return fp;
 }

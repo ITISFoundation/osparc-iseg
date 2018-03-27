@@ -9,26 +9,31 @@
  */
 #pragma once
 
-#include "Types.h"
 #include "iSegCore.h"
 
-class iSegCore_API stepsmooth
+#include "Types.h"
+
+namespace iseg {
+
+class iSegCore_API SmoothSteps
 {
 public:
-	stepsmooth();
-	~stepsmooth();
-	void dostepsmooth(tissues_size_t *line);
-	void init(float *mask1, unsigned short masklength1,
-						unsigned short linelength1, tissues_size_t nrtissues1);
+	SmoothSteps();
+	~SmoothSteps();
+	void dostepsmooth(tissues_size_t* line);
+	void init(float* mask1, unsigned short masklength1,
+			  unsigned short linelength1, tissues_size_t nrtissues1);
 	void init(unsigned short masklength1, unsigned short linelength1,
-						tissues_size_t nrtissues1);
+			  tissues_size_t nrtissues1);
 
 private:
-	float *mask;
+	float* mask;
 	unsigned short masklength;
 	unsigned short linelength;
 	tissues_size_t nrtissues;
-	float **weights;
+	float** weights;
 	void generate_binommask();
 	bool ownmask;
 };
+
+} // namespace iseg

@@ -7,10 +7,14 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "pixmapgenerator.h"
 #include "Precompiled.h"
+
+#include "pixmapgenerator.h"
 #include "tissueinfos.h"
+
 #include <qpainter.h>
+
+namespace iseg {
 
 QPixmap generatePixmap(tissues_size_t tissuenr)
 {
@@ -21,7 +25,7 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 		return abc;
 	}
 	unsigned char r, g, b;
-	TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
+	TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
 	tissueInfo->GetColorRGB(r, g, b);
 	abc.fill(QColor(r, g, b));
 	if (tissueInfo->locked)
@@ -46,3 +50,5 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 
 	return abc;
 }
+
+} // namespace iseg

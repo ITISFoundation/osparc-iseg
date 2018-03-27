@@ -15,7 +15,7 @@
 #include "bmp_read_1.h"
 
 #include "Core/IFT2.h"
-#include "Core/linedraw.h"
+#include "Core/addLine.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -28,23 +28,27 @@
 #include <algorithm>
 
 using namespace std;
+using namespace iseg;
 
-IFTrg_widget::IFTrg_widget(SlicesHandler *hand3D, QWidget *parent,
-													 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+IFTrg_widget::IFTrg_widget(SlicesHandler* hand3D, QWidget* parent,
+						   const char* name, Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
-			"Segment multiple tissues by drawing lines in the current slice based on "
-			"the Image Foresting Transform. "
-			"These lines are drawn with the color of the currently selected tissue. "
-			"Multiple lines of different colours can be drawn "
-			"and they are subsequently used as seeds to grow regions based on a "
-			"local homogeneity criterion. Through competitive growing the best "
-			"boundaries "
-			"between regions grown from lines with different colours are identified."
-			"<br>"
-			"The result is stored in the Target. To assign a segmented region to a "
-			"tissue the 'Adder' must be used."));
+		"Segment multiple tissues by drawing lines in the current slice based "
+		"on "
+		"the Image Foresting Transform. "
+		"These lines are drawn with the color of the currently selected "
+		"tissue. "
+		"Multiple lines of different colours can be drawn "
+		"and they are subsequently used as seeds to grow regions based on a "
+		"local homogeneity criterion. Through competitive growing the best "
+		"boundaries "
+		"between regions grown from lines with different colours are "
+		"identified."
+		"<br>"
+		"The result is stored in the Target. To assign a segmented region to a "
+		"tissue the 'Adder' must be used."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -56,12 +60,12 @@ IFTrg_widget::IFTrg_widget(SlicesHandler *hand3D, QWidget *parent,
 	pushclear = new QPushButton("Clear Lines", vbox1);
 	pushremove = new QPushButton("Remove Line", vbox1);
 	pushremove->setToggleButton(true);
-	pushremove->setToolTip(
-			Format("Remove Line followed by a click on a line deletes "
-						 "this line and automatically updates the segmentation. If Remove "
-						 "Line has "
-						 "been pressed accidentally, a second press will deactivate the "
-						 "function again."));
+	pushremove->setToolTip(Format(
+		"Remove Line followed by a click on a line deletes "
+		"this line and automatically updates the segmentation. If Remove "
+		"Line has "
+		"been pressed accidentally, a second press will deactivate the "
+		"function again."));
 
 	hbox1 = new Q3HBox(vbox1);
 
@@ -80,11 +84,11 @@ IFTrg_widget::IFTrg_widget(SlicesHandler *hand3D, QWidget *parent,
 
 	QObject::connect(pushclear, SIGNAL(clicked()), this, SLOT(clearmarks()));
 	QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed(int)));
+					 SLOT(slider_changed(int)));
 	QObject::connect(sl_thresh, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 }
 
 IFTrg_widget::~IFTrg_widget()
@@ -126,9 +130,10 @@ void IFTrg_widget::newloaded()
 
 void IFTrg_widget::init1()
 {
-	vector<vector<mark>> *vvm = bmphand->return_vvm();
+	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
-	for (vector<vector<mark>>::iterator it = vvm->begin(); it != vvm->end(); it++)
+	for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
+		 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
 		;
@@ -137,11 +142,11 @@ void IFTrg_widget::init1()
 	area = bmphand->return_height() * (unsigned)bmphand->return_width();
 	if (lbmap != NULL)
 		free(lbmap);
-	lbmap = (float *)malloc(sizeof(float) * area);
+	lbmap = (float*)malloc(sizeof(float) * area);
 	for (unsigned i = 0; i < area; i++)
 		lbmap[i] = 0;
 	unsigned width = (unsigned)bmphand->return_width();
-	for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		lbmap[width * it->p.py + it->p.px] = (float)it->mark;
 	}
@@ -204,12 +209,13 @@ void IFTrg_widget::mouse_released(Point p)
 	if (!pushremove->isOn())
 	{
 		addLine(&vmdyn, last_pt, p);
-		mark m;
+		Mark m;
 		m.mark = tissuenr;
 		unsigned width = (unsigned)bmphand->return_width();
-		vector<mark> vmdummy;
+		vector<Mark> vmdummy;
 		vmdummy.clear();
-		for (vector<Point>::iterator it = vmdyn.begin(); it != vmdyn.end(); it++)
+		for (vector<Point>::iterator it = vmdyn.begin(); it != vmdyn.end();
+			 it++)
 		{
 			m.p = *it;
 			vmdummy.push_back(m);
@@ -217,7 +223,7 @@ void IFTrg_widget::mouse_released(Point p)
 		}
 		vm.insert(vm.end(), vmdummy.begin(), vmdummy.end());
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		dataSelection.vvm = true;
@@ -244,9 +250,9 @@ void IFTrg_widget::execute()
 	if (hideparams)
 		thresh = 0;
 	getrange();
-	float *f1 = IFTrg->return_lb();
-	float *f2 = IFTrg->return_pf();
-	float *work_bits = bmphand->return_work();
+	float* f1 = IFTrg->return_lb();
+	float* f2 = IFTrg->return_pf();
+	float* work_bits = bmphand->return_work();
 
 	float d = 255.0f / bmphand->return_vvmmaxim();
 	for (unsigned i = 0; i < area; i++)
@@ -278,9 +284,9 @@ void IFTrg_widget::slider_changed(int i)
 	thresh = i * 0.01f * maxthresh;
 	if (IFTrg != NULL)
 	{
-		float *f1 = IFTrg->return_lb();
-		float *f2 = IFTrg->return_pf();
-		float *work_bits = bmphand->return_work();
+		float* f1 = IFTrg->return_lb();
+		float* f2 = IFTrg->return_pf();
+		float* work_bits = bmphand->return_work();
 
 		float d = 255.0f / bmphand->return_vvmmaxim();
 		for (unsigned i = 0; i < area; i++)
@@ -291,7 +297,7 @@ void IFTrg_widget::slider_changed(int i)
 				work_bits[i] = 0;
 		}
 		bmphand->set_mode(2, false);
-		emit end_datachange(this, common::NoUndo);
+		emit end_datachange(this, iseg::NoUndo);
 	}
 }
 
@@ -311,7 +317,7 @@ void IFTrg_widget::slicenr_changed()
 	//	}
 }
 
-void IFTrg_widget::bmphand_changed(bmphandler *bmph)
+void IFTrg_widget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -320,9 +326,10 @@ void IFTrg_widget::bmphand_changed(bmphandler *bmph)
 		lbmap[width*it->p.py+it->p.px]=0;
 	}*/
 
-	vector<vector<mark>> *vvm = bmphand->return_vvm();
+	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
-	for (vector<vector<mark>>::iterator it = vvm->begin(); it != vvm->end(); it++)
+	for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
+		 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
 		;
@@ -330,7 +337,7 @@ void IFTrg_widget::bmphand_changed(bmphandler *bmph)
 
 	for (unsigned i = 0; i < area; i++)
 		lbmap[i] = 0;
-	for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 	{
 		lbmap[width * it->p.py + it->p.px] = (float)it->mark;
 	}
@@ -353,7 +360,7 @@ void IFTrg_widget::bmphand_changed(bmphandler *bmph)
 
 void IFTrg_widget::getrange()
 {
-	float *pf = IFTrg->return_pf();
+	float* pf = IFTrg->return_pf();
 	maxthresh = 0;
 	for (unsigned i = 0; i < area; i++)
 	{
@@ -377,16 +384,16 @@ void IFTrg_widget::removemarks(Point p)
 {
 	if (bmphand->del_vm(p, 3))
 	{
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		dataSelection.vvm = true;
 		emit begin_datachange(dataSelection, this);
 
-		vector<vector<mark>> *vvm = bmphand->return_vvm();
+		vector<vector<Mark>>* vvm = bmphand->return_vvm();
 		vm.clear();
-		for (vector<vector<mark>>::iterator it = vvm->begin(); it != vvm->end();
-				 it++)
+		for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
+			 it++)
 		{
 			vm.insert(vm.end(), it->begin(), it->end());
 			;
@@ -395,7 +402,7 @@ void IFTrg_widget::removemarks(Point p)
 		unsigned width = (unsigned)bmphand->return_width();
 		for (unsigned i = 0; i < area; i++)
 			lbmap[i] = 0;
-		for (vector<mark>::iterator it = vm.begin(); it != vm.end(); it++)
+		for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
 		{
 			lbmap[width * it->p.py + it->p.px] = (float)it->mark;
 		}
@@ -409,7 +416,7 @@ void IFTrg_widget::removemarks(Point p)
 
 void IFTrg_widget::slider_pressed()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
@@ -417,7 +424,7 @@ void IFTrg_widget::slider_pressed()
 
 void IFTrg_widget::slider_released() { emit end_datachange(this); }
 
-FILE *IFTrg_widget::SaveParams(FILE *fp, int version)
+FILE* IFTrg_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -431,12 +438,12 @@ FILE *IFTrg_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *IFTrg_widget::LoadParams(FILE *fp, int version)
+FILE* IFTrg_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-												SLOT(slider_changed(int)));
+							SLOT(slider_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -445,7 +452,7 @@ FILE *IFTrg_widget::LoadParams(FILE *fp, int version)
 		fread(&maxthresh, sizeof(float), 1, fp);
 
 		QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-										 SLOT(slider_changed(int)));
+						 SLOT(slider_changed(int)));
 	}
 	return fp;
 }

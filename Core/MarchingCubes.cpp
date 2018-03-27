@@ -7,21 +7,25 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "marchingcubeprint.h"
 #include "Precompiled.h"
+
+#include "MarchingCubes.h"
+
 #include <string>
 #include <vector>
 
 using namespace std;
+using namespace iseg;
 
-vectissuedescr *hypermeshascii_read(const char *filename)
+vectissuedescr* hypermeshascii_read(const char* filename)
 {
-	vectissuedescr *tissdescvec = new vectissuedescr; //(vector<tissuedescript> *)
-	FILE *fp;
+	vectissuedescr* tissdescvec =
+		new vectissuedescr; //(vector<tissuedescript> *)
+	FILE* fp;
 	//	FILE *fp1=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
 
 	vector<tissuedescript>::iterator itinner, itouter;
-	vector<V3F> *vertices = new vector<V3F>;
+	vector<V3F>* vertices = new vector<V3F>;
 	V3F vertex;
 	tissuedescript ts;
 
@@ -44,15 +48,18 @@ vectissuedescr *hypermeshascii_read(const char *filename)
 		{
 			//			fseek(fp,ftell(fp),SEEK_SET);
 			fread(&str, 4, 1, fp);
-			if (str[0] == 'n' && str[1] == 'o' && str[2] == 'd' && str[3] == 'e')
+			if (str[0] == 'n' && str[1] == 'o' && str[2] == 'd' &&
+				str[3] == 'e')
 			{
 				fscanf(fp, "(%u,%f,%f,%f", &dummy, &vertex.v[0], &vertex.v[1],
-							 &vertex.v[2]);
+					   &vertex.v[2]);
 				vertices->push_back(vertex);
 			}
-			else if (str[0] == 't' && str[1] == 'r' && str[2] == 'i' && str[3] == '3')
+			else if (str[0] == 't' && str[1] == 'r' && str[2] == 'i' &&
+					 str[3] == '3')
 			{
-				fscanf(fp, "(%u,1,%u,%u,%u)", &dummy, &corner1, &corner2, &corner3);
+				fscanf(fp, "(%u,1,%u,%u,%u)", &dummy, &corner1, &corner2,
+					   &corner3);
 				if (!exterior1)
 				{
 					itinner->index_array->push_back(corner1 - 1);
@@ -67,7 +74,8 @@ vectissuedescr *hypermeshascii_read(const char *filename)
 				}
 				//				fprintf(fp1,"%u %u %u; ",corner1,corner2,corner3);
 			}
-			else if (str[0] == 'c' && str[1] == 'o' && str[2] == 'm' && str[3] == 'p')
+			else if (str[0] == 'c' && str[1] == 'o' && str[2] == 'm' &&
+					 str[3] == 'p')
 			{
 				fscanf(fp, "onent(%u,", &dummy);
 				fgetc(fp);
@@ -83,7 +91,8 @@ vectissuedescr *hypermeshascii_read(const char *filename)
 				string1.assign(name);
 
 				itinner = tissdescvec->vtd.begin();
-				while (itinner != tissdescvec->vtd.end() && itinner->name != string1)
+				while (itinner != tissdescvec->vtd.end() &&
+					   itinner->name != string1)
 					itinner++;
 				if (itinner == tissdescvec->vtd.end())
 				{
@@ -113,7 +122,8 @@ vectissuedescr *hypermeshascii_read(const char *filename)
 				name[count] = str[4];
 				string2.assign(name);
 				itouter = tissdescvec->vtd.begin();
-				while (itouter != tissdescvec->vtd.end() && itouter->name != string2)
+				while (itouter != tissdescvec->vtd.end() &&
+					   itouter->name != string2)
 					itouter++;
 				if (itouter == tissdescvec->vtd.end())
 				{

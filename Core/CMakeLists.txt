@@ -16,32 +16,30 @@ USE_OPENMP()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
-	3D_outlines.cpp
+	addLine.cpp
 	branchItem-simplified.cpp
-	coef.cpp
 	ColorLookupTable.cpp
 	common.cpp
-	contour_class.cpp
+	Contour.cpp
 	EM.cpp
-	feature_extractor.cpp
+	FeatureExtractor.cpp
 	fillcontour.cpp
 	ImageReader.cpp
 	ImageWriter.cpp
-	index_priorqueue.cpp
+	IndexPriorityQueue.cpp
 	InitializeITKFactory.cpp
-	gamma.cpp
-	k_means.cpp
-	linedraw.cpp
+	KMeans.cpp
 	LoadPlugin.cpp
-	Mark.cpp
-	marchingcubeprint.cpp
-	matexport.cpp
+	MarchingCubes.cpp
+	MatlabExport.cpp
+	MultidimensionalGamma.cpp
+	Outline.cpp
+	Precompiled.cpp
+	RTDoseIODModule.cpp
 	RTDoseReader.cpp
 	RTDoseWriter.cpp
-	RTDoseIODModule.cpp
-	Precompiled.cpp
-	sliceprovider.cpp
-	stepsmooth.cpp
+	SliceProvider.cpp
+	SmoothSteps.cpp
 	UndoElem.cpp
 	UndoQueue.cpp
 	VoxelSurface.cpp

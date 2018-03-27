@@ -7,8 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "EM.h"
 #include "Precompiled.h"
+
+#include "EM.h"
 
 #include <algorithm>
 #include <cmath>
@@ -16,11 +17,12 @@
 #include <iostream>
 
 using namespace std;
+using namespace iseg;
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
 void EM::init(short unsigned wi, short unsigned h, short nrclass,
-							short dimension, float **bit, float *weight)
+			  short dimension, float** bit, float* weight)
 {
 	width = wi;
 	height = h;
@@ -29,12 +31,12 @@ void EM::init(short unsigned wi, short unsigned h, short nrclass,
 	dim = dimension;
 	bits = bit;
 	weights = weight;
-	m = (short *)malloc(sizeof(short) * area * nrclasses);
-	w = (float *)malloc(sizeof(float) * area * nrclasses);
-	sw = (float *)malloc(sizeof(float) * nrclasses);
-	centers = (float *)malloc(sizeof(float) * dim * nrclass);
-	devs = (float *)malloc(sizeof(float) * nrclass);
-	ampls = (float *)malloc(sizeof(float) * nrclass);
+	m = (short*)malloc(sizeof(short) * area * nrclasses);
+	w = (float*)malloc(sizeof(float) * area * nrclasses);
+	sw = (float*)malloc(sizeof(float) * nrclasses);
+	centers = (float*)malloc(sizeof(float) * dim * nrclass);
+	devs = (float*)malloc(sizeof(float) * nrclass);
+	ampls = (float*)malloc(sizeof(float) * nrclass);
 
 	init_centers();
 	//	init_centers_rand();
@@ -43,8 +45,8 @@ void EM::init(short unsigned wi, short unsigned h, short nrclass,
 }
 
 void EM::init(short unsigned wi, short unsigned h, short nrclass,
-							short dimension, float **bit, float *weight, float *center,
-							float *dev, float *ampl)
+			  short dimension, float** bit, float* weight, float* center,
+			  float* dev, float* ampl)
 {
 	width = wi;
 	height = h;
@@ -53,16 +55,16 @@ void EM::init(short unsigned wi, short unsigned h, short nrclass,
 	dim = dimension;
 	bits = bit;
 	weights = weight;
-	m = (short *)malloc(sizeof(short) * area * nrclasses);
-	w = (float *)malloc(sizeof(float) * area * nrclasses);
-	sw = (float *)malloc(sizeof(float) * nrclasses);
-	centers = (float *)malloc(sizeof(float) * dim * nrclass);
+	m = (short*)malloc(sizeof(short) * area * nrclasses);
+	w = (float*)malloc(sizeof(float) * area * nrclasses);
+	sw = (float*)malloc(sizeof(float) * nrclasses);
+	centers = (float*)malloc(sizeof(float) * dim * nrclass);
 	for (short i = 0; i < nrclass * dimension; i++)
 		centers[i] = center[i];
-	devs = (float *)malloc(sizeof(float) * nrclass);
+	devs = (float*)malloc(sizeof(float) * nrclass);
 	for (short i = 0; i < nrclass; i++)
 		devs[i] = dev[i];
-	ampls = (float *)malloc(sizeof(float) * nrclass);
+	ampls = (float*)malloc(sizeof(float) * nrclass);
 	for (short i = 0; i < nrclass; i++)
 		ampls[i] = ampl[i];
 	for (unsigned i = 0; i < area; i++)
@@ -88,14 +90,14 @@ unsigned EM::make_iter(unsigned maxiter, unsigned converged)
 	return iter;
 }
 
-void EM::classify(float *result_bits)
+void EM::classify(float* result_bits)
 {
 	for (unsigned i = 0; i < area; i++)
 		result_bits[i] = 255.0f / (nrclasses - 1) * m[i];
 	return;
 }
 
-void EM::apply_to(float **sources, float *result_bits)
+void EM::apply_to(float** sources, float* result_bits)
 {
 	UNREFERENCED_PARAMETER(sources);
 	float dist, wmax, wdummy;
@@ -108,8 +110,8 @@ void EM::apply_to(float **sources, float *result_bits)
 		dist = 0;
 		for (short n = 0; n < dim; n++)
 		{
-			dist +=
-					(bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) * weights[n];
+			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
+					weights[n];
 		}
 		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
 		cindex = dim;
@@ -119,7 +121,7 @@ void EM::apply_to(float **sources, float *result_bits)
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (bits[n][i] - centers[cindex]) *
-								(bits[n][i] - centers[cindex]) * weights[n];
+						(bits[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
@@ -166,8 +168,9 @@ void EM::recompute_centers()
 			{
 				for (short k = 0; k < dim; k++)
 				{
-					devs[i] += w[j + area * i] * (bits[k][j] - centers[k + i * dim]) *
-										 (bits[k][j] - centers[k + i * dim]) * weights[k];
+					devs[i] += w[j + area * i] *
+							   (bits[k][j] - centers[k + i * dim]) *
+							   (bits[k][j] - centers[k + i * dim]) * weights[k];
 				}
 			}
 			devs[i] /= sw[i];
@@ -200,8 +203,8 @@ unsigned EM::recompute_membership()
 		dist = 0;
 		for (short n = 0; n < dim; n++)
 		{
-			dist +=
-					(bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) * weights[n];
+			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
+					weights[n];
 		}
 		//		wsum=wmax=w[i]=exp(-dist/(2*devs[0]))/sqrt(devs[0])*ampls[0];
 		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
@@ -214,7 +217,7 @@ unsigned EM::recompute_membership()
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (bits[n][i] - centers[cindex]) *
-								(bits[n][i] - centers[cindex]) * weights[n];
+						(bits[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
@@ -320,7 +323,7 @@ void EM::init_centers_rand()
 	return;
 }
 
-void EM::init_centers(float *center, float *dev, float *ampl)
+void EM::init_centers(float* center, float* dev, float* ampl)
 {
 	for (short i = 0; i < nrclasses * dim; i++)
 		centers[i] = center[i];
@@ -331,11 +334,11 @@ void EM::init_centers(float *center, float *dev, float *ampl)
 	return;
 }
 
-float *EM::return_centers() { return centers; }
+float* EM::return_centers() { return centers; }
 
-float *EM::return_devs() { return devs; }
+float* EM::return_devs() { return devs; }
 
-float *EM::return_ampls() { return ampls; }
+float* EM::return_ampls() { return ampls; }
 
 EM::~EM()
 {

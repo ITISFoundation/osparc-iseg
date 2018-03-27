@@ -10,29 +10,32 @@
 #ifndef VESSELWIDGET_19DEZ07
 #define VESSELWIDGET_19DEZ07
 
+#include "SlicesHandler.h"
+#include "world.h"
+
+#include "Addon/qwidget1.h"
+
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Addon/qwidget1.h"
-#include "SlicesHandler.h"
-#include "world.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
+
+namespace iseg {
 
 class vessel_widget : public QWidget1
 {
 	Q_OBJECT
 public:
-	vessel_widget(SlicesHandler *hand3D, QWidget *parent = 0,
-								const char *name = 0, Qt::WindowFlags wFlags = 0);
+	vessel_widget(SlicesHandler* hand3D, QWidget* parent = 0,
+				  const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~vessel_widget();
-	FILE *SaveParams(FILE *fp, int version);
-	FILE *LoadParams(FILE *fp, int version);
+	FILE* SaveParams(FILE* fp, int version);
+	FILE* LoadParams(FILE* fp, int version);
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
@@ -48,28 +51,28 @@ private:
 	BranchTree branchTree;
 	void getlabels();
 	void reset_branchTree();
-	SlicesHandler *handler3D;
+	SlicesHandler* handler3D;
 	std::vector<augmentedmark> labels;
 	std::vector<augmentedmark> selectedlabels;
-	Q3HBox *hbox1;
-	Q3HBox *hbox2;
-	Q3HBox *hbox3;
-	Q3VBox *vbox1;
-	QLabel *txt_start;
-	QLabel *txt_nrend;
-	QLabel *txt_endnr;
-	QLabel *txt_end;
-	QLabel *txt_info;
-	QComboBox *cbb_lb1;
-	QComboBox *cbb_lb2;
-	QSpinBox *sb_nrend;
-	QSpinBox *sb_endnr;
-	QPushButton *pb_exec;
-	QPushButton *pb_store;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3VBox* vbox1;
+	QLabel* txt_start;
+	QLabel* txt_nrend;
+	QLabel* txt_endnr;
+	QLabel* txt_end;
+	QLabel* txt_info;
+	QComboBox* cbb_lb1;
+	QComboBox* cbb_lb2;
+	QSpinBox* sb_nrend;
+	QSpinBox* sb_endnr;
+	QPushButton* pb_exec;
+	QPushButton* pb_store;
 	std::vector<Point> vp;
 
 signals:
-	void vp1_changed(std::vector<Point> *vp1);
+	void vp1_changed(std::vector<Point>* vp1);
 
 private slots:
 	void marks_changed();
@@ -80,5 +83,7 @@ private slots:
 	void execute();
 	void savevessel();
 };
+
+} // namespace iseg
 
 #endif

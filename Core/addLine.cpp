@@ -7,22 +7,26 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "linedraw.h"
 #include "Precompiled.h"
+
+#include "addLine.h"
 
 #include <cstdlib>
 
+namespace iseg {
+
 using namespace std;
 
-void addLine(vector<Point> *vP, Point p1, Point p2)
+void addLine(vector<Point>* vP, Point p1, Point p2)
 {
-	short deltax, deltay, xinc1, xinc2, yinc1, yinc2, den, num, numadd, numpixels;
+	short deltax, deltay, xinc1, xinc2, yinc1, yinc2, den, num, numadd,
+		numpixels;
 	Point p;
 
 	deltax = abs(p2.px - p1.px); // The difference between the x's
 	deltay = abs(p2.py - p1.py); // The difference between the y's
-	p.px = p1.px;								 // Start x off at the first pixel
-	p.py = p1.py;								 // Start y off at the first pixel
+	p.px = p1.px;				 // Start x off at the first pixel
+	p.py = p1.py;				 // Start y off at the first pixel
 
 	if (p2.px >= p1.px) // The x-values are increasing
 	{
@@ -68,10 +72,10 @@ void addLine(vector<Point> *vP, Point p1, Point p2)
 	for (short curpixel = 0; curpixel <= numpixels; curpixel++)
 	{
 		vP->push_back(p); // Draw the current pixel
-		num += numadd;		// Increase the numerator by the top of the fraction
-		if (num >= den)		// Check if numerator >= denominator
+		num += numadd;	// Increase the numerator by the top of the fraction
+		if (num >= den)   // Check if numerator >= denominator
 		{
-			num -= den;		 // Calculate the new numerator value
+			num -= den;	// Calculate the new numerator value
 			p.px += xinc1; // Change the x as appropriate
 			p.py += yinc1; // Change the y as appropriate
 		}
@@ -79,3 +83,5 @@ void addLine(vector<Point> *vP, Point p1, Point p2)
 		p.py += yinc2; // Change the y as appropriate
 	}
 }
+
+} // namespace iseg

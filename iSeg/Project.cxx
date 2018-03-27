@@ -7,9 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Project.h"
 #include "Precompiled.h"
+
+#include "Project.h"
+
 #include <QString>
+
+using namespace iseg;
 
 Project::Project()
 {

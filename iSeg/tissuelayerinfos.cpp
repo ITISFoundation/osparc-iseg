@@ -7,16 +7,19 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "tissuelayerinfos.h"
 #include "Precompiled.h"
+
+#include "tissuelayerinfos.h"
+
+using namespace iseg;
 
 tissuelayers_size_t TissueLayerInfos::GetTissueLayerCount()
 {
 	return (tissuelayers_size_t)tissueLayerInfosVector.size();
 }
 
-TissueLayerInfoStruct *
-		TissueLayerInfos::GetTissueLayerInfo(tissuelayers_size_t layerIdx)
+TissueLayerInfoStruct*
+	TissueLayerInfos::GetTissueLayerInfo(tissuelayers_size_t layerIdx)
 {
 	return &tissueLayerInfosVector[layerIdx];
 }
@@ -46,13 +49,13 @@ float TissueLayerInfos::GetTissueLayerOpac(tissuelayers_size_t layerIdx)
 }
 
 TissueLayerOverlayMode
-		TissueLayerInfos::GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx)
+	TissueLayerInfos::GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx)
 {
 	return tissueLayerInfosVector[layerIdx].mode;
 }
 
 void TissueLayerInfos::SetTissueLayerName(tissuelayers_size_t layerIdx,
-																					QString val)
+										  QString val)
 {
 	tissueLayerIndexMap.erase(tissueLayerInfosVector[layerIdx].name);
 	tissueLayerIndexMap.insert(TissueLayerIndexMapEntryType(val, layerIdx));
@@ -60,7 +63,7 @@ void TissueLayerInfos::SetTissueLayerName(tissuelayers_size_t layerIdx,
 }
 
 void TissueLayerInfos::SetTissueLayerVisible(tissuelayers_size_t layerIdx,
-																						 bool val)
+											 bool val)
 {
 	tissueLayerInfosVector[layerIdx].visible = val;
 }
@@ -69,29 +72,29 @@ void TissueLayerInfos::SetTissueLayersVisible(bool val)
 {
 	TissueLayerInfosVecType::iterator vecIt;
 	for (vecIt = tissueLayerInfosVector.begin() + 1;
-			 vecIt != tissueLayerInfosVector.end(); ++vecIt)
+		 vecIt != tissueLayerInfosVector.end(); ++vecIt)
 	{
 		vecIt->visible = val;
 	}
 }
 
 void TissueLayerInfos::SetTissueLayerOpac(tissuelayers_size_t layerIdx,
-																					float val)
+										  float val)
 {
 	tissueLayerInfosVector[layerIdx].opac = val;
 }
 
 void TissueLayerInfos::SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx,
-																								 TissueLayerOverlayMode val)
+												 TissueLayerOverlayMode val)
 {
 	tissueLayerInfosVector[layerIdx].mode = val;
 }
 
-void TissueLayerInfos::AddTissueLayer(TissueLayerInfoStruct &layer)
+void TissueLayerInfos::AddTissueLayer(TissueLayerInfoStruct& layer)
 {
 	tissueLayerInfosVector.push_back(layer);
 	tissueLayerIndexMap.insert(
-			TissueLayerIndexMapEntryType(layer.name, GetTissueLayerCount() - 1));
+		TissueLayerIndexMapEntryType(layer.name, GetTissueLayerCount() - 1));
 }
 
 void TissueLayerInfos::RemoveTissueLayer(tissuelayers_size_t layerIdx)
@@ -111,8 +114,8 @@ void TissueLayerInfos::CreateTissueLayerIndexMap()
 	tissueLayerIndexMap.clear();
 	for (tissuelayers_size_t idx = 0; idx < GetTissueLayerCount(); ++idx)
 	{
-		tissueLayerIndexMap.insert(
-				TissueLayerIndexMapEntryType(tissueLayerInfosVector[idx].name, idx));
+		tissueLayerIndexMap.insert(TissueLayerIndexMapEntryType(
+			tissueLayerInfosVector[idx].name, idx));
 	}
 }
 

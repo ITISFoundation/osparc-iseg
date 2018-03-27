@@ -29,18 +29,20 @@
 #include <q3mimefactory.h>
 #include <qpixmap.h>
 
+namespace iseg {
+
 class morpho_widget : public QWidget1
 {
 	Q_OBJECT
 public:
-	morpho_widget(SlicesHandler *hand3D, QWidget *parent = 0,
-								const char *name = 0, Qt::WindowFlags wFlags = 0);
+	morpho_widget(SlicesHandler* hand3D, QWidget* parent = 0,
+				  const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~morpho_widget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
-	FILE *SaveParams(FILE *fp, int version);
-	FILE *LoadParams(FILE *fp, int version);
+	FILE* SaveParams(FILE* fp, int version);
+	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
 	std::string GetName() { return std::string("Morpho"); };
 	virtual QIcon GetIcon(QDir picdir)
@@ -49,39 +51,41 @@ public:
 	};
 
 private:
-	bmphandler *bmphand;
-	SlicesHandler *handler3D;
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	Q3HBox *hboxoverall;
-	Q3VBox *vboxmethods;
-	Q3HBox *hbox1;
-	Q3HBox *hbox2;
-	Q3VBox *vbox1;
-	QLabel *txt_n;
-	QSpinBox *sb_n;
-	QPushButton *btn_exec;
-	QRadioButton *rb_8connect;
-	QRadioButton *rb_4connect;
-	QButtonGroup *connectgroup;
-	QRadioButton *rb_open;
-	QRadioButton *rb_close;
-	QRadioButton *rb_erode;
-	QRadioButton *rb_dilate;
-	QButtonGroup *modegroup;
-	QCheckBox *allslices;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3VBox* vbox1;
+	QLabel* txt_n;
+	QSpinBox* sb_n;
+	QPushButton* btn_exec;
+	QRadioButton* rb_8connect;
+	QRadioButton* rb_4connect;
+	QButtonGroup* connectgroup;
+	QRadioButton* rb_open;
+	QRadioButton* rb_close;
+	QRadioButton* rb_erode;
+	QRadioButton* rb_dilate;
+	QButtonGroup* modegroup;
+	QCheckBox* allslices;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection,
-												QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL,
-											common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(iseg::DataSelection& dataSelection,
+						  QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
+						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
-	void bmphand_changed(bmphandler *bmph);
+	void bmphand_changed(bmphandler* bmph);
 	void execute();
 };
+
+} // namespace iseg
 
 #endif

@@ -36,20 +36,20 @@ template<typename T> hid_t HDF5IO::getTypeValue()
 }
 
 template<typename T>
-bool HDF5IO::readData(handle_id_type file, const std::string &name,
-											size_t arg_offset, size_t arg_length, T *data_out)
+bool HDF5IO::readData(handle_id_type file, const std::string& name,
+					  size_t arg_offset, size_t arg_length, T* data_out)
 {
 	hid_t dataset; /* handles */
 	hid_t datatype, dataspace;
 	hid_t memspace;
 
-	hsize_t dimsm[1];		 /* memory space dimensions */
+	hsize_t dimsm[1];	/* memory space dimensions */
 	hsize_t dims_out[1]; /* dataset dimensions */
 	herr_t status;
 
-	hsize_t offset_in[1];	/* size of the hyperslab in the file */
-	hsize_t count[1];			 /* size of the hyperslab in the file */
-	hsize_t count_out[1];	/* size of the hyperslab in memory */
+	hsize_t offset_in[1];  /* size of the hyperslab in the file */
+	hsize_t count[1];	  /* size of the hyperslab in the file */
+	hsize_t count_out[1];  /* size of the hyperslab in memory */
 	hsize_t offset_out[1]; /* size of the hyperslab in memory */
 	int status_n, rank;
 
@@ -75,7 +75,7 @@ bool HDF5IO::readData(handle_id_type file, const std::string &name,
 	offset_in[0] = arg_offset;
 	count[0] = arg_length;
 	status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset_in, NULL,
-															 count, NULL);
+								 count, NULL);
 
 	/*
 	* Define the memory dataspace.
@@ -89,14 +89,14 @@ bool HDF5IO::readData(handle_id_type file, const std::string &name,
 	offset_out[0] = 0;
 	count_out[0] = arg_length;
 	status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
-															 count_out, NULL);
+								 count_out, NULL);
 
 	/*
 	* Read data from hyperslab in the file into the hyperslab in
 	* memory and display.
 	*/
-	status = H5Dread(dataset, getTypeValue<T>(), memspace, dataspace, H5P_DEFAULT,
-									 data_out);
+	status = H5Dread(dataset, getTypeValue<T>(), memspace, dataspace,
+					 H5P_DEFAULT, data_out);
 
 	H5Tclose(datatype);
 	H5Dclose(dataset);
@@ -107,9 +107,9 @@ bool HDF5IO::readData(handle_id_type file, const std::string &name,
 }
 
 template<typename T>
-bool HDF5IO::writeData(handle_id_type file, const std::string &name,
-											 T **const slice_data, size_t num_slices,
-											 size_t slice_size, size_t offset)
+bool HDF5IO::writeData(handle_id_type file, const std::string& name,
+					   T** const slice_data, size_t num_slices,
+					   size_t slice_size, size_t offset)
 {
 	hid_t properties = -1, datatype = -1;
 	hid_t dataspace = -1, dataset = -1;
@@ -136,8 +136,9 @@ bool HDF5IO::writeData(handle_id_type file, const std::string &name,
 
 		hsize_t const mega = 1024 * 1024;
 		hsize_t const giga = 1024 * mega;
-		hsize_t dim_chunks[1] = {
-				chunk_size == 0 ? std::min(slice_size, giga / sizeof(T)) : chunk_size};
+		hsize_t dim_chunks[1] = {chunk_size == 0
+									 ? std::min(slice_size, giga / sizeof(T))
+									 : chunk_size};
 		H5Pset_chunk(properties, rank, dim_chunks);
 		if (CompressionLevel >= 0) // if negative: disable compression
 		{
@@ -151,7 +152,8 @@ bool HDF5IO::writeData(handle_id_type file, const std::string &name,
 		datatype = H5Tcopy(getTypeValue<T>());
 		status = H5Tset_order(datatype, H5T_ORDER_LE);
 
-		dataset = H5Dcreate(file, name.c_str(), datatype, dataspace, properties);
+		dataset =
+			H5Dcreate(file, name.c_str(), datatype, dataspace, properties);
 	}
 	else // open existing
 	{
@@ -173,8 +175,8 @@ bool HDF5IO::writeData(handle_id_type file, const std::string &name,
 			hsize_t dim_offset[1] = {current_offset};
 			hsize_t dim_slab[1] = {slice_size};
 
-			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset, 0,
-																	 dim_slab, 0);
+			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset,
+										 0, dim_slab, 0);
 			if (status >= 0)
 			{
 				status = H5Sselect_valid(dataspace);
@@ -190,14 +192,16 @@ bool HDF5IO::writeData(handle_id_type file, const std::string &name,
 						hsize_t dim_memoffset[1] = {0};
 						hsize_t dim_memslab[1] = {slice_size};
 						status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET,
-																				 dim_memoffset, 0, dim_memslab, 0);
+													 dim_memoffset, 0,
+													 dim_memslab, 0);
 						if (status >= 0)
 						{
 							status = H5Sselect_valid(memspace);
 							if (status >= 0)
 							{
-								status = H5Dwrite(dataset, getTypeValue<T>(), memspace,
-																	dataspace, H5P_DEFAULT, slice_data[i]);
+								status = H5Dwrite(dataset, getTypeValue<T>(),
+												  memspace, dataspace,
+												  H5P_DEFAULT, slice_data[i]);
 							}
 						}
 

@@ -7,18 +7,20 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "matexport.h"
 #include "Precompiled.h"
+
+#include "MatlabExport.h"
 
 #include <cstdio>
 
 using namespace std;
+using namespace iseg;
 
-bool matexport::print_mat(const char *filename, float *matrix, int nx, int ny,
-													int nz, char *comment, int commentlength,
-													char *varname, int varnamelength, bool complex)
+bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
+						  int nz, char* comment, int commentlength,
+						  char* varname, int varnamelength, bool complex)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -114,12 +116,12 @@ bool matexport::print_mat(const char *filename, float *matrix, int nx, int ny,
 	return true;
 }
 
-bool matexport::print_matslices(const char *filename, float **matrix, int nx,
-																int ny, int nz, char *comment,
-																int commentlength, char *varname,
-																int varnamelength, bool complex)
+bool matexport::print_matslices(const char* filename, float** matrix, int nx,
+								int ny, int nz, char* comment,
+								int commentlength, char* varname,
+								int varnamelength, bool complex)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -218,11 +220,11 @@ bool matexport::print_matslices(const char *filename, float **matrix, int nx,
 	return true;
 }
 
-bool matexport::print_mat(const char *filename, unsigned char *matrix, int nx,
-													int ny, int nz, char *comment, int commentlength,
-													char *varname, int varnamelength)
+bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
+						  int ny, int nz, char* comment, int commentlength,
+						  char* varname, int varnamelength)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -308,12 +310,12 @@ bool matexport::print_mat(const char *filename, unsigned char *matrix, int nx,
 	fclose(fp);
 	return true;
 }
-bool matexport::print_matslices(const char *filename, unsigned char **matrix,
-																int nx, int ny, int nz, char *comment,
-																int commentlength, char *varname,
-																int varnamelength)
+bool matexport::print_matslices(const char* filename, unsigned char** matrix,
+								int nx, int ny, int nz, char* comment,
+								int commentlength, char* varname,
+								int varnamelength)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -400,11 +402,11 @@ bool matexport::print_matslices(const char *filename, unsigned char **matrix,
 }
 
 #ifdef TISSUES_SIZE_TYPEDEF
-bool matexport::print_mat(const char *filename, tissues_size_t *matrix, int nx,
-													int ny, int nz, char *comment, int commentlength,
-													char *varname, int varnamelength)
+bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
+						  int ny, int nz, char* comment, int commentlength,
+						  char* varname, int varnamelength)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -439,7 +441,8 @@ bool matexport::print_mat(const char *filename, tissues_size_t *matrix, int nx,
 	int padding = 0;
 	if (nx * ny * nz * sizeof(tissues_size_t) % 8 != 0)
 		padding = 8 - nx * ny * nz * sizeof(tissues_size_t) % 8;
-	val = 56 + nx * ny * nz * sizeof(tissues_size_t) + namefieldlength + padding;
+	val =
+		56 + nx * ny * nz * sizeof(tissues_size_t) + namefieldlength + padding;
 	fwrite(&val, 4, 1, fp);
 
 	// Array flags
@@ -516,12 +519,12 @@ bool matexport::print_mat(const char *filename, tissues_size_t *matrix, int nx,
 	fclose(fp);
 	return true;
 }
-bool matexport::print_matslices(const char *filename, tissues_size_t **matrix,
-																int nx, int ny, int nz, char *comment,
-																int commentlength, char *varname,
-																int varnamelength)
+bool matexport::print_matslices(const char* filename, tissues_size_t** matrix,
+								int nx, int ny, int nz, char* comment,
+								int commentlength, char* varname,
+								int varnamelength)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "wb");
 	if (fp == NULL)
 		return false;
@@ -556,7 +559,8 @@ bool matexport::print_matslices(const char *filename, tissues_size_t **matrix,
 	int padding = 0;
 	if (nx * ny * nz * sizeof(tissues_size_t) % 8 != 0)
 		padding = 8 - nx * ny * nz * sizeof(tissues_size_t) % 8;
-	val = 56 + nx * ny * nz * sizeof(tissues_size_t) + namefieldlength + padding;
+	val =
+		56 + nx * ny * nz * sizeof(tissues_size_t) + namefieldlength + padding;
 	fwrite(&val, 4, 1, fp);
 
 	// Array flags

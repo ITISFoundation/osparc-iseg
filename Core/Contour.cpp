@@ -7,21 +7,23 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "contour_class.h"
 #include "Precompiled.h"
 
+#include "Contour.h"
+
 using namespace std;
+using namespace iseg;
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-contour_class::contour_class()
+Contour::Contour()
 {
 	n = 0;
 	//	plist.resize(n1);
 	return;
 }
 
-contour_class::contour_class(vector<Point> *Pt_vec)
+Contour::Contour(vector<Point>* Pt_vec)
 {
 	n = (unsigned)(*Pt_vec).size();
 	plist.clear();
@@ -30,29 +32,29 @@ contour_class::contour_class(vector<Point> *Pt_vec)
 	return;
 }
 
-void contour_class::clear()
+void Contour::clear()
 {
 	plist.clear();
 	n = 0;
 	return;
 }
 
-void contour_class::add_point(Point p)
+void Contour::add_point(Point p)
 {
 	plist.push_back(p);
 	return;
 }
 
-void contour_class::add_points(vector<Point> *Pt_vec)
+void Contour::add_points(vector<Point>* Pt_vec)
 {
 	for (vector<Point>::iterator it = (*Pt_vec).begin(); it != (*Pt_vec).end();
-			 it++)
+		 it++)
 		plist.push_back(*it);
 	n = (unsigned)plist.size();
 	return;
 }
 
-void contour_class::print_contour()
+void Contour::print_contour()
 {
 	for (unsigned int i = 0; i < n; i++)
 		cout << plist[i].px << ":" << plist[i].py << " ";
@@ -60,7 +62,7 @@ void contour_class::print_contour()
 	return;
 }
 
-void contour_class::doug_peuck(float epsilon, bool closed)
+void Contour::doug_peuck(float epsilon, bool closed)
 {
 	UNREFERENCED_PARAMETER(closed);
 	if (n > 2)
@@ -89,7 +91,7 @@ void contour_class::doug_peuck(float epsilon, bool closed)
 	return;
 }
 
-void contour_class::presimplify(float d, bool closed)
+void Contour::presimplify(float d, bool closed)
 {
 	float d2 = d * d;
 	if (n >= 2)
@@ -122,9 +124,9 @@ void contour_class::presimplify(float d, bool closed)
 	return;
 }
 
-unsigned int contour_class::return_n() { return n; }
+unsigned int Contour::return_n() { return n; }
 
-void contour_class::return_contour(vector<Point> *Pt_vec)
+void Contour::return_contour(vector<Point>* Pt_vec)
 {
 	(*Pt_vec).clear();
 	for (unsigned int i = 0; i < n; i++)
@@ -132,8 +134,8 @@ void contour_class::return_contour(vector<Point> *Pt_vec)
 	return;
 }
 
-void contour_class::doug_peuck_sub(float epsilon, const unsigned int p1,
-																	 const unsigned int p2, vector<bool> *v1_p)
+void Contour::doug_peuck_sub(float epsilon, const unsigned int p1,
+							 const unsigned int p2, vector<bool>* v1_p)
 {
 	//	cout << p1<<" "<<p2<<endl;
 	if (p2 <= p1 + 1)
@@ -175,9 +177,9 @@ void contour_class::doug_peuck_sub(float epsilon, const unsigned int p1,
 }
 
 //abcd void contour_class2::doug_peuck(float epsilon,vector<Point> *Pt_vec,vector<unsigned short> *Meetings_vec,vector<Point> *Result_vec)
-void contour_class2::doug_peuck(float epsilon, vector<Point> *Pt_vec,
-																vector<unsigned> *Meetings_vec,
-																vector<Point> *Result_vec)
+void Contour2::doug_peuck(float epsilon, vector<Point>* Pt_vec,
+						  vector<unsigned>* Meetings_vec,
+						  vector<Point>* Result_vec)
 {
 	n = Pt_vec->size();
 	m = Meetings_vec->size();
@@ -200,10 +202,10 @@ void contour_class2::doug_peuck(float epsilon, vector<Point> *Pt_vec,
 		for (unsigned int i = 0; i + 1 < m; i++)
 		{
 			doug_peuck_sub(epsilon, Pt_vec, (*Meetings_vec)[i],
-										 (*Meetings_vec)[i + 1], &v1);
+						   (*Meetings_vec)[i + 1], &v1);
 		}
-		doug_peuck_sub2(epsilon, Pt_vec, (*Meetings_vec)[m - 1], (*Meetings_vec)[0],
-										&v1);
+		doug_peuck_sub2(epsilon, Pt_vec, (*Meetings_vec)[m - 1],
+						(*Meetings_vec)[0], &v1);
 
 		Result_vec->clear();
 		for (unsigned int i = 0; i < n; i++)
@@ -216,9 +218,9 @@ void contour_class2::doug_peuck(float epsilon, vector<Point> *Pt_vec,
 	return;
 }
 
-void contour_class2::doug_peuck_sub(float epsilon, vector<Point> *Pt_vec,
-																		unsigned short p1, unsigned short p2,
-																		vector<bool> *v1_p)
+void Contour2::doug_peuck_sub(float epsilon, vector<Point>* Pt_vec,
+							  unsigned short p1, unsigned short p2,
+							  vector<bool>* v1_p)
 {
 	if (p2 <= p1 + 1)
 		return;
@@ -273,9 +275,9 @@ void contour_class2::doug_peuck_sub(float epsilon, vector<Point> *Pt_vec,
 	return;
 }
 
-void contour_class2::doug_peuck_sub2(float epsilon, vector<Point> *Pt_vec,
-																		 unsigned short p1, unsigned short p2,
-																		 vector<bool> *v1_p)
+void Contour2::doug_peuck_sub2(float epsilon, vector<Point>* Pt_vec,
+							   unsigned short p1, unsigned short p2,
+							   vector<bool>* v1_p)
 {
 	if ((p2 == 0 && p1 + 1 == n) || p1 < p2)
 		return;

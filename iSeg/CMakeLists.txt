@@ -95,7 +95,6 @@ SET(ViewerHeaders
 	bmp_read_1.h
 	ChannelExtractor.h
 	dicomread.h
-	InternalUse.h
 	levelset.h
 	pixmapgenerator.h
 	Project.h

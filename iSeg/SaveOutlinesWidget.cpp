@@ -7,11 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "SaveOutlinesWidget.h"
 #include "Precompiled.h"
+
+#include "SaveOutlinesWidget.h"
 #include "SlicesHandler.h"
 #include "tissueinfos.h"
-#include <algorithm>
+
 #include <q3filedialog.h>
 #include <q3hbox.h>
 #include <q3listbox.h>
@@ -28,10 +29,11 @@
 #include <qwidget.h>
 
 using namespace std;
+using namespace iseg;
 
-SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler *hand3D, QWidget *parent,
-																			 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
+									   const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	lbo_tissues = new Q3ListBox(vbox1);
@@ -126,10 +128,11 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler *hand3D, QWidget *parent,
 	QObject::connect(pb_exec, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this,
-									 SLOT(mode_changed()));
-	QObject::connect(cb_extrusion, SIGNAL(clicked()), this, SLOT(mode_changed()));
+					 SLOT(mode_changed()));
+	QObject::connect(cb_extrusion, SIGNAL(clicked()), this,
+					 SLOT(mode_changed()));
 	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this,
-									 SLOT(simplif_changed()));
+					 SLOT(simplif_changed()));
 
 	mode_changed();
 
@@ -220,10 +223,10 @@ void SaveOutlinesWidget::file_pushed()
 	QString loadfilename;
 	if (rb_triang->isOn())
 		loadfilename = Q3FileDialog::getSaveFileName(
-				QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
+			QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
 	else
 		loadfilename =
-				Q3FileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
+			Q3FileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
 
 	le_file->setText(loadfilename);
 	return;
@@ -243,8 +246,8 @@ void SaveOutlinesWidget::save_pushed()
 	if (vtissues.empty())
 	{
 		QMessageBox::warning(this, tr("Warning"),
-												 tr("No tissues have been selected."), QMessageBox::Ok,
-												 0);
+							 tr("No tissues have been selected."),
+							 QMessageBox::Ok, 0);
 		return;
 	}
 
@@ -256,9 +259,9 @@ void SaveOutlinesWidget::save_pushed()
 			cerr << "triangulating..." << endl;
 			// If no extension given, add a default one
 			if (loadfilename.length() > 4 &&
-					!loadfilename.toLower().endsWith(QString(".vtp")) &&
-					!loadfilename.toLower().endsWith(QString(".stl")) &&
-					!loadfilename.toLower().endsWith(QString(".dat")))
+				!loadfilename.toLower().endsWith(QString(".vtp")) &&
+				!loadfilename.toLower().endsWith(QString(".stl")) &&
+				!loadfilename.toLower().endsWith(QString(".dat")))
 				loadfilename.append(".dat");
 
 			float ratio = sl_f->value() * 0.0099f + 0.01f;
@@ -275,26 +278,29 @@ void SaveOutlinesWidget::save_pushed()
 
 			// Call method to extract surface, smooth, simplify and finally save it to file
 			int numberOfErrors = handler3D->extract_tissue_surfaces(
-					loadfilename.ascii(), vtissues, usemc, ratio, smoothingiter);
+				loadfilename.ascii(), vtissues, usemc, ratio, smoothingiter);
 
 			if (numberOfErrors < 0)
 			{
-				QMessageBox::warning(this, "iSeg",
-														 "Surface extraction failed.\n\nMaybe something is "
-														 "wrong the pixel type or label field.",
-														 QMessageBox::Ok | QMessageBox::Default);
+				QMessageBox::warning(
+					this, "iSeg",
+					"Surface extraction failed.\n\nMaybe something is "
+					"wrong the pixel type or label field.",
+					QMessageBox::Ok | QMessageBox::Default);
 			}
 			else if (numberOfErrors > 0)
 			{
-				QMessageBox::warning(this, "iSeg",
-														 "Surface extraction might have failed.\n\nPlease "
-														 "verify the tissue names and colors carefully.",
-														 QMessageBox::Ok | QMessageBox::Default);
+				QMessageBox::warning(
+					this, "iSeg",
+					"Surface extraction might have failed.\n\nPlease "
+					"verify the tissue names and colors carefully.",
+					QMessageBox::Ok | QMessageBox::Default);
 			}
 		}
 		else
 		{
-			if (loadfilename.length() > 4 && !loadfilename.endsWith(QString(".txt")))
+			if (loadfilename.length() > 4 &&
+				!loadfilename.endsWith(QString(".txt")))
 				loadfilename.append(".txt");
 
 			if (sb_between->value() == 0)
@@ -304,36 +310,40 @@ void SaveOutlinesWidget::save_pushed()
 				//				handler3D->extract_contours2(sb_minsize->value(), vtissues);
 				if (rb_dougpeuck->isOn())
 				{
-					handler3D->extract_contours2_xmirrored(sb_minsize->value(), vtissues,
-																								 sl_f->value() * 0.05f);
+					handler3D->extract_contours2_xmirrored(
+						sb_minsize->value(), vtissues, sl_f->value() * 0.05f);
 					//					handler3D->dougpeuck_line(sl_f->value()*0.05f*2);
 				}
 				else if (rb_dist->isOn())
 				{
-					handler3D->extract_contours2_xmirrored(sb_minsize->value(), vtissues);
+					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
+														   vtissues);
 				}
 				else if (rb_none->isOn())
 				{
-					handler3D->extract_contours2_xmirrored(sb_minsize->value(), vtissues);
+					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
+														   vtissues);
 				}
 				handler3D->shift_contours(-(int)handler3D->return_width(),
-																	-(int)handler3D->return_height());
+										  -(int)handler3D->return_height());
 				if (cb_extrusion->isChecked())
 				{
-					handler3D->setextrusion_contours(sb_topextrusion->value() - 1,
-																					 sb_bottomextrusion->value() - 1);
+					handler3D->setextrusion_contours(
+						sb_topextrusion->value() - 1,
+						sb_bottomextrusion->value() - 1);
 				}
 				handler3D->save_contours(loadfilename.ascii());
 #define ROTTERDAM
 #ifdef ROTTERDAM
-				FILE *fp = fopen(loadfilename.ascii(), "a");
+				FILE* fp = fopen(loadfilename.ascii(), "a");
 				float disp[3];
 				handler3D->get_displacement(disp);
 				fprintf(fp, "V1\nX%i %i %i %i O%f %f %f\n",
-								-(int)handler3D->return_width(), (int)handler3D->return_width(),
-								-(int)handler3D->return_height(),
-								(int)handler3D->return_height(), disp[0], disp[1],
-								disp[2]); // TODO: rotation
+						-(int)handler3D->return_width(),
+						(int)handler3D->return_width(),
+						-(int)handler3D->return_height(),
+						(int)handler3D->return_height(), disp[0], disp[1],
+						disp[2]); // TODO: rotation
 				vector<augmentedmark> labels;
 				handler3D->get_labels(&labels);
 				if (!labels.empty())
@@ -341,9 +351,11 @@ void SaveOutlinesWidget::save_pushed()
 				for (size_t i = 0; i < labels.size(); i++)
 				{
 					fprintf(fp, "S%i 1\nL%i %i %s\n", (int)labels[i].slicenr,
-									(int)handler3D->return_width() - 1 - (int)labels[i].p.px * 2,
-									(int)labels[i].p.py * 2 - (int)handler3D->return_height() + 1,
-									labels[i].name.c_str());
+							(int)handler3D->return_width() - 1 -
+								(int)labels[i].p.px * 2,
+							(int)labels[i].p.py * 2 -
+								(int)handler3D->return_height() + 1,
+							labels[i].name.c_str());
 				}
 				fclose(fp);
 #endif
@@ -356,8 +368,9 @@ void SaveOutlinesWidget::save_pushed()
 			else
 			{
 				handler3D->extractinterpolatesave_contours2_xmirrored(
-						sb_minsize->value(), vtissues, sb_between->value(),
-						rb_dougpeuck->isOn(), sl_f->value() * 0.05f, loadfilename.ascii());
+					sb_minsize->value(), vtissues, sb_between->value(),
+					rb_dougpeuck->isOn(), sl_f->value() * 0.05f,
+					loadfilename.ascii());
 			}
 		}
 		close();
@@ -365,8 +378,8 @@ void SaveOutlinesWidget::save_pushed()
 	else
 	{
 		QMessageBox::warning(this, tr("Warning"),
-												 tr("No filename has been specified."), QMessageBox::Ok,
-												 0);
+							 tr("No filename has been specified."),
+							 QMessageBox::Ok, 0);
 		return;
 	}
 }

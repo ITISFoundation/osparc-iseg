@@ -7,17 +7,21 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "activeslices_config_widget.h"
 #include "Precompiled.h"
+
+#include "activeslices_config_widget.h"
+
 #include <q3vbox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
 #include <qwidget.h>
 
-ActiveSlicesConfig::ActiveSlicesConfig(SlicesHandler *hand3D, QWidget *parent,
-																			 const char *name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+ActiveSlicesConfig::ActiveSlicesConfig(SlicesHandler* hand3D, QWidget* parent,
+									   const char* name, Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -49,9 +53,9 @@ ActiveSlicesConfig::ActiveSlicesConfig(SlicesHandler *hand3D, QWidget *parent,
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(pb_ok, SIGNAL(clicked()), this, SLOT(ok_pressed()));
 	QObject::connect(sb_start, SIGNAL(valueChanged(int)), this,
-									 SLOT(startslice_changed(int)));
+					 SLOT(startslice_changed(int)));
 	QObject::connect(sb_end, SIGNAL(valueChanged(int)), this,
-									 SLOT(endslice_changed(int)));
+					 SLOT(endslice_changed(int)));
 
 	return;
 }

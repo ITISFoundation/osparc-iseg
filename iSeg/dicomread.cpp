@@ -7,9 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "dicomread.h"
 #include "Precompiled.h"
+
 #include "config.h"
+#include "dicomread.h"
 
 #include "../GDCM/vtkMyGDCMPolyDataReader.h"
 
@@ -19,7 +20,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-bool dicomread::opendicom(const char *filename)
+using namespace iseg;
+
+bool dicomread::opendicom(const char* filename)
 {
 	depth = 0;
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -56,13 +59,13 @@ unsigned short dicomread::get_height()
 	return i;
 }
 
-bool dicomread::load_pictureGDCM(const char *filename, float *bits)
+bool dicomread::load_pictureGDCM(const char* filename, float* bits)
 {
 	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, width, height);
 	return true;
 }
 
-bool dicomread::load_picture(float *bits)
+bool dicomread::load_picture(float* bits)
 {
 	get_height();
 	get_width();
@@ -81,12 +84,13 @@ bool dicomread::load_picture(float *bits)
 			}
 
 			i = (unsigned)buffer1[0] +
-					256 * ((unsigned)buffer1[1] +
-								 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+				256 *
+					((unsigned)buffer1[1] +
+					 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
 
 			if (i == unsigned(width) * height * bitdepth / 8)
 			{
-				unsigned char *bits1 = (unsigned char *)malloc(i);
+				unsigned char* bits1 = (unsigned char*)malloc(i);
 				if (bitdepth == 8)
 				{
 					size_t readnr = fread(bits1, 1, i, fp);
@@ -195,8 +199,8 @@ bool dicomread::load_picture(float *bits)
 		return false;
 }
 
-bool dicomread::load_picture(float *bits, Point p, unsigned short dx,
-														 unsigned short dy)
+bool dicomread::load_picture(float* bits, Point p, unsigned short dx,
+							 unsigned short dy)
 {
 	get_height();
 	get_width();
@@ -214,12 +218,13 @@ bool dicomread::load_picture(float *bits, Point p, unsigned short dx,
 			}
 
 			i = (unsigned)buffer1[0] +
-					256 * ((unsigned)buffer1[1] +
-								 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+				256 *
+					((unsigned)buffer1[1] +
+					 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
 
 			if (i == unsigned(width) * height * bitdepth / 8)
 			{
-				unsigned char *bits1 = (unsigned char *)malloc(i);
+				unsigned char* bits1 = (unsigned char*)malloc(i);
 				if (bitdepth == 8)
 				{
 					if (fread(bits1, 1, i, fp) == i)
@@ -292,7 +297,7 @@ bool dicomread::load_picture(float *bits, Point p, unsigned short dx,
 		return false;
 }
 
-bool dicomread::load_picture(float *bits, float center, float contrast)
+bool dicomread::load_picture(float* bits, float center, float contrast)
 {
 	if (load_picture(bits))
 	{
@@ -306,8 +311,8 @@ bool dicomread::load_picture(float *bits, float center, float contrast)
 		return false;
 }
 
-bool dicomread::load_picture(float *bits, float center, float contrast, Point p,
-														 unsigned short dx, unsigned short dy)
+bool dicomread::load_picture(float* bits, float center, float contrast, Point p,
+							 unsigned short dx, unsigned short dy)
 {
 	if (load_picture(bits, p, dx, dy))
 	{
@@ -361,7 +366,8 @@ float dicomread::slicepos()
 			vec1[2] = orient[0] * orient[4] - orient[1] * orient[3];
 			float l = vec1[0] * vec1[0] + vec1[1] * vec1[1] + vec1[2] * vec1[2];
 			if (l > 0)
-				f = (vec1[0] * loc[0] + vec1[1] * loc[1] + vec1[2] * loc[2]) / sqrt(l);
+				f = (vec1[0] * loc[0] + vec1[1] * loc[1] + vec1[2] * loc[2]) /
+					sqrt(l);
 		}
 	}
 
@@ -453,7 +459,7 @@ Pair dicomread::pixelsize()
 				d1 = -1;
 			}
 			while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-						 buffer[pos] == ' ')
+				   buffer[pos] == ' ')
 			{
 				if (buffer[pos] != ' ')
 					m = m * 10 + float(buffer[pos] - '0');
@@ -462,7 +468,7 @@ Pair dicomread::pixelsize()
 		}
 
 		if (pos < (int)l &&
-				(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
+			(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
 		{
 			p.low = f / d;
 			p.low *= pow(10.0f, d1 * m);
@@ -504,8 +510,9 @@ Pair dicomread::pixelsize()
 					pos++;
 					d1 = -1;
 				}
-				while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-							 buffer[pos] == ' ')
+				while ((pos < length && buffer[pos] >= '0' &&
+						buffer[pos] <= '9') ||
+					   buffer[pos] == ' ')
 				{
 					if (buffer[pos] != ' ')
 						m = m * 10 + float(buffer[pos] - '0');
@@ -538,7 +545,7 @@ Pair dicomread::pixelsize()
 			pos++;
 		}
 		if (pos < (int)l &&
-				(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
+			(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
 		{
 			pos++;
 			while (pos < length && buffer[pos] >= '0' && buffer[pos] <= '9')
@@ -607,7 +614,7 @@ bool dicomread::read_field(unsigned a, unsigned b)
 		return false;
 }
 
-bool dicomread::read_fieldnr(unsigned &a, unsigned &b)
+bool dicomread::read_fieldnr(unsigned& a, unsigned& b)
 {
 	if (fread(buffer1, 1, 4, fp) == 4)
 	{
@@ -618,8 +625,8 @@ bool dicomread::read_fieldnr(unsigned &a, unsigned &b)
 		{
 			if (fread(buffer1, 1, 4, fp) == 4)
 			{
-				if (buffer1[3] == 255 && buffer1[2] == 255 && buffer1[1] == 255 &&
-						buffer1[0] == 255)
+				if (buffer1[3] == 255 && buffer1[2] == 255 &&
+					buffer1[1] == 255 && buffer1[0] == 255)
 				{
 					depth++;
 					//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
@@ -705,12 +712,12 @@ unsigned dicomread::read_length()
 	if (fread(buffer1, 1, 4, fp) == 4)
 	{
 		if (buffer1[0] >= 'A' && buffer1[0] <= 'z' && buffer1[1] >= 'A' &&
-				buffer1[1] <= 'z')
+			buffer1[1] <= 'z')
 		{
 			if (((buffer1[0] != 'O' || buffer1[1] != 'B') &&
-					 (buffer1[0] != 'O' || buffer1[1] != 'W') &&
-					 (buffer1[0] != 'S' || buffer1[1] != 'Q') &&
-					 (buffer1[0] != 'U' || buffer1[1] != 'N')))
+				 (buffer1[0] != 'O' || buffer1[1] != 'W') &&
+				 (buffer1[0] != 'S' || buffer1[1] != 'Q') &&
+				 (buffer1[0] != 'U' || buffer1[1] != 'N')))
 			{
 				i = (unsigned)buffer1[2] + 256 * (unsigned)buffer1[3];
 			}
@@ -720,8 +727,8 @@ unsigned dicomread::read_length()
 				{
 					if (fread(buffer1, 1, 4, fp) == 4)
 					{
-						if (buffer1[3] == 255 && buffer1[2] == 255 && buffer1[1] == 255 &&
-								buffer1[0] == 255)
+						if (buffer1[3] == 255 && buffer1[2] == 255 &&
+							buffer1[1] == 255 && buffer1[0] == 255)
 						{
 							i = 0;
 							depth++;
@@ -731,9 +738,9 @@ unsigned dicomread::read_length()
 						}
 						else
 							i = (unsigned)buffer1[0] +
-									256 * ((unsigned)buffer1[1] +
-												 256 * ((unsigned)buffer1[2] +
-																256 * (unsigned)buffer1[3]));
+								256 * ((unsigned)buffer1[1] +
+									   256 * ((unsigned)buffer1[2] +
+											  256 * (unsigned)buffer1[3]));
 					}
 					else
 						i = 1000000;
@@ -745,7 +752,7 @@ unsigned dicomread::read_length()
 		else
 		{
 			if (buffer1[3] == 255 && buffer1[2] == 255 && buffer1[1] == 255 &&
-					buffer1[0] == 255)
+				buffer1[0] == 255)
 			{
 				i = 0;
 				depth++;
@@ -755,8 +762,9 @@ unsigned dicomread::read_length()
 			}
 			else
 				i = (unsigned)buffer1[0] +
-						256 * ((unsigned)buffer1[1] +
-									 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+					256 * ((unsigned)buffer1[1] +
+						   256 * ((unsigned)buffer1[2] +
+								  256 * (unsigned)buffer1[3]));
 		}
 		l = i;
 	}
@@ -781,7 +789,7 @@ void dicomread::go_start()
 		if (fread(buffer1, 1, 4, fp) == 4)
 		{
 			if (buffer1[0] != 'D' || buffer1[1] != 'I' || buffer1[2] != 'C' ||
-					buffer1[3] != 'M')
+				buffer1[3] != 'M')
 #ifdef _MSC_VER
 				_fseeki64(fp, 0, SEEK_SET);
 #else
@@ -865,7 +873,7 @@ float dicomread::ds2float()
 		d = -1;
 	}
 	while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-				 buffer[pos] == ' ')
+		   buffer[pos] == ' ')
 	{
 		if (buffer[pos] != ' ')
 			f = f * 10 + float(buffer[pos] - '0');
@@ -875,7 +883,7 @@ float dicomread::ds2float()
 	{
 		pos++;
 		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-					 buffer[pos] == ' ')
+			   buffer[pos] == ' ')
 		{
 			if (buffer[pos] != ' ')
 			{
@@ -896,7 +904,7 @@ float dicomread::ds2float()
 			d1 = -1;
 		}
 		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-					 buffer[pos] == ' ')
+			   buffer[pos] == ' ')
 		{
 			if (buffer[pos] != ' ')
 				m = m * 10 + float(buffer[pos] - '0');
@@ -910,7 +918,7 @@ float dicomread::ds2float()
 	return f;
 }
 
-float dicomread::ds2float(int &pos)
+float dicomread::ds2float(int& pos)
 {
 	float f = 0;
 	float d = 1;
@@ -928,7 +936,7 @@ float dicomread::ds2float(int &pos)
 		d = -1;
 	}
 	while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-				 buffer[pos] == ' ')
+		   buffer[pos] == ' ')
 	{
 		if (buffer[pos] != ' ')
 			f = f * 10 + float(buffer[pos] - '0');
@@ -938,7 +946,7 @@ float dicomread::ds2float(int &pos)
 	{
 		pos++;
 		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-					 buffer[pos] == ' ')
+			   buffer[pos] == ' ')
 		{
 			if (buffer[pos] != ' ')
 			{
@@ -959,7 +967,7 @@ float dicomread::ds2float(int &pos)
 			d1 = -1;
 		}
 		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-					 buffer[pos] == ' ')
+			   buffer[pos] == ' ')
 		{
 			if (buffer[pos] != ' ')
 				m = m * 10 + float(buffer[pos] - '0');
@@ -973,7 +981,7 @@ float dicomread::ds2float(int &pos)
 	return f;
 }
 
-void dicomread::dsarray2float(float *vals, unsigned short nrvals)
+void dicomread::dsarray2float(float* vals, unsigned short nrvals)
 {
 	int pos = 0;
 	unsigned short counter = 0;

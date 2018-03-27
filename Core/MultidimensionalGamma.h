@@ -11,30 +11,34 @@
 
 #include "iSegCore.h"
 
-class iSegCore_API multidimgamma
+namespace iseg {
+
+class iSegCore_API MultidimensionalGamma
 {
 public:
-	multidimgamma();
-	void init(short unsigned w, short unsigned h, short nrclass, short dimension,
-						float **bit, float *weight, float **centers1, float *tol_f1,
-						float *tol_d1, float dx1, float dy1);
+	MultidimensionalGamma();
+	void init(short unsigned w, short unsigned h, short nrclass,
+			  short dimension, float** bit, float* weight, float** centers1,
+			  float* tol_f1, float* tol_d1, float dx1, float dy1);
 	void execute();
-	void return_image(float *result_bits);
-	~multidimgamma();
+	void return_image(float* result_bits);
+	~MultidimensionalGamma();
 
 private:
-	short *m;
+	short* m;
 	short nrclasses;
 	short dim;
-	float **bits;
-	float *weights;
-	float **centers;
-	float *tol_f;
-	float *tol_d;
-	float *minvals;
+	float** bits;
+	float* weights;
+	float** centers;
+	float* tol_f;
+	float* tol_d;
+	float* minvals;
 	float dx;
 	float dy;
 	short unsigned width;
 	short unsigned height;
 	unsigned area;
 };
+
+} // namespace iseg

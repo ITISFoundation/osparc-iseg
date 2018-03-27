@@ -7,15 +7,17 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "index_priorqueue.h"
 #include "Precompiled.h"
 
-using namespace std;
+#include "IndexPriorityQueue.h"
 
-index_priorqueue::index_priorqueue(unsigned size2, float *valuemap1)
+using namespace std;
+using namespace iseg;
+
+IndexPriorityQueue::IndexPriorityQueue(unsigned size2, float* valuemap1)
 {
 	Q.clear();
-	indexmap = (int *)malloc(size2 * sizeof(int));
+	indexmap = (int*)malloc(size2 * sizeof(int));
 	for (unsigned i = 0; i < size2; i++)
 		indexmap[i] = -1;
 	valuemap = valuemap1;
@@ -24,7 +26,7 @@ index_priorqueue::index_priorqueue(unsigned size2, float *valuemap1)
 	return;
 }
 
-void index_priorqueue::clear()
+void IndexPriorityQueue::clear()
 {
 	for (size_t i = 0; i < Q.size(); i++)
 		indexmap[Q[i]] = -1;
@@ -33,7 +35,7 @@ void index_priorqueue::clear()
 	return;
 }
 
-unsigned index_priorqueue::pop()
+unsigned IndexPriorityQueue::pop()
 {
 	if (l <= 1)
 	{
@@ -81,7 +83,7 @@ unsigned index_priorqueue::pop()
 	}
 }
 
-void index_priorqueue::insert(unsigned pos, float value)
+void IndexPriorityQueue::insert(unsigned pos, float value)
 {
 	if (indexmap[pos] == -1)
 	{
@@ -114,7 +116,7 @@ void index_priorqueue::insert(unsigned pos, float value)
 	return;
 }
 
-void index_priorqueue::insert(unsigned pos)
+void IndexPriorityQueue::insert(unsigned pos)
 {
 	if (indexmap[pos] == -1)
 	{
@@ -144,7 +146,7 @@ void index_priorqueue::insert(unsigned pos)
 	return;
 }
 
-void index_priorqueue::remove(unsigned pos)
+void IndexPriorityQueue::remove(unsigned pos)
 {
 	if (indexmap[pos] >= 0)
 	{
@@ -173,7 +175,8 @@ void index_priorqueue::remove(unsigned pos)
 				child = test_node * 2 + 1;
 				if ((child + 1) >= l)
 					break;
-				if ((child + 2) < l && valuemap[Q[child]] > valuemap[Q[child + 1]])
+				if ((child + 2) < l &&
+					valuemap[Q[child]] > valuemap[Q[child + 1]])
 					child++;
 				if (val > valuemap[Q[child]])
 				{
@@ -202,7 +205,7 @@ void index_priorqueue::remove(unsigned pos)
 	return;
 }
 
-void index_priorqueue::change(unsigned pos, float value)
+void IndexPriorityQueue::change(unsigned pos, float value)
 {
 	if (indexmap[pos] >= 0)
 	{
@@ -247,7 +250,7 @@ void index_priorqueue::change(unsigned pos, float value)
 	return;
 }
 
-void index_priorqueue::make_smaller(unsigned pos, float value)
+void IndexPriorityQueue::make_smaller(unsigned pos, float value)
 {
 	if (indexmap[pos] >= 0)
 	{
@@ -275,7 +278,7 @@ void index_priorqueue::make_smaller(unsigned pos, float value)
 	return;
 }
 
-void index_priorqueue::make_larger(unsigned pos, float value)
+void IndexPriorityQueue::make_larger(unsigned pos, float value)
 {
 	if (indexmap[pos] >= 0)
 	{
@@ -307,20 +310,20 @@ void index_priorqueue::make_larger(unsigned pos, float value)
 	return;
 }
 
-void index_priorqueue::print_queue()
+void IndexPriorityQueue::print_queue()
 {
 	for (vector<unsigned>::iterator it = Q.begin(); it != Q.end(); it++)
 		cout << valuemap[*it] << ", ";
 	cout << "." << endl;
 }
 
-bool index_priorqueue::empty() { return l == 0; }
-bool index_priorqueue::in_queue(unsigned pos) { return indexmap[pos] != -1; }
+bool IndexPriorityQueue::empty() { return l == 0; }
+bool IndexPriorityQueue::in_queue(unsigned pos) { return indexmap[pos] != -1; }
 
-index_priorqueue::~index_priorqueue()
+IndexPriorityQueue::~IndexPriorityQueue()
 {
 	free(indexmap);
 	return;
 }
 
-unsigned index_priorqueue::size() { return l; }
+unsigned IndexPriorityQueue::size() { return l; }

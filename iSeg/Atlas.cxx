@@ -7,9 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Atlas.h"
 #include "Precompiled.h"
+
+#include "Atlas.h"
+
 #include <QDir>
+
+namespace iseg {
 
 Atlas::Atlas()
 {
@@ -17,3 +21,5 @@ Atlas::Atlas()
 		m_atlasfilename[i] = QString("");
 	m_atlasdir = QDir("");
 }
+
+} // namespace iseg

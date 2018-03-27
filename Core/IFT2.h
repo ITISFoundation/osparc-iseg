@@ -7,34 +7,43 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef IFT2d
-#define IFT2d
+#pragma once
 
+#include "Core/IndexPriorityQueue.h"
 #include "Core/Point.h"
-#include "Core/coef.h"
-#include "Core/index_priorqueue.h"
 
 #include <algorithm>
 #include <functional>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
+namespace iseg {
+
+struct coef
+{
+	unsigned short a;
+	float b;
+	float c;
+};
+
+inline bool operator!=(coef c, unsigned short f) { return c.a != f; }
+
 template<typename T> class IFT
 {
 public:
-	void IFTinit(unsigned short w, unsigned short h, float *E_bit,
-							 float *directivity_bit, T *lbl, bool connectivity)
+	void IFTinit(unsigned short w, unsigned short h, float* E_bit,
+				 float* directivity_bit, T* lbl, bool connectivity)
 	{
 		width = w;
 		height = h;
 		area = (unsigned)width * height;
-		parent = (unsigned *)malloc(sizeof(unsigned) * area);
-		pf = (float *)malloc(sizeof(float) * area);
-		Q = new index_priorqueue(area, pf);
-		processed = (bool *)malloc(sizeof(bool) * area);
-		lb = (T *)malloc(sizeof(T) * area);
-		directivity_bits = (float *)malloc(sizeof(float) * area);
-		E_bits = (float *)malloc(sizeof(float) * area);
+		parent = (unsigned*)malloc(sizeof(unsigned) * area);
+		pf = (float*)malloc(sizeof(float) * area);
+		Q = new IndexPriorityQueue(area, pf);
+		processed = (bool*)malloc(sizeof(bool) * area);
+		lb = (T*)malloc(sizeof(T) * area);
+		directivity_bits = (float*)malloc(sizeof(float) * area);
+		E_bits = (float*)malloc(sizeof(float) * area);
 		for (unsigned i = 0; i < area; i++)
 		{
 			directivity_bits[i] = directivity_bit[i];
@@ -44,7 +53,7 @@ public:
 
 		return;
 	}
-	void reinit(T *lbl, bool connectivity)
+	void reinit(T* lbl, bool connectivity)
 	{
 		for (unsigned i = 0; i < area; i++)
 		{
@@ -92,7 +101,7 @@ public:
 
 		return;
 	}
-	void reinit(T *lbl, bool connectivity, std::vector<unsigned> pts)
+	void reinit(T* lbl, bool connectivity, std::vector<unsigned> pts)
 	{
 		std::vector<unsigned>::iterator it = pts.begin();
 		for (unsigned i = 0; i < area; i++)
@@ -149,7 +158,7 @@ public:
 
 		return;
 	}
-	void reinit(T *lbl, float *E_bit, bool connectivity)
+	void reinit(T* lbl, float* E_bit, bool connectivity)
 	{
 		if (E_bits != E_bit)
 		{
@@ -163,8 +172,8 @@ public:
 
 		return;
 	}
-	void reinit(T *lbl, float *E_bit, bool connectivity,
-							std::vector<unsigned> pts)
+	void reinit(T* lbl, float* E_bit, bool connectivity,
+				std::vector<unsigned> pts)
 	{
 		if (E_bits != E_bit)
 		{
@@ -178,11 +187,11 @@ public:
 
 		return;
 	}
-	float *return_pf() { return pf; }
+	float* return_pf() { return pf; }
 	//		float *return_E() {return E_bits;};
 	//		float *return_directivity() {return directivity_bits;};
-	T *return_lb() { return lb; }
-	void return_path(Point p, std::vector<Point> *Pt_vec)
+	T* return_lb() { return lb; }
+	void return_path(Point p, std::vector<Point>* Pt_vec)
 	{
 		Point p1;
 		Pt_vec->clear();
@@ -197,7 +206,7 @@ public:
 
 		return;
 	}
-	void return_path(unsigned p, std::vector<unsigned> *Pt_vec)
+	void return_path(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
 		Pt_vec->clear();
 		unsigned pos = p;
@@ -209,7 +218,7 @@ public:
 
 		return;
 	}
-	void append_path(unsigned p, std::vector<unsigned> *Pt_vec)
+	void append_path(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
 		unsigned pos = p;
 		Pt_vec->push_back(pos);
@@ -234,18 +243,18 @@ public:
 	}
 
 protected:
-	float *pf; //path-function value
-	float *directivity_bits;
-	float *E_bits;
-	T *lb;
-	bool *processed;
+	float* pf; //path-function value
+	float* directivity_bits;
+	float* E_bits;
+	T* lb;
+	bool* processed;
 	short unsigned width;
 	short unsigned height;
 	unsigned area;
 
 private:
-	index_priorqueue *Q;
-	unsigned *parent;
+	IndexPriorityQueue* Q;
+	unsigned* parent;
 	inline void update_step(unsigned p, unsigned q, float direction)
 	{
 		float tmp;
@@ -295,7 +304,7 @@ typedef IFT<float> IFTFLOAT;
 class stupid_DT : public IFTFLOAT
 {
 public:
-	void stupid_DTinit(unsigned short w, unsigned short h, float *lbl)
+	void stupid_DTinit(unsigned short w, unsigned short h, float* lbl)
 	{
 		float f;
 		IFTinit(w, h, &f, &f, lbl, false);
@@ -314,7 +323,8 @@ private:
 class IFT_regiongrowing : public IFTFLOAT
 {
 public:
-	void rg_init(unsigned short w, unsigned short h, float *gradient, float *lbl)
+	void rg_init(unsigned short w, unsigned short h, float* gradient,
+				 float* lbl)
 	{
 		IFTinit(w, h, gradient, gradient, lbl, false);
 		return;
@@ -331,10 +341,10 @@ private:
 class IFT_livewire : public IFT<unsigned short>
 {
 public:
-	void lw_init(unsigned short w, unsigned short h, float *E_bits,
-							 float *direction, Point p)
+	void lw_init(unsigned short w, unsigned short h, float* E_bits,
+				 float* direction, Point p)
 	{
-		lbl = (unsigned short *)malloc((unsigned)w * h * sizeof(unsigned short));
+		lbl = (unsigned short*)malloc((unsigned)w * h * sizeof(unsigned short));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
 			lbl[i] = 0;
 		pt = p.px + p.py * w;
@@ -361,30 +371,31 @@ public:
 	~IFT_livewire() { free(lbl); }
 
 private:
-	unsigned short *lbl;
+	unsigned short* lbl;
 	unsigned pt;
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
 		return E_bits[q] + pf[p] +
-					 (abs(direction + directivity_bits[p] -
-								floor((direction + directivity_bits[p]) / 180) * 180 - 90) +
-						abs(direction + directivity_bits[q] -
-								floor((direction + directivity_bits[q]) / 180) * 180 - 90)) *
-							 0.14f / 270;
+			   (abs(direction + directivity_bits[p] -
+					floor((direction + directivity_bits[p]) / 180) * 180 - 90) +
+				abs(direction + directivity_bits[q] -
+					floor((direction + directivity_bits[q]) / 180) * 180 -
+					90)) *
+				   0.14f / 270;
 	}
 };
 
 class IFT_adaptfuzzy : public IFTFLOAT
 {
 public:
-	void fuzzy_init(unsigned short w, unsigned short h, float *E_bits, Point p,
-									float fm1, float fs1, float fs2)
+	void fuzzy_init(unsigned short w, unsigned short h, float* E_bits, Point p,
+					float fm1, float fs1, float fs2)
 	{
 		m1 = 2 * fm1;
 		s1 = -1 / (fs1 * fs1 * 8);
 		s2 = -1 / (fs2 * 2);
 		//			float f;
-		lbl = (float *)malloc((unsigned)w * h * sizeof(float));
+		lbl = (float*)malloc((unsigned)w * h * sizeof(float));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
 			lbl[i] = 0;
 		pt = p.px + p.py * (unsigned)w;
@@ -413,12 +424,12 @@ public:
 private:
 	unsigned pt;
 	float m1, s1, s2;
-	float *lbl;
+	float* lbl;
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
 		UNREFERENCED_PARAMETER(direction);
-		float h1 =
-				exp((E_bits[p] + E_bits[q] - m1) * (E_bits[p] + E_bits[q] - m1) * s1);
+		float h1 = exp((E_bits[p] + E_bits[q] - m1) *
+					   (E_bits[p] + E_bits[q] - m1) * s1);
 		float h2 = exp((E_bits[p] - E_bits[q]) * (E_bits[p] - E_bits[q]) * s2);
 		return std::max(pf[p], 1 - (h1 * h1 + h2 * h2) / (h1 + h2));
 	}
@@ -427,11 +438,11 @@ private:
 class IFT_fastmarch : public IFT<coef>
 {
 public:
-	void fastmarch_init(unsigned short w, unsigned short h, float *E_bits,
-											float *lbl)
+	void fastmarch_init(unsigned short w, unsigned short h, float* E_bits,
+						float* lbl)
 	{
-		Ebits = (float *)malloc((unsigned)w * h * sizeof(float));
-		lb1 = (coef *)malloc((unsigned)w * h * sizeof(coef));
+		Ebits = (float*)malloc((unsigned)w * h * sizeof(float));
+		lb1 = (coef*)malloc((unsigned)w * h * sizeof(coef));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
 		{
 			if (E_bits[i] != 0)
@@ -460,17 +471,17 @@ public:
 	}
 
 private:
-	float *Ebits;
-	coef *lb1;
+	float* Ebits;
+	coef* lb1;
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
 		UNREFERENCED_PARAMETER(direction);
 		(lb[q].a)++;
 		lb[q].b += pf[p];
 		lb[q].c += pf[p] * pf[p];
-		float f =
-				(lb[q].b + sqrt(lb[q].b * lb[q].b + E_bits[q] - lb[q].a * lb[q].c)) /
-				(lb[q].a);
+		float f = (lb[q].b +
+				   sqrt(lb[q].b * lb[q].b + E_bits[q] - lb[q].a * lb[q].c)) /
+				  (lb[q].a);
 		//			cout << f << " ";
 		return f;
 		//			return (lb[q].b+sqrt(lb[q].b*lb[q].b+E_bits[q]-lb[q].a*lb[q].c))/(lb[q].a);
@@ -490,9 +501,9 @@ private:
 class IFT_distance : public IFT<coef>
 {
 public:
-	void distance_init(unsigned short w, unsigned short h, float f, float *lbl)
+	void distance_init(unsigned short w, unsigned short h, float f, float* lbl)
 	{
-		lbel = (coef *)malloc((unsigned)w * h * sizeof(coef));
+		lbel = (coef*)malloc((unsigned)w * h * sizeof(coef));
 		unsigned i = 0;
 		for (unsigned short j = 0; j < h; j++)
 		{
@@ -514,17 +525,17 @@ public:
 				{
 					lbel[i].a = 1;
 					/*						if(float(k)!=lbel[i].b) cout << "a1";
-											if(float(j)!=lbel[i].c) cout << "a2";
-											lbel[i].b=float(k);
-											lbel[i].c=float(j);*/
+												if(float(j)!=lbel[i].c) cout << "a2";
+												lbel[i].b=float(k);
+												lbel[i].c=float(j);*/
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
 					lbel[i1].a = 1;
 					/*						if(float(k)!=lbel[i1].b) cout << "a3";
-											if(float(j+1)!=lbel[i1].c) cout << "a4";
-											lbel[i1].b=float(k);
-											lbel[i1].c=float(j+1);*/
+												if(float(j+1)!=lbel[i1].c) cout << "a4";
+												lbel[i1].b=float(k);
+												lbel[i1].c=float(j+1);*/
 				}
 				i++;
 				i1++;
@@ -540,17 +551,17 @@ public:
 				{
 					lbel[i].a = 1;
 					/*						if(float(k)!=lbel[i].b) cout << "b1";
-											if(float(j)!=lbel[i].c) cout << "b2";
-											lbel[i].b=float(k);
-											lbel[i].c=float(j);*/
+												if(float(j)!=lbel[i].c) cout << "b2";
+												lbel[i].b=float(k);
+												lbel[i].c=float(j);*/
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
 					lbel[i1].a = 1;
 					/*						if(float(k+1)!=lbel[i1].b) cout << "b3"<<i<<":"<<float(k+1)-lbel[i1].b<<" ";
-											if(float(j)!=lbel[i1].c) cout << "b4";
-											lbel[i1].b=float(k+1);
-											lbel[i1].c=float(j);*/
+												if(float(j)!=lbel[i1].c) cout << "b4";
+												lbel[i1].b=float(k+1);
+												lbel[i1].c=float(j);*/
 				}
 				i++;
 				i1++;
@@ -566,14 +577,15 @@ public:
 	~IFT_distance() { free(lbel); }
 
 private:
-	float *Ebits;
-	coef *lbel;
+	float* Ebits;
+	coef* lbel;
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
 		UNREFERENCED_PARAMETER(direction);
 		float x = float(q % width);
 		float y = float(q / width);
-		return sqrt((x - lb[p].b) * (x - lb[p].b) + (y - lb[p].c) * (y - lb[p].c));
+		return sqrt((x - lb[p].b) * (x - lb[p].b) +
+					(y - lb[p].c) * (y - lb[p].c));
 	}
 	inline void compute_lb(unsigned p, unsigned q)
 	{
@@ -589,4 +601,4 @@ private:
 	}
 };
 
-#endif
+} // namespace iseg

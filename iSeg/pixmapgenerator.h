@@ -13,4 +13,7 @@
 
 #include <qpixmap.h>
 
+namespace iseg {
+
 QPixmap generatePixmap(tissues_size_t tissuenr);
+}

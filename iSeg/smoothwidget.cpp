@@ -33,9 +33,11 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-smooth_widget::smooth_widget(SlicesHandler *hand3D, QWidget *parent,
-														 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+smooth_widget::smooth_widget(SlicesHandler* hand3D, QWidget* parent,
+							 const char* name, Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Smoothing and noise removal filters."));
 
@@ -64,8 +66,9 @@ smooth_widget::smooth_widget(SlicesHandler *hand3D, QWidget *parent,
 	sl_sigma = new QSlider(Qt::Horizontal, hbox2);
 	sl_sigma->setRange(1, 100);
 	sl_sigma->setValue(20);
-	sl_sigma->setToolTip("Sigma gives the radius of the smoothing filter. Larger "
-											 "values remove more details.");
+	sl_sigma->setToolTip(
+		"Sigma gives the radius of the smoothing filter. Larger "
+		"values remove more details.");
 	txt_sigma2 = new QLabel(" 5", hbox2);
 
 	txt_dt = new QLabel("dt: 1    ", hbox3);
@@ -77,12 +80,13 @@ smooth_widget::smooth_widget(SlicesHandler *hand3D, QWidget *parent,
 	sl_k = new QSlider(Qt::Horizontal, hbox4);
 	sl_k->setRange(0, 100);
 	sl_k->setValue(50);
-	sl_k->setToolTip("Together with value on the right, defines the Sigma of the "
-									 "smoothing filter.");
+	sl_k->setToolTip(
+		"Together with value on the right, defines the Sigma of the "
+		"smoothing filter.");
 	sb_kmax = new QSpinBox(1, 100, 1, hbox4);
 	sb_kmax->setValue(10);
 	sb_kmax->setToolTip("Gives the max. radius of the smoothing filter. This "
-											"value defines the scale used in the slider bar.");
+						"value defines the scale used in the slider bar.");
 
 	txt_restrain1 = new QLabel("Restraint: 0 ", hbox5);
 	sl_restrain = new QSlider(Qt::Horizontal, hbox5);
@@ -92,21 +96,22 @@ smooth_widget::smooth_widget(SlicesHandler *hand3D, QWidget *parent,
 
 	rb_gaussian = new QRadioButton(QString("Gaussian"), vboxmethods);
 	rb_gaussian->setToolTip("Gaussian smoothing blurs the image and can remove "
-													"noise and details (high frequency).");
+							"noise and details (high frequency).");
 	rb_average = new QRadioButton(QString("Average"), vboxmethods);
 	rb_average->setToolTip(
-			"Mean smoothing blurs the image and can remove noise and details.");
+		"Mean smoothing blurs the image and can remove noise and details.");
 	rb_median = new QRadioButton(QString("Median"), vboxmethods);
 	rb_median->setToolTip(
-			"Median filtering can remove (speckle or salt-and-pepper) noise.");
+		"Median filtering can remove (speckle or salt-and-pepper) noise.");
 	rb_sigmafilter = new QRadioButton(QString("Sigma Filter"), vboxmethods);
 	rb_sigmafilter->setToolTip(
-			"Sigma filtering is a mixture between Gaussian and Average filtering. It "
-			"preserves edges better than Average filtering.");
+		"Sigma filtering is a mixture between Gaussian and Average filtering. "
+		"It "
+		"preserves edges better than Average filtering.");
 	rb_anisodiff =
-			new QRadioButton(QString("Anisotropic Diffusion"), vboxmethods);
+		new QRadioButton(QString("Anisotropic Diffusion"), vboxmethods);
 	rb_anisodiff->setToolTip("Anisotropic diffusion can remove noise, while "
-													 "preserving significant details, such as edges.");
+							 "preserving significant details, such as edges.");
 
 	modegroup = new QButtonGroup(this);
 	modegroup->insert(rb_gaussian);
@@ -140,23 +145,25 @@ smooth_widget::smooth_widget(SlicesHandler *hand3D, QWidget *parent,
 	method_changed(0);
 
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-									 SLOT(method_changed(int)));
+					 SLOT(method_changed(int)));
 	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
 	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-									 SLOT(sigmaslider_changed(int)));
+					 SLOT(sigmaslider_changed(int)));
 	QObject::connect(sl_sigma, SIGNAL(sliderPressed()), this,
-									 SLOT(slider_pressed()));
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_sigma, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
+					 SLOT(slider_released()));
 	QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
-									 SLOT(kslider_changed(int)));
-	QObject::connect(sl_k, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+					 SLOT(kslider_changed(int)));
+	QObject::connect(sl_k, SIGNAL(sliderPressed()), this,
+					 SLOT(slider_pressed()));
 	QObject::connect(sl_k, SIGNAL(sliderReleased()), this,
-									 SLOT(slider_released()));
-	QObject::connect(sb_n, SIGNAL(valueChanged(int)), this, SLOT(n_changed(int)));
+					 SLOT(slider_released()));
+	QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
+					 SLOT(n_changed(int)));
 	QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
-									 SLOT(kmax_changed(int)));
+					 SLOT(kmax_changed(int)));
 
 	return;
 }
@@ -169,7 +176,7 @@ smooth_widget::~smooth_widget()
 
 void smooth_widget::execute()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
@@ -191,15 +198,15 @@ void smooth_widget::execute()
 		}
 		else if (rb_sigmafilter->isOn())
 		{
-			handler3D->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-														 (short unsigned)sb_n->value(),
-														 (short unsigned)sb_n->value());
+			handler3D->sigmafilter(
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		}
 		else
 		{
 			handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
-														sl_k->value() * 0.01f * sb_kmax->value(),
-														sl_restrain->value() * 0.01f);
+								  sl_k->value() * 0.01f * sb_kmax->value(),
+								  sl_restrain->value() * 0.01f);
 		}
 	}
 	else
@@ -219,14 +226,14 @@ void smooth_widget::execute()
 		else if (rb_sigmafilter->isOn())
 		{
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-													 (short unsigned)sb_n->value(),
-													 (short unsigned)sb_n->value());
+								 (short unsigned)sb_n->value(),
+								 (short unsigned)sb_n->value());
 		}
 		else
 		{
 			bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
-													sl_k->value() * 0.01f * sb_kmax->value(),
-													sl_restrain->value() * 0.01f);
+								sl_k->value() * 0.01f * sb_kmax->value(),
+								sl_restrain->value() * 0.01f);
 		}
 	}
 	emit end_datachange(this);
@@ -307,7 +314,7 @@ void smooth_widget::continue_diff()
 		return;
 	}
 
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
@@ -316,14 +323,14 @@ void smooth_widget::continue_diff()
 	if (allslices->isChecked())
 	{
 		handler3D->cont_anisodiff(1.0f, sb_iter->value(), f2,
-															sl_k->value() * 0.01f * sb_kmax->value(),
-															sl_restrain->value() * 0.01f);
+								  sl_k->value() * 0.01f * sb_kmax->value(),
+								  sl_restrain->value() * 0.01f);
 	}
 	else
 	{
 		bmphand->cont_anisodiff(1.0f, sb_iter->value(), f2,
-														sl_k->value() * 0.01f * sb_kmax->value(),
-														sl_restrain->value() * 0.01f);
+								sl_k->value() * 0.01f * sb_kmax->value(),
+								sl_restrain->value() * 0.01f);
 	}
 
 	emit end_datachange(this);
@@ -338,7 +345,7 @@ void smooth_widget::sigmaslider_changed(int newval)
 			handler3D->gaussian(sl_sigma->value() * 0.05f);
 		else
 			bmphand->gaussian(sl_sigma->value() * 0.05f);
-		emit end_datachange(this, common::NoUndo);
+		emit end_datachange(this, iseg::NoUndo);
 	}
 
 	return;
@@ -350,14 +357,14 @@ void smooth_widget::kslider_changed(int newval)
 	if (rb_sigmafilter->isOn())
 	{
 		if (allslices->isChecked())
-			handler3D->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-														 (short unsigned)sb_n->value(),
-														 (short unsigned)sb_n->value());
+			handler3D->sigmafilter(
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		else
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-													 (short unsigned)sb_n->value(),
-													 (short unsigned)sb_n->value());
-		emit end_datachange(this, common::NoUndo);
+								 (short unsigned)sb_n->value(),
+								 (short unsigned)sb_n->value());
+		emit end_datachange(this, iseg::NoUndo);
 	}
 
 	return;
@@ -367,7 +374,7 @@ void smooth_widget::n_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
@@ -377,15 +384,15 @@ void smooth_widget::n_changed(int newval)
 	{
 		if (allslices->isChecked())
 		{
-			handler3D->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-														 (short unsigned)sb_n->value(),
-														 (short unsigned)sb_n->value());
+			handler3D->sigmafilter(
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		}
 		else
 		{
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-													 (short unsigned)sb_n->value(),
-													 (short unsigned)sb_n->value());
+								 (short unsigned)sb_n->value(),
+								 (short unsigned)sb_n->value());
 		}
 	}
 	else if (rb_average)
@@ -406,7 +413,7 @@ void smooth_widget::kmax_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
@@ -416,15 +423,15 @@ void smooth_widget::kmax_changed(int newval)
 	{
 		if (allslices->isChecked())
 		{
-			handler3D->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-														 (short unsigned)sb_n->value(),
-														 (short unsigned)sb_n->value());
+			handler3D->sigmafilter(
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		}
 		else
 		{
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-													 (short unsigned)sb_n->value(),
-													 (short unsigned)sb_n->value());
+								 (short unsigned)sb_n->value(),
+								 (short unsigned)sb_n->value());
 		}
 	}
 	emit end_datachange(this);
@@ -440,7 +447,7 @@ void smooth_widget::slicenr_changed()
 	//	}
 }
 
-void smooth_widget::bmphand_changed(bmphandler *bmph)
+void smooth_widget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
@@ -462,7 +469,7 @@ void smooth_widget::slider_pressed()
 {
 	if ((rb_gaussian->isOn() || rb_sigmafilter->isOn()))
 	{
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
@@ -478,7 +485,7 @@ void smooth_widget::slider_released()
 	}
 }
 
-FILE *smooth_widget::SaveParams(FILE *fp, int version)
+FILE* smooth_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -512,20 +519,20 @@ FILE *smooth_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *smooth_widget::LoadParams(FILE *fp, int version)
+FILE* smooth_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-												SLOT(method_changed(int)));
+							SLOT(method_changed(int)));
 		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
-												SLOT(sigmaslider_changed(int)));
+							SLOT(sigmaslider_changed(int)));
 		QObject::disconnect(sl_k, SIGNAL(valueChanged(int)), this,
-												SLOT(kslider_changed(int)));
+							SLOT(kslider_changed(int)));
 		QObject::disconnect(sb_n, SIGNAL(valueChanged(int)), this,
-												SLOT(n_changed(int)));
+							SLOT(n_changed(int)));
 		QObject::disconnect(sb_kmax, SIGNAL(valueChanged(int)), this,
-												SLOT(kmax_changed(int)));
+							SLOT(kmax_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -556,15 +563,15 @@ FILE *smooth_widget::LoadParams(FILE *fp, int version)
 		method_changed(0);
 
 		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-										 SLOT(method_changed(int)));
+						 SLOT(method_changed(int)));
 		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-										 SLOT(sigmaslider_changed(int)));
+						 SLOT(sigmaslider_changed(int)));
 		QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
-										 SLOT(kslider_changed(int)));
+						 SLOT(kslider_changed(int)));
 		QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
-										 SLOT(n_changed(int)));
+						 SLOT(n_changed(int)));
 		QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
-										 SLOT(kmax_changed(int)));
+						 SLOT(kmax_changed(int)));
 	}
 	return fp;
 }

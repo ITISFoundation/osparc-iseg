@@ -7,10 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "tissuecleaner.h"
 #include "Precompiled.h"
 
+#include "tissuecleaner.h"
+
 #include <cstdlib>
+
+using namespace iseg;
 
 int TissueCleaner::base_connection(int c)
 {
@@ -20,8 +23,8 @@ int TissueCleaner::base_connection(int c)
 		return map[c] = base_connection(map[c]);
 }
 
-TissueCleaner::TissueCleaner(tissues_size_t **slices1, unsigned short n1,
-														 unsigned short width1, unsigned short height1)
+TissueCleaner::TissueCleaner(tissues_size_t** slices1, unsigned short n1,
+							 unsigned short width1, unsigned short height1)
 {
 	slices = slices1;
 	n = n1;
@@ -36,8 +39,8 @@ TissueCleaner::~TissueCleaner() { free(volume); }
 bool TissueCleaner::Allocate()
 {
 	//	volume=(int *)malloc(sizeof(int)*(unsigned)(width+1)*(unsigned)(height+1)*(unsigned)(n+1));
-	volume = (int *)malloc(sizeof(int) * (unsigned)(width) * (unsigned)(height) *
-												 (unsigned)(n));
+	volume = (int*)malloc(sizeof(int) * (unsigned)(width) * (unsigned)(height) *
+						  (unsigned)(n));
 	if (volume == NULL)
 		return false;
 	return true;
@@ -157,7 +160,8 @@ void TissueCleaner::ConnectedComponents()
 				volume[i1] = base_connection(volume[i1 - 1]);
 				if (slices[i][i2] == slices[i - 1][i2])
 				{
-					map[(int)base_connection(volume[i1 - offset[2]])] = volume[i1];
+					map[(int)base_connection(volume[i1 - offset[2]])] =
+						volume[i1];
 				}
 			}
 			else
@@ -182,7 +186,8 @@ void TissueCleaner::ConnectedComponents()
 				volume[i1] = base_connection(volume[i1 - width]);
 				if (slices[i][i2] == slices[i - 1][i2])
 				{
-					map[(int)base_connection(volume[i1 - offset[2]])] = volume[i1];
+					map[(int)base_connection(volume[i1 - offset[2]])] =
+						volume[i1];
 				}
 			}
 			else
@@ -206,11 +211,13 @@ void TissueCleaner::ConnectedComponents()
 					volume[i1] = base_connection(volume[i1 - 1]);
 					if (slices[i][i2] == slices[i][i2 - width])
 					{
-						map[(int)base_connection(volume[i1 - width])] = volume[i1];
+						map[(int)base_connection(volume[i1 - width])] =
+							volume[i1];
 					}
 					if (slices[i][i2] == slices[i - 1][i2])
 					{
-						map[(int)base_connection(volume[i1 - offset[2]])] = volume[i1];
+						map[(int)base_connection(volume[i1 - offset[2]])] =
+							volume[i1];
 					}
 				}
 				else
@@ -220,13 +227,15 @@ void TissueCleaner::ConnectedComponents()
 						volume[i1] = base_connection(volume[i1 - width]);
 						if (slices[i][i2] == slices[i - 1][i2])
 						{
-							map[(int)base_connection(volume[i1 - offset[2]])] = volume[i1];
+							map[(int)base_connection(volume[i1 - offset[2]])] =
+								volume[i1];
 						}
 					}
 					else
 					{
 						if (slices[i][i2] == slices[i - 1][i2])
-							volume[i1] = base_connection(volume[i1 - offset[2]]);
+							volume[i1] =
+								base_connection(volume[i1 - offset[2]]);
 						else
 						{
 							map.push_back(newest);
@@ -283,7 +292,8 @@ void TissueCleaner::Clean(float ratio, unsigned minsize)
 	erasemap.resize(map.size(), false);
 	for (size_t i = 0; i < map.size(); i++)
 	{
-		if (volumes[i] < minsize && volumes[i] < ratio * totvolumes[tissuemap[i]])
+		if (volumes[i] < minsize &&
+			volumes[i] < ratio * totvolumes[tissuemap[i]])
 			erasemap[i] = true;
 	}
 

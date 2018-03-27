@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef QWIDGET_14April05
-#define QWIDGET_14April05
+#pragma once
 
 #include <qcursor.h>
 #include <qdir.h>
@@ -19,24 +18,26 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
+namespace iseg {
+
 class ADDON_API QWidget1 : public QWidget
 {
 	Q_OBJECT
 public:
-	QWidget1(QWidget *parent, const char *name, Qt::WindowFlags wFlags)
-			: QWidget(parent, name, wFlags)
+	QWidget1(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QWidget(parent, name, wFlags)
 	{
 		m_cursor = new QCursor(Qt::CrossCursor);
 	};
 	virtual void init() {}
 	virtual void newloaded() {}
-	QCursor *m_cursor;
-	virtual FILE *SaveParams(FILE *fp, int version)
+	QCursor* m_cursor;
+	virtual FILE* SaveParams(FILE* fp, int version)
 	{
 		UNREFERENCED_PARAMETER(version);
 		return fp;
 	}
-	virtual FILE *LoadParams(FILE *fp, int version)
+	virtual FILE* LoadParams(FILE* fp, int version)
 	{
 		UNREFERENCED_PARAMETER(version);
 		return fp;
@@ -54,4 +55,4 @@ public slots:
 	virtual void slicenr_changed(){};
 };
 
-#endif
+} // namespace iseg

@@ -11,9 +11,11 @@
 #pragma once
 
 // BL TODO replace by ImageReader
-namespace ChannelExtractor {
+namespace iseg { namespace ChannelExtractor {
+
 enum ChannelEnum { kRed, kGreen, kBlue, kAlpha };
 
-bool getSlice(const char *filename, float *slice, int channel, unsigned slicenr,
-							unsigned width, unsigned height);
-}; // namespace ChannelExtractor
+bool getSlice(const char* filename, float* slice, int channel, unsigned slicenr,
+			  unsigned width, unsigned height);
+
+}} // namespace iseg::ChannelExtractor

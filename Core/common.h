@@ -13,12 +13,8 @@
 #include "Types.h"
 #include "iSegCore.h"
 
-/*
- * common.h
- * Common definitions for iSeg project.
- */
-
-namespace common {
+/// Common definitions for iSeg project.
+namespace iseg {
 
 struct iSegCore_API DataSelection
 {
@@ -29,20 +25,12 @@ struct iSegCore_API DataSelection
 		sliceNr = 0;
 	}
 
-	void CombineSelection(DataSelection &other)
-	{
-		bmp = bmp || other.bmp;
-		work = work || other.work;
-		tissues = tissues || other.tissues;
-		vvm = vvm || other.vvm;
-		limits = limits || other.limits;
-		marks = marks || other.marks;
-		tissueHierarchy = tissueHierarchy || other.tissueHierarchy;
-	}
+	void CombineSelection(DataSelection& other);
 
 	bool DataSelected()
 	{
-		return bmp || work || tissues || vvm || limits || marks || tissueHierarchy;
+		return bmp || work || tissues || vvm || limits || marks ||
+			   tissueHierarchy;
 	}
 
 	bool bmp;
@@ -66,21 +54,21 @@ enum EndUndoAction {
 };
 
 iSegCore_API int CombineTissuesVersion(const int version,
-																			 const int tissuesVersion);
-iSegCore_API void ExtractTissuesVersion(const int combinedVersion, int &version,
-																				int &tissuesVersion);
+									   const int tissuesVersion);
+iSegCore_API void ExtractTissuesVersion(const int combinedVersion, int& version,
+										int& tissuesVersion);
 
 // Quaternion <--> Direction Cosines Conversion
 // quaternion[4] = {w, x, y, z}, directionCosines[6] = {a, b, c, x, y, z}
-void QuaternionToDirectionCosines(const float *quaternion,
-																	float *directionCosines);
-void DirectionCosinesToQuaternion(const float *directionCosines,
-																	float *quaternion);
-void QuaternionFromMatrix(const float mat[3][3], float *quaternion);
+void QuaternionToDirectionCosines(const float* quaternion,
+								  float* directionCosines);
+void DirectionCosinesToQuaternion(const float* directionCosines,
+								  float* quaternion);
 
-iSegCore_API bool Normalize(float *vec);
-iSegCore_API bool Cross(float *vecA, float *vecB, float *vecOut);
-iSegCore_API bool Orthonormalize(float *vecA, float *vecB);
-} // namespace common
+iSegCore_API bool Normalize(float* vec);
+iSegCore_API bool Cross(float* vecA, float* vecB, float* vecOut);
+iSegCore_API bool Orthonormalize(float* vecA, float* vecB);
+
+} // namespace iseg
 
 #endif

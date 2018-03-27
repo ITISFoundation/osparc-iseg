@@ -7,14 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef rgbs_250108
-#define rgbs_250108
+#pragma once
 
-typedef struct
+namespace iseg {
+
+struct RGB
 {
 	float r;
 	float g;
 	float b;
-} rgbs;
+};
 
-#endif
+} // namespace iseg

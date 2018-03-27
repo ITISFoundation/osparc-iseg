@@ -13,13 +13,13 @@
 
 HDF5IO::HDF5IO(int compression) : CompressionLevel(compression) {}
 
-bool HDF5IO::existsValidHdf5(const std::string &fname)
+bool HDF5IO::existsValidHdf5(const std::string& fname)
 {
 	htri_t status = H5Fis_hdf5(fname.c_str());
 	return (status > 0);
 }
 
-HDF5IO::handle_id_type HDF5IO::open(const std::string &fname)
+HDF5IO::handle_id_type HDF5IO::open(const std::string& fname)
 {
 	if (!existsValidHdf5(fname.c_str()))
 	{
@@ -28,7 +28,7 @@ HDF5IO::handle_id_type HDF5IO::open(const std::string &fname)
 	return H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 }
 
-HDF5IO::handle_id_type HDF5IO::create(const std::string &fname, bool append)
+HDF5IO::handle_id_type HDF5IO::create(const std::string& fname, bool append)
 {
 	if (append && !existsValidHdf5(fname.c_str()))
 	{
@@ -40,7 +40,8 @@ HDF5IO::handle_id_type HDF5IO::create(const std::string &fname, bool append)
 	}
 	else
 	{
-		return H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+		return H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
+						 H5P_DEFAULT);
 	}
 }
 

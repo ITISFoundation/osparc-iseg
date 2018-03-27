@@ -7,10 +7,11 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "tissueinfos.h"
 #include "Precompiled.h"
+
 #include "SlicesHandler.h"
 #include "TissueHierarchy.h"
+#include "tissueinfos.h"
 
 #include "HDF5IO/HDF5Reader.h"
 #include "HDF5IO/HDF5Writer.h"
@@ -29,28 +30,29 @@
 
 using namespace HDF5;
 using namespace std;
+using namespace iseg;
 
-TissueInfoStruct *TissueInfos::GetTissueInfo(tissues_size_t tissuetype)
+TissueInfoStruct* TissueInfos::GetTissueInfo(tissues_size_t tissuetype)
 {
 	return &tissueInfosVector[tissuetype];
 }
 
-float *TissueInfos::GetTissueColor(tissues_size_t tissuetype)
+float* TissueInfos::GetTissueColor(tissues_size_t tissuetype)
 {
 	return tissueInfosVector[tissuetype].color;
 }
 
-void TissueInfos::GetTissueColorRGB(tissues_size_t tissuetype, unsigned char &r,
-																		unsigned char &g, unsigned char &b)
+void TissueInfos::GetTissueColorRGB(tissues_size_t tissuetype, unsigned char& r,
+									unsigned char& g, unsigned char& b)
 {
 	if (int(tissuetype) < tissueInfosVector.size())
 		tissueInfosVector[tissuetype].GetColorRGB(r, g, b);
 }
 
 void TissueInfos::GetTissueColorBlendedRGB(tissues_size_t tissuetype,
-																					 unsigned char &r, unsigned char &g,
-																					 unsigned char &b,
-																					 unsigned char offset)
+										   unsigned char& r, unsigned char& g,
+										   unsigned char& b,
+										   unsigned char offset)
 {
 	tissueInfosVector[tissuetype].GetColorBlendedRGB(r, g, b, offset);
 }
@@ -84,7 +86,7 @@ tissues_size_t TissueInfos::GetTissueType(QString tissuename)
 }
 
 void TissueInfos::SetTissueColor(tissues_size_t tissuetype, float r, float g,
-																 float b)
+								 float b)
 {
 	tissueInfosVector[tissuetype].SetColor(r, g, b);
 }
@@ -130,8 +132,8 @@ void TissueInfos::init_tissues1()
 void TissueInfos::SetTissuesLocked(bool val)
 {
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		vecIt->locked = val;
 	}
@@ -310,7 +312,7 @@ void TissueInfos::InitTissues()
 	CreateTissueTypeMap();
 }
 
-FILE *TissueInfos::SaveTissues(FILE *fp, unsigned short version)
+FILE* TissueInfos::SaveTissues(FILE* fp, unsigned short version)
 {
 	tissues_size_t tissuecount = GetTissueCount();
 	fwrite(&tissuecount, 1, sizeof(tissues_size_t), fp);
@@ -330,8 +332,8 @@ FILE *TissueInfos::SaveTissues(FILE *fp, unsigned short version)
 	}
 
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		fwrite(&(vecIt->color[0]), 1, sizeof(float), fp);
 		fwrite(&(vecIt->color[1]), 1, sizeof(float), fp);
@@ -349,9 +351,9 @@ FILE *TissueInfos::SaveTissues(FILE *fp, unsigned short version)
 }
 
 namespace {
-std::vector<TissueHierarchyItem *> GetLeaves(TissueHierarchyItem *hiearchy)
+std::vector<TissueHierarchyItem*> GetLeaves(TissueHierarchyItem* hiearchy)
 {
-	std::vector<TissueHierarchyItem *> leaves;
+	std::vector<TissueHierarchyItem*> leaves;
 	for (auto item : *hiearchy->GetChildren())
 	{
 		if (item->GetIsFolder())
@@ -368,7 +370,7 @@ std::vector<TissueHierarchyItem *> GetLeaves(TissueHierarchyItem *hiearchy)
 }
 
 std::map<std::string, std::string>
-		BuildHiearchyMap(TissueHierarchyItem *hiearchy)
+	BuildHiearchyMap(TissueHierarchyItem* hiearchy)
 {
 	std::map<std::string, std::string> result;
 
@@ -395,9 +397,9 @@ std::map<std::string, std::string>
 }
 } // namespace
 
-bool TissueInfos::SaveTissuesHDF(const char *filename,
-																 TissueHierarchyItem *hiearchy, bool naked,
-																 unsigned short version)
+bool TissueInfos::SaveTissuesHDF(const char* filename,
+								 TissueHierarchyItem* hiearchy, bool naked,
+								 unsigned short version)
 {
 	int compression = 1;
 
@@ -409,12 +411,12 @@ bool TissueInfos::SaveTissuesHDF(const char *filename,
 	// save working directory
 	QDir oldcwd = QDir::current();
 	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
+		 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
+		 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Writer writer;
 	writer.loud = 0;
@@ -463,8 +465,8 @@ bool TissueInfos::SaveTissuesHDF(const char *filename,
 
 	TissueInfosVecType::iterator vecIt;
 	int counter = 1;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		QString tissuename1 = vecIt->name;
 		tissuename1.replace(QString("\\"), QString("_"), true);
@@ -501,11 +503,11 @@ bool TissueInfos::SaveTissuesHDF(const char *filename,
 	return true;
 }
 
-FILE *TissueInfos::SaveTissueLocks(FILE *fp)
+FILE* TissueInfos::SaveTissueLocks(FILE* fp)
 {
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		unsigned char dummy = (unsigned char)vecIt->locked;
 		fwrite(&(dummy), 1, sizeof(unsigned char), fp);
@@ -514,13 +516,13 @@ FILE *TissueInfos::SaveTissueLocks(FILE *fp)
 	return fp;
 }
 
-FILE *TissueInfos::LoadTissueLocks(FILE *fp)
+FILE* TissueInfos::LoadTissueLocks(FILE* fp)
 {
 	unsigned char dummy;
 	tissueInfosVector[0].locked = false;
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		fread(&(dummy), sizeof(unsigned char), 1, fp);
 		vecIt->locked = (bool)dummy;
@@ -529,7 +531,7 @@ FILE *TissueInfos::LoadTissueLocks(FILE *fp)
 	return fp;
 }
 
-FILE *TissueInfos::LoadTissues(FILE *fp, int tissuesVersion)
+FILE* TissueInfos::LoadTissues(FILE* fp, int tissuesVersion)
 {
 	char name[100];
 	tissues_size_t tissuecount;
@@ -568,8 +570,8 @@ FILE *TissueInfos::LoadTissues(FILE *fp, int tissuesVersion)
 	}
 
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		vecIt->locked = false;
 		fread(&(vecIt->color[0]), sizeof(float), 1, fp);
@@ -598,7 +600,7 @@ FILE *TissueInfos::LoadTissues(FILE *fp, int tissuesVersion)
 	return fp;
 }
 
-bool TissueInfos::LoadTissuesHDF(const char *filename, int tissuesVersion)
+bool TissueInfos::LoadTissuesHDF(const char* filename, int tissuesVersion)
 {
 	HDF5Reader reader;
 	if (!reader.open(filename))
@@ -632,7 +634,7 @@ bool TissueInfos::LoadTissuesHDF(const char *filename, int tissuesVersion)
 	rgbo.resize(4);
 	int index;
 	for (std::vector<std::string>::iterator it = tissues.begin();
-			 it != tissues.end(); it++)
+		 it != tissues.end(); it++)
 	{
 		if (QString("version").compare(QString(it->c_str())) == 0) {}
 		else if (QString("bkg_rgbo").compare(QString(it->c_str())) == 0)
@@ -645,14 +647,16 @@ bool TissueInfos::LoadTissuesHDF(const char *filename, int tissuesVersion)
 		}
 		else
 		{
-			ok = ok && (reader.read(&index, (QString("/Tissues/") +
-																			 QString(it->c_str()) + QString("/index"))
-																					.toLocal8Bit()
-																					.constData()) != 0);
-			ok = ok && (reader.read(rgbo, (QString("/Tissues/") +
-																		 QString(it->c_str()) + QString("/rgbo"))
-																				.toLocal8Bit()
-																				.constData()) != 0);
+			ok = ok &&
+				 (reader.read(&index, (QString("/Tissues/") +
+									   QString(it->c_str()) + QString("/index"))
+										  .toLocal8Bit()
+										  .constData()) != 0);
+			ok = ok &&
+				 (reader.read(rgbo, (QString("/Tissues/") +
+									 QString(it->c_str()) + QString("/rgbo"))
+										.toLocal8Bit()
+										.constData()) != 0);
 			tissueInfosVector[index].locked = false;
 			tissueInfosVector[index].color[0] = rgbo[0];
 			tissueInfosVector[index].color[1] = rgbo[1];
@@ -669,10 +673,10 @@ bool TissueInfos::LoadTissuesHDF(const char *filename, int tissuesVersion)
 	return ok;
 }
 
-bool TissueInfos::SaveTissuesReadable(const char *filename,
-																			unsigned short version)
+bool TissueInfos::SaveTissuesReadable(const char* filename,
+									  unsigned short version)
 {
-	FILE *fp;
+	FILE* fp;
 	if ((fp = fopen(filename, "w")) == NULL)
 	{
 		return false;
@@ -690,19 +694,20 @@ bool TissueInfos::SaveTissuesReadable(const char *filename,
 		if (version < 5)
 		{
 			for (vecIt = tissueInfosVector.begin() + 1;
-					 vecIt != tissueInfosVector.end(); ++vecIt)
+				 vecIt != tissueInfosVector.end(); ++vecIt)
 			{
 				fprintf(fp, "C%f %f %f %s\n", vecIt->color[0], vecIt->color[1],
-								vecIt->color[2], vecIt->name.ascii());
+						vecIt->color[2], vecIt->name.ascii());
 			}
 		}
 		else
 		{
 			for (vecIt = tissueInfosVector.begin() + 1;
-					 vecIt != tissueInfosVector.end(); ++vecIt)
+				 vecIt != tissueInfosVector.end(); ++vecIt)
 			{
-				fprintf(fp, "C%f %f %f %f %s\n", vecIt->color[0], vecIt->color[1],
-								vecIt->color[2], vecIt->opac, vecIt->name.ascii());
+				fprintf(fp, "C%f %f %f %f %s\n", vecIt->color[0],
+						vecIt->color[1], vecIt->color[2], vecIt->opac,
+						vecIt->name.ascii());
 			}
 		}
 
@@ -711,14 +716,14 @@ bool TissueInfos::SaveTissuesReadable(const char *filename,
 	}
 }
 
-bool TissueInfos::LoadTissuesReadable(const char *filename,
-																			SlicesHandler *handler3D,
-																			tissues_size_t &removeTissuesRange)
+bool TissueInfos::LoadTissuesReadable(const char* filename,
+									  SlicesHandler* handler3D,
+									  tissues_size_t& removeTissuesRange)
 {
 	// To replace the old tissue list, handler3D->remove_tissues(removeTissuesRange) has to be called afterwards!
 
 	char name[100];
-	FILE *fp;
+	FILE* fp;
 	if ((fp = fopen(filename, "r")) == NULL)
 	{
 		InitTissues();
@@ -761,10 +766,10 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 			r = g = b = a = -1;
 			while (res != EOF && res != 6)
 			{
-				res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name, &r, &g,
-										 &b, &a);
+				res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name,
+							 &r, &g, &b, &a);
 				if (currLabel == r == g == b == a == 0 &&
-						QString("Unknown").compare(QString(name)) == 0)
+					QString("Unknown").compare(QString(name)) == 0)
 				{
 					isFreeSurfer = true;
 				}
@@ -779,8 +784,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 
 			// Get largest label index
 			tissues_size_t labelMax = 0;
-			while ((res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name, &r,
-													 &g, &b, &a)) != EOF)
+			while ((res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel,
+								 name, &r, &g, &b, &a)) != EOF)
 			{
 				if (res == 6)
 				{
@@ -798,7 +803,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 		}
 
 		std::set<tissues_size_t> missingTissues;
-		for (tissues_size_t type = 0; type <= TissueInfos::GetTissueCount(); ++type)
+		for (tissues_size_t type = 0; type <= TissueInfos::GetTissueCount();
+			 ++type)
 		{
 			missingTissues.insert(type);
 		}
@@ -814,8 +820,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 			currLabel = res = 0;
 			while (res != EOF && (res != 6 || currLabel == 0))
 			{
-				res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name, &r, &g,
-										 &b, &a);
+				res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name,
+							 &r, &g, &b, &a);
 			}
 
 			tissues_size_t dummyIdx = 1;
@@ -835,8 +841,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 					res = 0;
 					while (res != EOF && res != 6)
 					{
-						res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel, name, &r,
-												 &g, &b, &a);
+						res = fscanf(fp, "%d\t%s\t%d\t%d\t%d\t%d\n", &currLabel,
+									 name, &r, &g, &b, &a);
 					}
 				}
 				else
@@ -846,13 +852,15 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 					newTissueInfo.color[1] = float(rand()) / RAND_MAX;
 					newTissueInfo.color[2] = float(rand()) / RAND_MAX;
 					newTissueInfo.opac = 0.5f;
-					newTissueInfo.name = QString("DummyTissue%1").arg(dummyIdx++);
+					newTissueInfo.name =
+						QString("DummyTissue%1").arg(dummyIdx++);
 				}
 				newTissueInfosVec.push_back(newTissueInfo);
 
 				// Check whether the tissue existed before
 				tissues_size_t oldType = GetTissueType(newTissueInfo.name);
-				if (oldType > 0 && missingTissues.find(oldType) != missingTissues.end())
+				if (oldType > 0 &&
+					missingTissues.find(oldType) != missingTissues.end())
 				{
 					missingTissues.erase(missingTissues.find(oldType));
 				}
@@ -865,8 +873,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 				TissueInfoStruct newTissueInfo;
 				newTissueInfo.locked = false;
 				if (fscanf(fp, "C%f %f %f %s\n", &(newTissueInfo.color[0]),
-									 &(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
-									 name) != 4)
+						   &(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
+						   name) != 4)
 				{
 					fclose(fp);
 					InitTissues();
@@ -878,7 +886,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 
 				// Check whether the tissue existed before
 				tissues_size_t oldType = GetTissueType(newTissueInfo.name);
-				if (oldType > 0 && missingTissues.find(oldType) != missingTissues.end())
+				if (oldType > 0 &&
+					missingTissues.find(oldType) != missingTissues.end())
 				{
 					missingTissues.erase(missingTissues.find(oldType));
 				}
@@ -891,8 +900,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 				TissueInfoStruct newTissueInfo;
 				newTissueInfo.locked = false;
 				if (fscanf(fp, "C%f %f %f %f %s\n", &(newTissueInfo.color[0]),
-									 &(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
-									 &(newTissueInfo.opac), name) != 5)
+						   &(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
+						   &(newTissueInfo.opac), name) != 5)
 				{
 					fclose(fp);
 					InitTissues();
@@ -903,7 +912,8 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 
 				// Check whether the tissue existed before
 				tissues_size_t oldType = GetTissueType(newTissueInfo.name);
-				if (oldType > 0 && missingTissues.find(oldType) != missingTissues.end())
+				if (oldType > 0 &&
+					missingTissues.find(oldType) != missingTissues.end())
 				{
 					missingTissues.erase(missingTissues.find(oldType));
 				}
@@ -913,23 +923,26 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 		// Prepend existing tissues (including background) which the input file did not contain
 		removeTissuesRange = missingTissues.size() - 1;
 		for (std::set<tissues_size_t>::reverse_iterator riter =
-						 missingTissues.rbegin();
-				 riter != missingTissues.rend(); ++riter)
+				 missingTissues.rbegin();
+			 riter != missingTissues.rend(); ++riter)
 		{
 			newTissueInfosVec.insert(newTissueInfosVec.begin(),
-															 tissueInfosVector[*riter]);
+									 tissueInfosVector[*riter]);
 		}
 
 		// Permute tissue indices according to ordering in input file
-		tissues_size_t *idxMap = new tissues_size_t[tissueInfosVector.size()];
-		for (tissues_size_t oldIdx = 0; oldIdx < tissueInfosVector.size(); ++oldIdx)
+		tissues_size_t* idxMap = new tissues_size_t[tissueInfosVector.size()];
+		for (tissues_size_t oldIdx = 0; oldIdx < tissueInfosVector.size();
+			 ++oldIdx)
 		{
 			idxMap[oldIdx] = oldIdx;
 		}
 		bool permute = false;
-		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size(); ++newIdx)
+		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size();
+			 ++newIdx)
 		{
-			tissues_size_t oldIdx = GetTissueType(newTissueInfosVec[newIdx].name);
+			tissues_size_t oldIdx =
+				GetTissueType(newTissueInfosVec[newIdx].name);
 			if (oldIdx > 0 && oldIdx != newIdx)
 			{
 				idxMap[oldIdx] = newIdx;
@@ -951,9 +964,9 @@ bool TissueInfos::LoadTissuesReadable(const char *filename,
 	}
 }
 
-bool TissueInfos::SaveDefaultTissueList(const char *filename)
+bool TissueInfos::SaveDefaultTissueList(const char* filename)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "w");
 	if (fp == NULL)
 	{
@@ -961,21 +974,21 @@ bool TissueInfos::SaveDefaultTissueList(const char *filename)
 	}
 
 	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end();
-			 ++vecIt)
+	for (vecIt = tissueInfosVector.begin() + 1;
+		 vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		QString tissuename1 = vecIt->name;
 		tissuename1.replace(QChar(' '), QChar('_'));
 		fprintf(fp, "%s %f %f %f %f\n", tissuename1.ascii(), vecIt->color[0],
-						vecIt->color[1], vecIt->color[2], vecIt->opac);
+				vecIt->color[1], vecIt->color[2], vecIt->opac);
 	}
 	fclose(fp);
 	return true;
 }
 
-bool TissueInfos::LoadDefaultTissueList(const char *filename)
+bool TissueInfos::LoadDefaultTissueList(const char* filename)
 {
-	FILE *fp;
+	FILE* fp;
 	fp = fopen(filename, "r");
 	if (fp == NULL)
 	{
@@ -989,7 +1002,7 @@ bool TissueInfos::LoadDefaultTissueList(const char *filename)
 		tissueInfosVector.clear();
 		tissueInfosVector.resize(1); // Background
 		while (fscanf(fp, "%s %f %f %f %f", name1, &color_r, &color_g, &color_b,
-									&color_o) == 5)
+					  &color_o) == 5)
 		{
 			TissueInfoStruct newTissueInfo;
 			newTissueInfo.locked = false;
@@ -1007,14 +1020,14 @@ bool TissueInfos::LoadDefaultTissueList(const char *filename)
 tissues_size_t TissueInfos::GetTissueCount()
 {
 	return (tissues_size_t)tissueInfosVector.size() -
-				 1; // Tissue index 0 is the background
+		   1; // Tissue index 0 is the background
 }
 
-void TissueInfos::AddTissue(TissueInfoStruct &tissue)
+void TissueInfos::AddTissue(TissueInfoStruct& tissue)
 {
 	tissueInfosVector.push_back(tissue);
 	tissueTypeMap.insert(
-			TissueTypeMapEntryType(tissue.name.toLower(), GetTissueCount()));
+		TissueTypeMapEntryType(tissue.name.toLower(), GetTissueCount()));
 }
 
 void TissueInfos::RemoveTissue(tissues_size_t tissuetype)
@@ -1024,10 +1037,11 @@ void TissueInfos::RemoveTissue(tissues_size_t tissuetype)
 	CreateTissueTypeMap();
 }
 
-void TissueInfos::RemoveTissues(const std::set<tissues_size_t> &tissuetypes)
+void TissueInfos::RemoveTissues(const std::set<tissues_size_t>& tissuetypes)
 {
 	// Remove in descending order
-	for (auto riter = tissuetypes.rbegin(); riter != tissuetypes.rend(); ++riter)
+	for (auto riter = tissuetypes.rbegin(); riter != tissuetypes.rend();
+		 ++riter)
 	{
 		// tissueTypeMap.erase(tissueInfosVector[*riter].name.toLower());
 		tissueInfosVector.erase(tissueInfosVector.begin() + *riter);
@@ -1048,12 +1062,12 @@ void TissueInfos::CreateTissueTypeMap()
 	tissueTypeMap.clear();
 	for (tissues_size_t type = 1; type <= GetTissueCount(); ++type)
 	{
-		tissueTypeMap.insert(
-				TissueTypeMapEntryType(tissueInfosVector[type].name.toLower(), type));
+		tissueTypeMap.insert(TissueTypeMapEntryType(
+			tissueInfosVector[type].name.toLower(), type));
 	}
 }
 
-bool TissueInfos::ExportSurfaceGenerationToolXML(const char *filename)
+bool TissueInfos::ExportSurfaceGenerationToolXML(const char* filename)
 {
 	std::ofstream stream(filename, std::ofstream::out);
 	if (!stream.good())
@@ -1065,19 +1079,19 @@ bool TissueInfos::ExportSurfaceGenerationToolXML(const char *filename)
 		stream << "<?xml version=\"1.0\"?>" << endl;
 		stream << "<params>" << endl;
 		stream << "\t<input_file "
-							"path=\"C:/Users/jwolf/Desktop/"
-							"Louis_5mm_251_750_19_3_12final_padded.vti\">"
-					 << endl;
+				  "path=\"C:/Users/jwolf/Desktop/"
+				  "Louis_5mm_251_750_19_3_12final_padded.vti\">"
+			   << endl;
 		stream << "\t\t<scalar name=\"ImageScalars\"/>" << endl;
 		stream << "\t\t<extents "
-							"path=\"C:/Users/jwolf/Desktop/"
-							"Louis_5mm_251_750_19_3_12final_padded.csv\"/>"
-					 << endl;
+				  "path=\"C:/Users/jwolf/Desktop/"
+				  "Louis_5mm_251_750_19_3_12final_padded.csv\"/>"
+			   << endl;
 		stream << "\t</input_file>" << endl;
-		stream
-				<< "\t<output_file "
-					 "path=\"C:/Users/jwolf/Desktop/Louis_5mm_251_750_19_3_12final.vpm\">"
-				<< endl;
+		stream << "\t<output_file "
+				  "path=\"C:/Users/jwolf/Desktop/"
+				  "Louis_5mm_251_750_19_3_12final.vpm\">"
+			   << endl;
 		stream << "\t\t<model name=\"Test Model\"/>" << endl;
 		stream << "\t\t<version_a value=\"1\"/>" << endl;
 		stream << "\t\t<version_b value=\"0\"/>" << endl;
@@ -1093,19 +1107,20 @@ bool TissueInfos::ExportSurfaceGenerationToolXML(const char *filename)
 		TissueInfosVecType::iterator vecIt;
 		tissues_size_t label = 1;
 		for (vecIt = tissueInfosVector.begin() + 1;
-				 vecIt != tissueInfosVector.end(); ++vecIt, ++label)
+			 vecIt != tissueInfosVector.end(); ++vecIt, ++label)
 		{
-			stream << "\t\t<surface name=\"" << vecIt->name.ascii() << "\">" << endl;
+			stream << "\t\t<surface name=\"" << vecIt->name.ascii() << "\">"
+				   << endl;
 			stream << "\t\t\t<labels>" << endl;
 			stream << "\t\t\t\t<label id=\"" << label << "\"/>" << endl;
 			stream << "\t\t\t</labels>" << endl;
 			stream << "\t\t\t<color>" << endl;
 			stream << "\t\t\t\t<color_r value=\"" << vecIt->color[0] << "\"/>"
-						 << endl;
+				   << endl;
 			stream << "\t\t\t\t<color_g value=\"" << vecIt->color[1] << "\"/>"
-						 << endl;
+				   << endl;
 			stream << "\t\t\t\t<color_b value=\"" << vecIt->color[2] << "\"/>"
-						 << endl;
+				   << endl;
 			stream << "\t\t\t</color>" << endl;
 			stream << "\t\t\t<image_smoothing value=\"2\">" << endl;
 			stream << "\t\t\t\t<margin value=\"10\"/>" << endl;
@@ -1127,7 +1142,8 @@ bool TissueInfos::ExportSurfaceGenerationToolXML(const char *filename)
 			stream << "\t\t\t\t</edge_collapse>" << endl;
 			stream << "\t\t\t</mesh_simplification>" << endl;
 			stream << "\t\t\t<mesh_smoothing value=\"1\">" << endl;
-			stream << "\t\t\t\t<undo_intersections_iters value=\"10\"/>" << endl;
+			stream << "\t\t\t\t<undo_intersections_iters value=\"10\"/>"
+				   << endl;
 			stream << "\t\t\t\t<laplacian_smoothing>" << endl;
 			stream << "\t\t\t\t\t<laplacian_iters value=\"10\"/>" << endl;
 			stream << "\t\t\t\t\t<laplacian_relax value=\"0.1\"/>" << endl;

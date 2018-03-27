@@ -13,6 +13,8 @@
 
 #include <list>
 
+namespace iseg {
+
 //!
 class BranchTree
 {
@@ -26,8 +28,8 @@ public:
 	//! Destructor.
 	~BranchTree(void)
 	{
-		for (std::list<BranchItem *>::iterator it = _branchTree.begin();
-				 it != _branchTree.end(); it++)
+		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
+			 it != _branchTree.end(); it++)
 		{
 			delete *it;
 		}
@@ -36,8 +38,8 @@ public:
 
 	void clear()
 	{
-		for (std::list<BranchItem *>::iterator it = _branchTree.begin();
-				 it != _branchTree.end(); it++)
+		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
+			 it != _branchTree.end(); it++)
 		{
 			delete *it;
 		}
@@ -47,9 +49,9 @@ public:
 	unsigned getSize() { return _branchTree.size(); };
 
 	// adds a new branch to _branchTree and returns the created branchItem
-	BranchItem *addNewBranch()
+	BranchItem* addNewBranch()
 	{
-		BranchItem *BI = new BranchItem();
+		BranchItem* BI = new BranchItem();
 		_branchTree.push_back(BI);
 		_branchTreeIter = _branchTree.begin();
 		return BI;
@@ -58,14 +60,14 @@ public:
 	void resetIterator() { _branchTreeIter = _branchTree.begin(); };
 
 	// increase _branchTreeIter and return new element
-	BranchItem *getItem()
+	BranchItem* getItem()
 	{
 		if (_branchTreeIter == _branchTree.end())
 			return NULL;
 		else
 			return *_branchTreeIter;
 	}
-	BranchItem *getNextItem()
+	BranchItem* getNextItem()
 	{
 		if (_branchTreeIter != _branchTree.end())
 			_branchTreeIter++;
@@ -76,6 +78,8 @@ public:
 	};
 
 private:
-	std::list<BranchItem *>::iterator _branchTreeIter;
-	std::list<BranchItem *> _branchTree;
+	std::list<BranchItem*>::iterator _branchTreeIter;
+	std::list<BranchItem*> _branchTree;
 };
+
+} // namespace iseg

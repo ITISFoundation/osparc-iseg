@@ -7,27 +7,28 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "k_means.h"
 #include "Precompiled.h"
+
+#include "KMeans.h"
 
 #include <cstdlib>
 #include <float.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-
 #include <stdio.h>
 
 using namespace std;
+using namespace iseg;
 
-k_means::k_means()
+KMeans::KMeans()
 {
 	m = NULL;
 	centers = NULL;
 }
 
-void k_means::init(short unsigned w, short unsigned h, short nrclass,
-									 short dimension, float **bit, float *weight)
+void KMeans::init(short unsigned w, short unsigned h, short nrclass,
+				  short dimension, float** bit, float* weight)
 {
 	width = w;
 	height = h;
@@ -36,16 +37,16 @@ void k_means::init(short unsigned w, short unsigned h, short nrclass,
 	dim = dimension;
 	bits = bit;
 	weights = weight;
-	m = (short *)malloc(sizeof(unsigned) * area);
-	centers = (float *)malloc(sizeof(float) * dim * nrclass);
+	m = (short*)malloc(sizeof(unsigned) * area);
+	centers = (float*)malloc(sizeof(float) * dim * nrclass);
 
 	init_centers();
 
 	return;
 }
 
-void k_means::init(short unsigned w, short unsigned h, short nrclass,
-									 short dimension, float **bit, float *weight, float *center)
+void KMeans::init(short unsigned w, short unsigned h, short nrclass,
+				  short dimension, float** bit, float* weight, float* center)
 {
 	width = w;
 	height = h;
@@ -54,8 +55,8 @@ void k_means::init(short unsigned w, short unsigned h, short nrclass,
 	dim = dimension;
 	bits = bit;
 	weights = weight;
-	m = (short *)malloc(sizeof(unsigned) * area);
-	centers = (float *)malloc(sizeof(float) * dim * nrclass);
+	m = (short*)malloc(sizeof(unsigned) * area);
+	centers = (float*)malloc(sizeof(float) * dim * nrclass);
 	for (short i = 0; i < nrclass * dimension; i++)
 		centers[i] = center[i];
 	for (unsigned i = 0; i < area; i++)
@@ -64,7 +65,7 @@ void k_means::init(short unsigned w, short unsigned h, short nrclass,
 	return;
 }
 
-unsigned k_means::make_iter(unsigned maxiter, unsigned converged)
+unsigned KMeans::make_iter(unsigned maxiter, unsigned converged)
 {
 	/*
 	vector<vector<float>> centersVc;
@@ -102,14 +103,14 @@ unsigned k_means::make_iter(unsigned maxiter, unsigned converged)
 	return iter;
 }
 
-void k_means::return_m(float *result_bits)
+void KMeans::return_m(float* result_bits)
 {
 	for (unsigned i = 0; i < area; i++)
 		result_bits[i] = 255.0f / (nrclasses - 1) * m[i];
 	return;
 }
 
-void k_means::apply_to(float **sources, float *result_bits)
+void KMeans::apply_to(float** sources, float* result_bits)
 {
 	float dist, distmin;
 	short unsigned cindex;
@@ -123,7 +124,7 @@ void k_means::apply_to(float **sources, float *result_bits)
 		for (short n = 0; n < dim; n++)
 		{
 			distmin += (sources[n][i] - centers[cindex]) *
-								 (sources[n][i] - centers[cindex]) * weights[n];
+					   (sources[n][i] - centers[cindex]) * weights[n];
 			cindex++;
 		}
 		for (short l = 1; l < nrclasses; l++)
@@ -132,7 +133,7 @@ void k_means::apply_to(float **sources, float *result_bits)
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (sources[n][i] - centers[cindex]) *
-								(sources[n][i] - centers[cindex]) * weights[n];
+						(sources[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			if (dist < distmin)
@@ -147,7 +148,7 @@ void k_means::apply_to(float **sources, float *result_bits)
 	return;
 }
 
-void k_means::recompute_centers()
+void KMeans::recompute_centers()
 {
 	vector<unsigned> count;
 	vector<float> newcenters;
@@ -176,7 +177,7 @@ void k_means::recompute_centers()
 	return;
 }
 
-unsigned k_means::recompute_membership()
+unsigned KMeans::recompute_membership()
 {
 	unsigned count = 0;
 	float dist, distmin;
@@ -191,7 +192,7 @@ unsigned k_means::recompute_membership()
 		for (short n = 0; n < dim; n++)
 		{
 			distmin += (bits[n][i] - centers[cindex]) *
-								 (bits[n][i] - centers[cindex]) * weights[n];
+					   (bits[n][i] - centers[cindex]) * weights[n];
 			cindex++;
 		}
 		for (short l = 1; l < nrclasses; l++)
@@ -200,7 +201,7 @@ unsigned k_means::recompute_membership()
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (bits[n][i] - centers[cindex]) *
-								(bits[n][i] - centers[cindex]) * weights[n];
+						(bits[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			if (dist < distmin)
@@ -219,11 +220,11 @@ unsigned k_means::recompute_membership()
 	return count;
 }
 
-void k_means::init_centers()
+void KMeans::init_centers()
 {
 	// Get minimum and maximum values
-	float *minVals = (float *)malloc(sizeof(float) * dim);
-	float *maxVals = (float *)malloc(sizeof(float) * dim);
+	float* minVals = (float*)malloc(sizeof(float) * dim);
+	float* maxVals = (float*)malloc(sizeof(float) * dim);
 	for (short i = 0; i < dim; i++)
 	{
 		minVals[i] = FLT_MAX;
@@ -249,11 +250,11 @@ void k_means::init_centers()
 		for (short l = 0; l < nrclasses; l++)
 		{ //equally spaced for 3D, 27 classes
 			centers[l * 3 + 0] =
-					maxVals[0] - (l % 3 + .5f) * (maxVals[0] - minVals[0]) / 3;
-			centers[l * 3 + 1] =
-					maxVals[1] - ((l / 3) % 3 + .5f) * (maxVals[1] - minVals[1]) / 3;
+				maxVals[0] - (l % 3 + .5f) * (maxVals[0] - minVals[0]) / 3;
+			centers[l * 3 + 1] = maxVals[1] - ((l / 3) % 3 + .5f) *
+												  (maxVals[1] - minVals[1]) / 3;
 			centers[l * 3 + 2] =
-					maxVals[2] - (l / 9 + .5f) * (maxVals[2] - minVals[2]) / 3;
+				maxVals[2] - (l / 9 + .5f) * (maxVals[2] - minVals[2]) / 3;
 		}
 	}
 	else
@@ -263,8 +264,9 @@ void k_means::init_centers()
 		{
 			for (short i = 0; i < dim; i++)
 			{
-				centers[l * dim + i] = maxVals[i] - (float)l / (nrclasses - 1.0f) *
-																								(maxVals[i] - minVals[i]);
+				centers[l * dim + i] =
+					maxVals[i] -
+					(float)l / (nrclasses - 1.0f) * (maxVals[i] - minVals[i]);
 			}
 		}
 
@@ -282,7 +284,7 @@ void k_means::init_centers()
 	return;
 }
 
-void k_means::init_centers_rand()
+void KMeans::init_centers_rand()
 {
 	unsigned j;
 
@@ -299,23 +301,22 @@ void k_means::init_centers_rand()
 	return;
 }
 
-void k_means::init_centers(float *center)
+void KMeans::init_centers(float* center)
 {
 	for (short i = 0; i < nrclasses * dim; i++)
 		centers[i] = center[i];
 	return;
 }
 
-bool k_means::get_centers_from_file(const std::string &fileName,
-																		float *&centers, int &dimensions,
-																		int &classes)
+bool KMeans::get_centers_from_file(const std::string& fileName, float*& centers,
+								   int& dimensions, int& classes)
 {
 	std::vector<float> center_vector;
 	int className = -1;
 	dimensions = 0;
 	classes = 0;
 
-	FILE *initFile;
+	FILE* initFile;
 	char readChar[100];
 	initFile = fopen(fileName.c_str(), "r");
 	if (initFile == NULL)
@@ -351,7 +352,7 @@ bool k_means::get_centers_from_file(const std::string &fileName,
 		}
 	}
 
-	centers = (float *)malloc(sizeof(float) * dimensions * classes);
+	centers = (float*)malloc(sizeof(float) * dimensions * classes);
 	for (int i = 0; i < center_vector.size(); i++)
 	{
 		centers[i] = center_vector[i];
@@ -360,9 +361,9 @@ bool k_means::get_centers_from_file(const std::string &fileName,
 	return true;
 }
 
-float *k_means::return_centers() { return centers; }
+float* KMeans::return_centers() { return centers; }
 
-k_means::~k_means()
+KMeans::~KMeans()
 {
 	free(m);
 	free(centers);

@@ -28,12 +28,15 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent,
-												 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+edge_widget::edge_widget(SlicesHandler* hand3D, QWidget* parent,
+						 const char* name, Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(Format("Various edge extraction routines. These are mostly useful "
-										"as part of other segmentation techniques."));
+	setToolTip(
+		Format("Various edge extraction routines. These are mostly useful "
+			   "as part of other segmentation techniques."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -99,14 +102,14 @@ edge_widget::edge_widget(SlicesHandler *hand3D, QWidget *parent,
 	method_changed(0);
 
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-									 SLOT(method_changed(int)));
+					 SLOT(method_changed(int)));
 	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-									 SLOT(slider_changed(int)));
+					 SLOT(slider_changed(int)));
 	QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-									 SLOT(slider_changed(int)));
+					 SLOT(slider_changed(int)));
 	QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-									 SLOT(slider_changed(int)));
+					 SLOT(slider_changed(int)));
 
 	return;
 }
@@ -125,7 +128,7 @@ void edge_widget::slicenr_changed()
 	//	}
 }
 
-void edge_widget::bmphand_changed(bmphandler *bmph)
+void edge_widget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
@@ -133,7 +136,7 @@ void edge_widget::bmphand_changed(bmphandler *bmph)
 
 void edge_widget::execute()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
@@ -160,13 +163,14 @@ void edge_widget::execute()
 	}
 	else if (rb_canny->isOn())
 	{
-		bmphand->canny_line(sl_sigma->value() * 0.05f, sl_thresh1->value() * 1.5f,
-												sl_thresh2->value() * 1.5f);
+		bmphand->canny_line(sl_sigma->value() * 0.05f,
+							sl_thresh1->value() * 1.5f,
+							sl_thresh2->value() * 1.5f);
 	}
 	else
 	{
 		bmphand->laplacian_zero(sl_sigma->value() * 0.05f,
-														sl_thresh1->value() * 0.5f, false);
+								sl_thresh1->value() * 0.5f, false);
 	}
 
 	emit end_datachange(this);
@@ -301,7 +305,7 @@ void edge_widget::init()
 	hideparams_changed();
 }
 
-FILE *edge_widget::SaveParams(FILE *fp, int version)
+FILE* edge_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -331,18 +335,18 @@ FILE *edge_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *edge_widget::LoadParams(FILE *fp, int version)
+FILE* edge_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-												SLOT(method_changed(int)));
+							SLOT(method_changed(int)));
 		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
-												SLOT(slider_changed(int)));
+							SLOT(slider_changed(int)));
 		QObject::disconnect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-												SLOT(slider_changed(int)));
+							SLOT(slider_changed(int)));
 		QObject::disconnect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-												SLOT(slider_changed(int)));
+							SLOT(slider_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -369,13 +373,13 @@ FILE *edge_widget::LoadParams(FILE *fp, int version)
 		method_changed(0);
 
 		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-										 SLOT(method_changed(int)));
+						 SLOT(method_changed(int)));
 		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-										 SLOT(slider_changed(int)));
+						 SLOT(slider_changed(int)));
 		QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-										 SLOT(slider_changed(int)));
+						 SLOT(slider_changed(int)));
 		QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-										 SLOT(slider_changed(int)));
+						 SLOT(slider_changed(int)));
 	}
 	return fp;
 }

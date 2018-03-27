@@ -16,10 +16,12 @@
 #include <iostream>
 #include <vector>
 
-class iSegCore_API index_priorqueue
+namespace iseg {
+
+class iSegCore_API IndexPriorityQueue
 {
 public:
-	index_priorqueue(unsigned size2, float *valuemap1);
+	IndexPriorityQueue(unsigned size2, float* valuemap1);
 	unsigned pop();
 	unsigned size();
 	void insert(unsigned pos);
@@ -32,12 +34,13 @@ public:
 	bool empty();
 	void clear();
 	bool in_queue(unsigned pos);
-	~index_priorqueue();
+	~IndexPriorityQueue();
 
 private:
-	int *indexmap;
-	float *valuemap;
+	int* indexmap;
+	float* valuemap;
 	std::vector<unsigned> Q;
 	unsigned l;
 	unsigned size1;
 };
+} // namespace iseg

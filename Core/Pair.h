@@ -7,13 +7,14 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef PAIRH
-#define PAIRH
+#pragma once
 
-typedef struct
+namespace iseg {
+
+struct Pair
 {
 	float low;
 	float high;
-} Pair;
+};
 
-#endif
+} // namespace iseg

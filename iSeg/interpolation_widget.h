@@ -34,18 +34,20 @@
 #include <q3mimefactory.h>
 #include <qpixmap.h>
 
+namespace iseg {
+
 class interpol_widget : public QWidget1
 {
 	Q_OBJECT
 public:
-	interpol_widget(SlicesHandler *hand3D, QWidget *parent = 0,
-									const char *name = 0, Qt::WindowFlags wFlags = 0);
+	interpol_widget(SlicesHandler* hand3D, QWidget* parent = 0,
+					const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~interpol_widget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
-	FILE *SaveParams(FILE *fp, int version);
-	FILE *LoadParams(FILE *fp, int version);
+	FILE* SaveParams(FILE* fp, int version);
+	FILE* LoadParams(FILE* fp, int version);
 	std::string GetName() { return std::string("Interpol"); };
 	virtual QIcon GetIcon(QDir picdir)
 	{
@@ -53,42 +55,42 @@ public:
 	};
 
 private:
-	SlicesHandler *handler3D;
-	Q3HBox *hboxoverall;
-	Q3VBox *vboxmethods;
-	Q3VBox *vboxdataselect;
-	Q3VBox *vboxparams;
-	Q3VBox *vboxexecute;
-	Q3HBox *hboxextra;
-	Q3HBox *hboxbatch;
-	QLabel *txt_slicenr;
-	QSpinBox *sb_slicenr;
-	QLabel *txt_batchstride;
-	QSpinBox *sb_batchstride;
-	QPushButton *pushexec;
-	QPushButton *pushstart;
-	QRadioButton *rb_tissue;
-	QRadioButton *rb_tissueall;
-	QRadioButton *rb_work;
-	QButtonGroup *sourcegroup;
-	QRadioButton *rb_inter;
+	SlicesHandler* handler3D;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3VBox* vboxdataselect;
+	Q3VBox* vboxparams;
+	Q3VBox* vboxexecute;
+	Q3HBox* hboxextra;
+	Q3HBox* hboxbatch;
+	QLabel* txt_slicenr;
+	QSpinBox* sb_slicenr;
+	QLabel* txt_batchstride;
+	QSpinBox* sb_batchstride;
+	QPushButton* pushexec;
+	QPushButton* pushstart;
+	QRadioButton* rb_tissue;
+	QRadioButton* rb_tissueall;
+	QRadioButton* rb_work;
+	QButtonGroup* sourcegroup;
+	QRadioButton* rb_inter;
 	//	QRadioButton *rb_intergrey;
-	QRadioButton *rb_extra;
-	QRadioButton *rb_batchinter;
-	QButtonGroup *modegroup;
-	QRadioButton *rb_4connectivity;
-	QRadioButton *rb_8connectivity;
-	QButtonGroup *connectivitygroup;
-	QCheckBox *cb_medianset;
+	QRadioButton* rb_extra;
+	QRadioButton* rb_batchinter;
+	QButtonGroup* modegroup;
+	QRadioButton* rb_4connectivity;
+	QRadioButton* rb_8connectivity;
+	QButtonGroup* connectivitygroup;
+	QCheckBox* cb_medianset;
 	unsigned short startnr;
 	unsigned short nrslices;
 	unsigned short tissuenr;
 
 signals:
-	void begin_datachange(common::DataSelection &dataSelection,
-												QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL,
-											common::EndUndoAction undoAction = common::EndUndo);
+	void begin_datachange(iseg::DataSelection& dataSelection,
+						  QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
+						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -101,5 +103,7 @@ private slots:
 	void method_changed();
 	void source_changed();
 };
+
+} // namespace iseg
 
 #endif

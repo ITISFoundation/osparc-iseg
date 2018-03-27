@@ -7,10 +7,18 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "xyslice.h"
-#include "Core/Point.h"
 #include "Precompiled.h"
+
 #include "SlicesHandler.h"
+#include "tissueinfos.h"
+#include "xyslice.h"
+
+#include "Core/Point.h"
+
+#include <Q3HBoxLayout>
+#include <Q3VBoxLayout>
+#include <QCloseEvent>
+#include <QPaintEvent>
 #include <q3action.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
@@ -22,25 +30,21 @@
 #include <qpen.h>
 #include <qradiobutton.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "tissueinfos.h"
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
-#include <QCloseEvent>
-#include <QPaintEvent>
+
 #include <algorithm>
 
 using namespace std;
+using namespace iseg;
 
 bmptissuesliceshower::bmptissuesliceshower(
-		SlicesHandler *hand3D, unsigned short slicenr1, float thickness1,
-		float zoom1, bool orientation, bool bmpon, bool tissuevisible1,
-		bool zposvisible1, bool xyposvisible1, int xypos1, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(tissuevisible1),
-			handler3D(hand3D), slicenr(slicenr1), directionx(orientation),
-			bmporwork(bmpon), thickness(thickness1), zposvisible(zposvisible1),
-			xyposvisible(xyposvisible1), xypos(xypos1), zoom(zoom1)
+	SlicesHandler* hand3D, unsigned short slicenr1, float thickness1,
+	float zoom1, bool orientation, bool bmpon, bool tissuevisible1,
+	bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent,
+	const char* name, Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags), tissuevisible(tissuevisible1),
+	  handler3D(hand3D), slicenr(slicenr1), directionx(orientation),
+	  bmporwork(bmpon), thickness(thickness1), zposvisible(zposvisible1),
+	  xyposvisible(xyposvisible1), xypos(xypos1), zoom(zoom1)
 {
 	if (directionx)
 	{
@@ -97,7 +101,7 @@ bmptissuesliceshower::bmptissuesliceshower(
 	}
 }*/
 
-void bmptissuesliceshower::paintEvent(QPaintEvent *e)
+void bmptissuesliceshower::paintEvent(QPaintEvent* e)
 {
 	if (image.size() != QSize(0, 0))
 	{ // is an image loaded?
@@ -221,8 +225,9 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(0.0f,
-										 min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
+				f = (int)max(
+					0.0f,
+					min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				//				for(int y1=(int)(y*thickness);y1<int((y+1)*thickness);y1++)
 				//					image.setPixel(x,y1,qRgb(f*(tissuecolor[tissue[pos]][0]),f*tissuecolor[tissue[pos]][1],f*tissuecolor[tissue[pos]][2]));
 				if (tissue[pos] == 0)
@@ -232,7 +237,8 @@ void bmptissuesliceshower::reload_bits()
 				else
 				{
 					//						image.setPixel(x,y,qRgb(int(f/2+127.5f*(tissuecolor[tissue[pos]][0])),int(f/2+127.5f*tissuecolor[tissue[pos]][1]),int(f/2+127.5f*tissuecolor[tissue[pos]][2])));
-					TissueInfos::GetTissueColorBlendedRGB(tissue[pos], r, g, b, f);
+					TissueInfos::GetTissueColorBlendedRGB(tissue[pos], r, g, b,
+														  f);
 					image.setPixel(x, y, qRgb(r, g, b));
 				}
 				pos++;
@@ -255,8 +261,9 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(0.0f,
-										 min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
+				f = (int)max(
+					0.0f,
+					min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				//				for(int y1=(int)(y*thickness);y1<int((y+1)*thickness);y1++)
 				image.setPixel(x, y, qRgb(f, f, f));
 				pos++;
@@ -284,7 +291,7 @@ void bmptissuesliceshower::reload_bits()
 }
 
 void bmptissuesliceshower::set_scale(float offset1, float factor1,
-																		 bool bmporwork1)
+									 bool bmporwork1)
 {
 	if (bmporwork1)
 	{
@@ -393,7 +400,8 @@ void bmptissuesliceshower::pixelsize_changed(Pair pixelsize1)
 			//fprintf(fp3,"%f %f %f %i %i\n",pixelsize1.high,pixelsize1.low,d,(int)(width*d),(int)(height*thickness));
 			//fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
 			//fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
-			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+			setFixedSize((int)(width * d * zoom),
+						 (int)(height * thickness * zoom));
 			/*fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
 			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
 			fclose(fp3);*/
@@ -404,7 +412,8 @@ void bmptissuesliceshower::pixelsize_changed(Pair pixelsize1)
 			fprintf(fp3,"%f %f %f %i %i\n",pixelsize1.high,pixelsize1.low,d,(int)(width*d),(int)(height*thickness));
 			fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
 			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());*/
-			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+			setFixedSize((int)(width * d * zoom),
+						 (int)(height * thickness * zoom));
 			/*fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
 			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
 			fclose(fp3);*/
@@ -457,12 +466,12 @@ void bmptissuesliceshower::set_zoom(double z)
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-sliceshower_widget::sliceshower_widget(SlicesHandler *hand3D, bool orientation,
-																			 float thickness1, float zoom1,
-																			 QWidget *parent, const char *name,
-																			 Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), handler3D(hand3D), directionx(orientation),
-			xyexists(false)
+sliceshower_widget::sliceshower_widget(SlicesHandler* hand3D, bool orientation,
+									   float thickness1, float zoom1,
+									   QWidget* parent, const char* name,
+									   Qt::WindowFlags wFlags)
+	: QWidget(parent, name, wFlags), handler3D(hand3D), directionx(orientation),
+	  xyexists(false)
 {
 	//	setWindowIcon(QIcon("images/isegicon.png"));
 	if (directionx)
@@ -473,8 +482,9 @@ sliceshower_widget::sliceshower_widget(SlicesHandler *hand3D, bool orientation,
 	vbox = new Q3VBoxLayout(this);
 
 	scroller = new Q3ScrollView(this);
-	shower = new bmptissuesliceshower(handler3D, 0, thickness1, zoom1, directionx,
-																		true, true, false, false, 0, this);
+	shower =
+		new bmptissuesliceshower(handler3D, 0, thickness1, zoom1, directionx,
+								 true, true, false, false, 0, this);
 
 	vbox->addWidget(scroller);
 	scroller->addChild(shower);
@@ -517,16 +527,16 @@ sliceshower_widget::sliceshower_widget(SlicesHandler *hand3D, bool orientation,
 	vbox->addWidget(qsb_slicenr);
 
 	QObject::connect(qsb_slicenr, SIGNAL(valueChanged(int)), this,
-									 SLOT(slicenr_changed(int)));
+					 SLOT(slicenr_changed(int)));
 	QObject::connect(cb_tissuevisible, SIGNAL(clicked()), this,
-									 SLOT(tissuevisible_changed()));
+					 SLOT(tissuevisible_changed()));
 	QObject::connect(bg_bmporwork, SIGNAL(buttonClicked(int)), this,
-									 SLOT(workorbmp_changed()));
+					 SLOT(workorbmp_changed()));
 
 	QObject::connect(cb_xyposvisible, SIGNAL(clicked()), this,
-									 SLOT(xyposvisible_changed()));
+					 SLOT(xyposvisible_changed()));
 	QObject::connect(cb_zposvisible, SIGNAL(clicked()), this,
-									 SLOT(zposvisible_changed()));
+					 SLOT(zposvisible_changed()));
 
 	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 
@@ -549,7 +559,7 @@ sliceshower_widget::~sliceshower_widget()
 	delete qsb_slicenr;
 }
 
-void sliceshower_widget::closeEvent(QCloseEvent *qce)
+void sliceshower_widget::closeEvent(QCloseEvent* qce)
 {
 	emit hasbeenclosed();
 	QWidget::closeEvent(qce);
@@ -674,7 +684,7 @@ void sliceshower_widget::set_zoom(double z)
 }
 
 void sliceshower_widget::set_scale(float offset1, float factor1,
-																	 bool bmporwork1)
+								   bool bmporwork1)
 {
 	shower->set_scale(offset1, factor1, bmporwork1);
 }

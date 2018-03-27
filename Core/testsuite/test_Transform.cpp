@@ -10,7 +10,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../Transform.h"
-#include "../vec3.h"
+#include "../Vec3.h"
 
 namespace iseg {
 
@@ -19,11 +19,11 @@ void makeTransform(Transform &tr)
 {
 	tr.setIdentity();
 
-	vec3 d0(0.1f, 0.9f, 0.1f);
+	Vec3 d0(0.1f, 0.9f, 0.1f);
 	d0.normalize();
-	vec3 d1(0.9f, -0.1f, 0.1f);
+	Vec3 d1(0.9f, -0.1f, 0.1f);
 	d1.normalize();
-	vec3 d2(d0 ^ d1);
+	Vec3 d2(d0 ^ d1);
 	d2.normalize();
 	tr.setRotation(d0, d1, d2);
 
@@ -37,9 +37,9 @@ BOOST_AUTO_TEST_SUITE(Transform_suite);
 
 BOOST_AUTO_TEST_CASE(vec3_api)
 {
-	vec3 x(1, 0, 0);
-	vec3 y(0, 1, 0);
-	vec3 z(x ^ y);
+	Vec3 x(1, 0, 0);
+	Vec3 y(0, 1, 0);
+	Vec3 z(x ^ y);
 	BOOST_CHECK_CLOSE(z[2], 1.f, 1e-2f);
 }
 

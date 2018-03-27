@@ -11,8 +11,11 @@
 #define XDMFIMAGEMERGER_H
 
 #include "XdmfImageReader.h"
+
 #include "Core/SetGetMacros.h"
 #include "Core/Types.h"
+
+namespace iseg {
 
 class XdmfImageMerger
 {
@@ -60,10 +63,21 @@ protected:
 	std::vector<QString> MergeFileNames;
 
 private:
-	int InternalWrite(const char *filename, std::vector<QString> &mergefilenames, float **slicesbmp,float **sliceswork, tissues_size_t **slicestissue, unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height, float *pixelsize, float *offset, int compression);
-	int ReadSource(XdmfImageReader *imageReader, const char *filename, std::vector<float> &bufferFloat, size_t &sliceoffset);
-	int ReadTarget(XdmfImageReader *imageReader, const char *filename, std::vector<float> &bufferFloat, size_t &sliceoffset);
-	int ReadTissues(XdmfImageReader *imageReader, const char *filename, std::vector<tissues_size_t> &bufferTissuesSizeT, size_t &sliceoffset);
+	int InternalWrite(const char* filename,
+					  std::vector<QString>& mergefilenames, float** slicesbmp,
+					  float** sliceswork, tissues_size_t** slicestissue,
+					  unsigned nrslices, unsigned nrslicesTotal, unsigned width,
+					  unsigned height, float* pixelsize, float* offset,
+					  int compression);
+	int ReadSource(XdmfImageReader* imageReader, const char* filename,
+				   std::vector<float>& bufferFloat, size_t& sliceoffset);
+	int ReadTarget(XdmfImageReader* imageReader, const char* filename,
+				   std::vector<float>& bufferFloat, size_t& sliceoffset);
+	int ReadTissues(XdmfImageReader* imageReader, const char* filename,
+					std::vector<tissues_size_t>& bufferTissuesSizeT,
+					size_t& sliceoffset);
 };
+
+} // namespace iseg
 
 #endif // XDMFIMAGEMERGER_H

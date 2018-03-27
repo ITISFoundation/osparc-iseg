@@ -12,17 +12,17 @@
 
 #include "config.h"
 
-#include <qpushbutton.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qwidget.h>
-#include <qspinbox.h>
 #include <qcheckbox.h>
-#include <qlineedit.h>
-#include <qlayout.h> 
-#include <qlabel.h>
-#include <qdialog.h>
 #include <qcombobox.h>
+#include <qdialog.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
+#include <qspinbox.h>
+#include <qwidget.h>
 
 #include <vector>
 
@@ -30,31 +30,34 @@
 
 #include "../GDCM/vtkMyGDCMPolyDataReader.h"
 
+namespace iseg {
+
 class RtstructImport : public QDialog
 {
 	Q_OBJECT
 public:
-	RtstructImport(QString filename, SlicesHandler *hand3D, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
+	RtstructImport(QString filename, SlicesHandler* hand3D, QWidget* parent = 0,
+				   const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~RtstructImport();
 
 private:
-	SlicesHandler *handler3D;
-	Q3HBox *hbox1;
-	Q3HBox *hbox2;
-	Q3HBox *hbox3;
-	Q3HBox *hbox4;
-	Q3VBox *vbox1;
-	QSpinBox *sb_priority;
-	QComboBox *cb_solids;
-	QComboBox *cb_names;
-	QLineEdit *le_name;
-	QLabel *lb_priority;
-	QLabel *lb_namele;
-	QLabel *lb_namecb;
-	QCheckBox *cb_new;
-	QCheckBox *cb_ignore;
-	QPushButton *pb_cancel;
-	QPushButton *pb_ok;
+	SlicesHandler* handler3D;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3HBox* hbox4;
+	Q3VBox* vbox1;
+	QSpinBox* sb_priority;
+	QComboBox* cb_solids;
+	QComboBox* cb_names;
+	QLineEdit* le_name;
+	QLabel* lb_priority;
+	QLabel* lb_namele;
+	QLabel* lb_namecb;
+	QCheckBox* cb_new;
+	QCheckBox* cb_ignore;
+	QPushButton* pb_cancel;
+	QPushButton* pb_ok;
 	gdcmvtk_rtstruct::tissuevec tissues;
 	std::vector<bool> vecnew;
 	std::vector<bool> vecignore;
@@ -66,9 +69,11 @@ private:
 	int currentitem;
 
 signals:
-//	void rtstruct_loaded();
-	void begin_datachange(common::DataSelection &dataSelection, QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL, common::EndUndoAction undoAction = common::EndUndo);
+	//	void rtstruct_loaded();
+	void begin_datachange(iseg::DataSelection& dataSelection,
+						  QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
+						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 private slots:
 	void solid_changed(int);
@@ -77,5 +82,7 @@ private slots:
 	void ok_pressed();
 	void show_priorityInfo();
 };
+
+} // namespace iseg
 
 #endif

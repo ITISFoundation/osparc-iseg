@@ -7,21 +7,25 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "rtstruct_importer.h"
-#include "Core/fillcontour.h"
 #include "Precompiled.h"
+
 #include "pixmapgenerator.h"
+#include "rtstruct_importer.h"
 #include "tissueinfos.h"
+
+#include "Core/fillcontour.h"
 
 #include <q3filedialog.h>
 #include <qmessagebox.h>
 #include <qstring.h>
 #include <qstringlist.h>
 
-RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
-															 QWidget *parent, const char *name,
-															 Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+RtstructImport::RtstructImport(QString loadfilename, SlicesHandler* hand3D,
+							   QWidget* parent, const char* name,
+							   Qt::WindowFlags wFlags)
+	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = NULL;
 
@@ -33,7 +37,7 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
 
 	tissues.clear();
 	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(),
-																											tissues);
+														tissues);
 
 	vecignore.resize(tissues.size());
 	vecpriorities.resize(tissues.size());
@@ -61,10 +65,10 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
 		}
 
 		for (tissuenr = 0;
-				 tissuenr < TissueInfos::GetTissueCount() &&
-				 tissues[i]->name !=
-						 TissueInfos::GetTissueName(tissuenr + 1).toAscii().data();
-				 tissuenr++)
+			 tissuenr < TissueInfos::GetTissueCount() &&
+			 tissues[i]->name !=
+				 TissueInfos::GetTissueName(tissuenr + 1).toAscii().data();
+			 tissuenr++)
 		{}
 		if (tissuenr == (tissues_size_t)TissueInfos::GetTissueCount())
 		{
@@ -94,7 +98,7 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
 	lb_priority = new QLabel(QString("Priority: "), hbox1);
 	sb_priority = new QSpinBox(1, tissues.size(), 1, hbox1);
 	sb_priority->setValue(vecpriorities[cb_solids->currentItem()]);
-	QPushButton *infoButton = new QPushButton(hbox1);
+	QPushButton* infoButton = new QPushButton(hbox1);
 	infoButton->setText("Info");
 
 	cb_new = new QCheckBox("New Tissue", vbox1);
@@ -103,7 +107,7 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
 	hbox2 = new Q3HBox(vbox1);
 	lb_namele = new QLabel(QString("Name: "), hbox2);
 	le_name =
-			new QLineEdit(vectissuenames[cb_solids->currentItem()].c_str(), hbox2);
+		new QLineEdit(vectissuenames[cb_solids->currentItem()].c_str(), hbox2);
 
 	hbox3 = new Q3HBox(vbox1);
 	lb_namecb = new QLabel(QString("Name: "), hbox3);
@@ -124,13 +128,14 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler *hand3D,
 	updatevisibility();
 
 	QObject::connect(cb_solids, SIGNAL(activated(int)), this,
-									 SLOT(solid_changed(int)));
+					 SLOT(solid_changed(int)));
 	QObject::connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
-	QObject::connect(cb_ignore, SIGNAL(clicked()), this, SLOT(ignore_changed()));
+	QObject::connect(cb_ignore, SIGNAL(clicked()), this,
+					 SLOT(ignore_changed()));
 	QObject::connect(pb_ok, SIGNAL(clicked()), this, SLOT(ok_pressed()));
 	QObject::connect(infoButton, SIGNAL(clicked()), this,
-									 SLOT(show_priorityInfo()));
+					 SLOT(show_priorityInfo()));
 }
 
 RtstructImport::~RtstructImport() { delete vbox1; }
@@ -140,7 +145,7 @@ void RtstructImport::solid_changed(int i)
 	storeparams();
 	QObject::disconnect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
 	QObject::disconnect(cb_ignore, SIGNAL(clicked()), this,
-											SLOT(ignore_changed()));
+						SLOT(ignore_changed()));
 	currentitem = i;
 	cb_ignore->setChecked(vecignore[i]);
 	sb_priority->setValue(vecpriorities[i]);
@@ -148,7 +153,8 @@ void RtstructImport::solid_changed(int i)
 	le_name->setText(vectissuenames[i].c_str());
 	cb_names->setCurrentItem(vectissuenrs[i]);
 	QObject::connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
-	QObject::connect(cb_ignore, SIGNAL(clicked()), this, SLOT(ignore_changed()));
+	QObject::connect(cb_ignore, SIGNAL(clicked()), this,
+					 SLOT(ignore_changed()));
 	updatevisibility();
 }
 
@@ -162,7 +168,7 @@ void RtstructImport::ok_pressed()
 {
 	storeparams();
 
-	bool *mask = new bool[handler3D->return_area()];
+	bool* mask = new bool[handler3D->return_area()];
 
 	if (mask == 0)
 	{
@@ -174,7 +180,7 @@ void RtstructImport::ok_pressed()
 	for (size_t i = 0; i < tissues.size(); i++)
 	{
 		if ((vecignore[i] == false) && (!vectissuenames[i].empty()) &&
-				(vecnew[i] == true))
+			(vecnew[i] == true))
 			nrnew++;
 	}
 	if (nrnew >= TISSUES_SIZE_MAX - 1 - TissueInfos::GetTissueCount())
@@ -191,18 +197,18 @@ void RtstructImport::ok_pressed()
 	float dc[6];
 	handler3D->get_direction_cosines(dc);
 	unsigned short pixel_extents[2] = {handler3D->return_width(),
-																		 handler3D->return_height()};
+									   handler3D->return_height()};
 	float pixel_size[2] = {p.high, p.low};
 
 	if (abs(dc[0]) != 1.0f || abs(dc[4]) != 1.0f)
 	{
 		QMessageBox::about(
-				this, "Warning",
-				"Arbitrary rotations of image orientation (patient) not supported");
+			this, "Warning",
+			"Arbitrary rotations of image orientation (patient) not supported");
 		return;
 	}
 
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
@@ -218,7 +224,8 @@ void RtstructImport::ok_pressed()
 		int j = 0;
 		while (vecpriorities[j] != i)
 			j++, it++;
-		if (vecignore[j] == false && ((!vecnew[j]) || (!vectissuenames[j].empty())))
+		if (vecignore[j] == false &&
+			((!vecnew[j]) || (!vectissuenames[j].empty())))
 		{
 			if (vecnew[j])
 			{
@@ -239,18 +246,18 @@ void RtstructImport::ok_pressed()
 
 			size_t pospoints = 0;
 			size_t posoutlines = 0;
-			std::vector<float *> points;
+			std::vector<float*> points;
 			bool clockwisefill = false;
 			while (posoutlines < (*it)->outlinelength.size())
 			{
 				points.clear();
-				unsigned int *nrpoints = &((*it)->outlinelength[posoutlines]);
+				unsigned int* nrpoints = &((*it)->outlinelength[posoutlines]);
 				float zcoord = (*it)->points[pospoints + 2];
 				points.push_back(&((*it)->points[pospoints]));
 				pospoints += (*it)->outlinelength[posoutlines] * 3;
 				posoutlines++;
 				while (posoutlines < (*it)->outlinelength.size() &&
-							 zcoord == (*it)->points[pospoints + 2])
+					   zcoord == (*it)->points[pospoints + 2])
 				{
 					points.push_back(&((*it)->points[pospoints]));
 					pospoints += (*it)->outlinelength[posoutlines] * 3;
@@ -266,17 +273,20 @@ void RtstructImport::ok_pressed()
 				{
 					try
 					{
-						fillcontours::fill_contour(mask, pixel_extents, disp, pixel_size,
-																			 dc, &(points[0]), nrpoints,
-																			 points.size(), clockwisefill);
+						fillcontours::fill_contour(mask, pixel_extents, disp,
+												   pixel_size, dc, &(points[0]),
+												   nrpoints, points.size(),
+												   clockwisefill);
 					}
-					catch (std::exception &e)
+					catch (std::exception& e)
 					{
-						QMessageBox::about(this, "An Exception Occurred", e.what());
+						QMessageBox::about(this, "An Exception Occurred",
+										   e.what());
 						error = true;
 						break;
 					}
-					handler3D->add2tissue(tissuenr, mask, (unsigned short)slicenr, true);
+					handler3D->add2tissue(tissuenr, mask,
+										  (unsigned short)slicenr, true);
 				}
 			}
 		}
@@ -292,10 +302,10 @@ void RtstructImport::ok_pressed()
 void RtstructImport::show_priorityInfo()
 {
 	QMessageBox::information(
-			this, "Priority Information",
-			"1) Tissues have been sorted so that higher priority is given to the "
-			"smallest tissues.<br>"
-			"2) The higher number of priority, higher priority will have.");
+		this, "Priority Information",
+		"1) Tissues have been sorted so that higher priority is given to the "
+		"smallest tissues.<br>"
+		"2) The higher number of priority, higher priority will have.");
 }
 
 void RtstructImport::ignore_changed()

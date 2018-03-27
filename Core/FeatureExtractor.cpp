@@ -7,15 +7,17 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "feature_extractor.h"
 #include "Precompiled.h"
+
+#include "FeatureExtractor.h"
 
 #include <algorithm>
 
 using namespace std;
+using namespace iseg;
 
-void feature_extractor::init(float *bit, Point p1, Point p2, short unsigned w,
-														 short unsigned h)
+void FeatureExtractor::init(float* bit, Point p1, Point p2, short unsigned w,
+							short unsigned h)
 {
 	width = w;
 	height = h;
@@ -25,13 +27,13 @@ void feature_extractor::init(float *bit, Point p1, Point p2, short unsigned w,
 	return;
 }
 
-void feature_extractor::set_bits(float *bit)
+void FeatureExtractor::set_bits(float* bit)
 {
 	bits = bit;
 	return;
 }
 
-void feature_extractor::set_window(Point p1, Point p2)
+void FeatureExtractor::set_window(Point p1, Point p2)
 {
 	xmin = min(p1.px, p2.px);
 	xmax = max(p1.px, p2.px);
@@ -56,9 +58,9 @@ void feature_extractor::set_window(Point p1, Point p2)
 	return;
 }
 
-float feature_extractor::return_average() { return average; }
+float FeatureExtractor::return_average() { return average; }
 
-float feature_extractor::return_stddev()
+float FeatureExtractor::return_stddev()
 {
 	if (area != 1)
 	{
@@ -68,7 +70,7 @@ float feature_extractor::return_stddev()
 			for (short j = ymin; j <= ymax; j++)
 			{
 				stddev += (bits[unsigned(j) * width + i] - average) *
-									(bits[unsigned(j) * width + i] - average);
+						  (bits[unsigned(j) * width + i] - average);
 			}
 		}
 		return sqrt(stddev / (area - 1));
@@ -77,7 +79,7 @@ float feature_extractor::return_stddev()
 		return 1E10;
 }
 
-void feature_extractor::return_extrema(Pair *p)
+void FeatureExtractor::return_extrema(Pair* p)
 {
 	p->high = valmax;
 	p->low = valmin;
@@ -87,29 +89,29 @@ void feature_extractor::return_extrema(Pair *p)
 class feature_extractor_mask
 {
 public:
-	void init(float *bit, float *mask1, short unsigned w, short unsigned h,
-						float f1);
-	void set_bits(float *bit);
-	void set_mask(float *mask1);
+	void init(float* bit, float* mask1, short unsigned w, short unsigned h,
+			  float f1);
+	void set_bits(float* bit);
+	void set_mask(float* mask1);
 	void set_f(float f1);
 	float return_average();
 	float return_stddev();
-	void return_extrema(Pair *p);
+	void return_extrema(Pair* p);
 
 private:
 	float f;
-	float *bits;
+	float* bits;
 	float valmin;
 	float valmax;
 	float average;
 	short unsigned width;
 	short unsigned height;
 	unsigned area;
-	float *mask;
+	float* mask;
 };
 
-void feature_extractor_mask::init(float *bit, float *mask1, short unsigned w,
-																	short unsigned h, float f1)
+void feature_extractor_mask::init(float* bit, float* mask1, short unsigned w,
+								  short unsigned h, float f1)
 {
 	width = w;
 	height = h;
@@ -120,13 +122,13 @@ void feature_extractor_mask::init(float *bit, float *mask1, short unsigned w,
 	return;
 }
 
-void feature_extractor_mask::set_bits(float *bit)
+void feature_extractor_mask::set_bits(float* bit)
 {
 	bits = bit;
 	return;
 }
 
-void feature_extractor_mask::set_mask(float *mask1)
+void feature_extractor_mask::set_mask(float* mask1)
 {
 	area = 0;
 	unsigned pos = 0;
@@ -188,7 +190,7 @@ float feature_extractor_mask::return_stddev()
 		return 1E10;
 }
 
-void feature_extractor_mask::return_extrema(Pair *p)
+void feature_extractor_mask::return_extrema(Pair* p)
 {
 	p->high = valmax;
 	p->low = valmin;

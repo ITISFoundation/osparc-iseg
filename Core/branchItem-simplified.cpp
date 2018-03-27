@@ -7,8 +7,11 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "branchItem-simplified.h"
 #include "Precompiled.h"
+
+#include "branchItem-simplified.h"
+
+using namespace iseg;
 
 std::vector<unsigned> BranchItem::availablelabels(0);
 void BranchItem::init_availablelabels()

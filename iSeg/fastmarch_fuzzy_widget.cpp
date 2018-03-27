@@ -30,17 +30,20 @@
 
 #include <algorithm>
 
-FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler *hand3D,
-																						 QWidget *parent, const char *name,
-																						 Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler* hand3D,
+											 QWidget* parent, const char* name,
+											 Qt::WindowFlags wFlags)
+	: QWidget1(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(Format("The Fuzzy tab actually provides access to two different "
-										"segmentation techniques that have a very different "
-										"background but a similar user and interaction interface : "
-										"1) Fuzzy connectedness and 2) a Fast Marching "
-										"implementation of a levelset technique. Both methods "
-										"require a seed point to be specified."));
+	setToolTip(
+		Format("The Fuzzy tab actually provides access to two different "
+			   "segmentation techniques that have a very different "
+			   "background but a similar user and interaction interface : "
+			   "1) Fuzzy connectedness and 2) a Fast Marching "
+			   "implementation of a levelset technique. Both methods "
+			   "require a seed point to be specified."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -75,34 +78,35 @@ FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler *hand3D,
 	sl_m1 = new QSlider(Qt::Horizontal, hbox3);
 	sl_m1->setRange(0, 100);
 	sl_m1->setToolTip(
-			Format("The average gray value of the region to be segmented."));
+		Format("The average gray value of the region to be segmented."));
 
 	sl_s1 = new QSlider(Qt::Horizontal, hbox4);
 	sl_s1->setRange(0, 100);
-	sl_s1->setToolTip(Format("A measure of how much the gray values are expected "
-													 "to deviate from m1 (standard deviation)."));
+	sl_s1->setToolTip(
+		Format("A measure of how much the gray values are expected "
+			   "to deviate from m1 (standard deviation)."));
 
 	sl_s2 = new QSlider(Qt::Horizontal, hbox5);
 	sl_s2->setRange(0, 100);
-	sl_s2->setToolTip(Format(
-			"Sudden changes larger than s2 are considered to indicate boundaries."));
+	sl_s2->setToolTip(Format("Sudden changes larger than s2 are considered to "
+							 "indicate boundaries."));
 
 	rb_fastmarch = new QRadioButton(QString("Fast Marching"), vboxmethods);
 	rb_fastmarch->setToolTip(Format(
-			"Fuzzy connectedness computes for each image "
-			"point the likelihood of its belonging to the same region as the "
-			"starting "
-			"point. It achieves this by looking at each possible connecting path "
-			"between the two points and assigning the image point probability as "
-			"identical to the probability of this path lying entirely in the same "
-			"tissue "
-			"as the start point."));
+		"Fuzzy connectedness computes for each image "
+		"point the likelihood of its belonging to the same region as the "
+		"starting "
+		"point. It achieves this by looking at each possible connecting path "
+		"between the two points and assigning the image point probability as "
+		"identical to the probability of this path lying entirely in the same "
+		"tissue "
+		"as the start point."));
 	rb_fuzzy = new QRadioButton(QString("Fuzzy Connect."), vboxmethods);
 	rb_fuzzy->setToolTip(
-			Format("This tool simulates the evolution of a line (boundary) on a 2D "
-						 "image in time. "
-						 "The boundary is continuously expanding. The Sigma parameter "
-						 "(Gaussian smoothing) controls the impact of noise."));
+		Format("This tool simulates the evolution of a line (boundary) on a 2D "
+			   "image in time. "
+			   "The boundary is continuously expanding. The Sigma parameter "
+			   "(Gaussian smoothing) controls the impact of noise."));
 
 	bg_method = new QButtonGroup(this);
 	bg_method->insert(rb_fastmarch);
@@ -113,10 +117,10 @@ FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler *hand3D,
 
 	rb_drag = new QRadioButton(QString("Drag"), hbox7);
 	rb_drag->setToolTip(
-			Format("Drag allows the user to drag the mouse (after clicking on "
-						 "the start point and keeping the mouse button pressed down) "
-						 "specifying the "
-						 "extent of the region on the image."));
+		Format("Drag allows the user to drag the mouse (after clicking on "
+			   "the start point and keeping the mouse button pressed down) "
+			   "specifying the "
+			   "extent of the region on the image."));
 	rb_drag->setChecked(TRUE);
 	rb_drag->show();
 	rb_slider = new QRadioButton(QString("Slider"), hbox7);
@@ -164,35 +168,35 @@ FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler *hand3D,
 	IFTfuzzy = NULL;
 
 	QObject::connect(sl_extend, SIGNAL(valueChanged(int)), this,
-									 SLOT(slextend_changed(int)));
+					 SLOT(slextend_changed(int)));
 	QObject::connect(sl_extend, SIGNAL(sliderPressed()), this,
-									 SLOT(slextend_pressed()));
+					 SLOT(slextend_pressed()));
 	QObject::connect(sl_extend, SIGNAL(sliderReleased()), this,
-									 SLOT(slextend_released()));
+					 SLOT(slextend_released()));
 	QObject::connect(sl_sigma, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_m1, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_s1, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 	QObject::connect(sl_s2, SIGNAL(sliderMoved(int)), this,
-									 SLOT(slider_changed()));
+					 SLOT(slider_changed()));
 
 	QObject::connect(bg_method, SIGNAL(buttonClicked(int)), this,
-									 SLOT(method_changed()));
+					 SLOT(method_changed()));
 	QObject::connect(bg_interact, SIGNAL(buttonClicked(int)), this,
-									 SLOT(interact_changed()));
+					 SLOT(interact_changed()));
 
 	QObject::connect(sb_thresh, SIGNAL(valueChanged(int)), this,
-									 SLOT(spinbox_changed()));
+					 SLOT(spinbox_changed()));
 	QObject::connect(sb_m1, SIGNAL(valueChanged(int)), this,
-									 SLOT(spinbox_changed()));
+					 SLOT(spinbox_changed()));
 	QObject::connect(sb_s1, SIGNAL(valueChanged(int)), this,
-									 SLOT(spinbox_changed()));
+					 SLOT(spinbox_changed()));
 	QObject::connect(sb_s2, SIGNAL(valueChanged(int)), this,
-									 SLOT(spinbox_changed()));
+					 SLOT(spinbox_changed()));
 
 	sigma = 1.0f;
 	sigmamax = 5.0f;
@@ -229,7 +233,7 @@ void FastMarchFuzzy_widget::slicenr_changed()
 	//	}
 }
 
-void FastMarchFuzzy_widget::bmphand_changed(bmphandler *bmph)
+void FastMarchFuzzy_widget::bmphand_changed(bmphandler* bmph)
 {
 	if (IFTmarch != NULL)
 		delete IFTmarch;
@@ -317,8 +321,9 @@ void FastMarchFuzzy_widget::mouse_clicked(Point p)
 		if (IFTfuzzy == NULL)
 		{
 			IFTfuzzy = new IFT_adaptfuzzy;
-			IFTfuzzy->fuzzy_init(bmphand->return_width(), bmphand->return_height(),
-													 bmphand->return_bmp(), p, m1, s1, s2);
+			IFTfuzzy->fuzzy_init(bmphand->return_width(),
+								 bmphand->return_height(),
+								 bmphand->return_bmp(), p, m1, s1, s2);
 		}
 		else
 		{
@@ -341,7 +346,7 @@ void FastMarchFuzzy_widget::mouse_clicked(Point p)
 		sl_extend->setValue(int(extend / extendmax * 200));
 		sl_extend->setEnabled(true);
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
@@ -358,7 +363,7 @@ void FastMarchFuzzy_widget::mouse_released(Point p)
 		emit vpdyn_changed(&vpdyn_arg);
 		extend = map[unsigned(bmphand->return_width()) * p.py + p.px];
 
-		common::DataSelection dataSelection;
+		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
@@ -386,7 +391,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 		unsigned pos = 0;
 
 		if ((map[pos] <= extend && map[pos + 1] > extend) ||
-				(map[pos] <= extend && map[pos + width] > extend))
+			(map[pos] <= extend && map[pos + width] > extend))
 		{
 			p.px = 0;
 			p.py = 0;
@@ -396,8 +401,8 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
 			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos - 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend))
+				(map[pos] <= extend && map[pos - 1] > extend) ||
+				(map[pos] <= extend && map[pos + width] > extend))
 			{
 				p.px = j;
 				p.py = 0;
@@ -406,7 +411,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 			pos++;
 		}
 		if ((map[pos] <= extend && map[pos - 1] > extend) ||
-				(map[pos] <= extend && map[pos + width] > extend))
+			(map[pos] <= extend && map[pos + width] > extend))
 		{
 			p.px = width - 1;
 			p.py = 0;
@@ -417,8 +422,8 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 		for (unsigned short i = 1; i + 1 < height; i++)
 		{
 			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+				(map[pos] <= extend && map[pos + width] > extend) ||
+				(map[pos] <= extend && map[pos - width] > extend))
 			{
 				p.px = 0;
 				p.py = i;
@@ -428,9 +433,9 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 			for (unsigned short j = 1; j + 1 < width; j++)
 			{
 				if ((map[pos] <= extend && map[pos + 1] > extend) ||
-						(map[pos] <= extend && map[pos - 1] > extend) ||
-						(map[pos] <= extend && map[pos + width] > extend) ||
-						(map[pos] <= extend && map[pos - width] > extend))
+					(map[pos] <= extend && map[pos - 1] > extend) ||
+					(map[pos] <= extend && map[pos + width] > extend) ||
+					(map[pos] <= extend && map[pos - width] > extend))
 				{
 					p.px = j;
 					p.py = i;
@@ -439,8 +444,8 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 				pos++;
 			}
 			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+				(map[pos] <= extend && map[pos + width] > extend) ||
+				(map[pos] <= extend && map[pos - width] > extend))
 			{
 				p.px = width - 1;
 				p.py = i;
@@ -449,7 +454,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 			pos++;
 		}
 		if ((map[pos] <= extend && map[pos + 1] > extend) ||
-				(map[pos] <= extend && map[pos - width] > extend))
+			(map[pos] <= extend && map[pos - width] > extend))
 		{
 			p.px = 0;
 			p.py = height - 1;
@@ -459,8 +464,8 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
 			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos - 1] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+				(map[pos] <= extend && map[pos - 1] > extend) ||
+				(map[pos] <= extend && map[pos - width] > extend))
 			{
 				p.px = j;
 				p.py = height - 1;
@@ -469,7 +474,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 			pos++;
 		}
 		if ((map[pos] <= extend && map[pos - 1] > extend) ||
-				(map[pos] <= extend && map[pos - width] > extend))
+			(map[pos] <= extend && map[pos - width] > extend))
 		{
 			p.px = width - 1;
 			p.py = height - 1;
@@ -488,7 +493,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 
 void FastMarchFuzzy_widget::execute()
 {
-	float *workbits = bmphand->return_work();
+	float* workbits = bmphand->return_work();
 	for (unsigned i = 0; i < area; i++)
 	{
 		//		workbits[i]=map[i];
@@ -635,7 +640,7 @@ void FastMarchFuzzy_widget::slider_changed()
 
 void FastMarchFuzzy_widget::slextend_pressed()
 {
-	common::DataSelection dataSelection;
+	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
@@ -643,7 +648,7 @@ void FastMarchFuzzy_widget::slextend_pressed()
 
 void FastMarchFuzzy_widget::slextend_released() { emit end_datachange(this); }
 
-FILE *FastMarchFuzzy_widget::SaveParams(FILE *fp, int version)
+FILE* FastMarchFuzzy_widget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -690,24 +695,24 @@ FILE *FastMarchFuzzy_widget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *FastMarchFuzzy_widget::LoadParams(FILE *fp, int version)
+FILE* FastMarchFuzzy_widget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		QObject::disconnect(sl_extend, SIGNAL(valueChanged(int)), this,
-												SLOT(slextend_changed(int)));
+							SLOT(slextend_changed(int)));
 		QObject::disconnect(bg_method, SIGNAL(buttonClicked(int)), this,
-												SLOT(method_changed()));
+							SLOT(method_changed()));
 		QObject::disconnect(bg_interact, SIGNAL(buttonClicked(int)), this,
-												SLOT(interact_changed()));
+							SLOT(interact_changed()));
 		QObject::disconnect(sb_thresh, SIGNAL(valueChanged(int)), this,
-												SLOT(spinbox_changed()));
+							SLOT(spinbox_changed()));
 		QObject::disconnect(sb_m1, SIGNAL(valueChanged(int)), this,
-												SLOT(spinbox_changed()));
+							SLOT(spinbox_changed()));
 		QObject::disconnect(sb_s1, SIGNAL(valueChanged(int)), this,
-												SLOT(spinbox_changed()));
+							SLOT(spinbox_changed()));
 		QObject::disconnect(sb_s2, SIGNAL(valueChanged(int)), this,
-												SLOT(spinbox_changed()));
+							SLOT(spinbox_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -752,19 +757,19 @@ FILE *FastMarchFuzzy_widget::LoadParams(FILE *fp, int version)
 		interact_changed();
 
 		QObject::connect(sl_extend, SIGNAL(valueChanged(int)), this,
-										 SLOT(slextend_changed(int)));
+						 SLOT(slextend_changed(int)));
 		QObject::connect(bg_method, SIGNAL(buttonClicked(int)), this,
-										 SLOT(method_changed()));
+						 SLOT(method_changed()));
 		QObject::connect(bg_interact, SIGNAL(buttonClicked(int)), this,
-										 SLOT(interact_changed()));
+						 SLOT(interact_changed()));
 		QObject::connect(sb_thresh, SIGNAL(valueChanged(int)), this,
-										 SLOT(spinbox_changed()));
+						 SLOT(spinbox_changed()));
 		QObject::connect(sb_m1, SIGNAL(valueChanged(int)), this,
-										 SLOT(spinbox_changed()));
+						 SLOT(spinbox_changed()));
 		QObject::connect(sb_s1, SIGNAL(valueChanged(int)), this,
-										 SLOT(spinbox_changed()));
+						 SLOT(spinbox_changed()));
 		QObject::connect(sb_s2, SIGNAL(valueChanged(int)), this,
-										 SLOT(spinbox_changed()));
+						 SLOT(spinbox_changed()));
 	}
 	return fp;
 }

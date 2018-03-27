@@ -7,9 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "vtkImageExtractCompatibleMesher.h"
 #include "Precompiled.h"
 
+#include "vtkImageExtractCompatibleMesher.h"
 #include "vtkTemplateTriangulator.h"
 
 #include <algorithm>
@@ -86,7 +86,7 @@ struct Triangle
 		assert(n1 < n3);
 		assert(n2 < n3);
 	}
-	bool operator<(const Triangle &rhs) const
+	bool operator<(const Triangle& rhs) const
 	{
 		if (n1 != rhs.n1)
 			return (n1 < rhs.n1);
@@ -95,7 +95,7 @@ struct Triangle
 		else
 			return (n3 < rhs.n3);
 	}
-	bool operator==(const Triangle &rhs) const
+	bool operator==(const Triangle& rhs) const
 	{
 		return (n1 == rhs.n1 && n2 == rhs.n2 && n3 == rhs.n3);
 	}
@@ -123,10 +123,11 @@ public:
 		else /*(i==3)*/
 			return n3;
 	}
-	int WhichTriangle(Triangle &tri)
+	int WhichTriangle(Triangle& tri)
 	{
 		Triangle face;
-		for (int k = 0; k < 4; k++) {
+		for (int k = 0; k < 4; k++)
+		{
 			face.n1 = (*this)[tet_faces[k][0]];
 			face.n2 = (*this)[tet_faces[k][1]];
 			face.n3 = (*this)[tet_faces[k][2]];
@@ -190,7 +191,7 @@ public:
 		tetra.push_back(Tetrahedron(i0, i1, i2, i3));
 	}
 	size_t GetNumberOfTetrahedra() const { return tetra.size(); }
-	const Tetrahedron &GetTetrahedron(size_t cellId) const
+	const Tetrahedron& GetTetrahedron(size_t cellId) const
 	{
 		return tetra[cellId];
 	}
@@ -207,20 +208,25 @@ public:
 	{
 		std::cerr << "Building neighborhood information" << std::endl;
 		// allocate memory
-		try {
+		try
+		{
 			neighbors.resize(tetra.size());
 		}
-		catch (std::length_error & /*e*/) {
+		catch (std::length_error& /*e*/)
+		{
 			return false;
 		}
-		catch (std::bad_alloc & /*e*/) {
+		catch (std::bad_alloc& /*e*/)
+		{
 			return false;
 		}
-		catch (...) {
+		catch (...)
+		{
 			return false;
 		}
 		size_t max_unsigned_int = 4294967295;
-		if (tetra.size() >= max_unsigned_int) {
+		if (tetra.size() >= max_unsigned_int)
+		{
 			return false;
 		}
 
@@ -230,10 +236,11 @@ public:
 		triangle_id_map::iterator tmap_it;
 		//std::vector<IDType> t1(3), t2(3), t3(3), t4(3);
 		Triangle t1, t2, t3, t4;
-		std::vector<const Triangle *> faces(4);
+		std::vector<const Triangle*> faces(4);
 		IDType NC = static_cast<IDType>(tetra.size());
-		for (IDType cellId = 0; cellId < NC; cellId++) {
-			const Tetrahedron &tet = tetra[cellId];
+		for (IDType cellId = 0; cellId < NC; cellId++)
+		{
+			const Tetrahedron& tet = tetra[cellId];
 			// get four triangle faces
 			t1.n1 = tet[tet_faces[0][0]];
 			t1.n2 = tet[tet_faces[0][1]];
@@ -257,10 +264,12 @@ public:
 
 			//t1
 			tmap_it = tmap.find(t1);
-			if (tmap_it == tmap.end()) { // add first
+			if (tmap_it == tmap.end())
+			{ // add first
 				tmap[t1] = cellId;
 			}
-			else { //found second
+			else
+			{ //found second
 				assert(tmap_it->second != cellId);
 				const IDType neighborId = tmap_it->second;
 				const int j = tetra[neighborId].WhichTriangle(t1);
@@ -272,10 +281,12 @@ public:
 
 			// t2
 			tmap_it = tmap.find(t2);
-			if (tmap_it == tmap.end()) { // add first
+			if (tmap_it == tmap.end())
+			{ // add first
 				tmap[t2] = cellId;
 			}
-			else { //found second
+			else
+			{ //found second
 				assert(tmap_it->second != cellId);
 				const IDType neighborId = tmap_it->second;
 				const int j = tetra[neighborId].WhichTriangle(t2);
@@ -287,10 +298,12 @@ public:
 
 			// t3
 			tmap_it = tmap.find(t3);
-			if (tmap_it == tmap.end()) { // add first
+			if (tmap_it == tmap.end())
+			{ // add first
 				tmap[t3] = cellId;
 			}
-			else { //found second
+			else
+			{ //found second
 				assert(tmap_it->second != cellId);
 				const IDType neighborId = tmap_it->second;
 				const int j = tetra[neighborId].WhichTriangle(t3);
@@ -302,10 +315,12 @@ public:
 
 			// t4
 			tmap_it = tmap.find(t4);
-			if (tmap_it == tmap.end()) { // add first
+			if (tmap_it == tmap.end())
+			{ // add first
 				tmap[t4] = cellId;
 			}
-			else { //found second
+			else
+			{ //found second
 				assert(tmap_it->second != cellId);
 				const IDType neighborId = tmap_it->second;
 				const int j = tetra[neighborId].WhichTriangle(t4);
@@ -317,8 +332,9 @@ public:
 		}
 
 		std::cerr << "tmap size: " << tmap.size() << std::endl;
-		for (IDType cellId = 0; cellId < NC; cellId++) {
-			const Tetrahedron &tet = tetra[cellId];
+		for (IDType cellId = 0; cellId < NC; cellId++)
+		{
+			const Tetrahedron& tet = tetra[cellId];
 			// get four triangle faces
 			t1.n1 = tet[tet_faces[0][0]];
 			t1.n2 = tet[tet_faces[0][1]];
@@ -346,17 +362,20 @@ public:
 			faces[3] = &t4;
 
 			triangle_id_map::iterator tmap_it;
-			for (int j = 0; j < 4; j++) {
+			for (int j = 0; j < 4; j++)
+			{
 				// internal triangles were already removed from map above
 				if ((tmap_it = tmap.find(*faces[j])) == tmap.end())
 					continue;
 
 				IDType tid1 = tmap_it->second;
 				assert(tid1 >= 0 && tid1 < NC);
-				if (tid1 != cellId) {
+				if (tid1 != cellId)
+				{
 					neighbors[cellId].SetNeighbor(j, tid1);
 				}
-				else {
+				else
+				{
 					assert(tid1 == cellId);
 				}
 			}
@@ -374,9 +393,9 @@ private:
 class vtkTriangulatorImpl : public vtkTemplateTriangulator
 {
 public:
-	static vtkTriangulatorImpl *New();
+	static vtkTriangulatorImpl* New();
 	vtkTypeMacro(vtkTriangulatorImpl, vtkTemplateTriangulator);
-	void PrintSelf(ostream &os, vtkIndent indent)
+	void PrintSelf(ostream& os, vtkIndent indent)
 	{
 		Superclass::PrintSelf(os, indent);
 	}
@@ -401,20 +420,20 @@ public:
 
 	/// Override
 	virtual void AddTetrahedron(vtkIdType v1, vtkIdType v2, vtkIdType v3,
-															vtkIdType v4, int domain)
+								vtkIdType v4, int domain)
 	{
 		assert(Tetrahedra);
 		assert(CellDomainArray);
 		assert(Tetrahedra->GetNumberOfTetrahedra() ==
-					 CellDomainArray->GetNumberOfTuples());
+			   CellDomainArray->GetNumberOfTuples());
 		Tetrahedra->push_back(v1, v2, v3, v4);
 		CellDomainArray->InsertNextValue(domain);
 	}
 
-	vtkIncrementalPointLocator *Locator;
-	vtkPoints *Points;
-	TetContainer *Tetrahedra;
-	vtkShortArray *CellDomainArray;
+	vtkIncrementalPointLocator* Locator;
+	vtkPoints* Points;
+	TetContainer* Tetrahedra;
+	vtkShortArray* CellDomainArray;
 
 protected:
 	vtkTriangulatorImpl() {}
@@ -456,8 +475,9 @@ vtkImageExtractCompatibleMesher::vtkImageExtractCompatibleMesher()
 	this->MyTriangulator = NULL;
 
 	// by default process active point scalars
-	this->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS,
-															 vtkDataSetAttributes::SCALARS);
+	this->SetInputArrayToProcess(0, 0, 0,
+								 vtkDataObject::FIELD_ASSOCIATION_POINTS,
+								 vtkDataSetAttributes::SCALARS);
 }
 
 //----------------------------------------------------------------------------
@@ -468,14 +488,14 @@ vtkImageExtractCompatibleMesher::~vtkImageExtractCompatibleMesher()
 }
 
 //----------------------------------------------------------------------------
-void vtkImageExtractCompatibleMesher::PrintSelf(ostream &os, vtkIndent indent)
+void vtkImageExtractCompatibleMesher::PrintSelf(ostream& os, vtkIndent indent)
 {
 	this->Superclass::PrintSelf(os, indent);
 }
 
 //----------------------------------------------------------------------------
 int vtkImageExtractCompatibleMesher::FillInputPortInformation(
-		int vtkNotUsed(port), vtkInformation *info)
+	int vtkNotUsed(port), vtkInformation* info)
 {
 	info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkImageData");
 	return 1;
@@ -483,15 +503,17 @@ int vtkImageExtractCompatibleMesher::FillInputPortInformation(
 
 //----------------------------------------------------------------------------
 int vtkImageExtractCompatibleMesher::FillOutputPortInformation(
-		int port, vtkInformation *info)
+	int port, vtkInformation* info)
 {
 	//The input should be two vtkPolyData
-	if (port == 0) {
+	if (port == 0)
+	{
 		info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
 		return 1;
 	}
 	//The input should be two vtkPolyData
-	if (port == 1) {
+	if (port == 1)
+	{
 		info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
 		return 1;
 	}
@@ -500,41 +522,45 @@ int vtkImageExtractCompatibleMesher::FillOutputPortInformation(
 
 //----------------------------------------------------------------------------
 int vtkImageExtractCompatibleMesher::RequestData(
-		vtkInformation *vtkNotUsed(request), vtkInformationVector **inputVector,
-		vtkInformationVector *outputVector)
+	vtkInformation* vtkNotUsed(request), vtkInformationVector** inputVector,
+	vtkInformationVector* outputVector)
 {
 	return this->ContourSurface(inputVector, outputVector);
 }
 
 int vtkImageExtractCompatibleMesher::ContourSurface(
-		vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+	vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-	vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+	vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
 	this->Input =
-			vtkImageData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+		vtkImageData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-	if (this->Input->GetNumberOfCells() == 0) {
+	if (this->Input->GetNumberOfCells() == 0)
+	{
 		vtkErrorMacro(<< "Cannot run with zero cells");
 		return 1;
 	}
 	vtkIdType estimatedSize = this->Input->GetNumberOfCells();
 	estimatedSize = estimatedSize / 1024 * 1024; //multiple of 1024
-	if (estimatedSize < 1024) {
+	if (estimatedSize < 1024)
+	{
 		estimatedSize = 1024;
 	}
 	this->Points = vtkPoints::New();
 	Points->SetDataTypeToFloat();
 	Points->Allocate(estimatedSize / 2, estimatedSize / 2);
-	if (this->UseOctreeLocator) {
-		vtkIncrementalOctreePointLocator *loc =
-				vtkIncrementalOctreePointLocator::New();
+	if (this->UseOctreeLocator)
+	{
+		vtkIncrementalOctreePointLocator* loc =
+			vtkIncrementalOctreePointLocator::New();
 		loc->SetTolerance(0.0);
 		loc->SetMaxLevel(12); // does this have any effect?
 		// loc->SetMaxPointsPerLeaf(128);
 		this->Locator = loc;
 	}
-	else {
-		vtkMergePoints *loc = vtkMergePoints::New();
+	else
+	{
+		vtkMergePoints* loc = vtkMergePoints::New();
 		int div[3];
 		this->Input->GetDimensions(div);
 		div[0] = std::max(div[0] / 7, 50);
@@ -575,38 +601,44 @@ int vtkImageExtractCompatibleMesher::ContourSurface(
 	vtkIdType numKCells = dims[2] - 1;
 	vtkIdType sliceSize = numICells * numJCells;
 	vtkIdType extOffset = this->Input->GetExtent()[0] +
-												this->Input->GetExtent()[2] +
-												this->Input->GetExtent()[4];
+						  this->Input->GetExtent()[2] +
+						  this->Input->GetExtent()[4];
 
-	vtkPoints *cellPts;
-	vtkIdList *cellIds;
-	vtkGenericCell *cell = vtkGenericCell::New();
+	vtkPoints* cellPts;
+	vtkIdList* cellIds;
+	vtkGenericCell* cell = vtkGenericCell::New();
 	this->ClipScalars = this->GetInputArrayToProcess(0, inputVector);
-	if (!this->ClipScalars) {
+	if (!this->ClipScalars)
+	{
 		this->ClipScalars = this->Input->GetPointData()->GetArray(0);
-		if (!this->ClipScalars) {
+		if (!this->ClipScalars)
+		{
 			this->Input->Print(std::cerr);
 			vtkErrorMacro(<< "Cannot run without input scalars");
 			return 1;
 		}
 	}
-	vtkShortArray *cellScalars = vtkShortArray::New();
+	vtkShortArray* cellScalars = vtkShortArray::New();
 	cellScalars->SetNumberOfComponents(1);
 	cellScalars->SetNumberOfTuples(8);
 
 	// Traverse through all all voxels, compute tetrahedra on the go
 	int abort = 0;
-	for (vtkIdType k = 0; k < numKCells && !abort; k++) {
+	for (vtkIdType k = 0; k < numKCells && !abort; k++)
+	{
 		// Check for progress and abort on every z-slice
 		this->UpdateProgress(static_cast<double>(k) / numKCells);
 		abort = this->GetAbortExecute();
-		for (vtkIdType j = 0; j < numJCells; j++) {
-			for (vtkIdType i = 0; i < numICells; i++) {
+		for (vtkIdType j = 0; j < numJCells; j++)
+		{
+			for (vtkIdType i = 0; i < numICells; i++)
+			{
 				int flip = (extOffset + i + j + k) & 0x1;
 				vtkIdType cellId = i + j * numICells + k * sliceSize;
 
 				this->Input->GetCell(cellId, cell);
-				if (cell->GetCellType() == VTK_EMPTY_CELL) {
+				if (cell->GetCellType() == VTK_EMPTY_CELL)
+				{
 					continue;
 				}
 				cellPts = cell->GetPoints();
@@ -615,34 +647,41 @@ int vtkImageExtractCompatibleMesher::ContourSurface(
 				// Check if this cell is at surface/interface
 				bool isClipped = false;
 				int s0 = this->ClipScalars->GetComponent(cellIds->GetId(0), 0);
-				for (int ii = 0; ii < 8; ii++) {
-					int s = this->ClipScalars->GetComponent(cellIds->GetId(ii), 0);
+				for (int ii = 0; ii < 8; ii++)
+				{
+					int s =
+						this->ClipScalars->GetComponent(cellIds->GetId(ii), 0);
 					cellScalars->SetValue(ii, s);
-					if (s != s0) {
+					if (s != s0)
+					{
 						isClipped = true;
 					}
 				}
 
 				//
-				if (isClipped == true) {
-					this->ClipVoxel(cellScalars, flip, spacing, cellIds, cellPts);
+				if (isClipped == true)
+				{
+					this->ClipVoxel(cellScalars, flip, spacing, cellIds,
+									cellPts);
 				}
-				else if (s0 != this->BackgroundLabel) {
+				else if (s0 != this->BackgroundLabel)
+				{
 					this->TriangulateVoxel(s0, flip, spacing, cellIds, cellPts);
 				}
 			}
 		}
-		if (k % 10 == 0) {
+		if (k % 10 == 0)
+		{
 			std::cerr << "Time for full voxels: " << Timer<1>::EllapsedTime()
-								<< std::endl;
+					  << std::endl;
 			std::cerr << "Time for clipped voxels: " << Timer<2>::EllapsedTime()
-								<< std::endl;
+					  << std::endl;
 		}
 	}
 	std::cerr << "Final Time for full voxels: " << Timer<1>::EllapsedTime()
-						<< std::endl;
+			  << std::endl;
 	std::cerr << "Final Time for clipped voxels: " << Timer<2>::EllapsedTime()
-						<< std::endl;
+			  << std::endl;
 
 	// Start cleaning up
 	this->Triangulator->Delete();
@@ -650,19 +689,20 @@ int vtkImageExtractCompatibleMesher::ContourSurface(
 	cell->Delete();
 	cellScalars->Delete();
 
-	std::cerr << "Number of tetra: " << this->Tetrahedra->GetNumberOfTetrahedra()
-						<< std::endl;
+	std::cerr << "Number of tetra: "
+			  << this->Tetrahedra->GetNumberOfTetrahedra() << std::endl;
 	std::cerr << "Number of points: " << this->Points->GetNumberOfPoints()
-						<< std::endl;
+			  << std::endl;
 
 	// This is needed if using the ClipVoxel_not_used function instead of the newer ClipVoxel
 	// this->LabelTetra_not_used();
 
-	if (this->GenerateTetMeshOutput) {
+	if (this->GenerateTetMeshOutput)
+	{
 		// Create & Write tetrahedral mesh
-		vtkInformation *outInfo2 = outputVector->GetInformationObject(1);
-		vtkUnstructuredGrid *grid = vtkUnstructuredGrid::SafeDownCast(
-				outInfo2->Get(vtkDataObject::DATA_OBJECT()));
+		vtkInformation* outInfo2 = outputVector->GetInformationObject(1);
+		vtkUnstructuredGrid* grid = vtkUnstructuredGrid::SafeDownCast(
+			outInfo2->Get(vtkDataObject::DATA_OBJECT()));
 		this->GenerateTetMesh(grid);
 	}
 
@@ -688,8 +728,8 @@ int vtkImageExtractCompatibleMesher::ContourSurface(
 // triangulation. The ordering controls the orientation of any face
 // diagonals.
 void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
-		vtkShortArray *cellScalars, int flip, double spacing[3], vtkIdList *cellIds,
-		vtkPoints *cellPts)
+	vtkShortArray* cellScalars, int flip, double spacing[3], vtkIdList* cellIds,
+	vtkPoints* cellPts)
 {
 	Timer<2> timer;
 
@@ -698,16 +738,17 @@ void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
 	double bounds[6], p1[3], p2[3];
 	vtkIdType id, ptId;
 	static int edges[12][2] = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {0, 2}, {1, 3},
-														 {4, 6}, {5, 7}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+							   {4, 6}, {5, 7}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
 	static int order_flip[2][8] = {
-			{0, 3, 5, 6, 1, 2, 4, 7},
-			{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
+		{0, 3, 5, 6, 1, 2, 4, 7},
+		{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
 	static int order_noflip[8] = {0, 1, 2, 3,
-																4, 5, 6, 7}; //injection order without flip
+								  4, 5, 6, 7}; //injection order without flip
 
 	// compute bounds for voxel and initialize
 	cellPts->GetPoint(0, voxelOrigin);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
+	{
 		bounds[2 * i] = voxelOrigin[i];
 		bounds[2 * i + 1] = voxelOrigin[i] + spacing[i];
 	}
@@ -720,17 +761,20 @@ void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
 	// that the PreSortedOn() flag was set in the triangulator.
 	int type;
 	std::set<int> labelset;
-	for (int numPts = 0; numPts < 8; numPts++) {
+	for (int numPts = 0; numPts < 8; numPts++)
+	{
 		if (this->FiveTetrahedraPerVoxel)
 			ptId = order_flip[flip][numPts];
 		else
 			ptId = order_noflip[numPts];
 
 		s1 = cellScalars->GetValue(ptId);
-		if (s1 != this->BackgroundLabel) {
+		if (s1 != this->BackgroundLabel)
+		{
 			type = 0; //inside
 		}
-		else {
+		else
+		{
 			type = 4; //don't insert
 		}
 
@@ -739,7 +783,8 @@ void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
 
 		labelset.insert(s1);
 		cellPts->GetPoint(ptId, x);
-		if (this->Locator->InsertUniquePoint(x, id)) {
+		if (this->Locator->InsertUniquePoint(x, id))
+		{
 			this->PointDomainArray->InsertValue(id, s1);
 		}
 		this->Triangulator->InsertPoint(id, id, s1, x, x, type);
@@ -747,44 +792,52 @@ void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
 
 	// For each edge intersection point, insert into triangulation. Edge
 	// intersections exist where edge points have different scalar values (labels)
-	for (int edgeNum = 0; edgeNum < 12; edgeNum++) {
+	for (int edgeNum = 0; edgeNum < 12; edgeNum++)
+	{
 		s1 = cellScalars->GetValue(edges[edgeNum][0]);
 		s2 = cellScalars->GetValue(edges[edgeNum][1]);
 
-		if (s1 != s2) {
+		if (s1 != s2)
+		{
 			// generate edge intersection point
 			cellPts->GetPoint(edges[edgeNum][0], p1);
 			cellPts->GetPoint(edges[edgeNum][1], p2);
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 3; i++)
+			{
 				x[i] = 0.5 * (p1[i] + p2[i]);
 			}
 
 			// Incorporate point into output and interpolate edge data as necessary
-			if (this->Locator->InsertUniquePoint(x, ptId)) {
+			if (this->Locator->InsertUniquePoint(x, ptId))
+			{
 				this->PointDomainArray->InsertValue(
-						ptId,
-						SURFACE_DOMAIN); // reuse background for interface/surface label
+					ptId,
+					SURFACE_DOMAIN); // reuse background for interface/surface label
 			}
 
 			//Insert into Delaunay triangulation (type 2 = "boundary")
 			this->Triangulator->InsertPoint(ptId, ptId, 0, x, x, 2);
 		} //if edge intersects value
-	}		//for all edges
+	}	 //for all edges
 
 	// Create center point
-	if (this->CreateVoxelCenterPoint && labelset.size() > 2) {
+	if (this->CreateVoxelCenterPoint && labelset.size() > 2)
+	{
 		// generate edge intersection point
 		cellPts->GetPoint(0, p1);
 		cellPts->GetPoint(7, p2);
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++)
+		{
 			assert(p2[i] - p1[i] > spacing[i] * 0.5);
 			x[i] = 0.5 * (p1[i] + p2[i]);
 		}
 
 		// Incorporate point into output and interpolate edge data as necessary
-		if (this->Locator->InsertUniquePoint(x, ptId)) {
+		if (this->Locator->InsertUniquePoint(x, ptId))
+		{
 			this->PointDomainArray->InsertValue(
-					ptId, SURFACE_DOMAIN); // reuse background for interface/surface label
+				ptId,
+				SURFACE_DOMAIN); // reuse background for interface/surface label
 		}
 
 		//Insert into Delaunay triangulation (type 2 = "boundary")
@@ -802,16 +855,17 @@ void vtkImageExtractCompatibleMesher::ClipVoxel_not_used(
 
 	vtkIdType npts, *pts;
 	this->Connectivity->InitTraversal();
-	for (vtkIdType i = 0; i < numNew; i++) {
+	for (vtkIdType i = 0; i < numNew; i++)
+	{
 		this->Connectivity->GetNextCell(npts, pts);
 		this->Tetrahedra->push_back(pts[0], pts[1], pts[2], pts[3]);
 	}
 }
 
-void vtkImageExtractCompatibleMesher::ClipVoxel(vtkShortArray *cellScalars,
-																								int flip, double spacing[3],
-																								vtkIdList *cellIds,
-																								vtkPoints *cellPts)
+void vtkImageExtractCompatibleMesher::ClipVoxel(vtkShortArray* cellScalars,
+												int flip, double spacing[3],
+												vtkIdList* cellIds,
+												vtkPoints* cellPts)
 {
 	Timer<2> timer;
 
@@ -819,14 +873,15 @@ void vtkImageExtractCompatibleMesher::ClipVoxel(vtkShortArray *cellScalars,
 	double bounds[6];
 	vtkIdType id, ptId;
 	static int order_flip[2][8] = {
-			{0, 3, 5, 6, 1, 2, 4, 7},
-			{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
+		{0, 3, 5, 6, 1, 2, 4, 7},
+		{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
 	static int order_noflip[8] = {0, 1, 2, 3,
-																4, 5, 6, 7}; //injection order without flip
+								  4, 5, 6, 7}; //injection order without flip
 
 	// compute bounds for voxel and initialize
 	cellPts->GetPoint(0, voxelOrigin);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
+	{
 		bounds[2 * i] = voxelOrigin[i];
 		bounds[2 * i + 1] = voxelOrigin[i] + spacing[i];
 	}
@@ -837,23 +892,26 @@ void vtkImageExtractCompatibleMesher::ClipVoxel(vtkShortArray *cellScalars,
 
 	// Inject ordered voxel corner points into triangulation. Recall
 	// that the PreSortedOn() flag was set in the triangulator.
-	for (int numPts = 0; numPts < 8; numPts++) {
+	for (int numPts = 0; numPts < 8; numPts++)
+	{
 		if (this->FiveTetrahedraPerVoxel)
 			ptId = order_flip[flip][numPts];
 		else
 			ptId = order_noflip[numPts];
 
 		cellPts->GetPoint(ptId, x);
-		if (this->Locator->InsertUniquePoint(x, id)) {
-			this->PointDomainArray->InsertValue(id, cellScalars->GetValue(ptId));
+		if (this->Locator->InsertUniquePoint(x, id))
+		{
+			this->PointDomainArray->InsertValue(id,
+												cellScalars->GetValue(ptId));
 		}
 		this->Triangulator->InsertPoint(id, id, 0 /*cellScalar*/, x, x, 0);
 	}
 
 	// triangulate the points
 	if (UseTemplates)
-		this->Triangulator->TemplateTriangulate(VTK_NUMBER_OF_CELL_TYPES + flip, 8,
-																						12);
+		this->Triangulator->TemplateTriangulate(VTK_NUMBER_OF_CELL_TYPES + flip,
+												8, 12);
 	else
 		this->Triangulator->Triangulate();
 
@@ -864,21 +922,23 @@ void vtkImageExtractCompatibleMesher::ClipVoxel(vtkShortArray *cellScalars,
 
 	vtkIdType npts, *pts;
 	this->Connectivity->InitTraversal();
-	for (vtkIdType i = 0; i < numNew; i++) {
+	for (vtkIdType i = 0; i < numNew; i++)
+	{
 		this->Connectivity->GetNextCell(npts, pts);
 
 		// now check colors at nodes and subdivide the tetrahedra accordingly
-		int doms[4] = {
-				PointDomainArray->GetValue(pts[0]), PointDomainArray->GetValue(pts[1]),
-				PointDomainArray->GetValue(pts[2]), PointDomainArray->GetValue(pts[3])};
+		int doms[4] = {PointDomainArray->GetValue(pts[0]),
+					   PointDomainArray->GetValue(pts[1]),
+					   PointDomainArray->GetValue(pts[2]),
+					   PointDomainArray->GetValue(pts[3])};
 		MyTriangulator->AddMultipleDomainTetrahedron(pts, doms);
 	}
 }
 
 void vtkImageExtractCompatibleMesher::TriangulateVoxel(int cellScalar, int flip,
-																											 double spacing[3],
-																											 vtkIdList *cellIds,
-																											 vtkPoints *cellPts)
+													   double spacing[3],
+													   vtkIdList* cellIds,
+													   vtkPoints* cellPts)
 {
 	Timer<1> timer;
 
@@ -886,14 +946,15 @@ void vtkImageExtractCompatibleMesher::TriangulateVoxel(int cellScalar, int flip,
 	double bounds[6];
 	vtkIdType id, ptId;
 	static int order_flip[2][8] = {
-			{0, 3, 5, 6, 1, 2, 4, 7},
-			{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
+		{0, 3, 5, 6, 1, 2, 4, 7},
+		{1, 2, 4, 7, 0, 3, 5, 6}}; //injection order based on flip
 	static int order_noflip[8] = {0, 1, 2, 3,
-																4, 5, 6, 7}; //injection order without flip
+								  4, 5, 6, 7}; //injection order without flip
 
 	// compute bounds for voxel and initialize
 	cellPts->GetPoint(0, voxelOrigin);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
+	{
 		bounds[2 * i] = voxelOrigin[i];
 		bounds[2 * i + 1] = voxelOrigin[i] + spacing[i];
 	}
@@ -904,14 +965,16 @@ void vtkImageExtractCompatibleMesher::TriangulateVoxel(int cellScalar, int flip,
 
 	// Inject ordered voxel corner points into triangulation. Recall
 	// that the PreSortedOn() flag was set in the triangulator.
-	for (int numPts = 0; numPts < 8; numPts++) {
+	for (int numPts = 0; numPts < 8; numPts++)
+	{
 		if (this->FiveTetrahedraPerVoxel)
 			ptId = order_flip[flip][numPts];
 		else
 			ptId = order_noflip[numPts];
 
 		cellPts->GetPoint(ptId, x);
-		if (this->Locator->InsertUniquePoint(x, id)) {
+		if (this->Locator->InsertUniquePoint(x, id))
+		{
 			this->PointDomainArray->InsertValue(id, cellScalar);
 		}
 		this->Triangulator->InsertPoint(id, id, cellScalar, x, x, 0);
@@ -919,8 +982,8 @@ void vtkImageExtractCompatibleMesher::TriangulateVoxel(int cellScalar, int flip,
 
 	// triangulate the points
 	if (UseTemplates)
-		this->Triangulator->TemplateTriangulate(VTK_NUMBER_OF_CELL_TYPES + flip, 8,
-																						12);
+		this->Triangulator->TemplateTriangulate(VTK_NUMBER_OF_CELL_TYPES + flip,
+												8, 12);
 	else
 		this->Triangulator->Triangulate();
 
@@ -932,23 +995,25 @@ void vtkImageExtractCompatibleMesher::TriangulateVoxel(int cellScalar, int flip,
 	vtkIdType npts, *pts;
 	int doms[4] = {cellScalar, cellScalar, cellScalar, cellScalar};
 	this->Connectivity->InitTraversal();
-	for (vtkIdType i = 0; i < numNew; i++) {
+	for (vtkIdType i = 0; i < numNew; i++)
+	{
 		this->Connectivity->GetNextCell(npts, pts);
 		// this->Tetrahedra->push_back(pts[0],pts[1],pts[2],pts[3]);
 		MyTriangulator->AddMultipleDomainTetrahedron(pts, doms);
 	}
 }
 
-void vtkImageExtractCompatibleMesher::GenerateTetMesh(vtkUnstructuredGrid *grid)
+void vtkImageExtractCompatibleMesher::GenerateTetMesh(vtkUnstructuredGrid* grid)
 {
 	assert(Tetrahedra->GetNumberOfTetrahedra() ==
-				 CellDomainArray->GetNumberOfTuples());
+		   CellDomainArray->GetNumberOfTuples());
 	assert(grid);
 
 	grid->Allocate(Tetrahedra->GetNumberOfTetrahedra());
 	grid->SetPoints(this->Points);
 	vtkIdType numTets = this->Tetrahedra->GetNumberOfTetrahedra();
-	for (vtkIdType i = 0; i < numTets; i++) {
+	for (vtkIdType i = 0; i < numTets; i++)
+	{
 		vtkIdType pts[4];
 		Tetrahedron tet = this->Tetrahedra->GetTetrahedron(i);
 		pts[0] = tet[0];
@@ -965,13 +1030,13 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 {
 	assert(this->PointDomainArray && this->Tetrahedra);
 	assert(this->PointDomainArray->GetNumberOfTuples() ==
-				 this->Points->GetNumberOfPoints());
+		   this->Points->GetNumberOfPoints());
 	int OUTSIDE_DOMAIN = this->BackgroundLabel;
 
 	double x[3];
 
 	this->CellDomainArray->SetNumberOfTuples(
-			this->Tetrahedra->GetNumberOfTetrahedra());
+		this->Tetrahedra->GetNumberOfTetrahedra());
 
 	this->Tetrahedra->BuildNeighbors();
 
@@ -979,18 +1044,22 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 	int number4PointsOnSurface = 0;
 	NumberOfUnassignedLabels = 0;
 	vtkIdType numberOfCells = this->CellDomainArray->GetNumberOfTuples();
-	for (vtkIdType i = 0; i < numberOfCells; i++) {
+	for (vtkIdType i = 0; i < numberOfCells; i++)
+	{
 		// if (this->Grid->GetCellType(i) != VTK_TETRA)
-		const Tetrahedron &pts = this->Tetrahedra->GetTetrahedron(i);
+		const Tetrahedron& pts = this->Tetrahedra->GetTetrahedron(i);
 		int numberInside = 0;
 		int numberOutside = 0;
 		int numberSurface = 0;
 		int dom_cell = UNSURE_DOMAIN;
-		for (int j = 0; j < 4; j++) {
-			if (this->PointDomainArray->GetValue(pts[j]) == SURFACE_DOMAIN) {
+		for (int j = 0; j < 4; j++)
+		{
+			if (this->PointDomainArray->GetValue(pts[j]) == SURFACE_DOMAIN)
+			{
 				numberSurface++;
 			}
-			else if (this->PointDomainArray->GetValue(pts[j]) == OUTSIDE_DOMAIN) {
+			else if (this->PointDomainArray->GetValue(pts[j]) == OUTSIDE_DOMAIN)
+			{
 				dom_cell = this->PointDomainArray->GetValue(pts[j]);
 				numberOutside++;
 			}
@@ -1005,29 +1074,36 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 		this->CellDomainArray->SetValue(i, UNSURE_DOMAIN);
 
 		// at least not on surface
-		if (numberSurface < 4) {
-			if (numberInside + numberSurface == 4) {
+		if (numberSurface < 4)
+		{
+			if (numberInside + numberSurface == 4)
+			{
 				assert(dom_cell != UNSURE_DOMAIN);
 				this->CellDomainArray->SetValue(i, dom_cell);
 			}
 			// at least one outside
-			else if (numberOutside + numberSurface == 4) {
+			else if (numberOutside + numberSurface == 4)
+			{
 				assert(dom_cell != UNSURE_DOMAIN);
 				this->CellDomainArray->SetValue(i, dom_cell);
 			}
-			else {
+			else
+			{
 				std::cout << "Tetrahedron with both inside and outside nodes ("
-									<< numberInside << "," << numberOutside << ")." << std::endl;
+						  << numberInside << "," << numberOutside << ")."
+						  << std::endl;
 			}
 		}
 		// all points are on surface
-		else {
+		else
+		{
 			number4PointsOnSurface++;
 
 			int dom[4];
 			std::map<int, int> hist;
 			std::map<int, int>::iterator hist_it;
-			for (int k = 0; k < 4; k++) {
+			for (int k = 0; k < 4; k++)
+			{
 				this->Points->GetPoint(pts[k], x);
 				dom[k] = EvaluateLabel(x);
 				if ((hist_it = hist.find(dom[k])) == hist.end())
@@ -1035,14 +1111,18 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 				else
 					hist_it->second++;
 			}
-			if (hist.size() == 1) {
+			if (hist.size() == 1)
+			{
 				this->CellDomainArray->SetValue(i, dom[0]);
 			}
-			else {
+			else
+			{
 				int bestdom = dom[0];
 				int frequency = 0;
-				for (hist_it = hist.begin(); hist_it != hist.end(); ++hist_it) {
-					if (hist_it->second > frequency) {
+				for (hist_it = hist.begin(); hist_it != hist.end(); ++hist_it)
+				{
+					if (hist_it->second > frequency)
+					{
 						bestdom = hist_it->first;
 						frequency = hist_it->second;
 					}
@@ -1062,24 +1142,32 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 	int iter = 0;
 	int assigned = 0;
 	int abort = 0;
-	do {
+	do
+	{
 		std::cerr << "Iteration: " << iter << std::endl;
 		assigned = 0;
-		vtkShortArray *domainCopy = vtkShortArray::New();
+		vtkShortArray* domainCopy = vtkShortArray::New();
 		char name[32];
 		sprintf(name, "Material_%d", iter++);
 		domainCopy->SetName(name);
 		domainCopy->DeepCopy(this->CellDomainArray);
 
-		for (vtkIdType cellId = 0; cellId < numberOfCells; cellId++) {
-			if (domainCopy->GetValue(cellId) == UNSURE_DOMAIN) {
+		for (vtkIdType cellId = 0; cellId < numberOfCells; cellId++)
+		{
+			if (domainCopy->GetValue(cellId) == UNSURE_DOMAIN)
+			{
 				// check domain of each neighbor
 				std::map<int, int> hist;
 				std::map<int, int>::iterator hist_it;
-				for (int k = 0; k < 4; k++) {
-					if (this->Tetrahedra->HasNeighbor(cellId, k)) {
-						vtkIdType neighborId = this->Tetrahedra->GetNeighbor(cellId, k);
-						if ((dom = domainCopy->GetValue(neighborId)) != UNSURE_DOMAIN) {
+				for (int k = 0; k < 4; k++)
+				{
+					if (this->Tetrahedra->HasNeighbor(cellId, k))
+					{
+						vtkIdType neighborId =
+							this->Tetrahedra->GetNeighbor(cellId, k);
+						if ((dom = domainCopy->GetValue(neighborId)) !=
+							UNSURE_DOMAIN)
+						{
 							if ((hist_it = hist.find(dom)) == hist.end())
 								hist[dom] = 1;
 							else
@@ -1087,17 +1175,22 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 						}
 					}
 				}
-				if (hist.size() > 0) {
+				if (hist.size() > 0)
+				{
 					int cell_domain = UNSURE_DOMAIN;
 					int maxhist = 0;
 					int max2hist = 0;
-					for (hist_it = hist.begin(); hist_it != hist.end(); ++hist_it) {
-						if (hist_it->second >= 2) {
+					for (hist_it = hist.begin(); hist_it != hist.end();
+						 ++hist_it)
+					{
+						if (hist_it->second >= 2)
+						{
 							maxhist = 0;
 							cell_domain = hist_it->first;
 							break;
 						}
-						if (hist_it->second >= maxhist) {
+						if (hist_it->second >= maxhist)
+						{
 							max2hist = maxhist;
 							maxhist = hist_it->second;
 							cell_domain = hist_it->first;
@@ -1109,7 +1202,8 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 						this->CellDomainArray->SetValue(cellId, cell_domain);
 					else if (iter == MaxNumberOfIterations)
 						this->CellDomainArray->SetValue(cellId, cell_domain);
-					if (this->CellDomainArray->GetValue(cellId) != UNSURE_DOMAIN)
+					if (this->CellDomainArray->GetValue(cellId) !=
+						UNSURE_DOMAIN)
 						assigned++;
 				}
 			}
@@ -1125,15 +1219,21 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 
 	// Label unassigned cells (UNSURE_DOMAIN)
 	for (vtkIdType cellId = 0;
-			 cellId < numberOfCells && NumberOfUnassignedLabels > 0; cellId++) {
-		if (this->CellDomainArray->GetValue(cellId) == UNSURE_DOMAIN) {
+		 cellId < numberOfCells && NumberOfUnassignedLabels > 0; cellId++)
+	{
+		if (this->CellDomainArray->GetValue(cellId) == UNSURE_DOMAIN)
+		{
 			// check domain of each neighbor
 			std::map<int, int> hist;
-			for (int k = 0; k < 4; k++) {
-				if (this->Tetrahedra->HasNeighbor(cellId, k)) {
-					vtkIdType neighborId = this->Tetrahedra->GetNeighbor(cellId, k);
+			for (int k = 0; k < 4; k++)
+			{
+				if (this->Tetrahedra->HasNeighbor(cellId, k))
+				{
+					vtkIdType neighborId =
+						this->Tetrahedra->GetNeighbor(cellId, k);
 					if ((dom = this->CellDomainArray->GetValue(neighborId)) !=
-							UNSURE_DOMAIN) {
+						UNSURE_DOMAIN)
+					{
 						if (hist.find(dom) == hist.end())
 							hist[dom] = 1;
 						else
@@ -1144,13 +1244,16 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 			int cell_domain = UNSURE_DOMAIN;
 			int maxhist = 0;
 			std::map<int, int>::iterator it;
-			for (it = hist.begin(); it != hist.end(); ++it) {
-				if (it->second >= 2) {
+			for (it = hist.begin(); it != hist.end(); ++it)
+			{
+				if (it->second >= 2)
+				{
 					maxhist = 0;
 					cell_domain = it->first;
 					break;
 				}
-				if (it->second >= maxhist) {
+				if (it->second >= maxhist)
+				{
 					maxhist = it->second;
 					cell_domain = it->first;
 				}
@@ -1162,9 +1265,9 @@ int vtkImageExtractCompatibleMesher::LabelTetra_not_used()
 	}
 
 	std::cout << "Number of cells with 4 points on surface: "
-						<< number4PointsOnSurface << std::endl;
+			  << number4PointsOnSurface << std::endl;
 	std::cout << "Number of unassigned cells: " << NumberOfUnassignedLabels
-						<< std::endl;
+			  << std::endl;
 	return 1;
 }
 
@@ -1187,7 +1290,8 @@ int vtkImageExtractCompatibleMesher::EvaluateLabel(double x[3])
 	int j = (x[1] - origin[1] + 0.5 * spacing[1]) / spacing[1] - extent[2];
 	int k = (x[2] - origin[2] + 0.5 * spacing[2]) / spacing[2] - extent[4];
 
-	if (i >= 0 && i < dims[0] && j >= 0 && j < dims[1] && k >= 0 && k < dims[2]) {
+	if (i >= 0 && i < dims[0] && j >= 0 && j < dims[1] && k >= 0 && k < dims[2])
+	{
 		vtkIdType cellId = i + j * numICells + k * sliceSize;
 
 		assert(cellId >= 0 && cellId < this->ClipScalars->GetNumberOfTuples());
@@ -1195,18 +1299,19 @@ int vtkImageExtractCompatibleMesher::EvaluateLabel(double x[3])
 		return dom;
 	}
 	std::cout << "Warning: probing outside image " << i << " " << j << " " << k
-						<< std::endl;
+			  << std::endl;
 	return this->BackgroundLabel;
 }
 
 void vtkImageExtractCompatibleMesher::ExtractMeshDomainInterfaces(
-		vtkInformationVector *outputVector)
+	vtkInformationVector* outputVector)
 {
-	vtkInformation *outInfo = outputVector->GetInformationObject(0);
-	vtkPolyData *output =
-			vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+	vtkInformation* outInfo = outputVector->GetInformationObject(0);
+	vtkPolyData* output =
+		vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-	if (!this->CellDomainArray) {
+	if (!this->CellDomainArray)
+	{
 		vtkErrorMacro(<< "Cannot run without cell labels");
 		return;
 	}
@@ -1235,79 +1340,99 @@ void vtkImageExtractCompatibleMesher::ExtractMeshDomainInterfaces(
 	vtkIdType checkEvery = NCells / 20;
 	if (checkEvery == 0)
 		checkEvery = 1;
-	for (vtkIdType cellId = 0; cellId < NCells && !abort; cellId++) {
+	for (vtkIdType cellId = 0; cellId < NCells && !abort; cellId++)
+	{
 		if (static_cast<int>(this->CellDomainArray->GetTuple1(cellId)) ==
-				BackgroundLabel)
+			BackgroundLabel)
 			continue;
 
 		// Check for progress and abort
-		if (cellId % checkEvery == 0) {
+		if (cellId % checkEvery == 0)
+		{
 			this->UpdateProgress(static_cast<double>(cellId) / NCells);
 			abort = this->GetAbortExecute();
 		}
 
 		visited[cellId] = true;
-		const Tetrahedron &tet = this->Tetrahedra->GetTetrahedron(cellId);
-		for (int k = 0; k < 4; k++) {
+		const Tetrahedron& tet = this->Tetrahedra->GetTetrahedron(cellId);
+		for (int k = 0; k < 4; k++)
+		{
 			facePtIds->SetId(0, tet[tet_faces[k][0]]);
 			facePtIds->SetId(1, tet[tet_faces[k][1]]);
 			facePtIds->SetId(2, tet[tet_faces[k][2]]);
 
-			if (!this->Tetrahedra->HasNeighbor(cellId, k)) {
+			if (!this->Tetrahedra->HasNeighbor(cellId, k))
+			{
 				// boundary tet: add face
-				if (ptIdMapping[facePtIds->GetId(0)] < 0) {
+				if (ptIdMapping[facePtIds->GetId(0)] < 0)
+				{
 					this->Points->GetPoint(facePtIds->GetId(0), x);
-					ptIdMapping[facePtIds->GetId(0)] = points->InsertNextPoint(x);
+					ptIdMapping[facePtIds->GetId(0)] =
+						points->InsertNextPoint(x);
 				}
-				if (ptIdMapping[facePtIds->GetId(1)] < 0) {
+				if (ptIdMapping[facePtIds->GetId(1)] < 0)
+				{
 					this->Points->GetPoint(facePtIds->GetId(1), x);
-					ptIdMapping[facePtIds->GetId(1)] = points->InsertNextPoint(x);
+					ptIdMapping[facePtIds->GetId(1)] =
+						points->InsertNextPoint(x);
 				}
-				if (ptIdMapping[facePtIds->GetId(2)] < 0) {
+				if (ptIdMapping[facePtIds->GetId(2)] < 0)
+				{
 					this->Points->GetPoint(facePtIds->GetId(2), x);
-					ptIdMapping[facePtIds->GetId(2)] = points->InsertNextPoint(x);
+					ptIdMapping[facePtIds->GetId(2)] =
+						points->InsertNextPoint(x);
 				}
 
 				tri1Ids[0] = ptIdMapping[facePtIds->GetId(0)];
 				tri1Ids[1] = ptIdMapping[facePtIds->GetId(1)];
 				tri1Ids[2] = ptIdMapping[facePtIds->GetId(2)];
 				cells->InsertNextCell(3, tri1Ids);
-				domainArray->InsertNextValue(this->CellDomainArray->GetTuple1(cellId));
+				domainArray->InsertNextValue(
+					this->CellDomainArray->GetTuple1(cellId));
 			}
-			else if (visited[neighborId = this->Tetrahedra->GetNeighbor(cellId, k)] ==
-							 false) {
+			else if (visited[neighborId = this->Tetrahedra->GetNeighbor(
+								 cellId, k)] == false)
+			{
 				// neighbor has not been visited yet
 				if (this->CellDomainArray->GetTuple1(cellId) !=
-						this->CellDomainArray->GetTuple1(neighborId)) {
+					this->CellDomainArray->GetTuple1(neighborId))
+				{
 					// label is different: add face
-					if (ptIdMapping[facePtIds->GetId(0)] < 0) {
+					if (ptIdMapping[facePtIds->GetId(0)] < 0)
+					{
 						this->Points->GetPoint(facePtIds->GetId(0), x);
-						ptIdMapping[facePtIds->GetId(0)] = points->InsertNextPoint(x);
+						ptIdMapping[facePtIds->GetId(0)] =
+							points->InsertNextPoint(x);
 					}
-					if (ptIdMapping[facePtIds->GetId(1)] < 0) {
+					if (ptIdMapping[facePtIds->GetId(1)] < 0)
+					{
 						this->Points->GetPoint(facePtIds->GetId(1), x);
-						ptIdMapping[facePtIds->GetId(1)] = points->InsertNextPoint(x);
+						ptIdMapping[facePtIds->GetId(1)] =
+							points->InsertNextPoint(x);
 					}
-					if (ptIdMapping[facePtIds->GetId(2)] < 0) {
+					if (ptIdMapping[facePtIds->GetId(2)] < 0)
+					{
 						this->Points->GetPoint(facePtIds->GetId(2), x);
-						ptIdMapping[facePtIds->GetId(2)] = points->InsertNextPoint(x);
+						ptIdMapping[facePtIds->GetId(2)] =
+							points->InsertNextPoint(x);
 					}
 					tri1Ids[0] = ptIdMapping[facePtIds->GetId(0)];
 					tri1Ids[1] = ptIdMapping[facePtIds->GetId(1)];
 					tri1Ids[2] = ptIdMapping[facePtIds->GetId(2)];
 					cells->InsertNextCell(3, tri1Ids);
 					domainArray->InsertNextValue(
-							this->CellDomainArray->GetTuple1(cellId));
+						this->CellDomainArray->GetTuple1(cellId));
 
 					// add duplicate, unless the neighbor is background
-					if (static_cast<int>(this->CellDomainArray->GetTuple1(neighborId)) !=
-							BackgroundLabel) {
+					if (static_cast<int>(this->CellDomainArray->GetTuple1(
+							neighborId)) != BackgroundLabel)
+					{
 						tri2Ids[0] = ptIdMapping[facePtIds->GetId(0)];
 						tri2Ids[1] = ptIdMapping[facePtIds->GetId(2)];
 						tri2Ids[2] = ptIdMapping[facePtIds->GetId(1)];
 						cells->InsertNextCell(3, tri2Ids);
 						domainArray->InsertNextValue(
-								this->CellDomainArray->GetTuple1(neighborId));
+							this->CellDomainArray->GetTuple1(neighborId));
 					}
 				}
 			}
@@ -1316,5 +1441,5 @@ void vtkImageExtractCompatibleMesher::ExtractMeshDomainInterfaces(
 	output->SetPolys(cells);
 	std::cerr << "Number of tetra: " << NCells << std::endl;
 	std::cerr << "Number of triangles: " << cells->GetNumberOfCells()
-						<< std::endl;
+			  << std::endl;
 }
