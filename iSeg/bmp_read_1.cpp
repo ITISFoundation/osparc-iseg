@@ -20,6 +20,7 @@
 #include "Core/SliceProvider.h"
 #include "Core/addLine.h"
 
+#define cimg_display 0
 #include "CImg.h"
 #include "ChannelExtractor.h"
 #include "avw.h"
@@ -8772,7 +8773,7 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -10104,7 +10105,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -15580,7 +15581,7 @@ void bmphandler::fill_holes(float f, int minsize)
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -15841,7 +15842,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -16127,7 +16128,7 @@ void bmphandler::remove_islands(float f, int minsize)
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
@@ -16399,7 +16400,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	short offset[8] = {1,  width + 3,  width + 2,  width + 1,
+	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
 					   -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};

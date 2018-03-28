@@ -154,14 +154,8 @@ void PixelResize::resize_pressed()
 	bool bx, by;
 	float dx1 = le_dx->text().toFloat(&bx);
 	float dy1 = le_dy->text().toFloat(&by);
-	UNREFERENCED_PARAMETER(dx1);
-	UNREFERENCED_PARAMETER(dy1);
 	if (bx && by)
 	{
-		/*		Pair p1;
-				p1.high=dx1;
-				p1.low=dy1;
-				emit pixelsize_changed(p1);*/
 		accept();
 	}
 	else
@@ -277,9 +271,6 @@ void DisplacementDialog::set_pressed()
 	float dx1 = le_dispx->text().toFloat(&bx);
 	float dy1 = le_dispy->text().toFloat(&by);
 	float dz1 = le_dispz->text().toFloat(&bz);
-	UNREFERENCED_PARAMETER(dx1);
-	UNREFERENCED_PARAMETER(dy1);
-	UNREFERENCED_PARAMETER(dz1);
 	if (bx && by && bz)
 	{
 		accept();

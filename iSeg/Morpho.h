@@ -42,12 +42,12 @@ typename itk::Image<T, 3>::Pointer
 {
 	typedef typename itk::Image<T, 3> image_type;
 
-	image_type::SizeType size;
+	typename image_type::SizeType size;
 	size[0] = NextOddInteger(radius / spacing[0]);
 	size[1] = NextOddInteger(radius / spacing[1]);
 	size[2] = NextOddInteger(radius / spacing[2]);
 
-	image_type::RegionType region;
+	typename image_type::RegionType region;
 	region.SetSize(size);
 
 	auto img = image_type::New();
@@ -63,7 +63,7 @@ typename itk::Image<T, 3>::Pointer
 	};
 
 	double radius2 = radius * radius;
-	image_type::IndexType idx;
+	typename image_type::IndexType idx;
 	for (int k = 0; k < size[2]; ++k)
 	{
 		for (int j = 0; j < size[1]; ++j)

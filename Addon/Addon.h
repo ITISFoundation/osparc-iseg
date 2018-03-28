@@ -9,12 +9,13 @@
  */
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "AddonApi.h"
+
 #include "SlicesHandlerInterface.h"
 #include "qwidget1.h"
+
+#include <string>
+#include <vector>
 
 namespace iseg {
 class CSliceHandlerInterface;

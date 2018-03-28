@@ -70,7 +70,9 @@
 #include <qmessagebox.h>
 #include <qprogressdialog.h>
 
-#include <omp.h>
+#ifndef NO_OPENMP_SUPPORT
+#  include <omp.h>
+#endif
 
 using namespace iseg;
 
@@ -7292,7 +7294,7 @@ int SlicesHandler::extract_tissue_surfaces(
 		field[i] = 0;
 
 	// Check the label field
-	check(labelField);
+	check(labelField != 0);
 	//check( labelField->GetPointData()->HasArray(tissueIndexArrayName) );
 	check(labelField->GetFieldData()->HasArray(tissueNameArrayName));
 	check(labelField->GetFieldData()->HasArray(tissueColorArrayName));
@@ -9211,12 +9213,12 @@ bool SlicesHandler::print_amascii(const char* filename)
 		{
 			tissueInfo = TissueInfos::GetTissueInfo(tc + 1);
 			QString nameCpy = tissueInfo->name;
-			nameCpy = nameCpy.replace("ä", "ae");
-			nameCpy = nameCpy.replace("Ä", "Ae");
-			nameCpy = nameCpy.replace("ö", "oe");
-			nameCpy = nameCpy.replace("Ö", "Oe");
-			nameCpy = nameCpy.replace("ü", "ue");
-			nameCpy = nameCpy.replace("Ü", "Ue");
+			nameCpy = nameCpy.replace("ï¿½", "ae");
+			nameCpy = nameCpy.replace("ï¿½", "Ae");
+			nameCpy = nameCpy.replace("ï¿½", "oe");
+			nameCpy = nameCpy.replace("ï¿½", "Oe");
+			nameCpy = nameCpy.replace("ï¿½", "ue");
+			nameCpy = nameCpy.replace("ï¿½", "Ue");
 			streamname << "        " << nameCpy.ascii() << " {" << endl;
 			streamname << "            Color " << tissueInfo->color[0] << " "
 					   << tissueInfo->color[1] << " " << tissueInfo->color[2]
@@ -11849,7 +11851,11 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 		bmp1 = image_slices[i].return_work();
 	}
 
+#ifdef NO_OPENMP_SUPPORT
+	const int numberThreads = 1;
+#else
 	const int numberThreads = omp_get_max_threads();
+#endif
 	int sliceCounter = 0;
 	std::vector<std::vector<changesToMakeStruct>> partialChangesThreads;
 
@@ -11950,67 +11956,24 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 				}
 			}
 
-			for (int i = 0; i < partialChanges.size(); i++)
-				partialChangesThreads[omp_get_thread_num()].push_back(
-					partialChanges[i]);
+#ifdef NO_OPENMP_SUPPORT
+			int thread_id = 0;
+#else
+			int thread_id = omp_get_thread_num();
+#endif
 
-			if (0 == omp_get_thread_num())
+			for (int i = 0; i < partialChanges.size(); i++)
+			{
+				partialChangesThreads[thread_id].push_back(partialChanges[i]);
+			}
+
+			if (0 == thread_id)
 			{
 				sliceCounter++;
 				progress.setValue(numberThreads * sliceCounter);
 			}
 		}
 	}
-	/*
-	else
-	{
-		#pragma omp parallel for
-		for( int k=skinThick; k<dims[2]-skinThick; k++ )
-		{
-			std::vector<changesToMakeStruct> partialChanges;
-
-			tissues_size_t *tissuesMain = image_slices[k].return_tissues(0);
-
-			for( int j=skinThick; j<dims[1]-skinThick; j++ ) {
-				for( int i=skinThick; i<dims[0]-skinThick; i++ ) {
-					int pos = i + j*dims[0];
-					if( tissuesMain[pos] == backgroundID ) {
-						for( int z=0; z<offsetsSlices.size(); z++ ) {
-							int neighborSlice = z-((offsetsSlices.size()-1)/2);
-							tissues_size_t *tissuesAux = image_slices[k+neighborSlice].return_tissues(0);
-
-							//iterate through neighbors of pixel
-							//if any of these are not
-							for(int l=0; l<offsetsSlices[z].size(); l++) {
-								int idx = pos + offsetsSlices[z][l];
-								assert( idx >= 0 && idx < area );
-								if( tissuesAux[idx] != backgroundID && 
-									tissuesAux[idx] != skinID )
-								{
-									changesToMakeStruct change;
-									change.sliceNumber = k;
-									change.positionConvert = pos;
-									partialChanges.push_back(change);
-
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			for( int i=0; i<partialChanges.size(); i++ )
-				partialChangesThreads[omp_get_thread_num()].push_back(partialChanges[i]);
-
-			if( 0 == omp_get_thread_num() )
-			{
-				sliceCounter++;
-				progress.setValue( numberThreads*sliceCounter );
-			}
-		}
-	}
-	*/
 
 	for (int i = 0; i < partialChangesThreads.size(); i++)
 		for (int j = 0; j < partialChangesThreads[i].size(); j++)
@@ -12619,15 +12582,15 @@ typename itk::SliceContiguousImage<T>::Pointer
 	image->SetSpacing(spacing);
 	// \bug Transform (rotation/offset) not set
 
-	SliceContiguousImageType::IndexType start;
+	typename SliceContiguousImageType::IndexType start;
 	start.Fill(0);
 
-	SliceContiguousImageType::SizeType size;
+	typename SliceContiguousImageType::SizeType size;
 	size[0] = dims[0];
 	size[1] = dims[1];
 	size[2] = dims[2];
 
-	SliceContiguousImageType::RegionType region(start, size);
+	typename SliceContiguousImageType::RegionType region(start, size);
 	image->SetRegions(region);
 	image->Allocate();
 

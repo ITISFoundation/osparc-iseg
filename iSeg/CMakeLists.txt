@@ -16,13 +16,11 @@ IF(PLUGIN_VESSEL_WIDGET)
 	ADD_DEFINITIONS("/D PLUGIN_VESSEL_WIDGET")
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1 /openmp")
-SET(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /D NDEBUG /openmp")
-
 USE_QT4()
 USE_VTK()
 USE_ITK()
 USE_BOOST()
+USE_OPENMP()
 
 IF(ISEG_GPU_MC)
 	FIND_PACKAGE(OpenGL REQUIRED)
@@ -120,11 +118,11 @@ SET(ViewerHeaders
 )
 
 SET(ViewerSrcs
-	SlicesHandler.cxx
+	SlicesHandler.cpp
 	activeslices_config_widget.cpp
-	Atlas.cxx
-	AtlasViewer.cxx
-	AtlasWidget.cxx
+	Atlas.cpp
+	AtlasViewer.cpp
+	AtlasWidget.cpp
 	avw.cpp
 	bmp_read_1.cpp
 	bmpshower.cpp
@@ -134,9 +132,9 @@ SET(ViewerSrcs
 	fastmarch_fuzzy_widget.cpp
 	featurewidget.cpp
 	dicomread.cpp
-	XdmfImageReader.cxx
-	XdmfImageWriter.cxx
-	XdmfImageMerger.cxx
+	XdmfImageReader.cpp
+	XdmfImageWriter.cpp
+	XdmfImageMerger.cpp
 	hyster_widget.cpp
 	IFT_rg.cpp
 	interpolation_widget.cpp
@@ -149,13 +147,13 @@ SET(ViewerSrcs
 	pickerwidget.cpp
 	pixelsize_widget.cpp
 	pixmapgenerator.cpp
-	Project.cxx
+	Project.cpp
 	SaveOutlinesWidget.cpp
 	smoothwidget.cpp
-	MainWindow.cxx
+	MainWindow.cpp
 	rtstruct_importer.cpp
 	Precompiled.cpp
-	Settings.cxx
+	Settings.cpp
 	slicetransform.cpp
 	threshwidget.cpp
 	tissuecleaner.cpp
@@ -169,10 +167,10 @@ SET(ViewerSrcs
 	widgetcollection.cpp
 	world.cpp
 	xyslice.cpp
-	vtkGenericDataSetWriter.cxx
-	vtkImageExtractCompatibleMesher.cxx
-	vtkTemplateTriangulator.cxx
-	vtkEdgeCollapse.cxx
+	vtkGenericDataSetWriter.cpp
+	vtkImageExtractCompatibleMesher.cpp
+	vtkTemplateTriangulator.cpp
+	vtkEdgeCollapse.cpp
 	${ViewerSrcs}
 )
 

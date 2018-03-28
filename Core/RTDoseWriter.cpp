@@ -1024,7 +1024,7 @@ void RTDoseWriter::ByteEncodeVector(const T* offsets, unsigned int count,
 		std::string numberStr = std::string(buffer);
 		numberStr = numberStr.erase(0, numberStr.find_first_not_of('0'));
 		value.append(numberStr);
-		value.append(delimiter);
+		value.append(std::string(1,delimiter));
 	}
 	value.resize(value.size() - 1); // Remove last delimiter
 
