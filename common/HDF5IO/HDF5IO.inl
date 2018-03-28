@@ -2,7 +2,7 @@
 
 #include <hdf5.h>
 
-template<typename T> hid_t HDF5IO::getTypeValue()
+template<typename T> HDF5IO::handle_id_type HDF5IO::getTypeValue()
 {
 	if (typeid(T) == typeid(double))
 	{
@@ -136,9 +136,9 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 
 		hsize_t const mega = 1024 * 1024;
 		hsize_t const giga = 1024 * mega;
-		hsize_t dim_chunks[1] = {chunk_size == 0
-									 ? std::min<hsize_t>(slice_size, giga / sizeof(T))
-									 : chunk_size};
+		hsize_t dim_chunks[1] = {
+			chunk_size == 0 ? std::min<hsize_t>(slice_size, giga / sizeof(T))
+							: chunk_size};
 		H5Pset_chunk(properties, rank, dim_chunks);
 		if (CompressionLevel >= 0) // if negative: disable compression
 		{
