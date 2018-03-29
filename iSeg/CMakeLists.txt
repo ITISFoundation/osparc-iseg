@@ -23,6 +23,7 @@ USE_BOOST()
 USE_OPENMP()
 
 INCLUDE_DIRECTORIES(
+	${CMAKE_SOURCE_DIR}/Thirdparty/CImg
 	${CMAKE_SOURCE_DIR}/Thirdparty/GeometricPredicates
 	${CMAKE_SOURCE_DIR}/Thirdparty/GDCM
 	${CMAKE_SOURCE_DIR}/Thirdparty/VTK/GUISupport/Qt
@@ -113,7 +114,6 @@ SET(ViewerSrcs
 	vtkTemplateTriangulator.cpp
 	WatershedWidget.cpp
 	WidgetCollection.cpp
-	# WindowsModernStyle.cpp
 	World.cpp
 	XdmfImageMerger.cpp
 	XdmfImageReader.cpp
