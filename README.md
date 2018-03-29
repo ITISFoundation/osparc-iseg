@@ -67,7 +67,7 @@ The libraries below are required to be compiled and installed on the system in o
 - [Qt](https://download.qt.io/official_releases/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz): v4.8.7 (min 4.8.6)
 
   1. Download and unzip the Qt folder
-  2. Apply the patch located in the [repo root folder](02-fix_build_with_msvc2015-45e8f4ee.diff)(02-fix_build_with_msvc2015-45e8f4ee.diff) ([based on these instructions](https://stackoverflow.com/questions/32848962/how-to-build-qt-4-8-6-with-visual-studio-2015-without-official-support))
+  2. Apply the patch located in the [repo root folder](Thirdparty/Qt/02-fix_build_with_msvc2015-45e8f4ee.diff)(02-fix_build_with_msvc2015-45e8f4ee.diff) ([based on these instructions](https://stackoverflow.com/questions/32848962/how-to-build-qt-4-8-6-with-visual-studio-2015-without-official-support))
   3. Open a VisualStudio 2015 x64 prompt
   4. Go to downloaded Qt folder (cd _%QTFOLDER%_)
   5. Input _set Path=%PATH%;%QTFOLDER%\bin_

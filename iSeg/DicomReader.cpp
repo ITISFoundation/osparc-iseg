@@ -12,7 +12,7 @@
 #include "DicomReader.h"
 #include "config.h"
 
-#include "../GDCM/vtkMyGDCMPolyDataReader.h"
+#include "vtkMyGDCMPolyDataReader.h"
 
 #include <algorithm>
 #include <cerrno>

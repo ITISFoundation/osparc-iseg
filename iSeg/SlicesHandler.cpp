@@ -49,7 +49,7 @@
 #include "Core/Treaps.h"
 #include "Core/VoxelSurface.h"
 
-#include "../GDCM/vtkMyGDCMPolyDataReader.h"
+#include "vtkMyGDCMPolyDataReader.h"
 
 #include <vtkCellArray.h>
 #include <vtkCellData.h>

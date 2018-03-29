@@ -23,7 +23,9 @@ USE_BOOST()
 USE_OPENMP()
 
 INCLUDE_DIRECTORIES(
-	${CMAKE_SOURCE_DIR}/GUISupport/Qt
+	${CMAKE_SOURCE_DIR}/Thirdparty/GeometricPredicates
+	${CMAKE_SOURCE_DIR}/Thirdparty/GDCM
+	${CMAKE_SOURCE_DIR}/Thirdparty/VTK/GUISupport/Qt
 	${CMAKE_SOURCE_DIR}/GeometricPredicates
 )
 
@@ -138,14 +140,9 @@ TARGET_LINK_LIBRARIES(iSeg
 	iSegCore
 	Addon
 	QVTK
-	${FastMc}
-	${QT_LIBRARIES}
-	${OPENGL_LIBRARIES}
-	${VTK_LIBRARIES}
-	${ITK_LIBRARIES}
-	${ZLIB_LIBRARY}
 	predicates
 	vtkGDCM
+	${MY_EXTERNAL_LINK_LIBRARIES}
 )
 
 # To use SUBSYSTEM:WINDOWS instead of SUBSYSTEM:CONSOLE one needs to also link this library

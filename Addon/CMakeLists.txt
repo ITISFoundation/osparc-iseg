@@ -15,20 +15,12 @@ USE_ITK()
 SET(SOURCES
 	Addon.cpp
 	Addon.h
-	itkImportSliceContiguousImageContainer.h
-	itkImportSliceContiguousImageContainer.txx
-	itkSliceContiguousImage.h
-	itkSliceContiguousImage.txx
-	itkSliceContiguousImageContainer.h
-	itkSliceContiguousImageContainer.txx
-	itkSliceContiguousImageNeighborhoodAccessorFunctor.h
-	itkSliceContiguousImagePixelAccessor.h
-	itkSliceContiguousImagePixelAccessorFunctor.h
 	qwidget1.h
 	qwidget1.cpp
 	SlicesHandlerInterface.h
 )
+
 QT4_WRAP_CPP(MOCSrcsAddon qwidget1.h)
 ADD_LIBRARY(Addon SHARED  ${SOURCES} ${MOCSrcsAddon})
-TARGET_LINK_LIBRARIES(Addon ${QT_LIBRARIES} ${QT_QTMAIN_LIBRARY} QVTK )
+TARGET_LINK_LIBRARIES(Addon ${QT_LIBRARIES} ${QT_QTMAIN_LIBRARY} )
 VS_SET_PROPERTY(Addon "Addons")

@@ -7,10 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef RTSTRUCTIMPORTER_MARCH09
-#define RTSTRUCTIMPORTER_MARCH09
+#pragma once
 
 #include "config.h"
+
+#include "SlicesHandler.h"
+
+#include "vtkMyGDCMPolyDataReader.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -25,10 +28,6 @@
 #include <qwidget.h>
 
 #include <vector>
-
-#include "SlicesHandler.h"
-
-#include "../GDCM/vtkMyGDCMPolyDataReader.h"
 
 namespace iseg {
 
@@ -84,5 +83,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

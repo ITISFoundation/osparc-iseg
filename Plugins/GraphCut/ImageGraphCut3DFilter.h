@@ -11,39 +11,36 @@
 #define __ImageGraphCut3DFilter_h_
 
 // ITK
-#include "itkDiscreteGaussianImageFilter.h"
-#include "itkGradientMagnitudeImageFilter.h"
-#include "itkHistogram.h"
-#include "itkImage.h"
-#include "itkImageDuplicator.h"
-#include "itkImageRegionIterator.h"
-#include "itkImageToImageFilter.h"
-#include "itkListSample.h"
-#include "itkProgressReporter.h"
-#include "itkRecursiveGaussianImageFilter.h"
-#include "itkSampleToHistogramFilter.h"
-#include "itkShapedNeighborhoodIterator.h"
+#include <itkDiscreteGaussianImageFilter.h>
+#include <itkGradientMagnitudeImageFilter.h>
+#include <itkHistogram.h>
+#include <itkImage.h>
+#include <itkImageDuplicator.h>
+#include <itkImageRegionIterator.h>
 #include <itkImageRegionIteratorWithIndex.h>
+#include <itkImageToImageFilter.h>
+#include <itkListSample.h>
 #include <itkMatrix.h>
+#include <itkProgressReporter.h>
+#include <itkRecursiveGaussianImageFilter.h>
+#include <itkSampleToHistogramFilter.h>
+#include <itkShapedNeighborhoodIterator.h>
 #include <itkSymmetricEigenAnalysis.h>
 
 // STL
 #include <string>
 #include <vector>
 
-// Graph
-//#include "MaxFlowGraphKolmogorov.hxx"
-//#include "RegionPushRelabel.h"
-//#include "CompileTimeUtils.h"
-#include "Gc\Flow\Grid\Kohli.h"
-#include "Gc\Flow\Grid\PushRelabel\Fifo.h"
-#include "Gc\Flow\Grid\PushRelabel\HighestLevel.h"
+// Gc
+#include "Flow/Grid/Kohli.h"
+#include "Flow/Grid/PushRelabel/Fifo.h"
+#include "Flow/Grid/PushRelabel/HighestLevel.h"
 
 namespace itk {
 template<typename TInput, typename TForeground, typename TBackground,
-				 typename TOutput>
+		 typename TOutput>
 class ITK_EXPORT ImageGraphCut3DFilter
-		: public ImageToImageFilter<TInput, TOutput>
+	: public ImageToImageFilter<TInput, TOutput>
 {
 public:
 	// ITK related defaults
@@ -64,11 +61,13 @@ public:
 	typedef TOutput OutputImageType;
 
 	typedef itk::Statistics::Histogram<short,
-																		 itk::Statistics::DenseFrequencyContainer2>
-			HistogramType;
+									   itk::Statistics::DenseFrequencyContainer2>
+		HistogramType;
 	typedef std::vector<itk::Index<3>>
-			IndexContainerType; // container for sinks / sources
-	typedef enum { NoDirection, BrightDark, DarkBright } BoundaryDirectionType;
+		IndexContainerType; // container for sinks / sources
+	typedef enum { NoDirection,
+				   BrightDark,
+				   DarkBright } BoundaryDirectionType;
 
 	enum eMaxFlowAlgorithm {
 		kKohli = 0,
@@ -106,19 +105,19 @@ public:
 	}
 
 	// image setters
-	void SetInputImage(const InputImageType *image)
+	void SetInputImage(const InputImageType* image)
 	{
-		this->SetNthInput(0, const_cast<InputImageType *>(image));
+		this->SetNthInput(0, const_cast<InputImageType*>(image));
 	}
 
-	void SetForegroundImage(const ForegroundImageType *image)
+	void SetForegroundImage(const ForegroundImageType* image)
 	{
-		this->SetNthInput(1, const_cast<ForegroundImageType *>(image));
+		this->SetNthInput(1, const_cast<ForegroundImageType*>(image));
 	}
 
-	void SetBackgroundImage(const BackgroundImageType *image)
+	void SetBackgroundImage(const BackgroundImageType* image)
 	{
-		this->SetNthInput(2, const_cast<BackgroundImageType *>(image));
+		this->SetNthInput(2, const_cast<BackgroundImageType*>(image));
 	}
 
 	void SetVerboseOutput(bool b) { m_PrintTimer = b; }
@@ -140,44 +139,44 @@ private:
 		typename InputImageType::RegionType outputRegion;
 	};
 	typedef itk::Vector<typename InputImageType::PixelType, 1>
-			ListSampleMeasurementVectorType;
+		ListSampleMeasurementVectorType;
 	typedef itk::Statistics::ListSample<ListSampleMeasurementVectorType>
-			SampleType;
+		SampleType;
 	typedef itk::Statistics::SampleToHistogramFilter<SampleType, HistogramType>
-			SampleToHistogramFilterType;
+		SampleToHistogramFilterType;
 	typedef Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32>
-			GraphType;
+		GraphType;
 
-	void InitializeGraph(GraphType *, ImageContainer, ProgressReporter &progress);
+	void InitializeGraph(GraphType*, ImageContainer, ProgressReporter& progress);
 
-	void CutGraph(GraphType *, ImageContainer, ProgressReporter &progress);
+	void CutGraph(GraphType*, ImageContainer, ProgressReporter& progress);
 
 	// convert 3d itk indices to a continously numbered indices
 	unsigned int
-			ConvertIndexToVertexDescriptor(const itk::Index<3>,
-																		 typename InputImageType::RegionType);
+		ConvertIndexToVertexDescriptor(const itk::Index<3>,
+									   typename InputImageType::RegionType);
 
 	// image getters
-	const InputImageType *GetInputImage()
+	const InputImageType* GetInputImage()
 	{
-		return static_cast<const InputImageType *>(
-				this->ProcessObject::GetInput(0));
+		return static_cast<const InputImageType*>(
+			this->ProcessObject::GetInput(0));
 	}
 
-	const ForegroundImageType *GetForegroundImage()
+	const ForegroundImageType* GetForegroundImage()
 	{
 		if (GetNumberOfRequiredInputs() == 1)
 			return nullptr;
-		return static_cast<const ForegroundImageType *>(
-				this->ProcessObject::GetInput(1));
+		return static_cast<const ForegroundImageType*>(
+			this->ProcessObject::GetInput(1));
 	}
 
-	const BackgroundImageType *GetBackgroundImage()
+	const BackgroundImageType* GetBackgroundImage()
 	{
 		if (GetNumberOfRequiredInputs() == 1)
 			return nullptr;
-		return static_cast<const BackgroundImageType *>(
-				this->ProcessObject::GetInput(2));
+		return static_cast<const BackgroundImageType*>(
+			this->ProcessObject::GetInput(2));
 	}
 
 	// parameters
@@ -188,15 +187,15 @@ private:
 	bool m_6Connected;
 	int m_ForegroundValue;
 	int m_BackgroundValue;
-	double m_Sigma;							 // noise in boundary term
+	double m_Sigma;				 // noise in boundary term
 	int m_NumberOfHistogramBins; // bins per dimension of histograms
 	typename OutputImageType::PixelType m_ForegroundPixelValue;
 	typename OutputImageType::PixelType m_BackgroundPixelValue;
 	bool m_PrintTimer;
 
 private:
-	ImageGraphCut3DFilter(const Self &); // intentionally not implemented
-	void operator=(const Self &);				 // intentionally not implemented
+	ImageGraphCut3DFilter(const Self&); // intentionally not implemented
+	void operator=(const Self&);		// intentionally not implemented
 };
 } // namespace itk
 
