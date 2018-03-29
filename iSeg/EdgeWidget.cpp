@@ -32,7 +32,7 @@ using namespace iseg;
 
 edge_widget::edge_widget(SlicesHandler* hand3D, QWidget* parent,
 						 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
 		Format("Various edge extraction routines. These are mostly useful "

@@ -12,7 +12,7 @@
 #include "SlicesHandler.h"
 #include "VesselWidget.h"
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"
@@ -30,7 +30,7 @@ using namespace iseg;
 
 vessel_widget::vessel_widget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);

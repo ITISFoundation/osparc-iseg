@@ -37,7 +37,7 @@ using namespace iseg;
 
 smooth_widget::smooth_widget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Smoothing and noise removal filters."));
 

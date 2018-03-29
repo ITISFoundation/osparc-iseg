@@ -42,7 +42,7 @@ using namespace iseg;
 
 hyster_widget::hyster_widget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
 					  "neighboring pixels with similar intensities."));

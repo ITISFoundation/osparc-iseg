@@ -14,17 +14,17 @@
 namespace iseg { namespace plugin {
 
 namespace {
-CBiasCorrectionAddon _register_addon;
+BiasCorrectionPlugin _register_addon;
 }
 
-CBiasCorrectionAddon::CBiasCorrectionAddon() {}
+BiasCorrectionPlugin::BiasCorrectionPlugin() {}
 
-CBiasCorrectionAddon::~CBiasCorrectionAddon() {}
+BiasCorrectionPlugin::~BiasCorrectionPlugin() {}
 
-QWidget1 *CBiasCorrectionAddon::CreateWidget(QWidget *parent, const char *name,
-																						 Qt::WindowFlags wFlags) const
+WidgetInterface* BiasCorrectionPlugin::create_widget(QWidget* parent, const char* name,
+													 Qt::WindowFlags wFlags) const
 {
-	return new CBiasCorrection(SliceHandler(), parent, name, wFlags);
+	return new BiasCorrectionWidget(slice_handler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

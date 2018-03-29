@@ -9,21 +9,21 @@
  */
 #pragma once
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 namespace iseg { namespace plugin {
 
-class CLevelsetAddon : public CAddon
+class LevelsetPlugin : public Plugin
 {
 public:
-	CLevelsetAddon();
-	~CLevelsetAddon();
+	LevelsetPlugin();
+	~LevelsetPlugin();
 
-	virtual std::string Name() const { return "Levelset"; }
+	virtual std::string name() const { return "Levelset"; }
 
-	virtual std::string Description() const { return "LevelSet Plugin"; }
+	virtual std::string description() const { return "LevelSet Plugin"; }
 
-	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags) const;
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+										   Qt::WindowFlags wFlags) const;
 };
 }} // namespace iseg::plugin

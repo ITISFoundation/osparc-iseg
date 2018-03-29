@@ -24,8 +24,8 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 //Added by qt3to4:
-#include "Addon/qwidget1.h"
 #include "Core/Point.h"
+#include "Plugin/WidgetInterface.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 #include <q3mimefactory.h>
@@ -33,7 +33,7 @@
 
 namespace iseg {
 
-class OutlineCorr_widget : public QWidget1
+class OutlineCorr_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:

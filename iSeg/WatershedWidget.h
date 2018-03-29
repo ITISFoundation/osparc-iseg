@@ -10,7 +10,7 @@
 #ifndef WATERSHED_8MARCH05
 #define WATERSHED_8MARCH05
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include "Core/DataSelection.h"
 
@@ -34,7 +34,7 @@ namespace iseg {
 class SlicesHandler;
 class bmphandler;
 
-class watershed_widget : public QWidget1
+class watershed_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:

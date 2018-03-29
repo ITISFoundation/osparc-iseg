@@ -13,14 +13,15 @@ USE_QT4()
 USE_ITK()
 
 SET(SOURCES
-	Addon.cpp
-	Addon.h
-	qwidget1.h
-	qwidget1.cpp
+	Plugin.cpp
+	Plugin.h
+	PluginApi.h
 	SlicesHandlerInterface.h
+	WidgetInterface.h
+	WidgetInterface.cpp
 )
 
-QT4_WRAP_CPP(MOCSrcsAddon qwidget1.h)
-ADD_LIBRARY(Addon SHARED  ${SOURCES} ${MOCSrcsAddon})
-TARGET_LINK_LIBRARIES(Addon ${QT_LIBRARIES} ${QT_QTMAIN_LIBRARY} )
-VS_SET_PROPERTY(Addon "Addons")
+QT4_WRAP_CPP(MOCSrcs WidgetInterface.h)
+ADD_LIBRARY(Plugin SHARED  ${SOURCES} ${MOCSrcs})
+TARGET_LINK_LIBRARIES(Plugin ${QT_LIBRARIES} ${QT_QTMAIN_LIBRARY} )
+VS_SET_PROPERTY(Plugin "Plugins")

@@ -10,7 +10,7 @@
 #ifndef HANDLER3DSLICES
 #define HANDLER3DSLICES
 
-#include "Addon/SlicesHandlerInterface.h"
+#include "Plugin/SlicesHandlerInterface.h"
 
 #include "Core/Outline.h" // BL TODO get rid of this
 #include "Core/RGB.h"
@@ -32,7 +32,7 @@ class TissueHiearchy;
 class ColorLookupTable;
 class bmphandler;
 
-class SlicesHandler : public iseg::CSliceHandlerInterface
+class SlicesHandler : public iseg::SliceHandlerInterface
 {
 public:
 	SlicesHandler();

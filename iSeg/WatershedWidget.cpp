@@ -35,7 +35,7 @@ using namespace iseg;
 
 watershed_widget::watershed_widget(SlicesHandler* hand3D, QWidget* parent,
 								   const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
 		Format("Segment a tissue (2D) by selecting points in the current slice "

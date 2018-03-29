@@ -17,7 +17,7 @@
 #include "Core/Pair.h"
 #include "Core/Point.h"
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -48,7 +48,7 @@ using namespace iseg;
 
 thresh_widget::thresh_widget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment tissues based on thresholding techniques."));
 

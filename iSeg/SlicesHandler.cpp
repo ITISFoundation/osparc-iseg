@@ -5790,7 +5790,7 @@ void SlicesHandler::erosion(int n, bool connectivity)
 		(image_slices[i]).erosion(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5811,7 +5811,7 @@ void SlicesHandler::dilation(int n, bool connectivity)
 		(image_slices[i]).dilation(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5832,7 +5832,7 @@ void SlicesHandler::closure(int n, bool connectivity)
 		(image_slices[i]).closure(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5853,7 +5853,7 @@ void SlicesHandler::open(int n, bool connectivity)
 		(image_slices[i]).open(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);

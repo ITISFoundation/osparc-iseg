@@ -10,7 +10,7 @@
 #ifndef FMF_31March05
 #define FMF_31March05
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include "Core/DataSelection.h"
 #include "Core/Point.h"
@@ -38,7 +38,7 @@ class ImageForestingTransformFastMarching;
 class SlicesHandler;
 class bmphandler;
 
-class FastMarchFuzzy_widget : public QWidget1
+class FastMarchFuzzy_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:

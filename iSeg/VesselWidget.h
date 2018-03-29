@@ -13,7 +13,7 @@
 #include "SlicesHandler.h"
 #include "world.h"
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>
@@ -27,7 +27,7 @@
 
 namespace iseg {
 
-class vessel_widget : public QWidget1
+class vessel_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:

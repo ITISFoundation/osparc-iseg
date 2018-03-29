@@ -7,14 +7,8 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#pragma once
+#define BOOST_TEST_MODULE Plugin
+#define BOOST_TEST_NO_MAIN
+#include <boost/test/unit_test.hpp>
 
-#if defined(WIN32)
-#   ifdef Addon_EXPORTS
-#   	define ADDON_API __declspec(dllexport)
-#   else
-#   	define ADDON_API __declspec(dllimport)
-#   endif
-#else
-#	define ADDON_API
-#endif
+#include "../PluginApi.h"

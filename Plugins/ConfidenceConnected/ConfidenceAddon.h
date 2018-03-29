@@ -9,21 +9,21 @@
  */
 #pragma once
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 namespace iseg { namespace plugin {
 
-class CConfidenceAddon : public CAddon
+class ConfidencePlugin : public Plugin
 {
 public:
-	CConfidenceAddon();
-	~CConfidenceAddon();
+	ConfidencePlugin();
+	~ConfidencePlugin();
 
-	virtual std::string Name() const { return "Example Addon 1"; }
+	virtual std::string name() const { return "Example Addon 1"; }
 
-	virtual std::string Description() const { return "Hello World"; }
+	virtual std::string description() const { return "Hello World"; }
 
-	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags) const;
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+										   Qt::WindowFlags wFlags) const;
 };
 }} // namespace iseg::plugin

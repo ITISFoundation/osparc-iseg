@@ -15,7 +15,7 @@
 #include "Core/DataSelection.h"
 #include "Core/Point.h"
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>
@@ -34,7 +34,7 @@
 
 namespace iseg {
 
-class TransformWidget : public QWidget1
+class TransformWidget : public WidgetInterface
 {
 	Q_OBJECT
 

@@ -45,7 +45,7 @@
 #	include "RadiotherapyStructureSetImporter.h"
 #endif
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
@@ -681,11 +681,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	bool ok = iseg::plugin::LoadPlugins(this_exe.parent_path().string());
 	assert(ok == true);
 
-	auto addons = iseg::plugin::CAddonRegistry::GetAllAddons();
+	auto addons = iseg::plugin::PluginRegistry::registered_plugins();
 	for (auto a : addons)
 	{
-		a->SetSliceHandler(handler3D);
-		tabwidgets.push_back(a->CreateWidget(
+		a->install_slice_handler(handler3D);
+		tabwidgets.push_back(a->create_widget(
 			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase));
 	}
 
@@ -724,15 +724,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 			methodTab->raiseWidget(tabwidgets[posi]);
 	}
 
-	tab_changed((QWidget1*)methodTab->visibleWidget());
+	tab_changed((WidgetInterface*)methodTab->visibleWidget());
 
 	//	tab_old=(QWidget1 *)methodTab->visibleWidget();
 	updateTabvisibility();
 
 	int height_max = 0;
 	QSize qs; //,qsmax;
-		//	qsmax.setHeight(0);
-		//	qsmax.setWidth(0);
+			  //	qsmax.setHeight(0);
+			  //	qsmax.setWidth(0);
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
@@ -1400,7 +1400,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	}
 	hideparameters = new Q3Action("Simplified", 0, this);
 	hideparameters->setToggleAction(true);
-	hideparameters->setOn(QWidget1::get_hideparams());
+	hideparameters->setOn(WidgetInterface::get_hideparams());
 	connect(hideparameters, SIGNAL(toggled(bool)), this,
 			SLOT(execute_hideparameters(bool)));
 	hidesubmenu->insertSeparator();
@@ -3863,7 +3863,7 @@ void MainWindow::SaveSettings()
 		(unsigned short)iseg::CombineTissuesVersion(saveProjVersion, 1);
 	fwrite(&combinedVersion, 1, sizeof(unsigned short), fp);
 	bool flag;
-	flag = QWidget1::get_hideparams();
+	flag = WidgetInterface::get_hideparams();
 	fwrite(&flag, 1, sizeof(bool), fp);
 	//	flag=!hidestack->isOn();
 	flag = false;
@@ -5620,7 +5620,7 @@ void MainWindow::execute_activeslicesconf()
 
 void MainWindow::execute_hideparameters(bool checked)
 {
-	QWidget1::set_hideparams(checked);
+	WidgetInterface::set_hideparams(checked);
 	if (tab_old != NULL)
 		tab_old->hideparams_changed();
 }
@@ -5778,7 +5778,7 @@ void MainWindow::execute_showtabtoggled(bool)
 		showpb_tab[i] = showtab_action[i]->isOn();
 	}
 
-	QWidget1* currentwidget = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* currentwidget = (WidgetInterface*)methodTab->visibleWidget();
 	unsigned short i = 0;
 	while ((i < nrtabbuttons) && (currentwidget != tabwidgets[i]))
 		i++;
@@ -7142,7 +7142,7 @@ void MainWindow::workpicturevisible_changed()
 
 void MainWindow::slice_changed()
 {
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 	qw->slicenr_changed();
 
 	unsigned short slicenr = handler3D->get_activeslice() + 1;
@@ -7196,10 +7196,10 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
-		((QWidget1*)(tabwidgets[i]))->newloaded();
+		((WidgetInterface*)(tabwidgets[i]))->newloaded();
 	}
 
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 
 	if (handler3D->return_nrslices() != nrslices)
 	{
@@ -8112,7 +8112,7 @@ void MainWindow::tab_changed(QWidget* qw)
 							 SLOT(tissues_changed()));
 		}
 
-		tab_old = (QWidget1*)qw;
+		tab_old = (WidgetInterface*)qw;
 		tab_old->init();
 		bmp_show->setCursor(*(tab_old->m_cursor));
 		work_show->setCursor(*(tab_old->m_cursor));
@@ -8120,7 +8120,7 @@ void MainWindow::tab_changed(QWidget* qw)
 		updateMethodButtonsPressed(tab_old);
 	}
 	else
-		tab_old = (QWidget1*)qw;
+		tab_old = (WidgetInterface*)qw;
 
 	tab_old->setFocus();
 
@@ -8162,11 +8162,11 @@ void MainWindow::updateTabvisibility()
 		counter1++;
 	}
 
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 	updateMethodButtonsPressed(qw);
 }
 
-void MainWindow::updateMethodButtonsPressed(QWidget1* qw)
+void MainWindow::updateMethodButtonsPressed(WidgetInterface* qw)
 {
 	//	QWidget *qw=methodTab->visibleWidget();
 	unsigned short counter = 0;

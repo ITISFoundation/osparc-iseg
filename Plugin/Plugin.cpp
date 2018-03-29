@@ -7,18 +7,24 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Addon.h"
+
+#include "Plugin.h"
 
 namespace iseg { namespace plugin {
 
 namespace {
-std::vector<CAddon *> _addons;
+std::vector<Plugin*> _addons;
 }
 
-std::vector<CAddon *> CAddonRegistry::GetAllAddons() { return _addons; }
+std::vector<Plugin*> PluginRegistry::registered_plugins() { return _addons; }
 
-CAddon::CAddon() { _addons.push_back(this); }
+Plugin::Plugin() { _addons.push_back(this); }
 
-CAddon::~CAddon() {}
+Plugin::~Plugin() {}
+
+void Plugin::install_slice_handler(SliceHandlerInterface* slice_handler)
+{
+	_slice_handler = slice_handler;
+}
 
 }} // namespace iseg::plugin

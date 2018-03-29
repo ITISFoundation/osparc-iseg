@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "Addon/SlicesHandlerInterface.h"
-#include "Addon/qwidget1.h"
+#include "Plugin/SlicesHandlerInterface.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -19,14 +19,14 @@
 #include <qpushbutton.h>
 #include <qspinbox.h>
 
-class CGraphCutBoneSegmentation : public iseg::QWidget1
+class BoneSegmentationWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	CGraphCutBoneSegmentation(iseg::CSliceHandlerInterface* hand3D,
-							  QWidget* parent = 0, const char* name = 0,
-							  Qt::WindowFlags wFlags = 0);
-	~CGraphCutBoneSegmentation();
+	BoneSegmentationWidget(iseg::SliceHandlerInterface* hand3D,
+						   QWidget* parent = 0, const char* name = 0,
+						   Qt::WindowFlags wFlags = 0);
+	~BoneSegmentationWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
@@ -37,7 +37,7 @@ public:
 	};
 
 private:
-	iseg::CSliceHandlerInterface* m_Handler3D;
+	iseg::SliceHandlerInterface* m_Handler3D;
 	unsigned short m_CurrentSlice;
 	Q3VBox* m_VGrid;
 	Q3HBox* m_HGrid1;

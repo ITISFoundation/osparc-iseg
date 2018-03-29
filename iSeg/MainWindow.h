@@ -46,7 +46,7 @@ class Q3Accel;
 namespace iseg {
 
 class SlicesHandler;
-class QWidget1;
+class WidgetInterface;
 class TissueTreeWidget;
 class TissueHierarchyWidget;
 class bits_stack;
@@ -264,7 +264,7 @@ private:
 	interpol_widget* interpolwidget;
 	picker_widget* pickerwidget;
 	TransformWidget* transfrmWidget;
-	QWidget1* tab_old;
+	WidgetInterface* tab_old;
 	QCheckBox* cb_bmptissuevisible;
 	QCheckBox* cb_bmpcrosshairvisible;
 	QCheckBox* cb_bmpoutlinevisible;
@@ -341,9 +341,9 @@ private:
 	Q3HBoxLayout* hboxtabs;
 	Q3VBox* vboxtabs1;
 	Q3VBox* vboxtabs2;
-	void updateMethodButtonsPressed(QWidget1*);
+	void updateMethodButtonsPressed(WidgetInterface*);
 	void updateTabvisibility();
-	std::vector<QWidget1*> tabwidgets;
+	std::vector<WidgetInterface*> tabwidgets;
 	void disconnect_mouseclick();
 	void connect_mouseclick();
 	QWidget* vboxbmpw;

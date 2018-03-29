@@ -32,7 +32,7 @@ using namespace iseg;
 
 IFTrg_widget::IFTrg_widget(SlicesHandler* hand3D, QWidget* parent,
 						   const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
 		"Segment multiple tissues by drawing lines in the current slice based "

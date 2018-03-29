@@ -30,6 +30,6 @@ IF(PLUGIN_GRAPHCUT)
 		${MOCSrcsext})
 
 	# todo check libs in linker command
-	TARGET_LINK_LIBRARIES( GraphCut.ext Addon Gc ${ITK_LIBRARIES} QVTK ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES}  )
-	VS_SET_PROPERTY(GraphCut.ext "Addons")
+	TARGET_LINK_LIBRARIES( GraphCut.ext Plugin Gc ${MY_EXTERNAL_LINK_LIBRARIES} )
+	VS_SET_PROPERTY(GraphCut.ext "Plugins")
 ENDIF()

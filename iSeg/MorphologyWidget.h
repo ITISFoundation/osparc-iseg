@@ -23,7 +23,7 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 //Added by qt3to4:
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 #include <q3mimefactory.h>
@@ -31,7 +31,7 @@
 
 namespace iseg {
 
-class morpho_widget : public QWidget1
+class morpho_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:

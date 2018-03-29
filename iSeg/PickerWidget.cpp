@@ -24,7 +24,7 @@ using namespace iseg;
 
 picker_widget::picker_widget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Copy and erase regions. Copying can be used to transfer "
 					  "segmented regions from one slice to another. All the	"

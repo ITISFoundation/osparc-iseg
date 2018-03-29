@@ -13,15 +13,15 @@ IF(ISEG_BUILD_TESTING)
 	
 	FILE(GLOB HEADERS *.h)
 	SET(SOURCES
-		test_AddonMain.cpp
+		test_PluginMain.cpp
 	
 		test_iSegImageAdaptor.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_Addon ${SOURCES} ${HEADERS})
-	TARGET_LINK_LIBRARIES(TestSuite_Addon
-		Addon
+	ADD_LIBRARY(TestSuite_Plugin ${SOURCES} ${HEADERS})
+	TARGET_LINK_LIBRARIES(TestSuite_Plugin
+		Plugin
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_Addon "TestSuite")
+	VS_SET_PROPERTY(TestSuite_Plugin "TestSuite")
 ENDIF()

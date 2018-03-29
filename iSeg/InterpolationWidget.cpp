@@ -31,7 +31,7 @@ using namespace iseg;
 
 interpol_widget::interpol_widget(SlicesHandler* hand3D, QWidget* parent,
 								 const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
 

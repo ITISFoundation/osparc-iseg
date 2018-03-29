@@ -37,21 +37,20 @@
 #include "Flow/Grid/PushRelabel/HighestLevel.h"
 
 namespace itk {
-template<typename TInput, typename TForeground, typename TBackground,
-		 typename TOutput>
-class ITK_EXPORT ImageGraphCut3DFilter
-	: public ImageToImageFilter<TInput, TOutput>
+
+template<typename TInput, typename TForeground, typename TBackground, typename TOutput>
+class ITK_EXPORT ImageGraphCutFilter : public ImageToImageFilter<TInput, TOutput>
 {
 public:
 	// ITK related defaults
-	typedef ImageGraphCut3DFilter Self;
+	typedef ImageGraphCutFilter Self;
 	typedef ImageToImageFilter<TInput, TOutput> Superclass;
 	typedef SmartPointer<Self> Pointer;
 	typedef SmartPointer<const Self> ConstPointer;
 
 	itkNewMacro(Self);
 
-	itkTypeMacro(ImageGraphCut3DFilter, ImageToImageFilter);
+	itkTypeMacro(ImageGraphCutFilter, ImageToImageFilter);
 	itkStaticConstMacro(NDimension, unsigned int, TInput::ImageDimension);
 
 	// image types
@@ -123,8 +122,8 @@ public:
 	void SetVerboseOutput(bool b) { m_PrintTimer = b; }
 
 private:
-	ImageGraphCut3DFilter();
-	virtual ~ImageGraphCut3DFilter();
+	ImageGraphCutFilter();
+	virtual ~ImageGraphCutFilter();
 
 	virtual void GenerateData() override;
 
@@ -194,8 +193,8 @@ private:
 	bool m_PrintTimer;
 
 private:
-	ImageGraphCut3DFilter(const Self&); // intentionally not implemented
-	void operator=(const Self&);		// intentionally not implemented
+	ImageGraphCutFilter(const Self&); // intentionally not implemented
+	void operator=(const Self&);	  // intentionally not implemented
 };
 } // namespace itk
 

@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Addon/qwidget1.h"
+#include "Plugin/WidgetInterface.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
@@ -37,7 +37,7 @@
 
 namespace iseg {
 
-class featurewidget : public QWidget1
+class featurewidget : public WidgetInterface
 {
 	Q_OBJECT
 public:

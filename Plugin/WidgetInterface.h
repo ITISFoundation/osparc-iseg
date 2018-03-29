@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "AddonApi.h"
+#include "PluginApi.h"
 
 #include <qcursor.h>
 #include <qdir.h>
@@ -20,11 +20,11 @@
 
 namespace iseg {
 
-class ADDON_API QWidget1 : public QWidget
+class ISEG_PLUGIN_API WidgetInterface : public QWidget
 {
 	Q_OBJECT
 public:
-	QWidget1(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+	WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 	{
 		m_cursor = new QCursor(Qt::CrossCursor);

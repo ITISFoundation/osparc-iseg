@@ -7,9 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "qwidget1.h"
+#include "WidgetInterface.h"
 
 namespace iseg {
 
-bool QWidget1::hideparams = false;
+bool WidgetInterface::hideparams = false;
 }

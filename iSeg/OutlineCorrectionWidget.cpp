@@ -33,7 +33,7 @@ using namespace iseg;
 
 OutlineCorr_widget::OutlineCorr_widget(SlicesHandler* hand3D, QWidget* parent,
 									   const char* name, Qt::WindowFlags wFlags)
-	: QWidget1(parent, name, wFlags), handler3D(hand3D)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("OutLine Correction routines that can be used to modify "
 					  "the result of a "

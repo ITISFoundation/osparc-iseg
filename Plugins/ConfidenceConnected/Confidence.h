@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "Addon/SlicesHandlerInterface.h"
-#include "Addon/qwidget1.h"
+#include "Plugin/SlicesHandlerInterface.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -18,13 +18,13 @@
 #include <qpushbutton.h>
 #include <qspinbox.h>
 
-class CConfidence : public QWidget1
+class ConfidenceWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	CConfidence(iseg::CSliceHandlerInterface *hand3D, QWidget *parent = 0,
-							const char *name = 0, Qt::WindowFlags wFlags = 0);
-	~CConfidence();
+	ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+					 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~ConfidenceWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();
@@ -35,26 +35,26 @@ public:
 	};
 
 private:
-	unsigned int *usp;
-	iseg::CSliceHandlerInterface *handler3D;
+	unsigned int* usp;
+	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;
-	Q3VBox *vbox1;
-	QLabel *bias_header;
-	QPushButton *bias_exec;
-	Q3HBox *hbox2;
-	Q3HBox *hbox3;
-	Q3HBox *hbox4;
-	Q3HBox *hbox5;
-	QLabel *txt_h2;
-	QLabel *txt_h3;
-	QLabel *txt_h4;
-	QLabel *txt_h5;
-	QSpinBox *sl_h2;
-	QSpinBox *sl_h3;
-	QSpinBox *sl_h4;
-	QSpinBox *sl_h5;
-	QSpinBox *sl_h6;
-	QSpinBox *sl_h7;
+	Q3VBox* vbox1;
+	QLabel* bias_header;
+	QPushButton* bias_exec;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3HBox* hbox4;
+	Q3HBox* hbox5;
+	QLabel* txt_h2;
+	QLabel* txt_h3;
+	QLabel* txt_h4;
+	QLabel* txt_h5;
+	QSpinBox* sl_h2;
+	QSpinBox* sl_h3;
+	QSpinBox* sl_h4;
+	QSpinBox* sl_h5;
+	QSpinBox* sl_h6;
+	QSpinBox* sl_h7;
 
 public slots:
 	void slicenr_changed();

@@ -11,8 +11,8 @@
 
 #include <vector>
 
-#include "Addon/SlicesHandlerInterface.h"
-#include "Addon/qwidget1.h"
+#include "Plugin/SlicesHandlerInterface.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -25,13 +25,13 @@ namespace itk {
 class ProcessObject;
 }
 
-class CBiasCorrection : public iseg::QWidget1
+class BiasCorrectionWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	CBiasCorrection(iseg::CSliceHandlerInterface* hand3D, QWidget* parent = 0,
-					const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~CBiasCorrection();
+	BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+						 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~BiasCorrectionWidget();
 
 	QSize sizeHint() const override;
 	void init() override;
@@ -47,7 +47,7 @@ protected:
 						 int shrinkFactor, double convergenceThreshold);
 
 private:
-	iseg::CSliceHandlerInterface* handler3D;
+	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;
 	Q3VBox* vbox1;
 	QLabel* bias_header;
