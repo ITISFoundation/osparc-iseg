@@ -9,44 +9,40 @@
  */
 #include "Precompiled.h"
 
-#include "AtlasWidget.h"
-#include "FormatTooltip.h"
-#include "MainWindow.h"
-#include "SaveOutlinesWidget.h"
-#include "bmpshower.h"
-#include "loaderwidgets.h"
-#include "tissueinfos.h"
-
 #include "../config.h"
-#include "IFT_rg.h"
-#include "Settings.h"
-#include "activeslices_config_widget.h"
-#include "edge_widget.h"
-#include "fastmarch_fuzzy_widget.h"
-#include "featurewidget.h"
-#include "hyster_widget.h"
-#include "interpolation_widget.h"
-#include "livewirewidget.h"
-#include "measurementwidget.h"
-#include "morphowidget.h"
-#include "outlinecorrection.h"
-#include "pickerwidget.h"
-#include "pixelsize_widget.h"
-#include "smoothwidget.h"
-#include "threshwidget.h"
-#include "tissuecleaner.h"
-#include "transformwidget.h"
-#include "undoconfig_widget.h"
-#include "vessel_widget.h"
-#include "watershedwidget.h"
-#include "xyslice.h"
 
-#ifdef ISEG_GPU_MC
-#	include "window.h"
-#endif
+#include "ActiveslicesConfigWidget.h"
+#include "AtlasWidget.h"
+#include "EdgeWidget.h"
+#include "FastmarchingFuzzyWidget.h"
+#include "FeatureWidget.h"
+#include "FormatTooltip.h"
+#include "HystereticGrowingWidget.h"
+#include "ImageForestingTransformRegionGrowingWidget.h"
+#include "ImageInformationDialogs.h"
+#include "InterpolationWidget.h"
+#include "LivewireWidget.h"
+#include "LoaderWidgets.h"
+#include "MainWindow.h"
+#include "MeasurementWidget.h"
+#include "MorphologyWidget.h"
+#include "OutlineCorrectionWidget.h"
+#include "PickerWidget.h"
+#include "SaveOutlinesWidget.h"
+#include "Settings.h"
+#include "SliceViewerWidget.h"
+#include "SmoothingWidget.h"
+#include "ThresholdWidget.h"
+#include "TissueCleaner.h"
+#include "TissueInfos.h"
+#include "TransformWidget.h"
+#include "UndoConfigurationDialog.h"
+#include "VesselWidget.h"
+#include "WatershedWidget.h"
+#include "bmpshower.h"
 
 #ifndef NORTSTRUCTSUPPORT
-#	include "rtstruct_importer.h"
+#	include "RadiotherapyStructureSetImporter.h"
 #endif
 
 #include "Addon/Addon.h"
@@ -376,11 +372,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	iSegSubversion = ISEG_VERSION_MINOR;
 	build = ISEG_VERSION_PATCH;
 	tab_old = NULL;
-#ifdef ISEG_GPU_MC
-	surfaceview = new Window();
-#else
-	surfaceview = nullptr;
-#endif
 
 	setCaption(QString(" iSeg ") + QString::number(iSegVersion) + QString(".") +
 			   QString::number(iSegSubversion) + QString(" B") +
@@ -740,8 +731,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 
 	int height_max = 0;
 	QSize qs; //,qsmax;
-			  //	qsmax.setHeight(0);
-			  //	qsmax.setWidth(0);
+		//	qsmax.setHeight(0);
+		//	qsmax.setWidth(0);
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
@@ -7440,47 +7431,32 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		{
 			contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("New Tissue...", this,
-								   SLOT(newTissuePressed()));
-			contextMenu.insertItem("New Folder...", this,
-								   SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Folder...", this,
-								   SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Folder...", this,
-								   SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
+			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
+			contextMenu.insertItem("Mod. Folder...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Folder...", this, SLOT(removeTissueFolderPressed()));
 		}
 		else
 		{
 			contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("New Tissue...", this,
-								   SLOT(newTissuePressed()));
-			contextMenu.insertItem("New Folder...", this,
-								   SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Tissue...", this,
-								   SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Tissue...", this,
-								   SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
+			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
+			contextMenu.insertItem("Mod. Tissue...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Tissue...", this, SLOT(removeTissueFolderPressed()));
 			contextMenu.insertSeparator();
 			contextMenu.insertItem("Get Tissue", this, SLOT(tissue2work()));
 			contextMenu.insertItem("Clear Tissue", this, SLOT(cleartissue()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("Next Feat. Slice", this,
-								   SLOT(next_featuring_slice()));
-#ifdef ISEG_GPU_MC
-			contextMenu.insertItem("3D View", this, SLOT(startwidget()));
-#endif
+			contextMenu.insertItem("Next Feat. Slice", this, SLOT(next_featuring_slice()));
 		}
 		contextMenu.insertSeparator();
 		int itemId =
-			contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget,
-								   SLOT(toggle_show_tissue_indices()));
+			contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget, SLOT(toggle_show_tissue_indices()));
 		contextMenu.setItemChecked(
 			itemId, !tissueTreeWidget->get_tissue_indices_hidden());
-		contextMenu.insertItem("Sort By Name", tissueTreeWidget,
-							   SLOT(sort_by_tissue_name()));
-		contextMenu.insertItem("Sort By Index", tissueTreeWidget,
-							   SLOT(sort_by_tissue_index()));
+		contextMenu.insertItem("Sort By Name", tissueTreeWidget, SLOT(sort_by_tissue_name()));
+		contextMenu.insertItem("Sort By Index", tissueTreeWidget, SLOT(sort_by_tissue_index()));
 		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 	else // multi-selection
@@ -7490,13 +7466,9 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		contextMenu.insertSeparator();
 		contextMenu.insertItem("Delete Selected", this, SLOT(removeselected()));
 		contextMenu.insertItem("Clear Selected", this, SLOT(clearselected()));
-		contextMenu.insertItem("Get Selected", this,
-							   SLOT(selectedtissue2work()));
+		contextMenu.insertItem("Get Selected", this, SLOT(selectedtissue2work()));
 		contextMenu.insertItem("Merge", this, SLOT(merge()));
 		contextMenu.insertItem("Unselect all", this, SLOT(unselectall()));
-#ifdef ISEG_GPU_MC
-		contextMenu.insertItem("3D View", this, SLOT(startwidget()));
-#endif
 		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 }
@@ -9122,72 +9094,3 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 }
 
 void MainWindow::handle_end_dataexport(QWidget* sender) {}
-
-void MainWindow::startwidget()
-{
-#ifdef ISEG_GPU_MC
-	delete surfaceview;
-	surfaceview = new Window();
-	for (int i = surfaceview->tissuebox->count(); i >= 0; --i)
-		surfaceview->tissuebox->removeItem(i);
-
-	QList<QTreeWidgetItem*> list;
-	list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t nr = tissueTreeWidget->get_type(item);
-		QString name = tissueTreeWidget->get_name(item);
-		surfaceview->tissuebox->addItem(name, Qt::DisplayRole);
-	}
-	int dimension[3];
-	dimension[0] = (int)handler3D->return_width();
-	dimension[1] = (int)handler3D->return_height();
-	dimension[2] =
-		(int)(handler3D->return_endslice() - handler3D->return_startslice());
-	surfaceview->setDim(dimension);
-	Pair ps = handler3D->get_pixelsize();
-	float spacing[3] = {ps.high, ps.low, handler3D->get_slicethickness()};
-	surfaceview->setSpace(spacing);
-	std::vector<unsigned char*> voxel;
-	for (int i = 0; i < list.size(); ++i)
-	{
-		voxel.push_back(
-			new unsigned char[dimension[0] * dimension[1] * dimension[2]]);
-		for (int s = 0; s < dimension[0] * dimension[1] * dimension[2]; s++)
-		{
-			voxel[i][s] = 0;
-		}
-	}
-	std::vector<int> isovalues;
-	std::vector<unsigned char> colours;
-	int tmp = 0;
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
-		isovalues.push_back(currTissueType - 1);
-		unsigned char r, g, b;
-		TissueInfos::GetTissueColorRGB(currTissueType, r, g, b);
-		colours.push_back(r);
-		colours.push_back(g);
-		colours.push_back(b);
-		handler3D->selectedtissue2mc(currTissueType, &voxel[tmp]);
-		tmp = +1;
-	}
-
-	surfaceview->setisovalues(isovalues);
-	surfaceview->setColours(colours);
-	surfaceview->setVoxel(voxel);
-	surfaceview->resize(surfaceview->sizeHint());
-	int desktopArea =
-		QApplication::desktop()->width() * QApplication::desktop()->height();
-	int widgetArea = surfaceview->width() * surfaceview->height();
-	if (((float)widgetArea / (float)desktopArea) < 0.75f)
-		surfaceview->show();
-	else
-		surfaceview->showMaximized();
-#else
-	assert(false && "Calling surface view, but it has been disabled.");
-#endif
-}

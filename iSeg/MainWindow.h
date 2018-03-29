@@ -46,7 +46,6 @@ class Q3Accel;
 namespace iseg {
 
 class SlicesHandler;
-class Window;
 class QWidget1;
 class TissueTreeWidget;
 class TissueHierarchyWidget;
@@ -349,7 +348,6 @@ private:
 	void connect_mouseclick();
 	QWidget* vboxbmpw;
 	QWidget* vboxworkw;
-	Window* surfaceview;
 
 	CheckBoneConnectivityDialog* boneConnectivityDialog;
 
@@ -573,7 +571,6 @@ private slots:
 	void merge();
 	void removeselectedmerge(QList<QTreeWidgetItem*> list);
 	void unselectall();
-	void startwidget();
 
 	void pb_tab_pressed(int nr);
 	void bmpcrosshairvisible_changed();

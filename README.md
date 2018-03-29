@@ -29,12 +29,10 @@ The libraries below are required to be compiled and installed on the system in o
 - ITK, [Apache 2.0 license](https://itk.org/ITK/project/licenseversion1.html)
 - VTK, [BSD license](https://www.vtk.org/licensing/)
 - Qt 4.8, [GPL3 and LGPL2.1 license](https://www1.qt.io/licensing/)
-- GraphCut, [LGPL license](http://cbia.fi.muni.cz/user_dirs/gc_doc/)
-- GPU-Marching-Cubes, [Permissive license](https://github.com/smistad/GPU-Marching-Cubes/blob/master/LICENSE)
 
 ### Optional 3rd party libraries
 
-- OpenCL (necessary to use GPU computations, usually available from the graphics hardware manufacturers)
+- GraphCut, [LGPL license](http://cbia.fi.muni.cz/user_dirs/gc_doc/). This library is compiled depending on the CMake configuration (plugin selection).
 
 ### 3rd Party Libraries compilation instructions
 

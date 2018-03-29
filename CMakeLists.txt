@@ -46,11 +46,15 @@ MSVC_ONLY_EDIT_PROJECT( CMakeIncludes
 	${ISEG_CMAKE_FILES_INCLUDES}
 	${INSTALL_ALL_USED_LIBRARIES_CMAKE} # to make sure, it is always added independent of option
 )
+MSVC_ONLY_EDIT_PROJECT( ProjectFiles 
+	config.h.in
+	LICENSE
+	README.md
+)
 
 
 OPTION(ISEG_BUILD_TESTING "Build tests" ON)
 OPTION(ISEG_BUILD_PRECOMPILED_HEADER "Build precompiled header files" OFF)
-OPTION(ISEG_GPU_MC "Build iSEG with OpenCL Marching Cubes implementation" OFF)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 

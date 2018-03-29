@@ -11,7 +11,7 @@
 
 #define cimg_display 0
 #include "CImg.h"
-#include "loaderwidgets.h"
+#include "LoaderWidgets.h"
 
 #include "Core/Point.h"
 

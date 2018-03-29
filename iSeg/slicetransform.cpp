@@ -9,9 +9,9 @@
  */
 #include "Precompiled.h"
 
+#include "SliceTransform.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
-#include "slicetransform.h"
 
 #include <cmath>
 

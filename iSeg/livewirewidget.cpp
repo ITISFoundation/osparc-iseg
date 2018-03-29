@@ -10,9 +10,9 @@
 #include "Precompiled.h"
 
 #include "FormatTooltip.h"
+#include "LivewireWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
-#include "livewirewidget.h"
 
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"

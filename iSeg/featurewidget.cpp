@@ -9,11 +9,11 @@
  */
 #include "Precompiled.h"
 
+#include "FeatureWidget.h"
 #include "FormatTooltip.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
-#include "featurewidget.h"
-#include "tissueinfos.h"
 
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"

@@ -11,7 +11,7 @@
 
 #include "SaveOutlinesWidget.h"
 #include "SlicesHandler.h"
-#include "tissueinfos.h"
+#include "TissueInfos.h"
 
 #include <q3filedialog.h>
 #include <q3hbox.h>

@@ -10,10 +10,10 @@
 #include "Precompiled.h"
 
 #include "FormatTooltip.h"
+#include "MeasurementWidget.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
-#include "measurementwidget.h"
-#include "tissueinfos.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"

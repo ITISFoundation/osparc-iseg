@@ -21,12 +21,12 @@
 #include "Core/addLine.h"
 
 #define cimg_display 0
+#include "AvwReader.h"
 #include "CImg.h"
 #include "ChannelExtractor.h"
-#include "avw.h"
-#include "dicomread.h"
+#include "DicomReader.h"
+#include "TissueInfos.h"
 #include "levelset.h"
-#include "tissueinfos.h"
 
 #include <vtkBMPWriter.h>
 #include <vtkImageData.h>

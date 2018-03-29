@@ -10,9 +10,9 @@
 #include "Precompiled.h"
 
 #include "FormatTooltip.h"
+#include "PickerWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
-#include "pickerwidget.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"

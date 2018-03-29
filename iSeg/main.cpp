@@ -11,11 +11,11 @@
 
 #include "config.h"
 
+#include "DicomReader.h"
 #include "MainWindow.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
-#include "dicomread.h"
-#include "tissueinfos.h"
 
 #include "Core/BranchItem.h"
 #include "Core/Pair.h"
