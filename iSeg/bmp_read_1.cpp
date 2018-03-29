@@ -12,8 +12,8 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
-#include "Core/EM.h"
-#include "Core/IFT2.h"
+#include "Core/ExpectationMaximization.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
 #include "Core/KMeans.h"
 #include "Core/MultidimensionalGamma.h"
@@ -21,12 +21,12 @@
 #include "Core/addLine.h"
 
 #define cimg_display 0
+#include "AvwReader.h"
 #include "CImg.h"
 #include "ChannelExtractor.h"
-#include "avw.h"
-#include "dicomread.h"
+#include "DicomReader.h"
+#include "TissueInfos.h"
 #include "levelset.h"
-#include "tissueinfos.h"
 
 #include <vtkBMPWriter.h>
 #include <vtkImageData.h>
@@ -104,7 +104,8 @@ typedef struct /**** Bitmap information structure ****/
 } BITMAPINFO;
 #endif /* !WIN32 */
 
-template<typename T> inline void swap_maps(T const*& Tp1, T const*& Tp2)
+template<typename T>
+inline void swap_maps(T const*& Tp1, T const*& Tp2)
 {
 	T const* dummy;
 	dummy = Tp1;
@@ -2055,7 +2056,7 @@ bool bmphandler::ReloadArray(float* bits, unsigned short w1, unsigned short h1,
 
 bool bmphandler::LoadDICOM(const char* filename)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	if (!dcmread.opendicom(filename))
 		return (NULL);
@@ -2178,7 +2179,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 						   unsigned short dy)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 	dcmread.opendicom(filename);
 
 	unsigned short w = dcmread.get_width();
@@ -2311,7 +2312,7 @@ bool bmphandler::ReloadDICOM(const char* filename)
 	if (!loaded)
 		return (NULL);
 	//FILE             *fp;          /* Open file pointer */
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dcmread.opendicom(filename);
 
@@ -2338,7 +2339,7 @@ bool bmphandler::ReloadDICOM(const char* filename, Point p)
 	if (!loaded)
 		return (NULL);
 	//FILE             *fp;          /* Open file pointer */
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dcmread.opendicom(filename);
 
@@ -8773,8 +8774,8 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -10105,8 +10106,8 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -11162,7 +11163,7 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 void bmphandler::IFT_distance1(float f)
 {
 	unsigned char dummymode = mode1;
-	IFT_distance IFTdist;
+	ImageForestingTransformDistance IFTdist;
 	IFTdist.distance_init(width, height, f, bmp_bits);
 	float* f1 = IFTdist.return_pf();
 	for (unsigned i = 0; i < area; i++)
@@ -11177,36 +11178,10 @@ void bmphandler::IFT_distance1(float f)
 	return;
 }
 
-void bmphandler::stupidDT()
-{
-	unsigned char dummymode = mode1;
-	float thresholds[2];
-	thresholds[0] = 1.0f;
-	thresholds[1] = 190.0f;
-	threshold(thresholds);
-
-	stupid_DT sDT;
-	sDT.stupid_DTinit(width, height, work_bits);
-	float* f = sDT.return_pf();
-	for (unsigned i = 0; i < area; i++)
-		work_bits[i] = f[i];
-	vector<Point> Pt_vec;
-	Point p;
-	p.px = 200;
-	p.py = 350;
-	sDT.return_path(p, &Pt_vec);
-	for (vector<Point>::iterator it = Pt_vec.begin(); it != Pt_vec.end(); it++)
-		work_bits[(*it).py * width + (*it).px] = 255;
-
-	mode1 = dummymode;
-	mode2 = 1;
-	return;
-}
-
 void bmphandler::rgIFT(float* lb_map, float thresh)
 {
 	unsigned char dummymode = mode1;
-	IFT_regiongrowing IFTrg;
+	ImageForestingTransformRegionGrowing IFTrg;
 
 	//	sobel();
 
@@ -11230,9 +11205,10 @@ void bmphandler::rgIFT(float* lb_map, float thresh)
 	return;
 }
 
-IFT_regiongrowing* bmphandler::IFTrg_init(float* lb_map)
+ImageForestingTransformRegionGrowing* bmphandler::IFTrg_init(float* lb_map)
 {
-	IFT_regiongrowing* IFTrg = new IFT_regiongrowing;
+	ImageForestingTransformRegionGrowing* IFTrg =
+		new ImageForestingTransformRegionGrowing;
 
 	//	float *tmp=work_bits;
 	//	work_bits=sliceprovide->give_me();
@@ -11316,7 +11292,7 @@ IFT_regiongrowing* bmphandler::IFTrg_init(float* lb_map)
 	return;
 }*/
 
-IFT_livewire* bmphandler::livewireinit(Point pt)
+ImageForestingTransformLivewire* bmphandler::livewireinit(Point pt)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -11360,7 +11336,7 @@ IFT_livewire* bmphandler::livewireinit(Point pt)
 		for (unsigned i = 0; i < area; i++)
 			sobelx[i] = 0.43f * ((work_bits[i] + 1) / 256);
 
-	IFT_livewire* lw = new IFT_livewire;
+	ImageForestingTransformLivewire* lw = new ImageForestingTransformLivewire;
 	lw->lw_init(width, height, sobelx, dummy, pt);
 
 	sliceprovide->take_back(sobelx);
@@ -11408,7 +11384,7 @@ void bmphandler::livewire_test()
 		work_bits[i] = (0.43f * (1 - grad[i] / p.high) +
 						0.43f * ((work_bits[i] + 1) / 256));
 
-	IFT_livewire lw;
+	ImageForestingTransformLivewire lw;
 
 	Point P1;
 	P1.px = 140;
@@ -12835,7 +12811,7 @@ void bmphandler::adaptive_fuzzy(Point p, float m1, float s1, float s2,
 								float thresh)
 {
 	UNREFERENCED_PARAMETER(thresh);
-	IFT_adaptfuzzy af;
+	ImageForestingTransformAdaptFuzzy af;
 	af.fuzzy_init(width, height, bmp_bits, p, m1, s1, s2);
 	float* pf = af.return_pf();
 	for (unsigned i = 0; i < area; i++)
@@ -12851,7 +12827,7 @@ void bmphandler::adaptive_fuzzy(Point p, float m1, float s1, float s2,
 void bmphandler::fast_marching(Point p, float sigma, float thresh)
 {
 	unsigned char dummymode = mode1;
-	IFT_fastmarch fm;
+	ImageForestingTransformFastMarching fm;
 
 	float* dummy;
 	float* lbl = sliceprovide->give_me();
@@ -12891,11 +12867,13 @@ void bmphandler::fast_marching(Point p, float sigma, float thresh)
 	return;
 }
 
-IFT_fastmarch* bmphandler::fastmarching_init(Point p, float sigma, float thresh)
+ImageForestingTransformFastMarching*
+	bmphandler::fastmarching_init(Point p, float sigma, float thresh)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
-	IFT_fastmarch* fm = new IFT_fastmarch;
+	ImageForestingTransformFastMarching* fm =
+		new ImageForestingTransformFastMarching;
 
 	float* dummy;
 	float* work_store = work_bits;
@@ -13026,7 +13004,7 @@ void bmphandler::EMtest()
 	bits[0] = bmp_bits;
 	float weights[1];
 	weights[0] = 1;
-	EM em;
+	ExpectationMaximization em;
 	/*	float centers[4];
 	centers[0]=0;
 	centers[1]=60;
@@ -13264,7 +13242,7 @@ void bmphandler::gamma_mhd(short nrtissues, short dim,
 void bmphandler::em(short nrtissues, short dim, float** bits, float* weights,
 					unsigned int iternr, unsigned int converge)
 {
-	EM em;
+	ExpectationMaximization em;
 	em.init(width, height, nrtissues, dim, bits, weights);
 	em.make_iter(iternr, converge);
 	em.classify(work_bits);
@@ -13300,7 +13278,7 @@ void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
 	for (unsigned i = 0; i < area; ++i)
 		work_bits[i] = -beta * work_bits[i];
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;
@@ -13365,7 +13343,7 @@ void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
 	for (unsigned i = 0; i < area; ++i)
 		work_bits[i] = -beta * work_bits[i];
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;
@@ -13437,7 +13415,7 @@ void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 	for (unsigned i = 0; i < area; i++)
 		tmp[i] = 1.0f;
 
-	levelset levset;
+	Levelset levset;
 	levset.init(height, width, initlev, f, tmp, work_bits, 0.0f, epsilon,
 				stepsize);
 	levset.iterate(nrsteps, reinitfreq);
@@ -13506,7 +13484,7 @@ void bmphandler::cannylevelsettest(float sigma, float thresh_low,
 
 	//	SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testtest.bmp");
 
-	levelset levset;
+	Levelset levset;
 	levset.init(height, width, Pt, tmp, work_bits, 0.0f, epsilon, stepsize);
 	levset.iterate(nrsteps, reinitfreq);
 	levset.return_levelset(work_bits);
@@ -13543,7 +13521,7 @@ void bmphandler::threshlevelset(float thresh_low, float thresh_high,
 		work_bits[i] = 1 - abs(bmp_bits[i] - mean) / halfdiff;
 	//SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testt1.bmp");
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;
@@ -14820,7 +14798,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 
 	vvPouter.insert(vvPouter.end(), vvPinner.begin(), vvPinner.end());
 
-	IFT_distance IFTdist;
+	ImageForestingTransformDistance IFTdist;
 	IFTdist.distance_init(width, height, f, work_bits);
 	IFTdist.return_path(*(newline->begin()), &limit1);
 
@@ -15144,7 +15122,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 
 	vvPouter.insert(vvPouter.end(), vvPinner.begin(), vvPinner.end());
 
-	IFT_distance IFTdist;
+	ImageForestingTransformDistance IFTdist;
 	IFTdist.distance_init(width, height, f, work_bits);
 	IFTdist.return_path(*(newline->begin()), &limit1);
 
@@ -15581,8 +15559,8 @@ void bmphandler::fill_holes(float f, int minsize)
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -15842,8 +15820,8 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -16128,8 +16106,8 @@ void bmphandler::remove_islands(float f, int minsize)
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -16400,8 +16378,8 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	Point p;
 
 	vector<Point> vec_pt;
-	int offset[8] = {1,  width + 3,  width + 2,  width + 1,
-					   -1, -width - 3, -width - 2, -width - 1};
+	int offset[8] = {1, width + 3, width + 2, width + 1,
+					 -1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -17122,7 +17100,7 @@ void bmphandler::adaptwork2bmp(float f)
 		counterarray[i] = false;
 	}
 
-	IFT_livewire* lw = NULL;
+	ImageForestingTransformLivewire* lw = NULL;
 	//Point p;
 	if (!outerline.empty())
 	{

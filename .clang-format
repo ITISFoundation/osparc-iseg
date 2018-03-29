@@ -38,6 +38,7 @@ ReflowComments: false
 IndentWidth: 4
 UseTab: Always
 TabWidth: 4
+ColumnLimit: 0
 SpaceAfterTemplateKeyword: false
 #SpaceBeforeCtorInitializerColon: true
 SpaceBeforeAssignmentOperators: true

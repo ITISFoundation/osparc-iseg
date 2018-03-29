@@ -37,20 +37,38 @@
 #include <vtkPolygon.h>
 
 #include <vtkSmartPointer.h>
-#define vtkNew(type, name)                                                     \
-	vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+#define vtkNew(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 #include <algorithm>
 #include <iterator>
 #include <list>
 #include <set>
 
-#include "GeometricPredicates.h"
-namespace gp = GeometricPredicates;
+#include "predicates.h"
+
+struct gp
+{
+	static double exactinit()
+	{
+		static double v = ::exactinit();
+		return v;
+	}
+
+	static double getepsilon()
+	{
+		static double eps = ::getepsilon();
+		return eps;
+	}
+	static double orient3d(double a[3], double b[3], double c[3], double d[3])
+	{
+		return ::orient3d(a, b, d, c);
+	}
+};
 
 //----------------------------------------------------------------------------
 namespace MESH {
-template<class TElem, class TValue = double> struct SortElement
+template<class TElem, class TValue = double>
+struct SortElement
 {
 	SortElement(TElem e, TValue v) : elem(e), value(v) {}
 	bool operator<(SortElement const& rhs) const { return value < rhs.value; }
@@ -1596,7 +1614,7 @@ bool MESH::NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& tris)
 		mesh->GetPoint(tris[i].n3, x3);
 
 		// the test is assumed to symmetric
-		for (vtkIdType j = i + 1; j < tris.size(); j++)
+		for (vtkIdType j = i + 1; j < ntris; j++)
 		{
 			std::set<int> nunion;
 			nunion.insert(tris[i].n1);

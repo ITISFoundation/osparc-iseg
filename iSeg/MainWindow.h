@@ -12,8 +12,8 @@
 #include "Atlas.h"
 #include "Project.h"
 
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
 
 #include <qdir.h>
 #include <qmainwindow.h>
@@ -46,8 +46,7 @@ class Q3Accel;
 namespace iseg {
 
 class SlicesHandler;
-class Window;
-class QWidget1;
+class WidgetInterface;
 class TissueTreeWidget;
 class TissueHierarchyWidget;
 class bits_stack;
@@ -58,23 +57,23 @@ class ImageMath;
 class ImageOverlay;
 class zoomer_widget;
 class CheckBoneConnectivityDialog;
-class sliceshower_widget;
-class picker_widget;
-class interpol_widget;
-class featurewidget;
-class OutlineCorr_widget;
-class IFTrg_widget;
+class SliceViewerWidget;
+class PickerWidget;
+class InterpolationWidget;
+class FeatureWidget;
+class OutlineCorrectionWidget;
+class ImageForestingTransformRegionGrowingWidget;
 class TransformWidget;
-class FastMarchFuzzy_widget;
+class FastmarchingFuzzyWidget;
 class livewire_widget;
-class edge_widget;
-class morpho_widget;
-class hyster_widget;
-class vessel_widget;
-class watershed_widget;
-class smooth_widget;
-class thresh_widget;
-class measure_widget;
+class EdgeWidget;
+class MorphologyWidget;
+class HystereticGrowingWidget;
+class VesselWidget;
+class WatershedWidget;
+class SmoothingWidget;
+class ThresholdWidget;
+class MeasurementWidget;
 class bmptissuemarklineshower;
 class surfaceviewer3D;
 class volumeviewer3D;
@@ -246,26 +245,26 @@ private:
 	bits_stack* bitstack_widget;
 	extoverlay_widget* overlay_widget;
 	MultiDataset_widget* m_MultiDataset_widget;
-	thresh_widget* threshold_widget;
-	measure_widget* measurement_widget;
-	vessel_widget* vesselextr_widget;
-	smooth_widget* smoothing_widget;
-	edge_widget* edge_widg;
-	morpho_widget* morph_widget;
-	watershed_widget* wshed_widget;
-	hyster_widget* hyst_widget;
+	ThresholdWidget* threshold_widget;
+	MeasurementWidget* measurement_widget;
+	VesselWidget* vesselextr_widget;
+	SmoothingWidget* smoothing_widget;
+	EdgeWidget* edge_widg;
+	MorphologyWidget* morph_widget;
+	WatershedWidget* wshed_widget;
+	HystereticGrowingWidget* hyst_widget;
 	livewire_widget* lw_widget;
-	IFTrg_widget* iftrg_widget;
-	FastMarchFuzzy_widget* FMF_widget;
-	OutlineCorr_widget* OutlineCorrect_widget;
+	ImageForestingTransformRegionGrowingWidget* iftrg_widget;
+	FastmarchingFuzzyWidget* FMF_widget;
+	OutlineCorrectionWidget* OutlineCorrect_widget;
 	ScaleWork* scalewidget;
 	ImageMath* imagemathwidget;
 	ImageOverlay* imageoverlaywidget;
-	featurewidget* feature_widget;
-	interpol_widget* interpolwidget;
-	picker_widget* pickerwidget;
+	FeatureWidget* feature_widget;
+	InterpolationWidget* interpolwidget;
+	PickerWidget* pickerwidget;
 	TransformWidget* transfrmWidget;
-	QWidget1* tab_old;
+	WidgetInterface* tab_old;
 	QCheckBox* cb_bmptissuevisible;
 	QCheckBox* cb_bmpcrosshairvisible;
 	QCheckBox* cb_bmpoutlinevisible;
@@ -294,8 +293,8 @@ private:
 	bool tomove_scroller;
 	zoomer_widget* zoom_widget;
 	//	float thickness;
-	sliceshower_widget* xsliceshower;
-	sliceshower_widget* ysliceshower;
+	SliceViewerWidget* xsliceshower;
+	SliceViewerWidget* ysliceshower;
 	surfaceviewer3D* SV3D;
 	surfaceviewer3D* SV3Dbmp;
 	volumeviewer3D* VV3D;
@@ -342,14 +341,13 @@ private:
 	Q3HBoxLayout* hboxtabs;
 	Q3VBox* vboxtabs1;
 	Q3VBox* vboxtabs2;
-	void updateMethodButtonsPressed(QWidget1*);
+	void updateMethodButtonsPressed(WidgetInterface*);
 	void updateTabvisibility();
-	std::vector<QWidget1*> tabwidgets;
+	std::vector<WidgetInterface*> tabwidgets;
 	void disconnect_mouseclick();
 	void connect_mouseclick();
 	QWidget* vboxbmpw;
 	QWidget* vboxworkw;
-	Window* surfaceview;
 
 	CheckBoneConnectivityDialog* boneConnectivityDialog;
 
@@ -573,7 +571,6 @@ private slots:
 	void merge();
 	void removeselectedmerge(QList<QTreeWidgetItem*> list);
 	void unselectall();
-	void startwidget();
 
 	void pb_tab_pressed(int nr);
 	void bmpcrosshairvisible_changed();

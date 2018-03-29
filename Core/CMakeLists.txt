@@ -9,32 +9,37 @@
 ##
 ADD_SUBDIRECTORY(testsuite)
 
-USE_ITK()
 USE_BOOST()
-USE_VTK()
+USE_HDF5()
 USE_OPENMP()
+USE_ITK()
+USE_VTK()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	addLine.cpp
-	branchItem-simplified.cpp
+	BranchItem.cpp
 	ColorLookupTable.cpp
-	common.cpp
 	Contour.cpp
-	EM.cpp
+	ExpectationMaximization.cpp
 	FeatureExtractor.cpp
 	fillcontour.cpp
+	HDF5IO.cpp
+	HDF5Reader.cpp
+	HDF5Writer.cpp
 	ImageReader.cpp
 	ImageWriter.cpp
 	IndexPriorityQueue.cpp
 	InitializeITKFactory.cpp
 	KMeans.cpp
 	LoadPlugin.cpp
+	Log.cpp
 	MarchingCubes.cpp
 	MatlabExport.cpp
 	MultidimensionalGamma.cpp
 	Outline.cpp
 	Precompiled.cpp
+	ProjectVersion.cpp
 	RTDoseIODModule.cpp
 	RTDoseReader.cpp
 	RTDoseWriter.cpp

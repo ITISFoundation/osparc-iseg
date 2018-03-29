@@ -10,7 +10,7 @@
 #include "Precompiled.h"
 
 #include "TissueHierarchy.h"
-#include "tissueinfos.h"
+#include "TissueInfos.h"
 
 #include <QDir>
 #include <QFile>

@@ -9,11 +9,13 @@
 ##
 IF(ISEG_BUILD_TESTING)
 	USE_BOOST()
+	USE_HDF5()
 	
 	FILE(GLOB HEADERS *.h)
 	SET(SOURCES
 		test_iSegCoreMain.cpp
 	
+		test_HDF5IO.cpp
 		test_ImageIO.cpp
 		test_Transform.cpp
 	)

@@ -13,25 +13,24 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
+#include "AvwReader.h"
 #include "ChannelExtractor.h"
+#include "DicomReader.h"
+#include "LoaderWidgets.h"
 #include "Morpho.h"
 #include "TestingMacros.h"
 #include "TissueHierarchy.h"
+#include "TissueInfos.h"
 #include "XdmfImageMerger.h"
 #include "XdmfImageReader.h"
 #include "XdmfImageWriter.h"
-#include "avw.h"
-#include "dicomread.h"
-#include "loaderwidgets.h"
-#include "tissueinfos.h"
 #include "vtkEdgeCollapse.h"
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
-#include "HDF5IO/HDF5Writer.h"
-
-#include "Core/EM.h"
-#include "Core/IFT2.h"
+#include "Core/ExpectationMaximization.h"
+#include "Core/HDF5Writer.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
 #include "Core/ImageToITK.h"
 #include "Core/ImageWriter.h"
@@ -40,6 +39,7 @@
 #include "Core/MatlabExport.h"
 #include "Core/MultidimensionalGamma.h"
 #include "Core/Outline.h"
+#include "Core/ProjectVersion.h"
 #include "Core/RTDoseIODModule.h"
 #include "Core/RTDoseReader.h"
 #include "Core/RTDoseWriter.h"
@@ -49,7 +49,7 @@
 #include "Core/Treaps.h"
 #include "Core/VoxelSurface.h"
 
-#include "../GDCM/vtkMyGDCMPolyDataReader.h"
+#include "vtkMyGDCMPolyDataReader.h"
 
 #include <vtkCellArray.h>
 #include <vtkCellData.h>
@@ -71,7 +71,7 @@
 #include <qprogressdialog.h>
 
 #ifndef NO_OPENMP_SUPPORT
-#  include <omp.h>
+#	include <omp.h>
 #endif
 
 using namespace iseg;
@@ -1344,8 +1344,6 @@ int SlicesHandler::SaveAllXdmf(const char* filename, int compression,
 bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 								   unsigned short version)
 {
-	using namespace HDF5;
-
 	int compression = 1;
 
 	QString qFileName(filename);
@@ -3075,8 +3073,8 @@ bool SlicesHandler::SwapYZ()
 	float dc[6];
 	get_direction_cosines(dc);
 	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	iseg::Cross(&dc[0], &dc[3], cross);
-	iseg::Normalize(cross);
+	vtkMath::Cross(&dc[0], &dc[3], cross);
+	vtkMath::Normalize(cross);
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		dc[i + 3] = cross[i];
@@ -3142,8 +3140,8 @@ bool SlicesHandler::SwapXZ()
 	float dc[6];
 	get_direction_cosines(dc);
 	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	iseg::Cross(&dc[0], &dc[3], cross);
-	iseg::Normalize(cross);
+	vtkMath::Cross(&dc[0], &dc[3], cross);
+	vtkMath::Normalize(cross);
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		dc[i] = cross[i];
@@ -4534,7 +4532,7 @@ void SlicesHandler::em(unsigned short slicenr, short nrtissues,
 {
 	if (slicenr >= startslice && slicenr < endslice)
 	{
-		EM em;
+		ExpectationMaximization em;
 		float* bits[1];
 		bits[0] = image_slices[slicenr].return_bmp();
 		float weights[1];
@@ -5792,7 +5790,7 @@ void SlicesHandler::erosion(int n, bool connectivity)
 		(image_slices[i]).erosion(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5813,7 +5811,7 @@ void SlicesHandler::dilation(int n, bool connectivity)
 		(image_slices[i]).dilation(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5834,7 +5832,7 @@ void SlicesHandler::closure(int n, bool connectivity)
 		(image_slices[i]).closure(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -5855,7 +5853,7 @@ void SlicesHandler::open(int n, bool connectivity)
 		(image_slices[i]).open(n,connectivity);
 	}
 #else
-	auto all_slices = GetImage(iseg::CSliceHandlerInterface::kTarget, false);
+	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
 	itk::Size<3> radius;
 	radius.Fill(n);
@@ -7188,13 +7186,16 @@ void SlicesHandler::slicework_z(unsigned short slicenr)
 	return;
 }
 
-template<typename TScalarType> int GetScalarType()
+template<typename TScalarType>
+int GetScalarType()
 {
 	assert("This type is not implemented" && 0);
 	return VTK_VOID;
 }
-template<> int GetScalarType<unsigned char>() { return VTK_UNSIGNED_CHAR; }
-template<> int GetScalarType<unsigned short>() { return VTK_UNSIGNED_SHORT; }
+template<>
+int GetScalarType<unsigned char>() { return VTK_UNSIGNED_CHAR; }
+template<>
+int GetScalarType<unsigned short>() { return VTK_UNSIGNED_SHORT; }
 
 int SlicesHandler::extract_tissue_surfaces(
 	const QString& filename, std::vector<tissues_size_t>& tissuevec,
@@ -8753,7 +8754,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 	{
 		loaded = true;
 
-		dicomread dcmr;
+		DicomReader dcmr;
 		if (dcmr.opendicom(lfilename[0]))
 		{
 			Pair p1;
@@ -8942,7 +8943,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 {
 	float retval = -1.0f;
-	dicomread dcmread;
+	DicomReader dcmread;
 	std::vector<float> vpos;
 
 	for (std::vector<const char*>::iterator it = lfilename->begin();
@@ -8986,7 +8987,7 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 									 std::vector<unsigned>* dicomseriesnr,
 									 std::vector<unsigned>* dicomseriesnrlist)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dicomseriesnr->clear();
 	for (std::vector<const char*>::iterator it = vnames->begin();
@@ -9195,7 +9196,8 @@ bool SlicesHandler::print_amascii(const char* filename)
 	if (streamname.good())
 	{
 		bool ok = true;
-		streamname << "# AmiraMesh 3D ASCII 2.0" << endl << endl;
+		streamname << "# AmiraMesh 3D ASCII 2.0" << endl
+				   << endl;
 		streamname << "# CreationDate: Fri Jun 16 14:24:32 2006" << endl
 				   << endl
 				   << endl;
@@ -9240,14 +9242,17 @@ bool SlicesHandler::print_amascii(const char* filename)
 		streamname << "    BoundingBox 0 " << width * dx << " 0 " << height * dy
 				   << " 0 " << nrslices * thickness << "," << endl;
 		streamname << "    CoordType \"uniform\"" << endl;
-		streamname << "}" << endl << endl;
+		streamname << "}" << endl
+				   << endl;
 		if (tissueCount <= 255)
 		{
-			streamname << "Lattice { byte Labels } @1" << endl << endl;
+			streamname << "Lattice { byte Labels } @1" << endl
+					   << endl;
 		}
 		else
 		{
-			streamname << "Lattice { ushort Labels } @1" << endl << endl;
+			streamname << "Lattice { ushort Labels } @1" << endl
+					   << endl;
 		}
 		streamname << "# Data section follows" << endl;
 		streamname << "@1" << endl;
@@ -12259,7 +12264,8 @@ void SlicesHandler::regrow(unsigned short sourceslicenr,
 	delete results1;
 	delete results2;
 
-	IFT_regiongrowing* IFTrg = image_slices[sourceslicenr].IFTrg_init(lbmap);
+	ImageForestingTransformRegionGrowing* IFTrg =
+		image_slices[sourceslicenr].IFTrg_init(lbmap);
 	float thresh = 0;
 
 	float* f2 = IFTrg->return_pf();

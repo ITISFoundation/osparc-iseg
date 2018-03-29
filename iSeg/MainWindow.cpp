@@ -9,49 +9,46 @@
  */
 #include "Precompiled.h"
 
-#include "AtlasWidget.h"
-#include "FormatTooltip.h"
-#include "MainWindow.h"
-#include "SaveOutlinesWidget.h"
-#include "bmpshower.h"
-#include "loaderwidgets.h"
-#include "tissueinfos.h"
-
 #include "../config.h"
-#include "IFT_rg.h"
-#include "Settings.h"
-#include "activeslices_config_widget.h"
-#include "edge_widget.h"
-#include "fastmarch_fuzzy_widget.h"
-#include "featurewidget.h"
-#include "hyster_widget.h"
-#include "interpolation_widget.h"
-#include "livewirewidget.h"
-#include "measurementwidget.h"
-#include "morphowidget.h"
-#include "outlinecorrection.h"
-#include "pickerwidget.h"
-#include "pixelsize_widget.h"
-#include "smoothwidget.h"
-#include "threshwidget.h"
-#include "tissuecleaner.h"
-#include "transformwidget.h"
-#include "undoconfig_widget.h"
-#include "vessel_widget.h"
-#include "watershedwidget.h"
-#include "xyslice.h"
 
-#ifdef ISEG_GPU_MC
-#	include "window.h"
-#endif
+#include "ActiveslicesConfigWidget.h"
+#include "AtlasWidget.h"
+#include "EdgeWidget.h"
+#include "FastmarchingFuzzyWidget.h"
+#include "FeatureWidget.h"
+#include "FormatTooltip.h"
+#include "HystereticGrowingWidget.h"
+#include "ImageForestingTransformRegionGrowingWidget.h"
+#include "ImageInformationDialogs.h"
+#include "InterpolationWidget.h"
+#include "LivewireWidget.h"
+#include "LoaderWidgets.h"
+#include "MainWindow.h"
+#include "MeasurementWidget.h"
+#include "MorphologyWidget.h"
+#include "OutlineCorrectionWidget.h"
+#include "PickerWidget.h"
+#include "SaveOutlinesWidget.h"
+#include "Settings.h"
+#include "SliceViewerWidget.h"
+#include "SmoothingWidget.h"
+#include "ThresholdWidget.h"
+#include "TissueCleaner.h"
+#include "TissueInfos.h"
+#include "TransformWidget.h"
+#include "UndoConfigurationDialog.h"
+#include "VesselWidget.h"
+#include "WatershedWidget.h"
+#include "bmpshower.h"
 
 #ifndef NORTSTRUCTSUPPORT
-#	include "rtstruct_importer.h"
+#	include "RadiotherapyStructureSetImporter.h"
 #endif
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 #include "Core/LoadPlugin.h"
+#include "Core/ProjectVersion.h"
 #include "Core/Transform.h"
 
 #include <boost/filesystem.hpp>
@@ -375,11 +372,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	iSegSubversion = ISEG_VERSION_MINOR;
 	build = ISEG_VERSION_PATCH;
 	tab_old = NULL;
-#ifdef ISEG_GPU_MC
-	surfaceview = new Window();
-#else
-	surfaceview = nullptr;
-#endif
 
 	setCaption(QString(" iSeg ") + QString::number(iSegVersion) + QString(".") +
 			   QString::number(iSegSubversion) + QString(" B") +
@@ -624,60 +616,60 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	le_slicethick->setFixedWidth(80);
 
 	threshold_widget =
-		new thresh_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new ThresholdWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
-	hyst_widget = new hyster_widget(handler3D, this, "new window",
-									Qt::WDestructiveClose | Qt::WResizeNoErase);
+	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window",
+											  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
 	lw_widget = new livewire_widget(handler3D, this, "new window",
 									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(lw_widget);
-	iftrg_widget = new IFTrg_widget(handler3D, this, "new window",
-									Qt::WDestructiveClose | Qt::WResizeNoErase);
+	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(handler3D, this, "new window",
+																  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(iftrg_widget);
 	FMF_widget =
-		new FastMarchFuzzy_widget(handler3D, this, "new window",
-								  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new FastmarchingFuzzyWidget(handler3D, this, "new window",
+									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(FMF_widget);
 	wshed_widget =
-		new watershed_widget(handler3D, this, "new window",
-							 Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new WatershedWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(wshed_widget);
 	OutlineCorrect_widget =
-		new OutlineCorr_widget(handler3D, this, "new window",
-							   Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new OutlineCorrectionWidget(handler3D, this, "new window",
+									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(OutlineCorrect_widget);
 	interpolwidget =
-		new interpol_widget(handler3D, this, "new window",
-							Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new InterpolationWidget(handler3D, this, "new window",
+								Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(interpolwidget);
 	smoothing_widget =
-		new smooth_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new SmoothingWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(smoothing_widget);
 	morph_widget =
-		new morpho_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new MorphologyWidget(handler3D, this, "new window",
+							 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(morph_widget);
-	edge_widg = new edge_widget(handler3D, this, "new window",
-								Qt::WDestructiveClose | Qt::WResizeNoErase);
+	edge_widg = new EdgeWidget(handler3D, this, "new window",
+							   Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(edge_widg);
 	feature_widget =
-		new featurewidget(handler3D, this, "new window",
+		new FeatureWidget(handler3D, this, "new window",
 						  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(feature_widget);
 	measurement_widget =
-		new measure_widget(handler3D, this, "new window",
-						   Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new MeasurementWidget(handler3D, this, "new window",
+							  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(measurement_widget);
 	vesselextr_widget =
-		new vessel_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new VesselWidget(handler3D, this, "new window",
+						 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(vesselextr_widget);
 	pickerwidget =
-		new picker_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new PickerWidget(handler3D, this, "new window",
+						 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(pickerwidget);
 	transfrmWidget =
 		new TransformWidget(handler3D, this, "new window",
@@ -689,11 +681,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	bool ok = iseg::plugin::LoadPlugins(this_exe.parent_path().string());
 	assert(ok == true);
 
-	auto addons = iseg::plugin::CAddonRegistry::GetAllAddons();
+	auto addons = iseg::plugin::PluginRegistry::registered_plugins();
 	for (auto a : addons)
 	{
-		a->SetSliceHandler(handler3D);
-		tabwidgets.push_back(a->CreateWidget(
+		a->install_slice_handler(handler3D);
+		tabwidgets.push_back(a->create_widget(
 			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase));
 	}
 
@@ -732,15 +724,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 			methodTab->raiseWidget(tabwidgets[posi]);
 	}
 
-	tab_changed((QWidget1*)methodTab->visibleWidget());
+	tab_changed((WidgetInterface*)methodTab->visibleWidget());
 
 	//	tab_old=(QWidget1 *)methodTab->visibleWidget();
 	updateTabvisibility();
 
 	int height_max = 0;
 	QSize qs; //,qsmax;
-		//	qsmax.setHeight(0);
-		//	qsmax.setWidth(0);
+			  //	qsmax.setHeight(0);
+			  //	qsmax.setWidth(0);
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
@@ -1408,7 +1400,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	}
 	hideparameters = new Q3Action("Simplified", 0, this);
 	hideparameters->setToggleAction(true);
-	hideparameters->setOn(QWidget1::get_hideparams());
+	hideparameters->setOn(WidgetInterface::get_hideparams());
 	connect(hideparameters, SIGNAL(toggled(bool)), this,
 			SLOT(execute_hideparameters(bool)));
 	hidesubmenu->insertSeparator();
@@ -3559,7 +3551,7 @@ void MainWindow::execute_loadrtstruct()
 		return;
 	}
 
-	RtstructImport RI(loadfilename, handler3D, this);
+	RadiotherapyStructureSetImporter RI(loadfilename, handler3D, this);
 
 	QObject::connect(
 		&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
@@ -3871,7 +3863,7 @@ void MainWindow::SaveSettings()
 		(unsigned short)iseg::CombineTissuesVersion(saveProjVersion, 1);
 	fwrite(&combinedVersion, 1, sizeof(unsigned short), fp);
 	bool flag;
-	flag = QWidget1::get_hideparams();
+	flag = WidgetInterface::get_hideparams();
 	fwrite(&flag, 1, sizeof(bool), fp);
 	//	flag=!hidestack->isOn();
 	flag = false;
@@ -5584,7 +5576,7 @@ void MainWindow::execute_rotation()
 
 void MainWindow::execute_undoconf()
 {
-	UndoConfig UC(handler3D, this);
+	UndoConfigurationDialog UC(handler3D, this);
 	UC.move(QCursor::pos());
 	UC.exec();
 
@@ -5605,7 +5597,7 @@ void MainWindow::execute_undoconf()
 
 void MainWindow::execute_activeslicesconf()
 {
-	ActiveSlicesConfig AC(handler3D, this);
+	ActiveSlicesConfigWidget AC(handler3D, this);
 	AC.move(QCursor::pos());
 	AC.exec();
 
@@ -5628,7 +5620,7 @@ void MainWindow::execute_activeslicesconf()
 
 void MainWindow::execute_hideparameters(bool checked)
 {
-	QWidget1::set_hideparams(checked);
+	WidgetInterface::set_hideparams(checked);
 	if (tab_old != NULL)
 		tab_old->hideparams_changed();
 }
@@ -5786,7 +5778,7 @@ void MainWindow::execute_showtabtoggled(bool)
 		showpb_tab[i] = showtab_action[i]->isOn();
 	}
 
-	QWidget1* currentwidget = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* currentwidget = (WidgetInterface*)methodTab->visibleWidget();
 	unsigned short i = 0;
 	while ((i < nrtabbuttons) && (currentwidget != tabwidgets[i]))
 		i++;
@@ -5820,7 +5812,7 @@ void MainWindow::execute_xslice()
 
 	if (xsliceshower == NULL)
 	{
-		xsliceshower = new sliceshower_widget(
+		xsliceshower = new SliceViewerWidget(
 			handler3D, true, handler3D->get_slicethickness(),
 			zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		xsliceshower->zpos_changed();
@@ -5868,7 +5860,7 @@ void MainWindow::execute_yslice()
 
 	if (ysliceshower == NULL)
 	{
-		ysliceshower = new sliceshower_widget(
+		ysliceshower = new SliceViewerWidget(
 			handler3D, false, handler3D->get_slicethickness(),
 			zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		ysliceshower->zpos_changed();
@@ -7150,7 +7142,7 @@ void MainWindow::workpicturevisible_changed()
 
 void MainWindow::slice_changed()
 {
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 	qw->slicenr_changed();
 
 	unsigned short slicenr = handler3D->get_activeslice() + 1;
@@ -7204,10 +7196,10 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
-		((QWidget1*)(tabwidgets[i]))->newloaded();
+		((WidgetInterface*)(tabwidgets[i]))->newloaded();
 	}
 
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 
 	if (handler3D->return_nrslices() != nrslices)
 	{
@@ -7439,47 +7431,32 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		{
 			contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("New Tissue...", this,
-								   SLOT(newTissuePressed()));
-			contextMenu.insertItem("New Folder...", this,
-								   SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Folder...", this,
-								   SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Folder...", this,
-								   SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
+			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
+			contextMenu.insertItem("Mod. Folder...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Folder...", this, SLOT(removeTissueFolderPressed()));
 		}
 		else
 		{
 			contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("New Tissue...", this,
-								   SLOT(newTissuePressed()));
-			contextMenu.insertItem("New Folder...", this,
-								   SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Tissue...", this,
-								   SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Tissue...", this,
-								   SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
+			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
+			contextMenu.insertItem("Mod. Tissue...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Tissue...", this, SLOT(removeTissueFolderPressed()));
 			contextMenu.insertSeparator();
 			contextMenu.insertItem("Get Tissue", this, SLOT(tissue2work()));
 			contextMenu.insertItem("Clear Tissue", this, SLOT(cleartissue()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("Next Feat. Slice", this,
-								   SLOT(next_featuring_slice()));
-#ifdef ISEG_GPU_MC
-			contextMenu.insertItem("3D View", this, SLOT(startwidget()));
-#endif
+			contextMenu.insertItem("Next Feat. Slice", this, SLOT(next_featuring_slice()));
 		}
 		contextMenu.insertSeparator();
 		int itemId =
-			contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget,
-								   SLOT(toggle_show_tissue_indices()));
+			contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget, SLOT(toggle_show_tissue_indices()));
 		contextMenu.setItemChecked(
 			itemId, !tissueTreeWidget->get_tissue_indices_hidden());
-		contextMenu.insertItem("Sort By Name", tissueTreeWidget,
-							   SLOT(sort_by_tissue_name()));
-		contextMenu.insertItem("Sort By Index", tissueTreeWidget,
-							   SLOT(sort_by_tissue_index()));
+		contextMenu.insertItem("Sort By Name", tissueTreeWidget, SLOT(sort_by_tissue_name()));
+		contextMenu.insertItem("Sort By Index", tissueTreeWidget, SLOT(sort_by_tissue_index()));
 		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 	else // multi-selection
@@ -7489,13 +7466,9 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		contextMenu.insertSeparator();
 		contextMenu.insertItem("Delete Selected", this, SLOT(removeselected()));
 		contextMenu.insertItem("Clear Selected", this, SLOT(clearselected()));
-		contextMenu.insertItem("Get Selected", this,
-							   SLOT(selectedtissue2work()));
+		contextMenu.insertItem("Get Selected", this, SLOT(selectedtissue2work()));
 		contextMenu.insertItem("Merge", this, SLOT(merge()));
 		contextMenu.insertItem("Unselect all", this, SLOT(unselectall()));
-#ifdef ISEG_GPU_MC
-		contextMenu.insertItem("3D View", this, SLOT(startwidget()));
-#endif
 		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 }
@@ -8139,7 +8112,7 @@ void MainWindow::tab_changed(QWidget* qw)
 							 SLOT(tissues_changed()));
 		}
 
-		tab_old = (QWidget1*)qw;
+		tab_old = (WidgetInterface*)qw;
 		tab_old->init();
 		bmp_show->setCursor(*(tab_old->m_cursor));
 		work_show->setCursor(*(tab_old->m_cursor));
@@ -8147,7 +8120,7 @@ void MainWindow::tab_changed(QWidget* qw)
 		updateMethodButtonsPressed(tab_old);
 	}
 	else
-		tab_old = (QWidget1*)qw;
+		tab_old = (WidgetInterface*)qw;
 
 	tab_old->setFocus();
 
@@ -8189,11 +8162,11 @@ void MainWindow::updateTabvisibility()
 		counter1++;
 	}
 
-	QWidget1* qw = (QWidget1*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 	updateMethodButtonsPressed(qw);
 }
 
-void MainWindow::updateMethodButtonsPressed(QWidget1* qw)
+void MainWindow::updateMethodButtonsPressed(WidgetInterface* qw)
 {
 	//	QWidget *qw=methodTab->visibleWidget();
 	unsigned short counter = 0;
@@ -9121,72 +9094,3 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 }
 
 void MainWindow::handle_end_dataexport(QWidget* sender) {}
-
-void MainWindow::startwidget()
-{
-#ifdef ISEG_GPU_MC
-	delete surfaceview;
-	surfaceview = new Window();
-	for (int i = surfaceview->tissuebox->count(); i >= 0; --i)
-		surfaceview->tissuebox->removeItem(i);
-
-	QList<QTreeWidgetItem*> list;
-	list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t nr = tissueTreeWidget->get_type(item);
-		QString name = tissueTreeWidget->get_name(item);
-		surfaceview->tissuebox->addItem(name, Qt::DisplayRole);
-	}
-	int dimension[3];
-	dimension[0] = (int)handler3D->return_width();
-	dimension[1] = (int)handler3D->return_height();
-	dimension[2] =
-		(int)(handler3D->return_endslice() - handler3D->return_startslice());
-	surfaceview->setDim(dimension);
-	Pair ps = handler3D->get_pixelsize();
-	float spacing[3] = {ps.high, ps.low, handler3D->get_slicethickness()};
-	surfaceview->setSpace(spacing);
-	std::vector<unsigned char*> voxel;
-	for (int i = 0; i < list.size(); ++i)
-	{
-		voxel.push_back(
-			new unsigned char[dimension[0] * dimension[1] * dimension[2]]);
-		for (int s = 0; s < dimension[0] * dimension[1] * dimension[2]; s++)
-		{
-			voxel[i][s] = 0;
-		}
-	}
-	std::vector<int> isovalues;
-	std::vector<unsigned char> colours;
-	int tmp = 0;
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
-		isovalues.push_back(currTissueType - 1);
-		unsigned char r, g, b;
-		TissueInfos::GetTissueColorRGB(currTissueType, r, g, b);
-		colours.push_back(r);
-		colours.push_back(g);
-		colours.push_back(b);
-		handler3D->selectedtissue2mc(currTissueType, &voxel[tmp]);
-		tmp = +1;
-	}
-
-	surfaceview->setisovalues(isovalues);
-	surfaceview->setColours(colours);
-	surfaceview->setVoxel(voxel);
-	surfaceview->resize(surfaceview->sizeHint());
-	int desktopArea =
-		QApplication::desktop()->width() * QApplication::desktop()->height();
-	int widgetArea = surfaceview->width() * surfaceview->height();
-	if (((float)widgetArea / (float)desktopArea) < 0.75f)
-		surfaceview->show();
-	else
-		surfaceview->showMaximized();
-#else
-	assert(false && "Calling surface view, but it has been disabled.");
-#endif
-}

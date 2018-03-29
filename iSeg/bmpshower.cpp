@@ -12,7 +12,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 #include "bmpshower.h"
-#include "tissueinfos.h"
+#include "TissueInfos.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/Point.h"

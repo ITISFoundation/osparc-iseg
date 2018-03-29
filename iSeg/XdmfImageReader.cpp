@@ -12,9 +12,8 @@
 #include "XdmfImageReader.h"
 
 #include "Core/ColorLookupTable.h"
+#include "Core/HDF5Reader.h"
 #include "Core/Transform.h"
-
-#include "HDF5IO/HDF5Reader.h"
 
 #include <boost/algorithm/string/replace.hpp>
 
@@ -34,7 +33,6 @@
 #include <vector>
 
 using namespace std;
-using namespace HDF5;
 using namespace iseg;
 
 namespace {
@@ -163,7 +161,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		if (reader.exists(tissue_dname))
 		{
 			string type;
-			vector<HDF5::HDF5Reader::size_type> dims;
+			vector<HDF5Reader::size_type> dims;
 			if (!reader.getDatasetInfo(type, dims, tissue_dname))
 			{
 				cerr << "Error reading Tissue data type..." << endl;

@@ -11,6 +11,8 @@
 
 #include "AtlasWidget.h"
 
+#include "Core/ProjectVersion.h"
+
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>

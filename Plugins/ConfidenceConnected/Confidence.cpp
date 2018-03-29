@@ -23,9 +23,9 @@
 #include <algorithm>
 #include <sstream>
 
-CConfidence::CConfidence(iseg::CSliceHandlerInterface *hand3D, QWidget *parent,
-												 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
+								   const char* name, Qt::WindowFlags wFlags)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->get_activeslice();
 
@@ -33,8 +33,8 @@ CConfidence::CConfidence(iseg::CSliceHandlerInterface *hand3D, QWidget *parent,
 
 	vbox1 = new Q3VBox(this);
 	bias_header = new QLabel("ConfidenceConnected Algorithm:(Pick with OLC "
-													 "Foreground 1 pixel to start) ",
-													 vbox1);
+							 "Foreground 1 pixel to start) ",
+							 vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
 	hbox4 = new Q3HBox(vbox1);
@@ -64,18 +64,18 @@ CConfidence::CConfidence(iseg::CSliceHandlerInterface *hand3D, QWidget *parent,
 	return;
 }
 
-void CConfidence::do_work()
+void ConfidenceWidget::do_work()
 {
 	typedef itk::Image<float, 3> TInput;
 	typedef itk::Image<float, 3> TMask;
 	typedef TMask TOutput;
 
 	typedef itk::CurvatureFlowImageFilter<TInput, TInput>
-			CurvatureFlowImageFilterType;
+		CurvatureFlowImageFilterType;
 	CurvatureFlowImageFilterType::Pointer smoothing;
 	smoothing = CurvatureFlowImageFilterType::New();
 	typedef itk::ConfidenceConnectedImageFilter<TInput, TOutput>
-			ConnectedFilterType;
+		ConnectedFilterType;
 	ConnectedFilterType::Pointer confidenceConnected;
 	confidenceConnected = ConnectedFilterType::New();
 
@@ -84,7 +84,7 @@ void CConfidence::do_work()
 	input->Update();
 	smoothing->SetInput(input);
 	confidenceConnected->SetInput(smoothing->GetOutput());
-	TOutput *output;
+	TOutput* output;
 	output = confidenceConnected->GetOutput();
 
 	smoothing->SetNumberOfIterations(2);
@@ -102,29 +102,30 @@ void CConfidence::do_work()
 	handler3D->ModifyWorkFloat(output);
 }
 
-QSize CConfidence::sizeHint() const { return vbox1->sizeHint(); }
+QSize ConfidenceWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-CConfidence::~CConfidence()
+ConfidenceWidget::~ConfidenceWidget()
 {
 	delete vbox1;
 
 	free(usp);
 }
 
-void CConfidence::slicenr_changed()
+void ConfidenceWidget::slicenr_changed()
 {
 	activeslice = handler3D->get_activeslice();
 }
 
-void CConfidence::init()
+void ConfidenceWidget::init()
 {
 	slicenr_changed();
 	hideparams_changed();
 }
 
-void CConfidence::newloaded()
+void ConfidenceWidget::newloaded()
 {
-	if (usp != NULL) {
+	if (usp != NULL)
+	{
 		free(usp);
 		usp = NULL;
 	}
