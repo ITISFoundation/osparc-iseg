@@ -18,10 +18,9 @@
 #include "bmp_read_1.h"
 
 #include "Core/BranchItem.h"
+#include "Core/Log.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
-
-#include "Tools.h"
 
 #include <QPlastiqueStyle.h>
 #include <qapplication.h>
@@ -115,10 +114,9 @@ int main(int argc, char** argv)
 	}
 
 	cerr << "intercepting application's output to a log file..." << endl;
-	if (!Tools::interceptOutput(tmpdir.absolutePath().toStdString() +
-								"/iSeg.log"))
+	if (!interceptOutput(tmpdir.absolutePath().toStdString() + "/iSeg.log"))
 	{
-		Tools::error("intercepting output failed");
+		error("intercepting output failed");
 	}
 
 	QDir fileDirectory = fileinfo.dir();

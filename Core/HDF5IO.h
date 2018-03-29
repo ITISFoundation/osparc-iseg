@@ -9,12 +9,14 @@
  */
 #pragma once
 
+#include "iSegCore.h"
+
 #include <cstdint>
 #include <string>
 
-#include "HDF5IOApi.h"
+namespace iseg {
 
-class HDF5_EXPORT HDF5IO
+class iSegCore_API HDF5IO
 {
 public:
 	typedef long handle_id_type;
@@ -31,7 +33,8 @@ public:
 
 	bool close(handle_id_type fid);
 
-	template<typename T> handle_id_type getTypeValue();
+	template<typename T>
+	handle_id_type getTypeValue();
 
 	template<typename T>
 	bool readData(handle_id_type file_id, const std::string& name,
@@ -42,8 +45,12 @@ public:
 				   T** const slice_data, size_t num_slices, size_t slice_size,
 				   size_t offset = 0);
 
+	static std::string dumpErrorStack();
+
 protected:
 	int CompressionLevel;
 };
+
+} // namespace iseg
 
 #include "HDF5IO.inl"

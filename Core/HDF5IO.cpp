@@ -7,9 +7,29 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
+#include "Precompiled.h"
+
 #include "HDF5IO.h"
 
 #include <hdf5.h>
+
+#include <sstream>
+
+namespace iseg {
+
+namespace {
+
+herr_t H5Ewalk_cb(int n, H5E_error_t* err_desc, void* client_data)
+{
+	std::ostream* stream = static_cast<std::ostream*>(client_data);
+	*stream << H5Eget_major(err_desc->maj_num) << " - " << H5Eget_minor(err_desc->min_num);
+	if (err_desc->desc)
+		*stream << ": " << err_desc->desc;
+	*stream << "\n";
+	return 0;
+}
+
+} // namespace
 
 HDF5IO::HDF5IO(int compression) : CompressionLevel(compression) {}
 
@@ -54,3 +74,14 @@ bool HDF5IO::close(handle_id_type file)
 	}
 	return true;
 }
+
+std::string HDF5IO::dumpErrorStack()
+{
+	std::stringstream ss;
+	ss << "HDF5 error(s):"
+	   << "\r\n";
+	H5Ewalk(H5E_WALK_DOWNWARD, H5Ewalk_cb, &ss);
+	return ss.str();
+}
+
+} // namespace iseg

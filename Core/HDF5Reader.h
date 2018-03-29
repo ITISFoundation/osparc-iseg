@@ -8,18 +8,17 @@
  *  https://opensource.org/licenses/MIT
  */
 
-#ifndef HDF5READER_H
-#define HDF5READER_H
+#pragma once
 
-#include "HDF5IOApi.h"
+#include "iSegCore.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
-namespace HDF5 {
+namespace iseg {
 
-class HDF5_EXPORT HDF5Reader
+class iSegCore_API HDF5Reader
 {
 public:
 	typedef unsigned long long size_type;
@@ -104,5 +103,5 @@ private:
 	void* data;
 	hid_type file;
 };
-} // namespace HDF5
-#endif
+
+} // namespace iseg

@@ -11,9 +11,8 @@
 
 #include "XdmfImageWriter.h"
 
-#include "HDF5IO/HDF5Writer.h"
-
 #include "Core/ColorLookupTable.h"
+#include "Core/HDF5Writer.h"
 
 #include <QDir>
 #include <QDomDocument>
@@ -32,7 +31,6 @@
 #include <vector>
 
 using namespace std;
-using namespace HDF5;
 using namespace iseg;
 
 XdmfImageWriter::XdmfImageWriter()

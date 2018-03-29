@@ -7,21 +7,23 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include <cstdlib>
-#include <cassert>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include "Precompiled.h"
 
-#include "Tools.h"
+#include "Log.h"
 
-namespace Tools {
+//#include <cassert>
+//#include <cstdlib>
+//#include <fstream>
+//#include <iostream>
+//#include <sstream>
+
+namespace iseg {
 
 void quit(const std::string& msg, const int code)
 {
-	if(!msg.empty())
+	if (!msg.empty())
 		std::cerr << "Tools::quit() : " << msg << "\n";
-	if(flog.is_open())
+	if (flog.is_open())
 		flog.close();
 	exit(code);
 }
@@ -29,8 +31,9 @@ void quit(const std::string& msg, const int code)
 void error(const std::string& msg, const int code)
 {
 	const std::string msg2 = "Tools::error() : " + msg;
-	std::cerr << "\n" << msg2 << "\n";
-	if(flog.is_open())
+	std::cerr << "\n"
+			  << msg2 << "\n";
+	if (flog.is_open())
 		flog.close();
 	exit(code);
 }
@@ -38,7 +41,8 @@ void error(const std::string& msg, const int code)
 void warning(const std::string& msg)
 {
 	const std::string msg2 = "Tools::warning() : " + msg;
-	std::cerr << "\n" << msg2 << "\n\n";
+	std::cerr << "\n"
+			  << msg2 << "\n\n";
 }
 
 bool interceptOutput(const std::string& logname)
@@ -58,10 +62,12 @@ bool interceptOutput(const std::string& logname)
 	FILE *outfile, *errfile;
 	if ((outfile = freopen(logname.c_str(), "a", stdout)) == NULL)
 		return false;
-	else fprintf(stdout, "stdout redirected to %s\n", logname.c_str());
+	else
+		fprintf(stdout, "stdout redirected to %s\n", logname.c_str());
 	if ((errfile = freopen(logname.c_str(), "a", stderr)) == NULL)
 		return false;
-	else fprintf(stderr, "stderr redirected to %s\n", logname.c_str());
+	else
+		fprintf(stderr, "stderr redirected to %s\n", logname.c_str());
 	fflush(outfile);
 	fflush(errfile);
 
@@ -69,4 +75,4 @@ bool interceptOutput(const std::string& logname)
 	return true;
 }
 
-}
+} // namespace iseg

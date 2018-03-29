@@ -11,8 +11,8 @@
 
 #include "XdmfImageMerger.h"
 
-#include "HDF5IO/HDF5Reader.h"
-#include "HDF5IO/HDF5Writer.h"
+#include "Core/HDF5Reader.h"
+#include "Core/HDF5Writer.h"
 
 #include <QDir>
 #include <QDomDocument>
@@ -28,7 +28,6 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace HDF5;
 using namespace iseg;
 
 XdmfImageMerger::XdmfImageMerger()
@@ -513,7 +512,7 @@ int XdmfImageMerger::ReadTissues(
 	// Tissue
 	QString mapTissueName = imageReader->GetMapArrayNames()["Tissue"];
 	std::string type;
-	std::vector<HDF5::HDF5Reader::size_type> dims;
+	std::vector<HDF5Reader::size_type> dims;
 	if (!reader.getDatasetInfo(type, dims, mapTissueName.toAscii().data()))
 	{
 		std::cerr << "Error reading Tissue data type..." << std::endl;

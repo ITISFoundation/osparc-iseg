@@ -8,16 +8,16 @@
  *  https://opensource.org/licenses/MIT
  */
 
-#ifndef HDF5WRITER_H
-#define HDF5WRITER_H
+#pragma once
 
-#include "HDF5IOApi.h"
+#include "iSegCore.h"
 
 #include <string>
 #include <vector>
 
-namespace HDF5 {
-class HDF5_EXPORT HDF5Writer
+namespace iseg {
+
+class iSegCore_API HDF5Writer
 {
 public:
 	typedef unsigned long long size_type;
@@ -65,5 +65,5 @@ private:
 	hid_type file;
 	size_type bufsize;
 };
-} // namespace HDF5
-#endif
+
+} // namespace iseg

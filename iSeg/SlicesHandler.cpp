@@ -28,9 +28,8 @@
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
-#include "HDF5IO/HDF5Writer.h"
-
 #include "Core/ExpectationMaximization.h"
+#include "Core/HDF5Writer.h"
 #include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
 #include "Core/ImageToITK.h"
@@ -1345,8 +1344,6 @@ int SlicesHandler::SaveAllXdmf(const char* filename, int compression,
 bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 								   unsigned short version)
 {
-	using namespace HDF5;
-
 	int compression = 1;
 
 	QString qFileName(filename);

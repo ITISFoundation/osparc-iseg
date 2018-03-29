@@ -13,8 +13,8 @@
 #include "TissueHierarchy.h"
 #include "TissueInfos.h"
 
-#include "HDF5IO/HDF5Reader.h"
-#include "HDF5IO/HDF5Writer.h"
+#include "Core/HDF5Reader.h"
+#include "Core/HDF5Writer.h"
 
 // BL TODO get rid of Qt here
 #include <QDir>
@@ -28,7 +28,6 @@
 #include <iostream>
 #include <stdio.h>
 
-using namespace HDF5;
 using namespace std;
 using namespace iseg;
 

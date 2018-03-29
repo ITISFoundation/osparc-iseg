@@ -2,7 +2,10 @@
 
 #include <hdf5.h>
 
-template<typename T> HDF5IO::handle_id_type HDF5IO::getTypeValue()
+namespace iseg {
+
+template<typename T>
+HDF5IO::handle_id_type HDF5IO::getTypeValue()
 {
 	if (typeid(T) == typeid(double))
 	{
@@ -54,14 +57,14 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 	int status_n, rank;
 
 	/*
-	* Open the the dataset.
-	*/
+		* Open the the dataset.
+		*/
 	dataset = H5Dopen2(file, name.c_str(), H5P_DEFAULT);
 
 	/*
-	* Get datatype and dataspace handles and then query
-	* dataset rank and dimensions.
-	*/
+		* Get datatype and dataspace handles and then query
+		* dataset rank and dimensions.
+		*/
 	datatype = H5Dget_type(dataset);
 	dataspace = H5Dget_space(dataset);
 	rank = H5Sget_simple_extent_ndims(dataspace);
@@ -70,31 +73,31 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 	// TODO: FAIL_IF( rank != 1 )
 
 	/*
-	* Define hyperslab in the dataset.
-	*/
+		* Define hyperslab in the dataset.
+		*/
 	offset_in[0] = arg_offset;
 	count[0] = arg_length;
 	status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset_in, NULL,
 								 count, NULL);
 
 	/*
-	* Define the memory dataspace.
-	*/
+		* Define the memory dataspace.
+		*/
 	dimsm[0] = arg_length;
 	memspace = H5Screate_simple(1, dimsm, NULL);
 
 	/*
-	* Define memory hyperslab.
-	*/
+		* Define memory hyperslab.
+		*/
 	offset_out[0] = 0;
 	count_out[0] = arg_length;
 	status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
 								 count_out, NULL);
 
 	/*
-	* Read data from hyperslab in the file into the hyperslab in
-	* memory and display.
-	*/
+		* Read data from hyperslab in the file into the hyperslab in
+		* memory and display.
+		*/
 	status = H5Dread(dataset, getTypeValue<T>(), memspace, dataspace,
 					 H5P_DEFAULT, data_out);
 
@@ -116,22 +119,22 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 	herr_t status = 0;
 
 	/*
-	* Create a new dataset within the file using defined dataspace and
-	* datatype and default dataset creation properties.
-	*/
+		* Create a new dataset within the file using defined dataspace and
+		* datatype and default dataset creation properties.
+		*/
 	if (H5Lexists(file, name.c_str(), H5P_DEFAULT) <= 0)
 	{
 		/*
-		* Describe the size of the array and create the data space for fixed
-		* size dataset.
-		*/
+			* Describe the size of the array and create the data space for fixed
+			* size dataset.
+			*/
 		int rank = 1;
 		hsize_t dimsf[1] = {num_slices * slice_size};
 		dataspace = H5Screate_simple(rank, dimsf, 0);
 
 		/*
-		* Modify dataset creation properties by enable chunking and gzip compression
-		*/
+			* Modify dataset creation properties by enable chunking and gzip compression
+			*/
 		properties = H5Pcreate(H5P_DATASET_CREATE);
 
 		hsize_t const mega = 1024 * 1024;
@@ -146,9 +149,9 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 		}
 
 		/*
-		* Define datatype for the data in the file.
-		* We will store little endian numbers.
-		*/
+			* Define datatype for the data in the file.
+			* We will store little endian numbers.
+			*/
 		datatype = H5Tcopy(getTypeValue<T>());
 		status = H5Tset_order(datatype, H5T_ORDER_LE);
 
@@ -213,8 +216,8 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 	}
 
 	/*
-	* Close/release resources.
-	*/
+		* Close/release resources.
+		*/
 	if (dataspace >= 0)
 		H5Sclose(dataspace);
 	if (dataset >= 0)
@@ -226,3 +229,5 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 
 	return (status >= 0);
 }
+
+} // namespace iseg

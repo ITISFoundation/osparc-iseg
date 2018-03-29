@@ -37,8 +37,7 @@
 #include <vtkPolygon.h>
 
 #include <vtkSmartPointer.h>
-#define vtkNew(type, name)                                                     \
-	vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+#define vtkNew(type, name) vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 #include <algorithm>
 #include <iterator>
@@ -50,7 +49,8 @@ namespace gp = GeometricPredicates;
 
 //----------------------------------------------------------------------------
 namespace MESH {
-template<class TElem, class TValue = double> struct SortElement
+template<class TElem, class TValue = double>
+struct SortElement
 {
 	SortElement(TElem e, TValue v) : elem(e), value(v) {}
 	bool operator<(SortElement const& rhs) const { return value < rhs.value; }
