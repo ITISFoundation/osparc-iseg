@@ -38,13 +38,13 @@ class ImageForestingTransformFastMarching;
 class SlicesHandler;
 class bmphandler;
 
-class FastMarchFuzzy_widget : public WidgetInterface
+class FastmarchingFuzzyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FastMarchFuzzy_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-						  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~FastMarchFuzzy_widget();
+	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+							const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~FastmarchingFuzzyWidget();
 	void init();
 	void newloaded();
 	void cleanup();

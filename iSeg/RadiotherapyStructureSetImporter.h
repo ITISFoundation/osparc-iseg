@@ -31,13 +31,13 @@
 
 namespace iseg {
 
-class RtstructImport : public QDialog
+class RadiotherapyStructureSetImporter : public QDialog
 {
 	Q_OBJECT
 public:
-	RtstructImport(QString filename, SlicesHandler* hand3D, QWidget* parent = 0,
-				   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~RtstructImport();
+	RadiotherapyStructureSetImporter(QString filename, SlicesHandler* hand3D, QWidget* parent = 0,
+									 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~RadiotherapyStructureSetImporter();
 
 private:
 	SlicesHandler* handler3D;

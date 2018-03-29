@@ -21,9 +21,9 @@
 
 using namespace iseg;
 
-RtstructImport::RtstructImport(QString loadfilename, SlicesHandler* hand3D,
-							   QWidget* parent, const char* name,
-							   Qt::WindowFlags wFlags)
+RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadfilename, SlicesHandler* hand3D,
+																   QWidget* parent, const char* name,
+																   Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = NULL;
@@ -137,9 +137,9 @@ RtstructImport::RtstructImport(QString loadfilename, SlicesHandler* hand3D,
 					 SLOT(show_priorityInfo()));
 }
 
-RtstructImport::~RtstructImport() { delete vbox1; }
+RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() { delete vbox1; }
 
-void RtstructImport::solid_changed(int i)
+void RadiotherapyStructureSetImporter::solid_changed(int i)
 {
 	storeparams();
 	QObject::disconnect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
@@ -157,13 +157,13 @@ void RtstructImport::solid_changed(int i)
 	updatevisibility();
 }
 
-void RtstructImport::new_changed()
+void RadiotherapyStructureSetImporter::new_changed()
 {
 	storeparams();
 	updatevisibility();
 }
 
-void RtstructImport::ok_pressed()
+void RadiotherapyStructureSetImporter::ok_pressed()
 {
 	storeparams();
 
@@ -298,7 +298,7 @@ void RtstructImport::ok_pressed()
 	close();
 }
 
-void RtstructImport::show_priorityInfo()
+void RadiotherapyStructureSetImporter::show_priorityInfo()
 {
 	QMessageBox::information(
 		this, "Priority Information",
@@ -307,13 +307,13 @@ void RtstructImport::show_priorityInfo()
 		"2) The higher number of priority, higher priority will have.");
 }
 
-void RtstructImport::ignore_changed()
+void RadiotherapyStructureSetImporter::ignore_changed()
 {
 	storeparams();
 	updatevisibility();
 }
 
-void RtstructImport::updatevisibility()
+void RadiotherapyStructureSetImporter::updatevisibility()
 {
 	if (vecignore[cb_solids->currentItem()])
 	{
@@ -339,7 +339,7 @@ void RtstructImport::updatevisibility()
 	}
 }
 
-void RtstructImport::storeparams()
+void RadiotherapyStructureSetImporter::storeparams()
 {
 	int dummy = vecpriorities[currentitem];
 

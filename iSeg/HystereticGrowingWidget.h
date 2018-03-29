@@ -38,13 +38,13 @@
 
 namespace iseg {
 
-class hyster_widget : public WidgetInterface
+class HystereticGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	hyster_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~hyster_widget();
+	HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+							const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~HystereticGrowingWidget();
 	void init();
 	void newloaded();
 	void clean_up();

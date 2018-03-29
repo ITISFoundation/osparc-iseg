@@ -2056,7 +2056,7 @@ bool bmphandler::ReloadArray(float* bits, unsigned short w1, unsigned short h1,
 
 bool bmphandler::LoadDICOM(const char* filename)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	if (!dcmread.opendicom(filename))
 		return (NULL);
@@ -2179,7 +2179,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 						   unsigned short dy)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 	dcmread.opendicom(filename);
 
 	unsigned short w = dcmread.get_width();
@@ -2312,7 +2312,7 @@ bool bmphandler::ReloadDICOM(const char* filename)
 	if (!loaded)
 		return (NULL);
 	//FILE             *fp;          /* Open file pointer */
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dcmread.opendicom(filename);
 
@@ -2339,7 +2339,7 @@ bool bmphandler::ReloadDICOM(const char* filename, Point p)
 	if (!loaded)
 		return (NULL);
 	//FILE             *fp;          /* Open file pointer */
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dcmread.opendicom(filename);
 
@@ -13278,7 +13278,7 @@ void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
 	for (unsigned i = 0; i < area; ++i)
 		work_bits[i] = -beta * work_bits[i];
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;
@@ -13343,7 +13343,7 @@ void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
 	for (unsigned i = 0; i < area; ++i)
 		work_bits[i] = -beta * work_bits[i];
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;
@@ -13415,7 +13415,7 @@ void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 	for (unsigned i = 0; i < area; i++)
 		tmp[i] = 1.0f;
 
-	levelset levset;
+	Levelset levset;
 	levset.init(height, width, initlev, f, tmp, work_bits, 0.0f, epsilon,
 				stepsize);
 	levset.iterate(nrsteps, reinitfreq);
@@ -13484,7 +13484,7 @@ void bmphandler::cannylevelsettest(float sigma, float thresh_low,
 
 	//	SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testtest.bmp");
 
-	levelset levset;
+	Levelset levset;
 	levset.init(height, width, Pt, tmp, work_bits, 0.0f, epsilon, stepsize);
 	levset.iterate(nrsteps, reinitfreq);
 	levset.return_levelset(work_bits);
@@ -13521,7 +13521,7 @@ void bmphandler::threshlevelset(float thresh_low, float thresh_high,
 		work_bits[i] = 1 - abs(bmp_bits[i] - mean) / halfdiff;
 	//SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testt1.bmp");
 
-	levelset levset;
+	Levelset levset;
 	Point Pt;
 	Pt.px = 376;
 	Pt.py = 177;

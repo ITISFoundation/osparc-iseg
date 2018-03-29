@@ -30,8 +30,8 @@
 
 using namespace iseg;
 
-edge_widget::edge_widget(SlicesHandler* hand3D, QWidget* parent,
-						 const char* name, Qt::WindowFlags wFlags)
+EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
+					   const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
@@ -114,13 +114,13 @@ edge_widget::edge_widget(SlicesHandler* hand3D, QWidget* parent,
 	return;
 }
 
-edge_widget::~edge_widget()
+EdgeWidget::~EdgeWidget()
 {
 	delete vbox1;
 	delete modegroup;
 }
 
-void edge_widget::slicenr_changed()
+void EdgeWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -128,13 +128,13 @@ void edge_widget::slicenr_changed()
 	//	}
 }
 
-void edge_widget::bmphand_changed(bmphandler* bmph)
+void EdgeWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
 }
 
-void edge_widget::execute()
+void EdgeWidget::execute()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -176,7 +176,7 @@ void edge_widget::execute()
 	emit end_datachange(this);
 }
 
-void edge_widget::method_changed(int)
+void EdgeWidget::method_changed(int)
 {
 	if (hideparams)
 	{
@@ -283,7 +283,7 @@ void edge_widget::method_changed(int)
 	}
 }
 
-void edge_widget::slider_changed(int newval)
+void EdgeWidget::slider_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 	execute();
@@ -291,21 +291,21 @@ void edge_widget::slider_changed(int newval)
 	return;
 }
 
-QSize edge_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize EdgeWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void edge_widget::newloaded()
+void EdgeWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void edge_widget::init()
+void EdgeWidget::init()
 {
 	slicenr_changed();
 	hideparams_changed();
 }
 
-FILE* edge_widget::SaveParams(FILE* fp, int version)
+FILE* EdgeWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -335,7 +335,7 @@ FILE* edge_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* edge_widget::LoadParams(FILE* fp, int version)
+FILE* EdgeWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -384,4 +384,4 @@ FILE* edge_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void edge_widget::hideparams_changed() { method_changed(0); }
+void EdgeWidget::hideparams_changed() { method_changed(0); }

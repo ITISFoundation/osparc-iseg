@@ -33,13 +33,13 @@
 
 namespace iseg {
 
-class smooth_widget : public WidgetInterface
+class SmoothingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	smooth_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~smooth_widget();
+	SmoothingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+					const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~SmoothingWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

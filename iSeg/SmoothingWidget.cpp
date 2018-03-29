@@ -35,8 +35,8 @@
 
 using namespace iseg;
 
-smooth_widget::smooth_widget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
+SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
+								 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Smoothing and noise removal filters."));
@@ -168,13 +168,13 @@ smooth_widget::smooth_widget(SlicesHandler* hand3D, QWidget* parent,
 	return;
 }
 
-smooth_widget::~smooth_widget()
+SmoothingWidget::~SmoothingWidget()
 {
 	delete vbox1;
 	delete modegroup;
 }
 
-void smooth_widget::execute()
+void SmoothingWidget::execute()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
@@ -239,7 +239,7 @@ void smooth_widget::execute()
 	emit end_datachange(this);
 }
 
-void smooth_widget::method_changed(int)
+void SmoothingWidget::method_changed(int)
 {
 	if (rb_gaussian->isOn())
 	{
@@ -307,7 +307,7 @@ void smooth_widget::method_changed(int)
 	}
 }
 
-void smooth_widget::continue_diff()
+void SmoothingWidget::continue_diff()
 {
 	if (!rb_anisodiff->isOn())
 	{
@@ -336,7 +336,7 @@ void smooth_widget::continue_diff()
 	emit end_datachange(this);
 }
 
-void smooth_widget::sigmaslider_changed(int newval)
+void SmoothingWidget::sigmaslider_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 	if (rb_gaussian->isOn())
@@ -351,7 +351,7 @@ void smooth_widget::sigmaslider_changed(int newval)
 	return;
 }
 
-void smooth_widget::kslider_changed(int newval)
+void SmoothingWidget::kslider_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 	if (rb_sigmafilter->isOn())
@@ -370,7 +370,7 @@ void smooth_widget::kslider_changed(int newval)
 	return;
 }
 
-void smooth_widget::n_changed(int newval)
+void SmoothingWidget::n_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 
@@ -409,7 +409,7 @@ void smooth_widget::n_changed(int newval)
 	emit end_datachange(this);
 }
 
-void smooth_widget::kmax_changed(int newval)
+void SmoothingWidget::kmax_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
 
@@ -437,9 +437,9 @@ void smooth_widget::kmax_changed(int newval)
 	emit end_datachange(this);
 }
 
-QSize smooth_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize SmoothingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void smooth_widget::slicenr_changed()
+void SmoothingWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -447,25 +447,25 @@ void smooth_widget::slicenr_changed()
 	//	}
 }
 
-void smooth_widget::bmphand_changed(bmphandler* bmph)
+void SmoothingWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
 }
 
-void smooth_widget::init()
+void SmoothingWidget::init()
 {
 	slicenr_changed();
 	hideparams_changed();
 }
 
-void smooth_widget::newloaded()
+void SmoothingWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void smooth_widget::slider_pressed()
+void SmoothingWidget::slider_pressed()
 {
 	if ((rb_gaussian->isOn() || rb_sigmafilter->isOn()))
 	{
@@ -477,7 +477,7 @@ void smooth_widget::slider_pressed()
 	}
 }
 
-void smooth_widget::slider_released()
+void SmoothingWidget::slider_released()
 {
 	if (rb_gaussian->isOn() || rb_sigmafilter->isOn())
 	{
@@ -485,7 +485,7 @@ void smooth_widget::slider_released()
 	}
 }
 
-FILE* smooth_widget::SaveParams(FILE* fp, int version)
+FILE* SmoothingWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -519,7 +519,7 @@ FILE* smooth_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* smooth_widget::LoadParams(FILE* fp, int version)
+FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -576,4 +576,4 @@ FILE* smooth_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void smooth_widget::hideparams_changed() { method_changed(0); }
+void SmoothingWidget::hideparams_changed() { method_changed(0); }

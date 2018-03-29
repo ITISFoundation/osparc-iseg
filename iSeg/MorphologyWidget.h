@@ -10,34 +10,34 @@
 #ifndef MORPHO_4MARCH05
 #define MORPHO_4MARCH05
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Plugin/WidgetInterface.h"
+
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qsize.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Plugin/WidgetInterface.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 namespace iseg {
 
-class morpho_widget : public WidgetInterface
+class MorphologyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	morpho_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~morpho_widget();
+	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+					 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~MorphologyWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

@@ -10,31 +10,31 @@
 #ifndef MEASUREWIDGET_12DEZ07
 #define MEASUREWIDGET_12DEZ07
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Plugin/WidgetInterface.h"
+
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Plugin/WidgetInterface.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 namespace iseg {
 
-class measure_widget : public WidgetInterface
+class MeasurementWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	measure_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~measure_widget();
+	MeasurementWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+					  const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~MeasurementWidget();
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	QSize sizeHint() const;

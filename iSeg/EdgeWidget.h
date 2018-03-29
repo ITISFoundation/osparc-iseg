@@ -32,13 +32,13 @@
 
 namespace iseg {
 
-class edge_widget : public WidgetInterface
+class EdgeWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	edge_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~edge_widget();
+	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+			   const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~EdgeWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

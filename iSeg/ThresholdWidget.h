@@ -10,8 +10,13 @@
 #ifndef THRESHWIDGET_24Feb05
 #define THRESHWIDGET_24Feb05
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Plugin/WidgetInterface.h"
+
 #include <q3listbox.h>
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -22,27 +27,22 @@
 #include <qlayout.h>
 #include <qlineedit.h>
 #include <qpainter.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Plugin/WidgetInterface.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 namespace iseg {
 
-class thresh_widget : public WidgetInterface
+class ThresholdWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	thresh_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~thresh_widget();
+	ThresholdWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+					const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~ThresholdWidget();
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	QSize sizeHint() const;

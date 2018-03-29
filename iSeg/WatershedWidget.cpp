@@ -33,8 +33,8 @@
 
 using namespace iseg;
 
-watershed_widget::watershed_widget(SlicesHandler* hand3D, QWidget* parent,
-								   const char* name, Qt::WindowFlags wFlags)
+WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
+								 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
@@ -81,13 +81,13 @@ watershed_widget::watershed_widget(SlicesHandler* hand3D, QWidget* parent,
 	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
 }
 
-void watershed_widget::hsl_changed()
+void WatershedWidget::hsl_changed()
 {
 	recalc1();
 	emit end_datachange(this, iseg::NoUndo);
 }
 
-void watershed_widget::hsb_changed(int value)
+void WatershedWidget::hsb_changed(int value)
 {
 	int oldval100 = sbh_old * sl_h->value();
 	int sbh_new = value;
@@ -104,7 +104,7 @@ void watershed_widget::hsb_changed(int value)
 	return;
 }
 
-void watershed_widget::execute()
+void WatershedWidget::execute()
 {
 	if (usp != NULL)
 	{
@@ -117,7 +117,7 @@ void watershed_widget::execute()
 	recalc();
 }
 
-void watershed_widget::recalc()
+void WatershedWidget::recalc()
 {
 	if (usp != NULL)
 	{
@@ -134,7 +134,7 @@ void watershed_widget::recalc()
 	return;
 }
 
-void watershed_widget::marks_changed()
+void WatershedWidget::marks_changed()
 {
 	//	recalc();
 
@@ -153,7 +153,7 @@ void watershed_widget::marks_changed()
 	return;
 }
 
-void watershed_widget::recalc1()
+void WatershedWidget::recalc1()
 {
 	if (usp != NULL)
 	{
@@ -164,16 +164,16 @@ void watershed_widget::recalc1()
 	return;
 }
 
-QSize watershed_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize WatershedWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-watershed_widget::~watershed_widget()
+WatershedWidget::~WatershedWidget()
 {
 	delete vbox1;
 
 	free(usp);
 }
 
-void watershed_widget::slicenr_changed()
+void WatershedWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -181,7 +181,7 @@ void watershed_widget::slicenr_changed()
 	//	}
 }
 
-void watershed_widget::bmphand_changed(bmphandler* bmph)
+void WatershedWidget::bmphand_changed(bmphandler* bmph)
 {
 	if (usp != NULL)
 	{
@@ -193,13 +193,13 @@ void watershed_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void watershed_widget::init()
+void WatershedWidget::init()
 {
 	slicenr_changed();
 	hideparams_changed();
 }
 
-void watershed_widget::newloaded()
+void WatershedWidget::newloaded()
 {
 	if (usp != NULL)
 	{
@@ -211,7 +211,7 @@ void watershed_widget::newloaded()
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void watershed_widget::slider_pressed()
+void WatershedWidget::slider_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -219,9 +219,9 @@ void watershed_widget::slider_pressed()
 	emit begin_datachange(dataSelection, this);
 }
 
-void watershed_widget::slider_released() { emit end_datachange(this); }
+void WatershedWidget::slider_released() { emit end_datachange(this); }
 
-FILE* watershed_widget::SaveParams(FILE* fp, int version)
+FILE* WatershedWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -237,7 +237,7 @@ FILE* watershed_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* watershed_widget::LoadParams(FILE* fp, int version)
+FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -262,7 +262,7 @@ FILE* watershed_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void watershed_widget::hideparams_changed()
+void WatershedWidget::hideparams_changed()
 {
 	if (hideparams)
 	{

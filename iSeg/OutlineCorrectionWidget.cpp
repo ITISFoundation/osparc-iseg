@@ -31,8 +31,8 @@
 using namespace std;
 using namespace iseg;
 
-OutlineCorr_widget::OutlineCorr_widget(SlicesHandler* hand3D, QWidget* parent,
-									   const char* name, Qt::WindowFlags wFlags)
+OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent,
+												 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("OutLine Correction routines that can be used to modify "
@@ -268,7 +268,7 @@ OutlineCorr_widget::OutlineCorr_widget(SlicesHandler* hand3D, QWidget* parent,
 	workbits_changed();
 }
 
-OutlineCorr_widget::~OutlineCorr_widget()
+OutlineCorrectionWidget::~OutlineCorrectionWidget()
 {
 	delete vbox1;
 	delete method;
@@ -276,18 +276,18 @@ OutlineCorr_widget::~OutlineCorr_widget()
 	delete brushtype;
 }
 
-void OutlineCorr_widget::request_selected_tissue_BG()
+void OutlineCorrectionWidget::request_selected_tissue_BG()
 {
 	emit signal_request_selected_tissue_BG();
 }
 
-void OutlineCorr_widget::request_selected_tissue_TS()
+void OutlineCorrectionWidget::request_selected_tissue_TS()
 {
 	emit signal_request_selected_tissue_TS();
 }
 
-void OutlineCorr_widget::Select_selected_tissue_BG(QString tissueName,
-												   tissues_size_t nr)
+void OutlineCorrectionWidget::Select_selected_tissue_BG(QString tissueName,
+														tissues_size_t nr)
 {
 	backgroundText->clear();
 	backgroundText->setText(tissueName);
@@ -301,8 +301,8 @@ void OutlineCorr_widget::Select_selected_tissue_BG(QString tissueName,
 		pb_removeholes->setEnabled(false);
 }
 
-void OutlineCorr_widget::Select_selected_tissue_TS(QString tissueName,
-												   tissues_size_t nr)
+void OutlineCorrectionWidget::Select_selected_tissue_TS(QString tissueName,
+														tissues_size_t nr)
 {
 	skinText->clear();
 	skinText->setText(tissueName);
@@ -316,9 +316,9 @@ void OutlineCorr_widget::Select_selected_tissue_TS(QString tissueName,
 		pb_removeholes->setEnabled(false);
 }
 
-QSize OutlineCorr_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize OutlineCorrectionWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void OutlineCorr_widget::draw_circle(Point p)
+void OutlineCorrectionWidget::draw_circle(Point p)
 {
 	Point p1;
 	vpdyn.clear();
@@ -376,7 +376,7 @@ void OutlineCorr_widget::draw_circle(Point p)
 	vpdyn.clear();
 }
 
-void OutlineCorr_widget::mouse_clicked(Point p)
+void OutlineCorrectionWidget::mouse_clicked(Point p)
 {
 	if (selectobj)
 	{
@@ -471,7 +471,7 @@ void OutlineCorr_widget::mouse_clicked(Point p)
 	}
 }
 
-void OutlineCorr_widget::mouse_moved(Point p)
+void OutlineCorrectionWidget::mouse_moved(Point p)
 {
 	if (!selectobj)
 	{
@@ -547,7 +547,7 @@ void OutlineCorr_widget::mouse_moved(Point p)
 	}
 }
 
-void OutlineCorr_widget::mouse_released(Point p)
+void OutlineCorrectionWidget::mouse_released(Point p)
 {
 	if (selectobj)
 	{
@@ -604,7 +604,7 @@ void OutlineCorr_widget::mouse_released(Point p)
 	}
 }
 
-void OutlineCorr_widget::method_changed()
+void OutlineCorrectionWidget::method_changed()
 {
 	tissuesListBackground->hide();
 	tissuesListSkin->hide();
@@ -826,7 +826,7 @@ void OutlineCorr_widget::method_changed()
 	pixmm_changed();
 }
 
-void OutlineCorr_widget::removeholes_pushed()
+void OutlineCorrectionWidget::removeholes_pushed()
 {
 	//	bmphand->fill_holes(255.0f,sb_holesize->value());
 
@@ -1106,13 +1106,13 @@ void OutlineCorr_widget::removeholes_pushed()
 	emit end_datachange(this);
 }
 
-void OutlineCorr_widget::selectobj_pushed()
+void OutlineCorrectionWidget::selectobj_pushed()
 {
 	selectobj = true;
 	pb_selectobj->setDown(true);
 }
 
-void OutlineCorr_widget::workbits_changed()
+void OutlineCorrectionWidget::workbits_changed()
 {
 	bmphand = handler3D->get_activebmphandler();
 	float* workbits = bmphand->return_work();
@@ -1129,7 +1129,7 @@ void OutlineCorr_widget::workbits_changed()
 	}
 }
 
-void OutlineCorr_widget::slicenr_changed()
+void OutlineCorrectionWidget::slicenr_changed()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -1140,7 +1140,7 @@ void OutlineCorr_widget::slicenr_changed()
 		workbits_changed();
 }
 
-void OutlineCorr_widget::bmphand_changed(bmphandler* bmph)
+void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -1149,31 +1149,31 @@ void OutlineCorr_widget::bmphand_changed(bmphandler* bmph)
 	workbits_changed();
 }
 
-void OutlineCorr_widget::init()
+void OutlineCorrectionWidget::init()
 {
 	slicenr_changed();
 	hideparams_changed();
 }
 
-void OutlineCorr_widget::newloaded()
+void OutlineCorrectionWidget::newloaded()
 {
 	handler3D->get_spacing(spacing);
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void OutlineCorr_widget::tissuenr_changed(int tissuenr1)
+void OutlineCorrectionWidget::tissuenr_changed(int tissuenr1)
 {
 	tissuenr = (tissues_size_t)(tissuenr1 + 1);
 }
 
-void OutlineCorr_widget::cleanup()
+void OutlineCorrectionWidget::cleanup()
 {
 	vpdyn.clear();
 	emit vpdyn_changed(&vpdyn);
 }
 
-FILE* OutlineCorr_widget::SaveParams(FILE* fp, int version)
+FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -1221,7 +1221,7 @@ FILE* OutlineCorr_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* OutlineCorr_widget::LoadParams(FILE* fp, int version)
+FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -1282,9 +1282,9 @@ FILE* OutlineCorr_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void OutlineCorr_widget::hideparams_changed() { method_changed(); }
+void OutlineCorrectionWidget::hideparams_changed() { method_changed(); }
 
-void OutlineCorr_widget::pixmm_changed()
+void OutlineCorrectionWidget::pixmm_changed()
 {
 	bool add_skin_mm = mm->isOn() && addskin->isOn() && allslices->isChecked();
 	bool brush_mm = mm->isOn() && brush->isOn() && allslices->isChecked();

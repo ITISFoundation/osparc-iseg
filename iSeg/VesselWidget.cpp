@@ -28,8 +28,8 @@
 using namespace std;
 using namespace iseg;
 
-vessel_widget::vessel_widget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
+VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
+						   const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
@@ -80,11 +80,11 @@ vessel_widget::vessel_widget(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(cbb2_changed(int)));
 }
 
-vessel_widget::~vessel_widget() { delete vbox1; }
+VesselWidget::~VesselWidget() { delete vbox1; }
 
-QSize vessel_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize VesselWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void vessel_widget::init()
+void VesselWidget::init()
 {
 	getlabels();
 
@@ -98,19 +98,19 @@ void vessel_widget::init()
 	emit vp1_changed(&vp);
 }
 
-FILE* vessel_widget::SaveParams(FILE* fp, int version)
+FILE* VesselWidget::SaveParams(FILE* fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
-FILE* vessel_widget::LoadParams(FILE* fp, int version)
+FILE* VesselWidget::LoadParams(FILE* fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
-void vessel_widget::getlabels()
+void VesselWidget::getlabels()
 {
 	handler3D->get_labels(&labels);
 	QObject::disconnect(cbb_lb1, SIGNAL(activated(int)), this,
@@ -190,9 +190,9 @@ void vessel_widget::getlabels()
 	}
 }
 
-void vessel_widget::marks_changed() { getlabels(); }
+void VesselWidget::marks_changed() { getlabels(); }
 
-void vessel_widget::execute()
+void VesselWidget::execute()
 {
 	World _world;
 	reset_branchTree();
@@ -263,7 +263,7 @@ void vessel_widget::execute()
 	return;
 }
 
-void vessel_widget::nrend_changed(int newval)
+void VesselWidget::nrend_changed(int newval)
 {
 	if (newval >= (int)selectedlabels.size())
 	{
@@ -289,7 +289,7 @@ void vessel_widget::nrend_changed(int newval)
 	return;
 }
 
-void vessel_widget::endnr_changed(int newval)
+void VesselWidget::endnr_changed(int newval)
 {
 	QObject::disconnect(cbb_lb2, SIGNAL(activated(int)), this,
 						SLOT(cbb2_changed(int)));
@@ -303,19 +303,19 @@ void vessel_widget::endnr_changed(int newval)
 					 SLOT(cbb2_changed(int)));
 }
 
-void vessel_widget::cbb1_changed(int newval)
+void VesselWidget::cbb1_changed(int newval)
 {
 	selectedlabels[0] = labels[newval];
 }
 
-void vessel_widget::cbb2_changed(int newval)
+void VesselWidget::cbb2_changed(int newval)
 {
 	selectedlabels[sb_endnr->value()] = labels[newval];
 }
 
-void vessel_widget::newloaded() { reset_branchTree(); }
+void VesselWidget::newloaded() { reset_branchTree(); }
 
-void vessel_widget::reset_branchTree()
+void VesselWidget::reset_branchTree()
 {
 	branchTree.clear();
 	vp.clear();
@@ -323,7 +323,7 @@ void vessel_widget::reset_branchTree()
 	pb_store->setEnabled(false);
 }
 
-void vessel_widget::slicenr_changed()
+void VesselWidget::slicenr_changed()
 {
 	branchTree.resetIterator();
 	vp.clear();
@@ -335,7 +335,7 @@ void vessel_widget::slicenr_changed()
 	emit vp1_changed(&vp);
 }
 
-void vessel_widget::savevessel()
+void VesselWidget::savevessel()
 {
 	QString savefilename = Q3FileDialog::getSaveFileName(
 		QString::null, "Vessel-Tracks (*.txt)\n", this); //, filename);
@@ -375,7 +375,7 @@ void vessel_widget::savevessel()
 	}
 }
 
-void vessel_widget::clean_up()
+void VesselWidget::clean_up()
 {
 	vp.clear();
 	emit vp1_changed(&vp);

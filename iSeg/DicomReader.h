@@ -22,7 +22,7 @@ namespace iseg {
 
 const unsigned length = 1000; // Arbitrary buffer size
 
-class dicomread
+class DicomReader
 {
 public:
 	bool opendicom(const char* filename);

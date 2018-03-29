@@ -32,9 +32,9 @@
 
 using namespace iseg;
 
-FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler* hand3D,
-											 QWidget* parent, const char* name,
-											 Qt::WindowFlags wFlags)
+FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
+												 QWidget* parent, const char* name,
+												 Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
@@ -211,7 +211,7 @@ FastMarchFuzzy_widget::FastMarchFuzzy_widget(SlicesHandler* hand3D,
 	sl_sigma->setValue(int(sigma * 100 / sigmamax));
 }
 
-FastMarchFuzzy_widget::~FastMarchFuzzy_widget()
+FastmarchingFuzzyWidget::~FastmarchingFuzzyWidget()
 {
 	delete vbox1;
 	delete bg_method;
@@ -225,7 +225,7 @@ FastMarchFuzzy_widget::~FastMarchFuzzy_widget()
 	return;
 }
 
-void FastMarchFuzzy_widget::slicenr_changed()
+void FastmarchingFuzzyWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -233,7 +233,7 @@ void FastMarchFuzzy_widget::slicenr_changed()
 	//	}
 }
 
-void FastMarchFuzzy_widget::bmphand_changed(bmphandler* bmph)
+void FastmarchingFuzzyWidget::bmphand_changed(bmphandler* bmph)
 {
 	if (IFTmarch != NULL)
 		delete IFTmarch;
@@ -249,7 +249,7 @@ void FastMarchFuzzy_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void FastMarchFuzzy_widget::init()
+void FastmarchingFuzzyWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -276,13 +276,13 @@ void FastMarchFuzzy_widget::init()
 	//	IFTfuzzy
 }
 
-void FastMarchFuzzy_widget::newloaded()
+void FastmarchingFuzzyWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void FastMarchFuzzy_widget::cleanup()
+void FastmarchingFuzzyWidget::cleanup()
 {
 	if (IFTmarch != NULL)
 		delete IFTmarch;
@@ -293,9 +293,9 @@ void FastMarchFuzzy_widget::cleanup()
 	sl_extend->setEnabled(false);
 }
 
-QSize FastMarchFuzzy_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize FastmarchingFuzzyWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void FastMarchFuzzy_widget::getrange()
+void FastmarchingFuzzyWidget::getrange()
 {
 	extendmax = 0;
 	for (unsigned i = 0; i < area; i++)
@@ -304,7 +304,7 @@ void FastMarchFuzzy_widget::getrange()
 	return;
 }
 
-void FastMarchFuzzy_widget::mouse_clicked(Point p)
+void FastmarchingFuzzyWidget::mouse_clicked(Point p)
 {
 	if (rb_fastmarch->isOn())
 	{
@@ -355,7 +355,7 @@ void FastMarchFuzzy_widget::mouse_clicked(Point p)
 	}
 }
 
-void FastMarchFuzzy_widget::mouse_released(Point p)
+void FastmarchingFuzzyWidget::mouse_released(Point p)
 {
 	if (rb_drag->isOn())
 	{
@@ -377,7 +377,7 @@ void FastMarchFuzzy_widget::mouse_released(Point p)
 	}
 }
 
-void FastMarchFuzzy_widget::mouse_moved(Point p)
+void FastmarchingFuzzyWidget::mouse_moved(Point p)
 {
 	if (rb_drag->isOn())
 	{
@@ -491,7 +491,7 @@ void FastMarchFuzzy_widget::mouse_moved(Point p)
 	}
 }
 
-void FastMarchFuzzy_widget::execute()
+void FastmarchingFuzzyWidget::execute()
 {
 	float* workbits = bmphand->return_work();
 	for (unsigned i = 0; i < area; i++)
@@ -505,7 +505,7 @@ void FastMarchFuzzy_widget::execute()
 	bmphand->set_mode(2, false);
 }
 
-void FastMarchFuzzy_widget::slextend_changed(int val)
+void FastmarchingFuzzyWidget::slextend_changed(int val)
 {
 	extend = val * 0.005f * extendmax;
 	if (rb_slider->isOn())
@@ -514,14 +514,14 @@ void FastMarchFuzzy_widget::slextend_changed(int val)
 	return;
 }
 
-void FastMarchFuzzy_widget::bmp_changed()
+void FastmarchingFuzzyWidget::bmp_changed()
 {
 	bmphand = handler3D->get_activebmphandler();
 	//	sl_extend->setEnabled(false);
 	init();
 }
 
-void FastMarchFuzzy_widget::method_changed()
+void FastmarchingFuzzyWidget::method_changed()
 {
 	if (rb_fastmarch->isOn())
 	{
@@ -548,7 +548,7 @@ void FastMarchFuzzy_widget::method_changed()
 	}
 }
 
-void FastMarchFuzzy_widget::interact_changed()
+void FastmarchingFuzzyWidget::interact_changed()
 {
 	if (rb_drag->isOn())
 	{
@@ -565,7 +565,7 @@ void FastMarchFuzzy_widget::interact_changed()
 	}
 }
 
-void FastMarchFuzzy_widget::spinbox_changed()
+void FastmarchingFuzzyWidget::spinbox_changed()
 {
 	if (thresh > sb_thresh->value())
 	{
@@ -619,7 +619,7 @@ void FastMarchFuzzy_widget::spinbox_changed()
 	return;
 }
 
-void FastMarchFuzzy_widget::slider_changed()
+void FastmarchingFuzzyWidget::slider_changed()
 {
 	sigma = sl_sigma->value() * 0.01f * sigmamax;
 	thresh = sl_thresh->value() * 0.01f * sb_thresh->value();
@@ -638,7 +638,7 @@ void FastMarchFuzzy_widget::slider_changed()
 	return;
 }
 
-void FastMarchFuzzy_widget::slextend_pressed()
+void FastmarchingFuzzyWidget::slextend_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -646,9 +646,9 @@ void FastMarchFuzzy_widget::slextend_pressed()
 	emit begin_datachange(dataSelection, this);
 }
 
-void FastMarchFuzzy_widget::slextend_released() { emit end_datachange(this); }
+void FastmarchingFuzzyWidget::slextend_released() { emit end_datachange(this); }
 
-FILE* FastMarchFuzzy_widget::SaveParams(FILE* fp, int version)
+FILE* FastmarchingFuzzyWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -695,7 +695,7 @@ FILE* FastMarchFuzzy_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* FastMarchFuzzy_widget::LoadParams(FILE* fp, int version)
+FILE* FastmarchingFuzzyWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -774,7 +774,7 @@ FILE* FastMarchFuzzy_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void FastMarchFuzzy_widget::hideparams_changed()
+void FastmarchingFuzzyWidget::hideparams_changed()
 {
 	method_changed();
 	interact_changed();

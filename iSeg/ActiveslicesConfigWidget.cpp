@@ -19,8 +19,8 @@
 
 using namespace iseg;
 
-ActiveSlicesConfig::ActiveSlicesConfig(SlicesHandler* hand3D, QWidget* parent,
-									   const char* name, Qt::WindowFlags wFlags)
+ActiveSlicesConfigWidget::ActiveSlicesConfigWidget(SlicesHandler* hand3D, QWidget* parent,
+												   const char* name, Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
@@ -60,7 +60,7 @@ ActiveSlicesConfig::ActiveSlicesConfig(SlicesHandler* hand3D, QWidget* parent,
 	return;
 }
 
-void ActiveSlicesConfig::ok_pressed()
+void ActiveSlicesConfigWidget::ok_pressed()
 {
 	if (sb_start->value() > sb_end->value())
 		return;
@@ -71,7 +71,7 @@ void ActiveSlicesConfig::ok_pressed()
 	close();
 }
 
-void ActiveSlicesConfig::startslice_changed(int startslice1)
+void ActiveSlicesConfigWidget::startslice_changed(int startslice1)
 {
 	if (startslice1 > sb_end->value())
 	{
@@ -84,7 +84,7 @@ void ActiveSlicesConfig::startslice_changed(int startslice1)
 	}
 }
 
-void ActiveSlicesConfig::endslice_changed(int endslice1)
+void ActiveSlicesConfigWidget::endslice_changed(int endslice1)
 {
 	if (endslice1 < sb_start->value())
 	{

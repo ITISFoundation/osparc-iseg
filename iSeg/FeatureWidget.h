@@ -37,11 +37,11 @@
 
 namespace iseg {
 
-class featurewidget : public WidgetInterface
+class FeatureWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	featurewidget(SlicesHandler* hand3D, QWidget* parent = 0,
+	FeatureWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 				  const char* name = 0, Qt::WindowFlags wFlags = 0);
 	void init();
 	void newloaded();

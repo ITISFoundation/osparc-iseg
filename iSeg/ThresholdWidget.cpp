@@ -46,8 +46,8 @@
 
 using namespace iseg;
 
-thresh_widget::thresh_widget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
+ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
+								 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment tissues based on thresholding techniques."));
@@ -247,13 +247,13 @@ thresh_widget::thresh_widget(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(selectCenterFile_pushed()));
 }
 
-thresh_widget::~thresh_widget()
+ThresholdWidget::~ThresholdWidget()
 {
 	delete vbox1;
 	delete modegroup;
 }
 
-void thresh_widget::execute()
+void ThresholdWidget::execute()
 {
 	unsigned char modedummy;
 
@@ -461,7 +461,7 @@ void thresh_widget::execute()
 	emit end_datachange(this);
 }
 
-void thresh_widget::method_changed(int)
+void ThresholdWidget::method_changed(int)
 {
 	if (hideparams)
 	{
@@ -577,7 +577,7 @@ void thresh_widget::method_changed(int)
 	}
 }
 
-void thresh_widget::getrange()
+void ThresholdWidget::getrange()
 {
 	Pair p;
 	bmphand->get_bmprange(&p);
@@ -607,7 +607,7 @@ void thresh_widget::getrange()
 	return;
 }
 
-void thresh_widget::tissuenr_changed(int newval)
+void ThresholdWidget::tissuenr_changed(int newval)
 {
 	if (rb_manual->isOn())
 	{
@@ -631,7 +631,7 @@ void thresh_widget::tissuenr_changed(int newval)
 	return;
 }
 
-void thresh_widget::nrtissues_changed(int newval)
+void ThresholdWidget::nrtissues_changed(int newval)
 {
 	if (rb_manual->isOn())
 	{
@@ -656,7 +656,7 @@ void thresh_widget::nrtissues_changed(int newval)
 	return;
 }
 
-void thresh_widget::dim_changed(int newval)
+void ThresholdWidget::dim_changed(int newval)
 {
 	if (rb_kmeans->isOn() || rb_EM->isOn())
 	{
@@ -698,7 +698,7 @@ void thresh_widget::dim_changed(int newval)
 	return;
 }
 
-void thresh_widget::subsect_toggled()
+void ThresholdWidget::subsect_toggled()
 {
 	if (subsect->isOn())
 	{
@@ -712,7 +712,7 @@ void thresh_widget::subsect_toggled()
 	return;
 }
 
-void thresh_widget::slider_changed(int newval)
+void ThresholdWidget::slider_changed(int newval)
 {
 	if (rb_manual->isOn())
 	{
@@ -736,7 +736,7 @@ void thresh_widget::slider_changed(int newval)
 	return;
 }
 
-void thresh_widget::slider_pressed()
+void ThresholdWidget::slider_pressed()
 {
 	if (rb_manual->isOn())
 	{
@@ -748,7 +748,7 @@ void thresh_widget::slider_pressed()
 	}
 }
 
-void thresh_widget::slider_released()
+void ThresholdWidget::slider_released()
 {
 	if (rb_manual->isOn())
 	{
@@ -756,7 +756,7 @@ void thresh_widget::slider_released()
 	}
 }
 
-void thresh_widget::bmp_changed()
+void ThresholdWidget::bmp_changed()
 {
 	bmphand = handler3D->get_activebmphandler();
 	getrange();
@@ -764,9 +764,9 @@ void thresh_widget::bmp_changed()
 	return;
 }
 
-QSize thresh_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize ThresholdWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void thresh_widget::slicenr_changed()
+void ThresholdWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -774,7 +774,7 @@ void thresh_widget::slicenr_changed()
 	//	}
 }
 
-void thresh_widget::bmphand_changed(bmphandler* bmph)
+void ThresholdWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -783,7 +783,7 @@ void thresh_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void thresh_widget::init()
+void ThresholdWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -795,13 +795,13 @@ void thresh_widget::init()
 	hideparams_changed();
 }
 
-void thresh_widget::newloaded()
+void ThresholdWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
-void thresh_widget::le_borderval_returnpressed()
+void ThresholdWidget::le_borderval_returnpressed()
 {
 	bool b1;
 	float val = le_borderval->text().toFloat(&b1);
@@ -844,7 +844,7 @@ void thresh_widget::le_borderval_returnpressed()
 	}
 }
 
-void thresh_widget::saveborders_execute()
+void ThresholdWidget::saveborders_execute()
 {
 	QString savefilename = Q3FileDialog::getSaveFileName(
 		QString::null, "Boarders (*.txt)\n", this); //, filename);
@@ -861,7 +861,7 @@ void thresh_widget::saveborders_execute()
 	}
 }
 
-void thresh_widget::loadborders_execute()
+void ThresholdWidget::loadborders_execute()
 {
 	if (rb_manual->isOn())
 	{
@@ -909,7 +909,7 @@ void thresh_widget::loadborders_execute()
 	}
 }
 
-FILE* thresh_widget::SaveParams(FILE* fp, int version)
+FILE* ThresholdWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -960,7 +960,7 @@ FILE* thresh_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* thresh_widget::LoadParams(FILE* fp, int version)
+FILE* ThresholdWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -1049,9 +1049,9 @@ FILE* thresh_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void thresh_widget::hideparams_changed() { method_changed(0); }
+void ThresholdWidget::hideparams_changed() { method_changed(0); }
 
-void thresh_widget::select_pushed()
+void ThresholdWidget::select_pushed()
 {
 	QString loadfilename = Q3FileDialog::getOpenFileName(
 		QString::null,
@@ -1086,14 +1086,14 @@ void thresh_widget::select_pushed()
 	return;
 }
 
-void thresh_widget::selectCenterFile_pushed()
+void ThresholdWidget::selectCenterFile_pushed()
 {
 	centerFilename = Q3FileDialog::getOpenFileName(QString::null,
 												   "Text File (*.txt*)", this);
 	le_centerFilename->setText(centerFilename);
 }
 
-void thresh_widget::RGBA_changed(int change)
+void ThresholdWidget::RGBA_changed(int change)
 {
 	int buttonsChecked = 0;
 	buttonsChecked = buttonR->isChecked() + buttonG->isChecked() +
@@ -1104,7 +1104,7 @@ void thresh_widget::RGBA_changed(int change)
 		sb_tissuenr->setValue(2);
 }
 
-void thresh_widget::useCenterFile_changed(int change)
+void ThresholdWidget::useCenterFile_changed(int change)
 {
 	if (change > 0)
 	{

@@ -8754,7 +8754,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 	{
 		loaded = true;
 
-		dicomread dcmr;
+		DicomReader dcmr;
 		if (dcmr.opendicom(lfilename[0]))
 		{
 			Pair p1;
@@ -8943,7 +8943,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 {
 	float retval = -1.0f;
-	dicomread dcmread;
+	DicomReader dcmread;
 	std::vector<float> vpos;
 
 	for (std::vector<const char*>::iterator it = lfilename->begin();
@@ -8987,7 +8987,7 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 									 std::vector<unsigned>* dicomseriesnr,
 									 std::vector<unsigned>* dicomseriesnrlist)
 {
-	dicomread dcmread;
+	DicomReader dcmread;
 
 	dicomseriesnr->clear();
 	for (std::vector<const char*>::iterator it = vnames->begin();

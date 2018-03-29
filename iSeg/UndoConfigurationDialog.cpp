@@ -19,8 +19,8 @@
 
 using namespace iseg;
 
-UndoConfig::UndoConfig(SlicesHandler* hand3D, QWidget* parent, const char* name,
-					   Qt::WindowFlags wFlags)
+UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name,
+												 Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
@@ -55,9 +55,9 @@ UndoConfig::UndoConfig(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	return;
 }
 
-UndoConfig::~UndoConfig() { delete vbox1; }
+UndoConfigurationDialog::~UndoConfigurationDialog() { delete vbox1; }
 
-void UndoConfig::ok_pressed()
+void UndoConfigurationDialog::ok_pressed()
 {
 	handler3D->set_undo3D(cb_undo3D->isChecked());
 	handler3D->SetNumberOfUndoArrays((unsigned)sb_nrundoarrays->value());

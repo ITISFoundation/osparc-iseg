@@ -33,13 +33,13 @@
 
 namespace iseg {
 
-class IFTrg_widget : public WidgetInterface
+class ImageForestingTransformRegionGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	IFTrg_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				 const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~IFTrg_widget();
+	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+											   const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~ImageForestingTransformRegionGrowingWidget();
 	void init();
 	void newloaded();
 	void cleanup();

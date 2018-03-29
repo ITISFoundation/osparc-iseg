@@ -466,10 +466,10 @@ void bmptissuesliceshower::set_zoom(double z)
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-sliceshower_widget::sliceshower_widget(SlicesHandler* hand3D, bool orientation,
-									   float thickness1, float zoom1,
-									   QWidget* parent, const char* name,
-									   Qt::WindowFlags wFlags)
+SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
+									 float thickness1, float zoom1,
+									 QWidget* parent, const char* name,
+									 Qt::WindowFlags wFlags)
 	: QWidget(parent, name, wFlags), handler3D(hand3D), directionx(orientation),
 	  xyexists(false)
 {
@@ -545,7 +545,7 @@ sliceshower_widget::sliceshower_widget(SlicesHandler* hand3D, bool orientation,
 	return;
 }
 
-sliceshower_widget::~sliceshower_widget()
+SliceViewerWidget::~SliceViewerWidget()
 {
 	delete vbox;
 	delete shower;
@@ -559,21 +559,21 @@ sliceshower_widget::~sliceshower_widget()
 	delete qsb_slicenr;
 }
 
-void sliceshower_widget::closeEvent(QCloseEvent* qce)
+void SliceViewerWidget::closeEvent(QCloseEvent* qce)
 {
 	emit hasbeenclosed();
 	QWidget::closeEvent(qce);
 }
 
-void sliceshower_widget::slicenr_changed(int i)
+void SliceViewerWidget::slicenr_changed(int i)
 {
 	shower->slicenr_changed(i - 1);
 	emit slice_changed(i - 1);
 }
 
-int sliceshower_widget::get_slicenr() { return qsb_slicenr->value() - 1; }
+int SliceViewerWidget::get_slicenr() { return qsb_slicenr->value() - 1; }
 
-void sliceshower_widget::bmp_changed()
+void SliceViewerWidget::bmp_changed()
 {
 	if (rb_bmp->isOn())
 	{
@@ -598,7 +598,7 @@ void sliceshower_widget::bmp_changed()
 	}
 }
 
-void sliceshower_widget::work_changed()
+void SliceViewerWidget::work_changed()
 {
 	if (rb_work->isOn())
 	{
@@ -623,14 +623,14 @@ void sliceshower_widget::work_changed()
 	}
 }
 
-void sliceshower_widget::tissue_changed() { shower->tissue_changed(); }
+void SliceViewerWidget::tissue_changed() { shower->tissue_changed(); }
 
-void sliceshower_widget::tissuevisible_changed()
+void SliceViewerWidget::tissuevisible_changed()
 {
 	shower->set_tissuevisible(cb_tissuevisible->isChecked());
 }
 
-void sliceshower_widget::workorbmp_changed()
+void SliceViewerWidget::workorbmp_changed()
 {
 	if (rb_bmp->isOn())
 	{
@@ -642,19 +642,19 @@ void sliceshower_widget::workorbmp_changed()
 	}
 }
 
-void sliceshower_widget::thickness_changed(float thickness1)
+void SliceViewerWidget::thickness_changed(float thickness1)
 {
 	shower->thickness_changed(thickness1);
 	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
-void sliceshower_widget::pixelsize_changed(Pair pixelsize1)
+void SliceViewerWidget::pixelsize_changed(Pair pixelsize1)
 {
 	shower->pixelsize_changed(pixelsize1);
 	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
-void sliceshower_widget::xyexists_changed(bool on)
+void SliceViewerWidget::xyexists_changed(bool on)
 {
 	cb_xyposvisible->setEnabled(on);
 	if (on)
@@ -663,38 +663,38 @@ void sliceshower_widget::xyexists_changed(bool on)
 	}
 }
 
-void sliceshower_widget::zpos_changed() { shower->zpos_changed(); }
+void SliceViewerWidget::zpos_changed() { shower->zpos_changed(); }
 
-void sliceshower_widget::xypos_changed(int i) { shower->xypos_changed(i); }
+void SliceViewerWidget::xypos_changed(int i) { shower->xypos_changed(i); }
 
-void sliceshower_widget::xyposvisible_changed()
+void SliceViewerWidget::xyposvisible_changed()
 {
 	shower->set_xyposvisible(cb_xyposvisible->isChecked());
 }
 
-void sliceshower_widget::zposvisible_changed()
+void SliceViewerWidget::zposvisible_changed()
 {
 	shower->set_zposvisible(cb_zposvisible->isChecked());
 }
 
-void sliceshower_widget::set_zoom(double z)
+void SliceViewerWidget::set_zoom(double z)
 {
 	shower->set_zoom(z);
 	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
-void sliceshower_widget::set_scale(float offset1, float factor1,
-								   bool bmporwork1)
+void SliceViewerWidget::set_scale(float offset1, float factor1,
+								  bool bmporwork1)
 {
 	shower->set_scale(offset1, factor1, bmporwork1);
 }
 
-void sliceshower_widget::set_scaleoffset(float offset1, bool bmporwork1)
+void SliceViewerWidget::set_scaleoffset(float offset1, bool bmporwork1)
 {
 	shower->set_scaleoffset(offset1, bmporwork1);
 }
 
-void sliceshower_widget::set_scalefactor(float factor1, bool bmporwork1)
+void SliceViewerWidget::set_scalefactor(float factor1, bool bmporwork1)
 {
 	shower->set_scalefactor(factor1, bmporwork1);
 }

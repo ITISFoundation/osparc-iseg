@@ -15,7 +15,7 @@
 using namespace std;
 using namespace iseg;
 
-levelset::levelset()
+Levelset::Levelset()
 {
 	loaded = false;
 	image = new bmphandler;
@@ -23,7 +23,7 @@ levelset::levelset()
 	return;
 }
 
-void levelset::init(unsigned short h, unsigned short w, float* levlset,
+void Levelset::init(unsigned short h, unsigned short w, float* levlset,
 					float* kbit, float* Pbit, float balloon, float epsilon1,
 					float step_size)
 {
@@ -66,7 +66,7 @@ void levelset::init(unsigned short h, unsigned short w, float* levlset,
 	return;
 }
 
-void levelset::init(unsigned short h, unsigned short w, float* initial, float f,
+void Levelset::init(unsigned short h, unsigned short w, float* initial, float f,
 					float* kbit, float* Pbit, float balloon, float epsilon1,
 					float step_size)
 {
@@ -86,7 +86,7 @@ void levelset::init(unsigned short h, unsigned short w, float* initial, float f,
 	return;
 }
 
-void levelset::init(unsigned short h, unsigned short w, Point p, float* kbit,
+void Levelset::init(unsigned short h, unsigned short w, Point p, float* kbit,
 					float* Pbit, float balloon, float epsilon1, float step_size)
 {
 	width = w;
@@ -117,7 +117,7 @@ void levelset::init(unsigned short h, unsigned short w, Point p, float* kbit,
 	return;
 }
 
-void levelset::iterate(unsigned nrsteps, unsigned updatefreq)
+void Levelset::iterate(unsigned nrsteps, unsigned updatefreq)
 {
 	for (unsigned i = 1; i <= nrsteps; ++i)
 	{
@@ -131,13 +131,13 @@ void levelset::iterate(unsigned nrsteps, unsigned updatefreq)
 	return;
 }
 
-void levelset::set_k(float* kbit)
+void Levelset::set_k(float* kbit)
 {
 	kbits = kbit;
 	return;
 }
 
-void levelset::set_P(float* Pbit)
+void Levelset::set_P(float* Pbit)
 {
 	Pbits = Pbit;
 	diffx(Pbits, Px);
@@ -161,7 +161,7 @@ void levelset::set_P(float* Pbit)
 	return;
 }
 
-void levelset::reinitialize()
+void Levelset::reinitialize()
 {
 	float thresh[2];
 	thresh[0] = 1;
@@ -196,7 +196,7 @@ void levelset::reinitialize()
 	return;
 }
 
-void levelset::make_step()
+void Levelset::make_step()
 {
 	float* levset;
 	levset = image->return_work();
@@ -231,7 +231,7 @@ void levelset::make_step()
 	return;
 }
 
-void levelset::diffx(float* input, float* output)
+void Levelset::diffx(float* input, float* output)
 {
 	unsigned k = 1;
 
@@ -253,7 +253,7 @@ void levelset::diffx(float* input, float* output)
 	return;
 }
 
-void levelset::diffy(float* input, float* output)
+void Levelset::diffy(float* input, float* output)
 {
 	unsigned k = width;
 	for (unsigned short j = 1; j < height - 1; ++j)
@@ -273,7 +273,7 @@ void levelset::diffy(float* input, float* output)
 	return;
 }
 
-void levelset::diffxx(float* input, float* output)
+void Levelset::diffxx(float* input, float* output)
 {
 	unsigned k = 1;
 	for (unsigned short j = 0; j < height; ++j)
@@ -294,7 +294,7 @@ void levelset::diffxx(float* input, float* output)
 	return;
 }
 
-void levelset::diffxy(float* input, float* output)
+void Levelset::diffxy(float* input, float* output)
 {
 	unsigned k = width + 1;
 	for (unsigned short j = 1; j < height - 1; ++j)
@@ -321,7 +321,7 @@ void levelset::diffxy(float* input, float* output)
 	return;
 }
 
-void levelset::diffyy(float* input, float* output)
+void Levelset::diffyy(float* input, float* output)
 {
 	unsigned k = width;
 	for (unsigned short j = 1; j < height - 1; ++j)
@@ -341,7 +341,7 @@ void levelset::diffyy(float* input, float* output)
 	return;
 }
 
-void levelset::return_levelset(float* output)
+void Levelset::return_levelset(float* output)
 {
 	//	image->SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump.bmp");
 
@@ -385,7 +385,7 @@ void levelset::return_levelset(float* output)
 	return;
 }
 
-void levelset::return_zerolevelset(vector<vector<Point>>* v1,
+void Levelset::return_zerolevelset(vector<vector<Point>>* v1,
 								   vector<vector<Point>>* v2, int minsize)
 {
 	image->swap_bmpwork();
@@ -408,7 +408,7 @@ void levelset::return_zerolevelset(vector<vector<Point>>* v1,
 	return;
 }
 
-levelset::~levelset()
+Levelset::~Levelset()
 {
 	if (loaded)
 	{

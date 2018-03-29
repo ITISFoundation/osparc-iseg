@@ -25,8 +25,8 @@
 
 using namespace iseg;
 
-measure_widget::measure_widget(SlicesHandler* hand3D, QWidget* parent,
-							   const char* name, Qt::WindowFlags wFlags)
+MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
+									 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
@@ -113,16 +113,16 @@ measure_widget::measure_widget(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(cbb_changed(int)));
 }
 
-measure_widget::~measure_widget()
+MeasurementWidget::~MeasurementWidget()
 {
 	delete vbox1;
 	delete modegroup;
 	delete inputgroup;
 }
 
-QSize measure_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize MeasurementWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void measure_widget::bmphand_changed(bmphandler* bmph)
+void MeasurementWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -131,7 +131,7 @@ void measure_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void measure_widget::init()
+void MeasurementWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -142,13 +142,13 @@ void measure_widget::init()
 		getlabels();
 }
 
-void measure_widget::newloaded()
+void MeasurementWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
-FILE* measure_widget::SaveParams(FILE* fp, int version)
+FILE* MeasurementWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 4)
 	{
@@ -172,7 +172,7 @@ FILE* measure_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* measure_widget::LoadParams(FILE* fp, int version)
+FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 3)
 	{
@@ -211,7 +211,7 @@ FILE* measure_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void measure_widget::pt_clicked(Point p)
+void MeasurementWidget::pt_clicked(Point p)
 {
 	if (rb_pts->isOn())
 	{
@@ -441,15 +441,15 @@ void measure_widget::pt_clicked(Point p)
 	}
 }
 
-void measure_widget::set_coord(unsigned short posit, Point p,
-							   unsigned short slicenr)
+void MeasurementWidget::set_coord(unsigned short posit, Point p,
+								  unsigned short slicenr)
 {
 	pt[posit][0] = (int)p.px;
 	pt[posit][1] = (int)p.py;
 	pt[posit][2] = (int)slicenr;
 }
 
-void measure_widget::cbb_changed(int)
+void MeasurementWidget::cbb_changed(int)
 {
 	if (rb_lbls->isOn() && !rb_vol->isOn())
 	{
@@ -569,11 +569,11 @@ void measure_widget::cbb_changed(int)
 	}
 }
 
-void measure_widget::method_changed(int) { update_visualization(); }
+void MeasurementWidget::method_changed(int) { update_visualization(); }
 
-void measure_widget::inputtype_changed(int) { update_visualization(); }
+void MeasurementWidget::inputtype_changed(int) { update_visualization(); }
 
-void measure_widget::update_visualization()
+void MeasurementWidget::update_visualization()
 {
 	if (labels.empty())
 	{
@@ -655,7 +655,7 @@ void measure_widget::update_visualization()
 	}
 }
 
-void measure_widget::getlabels()
+void MeasurementWidget::getlabels()
 {
 	handler3D->get_labels(&labels);
 	cbb_lb1->clear();
@@ -697,9 +697,9 @@ void measure_widget::getlabels()
 	update_visualization();
 }
 
-void measure_widget::marks_changed() { getlabels(); }
+void MeasurementWidget::marks_changed() { getlabels(); }
 
-float measure_widget::calculate()
+float MeasurementWidget::calculate()
 {
 	float thick = handler3D->get_slicethickness();
 	Pair p1 = handler3D->get_pixelsize();
@@ -834,7 +834,7 @@ float measure_widget::calculate()
 	return value;
 }
 
-float measure_widget::calculatevec(unsigned short orient)
+float MeasurementWidget::calculatevec(unsigned short orient)
 {
 	float thick = handler3D->get_slicethickness();
 	Pair p1 = handler3D->get_pixelsize();
@@ -880,7 +880,7 @@ float measure_widget::calculatevec(unsigned short orient)
 	return value;
 }
 
-void measure_widget::pt_moved(Point p)
+void MeasurementWidget::pt_moved(Point p)
 {
 	if (drawing)
 	{
@@ -890,7 +890,7 @@ void measure_widget::pt_moved(Point p)
 	}
 }
 
-void measure_widget::cleanup()
+void MeasurementWidget::cleanup()
 {
 	dynamic.clear();
 	established.clear();

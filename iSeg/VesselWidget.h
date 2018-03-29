@@ -27,13 +27,13 @@
 
 namespace iseg {
 
-class vessel_widget : public WidgetInterface
+class VesselWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	vessel_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~vessel_widget();
+	VesselWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~VesselWidget();
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	QSize sizeHint() const;

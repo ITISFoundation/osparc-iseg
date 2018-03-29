@@ -40,7 +40,7 @@
 
 using namespace iseg;
 
-featurewidget::featurewidget(SlicesHandler* hand3D, QWidget* parent,
+FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 							 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
@@ -98,15 +98,15 @@ featurewidget::featurewidget(SlicesHandler* hand3D, QWidget* parent,
 	return;
 }
 
-QSize featurewidget::sizeHint() const { return hbox1->sizeHint(); }
+QSize FeatureWidget::sizeHint() const { return hbox1->sizeHint(); }
 
-void featurewidget::pt_clicked(Point p)
+void FeatureWidget::pt_clicked(Point p)
 {
 	selecting = true;
 	pstart = p;
 }
 
-void featurewidget::pt_moved(Point p)
+void FeatureWidget::pt_moved(Point p)
 {
 	if (selecting)
 	{
@@ -144,7 +144,7 @@ void featurewidget::pt_moved(Point p)
 	return;
 }
 
-void featurewidget::pt_released(Point p)
+void FeatureWidget::pt_released(Point p)
 {
 	dynamic.clear();
 	emit vpdyn_changed(&dynamic);
@@ -171,7 +171,7 @@ void featurewidget::pt_released(Point p)
 	return;
 }
 
-void featurewidget::slicenr_changed()
+void FeatureWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -179,9 +179,9 @@ void featurewidget::slicenr_changed()
 	//	}
 }
 
-void featurewidget::init() { slicenr_changed(); }
+void FeatureWidget::init() { slicenr_changed(); }
 
-void featurewidget::newloaded()
+void FeatureWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();

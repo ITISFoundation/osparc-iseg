@@ -29,8 +29,8 @@
 
 using namespace iseg;
 
-interpol_widget::interpol_widget(SlicesHandler* hand3D, QWidget* parent,
-								 const char* name, Qt::WindowFlags wFlags)
+InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
+										 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
@@ -157,16 +157,16 @@ interpol_widget::interpol_widget(SlicesHandler* hand3D, QWidget* parent,
 	source_changed();
 }
 
-interpol_widget::~interpol_widget()
+InterpolationWidget::~InterpolationWidget()
 {
 	delete sourcegroup;
 	delete modegroup;
 	delete hboxoverall;
 }
 
-QSize interpol_widget::sizeHint() const { return hboxoverall->sizeHint(); }
+QSize InterpolationWidget::sizeHint() const { return hboxoverall->sizeHint(); }
 
-void interpol_widget::init()
+void InterpolationWidget::init()
 {
 	if (handler3D->return_nrslices() != nrslices)
 	{
@@ -177,16 +177,16 @@ void interpol_widget::init()
 	}
 }
 
-void interpol_widget::newloaded() {}
+void InterpolationWidget::newloaded() {}
 
-void interpol_widget::slicenr_changed() {}
+void InterpolationWidget::slicenr_changed() {}
 
-void interpol_widget::tissuenr_changed(int tissuetype)
+void InterpolationWidget::tissuenr_changed(int tissuetype)
 {
 	tissuenr = (tissues_size_t)tissuetype + 1;
 }
 
-void interpol_widget::handler3D_changed()
+void InterpolationWidget::handler3D_changed()
 {
 	if (handler3D->return_nrslices() != nrslices)
 	{
@@ -197,13 +197,13 @@ void interpol_widget::handler3D_changed()
 	pushexec->setEnabled(false);
 }
 
-void interpol_widget::startslice_pressed()
+void InterpolationWidget::startslice_pressed()
 {
 	startnr = handler3D->get_activeslice();
 	pushexec->setEnabled(true);
 }
 
-void interpol_widget::execute()
+void InterpolationWidget::execute()
 {
 	unsigned short batchstride = (unsigned short)sb_batchstride->value();
 
@@ -454,7 +454,7 @@ void interpol_widget::execute()
 	}
 }
 
-void interpol_widget::method_changed()
+void InterpolationWidget::method_changed()
 {
 	if (rb_extra->isOn())
 	{
@@ -505,7 +505,7 @@ void interpol_widget::method_changed()
 	}
 }
 
-void interpol_widget::source_changed()
+void InterpolationWidget::source_changed()
 {
 	/*	if(rb_work->isOn()){
 		rb_intergrey->show();
@@ -514,7 +514,7 @@ void interpol_widget::source_changed()
 	}*/
 }
 
-FILE* interpol_widget::SaveParams(FILE* fp, int version)
+FILE* InterpolationWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -550,7 +550,7 @@ FILE* interpol_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* interpol_widget::LoadParams(FILE* fp, int version)
+FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{

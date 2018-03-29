@@ -40,8 +40,8 @@
 using namespace std;
 using namespace iseg;
 
-hyster_widget::hyster_widget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
+HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
+												 const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
@@ -165,9 +165,9 @@ hyster_widget::hyster_widget(SlicesHandler* hand3D, QWidget* parent,
 	init1();
 }
 
-hyster_widget::~hyster_widget() { delete vbox1; }
+HystereticGrowingWidget::~HystereticGrowingWidget() { delete vbox1; }
 
-void hyster_widget::slicenr_changed()
+void HystereticGrowingWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -175,7 +175,7 @@ void hyster_widget::slicenr_changed()
 	//	}
 }
 
-void hyster_widget::bmphand_changed(bmphandler* bmph)
+void HystereticGrowingWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -186,7 +186,7 @@ void hyster_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void hyster_widget::pt_clicked(Point p)
+void HystereticGrowingWidget::pt_clicked(Point p)
 {
 	if (limitdrawing)
 	{
@@ -202,7 +202,7 @@ void hyster_widget::pt_clicked(Point p)
 	}
 }
 
-void hyster_widget::update_visible()
+void HystereticGrowingWidget::update_visible()
 {
 	if (autoseed->isOn())
 	{
@@ -224,7 +224,7 @@ void hyster_widget::update_visible()
 	return;
 }
 
-void hyster_widget::auto_toggled()
+void HystereticGrowingWidget::auto_toggled()
 {
 	update_visible();
 
@@ -236,7 +236,7 @@ void hyster_widget::auto_toggled()
 	return;
 }
 
-void hyster_widget::execute()
+void HystereticGrowingWidget::execute()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
@@ -249,7 +249,7 @@ void hyster_widget::execute()
 	emit end_datachange(this);
 }
 
-void hyster_widget::execute1()
+void HystereticGrowingWidget::execute1()
 {
 	if (autoseed->isOn())
 	{
@@ -294,7 +294,7 @@ void hyster_widget::execute1()
 	}
 }
 
-void hyster_widget::getrange()
+void HystereticGrowingWidget::getrange()
 {
 	float ll =
 		lower_limit + (upper_limit - lower_limit) * 0.005f * sl_lower->value();
@@ -311,7 +311,7 @@ void hyster_widget::getrange()
 	getrange_sub(ll, uu, ul, lu);
 }
 
-void hyster_widget::getrange_sub(float ll, float uu, float ul, float lu)
+void HystereticGrowingWidget::getrange_sub(float ll, float uu, float ul, float lu)
 {
 	if (ll < lower_limit)
 	{
@@ -397,18 +397,18 @@ void hyster_widget::getrange_sub(float ll, float uu, float ul, float lu)
 	return;
 }
 
-void hyster_widget::slider_changed() { execute1(); }
+void HystereticGrowingWidget::slider_changed() { execute1(); }
 
-void hyster_widget::bmp_changed()
+void HystereticGrowingWidget::bmp_changed()
 {
 	bmphand = handler3D->get_activebmphandler();
 
 	getrange();
 }
 
-QSize hyster_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize HystereticGrowingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void hyster_widget::init()
+void HystereticGrowingWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -420,7 +420,7 @@ void hyster_widget::init()
 	hideparams_changed();
 }
 
-void hyster_widget::newloaded()
+void HystereticGrowingWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -436,7 +436,7 @@ void hyster_widget::newloaded()
 	}
 }
 
-void hyster_widget::init1()
+void HystereticGrowingWidget::init1()
 {
 	limitdrawing = false;
 	drawlimit->setDown(false);
@@ -453,7 +453,7 @@ void hyster_widget::init1()
 	emit vp1_changed(&vp1);
 }
 
-void hyster_widget::clean_up()
+void HystereticGrowingWidget::clean_up()
 {
 	limitdrawing = false;
 	drawlimit->setDown(false);
@@ -462,7 +462,7 @@ void hyster_widget::clean_up()
 	return;
 }
 
-void hyster_widget::pt_moved(Point p)
+void HystereticGrowingWidget::pt_moved(Point p)
 {
 	if (limitdrawing)
 	{
@@ -472,7 +472,7 @@ void hyster_widget::pt_moved(Point p)
 	}
 }
 
-void hyster_widget::pt_released(Point p)
+void HystereticGrowingWidget::pt_released(Point p)
 {
 	if (limitdrawing)
 	{
@@ -495,7 +495,7 @@ void hyster_widget::pt_released(Point p)
 	}
 }
 
-void hyster_widget::limitpressed()
+void HystereticGrowingWidget::limitpressed()
 {
 	drawlimit->setDown(true);
 	limitdrawing = true;
@@ -503,7 +503,7 @@ void hyster_widget::limitpressed()
 	emit vpdyn_changed(&vpdyn);
 }
 
-void hyster_widget::clearpressed()
+void HystereticGrowingWidget::clearpressed()
 {
 	limitdrawing = false;
 	drawlimit->setDown(false);
@@ -522,7 +522,7 @@ void hyster_widget::clearpressed()
 	emit vp1dyn_changed(&vp1, &vpdyn);
 }
 
-void hyster_widget::slider_pressed()
+void HystereticGrowingWidget::slider_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
@@ -531,9 +531,9 @@ void hyster_widget::slider_pressed()
 	emit begin_datachange(dataSelection, this);
 }
 
-void hyster_widget::slider_released() { emit end_datachange(this); }
+void HystereticGrowingWidget::slider_released() { emit end_datachange(this); }
 
-void hyster_widget::saveborders_execute()
+void HystereticGrowingWidget::saveborders_execute()
 {
 	QString savefilename = Q3FileDialog::getSaveFileName(
 		QString::null, "Thresholds (*.txt)\n", this); //, filename);
@@ -555,7 +555,7 @@ void hyster_widget::saveborders_execute()
 	}
 }
 
-void hyster_widget::loadborders_execute()
+void HystereticGrowingWidget::loadborders_execute()
 {
 	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
 														 "Borders (*.txt)\n"
@@ -577,7 +577,7 @@ void hyster_widget::loadborders_execute()
 	}
 }
 
-void hyster_widget::le_bordervall_returnpressed()
+void HystereticGrowingWidget::le_bordervall_returnpressed()
 {
 	bool b1;
 	float val = le_bordervall->text().toFloat(&b1);
@@ -620,7 +620,7 @@ void hyster_widget::le_bordervall_returnpressed()
 	}
 }
 
-void hyster_widget::le_bordervalu_returnpressed()
+void HystereticGrowingWidget::le_bordervalu_returnpressed()
 {
 	bool b1;
 	float val = le_bordervalu->text().toFloat(&b1);
@@ -663,7 +663,7 @@ void hyster_widget::le_bordervalu_returnpressed()
 	}
 }
 
-void hyster_widget::le_bordervallh_returnpressed()
+void HystereticGrowingWidget::le_bordervallh_returnpressed()
 {
 	bool b1;
 	float val = le_bordervallh->text().toFloat(&b1);
@@ -711,7 +711,7 @@ void hyster_widget::le_bordervallh_returnpressed()
 	}
 }
 
-void hyster_widget::le_bordervaluh_returnpressed()
+void HystereticGrowingWidget::le_bordervaluh_returnpressed()
 {
 	bool b1;
 	float val = le_bordervaluh->text().toFloat(&b1);
@@ -759,7 +759,7 @@ void hyster_widget::le_bordervaluh_returnpressed()
 	}
 }
 
-FILE* hyster_widget::SaveParams(FILE* fp, int version)
+FILE* HystereticGrowingWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -784,7 +784,7 @@ FILE* hyster_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* hyster_widget::LoadParams(FILE* fp, int version)
+FILE* HystereticGrowingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -834,7 +834,7 @@ FILE* hyster_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void hyster_widget::hideparams_changed()
+void HystereticGrowingWidget::hideparams_changed()
 {
 	if (hideparams)
 	{

@@ -616,60 +616,60 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	le_slicethick->setFixedWidth(80);
 
 	threshold_widget =
-		new thresh_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new ThresholdWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
-	hyst_widget = new hyster_widget(handler3D, this, "new window",
-									Qt::WDestructiveClose | Qt::WResizeNoErase);
+	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window",
+											  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
 	lw_widget = new livewire_widget(handler3D, this, "new window",
 									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(lw_widget);
-	iftrg_widget = new IFTrg_widget(handler3D, this, "new window",
-									Qt::WDestructiveClose | Qt::WResizeNoErase);
+	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(handler3D, this, "new window",
+																  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(iftrg_widget);
 	FMF_widget =
-		new FastMarchFuzzy_widget(handler3D, this, "new window",
-								  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new FastmarchingFuzzyWidget(handler3D, this, "new window",
+									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(FMF_widget);
 	wshed_widget =
-		new watershed_widget(handler3D, this, "new window",
-							 Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new WatershedWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(wshed_widget);
 	OutlineCorrect_widget =
-		new OutlineCorr_widget(handler3D, this, "new window",
-							   Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new OutlineCorrectionWidget(handler3D, this, "new window",
+									Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(OutlineCorrect_widget);
 	interpolwidget =
-		new interpol_widget(handler3D, this, "new window",
-							Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new InterpolationWidget(handler3D, this, "new window",
+								Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(interpolwidget);
 	smoothing_widget =
-		new smooth_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new SmoothingWidget(handler3D, this, "new window",
+							Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(smoothing_widget);
 	morph_widget =
-		new morpho_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new MorphologyWidget(handler3D, this, "new window",
+							 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(morph_widget);
-	edge_widg = new edge_widget(handler3D, this, "new window",
-								Qt::WDestructiveClose | Qt::WResizeNoErase);
+	edge_widg = new EdgeWidget(handler3D, this, "new window",
+							   Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(edge_widg);
 	feature_widget =
-		new featurewidget(handler3D, this, "new window",
+		new FeatureWidget(handler3D, this, "new window",
 						  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(feature_widget);
 	measurement_widget =
-		new measure_widget(handler3D, this, "new window",
-						   Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new MeasurementWidget(handler3D, this, "new window",
+							  Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(measurement_widget);
 	vesselextr_widget =
-		new vessel_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new VesselWidget(handler3D, this, "new window",
+						 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(vesselextr_widget);
 	pickerwidget =
-		new picker_widget(handler3D, this, "new window",
-						  Qt::WDestructiveClose | Qt::WResizeNoErase);
+		new PickerWidget(handler3D, this, "new window",
+						 Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(pickerwidget);
 	transfrmWidget =
 		new TransformWidget(handler3D, this, "new window",
@@ -3551,7 +3551,7 @@ void MainWindow::execute_loadrtstruct()
 		return;
 	}
 
-	RtstructImport RI(loadfilename, handler3D, this);
+	RadiotherapyStructureSetImporter RI(loadfilename, handler3D, this);
 
 	QObject::connect(
 		&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
@@ -5576,7 +5576,7 @@ void MainWindow::execute_rotation()
 
 void MainWindow::execute_undoconf()
 {
-	UndoConfig UC(handler3D, this);
+	UndoConfigurationDialog UC(handler3D, this);
 	UC.move(QCursor::pos());
 	UC.exec();
 
@@ -5597,7 +5597,7 @@ void MainWindow::execute_undoconf()
 
 void MainWindow::execute_activeslicesconf()
 {
-	ActiveSlicesConfig AC(handler3D, this);
+	ActiveSlicesConfigWidget AC(handler3D, this);
 	AC.move(QCursor::pos());
 	AC.exec();
 
@@ -5812,7 +5812,7 @@ void MainWindow::execute_xslice()
 
 	if (xsliceshower == NULL)
 	{
-		xsliceshower = new sliceshower_widget(
+		xsliceshower = new SliceViewerWidget(
 			handler3D, true, handler3D->get_slicethickness(),
 			zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		xsliceshower->zpos_changed();
@@ -5860,7 +5860,7 @@ void MainWindow::execute_yslice()
 
 	if (ysliceshower == NULL)
 	{
-		ysliceshower = new sliceshower_widget(
+		ysliceshower = new SliceViewerWidget(
 			handler3D, false, handler3D->get_slicethickness(),
 			zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		ysliceshower->zpos_changed();

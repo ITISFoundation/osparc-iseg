@@ -18,10 +18,10 @@ namespace iseg {
 
 class bmphandler;
 
-class levelset
+class Levelset
 {
 public:
-	levelset();
+	Levelset();
 	void init(unsigned short h, unsigned short w, Point p, float* kbit,
 			  float* Pbit, float balloon, float epsilon1, float step_size);
 	void init(unsigned short h, unsigned short w, float* initial, float f,
@@ -35,7 +35,7 @@ public:
 	void return_levelset(float* output);
 	void return_zerolevelset(std::vector<std::vector<Point>>* v1,
 							 std::vector<std::vector<Point>>* v2, int minsize);
-	~levelset();
+	~Levelset();
 
 private:
 	bool loaded;

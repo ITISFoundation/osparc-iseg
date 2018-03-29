@@ -22,7 +22,7 @@
 
 using namespace iseg;
 
-bool dicomread::opendicom(const char* filename)
+bool DicomReader::opendicom(const char* filename)
 {
 	depth = 0;
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -31,9 +31,9 @@ bool dicomread::opendicom(const char* filename)
 		return true;
 }
 
-void dicomread::closedicom() { fclose(fp); }
+void DicomReader::closedicom() { fclose(fp); }
 
-unsigned short dicomread::get_width()
+unsigned short DicomReader::get_width()
 {
 	unsigned short i = 0;
 
@@ -46,7 +46,7 @@ unsigned short dicomread::get_width()
 	return i;
 }
 
-unsigned short dicomread::get_height()
+unsigned short DicomReader::get_height()
 {
 	unsigned short i = 0;
 
@@ -59,13 +59,13 @@ unsigned short dicomread::get_height()
 	return i;
 }
 
-bool dicomread::load_pictureGDCM(const char* filename, float* bits)
+bool DicomReader::load_pictureGDCM(const char* filename, float* bits)
 {
 	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, width, height);
 	return true;
 }
 
-bool dicomread::load_picture(float* bits)
+bool DicomReader::load_picture(float* bits)
 {
 	get_height();
 	get_width();
@@ -199,8 +199,8 @@ bool dicomread::load_picture(float* bits)
 		return false;
 }
 
-bool dicomread::load_picture(float* bits, Point p, unsigned short dx,
-							 unsigned short dy)
+bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
+							   unsigned short dy)
 {
 	get_height();
 	get_width();
@@ -297,7 +297,7 @@ bool dicomread::load_picture(float* bits, Point p, unsigned short dx,
 		return false;
 }
 
-bool dicomread::load_picture(float* bits, float center, float contrast)
+bool DicomReader::load_picture(float* bits, float center, float contrast)
 {
 	if (load_picture(bits))
 	{
@@ -311,8 +311,8 @@ bool dicomread::load_picture(float* bits, float center, float contrast)
 		return false;
 }
 
-bool dicomread::load_picture(float* bits, float center, float contrast, Point p,
-							 unsigned short dx, unsigned short dy)
+bool DicomReader::load_picture(float* bits, float center, float contrast, Point p,
+							   unsigned short dx, unsigned short dy)
 {
 	if (load_picture(bits, p, dx, dy))
 	{
@@ -326,7 +326,7 @@ bool dicomread::load_picture(float* bits, float center, float contrast, Point p,
 		return false;
 }
 
-bool dicomread::imagepos(float f[3])
+bool DicomReader::imagepos(float f[3])
 {
 	bool ok = false;
 	if (read_field(32, 50))
@@ -337,7 +337,7 @@ bool dicomread::imagepos(float f[3])
 	return ok;
 }
 
-bool dicomread::imageorientation(float f[6])
+bool DicomReader::imageorientation(float f[6])
 {
 	bool ok = false;
 	if (read_field(32, 55))
@@ -348,7 +348,7 @@ bool dicomread::imageorientation(float f[6])
 	return ok;
 }
 
-float dicomread::slicepos()
+float DicomReader::slicepos()
 {
 	float f = 0;
 
@@ -386,7 +386,7 @@ float dicomread::slicepos()
 	return f;
 }
 
-unsigned dicomread::seriesnr()
+unsigned DicomReader::seriesnr()
 {
 	unsigned nr = 0;
 
@@ -396,7 +396,7 @@ unsigned dicomread::seriesnr()
 	return nr;
 }
 
-float dicomread::thickness()
+float DicomReader::thickness()
 {
 	float f = 1;
 
@@ -412,7 +412,7 @@ float dicomread::thickness()
 	return f;
 }
 
-Pair dicomread::pixelsize()
+Pair DicomReader::pixelsize()
 {
 	Pair p;
 	p.low = p.high = 0;
@@ -565,7 +565,7 @@ Pair dicomread::pixelsize()
 	return p;
 }
 
-unsigned short dicomread::get_bitdepth()
+unsigned short DicomReader::get_bitdepth()
 {
 	unsigned short i = 16;
 
@@ -578,7 +578,7 @@ unsigned short dicomread::get_bitdepth()
 	return i;
 }
 
-bool dicomread::read_field(unsigned a, unsigned b)
+bool DicomReader::read_field(unsigned a, unsigned b)
 {
 	go_start();
 	unsigned a1, b1;
@@ -614,7 +614,7 @@ bool dicomread::read_field(unsigned a, unsigned b)
 		return false;
 }
 
-bool dicomread::read_fieldnr(unsigned& a, unsigned& b)
+bool DicomReader::read_fieldnr(unsigned& a, unsigned& b)
 {
 	if (fread(buffer1, 1, 4, fp) == 4)
 	{
@@ -667,7 +667,7 @@ bool dicomread::read_fieldnr(unsigned& a, unsigned& b)
 		return false;
 }
 
-bool dicomread::read_fieldcontent()
+bool DicomReader::read_fieldcontent()
 {
 	read_length();
 	if (l == 1000000)
@@ -688,7 +688,7 @@ bool dicomread::read_fieldcontent()
 	}
 }
 
-bool dicomread::next_field()
+bool DicomReader::next_field()
 {
 	read_length();
 	if (l == 1000000)
@@ -706,7 +706,7 @@ bool dicomread::next_field()
 	}
 }
 
-unsigned dicomread::read_length()
+unsigned DicomReader::read_length()
 {
 	unsigned i = 0;
 	if (fread(buffer1, 1, 4, fp) == 4)
@@ -776,7 +776,7 @@ unsigned dicomread::read_length()
 	return l;
 }
 
-void dicomread::go_start()
+void DicomReader::go_start()
 {
 #ifdef _MSC_VER
 	int result = _fseeki64(fp, 128, SEEK_SET);
@@ -828,7 +828,7 @@ void dicomread::go_start()
 	}
 }
 
-bool dicomread::go_label(unsigned a, unsigned b)
+bool DicomReader::go_label(unsigned a, unsigned b)
 {
 	go_start();
 	unsigned a1, b1;
@@ -856,7 +856,7 @@ bool dicomread::go_label(unsigned a, unsigned b)
 		return false;
 }
 
-float dicomread::ds2float()
+float DicomReader::ds2float()
 {
 	float f = 0;
 	float d = 1;
@@ -918,7 +918,7 @@ float dicomread::ds2float()
 	return f;
 }
 
-float dicomread::ds2float(int& pos)
+float DicomReader::ds2float(int& pos)
 {
 	float f = 0;
 	float d = 1;
@@ -981,7 +981,7 @@ float dicomread::ds2float(int& pos)
 	return f;
 }
 
-void dicomread::dsarray2float(float* vals, unsigned short nrvals)
+void DicomReader::dsarray2float(float* vals, unsigned short nrvals)
 {
 	int pos = 0;
 	unsigned short counter = 0;
@@ -997,7 +997,7 @@ void dicomread::dsarray2float(float* vals, unsigned short nrvals)
 	}
 }
 
-int dicomread::is2int()
+int DicomReader::is2int()
 {
 	int i = 0;
 	int d = 1;
@@ -1022,7 +1022,7 @@ int dicomread::is2int()
 	return i;
 }
 
-int dicomread::bin2int()
+int DicomReader::bin2int()
 {
 	int i = 0;
 	int pos = 0;

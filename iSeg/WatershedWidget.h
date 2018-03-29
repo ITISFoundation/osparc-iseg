@@ -34,13 +34,13 @@ namespace iseg {
 class SlicesHandler;
 class bmphandler;
 
-class watershed_widget : public WidgetInterface
+class WatershedWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	watershed_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-					 const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~watershed_widget();
+	WatershedWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+					const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~WatershedWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

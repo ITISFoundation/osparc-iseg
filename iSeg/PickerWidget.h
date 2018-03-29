@@ -33,13 +33,13 @@
 
 namespace iseg {
 
-class picker_widget : public WidgetInterface
+class PickerWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	picker_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~picker_widget();
+	PickerWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~PickerWidget();
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	QSize sizeHint() const;

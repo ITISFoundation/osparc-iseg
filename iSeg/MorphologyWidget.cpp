@@ -33,8 +33,8 @@
 
 using namespace iseg;
 
-morpho_widget::morpho_widget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
+MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
+								   const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
@@ -102,14 +102,14 @@ morpho_widget::morpho_widget(SlicesHandler* hand3D, QWidget* parent,
 	return;
 }
 
-morpho_widget::~morpho_widget()
+MorphologyWidget::~MorphologyWidget()
 {
 	delete vbox1;
 	delete connectgroup;
 	delete modegroup;
 }
 
-void morpho_widget::execute()
+void MorphologyWidget::execute()
 {
 	bool connect8 = rb_8connect->isOn();
 
@@ -167,9 +167,9 @@ void morpho_widget::execute()
 	emit end_datachange(this);
 }
 
-QSize morpho_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize MorphologyWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void morpho_widget::slicenr_changed()
+void MorphologyWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -177,13 +177,13 @@ void morpho_widget::slicenr_changed()
 	//	}
 }
 
-void morpho_widget::bmphand_changed(bmphandler* bmph)
+void MorphologyWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
 }
 
-void morpho_widget::init()
+void MorphologyWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -193,13 +193,13 @@ void morpho_widget::init()
 	hideparams_changed();
 }
 
-void morpho_widget::newloaded()
+void MorphologyWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-FILE* morpho_widget::SaveParams(FILE* fp, int version)
+FILE* MorphologyWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -225,7 +225,7 @@ FILE* morpho_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* morpho_widget::LoadParams(FILE* fp, int version)
+FILE* MorphologyWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -250,7 +250,7 @@ FILE* morpho_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void morpho_widget::hideparams_changed()
+void MorphologyWidget::hideparams_changed()
 {
 	if (hideparams)
 	{

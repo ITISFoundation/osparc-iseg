@@ -10,8 +10,13 @@
 #ifndef Interpolate_20April05
 #define Interpolate_20April05
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Plugin/WidgetInterface.h"
+
 #include <q3listbox.h>
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -22,27 +27,22 @@
 #include <qlayout.h>
 #include <qlineedit.h>
 #include <qpainter.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Plugin/WidgetInterface.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 namespace iseg {
 
-class interpol_widget : public WidgetInterface
+class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	interpol_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-					const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~interpol_widget();
+	InterpolationWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+						const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~InterpolationWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

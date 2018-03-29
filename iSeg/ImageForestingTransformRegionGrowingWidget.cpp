@@ -30,8 +30,8 @@
 using namespace std;
 using namespace iseg;
 
-IFTrg_widget::IFTrg_widget(SlicesHandler* hand3D, QWidget* parent,
-						   const char* name, Qt::WindowFlags wFlags)
+ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
+																					   const char* name, Qt::WindowFlags wFlags)
 	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
@@ -91,7 +91,7 @@ IFTrg_widget::IFTrg_widget(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(slider_released()));
 }
 
-IFTrg_widget::~IFTrg_widget()
+ImageForestingTransformRegionGrowingWidget::~ImageForestingTransformRegionGrowingWidget()
 {
 	delete vbox1;
 
@@ -102,7 +102,7 @@ IFTrg_widget::~IFTrg_widget()
 	return;
 }
 
-void IFTrg_widget::init()
+void ImageForestingTransformRegionGrowingWidget::init()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -122,13 +122,13 @@ void IFTrg_widget::init()
 	return;
 }
 
-void IFTrg_widget::newloaded()
+void ImageForestingTransformRegionGrowingWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void IFTrg_widget::init1()
+void ImageForestingTransformRegionGrowingWidget::init1()
 {
 	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
@@ -165,7 +165,7 @@ void IFTrg_widget::init1()
 		sl_thresh->setEnabled(true);
 }
 
-void IFTrg_widget::cleanup()
+void ImageForestingTransformRegionGrowingWidget::cleanup()
 {
 	vmdyn.clear();
 	if (IFTrg != NULL)
@@ -179,13 +179,13 @@ void IFTrg_widget::cleanup()
 	emit vm_changed(&vmempty);
 }
 
-void IFTrg_widget::tissuenr_changed(int i)
+void ImageForestingTransformRegionGrowingWidget::tissuenr_changed(int i)
 {
 	tissuenr = (unsigned)i + 1;
 	return;
 }
 
-void IFTrg_widget::mouse_clicked(Point p)
+void ImageForestingTransformRegionGrowingWidget::mouse_clicked(Point p)
 {
 	last_pt = p;
 	if (pushremove->isOn())
@@ -194,7 +194,7 @@ void IFTrg_widget::mouse_clicked(Point p)
 	}
 }
 
-void IFTrg_widget::mouse_moved(Point p)
+void ImageForestingTransformRegionGrowingWidget::mouse_moved(Point p)
 {
 	if (!pushremove->isOn())
 	{
@@ -204,7 +204,7 @@ void IFTrg_widget::mouse_moved(Point p)
 	}
 }
 
-void IFTrg_widget::mouse_released(Point p)
+void ImageForestingTransformRegionGrowingWidget::mouse_released(Point p)
 {
 	if (!pushremove->isOn())
 	{
@@ -244,7 +244,7 @@ void IFTrg_widget::mouse_released(Point p)
 	}
 }
 
-void IFTrg_widget::execute()
+void ImageForestingTransformRegionGrowingWidget::execute()
 {
 	IFTrg->reinit(lbmap, false);
 	if (hideparams)
@@ -267,7 +267,7 @@ void IFTrg_widget::execute()
 	bmphand->set_mode(2, false);
 }
 
-void IFTrg_widget::clearmarks()
+void ImageForestingTransformRegionGrowingWidget::clearmarks()
 {
 	for (unsigned i = 0; i < area; i++)
 		lbmap[i] = 0;
@@ -279,7 +279,7 @@ void IFTrg_widget::clearmarks()
 	emit vm_changed(&vm);
 }
 
-void IFTrg_widget::slider_changed(int i)
+void ImageForestingTransformRegionGrowingWidget::slider_changed(int i)
 {
 	thresh = i * 0.01f * maxthresh;
 	if (IFTrg != NULL)
@@ -301,7 +301,7 @@ void IFTrg_widget::slider_changed(int i)
 	}
 }
 
-void IFTrg_widget::bmp_changed()
+void ImageForestingTransformRegionGrowingWidget::bmp_changed()
 {
 	//	cleanup();
 	bmphand = handler3D->get_activebmphandler();
@@ -309,7 +309,7 @@ void IFTrg_widget::bmp_changed()
 	init1();
 }
 
-void IFTrg_widget::slicenr_changed()
+void ImageForestingTransformRegionGrowingWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -317,7 +317,7 @@ void IFTrg_widget::slicenr_changed()
 	//	}
 }
 
-void IFTrg_widget::bmphand_changed(bmphandler* bmph)
+void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -358,7 +358,7 @@ void IFTrg_widget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void IFTrg_widget::getrange()
+void ImageForestingTransformRegionGrowingWidget::getrange()
 {
 	float* pf = IFTrg->return_pf();
 	maxthresh = 0;
@@ -378,9 +378,9 @@ void IFTrg_widget::getrange()
 	return;
 }
 
-QSize IFTrg_widget::sizeHint() const { return vbox1->sizeHint(); }
+QSize ImageForestingTransformRegionGrowingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void IFTrg_widget::removemarks(Point p)
+void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 {
 	if (bmphand->del_vm(p, 3))
 	{
@@ -414,7 +414,7 @@ void IFTrg_widget::removemarks(Point p)
 	}
 }
 
-void IFTrg_widget::slider_pressed()
+void ImageForestingTransformRegionGrowingWidget::slider_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->get_activeslice();
@@ -422,9 +422,9 @@ void IFTrg_widget::slider_pressed()
 	emit begin_datachange(dataSelection, this);
 }
 
-void IFTrg_widget::slider_released() { emit end_datachange(this); }
+void ImageForestingTransformRegionGrowingWidget::slider_released() { emit end_datachange(this); }
 
-FILE* IFTrg_widget::SaveParams(FILE* fp, int version)
+FILE* ImageForestingTransformRegionGrowingWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -438,7 +438,7 @@ FILE* IFTrg_widget::SaveParams(FILE* fp, int version)
 	return fp;
 }
 
-FILE* IFTrg_widget::LoadParams(FILE* fp, int version)
+FILE* ImageForestingTransformRegionGrowingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -457,7 +457,7 @@ FILE* IFTrg_widget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void IFTrg_widget::hideparams_changed()
+void ImageForestingTransformRegionGrowingWidget::hideparams_changed()
 {
 	if (hideparams)
 	{

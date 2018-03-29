@@ -10,36 +10,37 @@
 #ifndef OLC_4APRIL05
 #define OLC_4APRIL05
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Core/Point.h"
+
+#include "Plugin/WidgetInterface.h"
+
 #include <q3hbox.h>
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qdialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Core/Point.h"
-#include "Plugin/WidgetInterface.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 namespace iseg {
 
-class OutlineCorr_widget : public WidgetInterface
+class OutlineCorrectionWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	OutlineCorr_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-					   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~OutlineCorr_widget();
+	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+							const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~OutlineCorrectionWidget();
 	QSize sizeHint() const;
 	void init();
 	void newloaded();

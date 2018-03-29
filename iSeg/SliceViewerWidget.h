@@ -93,14 +93,14 @@ public slots:
 	//void mode_changed(unsigned char newmode);
 };
 
-class sliceshower_widget : public QWidget
+class SliceViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	sliceshower_widget(SlicesHandler* hand3D, bool orientation,
-					   float thickness1, float zoom1, QWidget* parent = 0,
-					   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~sliceshower_widget();
+	SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
+					  float thickness1, float zoom1, QWidget* parent = 0,
+					  const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~SliceViewerWidget();
 	int get_slicenr();
 
 protected:
