@@ -10,11 +10,12 @@
 #ifndef TRANSFORM_17NOV11
 #define TRANSFORM_17NOV11
 
+#include "slicetransform.h"
+
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
 
 #include "Addon/qwidget1.h"
-#include "slicetransform.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>

@@ -14,7 +14,7 @@
 #include "bmp_read_1.h"
 #include "livewirewidget.h"
 
-#include "Core/IFT2.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
 #include "Core/addLine.h"

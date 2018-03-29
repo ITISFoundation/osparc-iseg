@@ -30,8 +30,8 @@
 
 #include "HDF5IO/HDF5Writer.h"
 
-#include "Core/EM.h"
-#include "Core/IFT2.h"
+#include "Core/ExpectationMaximization.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
 #include "Core/ImageToITK.h"
 #include "Core/ImageWriter.h"
@@ -40,6 +40,7 @@
 #include "Core/MatlabExport.h"
 #include "Core/MultidimensionalGamma.h"
 #include "Core/Outline.h"
+#include "Core/ProjectVersion.h"
 #include "Core/RTDoseIODModule.h"
 #include "Core/RTDoseReader.h"
 #include "Core/RTDoseWriter.h"
@@ -71,7 +72,7 @@
 #include <qprogressdialog.h>
 
 #ifndef NO_OPENMP_SUPPORT
-#  include <omp.h>
+#	include <omp.h>
 #endif
 
 using namespace iseg;
@@ -3075,8 +3076,8 @@ bool SlicesHandler::SwapYZ()
 	float dc[6];
 	get_direction_cosines(dc);
 	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	iseg::Cross(&dc[0], &dc[3], cross);
-	iseg::Normalize(cross);
+	vtkMath::Cross(&dc[0], &dc[3], cross);
+	vtkMath::Normalize(cross);
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		dc[i + 3] = cross[i];
@@ -3142,8 +3143,8 @@ bool SlicesHandler::SwapXZ()
 	float dc[6];
 	get_direction_cosines(dc);
 	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	iseg::Cross(&dc[0], &dc[3], cross);
-	iseg::Normalize(cross);
+	vtkMath::Cross(&dc[0], &dc[3], cross);
+	vtkMath::Normalize(cross);
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		dc[i] = cross[i];
@@ -4534,7 +4535,7 @@ void SlicesHandler::em(unsigned short slicenr, short nrtissues,
 {
 	if (slicenr >= startslice && slicenr < endslice)
 	{
-		EM em;
+		ExpectationMaximization em;
 		float* bits[1];
 		bits[0] = image_slices[slicenr].return_bmp();
 		float weights[1];
@@ -7188,13 +7189,16 @@ void SlicesHandler::slicework_z(unsigned short slicenr)
 	return;
 }
 
-template<typename TScalarType> int GetScalarType()
+template<typename TScalarType>
+int GetScalarType()
 {
 	assert("This type is not implemented" && 0);
 	return VTK_VOID;
 }
-template<> int GetScalarType<unsigned char>() { return VTK_UNSIGNED_CHAR; }
-template<> int GetScalarType<unsigned short>() { return VTK_UNSIGNED_SHORT; }
+template<>
+int GetScalarType<unsigned char>() { return VTK_UNSIGNED_CHAR; }
+template<>
+int GetScalarType<unsigned short>() { return VTK_UNSIGNED_SHORT; }
 
 int SlicesHandler::extract_tissue_surfaces(
 	const QString& filename, std::vector<tissues_size_t>& tissuevec,
@@ -9195,7 +9199,8 @@ bool SlicesHandler::print_amascii(const char* filename)
 	if (streamname.good())
 	{
 		bool ok = true;
-		streamname << "# AmiraMesh 3D ASCII 2.0" << endl << endl;
+		streamname << "# AmiraMesh 3D ASCII 2.0" << endl
+				   << endl;
 		streamname << "# CreationDate: Fri Jun 16 14:24:32 2006" << endl
 				   << endl
 				   << endl;
@@ -9240,14 +9245,17 @@ bool SlicesHandler::print_amascii(const char* filename)
 		streamname << "    BoundingBox 0 " << width * dx << " 0 " << height * dy
 				   << " 0 " << nrslices * thickness << "," << endl;
 		streamname << "    CoordType \"uniform\"" << endl;
-		streamname << "}" << endl << endl;
+		streamname << "}" << endl
+				   << endl;
 		if (tissueCount <= 255)
 		{
-			streamname << "Lattice { byte Labels } @1" << endl << endl;
+			streamname << "Lattice { byte Labels } @1" << endl
+					   << endl;
 		}
 		else
 		{
-			streamname << "Lattice { ushort Labels } @1" << endl << endl;
+			streamname << "Lattice { ushort Labels } @1" << endl
+					   << endl;
 		}
 		streamname << "# Data section follows" << endl;
 		streamname << "@1" << endl;
@@ -12259,7 +12267,8 @@ void SlicesHandler::regrow(unsigned short sourceslicenr,
 	delete results1;
 	delete results2;
 
-	IFT_regiongrowing* IFTrg = image_slices[sourceslicenr].IFTrg_init(lbmap);
+	ImageForestingTransformRegionGrowing* IFTrg =
+		image_slices[sourceslicenr].IFTrg_init(lbmap);
 	float thresh = 0;
 
 	float* f2 = IFTrg->return_pf();

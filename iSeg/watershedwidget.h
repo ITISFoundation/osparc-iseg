@@ -12,7 +12,7 @@
 
 #include "Addon/qwidget1.h"
 
-#include "Core/common.h"
+#include "Core/DataSelection.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>

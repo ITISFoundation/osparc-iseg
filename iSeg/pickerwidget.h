@@ -10,23 +10,26 @@
 #ifndef PICKERWIDGET_15DEZ08
 #define PICKERWIDGET_15DEZ08
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Addon/qwidget1.h"
+
+#include "Core/DataSelection.h"
+
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcombobox.h>
 #include <qevent.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Addon/qwidget1.h"
-#include "Core/common.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
+
+#include <algorithm>
 
 namespace iseg {
 

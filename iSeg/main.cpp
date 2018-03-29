@@ -17,9 +17,9 @@
 #include "dicomread.h"
 #include "tissueinfos.h"
 
+#include "Core/BranchItem.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
-#include "Core/branchItem-simplified.h"
 
 #include "Tools.h"
 
@@ -223,7 +223,9 @@ int main(int argc, char** argv)
 	}
 
 #ifdef SHOWSPLASH
-	while (now.msecsTo(QTime::currentTime()) < 2000) {}
+	while (now.msecsTo(QTime::currentTime()) < 2000)
+	{
+	}
 #endif
 
 	mainWindow->showMaximized();

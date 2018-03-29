@@ -10,8 +10,9 @@
 #ifndef WIDGETCOLLECTION
 #define WIDGETCOLLECTION
 
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
+#include "Core/Types.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
@@ -328,7 +329,7 @@ public:
 	// Hierarchy
 	void
 		update_tree_widget(); // Updates QTreeWidget from internal representation
-	void update_hierarchy(); // Updates internal representation from QTreeWidget
+	void update_hierarchy();  // Updates internal representation from QTreeWidget
 	unsigned short get_selected_hierarchy();
 	unsigned short get_hierarchy_count();
 	std::vector<QString>* get_hierarchy_names_ptr();

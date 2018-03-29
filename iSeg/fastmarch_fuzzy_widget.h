@@ -12,30 +12,29 @@
 
 #include "Addon/qwidget1.h"
 
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
 
 #include <q3hbox.h>
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include <q3mimefactory.h>
-#include <qpixmap.h>
 
 #include <algorithm>
 
 namespace iseg {
 
-class IFT_adaptfuzzy;
-class IFT_fastmarch;
+class ImageForestingTransformAdaptFuzzy;
+class ImageForestingTransformFastMarching;
 class SlicesHandler;
 class bmphandler;
 
@@ -61,8 +60,8 @@ public:
 
 private:
 	float* map;
-	IFT_fastmarch* IFTmarch;
-	IFT_adaptfuzzy* IFTfuzzy;
+	ImageForestingTransformFastMarching* IFTmarch;
+	ImageForestingTransformAdaptFuzzy* IFTfuzzy;
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;

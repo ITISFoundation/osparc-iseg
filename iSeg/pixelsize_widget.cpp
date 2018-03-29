@@ -12,7 +12,7 @@
 #include "SlicesHandler.h"
 #include "pixelsize_widget.h"
 
-#include "Core/common.h"
+#include <vtkMath.h>
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -25,6 +25,53 @@
 
 using namespace std;
 using namespace iseg;
+
+namespace {
+bool orthonormalize(float* vecA, float* vecB)
+{
+	// Check whether input valid
+	bool ok = true;
+	float precision = 1.0e-07;
+
+	// Input vectors non-zero length
+	float lenA = std::sqrtf(vtkMath::Dot(vecA, vecA));
+	float lenB = std::sqrtf(vtkMath::Dot(vecB, vecB));
+	ok &= lenA >= precision;
+	ok &= lenB >= precision;
+
+	// Input vectors not collinear
+	float tmp = std::abs(vtkMath::Dot(vecA, vecB));
+	ok &= std::abs(tmp - lenA * lenB) >= precision;
+	if (!ok)
+	{
+		return false;
+	}
+
+	float cross[3];
+	vtkMath::Cross(vecA, vecB, cross);
+
+	float A[3][3];
+	for (unsigned short i = 0; i < 3; ++i)
+	{
+		A[0][i] = vecA[i];
+		A[1][i] = vecB[i];
+		A[2][i] = cross[i];
+	}
+
+	float B[3][3];
+	vtkMath::Orthogonalize3x3(A, B);
+	for (unsigned short i = 0; i < 3; ++i)
+	{
+		vecA[i] = B[0][i];
+		vecB[i] = B[1][i];
+	}
+
+	vtkMath::Normalize(vecA);
+	vtkMath::Normalize(vecB);
+
+	return true;
+}
+} // namespace
 
 PixelResize::PixelResize(SlicesHandler* hand3D, QWidget* parent,
 						 const char* name, Qt::WindowFlags wFlags)
@@ -432,7 +479,7 @@ void RotationDialog::set_pressed()
 
 void RotationDialog::orthonorm_pressed()
 {
-	if (iseg::Orthonormalize(&directionCosines[0], &directionCosines[3]))
+	if (orthonormalize(&directionCosines[0], &directionCosines[3]))
 	{
 		le_dca->setText(QString::number(directionCosines[0]));
 		le_dcb->setText(QString::number(directionCosines[1]));

@@ -14,7 +14,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Core/IFT2.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/addLine.h"
 
 #include <q3hbox.h>

@@ -15,8 +15,8 @@
 
 #include "Addon/qwidget1.h"
 
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
 
 #include <q3hbox.h>
 #include <q3mimefactory.h>
@@ -57,7 +57,7 @@ private:
 	void init1();
 	void removemarks(Point p);
 	float* lbmap;
-	IFT_regiongrowing* IFTrg;
+	ImageForestingTransformRegionGrowing* IFTrg;
 	Point last_pt;
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;

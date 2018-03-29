@@ -9,14 +9,17 @@
  */
 #include "Precompiled.h"
 
-#include "branchItem-simplified.h"
+#include "BranchItem.h"
 
-using namespace iseg;
+namespace iseg {
 
 std::vector<unsigned> BranchItem::availablelabels(0);
+
 void BranchItem::init_availablelabels()
 {
 	availablelabels.clear();
 	for (unsigned i = 60000; i > 0; i--)
 		availablelabels.push_back(i);
 }
+
+} // namespace iseg

@@ -28,7 +28,7 @@ struct coef
 
 inline bool operator!=(coef c, unsigned short f) { return c.a != f; }
 
-template<typename T> class IFT
+template<typename T> class ImageForestingTransform
 {
 public:
 	void IFTinit(unsigned short w, unsigned short h, float* E_bit,
@@ -229,7 +229,7 @@ public:
 
 		return;
 	}
-	virtual ~IFT()
+	virtual ~ImageForestingTransform()
 	{
 		free(pf);
 		free(lb);
@@ -300,27 +300,8 @@ private:
 	}
 };
 
-typedef IFT<float> IFTFLOAT;
-class stupid_DT : public IFTFLOAT
-{
-public:
-	void stupid_DTinit(unsigned short w, unsigned short h, float* lbl)
-	{
-		float f;
-		IFTinit(w, h, &f, &f, lbl, false);
-		return;
-	}
-
-private:
-	inline float compute_pf(unsigned p, unsigned q, float direction)
-	{
-		UNREFERENCED_PARAMETER(q);
-		UNREFERENCED_PARAMETER(direction);
-		return pf[p] + 1;
-	}
-};
-
-class IFT_regiongrowing : public IFTFLOAT
+class ImageForestingTransformRegionGrowing
+	: public ImageForestingTransform<float>
 {
 public:
 	void rg_init(unsigned short w, unsigned short h, float* gradient,
@@ -338,7 +319,8 @@ private:
 	}
 };
 
-class IFT_livewire : public IFT<unsigned short>
+class ImageForestingTransformLivewire
+	: public ImageForestingTransform<unsigned short>
 {
 public:
 	void lw_init(unsigned short w, unsigned short h, float* E_bits,
@@ -368,7 +350,7 @@ public:
 		reinit(lbl, E_bits, true, pts);
 		return;
 	}
-	~IFT_livewire() { free(lbl); }
+	~ImageForestingTransformLivewire() { free(lbl); }
 
 private:
 	unsigned short* lbl;
@@ -385,7 +367,7 @@ private:
 	}
 };
 
-class IFT_adaptfuzzy : public IFTFLOAT
+class ImageForestingTransformAdaptFuzzy : public ImageForestingTransform<float>
 {
 public:
 	void fuzzy_init(unsigned short w, unsigned short h, float* E_bits, Point p,
@@ -419,7 +401,7 @@ public:
 		s2 = -1 / (fs2 * 2);
 	}
 
-	~IFT_adaptfuzzy() { free(lbl); }
+	~ImageForestingTransformAdaptFuzzy() { free(lbl); }
 
 private:
 	unsigned pt;
@@ -435,7 +417,7 @@ private:
 	}
 };
 
-class IFT_fastmarch : public IFT<coef>
+class ImageForestingTransformFastMarching : public ImageForestingTransform<coef>
 {
 public:
 	void fastmarch_init(unsigned short w, unsigned short h, float* E_bits,
@@ -464,7 +446,7 @@ public:
 		IFTinit(w, h, Ebits, Ebits, lb1, false);
 		return;
 	}
-	~IFT_fastmarch()
+	~ImageForestingTransformFastMarching()
 	{
 		free(Ebits);
 		free(lb1);
@@ -498,7 +480,7 @@ private:
 	}
 };
 
-class IFT_distance : public IFT<coef>
+class ImageForestingTransformDistance : public ImageForestingTransform<coef>
 {
 public:
 	void distance_init(unsigned short w, unsigned short h, float f, float* lbl)
@@ -574,7 +556,7 @@ public:
 		IFTinit(w, h, lbl, lbl, lbel, false);
 		return;
 	}
-	~IFT_distance() { free(lbel); }
+	~ImageForestingTransformDistance() { free(lbel); }
 
 private:
 	float* Ebits;

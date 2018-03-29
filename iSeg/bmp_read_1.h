@@ -21,9 +21,9 @@
 
 namespace iseg {
 
-class IFT_regiongrowing;
-class IFT_livewire;
-class IFT_fastmarch;
+class ImageForestingTransformRegionGrowing;
+class ImageForestingTransformLivewire;
+class ImageForestingTransformFastMarching;
 class SliceProvider;
 class SliceProviderInstaller;
 
@@ -344,16 +344,16 @@ public:
 	void set_work_pt(Point p, float f);
 	void set_bmp_pt(Point p, float f);
 	void set_tissue_pt(tissuelayers_size_t idx, Point p, tissues_size_t f);
-	void stupidDT();
 	void rgIFT(float* lb_map, float thresh);
-	IFT_regiongrowing* IFTrg_init(float* lb_map);
+	ImageForestingTransformRegionGrowing* IFTrg_init(float* lb_map);
 	//		void rgIFT(std::vector<mark> *vm,float thresh);
 	void livewire_test();
-	IFT_livewire* livewireinit(Point p);
+	ImageForestingTransformLivewire* livewireinit(Point p);
 	void fill_contour(std::vector<Point>* vp, bool continuous);
 	void adaptive_fuzzy(Point p, float m1, float s1, float s2, float thresh);
 	void fast_marching(Point p, float sigma, float thresh);
-	IFT_fastmarch* fastmarching_init(Point p, float sigma, float thresh);
+	ImageForestingTransformFastMarching* fastmarching_init(Point p, float sigma,
+														   float thresh);
 	void classify(short nrclasses, short dim, float** bits, float* weights,
 				  float* centers, float maxdist);
 	void classifytest();

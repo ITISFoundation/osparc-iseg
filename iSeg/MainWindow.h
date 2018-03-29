@@ -12,8 +12,8 @@
 #include "Atlas.h"
 #include "Project.h"
 
+#include "Core/DataSelection.h"
 #include "Core/Point.h"
-#include "Core/common.h"
 
 #include <qdir.h>
 #include <qmainwindow.h>

@@ -11,9 +11,10 @@
 
 #include "iSegCore.h"
 
+#include "DataSelection.h"
 #include "Mark.h"
 #include "Point.h"
-#include "common.h"
+#include "Types.h"
 
 #include <vector>
 
@@ -23,7 +24,7 @@ class iSegCore_API UndoElem
 {
 public:
 	bool multi;
-	iseg::DataSelection dataSelection;
+	DataSelection dataSelection;
 	float* bmp_old;
 	float* work_old;
 	tissues_size_t* tissue_old;

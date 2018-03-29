@@ -10,8 +10,16 @@
 #ifndef LWWIDGET_17March05
 #define LWWIDGET_17March05
 
-#include <algorithm>
+#include "SlicesHandler.h"
+#include "bmp_read_1.h"
+
+#include "Addon/qwidget1.h"
+
+#include "Core/DataSelection.h"
+#include "Core/ImageForestingTransform.h"
+
 #include <q3listbox.h>
+#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -23,19 +31,14 @@
 #include <qlayout.h>
 #include <qlineedit.h>
 #include <qpainter.h>
+#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Addon/qwidget1.h"
-#include "Core/IFT2.h"
-#include "Core/common.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
-#include <q3mimefactory.h>
-#include <qpixmap.h>
+
+#include <algorithm>
 
 namespace iseg {
 
@@ -53,8 +56,8 @@ public:
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
 	QSize sizeHint() const;
-	IFT_livewire* lw;
-	IFT_livewire* lwfirst;
+	ImageForestingTransformLivewire* lw;
+	ImageForestingTransformLivewire* lwfirst;
 	std::string GetName() { return std::string("Contour"); };
 	virtual QIcon GetIcon(QDir picdir)
 	{

@@ -14,7 +14,7 @@
 #include "bmp_read_1.h"
 #include "fastmarch_fuzzy_widget.h"
 
-#include "Core/IFT2.h"
+#include "Core/ImageForestingTransform.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -320,7 +320,7 @@ void FastMarchFuzzy_widget::mouse_clicked(Point p)
 	{
 		if (IFTfuzzy == NULL)
 		{
-			IFTfuzzy = new IFT_adaptfuzzy;
+			IFTfuzzy = new ImageForestingTransformAdaptFuzzy;
 			IFTfuzzy->fuzzy_init(bmphand->return_width(),
 								 bmphand->return_height(),
 								 bmphand->return_bmp(), p, m1, s1, s2);

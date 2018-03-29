@@ -14,10 +14,11 @@
 namespace iseg {
 
 // Warning: devs should really be matrices. But this would necessitate a matrix inversion...
-class iSegCore_API EM
+class iSegCore_API ExpectationMaximization
 {
 public:
-	~EM();
+	~ExpectationMaximization();
+
 	void init(short unsigned wi, short unsigned h, short nrclass,
 			  short dimension, float** bit, float* weight);
 	void init(short unsigned wi, short unsigned h, short nrclass,
@@ -36,18 +37,19 @@ public:
 private:
 	void recompute_centers();
 	unsigned recompute_membership();
-	short* m;
-	float* w;
-	float* sw;
-	short nrclasses;
-	short dim;
-	float** bits;
-	float* weights;
-	float* centers;
-	float* devs;
-	float* ampls;
-	short unsigned width;
-	short unsigned height;
-	unsigned area;
+	short* m = nullptr;
+	float* w = nullptr;
+	float* sw = nullptr;
+	short nrclasses = 0;
+	short dim = 0;
+	float** bits = nullptr;
+	float* weights = nullptr;
+	float* centers = nullptr;
+	float* devs = nullptr;
+	float* ampls = nullptr;
+	short unsigned width = 0;
+	short unsigned height = 0;
+	unsigned area = 0;
 };
+
 } // namespace iseg

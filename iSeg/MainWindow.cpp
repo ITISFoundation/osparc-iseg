@@ -52,6 +52,7 @@
 #include "Addon/Addon.h"
 
 #include "Core/LoadPlugin.h"
+#include "Core/ProjectVersion.h"
 #include "Core/Transform.h"
 
 #include <boost/filesystem.hpp>
@@ -739,8 +740,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 
 	int height_max = 0;
 	QSize qs; //,qsmax;
-		//	qsmax.setHeight(0);
-		//	qsmax.setWidth(0);
+			  //	qsmax.setHeight(0);
+			  //	qsmax.setWidth(0);
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();

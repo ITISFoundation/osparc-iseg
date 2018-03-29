@@ -17,11 +17,10 @@ USE_OPENMP()
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	addLine.cpp
-	branchItem-simplified.cpp
+	BranchItem.cpp
 	ColorLookupTable.cpp
-	common.cpp
 	Contour.cpp
-	EM.cpp
+	ExpectationMaximization.cpp
 	FeatureExtractor.cpp
 	fillcontour.cpp
 	ImageReader.cpp
@@ -35,6 +34,7 @@ SET(SOURCES
 	MultidimensionalGamma.cpp
 	Outline.cpp
 	Precompiled.cpp
+	ProjectVersion.cpp
 	RTDoseIODModule.cpp
 	RTDoseReader.cpp
 	RTDoseWriter.cpp

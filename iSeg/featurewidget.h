@@ -13,7 +13,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Core/IFT2.h"
+#include "Core/ImageForestingTransform.h"
 
 #include <q3listbox.h>
 #include <q3vbox.h>

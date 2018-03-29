@@ -9,7 +9,7 @@
  */
 #include "Precompiled.h"
 
-#include "EM.h"
+#include "ExpectationMaximization.h"
 
 #include <algorithm>
 #include <cmath>
@@ -21,8 +21,8 @@ using namespace iseg;
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-void EM::init(short unsigned wi, short unsigned h, short nrclass,
-			  short dimension, float** bit, float* weight)
+void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
+								   short dimension, float** bit, float* weight)
 {
 	width = wi;
 	height = h;
@@ -44,9 +44,9 @@ void EM::init(short unsigned wi, short unsigned h, short nrclass,
 	return;
 }
 
-void EM::init(short unsigned wi, short unsigned h, short nrclass,
-			  short dimension, float** bit, float* weight, float* center,
-			  float* dev, float* ampl)
+void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
+								   short dimension, float** bit, float* weight, float* center,
+								   float* dev, float* ampl)
 {
 	width = wi;
 	height = h;
@@ -73,7 +73,7 @@ void EM::init(short unsigned wi, short unsigned h, short nrclass,
 	return;
 }
 
-unsigned EM::make_iter(unsigned maxiter, unsigned converged)
+unsigned ExpectationMaximization::make_iter(unsigned maxiter, unsigned converged)
 {
 	unsigned iter = 0;
 	unsigned conv = area;
@@ -90,14 +90,14 @@ unsigned EM::make_iter(unsigned maxiter, unsigned converged)
 	return iter;
 }
 
-void EM::classify(float* result_bits)
+void ExpectationMaximization::classify(float* result_bits)
 {
 	for (unsigned i = 0; i < area; i++)
 		result_bits[i] = 255.0f / (nrclasses - 1) * m[i];
 	return;
 }
 
-void EM::apply_to(float** sources, float* result_bits)
+void ExpectationMaximization::apply_to(float** sources, float* result_bits)
 {
 	UNREFERENCED_PARAMETER(sources);
 	float dist, wmax, wdummy;
@@ -137,7 +137,7 @@ void EM::apply_to(float** sources, float* result_bits)
 	return;
 }
 
-void EM::recompute_centers()
+void ExpectationMaximization::recompute_centers()
 {
 	float devold;
 	for (short i = 0; i < nrclasses; i++)
@@ -185,7 +185,7 @@ void EM::recompute_centers()
 	return;
 }
 
-unsigned EM::recompute_membership()
+unsigned ExpectationMaximization::recompute_membership()
 {
 	unsigned count = 0;
 	float dist, wmax, wsum, wdummy;
@@ -263,7 +263,7 @@ unsigned EM::recompute_membership()
 	return count;
 }
 
-void EM::init_centers()
+void ExpectationMaximization::init_centers()
 {
 	for (short j = 0; j < nrclasses; j++)
 		sw[j] = 0;
@@ -287,7 +287,7 @@ void EM::init_centers()
 	return;
 }
 
-void EM::init_centers_rand()
+void ExpectationMaximization::init_centers_rand()
 {
 	unsigned j;
 
@@ -323,7 +323,7 @@ void EM::init_centers_rand()
 	return;
 }
 
-void EM::init_centers(float* center, float* dev, float* ampl)
+void ExpectationMaximization::init_centers(float* center, float* dev, float* ampl)
 {
 	for (short i = 0; i < nrclasses * dim; i++)
 		centers[i] = center[i];
@@ -334,13 +334,13 @@ void EM::init_centers(float* center, float* dev, float* ampl)
 	return;
 }
 
-float* EM::return_centers() { return centers; }
+float* ExpectationMaximization::return_centers() { return centers; }
 
-float* EM::return_devs() { return devs; }
+float* ExpectationMaximization::return_devs() { return devs; }
 
-float* EM::return_ampls() { return ampls; }
+float* ExpectationMaximization::return_ampls() { return ampls; }
 
-EM::~EM()
+ExpectationMaximization::~ExpectationMaximization()
 {
 	free(w);
 	free(sw);

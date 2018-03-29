@@ -14,8 +14,8 @@
 
 #include "SlicesHandler.h"
 
+#include "Core/BranchTree.h"
 #include "Core/Vec3.h"
-#include "Core/branchTree-simplified.h"
 
 #include <iostream>
 #include <list>

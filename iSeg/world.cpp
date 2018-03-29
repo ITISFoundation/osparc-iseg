@@ -11,7 +11,7 @@
 
 #include "world.h"
 
-#include "Core/branchItem-simplified.h"
+#include "Core/BranchItem.h"
 
 #include <cmath>
 #include <math.h>
@@ -1734,7 +1734,7 @@ void World::outputBranchTree(BranchItem* branchItem, std::string prefix,
 	std::vector<Vec3>* center = branchItem->getCenterList();
 	std::vector<Vec3>::iterator iter1;
 
-	fprintf(fp, "size(%i):", center->size());
+	fprintf(fp, "size(%i):", static_cast<int>(center->size()));
 	for (iter1 = center->begin(); iter1 != center->end(); iter1++)
 	{
 		fprintf(fp, "(%f %f %f) ", (*iter1)[0], (*iter1)[1], (*iter1)[2]);
