@@ -1,5 +1,3 @@
-#iSEG
-
 ![iSEG logo](iSeg/images/isegicon.png)
 
 ## Description
