@@ -10,7 +10,7 @@
 #ifndef ATLAS_WIDGET
 #define ATLAS_WIDGET
 
-#include "widgetcollection.h"
+#include "WidgetCollection.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"

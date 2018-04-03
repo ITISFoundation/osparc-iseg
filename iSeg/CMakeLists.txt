@@ -31,38 +31,6 @@ INCLUDE_DIRECTORIES(
 )
 
 
-SET(MyMocHeaders
-	ActiveslicesConfigWidget.h
-	AtlasViewer.h
-	AtlasWidget.h
-	bmpshower.h
-	EdgeWidget.h
-	FastmarchingFuzzyWidget.h
-	FeatureWidget.h
-	HystereticGrowingWidget.h
-	ImageForestingTransformRegionGrowingWidget.h
-	ImageInformationDialogs.h
-	InterpolationWidget.h
-	LivewireWidget.h
-	LoaderWidgets.h
-	MainWindow.h
-	MeasurementWidget.h
-	MorphologyWidget.h
-	OutlineCorrectionWidget.h
-	PickerWidget.h
-	RadiotherapyStructureSetImporter.h
-	SaveOutlinesWidget.h
-	Settings.h
-	SliceViewerWidget.h
-	SmoothingWidget.h
-	ThresholdWidget.h
-	TransformWidget.h
-	UndoConfigurationDialog.h
-	VesselWidget.h
-	WatershedWidget.h
-	WidgetCollection.h
-)
-
 FILE(GLOB ViewerHeaders *.h)
 
 SET(ViewerSrcs
@@ -120,12 +88,43 @@ SET(ViewerSrcs
 	XdmfImageWriter.cpp
 )
 
+SET(MyMocHeaders
+	ActiveslicesConfigWidget.h
+	AtlasViewer.h
+	AtlasWidget.h
+	bmpshower.h
+	EdgeWidget.h
+	FastmarchingFuzzyWidget.h
+	FeatureWidget.h
+	HystereticGrowingWidget.h
+	ImageForestingTransformRegionGrowingWidget.h
+	ImageInformationDialogs.h
+	InterpolationWidget.h
+	LivewireWidget.h
+	LoaderWidgets.h
+	MainWindow.h
+	MeasurementWidget.h
+	MorphologyWidget.h
+	OutlineCorrectionWidget.h
+	PickerWidget.h
+	RadiotherapyStructureSetImporter.h
+	SaveOutlinesWidget.h
+	Settings.h
+	SliceViewerWidget.h
+	SmoothingWidget.h
+	ThresholdWidget.h
+	TransformWidget.h
+	UndoConfigurationDialog.h
+	VesselWidget.h
+	WatershedWidget.h
+	WidgetCollection.h
+)
+
 SET(UIS
 	Settings.ui
 )
 
 SET(RCCS images.qrc)
-
 
 QT4_WRAP_UI(UIHeaders ${UIS})
 QT4_WRAP_CPP(MOCSrcs ${MyMocHeaders})
@@ -146,7 +145,7 @@ TARGET_LINK_LIBRARIES(iSeg
 )
 
 # To use SUBSYSTEM:WINDOWS instead of SUBSYSTEM:CONSOLE one needs to also link this library
-IF(WIN32)
+IF(MSVC)
 	TARGET_LINK_LIBRARIES(iSeg ${QT_QTMAIN_LIBRARY})
 	MSVC_IGNORE_SPECIFIC_DEFAULT_LIBRARIES_DEBUG(MSVCRT.lib)
 	MSVC_SOURCE_GROUP( "Moc Files"  ${MOCSrcs})
@@ -157,16 +156,23 @@ ENDIF()
 IF(ISEG_BUILD_PRECOMPILED_HEADER)
 	ADD_PRECOMPILED_HEADER( iSeg Precompiled.h )
 
-	SET(sources_wo_pch ${MOCSrcs} ${RCCSrcs})
-	FOREACH(src_file ${sources_wo_pch})
-		SET_SOURCE_FILES_PROPERTIES(${src_file} 
-			PROPERTIES COMPILE_FLAGS "/YuPrecompiled.h /FIPrecompiled.h")
-	ENDFOREACH()
+	IF(MSVC)
+		SET(sources_wo_pch ${MOCSrcs} ${RCCSrcs})
+		FOREACH(src_file ${sources_wo_pch})
+			SET_SOURCE_FILES_PROPERTIES(${src_file} 
+				PROPERTIES COMPILE_FLAGS "/YuPrecompiled.h /FIPrecompiled.h")
+		ENDFOREACH()
+	ENDIF()
 ENDIF()
 
+# copy to build folder
+# todo: how to get images into bundle?
+FOREACH(BUILD_TYPE ${CMAKE_CONFIGURATION_TYPES})
+	FILE(INSTALL ${CMAKE_SOURCE_DIR}/iSeg/images/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BUILD_TYPE}/images FILES_MATCHING PATTERN "*.png" PATTERN ".svn" EXCLUDE)
+	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/iSeg/images/isegicon64.ico ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BUILD_TYPE}/images/isegicon.ico COPYONLY)
+ENDFOREACH()
 
-
-# INSTALL
+# install
 INSTALL(CODE "MESSAGE(\"Installing iSeg...\")")
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/iSeg/images/ DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/images FILES_MATCHING PATTERN "*.png" PATTERN ".svn" EXCLUDE)
 IF(UNIX)

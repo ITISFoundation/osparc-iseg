@@ -10,10 +10,11 @@
 #ifndef ATLAS_VIEWER
 #define ATLAS_VIEWER
 
-#include "widgetcollection.h"
+#include "Plugin/WidgetInterface.h"
 
 #include "Core/Pair.h"
 #include "Core/Point.h"
+#include "Core/Types.h"
 
 #include <QCloseEvent>
 #include <QContextMenuEvent>

@@ -11,7 +11,7 @@
 #define VESSELWIDGET_19DEZ07
 
 #include "SlicesHandler.h"
-#include "world.h"
+#include "World.h"
 
 #include "Plugin/WidgetInterface.h"
 

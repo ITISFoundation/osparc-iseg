@@ -18,4 +18,5 @@
 namespace iseg {
 
 iSegCore_API void addLine(std::vector<Point>* vP, Point p1, Point p2);
+
 }

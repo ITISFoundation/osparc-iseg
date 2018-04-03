@@ -19,6 +19,9 @@ namespace iseg {
 class SliceHandlerInterface
 {
 public:
+	typedef unsigned short tissue_type;
+	typedef float          pixel_type;
+
 	virtual unsigned short return_startslice() = 0;
 	virtual unsigned short return_endslice() = 0;
 	virtual unsigned short get_activeslice() = 0;
@@ -39,8 +42,8 @@ public:
 		kSource,
 		kTarget
 	};
-	virtual itk::SliceContiguousImage<float>::Pointer GetImage(eImageType type, bool active_slices) = 0;
-	virtual itk::SliceContiguousImage<unsigned short>::Pointer GetTissues(bool active_slices) = 0;
+	virtual itk::SliceContiguousImage<pixel_type>::Pointer GetImage(eImageType type, bool active_slices) = 0;
+	virtual itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices) = 0;
 };
 
 } // namespace iseg

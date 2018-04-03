@@ -10,7 +10,7 @@
 #ifndef TRANSFORM_17NOV11
 #define TRANSFORM_17NOV11
 
-#include "slicetransform.h"
+#include "SliceTransform.h"
 
 #include "Core/DataSelection.h"
 #include "Core/Point.h"
