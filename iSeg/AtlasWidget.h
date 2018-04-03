@@ -10,8 +10,17 @@
 #ifndef ATLAS_WIDGET
 #define ATLAS_WIDGET
 
-#include "widgetcollection.h"
+#include "WidgetCollection.h"
+
+#include "Core/Pair.h"
+#include "Core/Point.h"
+
+#include <QCloseEvent>
+#include <QContextMenuEvent>
+#include <QMouseEvent>
+#include <QPaintEvent>
 #include <QScrollArea>
+#include <QWheelEvent>
 #include <q3action.h>
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -22,52 +31,47 @@
 #include <qpushbutton.h>
 #include <qslider.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Core/Pair.h"
-#include "Core/Point.h"
-#include <QCloseEvent>
-#include <QContextMenuEvent>
-#include <QMouseEvent>
-#include <QPaintEvent>
-#include <QWheelEvent>
+
 #include <vector>
 
 #include "AtlasViewer.h"
+
+namespace iseg {
 
 class AtlasWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasWidget(const char *filename, QDir picpath, QWidget *parent = 0,
-							const char *name = 0, Qt::WindowFlags wFlags = 0);
+	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = 0,
+				const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasWidget();
 	bool isOK;
 
 private:
-	QLabel *lb_contrast;
-	QLabel *lb_brightness;
-	QLabel *lb_transp;
-	QLabel *lb_name;
-	QSlider *sl_contrast;
-	QSlider *sl_brightness;
-	QSlider *sl_transp;
-	AtlasViewer *atlasViewer;
-	QScrollArea *sa_viewer;
-	zoomer_widget *zoomer;
-	QScrollBar *scb_slicenr;
-	QButtonGroup *bg_orient;
-	QRadioButton *rb_x;
-	QRadioButton *rb_y;
-	QRadioButton *rb_z;
-	QHBoxLayout *hbox1;
-	QHBoxLayout *hbox2;
-	QHBoxLayout *hbox3;
-	QVBoxLayout *vbox1;
+	QLabel* lb_contrast;
+	QLabel* lb_brightness;
+	QLabel* lb_transp;
+	QLabel* lb_name;
+	QSlider* sl_contrast;
+	QSlider* sl_brightness;
+	QSlider* sl_transp;
+	AtlasViewer* atlasViewer;
+	QScrollArea* sa_viewer;
+	zoomer_widget* zoomer;
+	QScrollBar* scb_slicenr;
+	QButtonGroup* bg_orient;
+	QRadioButton* rb_x;
+	QRadioButton* rb_y;
+	QRadioButton* rb_z;
+	QHBoxLayout* hbox1;
+	QHBoxLayout* hbox2;
+	QHBoxLayout* hbox3;
+	QVBoxLayout* vbox1;
 
-	bool loadfile(const char *filename);
+	bool loadfile(const char* filename);
 
-	float *image;
-	tissues_size_t *tissue;
+	float* image;
+	tissues_size_t* tissue;
 	float minval, maxval;
 	float dx, dy, dz;
 	unsigned short dimx, dimy, dimz;
@@ -86,4 +90,5 @@ private slots:
 	void sl_brightcontr_moved();
 };
 
+} // namespace iseg
 #endif //ATLAS_WIDGET

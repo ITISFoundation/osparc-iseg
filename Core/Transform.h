@@ -10,9 +10,11 @@
 
 #pragma once
 
-#include "vec3.h"
+#include "Vec3.h"
 
 #include <algorithm>
+
+namespace iseg {
 
 class Transform
 {
@@ -59,7 +61,7 @@ public:
 		T d1[] = {dc[0], dc[1], dc[2]};
 		T d2[] = {dc[3], dc[4], dc[5]};
 		T d3[] = {d1[1] * d2[2] - d1[2] * d2[1], d1[2] * d2[0] - d1[0] * d2[2],
-							d1[0] * d2[1] - d1[1] * d2[0]};
+				  d1[0] * d2[1] - d1[1] * d2[0]};
 
 		for (unsigned int r = 0; r < 3; r++)
 		{
@@ -71,7 +73,7 @@ public:
 		}
 	}
 
-	template<typename TVec3> void getOffset(TVec3 &offset) const
+	template<typename TVec3> void getOffset(TVec3& offset) const
 	{
 		for (unsigned int r = 0; r < 3; r++)
 		{
@@ -79,7 +81,7 @@ public:
 		}
 	}
 
-	template<typename TVec3> void setOffset(const TVec3 &offset)
+	template<typename TVec3> void setOffset(const TVec3& offset)
 	{
 		for (unsigned int r = 0; r < 3; r++)
 		{
@@ -87,7 +89,7 @@ public:
 		}
 	}
 
-	template<typename TRotation3x3> void getRotation(TRotation3x3 &rot) const
+	template<typename TRotation3x3> void getRotation(TRotation3x3& rot) const
 	{
 		for (unsigned int r = 0; r < 3; r++)
 		{
@@ -99,7 +101,7 @@ public:
 	}
 
 	template<typename TVec3>
-	void setRotation(const TVec3 &c0, const TVec3 &c1, const TVec3 &c2)
+	void setRotation(const TVec3& c0, const TVec3& c1, const TVec3& c2)
 	{
 		for (unsigned int r = 0; r < 3; r++)
 		{
@@ -109,17 +111,17 @@ public:
 		}
 	}
 
-	template<typename TVec3> TVec3 rigidTransformPoint(const TVec3 &in) const
+	template<typename TVec3> TVec3 rigidTransformPoint(const TVec3& in) const
 	{
 		typedef typename TVec3::value_type T2;
 
 		TVec3 out;
 		out[0] = static_cast<T2>(_m[0][0] * in[0] + _m[0][1] * in[1] +
-														 _m[0][2] * in[2] + _m[0][3]);
+								 _m[0][2] * in[2] + _m[0][3]);
 		out[1] = static_cast<T2>(_m[1][0] * in[0] + _m[1][1] * in[1] +
-														 _m[1][2] * in[2] + _m[1][3]);
+								 _m[1][2] * in[2] + _m[1][3]);
 		out[2] = static_cast<T2>(_m[2][0] * in[0] + _m[2][1] * in[1] +
-														 _m[2][2] * in[2] + _m[2][3]);
+								 _m[2][2] * in[2] + _m[2][3]);
 		return out;
 	}
 
@@ -127,21 +129,21 @@ public:
 	// for cropping, padding_lo[.] is negative
 	void paddingUpdateTransform(const int padding_lo[3], const float spacing[3])
 	{
-		vec3 new_corner_before_transform(-padding_lo[0] * spacing[0],
-																		 -padding_lo[1] * spacing[1],
-																		 -padding_lo[2] * spacing[2]);
-		vec3 p1 = rigidTransformPoint(vec3(0, 0, 0));
-		vec3 p2 = rigidTransformPoint(new_corner_before_transform);
+		Vec3 new_corner_before_transform(-padding_lo[0] * spacing[0],
+										 -padding_lo[1] * spacing[1],
+										 -padding_lo[2] * spacing[2]);
+		Vec3 p1 = rigidTransformPoint(Vec3(0, 0, 0));
+		Vec3 p2 = rigidTransformPoint(new_corner_before_transform);
 
-		vec3 t_before;
+		Vec3 t_before;
 		getOffset(t_before);
 		setOffset(t_before + (p2 - p1));
 	}
 
-	float *operator[](size_t row) { return _m[row]; }
-	const float *operator[](size_t row) const { return _m[row]; }
+	float* operator[](size_t row) { return _m[row]; }
+	const float* operator[](size_t row) const { return _m[row]; }
 
-	bool operator!=(const Transform &other) const
+	bool operator!=(const Transform& other) const
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -154,3 +156,5 @@ public:
 		return false;
 	}
 };
+
+} // namespace iseg

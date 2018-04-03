@@ -9,19 +9,22 @@
  */
 #pragma once
 
-#include "UndoElem.h"
 #include "iSegCore.h"
+
+#include "UndoElem.h"
+
+namespace iseg {
 
 class iSegCore_API UndoQueue
 {
 public:
 	UndoQueue();
 	~UndoQueue();
-	void add_undo(UndoElem *ue);
-	void merge_undo(UndoElem *ue);
-	bool add_undo(MultiUndoElem *ue);
-	UndoElem *undo();
-	UndoElem *redo();
+	void add_undo(UndoElem* ue);
+	void merge_undo(UndoElem* ue);
+	bool add_undo(MultiUndoElem* ue);
+	UndoElem* undo();
+	UndoElem* redo();
 	void clear_undo();
 	unsigned return_nrredo();
 	unsigned return_nrundo();
@@ -34,10 +37,12 @@ public:
 private:
 	unsigned nrundo;
 	unsigned nrundoarraysmax;
-	void sub_add_undo(UndoElem *ue);
+	void sub_add_undo(UndoElem* ue);
 	unsigned nrundoarrays;
-	std::vector<UndoElem *> undos;
+	std::vector<UndoElem*> undos;
 	unsigned first;
 	unsigned nrnow;
 	unsigned nrin;
 };
+
+} // namespace iseg

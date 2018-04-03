@@ -4,19 +4,36 @@
 # - library
 # - preprocessor definitions needed by package
 #
-FIND_PACKAGE(VTK 7.1 REQUIRED 
-	COMPONENTS 
-	vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
-	vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
-	vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
-	vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
-	vtkRenderingCore vtkRenderingOpenGL vtkInteractionWidgets
-	vtksys
-	vtkRenderingVolume vtkRenderingVolumeOpenGL vtkRenderingAnnotation vtkRenderingLOD
-	vtkInteractionStyle)
+OPTION(ISEG_VTK_OPENGL2 "Expect VTK with OpenGL2 backend (VTK_RENDERING_BACKEND=OpenGL2)" ON)
+IF(ISEG_VTK_OPENGL2)
+	FIND_PACKAGE(VTK 7.1 REQUIRED
+		COMPONENTS 
+		vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
+		vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
+		vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
+		vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
+		vtkRenderingCore vtkRenderingOpenGL2 vtkInteractionWidgets
+		vtksys
+		vtkRenderingVolume vtkRenderingVolumeOpenGL2 vtkRenderingAnnotation vtkRenderingLOD
+		vtkInteractionStyle)
+ELSE()
+	FIND_PACKAGE(VTK 7.1 REQUIRED
+		COMPONENTS 
+		vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
+		vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
+		vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
+		vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
+		vtkRenderingCore vtkRenderingOpenGL vtkInteractionWidgets
+		vtksys
+		vtkRenderingVolume vtkRenderingVolumeOpenGL vtkRenderingAnnotation vtkRenderingLOD
+		vtkInteractionStyle)
+ENDIF()
 
 MACRO(USE_VTK)
 	INCLUDE(${VTK_USE_FILE})
+	IF(ISEG_VTK_OPENGL2)
+		ADD_DEFINITIONS(-DISEG_VTK_OPENGL2)
+	ENDIF()
 	
 	LIST( APPEND MY_EXTERNAL_LINK_LIBRARIES ${VTK_LIBRARIES} )
 	REMEMBER_TO_CALL_THIS_INSTALL_MACRO( INSTALL_RUNTIME_LIBRARIES_VTK )

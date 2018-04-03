@@ -7,19 +7,23 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "RTDoseReader.h"
 #include "Precompiled.h"
+
+#include "RTDoseReader.h"
+
 #include "gdcmAttribute.h"
 #include "gdcmImageReader.h"
 
 #pragma warning(disable : 4244)
 
+using namespace iseg;
+
 RTDoseReader::RTDoseReader() {}
 
 RTDoseReader::~RTDoseReader() {}
 
-bool RTDoseReader::ReadSizeData(const char *filename, unsigned int *dims,
-																double *spacing, double *origin, double *dc)
+bool RTDoseReader::ReadSizeData(const char* filename, unsigned int* dims,
+								double* spacing, double* origin, double* dc)
 {
 	gdcm::ImageReader imreader;
 	imreader.SetFileName(filename);
@@ -29,10 +33,10 @@ bool RTDoseReader::ReadSizeData(const char *filename, unsigned int *dims,
 	}
 	gdcm::Image image = imreader.GetImage();
 
-	const unsigned int *tmp0 = image.GetDimensions();
-	const double *tmp1 = image.GetSpacing();
-	const double *tmp2 = image.GetOrigin();
-	const double *tmp3 = image.GetDirectionCosines();
+	const unsigned int* tmp0 = image.GetDimensions();
+	const double* tmp1 = image.GetSpacing();
+	const double* tmp2 = image.GetOrigin();
+	const double* tmp3 = image.GetDirectionCosines();
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		dims[i] = tmp0[i];
@@ -45,10 +49,10 @@ bool RTDoseReader::ReadSizeData(const char *filename, unsigned int *dims,
 	return true;
 }
 
-bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
+bool RTDoseReader::ReadPixelData(const char* filename, float** bits)
 {
 	// Read RTdose data
-	gdcm::Reader *reader = new gdcm::Reader();
+	gdcm::Reader* reader = new gdcm::Reader();
 	reader->SetFileName(filename);
 	if (!reader->Read())
 	{
@@ -64,11 +68,12 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 		return false;
 	}
 
-	const gdcm::DataSet &ds = reader->GetFile().GetDataSet();
+	const gdcm::DataSet& ds = reader->GetFile().GetDataSet();
 
 	// (0028,0009) SQ (Sequence with explicit length #=1)      # Frame increment pointer // TODO: Should be equal to 3004000C (Grid Frame Offset Vector), ignore???
 	gdcm::Attribute<0x0028, 0x0009> atframeincrptr;
-	atframeincrptr.SetFromDataElement(ds.GetDataElement(atframeincrptr.GetTag()));
+	atframeincrptr.SetFromDataElement(
+		ds.GetDataElement(atframeincrptr.GetTag()));
 	if (atframeincrptr.GetValue() != gdcm::Tag(0x3004, 0x000C))
 	{
 		delete reader;
@@ -77,7 +82,7 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 
 	// (0028,0100) SQ (Sequence with explicit length #=1)      # Bits Allocated (16 or 32 for RTdose)
 	gdcm::Attribute<0x0028, 0x0100> atbitsppx;
-	const gdcm::DataElement &debitsppx = ds.GetDataElement(atbitsppx.GetTag());
+	const gdcm::DataElement& debitsppx = ds.GetDataElement(atbitsppx.GetTag());
 	atbitsppx.SetFromDataElement(debitsppx);
 	unsigned short bitsppx = atbitsppx.GetValue();
 	if (!(bitsppx == 16 || bitsppx == 32))
@@ -89,7 +94,7 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 	// (3004,000C)										       # Grid Frame Offset Vector (array which contains the dose image plane offsets (in mm) of the dose image frames)
 	gdcm::Attribute<0x3004, 0x000C> atoffsetvec;
 	atoffsetvec.SetFromDataElement(ds.GetDataElement(atoffsetvec.GetTag()));
-	const double *offsetvals = atoffsetvec.GetValues();
+	const double* offsetvals = atoffsetvec.GetValues();
 	if (offsetvals[0] != 0.0)
 	{
 		// TODO: Plane locations in patient coordinate system not handled
@@ -106,7 +111,8 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 		// (3004,000E) SQ (Sequence with explicit length #=1)      # Dose Grid Scaling
 		// Scaling factor that when multiplied by the pixel data yields grid doses in the dose units
 		gdcm::Attribute<0x3004, 0x000E> atgridscaling;
-		atgridscaling.SetFromDataElement(ds.GetDataElement(atgridscaling.GetTag()));
+		atgridscaling.SetFromDataElement(
+			ds.GetDataElement(atgridscaling.GetTag()));
 		gridscaling = atgridscaling.GetValue();
 	}
 
@@ -123,7 +129,7 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 	delete reader;
 
 	// Read pixel data
-	gdcm::ImageReader *imreader = new gdcm::ImageReader();
+	gdcm::ImageReader* imreader = new gdcm::ImageReader();
 	imreader->SetFileName(filename);
 	if (!imreader->Read())
 	{
@@ -136,9 +142,9 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 	//	return false;
 	//}
 
-	const unsigned int *dims = image.GetDimensions();
-	const double *spacing = image.GetSpacing();
-	const double *origin = image.GetOrigin();
+	const unsigned int* dims = image.GetDimensions();
+	const double* spacing = image.GetSpacing();
+	const double* origin = image.GetOrigin();
 
 	for (unsigned int i = 0; i < dims[2]; ++i)
 	{
@@ -152,15 +158,15 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 
 	std::vector<char> vbuffer;
 	vbuffer.resize(image.GetBufferLength());
-	char *buffer = &vbuffer[0];
+	char* buffer = &vbuffer[0];
 	image.GetBuffer(buffer);
 
 	if (image.GetPixelFormat() == gdcm::PixelFormat::UINT16)
 	{
-		unsigned short *buffer16 = (unsigned short *)buffer;
+		unsigned short* buffer16 = (unsigned short*)buffer;
 		for (unsigned short z = 0; z < dims[2]; ++z)
 		{
-			float *tmp = &(bits[z][0]);
+			float* tmp = &(bits[z][0]);
 			for (unsigned short y = 0; y < dims[1]; ++y)
 			{
 				for (unsigned short x = 0; x < dims[0]; ++x)
@@ -172,10 +178,10 @@ bool RTDoseReader::ReadPixelData(const char *filename, float **bits)
 	}
 	else if (image.GetPixelFormat() == gdcm::PixelFormat::UINT32)
 	{
-		unsigned int *buffer32 = (unsigned int *)buffer;
+		unsigned int* buffer32 = (unsigned int*)buffer;
 		for (unsigned short z = 0; z < dims[2]; ++z)
 		{
-			float *tmp = &(bits[z][0]);
+			float* tmp = &(bits[z][0]);
 			for (unsigned short y = 0; y < dims[1]; ++y)
 			{
 				for (unsigned short x = 0; x < dims[0]; ++x)

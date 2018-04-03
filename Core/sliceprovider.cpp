@@ -7,96 +7,86 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "sliceprovider.h"
 #include "Precompiled.h"
+
+#include "SliceProvider.h"
 
 #include <cstdlib>
 
 using namespace std;
+using namespace iseg;
 
-sliceprovider::sliceprovider(unsigned area1)
-{
-	area = area1;
-	//for(unsigned short i=0;i<nrslices;++i){
-	//	slicestack.push((T *)malloc(sizeof(T)*area));
-	//}
-	return;
-}
+SliceProvider::SliceProvider(unsigned area1) { area = area1; }
 
-sliceprovider::~sliceprovider()
+SliceProvider::~SliceProvider()
 {
 	while (!slicestack.empty())
 	{
 		free(slicestack.top());
 		slicestack.pop();
 	}
-
-	return;
 }
 
-float *sliceprovider::give_me()
+float* SliceProvider::give_me()
 {
 	if (slicestack.empty())
 	{
-		return (float *)malloc(sizeof(float) * area);
+		return (float*)malloc(sizeof(float) * area);
 	}
 	else
 	{
-		float *result = slicestack.top();
+		float* result = slicestack.top();
 		slicestack.pop();
 		return result;
 	}
 }
 
-void sliceprovider::take_back(float *slice)
+void SliceProvider::take_back(float* slice)
 {
 	if (slice != NULL)
 		slicestack.push(slice);
-	return;
 }
 
-void sliceprovider::merge(sliceprovider *sp)
+void SliceProvider::merge(SliceProvider* sp)
 {
 	if (area == sp->return_area())
 	{
 		while (!slicestack.empty())
 			sp->take_back(give_me());
 	}
-	return;
 }
 
-unsigned sliceprovider::return_area() { return area; }
+unsigned SliceProvider::return_area() { return area; }
 
-unsigned short sliceprovider::return_nrslices()
+unsigned short SliceProvider::return_nrslices()
 {
 	return (unsigned short)slicestack.size();
 }
 
-sliceprovider_installer *sliceprovider_installer::inst = NULL;
+SliceProviderInstaller* SliceProviderInstaller::inst = NULL;
 
-unsigned short sliceprovider_installer::counter = 0;
+unsigned short SliceProviderInstaller::counter = 0;
 
-sliceprovider_installer *sliceprovider_installer::getinst()
+SliceProviderInstaller* SliceProviderInstaller::getinst()
 {
 	static Waechter w;
 	if (inst == NULL)
-		inst = new sliceprovider_installer;
+		inst = new SliceProviderInstaller;
 
 	counter++;
 	return inst;
 }
 
-void sliceprovider_installer::return_instance()
+void SliceProviderInstaller::return_instance()
 {
 	//	if(--counter==0) ~sliceprovider_installer();
 	//	if(--counter==0) delete this;
 	--counter;
-	return;
 }
 
-bool sliceprovider_installer::unused() { return counter == 0; }
+bool SliceProviderInstaller::unused() { return counter == 0; }
 
-sliceprovider *sliceprovider_installer::install(unsigned area1)
+SliceProvider* SliceProviderInstaller::install(unsigned area1)
 {
 	/*	FILE *fp1=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
 	fprintf(fp1,"E %u",(unsigned)&splist);
@@ -121,13 +111,13 @@ sliceprovider *sliceprovider_installer::install(unsigned area1)
 		spobj spobj1;
 		spobj1.installnr = 1;
 		spobj1.area = area1;
-		spobj1.spp = new sliceprovider(area1);
+		spobj1.spp = new SliceProvider(area1);
 		splist.push_back(spobj1);
 		return spobj1.spp;
 	}
 }
 
-void sliceprovider_installer::uninstall(sliceprovider *sp)
+void SliceProviderInstaller::uninstall(SliceProvider* sp)
 {
 	list<spobj>::iterator it = splist.begin();
 	while (it != splist.end() && (it->area != sp->return_area()))
@@ -142,10 +132,9 @@ void sliceprovider_installer::uninstall(sliceprovider *sp)
 			return;
 		}
 	}
-	return;
 }
 
-sliceprovider_installer::~sliceprovider_installer()
+SliceProviderInstaller::~SliceProviderInstaller()
 {
 	for (list<spobj>::iterator it = splist.begin(); it != splist.end(); it++)
 	{
@@ -153,11 +142,9 @@ sliceprovider_installer::~sliceprovider_installer()
 	}
 
 	inst = NULL;
-
-	return;
 }
 
-void sliceprovider_installer::report() const
+void SliceProviderInstaller::report() const
 {
 	std::map<int, int> area_counts;
 	std::map<int, int> area_counts_empty;

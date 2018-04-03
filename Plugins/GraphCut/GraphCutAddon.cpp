@@ -15,31 +15,41 @@
 namespace iseg { namespace plugin {
 
 namespace {
-CGCBoneSegmentationAddon _register_bone_seg;
+GCBoneSegmentationPlugin _register_bone_seg;
 //CGCTissueSeparatorAddon  _register_tissue_sep;
 } // namespace
 
-CGCBoneSegmentationAddon::CGCBoneSegmentationAddon() {}
+GCBoneSegmentationPlugin::GCBoneSegmentationPlugin() {}
 
-CGCBoneSegmentationAddon::~CGCBoneSegmentationAddon() {}
+GCBoneSegmentationPlugin::~GCBoneSegmentationPlugin() {}
 
-QWidget1 *CGCBoneSegmentationAddon::CreateWidget(QWidget *parent,
-																								 const char *name,
-																								 Qt::WindowFlags wFlags) const
+std::string GCBoneSegmentationPlugin::description() const
 {
-	return new CGraphCutBoneSegmentation(SliceHandler(), parent, name, wFlags);
+	return "Automatic bone segmentation in CT images using graph-cut method.";
+}
+
+WidgetInterface* GCBoneSegmentationPlugin::create_widget(QWidget* parent,
+														 const char* name,
+														 Qt::WindowFlags wFlags) const
+{
+	return new BoneSegmentationWidget(slice_handler(), parent, name, wFlags);
 }
 
 //////////////////////////////////////////////////////////////////////////
-CGCTissueSeparatorAddon::CGCTissueSeparatorAddon() {}
+CGCTissueSeparatorPlugin::CGCTissueSeparatorPlugin() {}
 
-CGCTissueSeparatorAddon::~CGCTissueSeparatorAddon() {}
+CGCTissueSeparatorPlugin::~CGCTissueSeparatorPlugin() {}
 
-QWidget1 *CGCTissueSeparatorAddon::CreateWidget(QWidget *parent,
-																								const char *name,
-																								Qt::WindowFlags wFlags) const
+std::string CGCTissueSeparatorPlugin::description() const
 {
-	return new CGraphCutTissueSeparator(SliceHandler(), parent, name, wFlags);
+	return "Separate tissue using only minor user-input.";
+}
+
+WidgetInterface* CGCTissueSeparatorPlugin::create_widget(QWidget* parent,
+														 const char* name,
+														 Qt::WindowFlags wFlags) const
+{
+	return new TissueSeparatorWidget(slice_handler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

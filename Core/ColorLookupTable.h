@@ -14,6 +14,8 @@
 
 class vtkLookupTable;
 
+namespace iseg {
+
 class iSegCore_API ColorLookupTable
 {
 public:
@@ -25,9 +27,10 @@ public:
 
 	void SetColor(size_t idx, unsigned char rgb[3]);
 	void GetColor(double v, unsigned char rgb[3]) const;
-	void GetColor(double v, unsigned char &r, unsigned char &g,
-								unsigned char &b) const;
+	void GetColor(double v, unsigned char& r, unsigned char& g,
+				  unsigned char& b) const;
 
 private:
-	vtkLookupTable *m_Lut;
+	vtkLookupTable* m_Lut;
 };
+} // namespace iseg

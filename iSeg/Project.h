@@ -12,10 +12,12 @@
 
 #include <QString>
 
+namespace iseg {
+
 class Project
 {
 public:
-    Project();
+	Project();
 	QString m_loadprojfilename1;
 	QString m_loadprojfilename2;
 	QString m_loadprojfilename3;
@@ -27,5 +29,7 @@ public:
 	int lpf4nr;
 	int separatornr;
 };
+
+} // namespace iseg
 
 #endif // PROJECT_H

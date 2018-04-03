@@ -25,16 +25,14 @@ The libraries below are required to be compiled and installed on the system in o
 
 - Boost, [Boost license](http://www.boost.org/users/license.html)
 - HDF5, [BSD-like license](https://support.hdfgroup.org/products/licenses.html)
-- zlib, [license](http://zlib.net/zlib_license.html)
+- zlib, [ZLIB license](http://zlib.net/zlib_license.html)
 - ITK, [Apache 2.0 license](https://itk.org/ITK/project/licenseversion1.html)
 - VTK, [BSD license](https://www.vtk.org/licensing/)
 - Qt 4.8, [GPL3 and LGPL2.1 license](https://www1.qt.io/licensing/)
-- GraphCut, [LGPL license](http://cbia.fi.muni.cz/user_dirs/gc_doc/)
-- GPU-Marching-Cubes, [Permissive license](https://github.com/smistad/GPU-Marching-Cubes/blob/master/LICENSE)
 
 ### Optional 3rd party libraries
 
-- OpenCL (necessary to use GPU computations, usually available from the graphics hardware manufacturers)
+- GraphCut, [LGPL license](http://cbia.fi.muni.cz/user_dirs/gc_doc/). This library is compiled depending on the CMake configuration (plugin selection).
 
 ### 3rd Party Libraries compilation instructions
 
@@ -69,7 +67,7 @@ The libraries below are required to be compiled and installed on the system in o
 - [Qt](https://download.qt.io/official_releases/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz): v4.8.7 (min 4.8.6)
 
   1. Download and unzip the Qt folder
-  2. Apply the patch located in the [repo root folder](02-fix_build_with_msvc2015-45e8f4ee.diff)(02-fix_build_with_msvc2015-45e8f4ee.diff) ([based on these instructions](https://stackoverflow.com/questions/32848962/how-to-build-qt-4-8-6-with-visual-studio-2015-without-official-support))
+  2. Apply the patch located in the [repo root folder](Thirdparty/Qt/02-fix_build_with_msvc2015-45e8f4ee.diff)(02-fix_build_with_msvc2015-45e8f4ee.diff) ([based on these instructions](https://stackoverflow.com/questions/32848962/how-to-build-qt-4-8-6-with-visual-studio-2015-without-official-support))
   3. Open a VisualStudio 2015 x64 prompt
   4. Go to downloaded Qt folder (cd _%QTFOLDER%_)
   5. Input _set Path=%PATH%;%QTFOLDER%\bin_

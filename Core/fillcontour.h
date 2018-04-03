@@ -11,14 +11,16 @@
 
 #include "iSegCore.h"
 
-namespace fillcontours {
-iSegCore_API bool pointinpoly(float *pt, unsigned int cnt, float *polypts);
-iSegCore_API int whichquad(float *pt, float *orig);
-iSegCore_API bool is_hole(float **points, unsigned int *nrpoints,
-													unsigned int nrcontours, unsigned int contournr);
-iSegCore_API void fill_contour(bool *array, unsigned short *pixel_extents,
-															 float *origin, float *pixel_size,
-															 float *direction_cosines, float **points,
-															 unsigned int *nrpoints, unsigned int nrcontours,
-															 bool clockwisefill);
-} // namespace fillcontours
+namespace iseg { namespace fillcontours {
+
+iSegCore_API bool pointinpoly(float* pt, unsigned int cnt, float* polypts);
+iSegCore_API int whichquad(float* pt, float* orig);
+iSegCore_API bool is_hole(float** points, unsigned int* nrpoints,
+						  unsigned int nrcontours, unsigned int contournr);
+iSegCore_API void fill_contour(bool* array, unsigned short* pixel_extents,
+							   float* origin, float* pixel_size,
+							   float* direction_cosines, float** points,
+							   unsigned int* nrpoints, unsigned int nrcontours,
+							   bool clockwisefill);
+
+}} // namespace iseg::fillcontours

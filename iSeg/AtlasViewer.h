@@ -10,8 +10,18 @@
 #ifndef ATLAS_VIEWER
 #define ATLAS_VIEWER
 
-#include "widgetcollection.h"
+#include "Plugin/WidgetInterface.h"
+
+#include "Core/Pair.h"
+#include "Core/Point.h"
+#include "Core/Types.h"
+
+#include <QCloseEvent>
+#include <QContextMenuEvent>
+#include <QMouseEvent>
+#include <QPaintEvent>
 #include <QScrollArea>
+#include <QWheelEvent>
 #include <q3action.h>
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -22,25 +32,21 @@
 #include <qpushbutton.h>
 #include <qslider.h>
 #include <qwidget.h>
-//Added by qt3to4:
-#include "Core/Pair.h"
-#include "Core/Point.h"
-#include <QCloseEvent>
-#include <QContextMenuEvent>
-#include <QMouseEvent>
-#include <QPaintEvent>
-#include <QWheelEvent>
+
 #include <vector>
+
+namespace iseg {
 
 class AtlasViewer : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasViewer(float *bmpbits1, tissues_size_t *tissue1, unsigned char orient1,
-							unsigned short dimx1, unsigned short dimy1, unsigned short dimz1,
-							float dx1, float dy1, float dz1, std::vector<float> *r,
-							std::vector<float> *g, std::vector<float> *b, QWidget *parent = 0,
-							const char *name = 0, Qt::WindowFlags wFlags = 0);
+	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1,
+				unsigned short dimx1, unsigned short dimy1,
+				unsigned short dimz1, float dx1, float dy1, float dz1,
+				std::vector<float>* r, std::vector<float>* g,
+				std::vector<float>* b, QWidget* parent = 0,
+				const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasViewer();
 	void init();
 	void update();
@@ -50,11 +56,11 @@ signals:
 	void mousemoved_sign(tissues_size_t t);
 
 protected:
-	void paintEvent(QPaintEvent *e);
-	void mouseMoveEvent(QMouseEvent *e);
+	void paintEvent(QPaintEvent* e);
+	void mouseMoveEvent(QMouseEvent* e);
 
 private:
-	QPainter *painter;
+	QPainter* painter;
 	float scalefactor;
 	float scaleoffset;
 	double zoom;
@@ -68,13 +74,13 @@ private:
 	unsigned short dimx, dimy, dimz;
 	float dx, dy, dz;
 	float tissueopac;
-	float *bmpbits;
-	tissues_size_t *tissue;
-	float *current_bmpbits;
-	tissues_size_t *current_tissue;
-	std::vector<float> *color_r;
-	std::vector<float> *color_g;
-	std::vector<float> *color_b;
+	float* bmpbits;
+	tissues_size_t* tissue;
+	float* current_bmpbits;
+	tissues_size_t* current_tissue;
+	std::vector<float>* color_r;
+	std::vector<float>* color_g;
+	std::vector<float>* color_b;
 
 public slots:
 	void set_scale(float offset1, float factor1);
@@ -91,4 +97,5 @@ public slots:
 	void pixelsize_changed(Pair pixelsize1);
 };
 
+} // namespace iseg
 #endif //ATLAS_VIEWER

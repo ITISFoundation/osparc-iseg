@@ -11,13 +11,17 @@
 
 #include "iSegCore.h"
 
+namespace iseg {
+
 class iSegCore_API RTDoseReader
 {
 public:
 	RTDoseReader();
 	~RTDoseReader();
 
-	static bool ReadSizeData(const char *filename, unsigned int *dims,
-													 double *spacing, double *origin, double *dc);
-	static bool ReadPixelData(const char *filename, float **bits);
+	static bool ReadSizeData(const char* filename, unsigned int* dims,
+							 double* spacing, double* origin, double* dc);
+	static bool ReadPixelData(const char* filename, float** bits);
 };
+
+} // namespace iseg

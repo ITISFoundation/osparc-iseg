@@ -9,4 +9,7 @@
  */
 #pragma once
 
+namespace iseg {
+
 void initializeITKFactory();
+}

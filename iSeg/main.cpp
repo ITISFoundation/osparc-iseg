@@ -8,22 +8,22 @@
  *  https://opensource.org/licenses/MIT
  */
 #include "Precompiled.h"
+
 #include "config.h"
 
+#include "DicomReader.h"
 #include "MainWindow.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
-#include "dicomread.h"
-#include "tissueinfos.h"
 
-#include "Core/3Dsegment.h"
+#include "Core/BranchItem.h"
+#include "Core/Log.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
-#include "Core/branchItem-simplified.h"
-
-#include "Tools.h"
 
 #include <QPlastiqueStyle.h>
+#include <QSplashScreen>
 #include <qapplication.h>
 #include <qdatetime.h>
 #include <qlabel.h>
@@ -45,33 +45,35 @@
 
 #pragma warning(disable : 4100)
 
+#define SHOWSPLASH
+
 using namespace std;
+using namespace iseg;
 
 namespace {
 // \brief Redirect VTK errors/warnings to file
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
 public:
-	static vtkCustomOutputWindow *New();
+	static vtkCustomOutputWindow* New();
 	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream &os, vtkIndent indent) {}
+	virtual void PrintSelf(ostream& os, vtkIndent indent) {}
 
 	// Put the text into the output stream.
-	virtual void DisplayText(const char *msg) { std::cerr << msg << std::endl; }
+	virtual void DisplayText(const char* msg) { std::cerr << msg << std::endl; }
 
 protected:
 	vtkCustomOutputWindow() {}
-	virtual ~vtkCustomOutputWindow() {}
 
 private:
-	vtkCustomOutputWindow(const vtkCustomOutputWindow &); // Not implemented.
-	void operator=(const vtkCustomOutputWindow &);				// Not implemented.
+	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
+	void operator=(const vtkCustomOutputWindow&);		 // Not implemented.
 };
 
 vtkStandardNewMacro(vtkCustomOutputWindow);
 } // namespace
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	auto eow = vtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
@@ -114,18 +116,18 @@ int main(int argc, char **argv)
 	}
 
 	cerr << "intercepting application's output to a log file..." << endl;
-	if (!Tools::interceptOutput(tmpdir.absolutePath().toStdString() +
-															"/iSeg.log"))
+	if (!interceptOutput(tmpdir.absolutePath().toStdString() + "/iSeg.log"))
 	{
-		Tools::error("intercepting output failed");
+		error("intercepting output failed");
 	}
 
 	QDir fileDirectory = fileinfo.dir();
 	cerr << "fileDirectory = " << fileDirectory.absolutePath().toAscii().data()
-			 << endl;
+		 << endl;
 
 	QDir picpath = fileinfo.dir();
-	cerr << "picture path = " << picpath.absolutePath().toAscii().data() << endl;
+	cerr << "picture path = " << picpath.absolutePath().toAscii().data()
+		 << endl;
 	if (!picpath.cd("images"))
 	{
 		cerr << "images folder does not exist" << endl;
@@ -142,7 +144,8 @@ int main(int argc, char **argv)
 #ifdef SHOWSPLASH
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
 #endif
-	QString stylesheetpath = stylesheetdir.absFilePath(QString("S4L.stylesheet"));
+	QString stylesheetpath =
+		stylesheetdir.absFilePath(QString("S4L.stylesheet"));
 	QString locationpath = fileDirectory.absPath();
 	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
 	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
@@ -170,25 +173,28 @@ int main(int argc, char **argv)
 	QString pixmapstr = QString(splashpicpath.toAscii().data());
 	QPixmap pixmap1(pixmapstr);
 
-	QSplashScreen splash1(pixmap1.scaledToHeight(600, Qt::SmoothTransformation));
+	QSplashScreen splash1(
+		pixmap1.scaledToHeight(600, Qt::SmoothTransformation));
 	splash1.show();
 #endif
 	QTime now = QTime::currentTime();
 	ab1.processEvents();
 
-	MainWindow *mainWindow = NULL;
+	MainWindow* mainWindow = NULL;
 	if (argc > 1)
 	{
 		QString qstr(argv[1]);
 		if (qstr.compare(QString("S4Llink")) == 0)
 			mainWindow = new MainWindow(
-					&h3Ds2, QString(locationpath.toAscii().data()), picpath, tmpdir, true,
-					0, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+				&h3Ds2, QString(locationpath.toAscii().data()), picpath, tmpdir,
+				true, 0, "new window",
+				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 	}
 	if (mainWindow == NULL)
-		mainWindow = new MainWindow(
-				&h3Ds2, QString(locationpath.toAscii().data()), picpath, tmpdir, false,
-				0, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+		mainWindow =
+			new MainWindow(&h3Ds2, QString(locationpath.toAscii().data()),
+						   picpath, tmpdir, false, 0, "new window",
+						   Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 
 	QFile qss(stylesheetpath.toAscii().data());
 	qss.open(QFile::ReadOnly);
@@ -217,7 +223,9 @@ int main(int argc, char **argv)
 	}
 
 #ifdef SHOWSPLASH
-	while (now.msecsTo(QTime::currentTime()) < 2000) {}
+	while (now.msecsTo(QTime::currentTime()) < 2000)
+	{
+	}
 #endif
 
 	mainWindow->showMaximized();
@@ -239,9 +247,9 @@ int main(int argc, char **argv)
 	SlicesHandler h3Ds1;
 
 	QApplication ab2(argc, argv);
-	MainWindow *tbw2 =
-			new MainWindow(&h3Ds1, locationpath, picpath, tmpdir, false, 0,
-										 "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	MainWindow* tbw2 = new MainWindow(
+		&h3Ds1, locationpath, picpath, tmpdir, false, 0, "new window",
+		Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tbw2->show();
 
 	QObject::connect(&ab2, SIGNAL(lastWindowClosed()), &ab2, SLOT(quit()));

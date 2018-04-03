@@ -7,13 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "UndoElem.h"
 #include "Precompiled.h"
+
+#include "UndoElem.h"
 
 #include <cstdlib>
 #include <vector>
 
 using namespace std;
+using namespace iseg;
 
 UndoElem::UndoElem()
 {
@@ -39,7 +41,7 @@ UndoElem::~UndoElem()
 		free(tissue_new);
 }
 
-void UndoElem::merge(UndoElem *ue)
+void UndoElem::merge(UndoElem* ue)
 {
 	if (dataSelection.sliceNr == ue->dataSelection.sliceNr && !multi)
 	{
@@ -146,8 +148,8 @@ MultiUndoElem::MultiUndoElem() { multi = true; }
 
 MultiUndoElem::~MultiUndoElem()
 {
-	vector<float *>::iterator itf;
-	vector<tissues_size_t *>::iterator it8;
+	vector<float*>::iterator itf;
+	vector<tissues_size_t*>::iterator it8;
 
 	for (itf = vbmp_old.begin(); itf != vbmp_old.end(); itf++)
 		free(*itf);
@@ -163,7 +165,7 @@ MultiUndoElem::~MultiUndoElem()
 		free(*it8);
 }
 
-void MultiUndoElem::merge(UndoElem *ue) {}
+void MultiUndoElem::merge(UndoElem* ue) {}
 
 unsigned MultiUndoElem::arraynr()
 {

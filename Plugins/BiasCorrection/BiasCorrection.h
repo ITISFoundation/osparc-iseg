@@ -11,8 +11,8 @@
 
 #include <vector>
 
-#include "Addon/SlicesHandlerInterface.h"
-#include "Addon/qwidget1.h"
+#include "Plugin/SlicesHandlerInterface.h"
+#include "Plugin/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -25,13 +25,13 @@ namespace itk {
 class ProcessObject;
 }
 
-class CBiasCorrection : public QWidget1
+class BiasCorrectionWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	CBiasCorrection(iseg::CSliceHandlerInterface *hand3D, QWidget *parent = 0,
-									const char *name = 0, Qt::WindowFlags wFlags = 0);
-	~CBiasCorrection();
+	BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+						 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~BiasCorrectionWidget();
 
 	QSize sizeHint() const override;
 	void init() override;
@@ -41,27 +41,28 @@ public:
 
 protected:
 	template<typename ImagePointer>
-	ImagePointer DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
-																const std::vector<unsigned int> &numIters,
-																int shrinkFactor, double convergenceThreshold);
+	ImagePointer
+		DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
+						 const std::vector<unsigned int>& numIters,
+						 int shrinkFactor, double convergenceThreshold);
 
 private:
-	iseg::CSliceHandlerInterface *handler3D;
+	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;
-	Q3VBox *vbox1;
-	QLabel *bias_header;
-	QPushButton *bias_exec;
-	Q3HBox *hbox2;
-	Q3HBox *hbox3;
-	Q3HBox *hbox4;
-	QLabel *txt_h2;
-	QLabel *txt_h3;
-	QLabel *txt_h4;
-	QSpinBox *edit_num_levels;
-	QSpinBox *edit_shrink_factor;
-	QSpinBox *edit_num_iterations;
+	Q3VBox* vbox1;
+	QLabel* bias_header;
+	QPushButton* bias_exec;
+	Q3HBox* hbox2;
+	Q3HBox* hbox3;
+	Q3HBox* hbox4;
+	QLabel* txt_h2;
+	QLabel* txt_h3;
+	QLabel* txt_h4;
+	QSpinBox* edit_num_levels;
+	QSpinBox* edit_shrink_factor;
+	QSpinBox* edit_num_iterations;
 
-	itk::ProcessObject *m_CurrentFilter;
+	itk::ProcessObject* m_CurrentFilter;
 
 public slots:
 	void slicenr_changed();

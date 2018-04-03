@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef SLICEPROVIDER
-#define SLICEPROVIDER
+#pragma once
 
 #include "iSegCore.h"
 
@@ -16,59 +15,61 @@
 #include <list>
 #include <stack>
 
-class iSegCore_API sliceprovider
+namespace iseg {
+
+class iSegCore_API SliceProvider
 {
 public:
-	sliceprovider(unsigned area1);
-	~sliceprovider();
+	SliceProvider(unsigned area1);
+	~SliceProvider();
 	unsigned return_area();
 	unsigned short return_nrslices();
-	float *give_me();
-	void merge(sliceprovider *sp);
-	void take_back(float *slice);
+	float* give_me();
+	void merge(SliceProvider* sp);
+	void take_back(float* slice);
 
 private:
 	unsigned area;
-	std::stack<float *> slicestack;
+	std::stack<float*> slicestack;
 };
 
 struct spobj
 {
 	unsigned area;
-	sliceprovider *spp;
+	SliceProvider* spp;
 	unsigned short installnr;
 };
 
-class iSegCore_API sliceprovider_installer
+class iSegCore_API SliceProviderInstaller
 {
 public:
-	static sliceprovider_installer *getinst();
+	static SliceProviderInstaller* getinst();
 	void return_instance();
-	sliceprovider *install(unsigned area);
-	void uninstall(sliceprovider *sp);
+	SliceProvider* install(unsigned area);
+	void uninstall(SliceProvider* sp);
 	bool unused();
-	~sliceprovider_installer();
+	~SliceProviderInstaller();
 
 	void report() const;
 
 private:
-	static sliceprovider_installer *inst;
+	static SliceProviderInstaller* inst;
 	static unsigned short counter;
 	std::list<spobj> splist;
 	bool delete_unused = true;
-	sliceprovider_installer(){};
-	sliceprovider_installer(sliceprovider_installer const &);
-	sliceprovider_installer &operator=(sliceprovider_installer const &rhs);
+	SliceProviderInstaller(){};
+	SliceProviderInstaller(SliceProviderInstaller const&);
+	SliceProviderInstaller& operator=(SliceProviderInstaller const& rhs);
 	class Waechter
 	{
 	public:
 		~Waechter()
 		{
-			if (sliceprovider_installer::inst != NULL)
-				delete sliceprovider_installer::inst;
+			if (SliceProviderInstaller::inst != NULL)
+				delete SliceProviderInstaller::inst;
 		}
 	};
 	friend class Waechter;
 };
 
-#endif
+} // namespace iseg

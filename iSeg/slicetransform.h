@@ -11,13 +11,15 @@
 
 #include "Core/Types.h"
 
+namespace iseg {
+
 class SlicesHandler;
 class bmphandler;
 
 class SliceTransform
 {
 public:
-	SliceTransform(SlicesHandler *hand3D);
+	SliceTransform(SlicesHandler* hand3D);
 	~SliceTransform();
 
 	void SelectTransformData(bool source, bool target, bool tissues);
@@ -34,17 +36,17 @@ public:
 	void Translate(int offsetX, int offsetY, bool apply = true);
 	void Rotate(double angle, int centerX, int centerY, bool apply = true);
 	void Scale(double factorX, double factorY, int centerX, int centerY,
-						 bool apply = true);
+			   bool apply = true);
 	void Shear(double angle, bool shearXAxis, int axisPosition,
-						 bool apply = true);
+			   bool apply = true);
 	void Flip(bool flipXAxis, int axisPosition, bool apply = true);
-	void Matrix(double *inverseMatrix, bool apply = true);
+	void Matrix(double* inverseMatrix, bool apply = true);
 
 	bool GetIsIdentityTransform();
 
 private:
 	void ResetTransformMatrix();
-	void GetTransformMatrix(double *copyToMatrix);
+	void GetTransformMatrix(double* copyToMatrix);
 
 	void ReallocateSliceData();
 	void CopyFromOriginalSlice(bool source, bool target, bool tissues);
@@ -55,14 +57,14 @@ private:
 
 private:
 	// Image data
-	bmphandler *bmphand;
-	SlicesHandler *handler3D;
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
 	unsigned short activeSlice;
 
 	// Original slice data
-	float *originalSource;
-	float *originalTarget;
-	tissues_size_t *originalTissues;
+	float* originalSource;
+	float* originalTarget;
+	tissues_size_t* originalTissues;
 
 	// Transformation
 	double transformMatrix[3 * 3];
@@ -70,3 +72,5 @@ private:
 	bool transformTarget;
 	bool transformTissues;
 };
+
+} // namespace iseg

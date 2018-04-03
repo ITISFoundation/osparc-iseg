@@ -10,7 +10,15 @@
 OPTION(PLUGIN_BIAS "Build MRI bias correction plugin" ON)
 IF(PLUGIN_BIAS)
 	QT4_WRAP_CPP(MOCSrcsbias BiasCorrection.h)
-	ADD_LIBRARY(BiasCorrection.ext SHARED BiasCorrectionAddon.cpp BiasCorrectionAddon.h BiasCorrection.cpp BiasCorrection.h ${MOCSrcsbias})
-	TARGET_LINK_LIBRARIES( BiasCorrection.ext Addon ${ITK_LIBRARIES} QVTK ${QT_LIBRARIES}  )
-	VS_SET_PROPERTY(BiasCorrection.ext "Addons")
+
+	ADD_LIBRARY(BiasCorrection.ext SHARED 
+		BiasCorrectionAddon.cpp 
+		BiasCorrectionAddon.h 
+		BiasCorrection.cpp 
+		BiasCorrection.h 
+		${MOCSrcsbias}
+	)
+	
+	TARGET_LINK_LIBRARIES( BiasCorrection.ext Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
+	VS_SET_PROPERTY(BiasCorrection.ext "Plugins")
 ENDIF()

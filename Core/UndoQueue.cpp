@@ -7,10 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "UndoQueue.h"
 #include "Precompiled.h"
 
+#include "UndoQueue.h"
+
 using namespace std;
+using namespace iseg;
 
 UndoQueue::UndoQueue()
 {
@@ -26,7 +28,7 @@ UndoQueue::~UndoQueue()
 		delete undos[(first + i) % nrundo];
 }
 
-void UndoQueue::sub_add_undo(UndoElem *ue)
+void UndoQueue::sub_add_undo(UndoElem* ue)
 {
 	if (nrnow == nrundo)
 	{
@@ -65,7 +67,7 @@ void UndoQueue::sub_add_undo(UndoElem *ue)
 	nrin = nrnow;
 }
 
-void UndoQueue::merge_undo(UndoElem *ue)
+void UndoQueue::merge_undo(UndoElem* ue)
 {
 	if (!ue->multi)
 	{
@@ -87,9 +89,9 @@ void UndoQueue::merge_undo(UndoElem *ue)
 	}
 }
 
-void UndoQueue::add_undo(UndoElem *ue) { sub_add_undo(ue); }
+void UndoQueue::add_undo(UndoElem* ue) { sub_add_undo(ue); }
 
-bool UndoQueue::add_undo(MultiUndoElem *ue)
+bool UndoQueue::add_undo(MultiUndoElem* ue)
 {
 	if (ue->arraynr() < nrundoarraysmax)
 	{
@@ -102,7 +104,7 @@ bool UndoQueue::add_undo(MultiUndoElem *ue)
 	}
 }
 
-UndoElem *UndoQueue::undo()
+UndoElem* UndoQueue::undo()
 {
 	if (nrnow > 0)
 	{
@@ -112,7 +114,7 @@ UndoElem *UndoQueue::undo()
 		return NULL;
 }
 
-UndoElem *UndoQueue::redo()
+UndoElem* UndoQueue::redo()
 {
 	if (nrnow < nrin)
 	{
@@ -182,7 +184,7 @@ void UndoQueue::set_nrundo(unsigned nr)
 			delete undos[(first + nrin) % nrundo];
 		}
 
-		vector<UndoElem *> vue;
+		vector<UndoElem*> vue;
 		vue.clear();
 		vue.insert(vue.begin(), undos.begin(), undos.end());
 
@@ -203,5 +205,5 @@ void UndoQueue::reverse_undosliceorder(unsigned short nrslices)
 {
 	for (unsigned i = 0; i < nrin; i++)
 		undos[i]->dataSelection.sliceNr =
-				nrslices - 1 - undos[i]->dataSelection.sliceNr;
+			nrslices - 1 - undos[i]->dataSelection.sliceNr;
 }

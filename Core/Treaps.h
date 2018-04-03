@@ -10,12 +10,13 @@
 
 /* -*- C++ -*- */
 
-#ifndef _TREAP_H_
-#define _TREAP_H_
+#pragma once
 
 #include <assert.h>
 #include <limits.h>
 #include <stdlib.h>
+
+namespace iseg {
 
 // A Cartesian tree.
 // adapted from treap code by Bobby Blumofe
@@ -27,19 +28,19 @@ public:
 	{ // A node in the treap.
 		friend class Treap;
 		unsigned int priority; //   The priority.
-		KEY key;							 //   The key.
-		VALUE value;					 //   The value.
-		Node *parent;					 //   Pointer to parent.
-		Node *left;						 //   Pointer to left child.
-		Node *right;					 //   Pointer to right child.
+		KEY key;			   //   The key.
+		VALUE value;		   //   The value.
+		Node* parent;		   //   Pointer to parent.
+		Node* left;			   //   Pointer to left child.
+		Node* right;		   //   Pointer to right child.
 
 	public:
 		// Construct node.
 		Node(void) : left(NULL), right(NULL) {}
 
-		Node(unsigned int priority_, KEY key_, VALUE value_, Node *parent_)
-				: priority(priority_), key(key_), value(value_), parent(parent_),
-					left(NULL), right(NULL)
+		Node(unsigned int priority_, KEY key_, VALUE value_, Node* parent_)
+			: priority(priority_), key(key_), value(value_), parent(parent_),
+			  left(NULL), right(NULL)
 		{
 		}
 		KEY getKey(void) const { return key; }
@@ -56,25 +57,25 @@ public:
 
 	// Return value of key or 0 if not found.
 	// Return a matching node (or NULL if not found).
-	Node *lookup(KEY key) const { return lookup_(key); }
+	Node* lookup(KEY key) const { return lookup_(key); }
 
 	// Return a matching node (or NULL if not found).
-	Node *lookupGreater(KEY key) const { return lookupGreater_(key); }
+	Node* lookupGreater(KEY key) const { return lookupGreater_(key); }
 
 	// Set the given key to have the given value.
-	void insert(Node *n, KEY key, VALUE value, unsigned int priority);
+	void insert(Node* n, KEY key, VALUE value, unsigned int priority);
 	void insert(KEY key, VALUE value, unsigned int priority);
-	void update_priority(Node *n, unsigned int priority);
-	void insert(Node *n);
-	Node *get_top() { return root; }
+	void update_priority(Node* n, unsigned int priority);
+	void insert(Node* n);
+	Node* get_top() { return root; }
 
 	// Remove entry with given key.
 	// Remove entry.
-	Node *remove(Node *node)
+	Node* remove(Node* node)
 	{
 #if 0
-		// Search for node with given key.
-		Node* node = lookup_ (key);
+			// Search for node with given key.
+			Node* node = lookup_(key);
 #endif
 
 		// If not found, then do nothing.
@@ -103,7 +104,7 @@ public:
 		}
 
 		// Clip off node.
-		Node *parent = node->parent;
+		Node* parent = node->parent;
 		if (!parent)
 		{
 			assert(root == node);
@@ -122,8 +123,8 @@ public:
 		// assert (bstProperty (root, INT_MIN, INT_MAX));
 
 #if 0
-		delete node;
-		return NULL;
+			delete node;
+			return NULL;
 #else
 		// Return the removed node.
 
@@ -137,7 +138,7 @@ public:
 		cout << endl;
 	}
 
-	void reallyPrint(Node *node) const
+	void reallyPrint(Node* node) const
 	{
 		if (node == NULL)
 			return;
@@ -147,27 +148,27 @@ public:
 	}
 
 private:
-	Node *root; // Pointer to root node of treap.
+	Node* root; // Pointer to root node of treap.
 
 	// Disable copy and assignment.
-	Treap(const Treap &treap) {}
-	Treap &operator=(const Treap &treap) { return *this; }
+	Treap(const Treap& treap) {}
+	Treap& operator=(const Treap& treap) { return *this; }
 
 	// Check treap properties.
-	int heapProperty(Node *node, int lbound) const;
-	int bstProperty(Node *node, int lbound, int ubound) const;
+	int heapProperty(Node* node, int lbound) const;
+	int bstProperty(Node* node, int lbound, int ubound) const;
 
 	// Delete treap rooted at given node.
-	void deleteTreap(Node *node);
+	void deleteTreap(Node* node);
 
 	// Return node with given key or NULL if not found.
-	Node *lookup_(KEY key) const;
-	Node *lookupGreater_(KEY key) const;
-	Node *lookupGeq(KEY key, Node *root) const;
+	Node* lookup_(KEY key) const;
+	Node* lookupGreater_(KEY key) const;
+	Node* lookupGeq(KEY key, Node* root) const;
 
 	// Perform rotations.
-	void rotateLeft(Node *node);
-	void rotateRight(Node *node);
+	void rotateLeft(Node* node);
+	void rotateRight(Node* node);
 };
 
 // Construct an empty treap.
@@ -180,7 +181,7 @@ template<class KEY, class VALUE> Treap<KEY, VALUE>::~Treap(void)
 }
 
 // Delete treap rooted at given node.
-template<class KEY, class VALUE> void Treap<KEY, VALUE>::deleteTreap(Node *node)
+template<class KEY, class VALUE> void Treap<KEY, VALUE>::deleteTreap(Node* node)
 {
 	// If empty, nothing to do.
 	if (!node)
@@ -196,7 +197,7 @@ template<class KEY, class VALUE> void Treap<KEY, VALUE>::deleteTreap(Node *node)
 
 // Test heap property in subtreap rooted at node.
 template<class KEY, class VALUE>
-int Treap<KEY, VALUE>::heapProperty(Node *node, int lbound) const
+int Treap<KEY, VALUE>::heapProperty(Node* node, int lbound) const
 {
 	// Empty treap satisfies.
 	if (!node)
@@ -220,7 +221,7 @@ int Treap<KEY, VALUE>::heapProperty(Node *node, int lbound) const
 
 // Test bst property in subtreap rooted at node.
 template<class KEY, class VALUE>
-int Treap<KEY, VALUE>::bstProperty(Node *node, int lbound, int ubound) const
+int Treap<KEY, VALUE>::bstProperty(Node* node, int lbound, int ubound) const
 {
 	// Empty treap satisfies.
 	if (!node)
@@ -243,10 +244,10 @@ int Treap<KEY, VALUE>::bstProperty(Node *node, int lbound, int ubound) const
 }
 
 // Perform a left rotation.
-template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateLeft(Node *node)
+template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateLeft(Node* node)
 {
 	// Get right child.
-	Node *right = node->right;
+	Node* right = node->right;
 	assert(right);
 
 	// Give node right's left child.
@@ -279,10 +280,10 @@ template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateLeft(Node *node)
 }
 
 // Perform a right rotation.
-template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateRight(Node *node)
+template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateRight(Node* node)
 {
 	// Get left child.
-	Node *left = node->left;
+	Node* left = node->left;
 	assert(left);
 
 	// Give node left's right child.
@@ -316,10 +317,10 @@ template<class KEY, class VALUE> void Treap<KEY, VALUE>::rotateRight(Node *node)
 
 // Return node with given key or 0 if not found.
 template<class KEY, class VALUE>
-typename Treap<KEY, VALUE>::Node *Treap<KEY, VALUE>::lookup_(KEY key) const
+typename Treap<KEY, VALUE>::Node* Treap<KEY, VALUE>::lookup_(KEY key) const
 {
 	// Start at the root.
-	Node *node = root;
+	Node* node = root;
 
 	// While subtreap rooted at node not empty...
 	while (node)
@@ -340,21 +341,21 @@ typename Treap<KEY, VALUE>::Node *Treap<KEY, VALUE>::lookup_(KEY key) const
 }
 
 template<class KEY, class VALUE>
-typename Treap<KEY, VALUE>::Node *
-		Treap<KEY, VALUE>::lookupGreater_(KEY key) const
+typename Treap<KEY, VALUE>::Node*
+	Treap<KEY, VALUE>::lookupGreater_(KEY key) const
 {
 	return lookupGeq(key, root);
 }
 
 // Return node with greater or equal key or 0 if not found.
 template<class KEY, class VALUE>
-typename Treap<KEY, VALUE>::Node *Treap<KEY, VALUE>::lookupGeq(KEY key,
-																															 Node *rt) const
+typename Treap<KEY, VALUE>::Node* Treap<KEY, VALUE>::lookupGeq(KEY key,
+															   Node* rt) const
 {
-	Node *bestSoFar = NULL;
+	Node* bestSoFar = NULL;
 
 	// Start at the root.
-	Node *node = rt;
+	Node* node = rt;
 
 	// While subtreap rooted at node not empty...
 	while (node)
@@ -383,8 +384,8 @@ typename Treap<KEY, VALUE>::Node *Treap<KEY, VALUE>::lookupGeq(KEY key,
 
 // Set the given key to have the given value.
 template<class KEY, class VALUE>
-void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n, KEY key,
-															 VALUE value, unsigned int priority)
+void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node* n, KEY key,
+							   VALUE value, unsigned int priority)
 {
 	//  print();
 
@@ -392,18 +393,18 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n, KEY key,
 	assert(value != 0);
 
 	// Start at the root.
-	Node *parent = 0;
-	Node *node = root;
+	Node* parent = 0;
+	Node* node = root;
 
 	// While subtreap rooted at node not empty...
 	while (node)
 	{
 #if 0
-		// If found, then update value and done.
-		if (key == node->key) {
-			node->value = value;
-			return;
-		}
+			// If found, then update value and done.
+			if (key == node->key) {
+				node->value = value;
+				return;
+			}
 #endif
 
 		// Otherwise, search left or right subtreap.
@@ -419,8 +420,8 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n, KEY key,
 	// EDB was
 	// node = new Node (lrand48(), key, value, parent);
 	node = new Node(
-			priority, key, value,
-			parent); //xxxa node = new (n) Node (priority, key, value, parent);
+		priority, key, value,
+		parent); //xxxa node = new (n) Node (priority, key, value, parent);
 	n = node;
 	//n->priority=priority;
 	//n->key=key;
@@ -461,7 +462,7 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n, KEY key,
 
 // Set the given key to have the given value.
 template<class KEY, class VALUE>
-void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n)
+void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node* n)
 {
 	//  print();
 
@@ -469,8 +470,8 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n)
 	assert(n->value != 0);
 
 	// Start at the root.
-	Node *parent = 0;
-	Node *node = root;
+	Node* parent = 0;
+	Node* node = root;
 
 	// While subtreap rooted at node not empty...
 	while (node)
@@ -523,11 +524,11 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node *n)
 }
 
 template<class KEY, class VALUE>
-void Treap<KEY, VALUE>::update_priority(Node *n, unsigned int priority)
+void Treap<KEY, VALUE>::update_priority(Node* n, unsigned int priority)
 { // this could certainly be sped up...
 	remove(n);
 	n->priority = priority;
 	insert(n);
 }
 
-#endif // _TREAP_H_
+} // namespace iseg
