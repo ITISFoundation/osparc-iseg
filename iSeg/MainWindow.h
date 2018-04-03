@@ -106,14 +106,6 @@ public:
 	void LoadSettings(const char* loadfilename);
 	void loadproj(const QString& loadfilename);
 	void loadS4Llink(const QString& loadfilename);
-	//	void update();
-	int iSegVersion;
-	int iSegSubversion;
-	int build;
-	bool m_editingmode;
-
-	bool m_Modified;
-	//QPoint mousePosZoom;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -149,6 +141,9 @@ signals:
 	void end_dataexport(QWidget* sender = NULL);
 
 private:
+	bool m_editingmode;
+	bool m_Modified;
+
 	std::string settingsfile;
 	QString m_locationstring;
 	QDir m_picpath;

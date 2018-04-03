@@ -14,6 +14,5 @@
  * This config file has been automatically generated. Do not modify.
  */
 
-#define ISEG_VERSION_MAJOR @ISEG_VERSION_MAJOR@
-#define ISEG_VERSION_MINOR @ISEG_VERSION_MINOR@
-#define ISEG_VERSION_PATCH @ISEG_VERSION_PATCH@
+#define ISEG_GIT_SHA1 @GIT_SHA1@
+#define ISEG_VERSION @ISEG_VERSION@

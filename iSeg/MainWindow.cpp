@@ -68,6 +68,9 @@
 #include <q3widgetstack.h>
 #include <qtextedit.h>
 
+#define str_macro(s) #s
+#define xstr(s) str_macro(s)
+
 using namespace std;
 using namespace iseg;
 
@@ -368,14 +371,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	m_picpath = picpath;
 	m_tmppath = tmppath;
 	m_editingmode = editingmode;
-	iSegVersion = ISEG_VERSION_MAJOR;
-	iSegSubversion = ISEG_VERSION_MINOR;
-	build = ISEG_VERSION_PATCH;
-	tab_old = NULL;
+	tab_old = nullptr;
 
-	setCaption(QString(" iSeg ") + QString::number(iSegVersion) + QString(".") +
-			   QString::number(iSegSubversion) + QString(" B") +
-			   QString::number(build) + QString(" - No Filename"));
+	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - No Filename"));
 	QIcon isegicon(m_picpath.absFilePath(QString("isegicon.png")).ascii());
 	setWindowIcon(isegicon);
 	m_locationstring = locationstring;
@@ -731,8 +729,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 
 	int height_max = 0;
 	QSize qs; //,qsmax;
-			  //	qsmax.setHeight(0);
-			  //	qsmax.setWidth(0);
+		//	qsmax.setHeight(0);
+		//	qsmax.setWidth(0);
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
@@ -3740,9 +3738,7 @@ void MainWindow::execute_saveprojas()
 		progress.setModal(true);
 		progress.setValue(1);
 
-		setCaption(QString(" iSeg ") + QString::number(iSegVersion) +
-				   QString(".") + QString::number(iSegSubversion) +
-				   QString(" B") + QString::number(build) + QString(" - ") +
+		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") +
 				   TruncateFileName(savefilename));
 
 		//m_saveprojfilename = tempFileName;
@@ -4169,9 +4165,7 @@ void MainWindow::execute_saveproj()
 			progress.setModal(true);
 			progress.setValue(1);
 
-			setCaption(QString(" iSeg ") + QString::number(iSegVersion) +
-					   QString(".") + QString::number(iSegSubversion) +
-					   QString(" B") + QString::number(build) + QString(" - ") +
+			setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") +
 					   TruncateFileName(m_saveprojfilename));
 
 			m_saveprojfilename = tempFileName;
@@ -4308,9 +4302,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 	if (!loadfilename.isEmpty())
 	{
 		m_saveprojfilename = loadfilename;
-		setCaption(QString(" iSeg ") + QString::number(iSegVersion) +
-				   QString(".") + QString::number(iSegSubversion) +
-				   QString(" B") + QString::number(build) + QString(" - ") +
+		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") +
 				   TruncateFileName(loadfilename));
 		AddLoadProj(m_saveprojfilename);
 		int tissuesVersion = 0;
@@ -5084,9 +5076,7 @@ void MainWindow::execute_new()
 	emit end_datachange(this, iseg::ClearUndo);
 
 	m_saveprojfilename = QString("");
-	setCaption(QString(" iSeg ") + QString::number(iSegVersion) + QString(".") +
-			   QString::number(iSegSubversion) + QString(" B") +
-			   QString::number(build) + QString(" - No Filename"));
+	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - No Filename"));
 	m_notes->clear();
 
 	reset_brightnesscontrast();
@@ -5959,10 +5949,9 @@ void MainWindow::execute_grouptissues()
 
 void MainWindow::execute_about()
 {
-	std::ostringstream stream1;
-	stream1 << "\n\niSeg            \nVersion: " << iSegVersion << "."
-			<< iSegSubversion << "\nBuild: " << build;
-	QMessageBox::about(this, "About", QString(stream1.str().c_str()));
+	std::ostringstream ss;
+	ss << "\n\niSeg            \nOpen Source Version: " << std::string(xstr(ISEG_GIT_SHA1));
+	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 
 void MainWindow::add_mark(Point p)

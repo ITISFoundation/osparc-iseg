@@ -8,11 +8,7 @@
 ##  https://opensource.org/licenses/MIT
 ##
 PROJECT(ISEG C CXX)
-SET(ISEG_VERSION_MAJOR 3)
-SET(ISEG_VERSION_MINOR 10)
-SET(ISEG_VERSION_PATCH 8)
-SET(ISEG_VERSION
-  ${ISEG_VERSION_MAJOR}.${ISEG_VERSION_MINOR}.${ISEG_VERSION_PATCH})
+SET(ISEG_VERSION "Open Source")
 SET(ISEG_PRODUCT_NAME "iSEG_v${ISEG_VERSION}")
   
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6)
@@ -33,6 +29,7 @@ LIST( APPEND ISEG_CMAKE_FILES_INCLUDES
 	${CMAKE_SOURCE_DIR}/CMake/CommonMacros.cmake
 	${CMAKE_SOURCE_DIR}/CMake/CMakeSetProperty.cmake
 	${CMAKE_SOURCE_DIR}/CMake/PrecompiledHeaderSupport.cmake
+	${CMAKE_SOURCE_DIR}/CMake/GetGitRevisionDescription.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyBoost.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyHDF5.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyITK.cmake
@@ -46,6 +43,7 @@ MSVC_ONLY_EDIT_PROJECT( CMakeIncludes
 	${ISEG_CMAKE_FILES_INCLUDES}
 	${INSTALL_ALL_USED_LIBRARIES_CMAKE} # to make sure, it is always added independent of option
 )
+
 MSVC_ONLY_EDIT_PROJECT( ProjectFiles 
 	config.h.in
 	LICENSE
@@ -55,6 +53,7 @@ MSVC_ONLY_EDIT_PROJECT( ProjectFiles
 
 OPTION(ISEG_BUILD_TESTING "Build tests" ON)
 OPTION(ISEG_BUILD_PRECOMPILED_HEADER "Build precompiled header files" OFF)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 
