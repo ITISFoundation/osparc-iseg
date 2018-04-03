@@ -23,6 +23,7 @@
 #include "Core/Point.h"
 
 #include <QPlastiqueStyle.h>
+#include <QSplashScreen>
 #include <qapplication.h>
 #include <qdatetime.h>
 #include <qlabel.h>
@@ -44,6 +45,8 @@
 
 #pragma warning(disable : 4100)
 
+#define SHOWSPLASH
+
 using namespace std;
 using namespace iseg;
 
@@ -61,7 +64,6 @@ public:
 
 protected:
 	vtkCustomOutputWindow() {}
-	virtual ~vtkCustomOutputWindow() {}
 
 private:
 	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
