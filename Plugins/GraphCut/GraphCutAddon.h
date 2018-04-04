@@ -9,41 +9,36 @@
  */
 #pragma once
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 namespace iseg { namespace plugin {
 
-class CGCBoneSegmentationAddon : public CAddon
+class GCBoneSegmentationPlugin : public Plugin
 {
 public:
-	CGCBoneSegmentationAddon();
-	~CGCBoneSegmentationAddon();
+	GCBoneSegmentationPlugin();
+	~GCBoneSegmentationPlugin();
 
-	virtual std::string Name() const { return "CT Auto-Bone"; }
+	virtual std::string name() const { return "CT Auto-Bone"; }
 
-	virtual std::string Description() const
-	{
-		return "Automatic bone segmentation in CT images using graph-cut method.";
-	}
+	virtual std::string description() const;
 
-	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags) const;
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+										   Qt::WindowFlags wFlags) const;
 };
 
-class CGCTissueSeparatorAddon : public CAddon
+class CGCTissueSeparatorPlugin : public Plugin
 {
 public:
-	CGCTissueSeparatorAddon();
-	~CGCTissueSeparatorAddon();
+	CGCTissueSeparatorPlugin();
+	~CGCTissueSeparatorPlugin();
 
-	virtual std::string Name() const { return "Tissue Separator"; }
+	virtual std::string name() const { return "Tissue Separator"; }
 
-	virtual std::string Description() const
-	{
-		return "Separate tissue using only minor user-input.";
-	}
+	virtual std::string description() const;
 
-	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags) const;
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+										   Qt::WindowFlags wFlags) const;
 };
+
 }} // namespace iseg::plugin

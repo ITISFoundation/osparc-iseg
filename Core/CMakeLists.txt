@@ -9,39 +9,42 @@
 ##
 ADD_SUBDIRECTORY(testsuite)
 
-USE_ITK()
 USE_BOOST()
-USE_VTK()
+USE_HDF5()
 USE_OPENMP()
+USE_ITK()
+USE_VTK()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
-	3D_outlines.cpp
-	branchItem-simplified.cpp
-	coef.cpp
+	addLine.cpp
+	BranchItem.cpp
 	ColorLookupTable.cpp
-	common.cpp
-	contour_class.cpp
-	EM.cpp
-	feature_extractor.cpp
+	Contour.cpp
+	ExpectationMaximization.cpp
+	FeatureExtractor.cpp
 	fillcontour.cpp
+	HDF5IO.cpp
+	HDF5Reader.cpp
+	HDF5Writer.cpp
 	ImageReader.cpp
 	ImageWriter.cpp
-	index_priorqueue.cpp
+	IndexPriorityQueue.cpp
 	InitializeITKFactory.cpp
-	gamma.cpp
-	k_means.cpp
-	linedraw.cpp
+	KMeans.cpp
 	LoadPlugin.cpp
-	Mark.cpp
-	marchingcubeprint.cpp
-	matexport.cpp
+	Log.cpp
+	MarchingCubes.cpp
+	MatlabExport.cpp
+	MultidimensionalGamma.cpp
+	Outline.cpp
+	Precompiled.cpp
+	ProjectVersion.cpp
+	RTDoseIODModule.cpp
 	RTDoseReader.cpp
 	RTDoseWriter.cpp
-	RTDoseIODModule.cpp
-	Precompiled.cpp
-	sliceprovider.cpp
-	stepsmooth.cpp
+	SliceProvider.cpp
+	SmoothSteps.cpp
 	UndoElem.cpp
 	UndoQueue.cpp
 	VoxelSurface.cpp

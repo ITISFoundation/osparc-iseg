@@ -17,22 +17,22 @@
 #pragma once
 
 #define check(expr)                                                            \
-	if ((expr) == false)                                                         \
-	{                                                                            \
-		std::cerr << "ERROR: Expression false: " << (#expr) << std::endl;          \
-		error_counter++;                                                           \
+	if ((expr) == false)                                                       \
+	{                                                                          \
+		std::cerr << "ERROR: Expression false: " << (#expr) << std::endl;      \
+		error_counter++;                                                       \
 	}
 #define check_equal(expr1, expr2)                                              \
-	if ((expr1) != (expr2))                                                      \
-	{                                                                            \
-		std::cerr << "ERROR: Expression false: " << (expr1) << " != " << (expr2)   \
-							<< std::endl;                                                    \
-		error_counter++;                                                           \
+	if ((expr1) != (expr2))                                                    \
+	{                                                                          \
+		std::cerr << "ERROR: Expression false: " << (expr1)                    \
+				  << " != " << (expr2) << std::endl;                           \
+		error_counter++;                                                       \
 	}
 #define check_not_equal(expr1, expr2)                                          \
-	if ((expr1) == (expr2))                                                      \
-	{                                                                            \
-		std::cerr << "ERROR: Expression false: " << (expr1) << " == " << (expr2)   \
-							<< std::endl;                                                    \
-		error_counter++;                                                           \
+	if ((expr1) == (expr2))                                                    \
+	{                                                                          \
+		std::cerr << "ERROR: Expression false: " << (expr1)                    \
+				  << " == " << (expr2) << std::endl;                           \
+		error_counter++;                                                       \
 	}

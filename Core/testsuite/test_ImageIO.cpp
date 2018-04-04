@@ -12,7 +12,7 @@
 #include "../ImageReader.h"
 #include "../ImageWriter.h"
 #include "../Transform.h"
-#include "../vec3.h"
+#include "../Vec3.h"
 
 #include <boost/filesystem.hpp>
 
@@ -39,11 +39,11 @@ public:
 		_transform.setIdentity();
 		if (non_trivial_transform)
 		{
-			vec3 d0(0.1f, 0.9f, 0.1f);
+			Vec3 d0(0.1f, 0.9f, 0.1f);
 			d0.normalize();
-			vec3 d1(0.9f, -0.1f, 0.1f);
+			Vec3 d1(0.9f, -0.1f, 0.1f);
 			d1.normalize();
-			vec3 d2(d0 ^ d1);
+			Vec3 d2(d0 ^ d1);
 			d2.normalize();
 			_transform.setRotation(d0, d1, d2);
 

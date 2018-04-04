@@ -17,6 +17,8 @@
 #pragma warning(push)
 #pragma warning(disable : 4267)
 
+namespace iseg {
+
 enum PatientSexEnum { Male, Female, Other, Unspecified };
 
 enum DoseUnitsEnum { Gray, Relative };
@@ -58,14 +60,14 @@ public:
 	std::string GetPatientID() { return PatientID; };
 	// Issuer of Patient ID Macro (Table 10-18)
 	// Patient's Birth Date (Type = 2, VM = 1)
-	void SetPatientBirthDate(const unsigned short *values)
+	void SetPatientBirthDate(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
 			PatientBirthDate[i] = values[i];
 		}
 	};
-	unsigned short *GetPatientBirthDate() { return PatientBirthDate; };
+	unsigned short* GetPatientBirthDate() { return PatientBirthDate; };
 	// Patient's Sex (Type = 2, VM = 1)
 	void SetPatientSex(PatientSexEnum value) { PatientSex = value; };
 	PatientSexEnum GetPatientSex() { return PatientSex; };
@@ -105,23 +107,23 @@ public:
 	void SetStudyInstanceUID(std::string value) { StudyInstanceUID = value; };
 	std::string GetStudyInstanceUID() { return StudyInstanceUID; };
 	// Study Date (Type = 2, VM = 1)
-	void SetStudyDate(const unsigned short *values)
+	void SetStudyDate(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
 			StudyDate[i] = values[i];
 		}
 	};
-	unsigned short *GetStudyDate() { return StudyDate; };
+	unsigned short* GetStudyDate() { return StudyDate; };
 	// Study Time (Type = 2, VM = 1)
-	void SetStudyTime(const unsigned short *values)
+	void SetStudyTime(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
 			StudyTime[i] = values[i];
 		}
 	};
-	unsigned short *GetStudyTime() { return StudyTime; };
+	unsigned short* GetStudyTime() { return StudyTime; };
 	// Referring Physician's Name (Type = 2, VM = 1)
 	void SetReferringPhysicianName(std::string value)
 	{
@@ -173,7 +175,10 @@ public:
 	{
 		OperatorsName[idx] = value;
 	};
-	void AddOperatorsName(std::string value) { OperatorsName.push_back(value); };
+	void AddOperatorsName(std::string value)
+	{
+		OperatorsName.push_back(value);
+	};
 	std::string GetOperatorsName(unsigned short idx)
 	{
 		return OperatorsName[idx];
@@ -269,32 +274,32 @@ public:
 	// --------------------------------------------------------------
 
 	// Pixel Spacing (Type = 1, VM = 2) // TODO
-	void SetPixelSpacing(const double *values)
+	void SetPixelSpacing(const double* values)
 	{
 		for (unsigned short i = 0; i < 2; ++i)
 		{
 			PixelSpacing[i] = values[i];
 		}
 	};
-	double *GetPixelSpacing() { return PixelSpacing; };
+	double* GetPixelSpacing() { return PixelSpacing; };
 	// Image Orientation (Patient) (Type = 1, VM = 6) // TODO
-	void SetImageOrientationPatient(const double *values)
+	void SetImageOrientationPatient(const double* values)
 	{
 		for (unsigned short i = 0; i < 6; ++i)
 		{
 			ImageOrientationPatient[i] = values[i];
 		}
 	};
-	double *GetImageOrientationPatient() { return ImageOrientationPatient; };
+	double* GetImageOrientationPatient() { return ImageOrientationPatient; };
 	// Image Position (Patient) (Type = 1, VM = 3) // TODO
-	void SetImagePositionPatient(const double *values)
+	void SetImagePositionPatient(const double* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
 			ImagePositionPatient[i] = values[i];
 		}
 	};
-	double *GetImagePositionPatient() { return ImagePositionPatient; };
+	double* GetImagePositionPatient() { return ImagePositionPatient; };
 	// Slice Thickness (Type = 2, VM = 1)
 	void SetSliceThickness(double value) { SliceThickness = value; };
 	double GetSliceThickness() { return SliceThickness; };
@@ -336,8 +341,8 @@ public:
 		}
 	};
 	// Pixel Data (Type = 1C, VM = 1)
-	void SetPixelData(float *values) { PixelData = values; };
-	float *GetPixelData() { return PixelData; };
+	void SetPixelData(float* values) { PixelData = values; };
+	float* GetPixelData() { return PixelData; };
 	// Planar Configuration (Type = 1C, VM = 1)
 	// Pixel Aspect Ratio (Type = 1C, VM = 1)
 	// Smallest Image Pixel Value (Type = 3, VM = ?)
@@ -427,11 +432,11 @@ public:
 	// >> Referenced Brachy Application Setup Sequence (Type = 1C, VM = ?) // TODO
 	// >>> Referenced Brachy Application Setup Number (Type = 1, VM = ?) // TODO
 	// Grid Frame Offset Vector (Type = 1C, VM = 2-n)
-	void SetGridFrameOffsetVector(double *values)
+	void SetGridFrameOffsetVector(double* values)
 	{
 		GridFrameOffsetVector = values;
 	};
-	double *GetGridFrameOffsetVector() { return GridFrameOffsetVector; };
+	double* GetGridFrameOffsetVector() { return GridFrameOffsetVector; };
 	// Dose Grid Scaling (Type = 1C, VM = 1)
 	double GetDoseGridScaling();
 	// Tissue Heterogeneity Correction (Type = 3, VM = ?)
@@ -544,16 +549,17 @@ protected:
 	unsigned short Rows;
 	unsigned short Columns;
 	unsigned short BitsAllocated;
-	float *PixelData;
+	float* PixelData;
 	unsigned int NumberOfFrames;
 	DoseUnitsEnum DoseUnits;
 	DoseTypeEnum DoseType;
 	DoseSummationTypeEnum DoseSummationType;
 	std::vector<std::string> ReferencedRTPlanSequence;
-	double *GridFrameOffsetVector;
+	double* GridFrameOffsetVector;
 	std::string SOPClassUID;
 	std::string SOPInstanceUID;
 	std::vector<CharacterSetEnum> SpecificCharacterSet;
 };
 
+} // namespace iseg
 #pragma warning(pop)

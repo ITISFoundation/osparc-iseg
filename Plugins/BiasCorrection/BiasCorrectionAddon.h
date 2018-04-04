@@ -9,21 +9,21 @@
  */
 #pragma once
 
-#include "Addon/Addon.h"
+#include "Plugin/Plugin.h"
 
 namespace iseg { namespace plugin {
 
-class CBiasCorrectionAddon : public CAddon
+class BiasCorrectionPlugin : public Plugin
 {
 public:
-	CBiasCorrectionAddon();
-	~CBiasCorrectionAddon();
+	BiasCorrectionPlugin();
+	~BiasCorrectionPlugin();
 
-	virtual std::string Name() const { return "Bias Addon "; }
+	virtual std::string name() const { return "Bias Addon "; }
 
-	virtual std::string Description() const { return "Bias Plugin"; }
+	virtual std::string description() const { return "Bias Plugin"; }
 
-	virtual QWidget1 *CreateWidget(QWidget *parent, const char *name,
-																 Qt::WindowFlags wFlags) const;
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+										   Qt::WindowFlags wFlags) const;
 };
 }} // namespace iseg::plugin

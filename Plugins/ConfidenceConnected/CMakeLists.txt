@@ -10,7 +10,15 @@
 OPTION(PLUGIN_CONFIDENCE "Build confidence connected segmentation plugin" OFF)
 IF(PLUGIN_CONFIDENCE)
 	QT4_WRAP_CPP(MOCSrcscon Confidence.h)
-	ADD_LIBRARY(Confidence.ext SHARED ConfidenceAddon.cpp ConfidenceAddon.h Confidence.cpp Confidence.h ${MOCSrcscon})
-	TARGET_LINK_LIBRARIES( Confidence.ext Addon ${ITK_LIBRARIES} QVTK ${QT_LIBRARIES}  )
-	VS_SET_PROPERTY(Confidence.ext "Addons")
+
+	ADD_LIBRARY(Confidence.ext SHARED 
+		ConfidenceAddon.cpp 
+		ConfidenceAddon.h 
+		Confidence.cpp 
+		Confidence.h 
+		${MOCSrcscon}
+	)
+
+	TARGET_LINK_LIBRARIES( Confidence.ext Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
+	VS_SET_PROPERTY(Confidence.ext "Plugins")
 ENDIF()

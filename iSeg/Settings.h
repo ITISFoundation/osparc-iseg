@@ -12,18 +12,20 @@
 
 #include <QDialog>
 
-class MainWindow;
-
 namespace Ui {
 class Settings;
 }
+
+namespace iseg {
+
+class MainWindow;
 
 class Settings : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit Settings(QWidget *parent = 0);
+	explicit Settings(QWidget* parent = 0);
 	~Settings();
 
 public slots:
@@ -31,8 +33,10 @@ public slots:
 	virtual void reject();
 
 private:
-	Ui::Settings *ui;
-	MainWindow *mainWindow;
+	Ui::Settings* ui;
+	MainWindow* mainWindow;
 };
+
+} // namespace iseg
 
 #endif // SETTINGS_H

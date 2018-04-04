@@ -7,13 +7,18 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "RTDoseWriter.h"
 #include "Precompiled.h"
+
+#include "RTDoseWriter.h"
+
 #include "gdcmAttribute.h"
 #include "gdcmImageWriter.h"
 #include "gdcmItem.h"
 #include "gdcmSequenceOfItems.h"
+
 #include <sstream>
+
+using namespace iseg;
 
 RTDoseWriter::RTDoseWriter()
 {
@@ -50,99 +55,99 @@ RTDoseWriter::RTDoseWriter()
 	if (_attributeTagVRType.size() <= 0)
 	{
 		_attributeTagVRType["PatientName"] =
-				TagVRTypePair(gdcm::Tag(0x0010, 0x0010), gdcm::VR::PN);
+			TagVRTypePair(gdcm::Tag(0x0010, 0x0010), gdcm::VR::PN);
 		_attributeTagVRType["PatientID"] =
-				TagVRTypePair(gdcm::Tag(0x0010, 0x0020), gdcm::VR::LO);
+			TagVRTypePair(gdcm::Tag(0x0010, 0x0020), gdcm::VR::LO);
 		_attributeTagVRType["PatientBirthDate"] =
-				TagVRTypePair(gdcm::Tag(0x0010, 0x0030), gdcm::VR::DA);
+			TagVRTypePair(gdcm::Tag(0x0010, 0x0030), gdcm::VR::DA);
 		_attributeTagVRType["PatientSex"] =
-				TagVRTypePair(gdcm::Tag(0x0010, 0x0040), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x0010, 0x0040), gdcm::VR::CS);
 		_attributeTagVRType["StudyInstanceUID"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x000D), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x000D), gdcm::VR::UI);
 		_attributeTagVRType["StudyDate"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0020), gdcm::VR::DA);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0020), gdcm::VR::DA);
 		_attributeTagVRType["StudyTime"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0030), gdcm::VR::TM);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0030), gdcm::VR::TM);
 		_attributeTagVRType["ReferringPhysicianName"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0090), gdcm::VR::PN);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0090), gdcm::VR::PN);
 		_attributeTagVRType["StudyID"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0010), gdcm::VR::SH);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0010), gdcm::VR::SH);
 		_attributeTagVRType["AccessionNumber"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0050), gdcm::VR::SH);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0050), gdcm::VR::SH);
 		_attributeTagVRType["Modality"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0060), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0060), gdcm::VR::CS);
 		_attributeTagVRType["SeriesInstanceUID"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x000E), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x000E), gdcm::VR::UI);
 		_attributeTagVRType["SeriesNumber"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0011), gdcm::VR::IS);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0011), gdcm::VR::IS);
 		_attributeTagVRType["OperatorsName"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x1070), gdcm::VR::PN);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x1070), gdcm::VR::PN);
 		_attributeTagVRType["FrameOfReferenceUID"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0052), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0052), gdcm::VR::UI);
 		_attributeTagVRType["PositionReferenceIndicator"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x1040), gdcm::VR::LO);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x1040), gdcm::VR::LO);
 		_attributeTagVRType["Manufacturer"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0070), gdcm::VR::LO);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0070), gdcm::VR::LO);
 		_attributeTagVRType["InstanceNumber"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0013), gdcm::VR::IS);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0013), gdcm::VR::IS);
 		_attributeTagVRType["PixelSpacing"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0030), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0030), gdcm::VR::DS);
 		_attributeTagVRType["ImageOrientationPatient"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0037), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0037), gdcm::VR::DS);
 		_attributeTagVRType["ImagePositionPatient"] =
-				TagVRTypePair(gdcm::Tag(0x0020, 0x0032), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x0020, 0x0032), gdcm::VR::DS);
 		_attributeTagVRType["SliceThickness"] =
-				TagVRTypePair(gdcm::Tag(0x0018, 0x0050), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x0018, 0x0050), gdcm::VR::DS);
 		_attributeTagVRType["SamplesPerPixel"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0002), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0002), gdcm::VR::US);
 		_attributeTagVRType["PhotometricInterpretation"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0004), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0004), gdcm::VR::CS);
 		_attributeTagVRType["Rows"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0010), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0010), gdcm::VR::US);
 		_attributeTagVRType["Columns"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0011), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0011), gdcm::VR::US);
 		_attributeTagVRType["BitsAllocated"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x00100), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x00100), gdcm::VR::US);
 		_attributeTagVRType["BitsStored"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0101), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0101), gdcm::VR::US);
 		_attributeTagVRType["HighBit"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0102), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0102), gdcm::VR::US);
 		_attributeTagVRType["PixelRepresentation"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0103), gdcm::VR::US);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0103), gdcm::VR::US);
 		_attributeTagVRType["PixelData"] = TagVRTypePair(
-				gdcm::Tag(0x7fe0, 0x0010), gdcm::VR::OW); // TODO: OW or OB
+			gdcm::Tag(0x7fe0, 0x0010), gdcm::VR::OW); // TODO: OW or OB
 		_attributeTagVRType["NumberOfFrames"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0008), gdcm::VR::IS);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0008), gdcm::VR::IS);
 		_attributeTagVRType["FrameIncrementPointer"] =
-				TagVRTypePair(gdcm::Tag(0x0028, 0x0009), gdcm::VR::AT);
+			TagVRTypePair(gdcm::Tag(0x0028, 0x0009), gdcm::VR::AT);
 		_attributeTagVRType["DoseUnits"] =
-				TagVRTypePair(gdcm::Tag(0x3004, 0x0002), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x3004, 0x0002), gdcm::VR::CS);
 		_attributeTagVRType["DoseType"] =
-				TagVRTypePair(gdcm::Tag(0x3004, 0x0004), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x3004, 0x0004), gdcm::VR::CS);
 		_attributeTagVRType["DoseSummationType"] =
-				TagVRTypePair(gdcm::Tag(0x3004, 0x000A), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x3004, 0x000A), gdcm::VR::CS);
 		_attributeTagVRType["ReferencedRTPlanSequence"] =
-				TagVRTypePair(gdcm::Tag(0x300C, 0x0002), gdcm::VR::SQ);
+			TagVRTypePair(gdcm::Tag(0x300C, 0x0002), gdcm::VR::SQ);
 		_attributeTagVRType["ReferencedSOPClassUID"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x1150), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x1150), gdcm::VR::UI);
 		_attributeTagVRType["ReferencedSOPInstanceUID"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x1155), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x1155), gdcm::VR::UI);
 		_attributeTagVRType["GridFrameOffsetVector"] =
-				TagVRTypePair(gdcm::Tag(0x3004, 0x000C), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x3004, 0x000C), gdcm::VR::DS);
 		_attributeTagVRType["DoseGridScaling"] =
-				TagVRTypePair(gdcm::Tag(0x3004, 0x000E), gdcm::VR::DS);
+			TagVRTypePair(gdcm::Tag(0x3004, 0x000E), gdcm::VR::DS);
 		_attributeTagVRType["SOPClassUID"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0016), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0016), gdcm::VR::UI);
 		_attributeTagVRType["SOPInstanceUID"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0018), gdcm::VR::UI);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0018), gdcm::VR::UI);
 		_attributeTagVRType["SpecificCharacterSet"] =
-				TagVRTypePair(gdcm::Tag(0x0008, 0x0005), gdcm::VR::CS);
+			TagVRTypePair(gdcm::Tag(0x0008, 0x0005), gdcm::VR::CS);
 	}
 }
 
 RTDoseWriter::~RTDoseWriter() {}
 
-bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
+bool RTDoseWriter::Write(const char* filename, RTDoseIODModule* rtDose)
 {
 #if 1
 	// TODO: Only supports volumetric image data. Should dose points and isodose curves be supported? (Find reference which states that only volumetric data in use.)
@@ -157,16 +162,16 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	}
 
 	gdcm::ImageWriter writer;
-	gdcm::Image &image = writer.GetImage();
-	gdcm::DataSet &dataset = writer.GetFile().GetDataSet();
+	gdcm::Image& image = writer.GetImage();
+	gdcm::DataSet& dataset = writer.GetFile().GetDataSet();
 
 	unsigned int dimensions[3] = {rtDose->GetRows(), rtDose->GetColumns(),
-																rtDose->GetNumberOfFrames()};
+								  rtDose->GetNumberOfFrames()};
 	image.SetNumberOfDimensions(3);
 	image.SetDimensions(dimensions);
 	double spacing[3] = {rtDose->GetPixelSpacing()[0],
-											 rtDose->GetPixelSpacing()[1],
-											 rtDose->GetSliceThickness()};
+						 rtDose->GetPixelSpacing()[1],
+						 rtDose->GetSliceThickness()};
 	image.SetSpacing(spacing);
 	image.SetDirectionCosines(rtDose->GetImageOrientationPatient());
 	image.SetOrigin(rtDose->GetImagePositionPatient());
@@ -197,7 +202,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	image.SetPixelFormat(pf);
 
 	gdcm::PhotometricInterpretation pi =
-			gdcm::PhotometricInterpretation::MONOCHROME2;
+		gdcm::PhotometricInterpretation::MONOCHROME2;
 	image.SetPhotometricInterpretation(pi);
 
 	// Patient Module (C7.1.1)
@@ -205,16 +210,17 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Patient's Name (Type = 2, VM = 1)
 	ReplaceDataElement(dataset, std::string("PatientName"),
-										 rtDose->GetPatientName());
+					   rtDose->GetPatientName());
 
 	// Patient ID (Type = 2, VM = 1)
-	ReplaceDataElement(dataset, std::string("PatientID"), rtDose->GetPatientID());
+	ReplaceDataElement(dataset, std::string("PatientID"),
+					   rtDose->GetPatientID());
 
 	// Issuer of Patient ID Macro (Table 10-18)
 
 	// Patient's Birth Date (Type = 2, VM = 1)
 	std::string birthDate;
-	unsigned short *birthDatePtr = rtDose->GetPatientBirthDate();
+	unsigned short* birthDatePtr = rtDose->GetPatientBirthDate();
 	FormatDate(birthDatePtr[0], birthDatePtr[1], birthDatePtr[2], birthDate);
 	ReplaceDataElement(dataset, std::string("PatientBirthDate"), birthDate);
 
@@ -268,23 +274,23 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Study Instance UID (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("StudyInstanceUID"),
-										 rtDose->GetStudyInstanceUID());
+					   rtDose->GetStudyInstanceUID());
 
 	// Study Date (Type = 2, VM = 1)
 	std::string studyDate;
-	unsigned short *studyDatePtr = rtDose->GetStudyDate();
+	unsigned short* studyDatePtr = rtDose->GetStudyDate();
 	FormatDate(studyDatePtr[0], studyDatePtr[1], studyDatePtr[2], studyDate);
 	ReplaceDataElement(dataset, std::string("StudyDate"), studyDate);
 
 	// Study Time (Type = 2, VM = 1)
 	std::string studyTime;
-	unsigned short *studyTimePtr = rtDose->GetStudyTime();
+	unsigned short* studyTimePtr = rtDose->GetStudyTime();
 	FormatTime(studyTimePtr[0], studyTimePtr[1], studyTimePtr[2], studyTime);
 	ReplaceDataElement(dataset, std::string("StudyTime"), studyTime);
 
 	// Referring Physician's Name (Type = 2, VM = 1)
 	ReplaceDataElement(dataset, std::string("ReferringPhysicianName"),
-										 rtDose->GetReferringPhysicianName());
+					   rtDose->GetReferringPhysicianName());
 
 	// Referring Physician Identification Sequence (Type = 3, VM = ?)
 	// > Person Identification Macro (Table 10-1)
@@ -294,7 +300,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Accession Number (Type = 2, VM = 1)
 	ReplaceDataElement(dataset, std::string("AccessionNumber"),
-										 rtDose->GetAccessionNumber());
+					   rtDose->GetAccessionNumber());
 
 	// Issuer of Accession Number Sequence (Type = 3, VM = ?)
 	// > HL7v2 Hierarchic Designator Macro (Table 10-17)
@@ -322,7 +328,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Series Instance UID (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("SeriesInstanceUID"),
-										 rtDose->GetSeriesInstanceUID());
+					   rtDose->GetSeriesInstanceUID());
 
 	// Series Number (Type = 2, VM = 1)
 	std::string seriesNr = "";
@@ -340,7 +346,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	for (unsigned int i = 0; i < rtDose->GetOperatorsNameCount(); ++i)
 	{
 		InsertDataElement(dataset, std::string("OperatorsName"),
-											rtDose->GetOperatorsName(i));
+						  rtDose->GetOperatorsName(i));
 	}
 
 	// Referenced Performed Procedure Step Sequence (Type = 3, VM = ?)
@@ -353,18 +359,18 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Frame of Reference UID (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("FrameOfReferenceUID"),
-										 rtDose->GetFrameOfReferenceUID());
+					   rtDose->GetFrameOfReferenceUID());
 
 	// Position Reference Indicator (Type = 2, VM = 1)
 	ReplaceDataElement(dataset, std::string("PositionReferenceIndicator"),
-										 rtDose->GetPositionReferenceIndicator());
+					   rtDose->GetPositionReferenceIndicator());
 
 	// General Equipment Module (C7.5.1)
 	// --------------------------------------------------------------
 
 	// Manufacturer (Type = 2, VM = 1)
 	ReplaceDataElement(dataset, std::string("Manufacturer"),
-										 rtDose->GetManufacturer());
+					   rtDose->GetManufacturer());
 
 	// Institution Name (Type = 3, VM = ?)
 	// Institution Address (Type = 3, VM = ?)
@@ -431,7 +437,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	// --------------------------------------------------------------
 
 	// Pixel Spacing (Type = 1, VM = 2)
-	double *pixelSpacingPtr = rtDose->GetPixelSpacing();
+	double* pixelSpacingPtr = rtDose->GetPixelSpacing();
 	std::string pixelSpacing;
 	for (unsigned short i = 0; i < 2; ++i)
 	{
@@ -440,23 +446,23 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	}
 
 	// Image Orientation (Patient) (Type = 1, VM = 6)
-	double *imgOrientationPtr = rtDose->GetImageOrientationPatient();
+	double* imgOrientationPtr = rtDose->GetImageOrientationPatient();
 	std::string imgOrientation;
 	for (unsigned short i = 0; i < 6; ++i)
 	{
 		StringEncodeNumber(imgOrientationPtr[i], imgOrientation);
 		InsertDataElement(dataset, std::string("ImageOrientationPatient"),
-											imgOrientation);
+						  imgOrientation);
 	}
 
 	// Image Position (Patient) (Type = 1, VM = 3)
-	double *imgPositionPtr = rtDose->GetImagePositionPatient();
+	double* imgPositionPtr = rtDose->GetImagePositionPatient();
 	std::string imgPosition;
 	for (unsigned short i = 0; i < 3; ++i)
 	{
 		StringEncodeNumber(imgPositionPtr[i], imgPosition);
 		InsertDataElement(dataset, std::string("ImagePositionPatient"),
-											imgPosition);
+						  imgPosition);
 	}
 
 	// Slice Thickness (Type = 2, VM = 1)
@@ -475,11 +481,12 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	// Samples per Pixel (Type = 1, VM = 1)
 	std::string samplesPerPixel;
 	ByteEncodeNumber(rtDose->GetSamplesPerPixel(), samplesPerPixel);
-	ReplaceDataElement(dataset, std::string("SamplesPerPixel"), samplesPerPixel);
+	ReplaceDataElement(dataset, std::string("SamplesPerPixel"),
+					   samplesPerPixel);
 
 	// Photometric Interpretation (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("PhotometricInterpretation"),
-										 rtDose->GetPhotometricInterpretation());
+					   rtDose->GetPhotometricInterpretation());
 
 	// Rows (Type = 1, VM = 1)
 	std::string dims;
@@ -514,9 +521,9 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	double doseGridScaling = rtDose->GetDoseGridScaling();
 	unsigned short bytesPerVoxel = rtDose->GetBitsAllocated() / 8;
 	unsigned long volume = dimensions[0] * dimensions[1] * dimensions[2];
-	char *quantizedPixelData = new char[volume * bytesPerVoxel];
-	float *ptrSrc = &rtDose->GetPixelData()[0];
-	char *ptrDst = &quantizedPixelData[0];
+	char* quantizedPixelData = new char[volume * bytesPerVoxel];
+	float* ptrSrc = &rtDose->GetPixelData()[0];
+	char* ptrDst = &quantizedPixelData[0];
 	for (unsigned long i = 0; i < volume; ++i)
 	{
 		unsigned int val = std::floor(*ptrSrc++ / doseGridScaling);
@@ -528,7 +535,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 		}
 	}
 	pixeldata.SetByteValue(quantizedPixelData,
-												 (uint32_t)(volume * bytesPerVoxel));
+						   (uint32_t)(volume * bytesPerVoxel));
 	image.SetDataElement(pixeldata);
 
 	// Planar Configuration (Type = 1C, VM = 1)
@@ -555,7 +562,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// Frame Increment Pointer (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("FrameIncrementPointer"),
-										 rtDose->GetFrameIncrementPointer());
+					   rtDose->GetFrameIncrementPointer());
 
 	// RT Dose Module (C8.8.3)
 	// --------------------------------------------------------------
@@ -601,22 +608,23 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 	case Brachy: summationType = "BRACHY"; break;
 	case ControlPoint: summationType = "CONTROL_POINT"; break;
 	}
-	ReplaceDataElement(dataset, std::string("DoseSummationType"), summationType);
+	ReplaceDataElement(dataset, std::string("DoseSummationType"),
+					   summationType);
 
 	// Referenced RT Plan Sequence (Type = 1C, VM = 1) // TODO: Different summation types
 	// > SOP Instance Reference Macro (Table 10-11)
 	gdcm::SmartPointer<gdcm::SequenceOfItems> sq = new gdcm::SequenceOfItems();
 	sq->SetLengthToUndefined();
 	for (unsigned int i = 0; i < rtDose->GetReferencedRTPlanInstanceUIDCount();
-			 ++i)
+		 ++i)
 	{
 		gdcm::Item it;
 		it.SetVLToUndefined();
-		gdcm::DataSet &nds = it.GetNestedDataSet();
+		gdcm::DataSet& nds = it.GetNestedDataSet();
 		InsertDataElement(nds, std::string("ReferencedSOPClassUID"),
-											rtDose->GetReferencedRTPlanClassUID());
+						  rtDose->GetReferencedRTPlanClassUID());
 		InsertDataElement(nds, std::string("ReferencedSOPInstanceUID"),
-											rtDose->GetReferencedRTPlanInstanceUID(i));
+						  rtDose->GetReferencedRTPlanInstanceUID(i));
 		sq->AddItem(it);
 	}
 	InsertSequence(dataset, std::string("ReferencedRTPlanSequence"), sq);
@@ -654,11 +662,11 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	// SOP Class UID (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("SOPClassUID"),
-										 rtDose->GetSOPClassUID());
+					   rtDose->GetSOPClassUID());
 
 	// SOP Instance UID (Type = 1, VM = 1)
 	ReplaceDataElement(dataset, std::string("SOPInstanceUID"),
-										 rtDose->GetSOPInstanceUID());
+					   rtDose->GetSOPInstanceUID());
 
 	// Specific Character Set (Type = 1C, VM = 1-n)
 	for (unsigned short i = 0; i < rtDose->GetSpecificCharacterSetCount(); ++i)
@@ -672,7 +680,7 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 			// TODO: Support other character sets
 		}
 		InsertDataElement(dataset, std::string("SpecificCharacterSet"),
-											characterSet);
+						  characterSet);
 	}
 
 	// Instance Creation Date (Type = 3, VM = ?)
@@ -744,31 +752,33 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 
 	vtkSmartPointer<vtkImageData> input = vtkSmartPointer<vtkImageData>::New();
 	input->SetNumberOfScalarComponents(1);
-	input->SetScalarTypeToUnsignedInt(); // RTDose only accepts UINT16 and UINT32
+	input
+		->SetScalarTypeToUnsignedInt(); // RTDose only accepts UINT16 and UINT32
 	input->SetDimensions(dims[0], dims[1], dims[2]);
 	input->SetSpacing(spacing);
 	input->SetOrigin(origin);
-	unsigned int *field = (unsigned int *)input->GetScalarPointer(0, 0, 0);
+	unsigned int* field = (unsigned int*)input->GetScalarPointer(0, 0, 0);
 
-	unsigned int *fieldptr = &(field[0]);
+	unsigned int* fieldptr = &(field[0]);
 	for (unsigned int z = 0; z < dims[2]; ++z)
 	{
-		float *bitsptr = &(bits[z][0]);
+		float* bitsptr = &(bits[z][0]);
 		for (unsigned int y = 0; y < dims[1]; ++y)
 		{
 			for (unsigned int x = 0; x < dims[0]; ++x)
 			{
-				*fieldptr++ = (unsigned int)*bitsptr++; // TODO: RT Dose scalar scaling
+				*fieldptr++ =
+					(unsigned int)*bitsptr++; // TODO: RT Dose scalar scaling
 			}
 		}
 	}
 
-	vtkGDCMImageWriter *writer = vtkGDCMImageWriter::New();
+	vtkGDCMImageWriter* writer = vtkGDCMImageWriter::New();
 	writer->SetFileName(filename);
 	writer->SetInput(input);
 	writer->SetFileDimensionality(3);
 	vtkSmartPointer<vtkMedicalImageProperties> medicalImageProps =
-			vtkSmartPointer<vtkMedicalImageProperties>::New();
+		vtkSmartPointer<vtkMedicalImageProperties>::New();
 	medicalImageProps->SetModality("RT");
 	writer->SetMedicalImageProperties(medicalImageProps);
 	writer->SetShift(0.0);
@@ -783,9 +793,9 @@ bool RTDoseWriter::Write(const char *filename, RTDoseIODModule *rtDose)
 #endif
 }
 
-void RTDoseWriter::InsertDataElement(gdcm::DataSet &dataset,
-																		 const std::string keyword,
-																		 std::string value, unsigned int vm)
+void RTDoseWriter::InsertDataElement(gdcm::DataSet& dataset,
+									 const std::string keyword,
+									 std::string value, unsigned int vm)
 {
 	gdcm::Tag tag = _attributeTagVRType[keyword].first;
 	gdcm::VR::VRType vr = _attributeTagVRType[keyword].second;
@@ -799,9 +809,9 @@ void RTDoseWriter::InsertDataElement(gdcm::DataSet &dataset,
 	dataset.Insert(de);
 }
 
-void RTDoseWriter::ReplaceDataElement(gdcm::DataSet &dataset,
-																			const std::string keyword,
-																			std::string value, unsigned int vm)
+void RTDoseWriter::ReplaceDataElement(gdcm::DataSet& dataset,
+									  const std::string keyword,
+									  std::string value, unsigned int vm)
 {
 	gdcm::Tag tag = _attributeTagVRType[keyword].first;
 	gdcm::VR::VRType vr = _attributeTagVRType[keyword].second;
@@ -815,9 +825,9 @@ void RTDoseWriter::ReplaceDataElement(gdcm::DataSet &dataset,
 	dataset.Replace(de);
 }
 
-void RTDoseWriter::InsertSequence(gdcm::DataSet &dataset,
-																	const std::string keyword,
-																	gdcm::SequenceOfItems *sequence)
+void RTDoseWriter::InsertSequence(gdcm::DataSet& dataset,
+								  const std::string keyword,
+								  gdcm::SequenceOfItems* sequence)
 {
 	gdcm::Tag tag = _attributeTagVRType[keyword].first;
 	gdcm::VR::VRType vr = _attributeTagVRType[keyword].second;
@@ -830,9 +840,9 @@ void RTDoseWriter::InsertSequence(gdcm::DataSet &dataset,
 	dataset.Insert(de);
 }
 
-void RTDoseWriter::ReplaceStringSection(std::string &text,
-																				const std::string oldSection,
-																				const std::string newSection)
+void RTDoseWriter::ReplaceStringSection(std::string& text,
+										const std::string oldSection,
+										const std::string newSection)
 {
 	int tmp;
 	unsigned int len = newSection.length();
@@ -842,8 +852,8 @@ void RTDoseWriter::ReplaceStringSection(std::string &text,
 	}
 }
 
-void RTDoseWriter::FormatDate(unsigned short &year, unsigned short &month,
-															unsigned short &day, std::string &result)
+void RTDoseWriter::FormatDate(unsigned short& year, unsigned short& month,
+							  unsigned short& day, std::string& result)
 {
 	if (year && month && day)
 	{
@@ -858,8 +868,8 @@ void RTDoseWriter::FormatDate(unsigned short &year, unsigned short &month,
 	}
 }
 
-void RTDoseWriter::FormatTime(unsigned short &hours, unsigned short &minutes,
-															unsigned short &seconds, std::string &result)
+void RTDoseWriter::FormatTime(unsigned short& hours, unsigned short& minutes,
+							  unsigned short& seconds, std::string& result)
 {
 	if (hours && minutes && seconds)
 	{
@@ -874,8 +884,8 @@ void RTDoseWriter::FormatTime(unsigned short &hours, unsigned short &minutes,
 	}
 }
 
-void RTDoseWriter::AdjustVRTypeString(gdcm::VR::VRType &vr, unsigned int vm,
-																			std::string &value)
+void RTDoseWriter::AdjustVRTypeString(gdcm::VR::VRType& vr, unsigned int vm,
+									  std::string& value)
 {
 	// TODO: Confirm padding
 	switch (vr)
@@ -951,7 +961,7 @@ void RTDoseWriter::AdjustVRTypeString(gdcm::VR::VRType &vr, unsigned int vm,
 }
 
 template<typename T>
-void RTDoseWriter::StringEncodeNumber(T number, std::string &value)
+void RTDoseWriter::StringEncodeNumber(T number, std::string& value)
 {
 	std::stringstream out;
 	out << number;
@@ -959,10 +969,10 @@ void RTDoseWriter::StringEncodeNumber(T number, std::string &value)
 }
 
 template<typename T>
-void RTDoseWriter::ByteEncodeNumber(T number, std::string &value)
+void RTDoseWriter::ByteEncodeNumber(T number, std::string& value)
 {
 	unsigned short bytes = sizeof(T);
-	char *buffer = new char[bytes];
+	char* buffer = new char[bytes];
 	for (unsigned short i = 0; i < bytes; ++i)
 	{
 		buffer[bytes - i - 1] = number & 0xFF;
@@ -973,8 +983,8 @@ void RTDoseWriter::ByteEncodeNumber(T number, std::string &value)
 }
 
 template<typename T>
-void RTDoseWriter::StringEncodeVector(const T *offsets, unsigned int count,
-																			std::string &value)
+void RTDoseWriter::StringEncodeVector(const T* offsets, unsigned int count,
+									  std::string& value)
 {
 	if (count <= 0)
 		return;
@@ -992,8 +1002,8 @@ void RTDoseWriter::StringEncodeVector(const T *offsets, unsigned int count,
 }
 
 template<typename T>
-void RTDoseWriter::ByteEncodeVector(const T *offsets, unsigned int count,
-																		std::string &value)
+void RTDoseWriter::ByteEncodeVector(const T* offsets, unsigned int count,
+									std::string& value)
 {
 	// TODO: test or remove
 	if (count <= 0)
@@ -1002,7 +1012,7 @@ void RTDoseWriter::ByteEncodeVector(const T *offsets, unsigned int count,
 	value = "";
 
 	unsigned short bytes = sizeof(T);
-	char *buffer = new char[bytes];
+	char* buffer = new char[bytes];
 	for (unsigned int idx = 0; idx < count; ++idx)
 	{
 		T number = offsets[idx];
@@ -1014,7 +1024,7 @@ void RTDoseWriter::ByteEncodeVector(const T *offsets, unsigned int count,
 		std::string numberStr = std::string(buffer);
 		numberStr = numberStr.erase(0, numberStr.find_first_not_of('0'));
 		value.append(numberStr);
-		value.append(delimiter);
+		value.append(std::string(1,delimiter));
 	}
 	value.resize(value.size() - 1); // Remove last delimiter
 
@@ -1023,4 +1033,4 @@ void RTDoseWriter::ByteEncodeVector(const T *offsets, unsigned int count,
 
 std::map<gdcm::VR::VRType, unsigned short> RTDoseWriter::_vrTypeMaxLength;
 std::map<std::string, RTDoseWriter::TagVRTypePair>
-		RTDoseWriter::_attributeTagVRType;
+	RTDoseWriter::_attributeTagVRType;

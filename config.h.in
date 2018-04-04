@@ -8,16 +8,11 @@
  *  https://opensource.org/licenses/MIT
  */
 
-#ifndef __framework_config_h__
-#define __framework_config_h__
+#pragma once
 
 /*
  * This config file has been automatically generated. Do not modify.
  */
 
-#define ISEG_VERSION_MAJOR @ISEG_VERSION_MAJOR@
-#define ISEG_VERSION_MINOR @ISEG_VERSION_MINOR@
-#define ISEG_VERSION_PATCH @ISEG_VERSION_PATCH@
-#cmakedefine ISEG_GPU_MC
-
-#endif /* __framework_config_h__ */
+#define ISEG_GIT_SHA1 @GIT_SHA1@
+#define ISEG_VERSION @ISEG_VERSION@

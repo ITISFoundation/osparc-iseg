@@ -7,17 +7,19 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "ChannelExtractor.h"
 #include "Precompiled.h"
+
+#include "ChannelExtractor.h"
 
 #include <QColor>
 #include <QImage>
 
-using namespace ChannelExtractor;
+using namespace iseg;
+using namespace iseg::ChannelExtractor;
 
-bool ChannelExtractor::getSlice(const char *filename, float *slice, int channel,
-																unsigned slicenr, unsigned width,
-																unsigned height)
+bool ChannelExtractor::getSlice(const char* filename, float* slice, int channel,
+								unsigned slicenr, unsigned width,
+								unsigned height)
 {
 	QImage loadedImage(filename);
 
@@ -47,9 +49,9 @@ bool ChannelExtractor::getSlice(const char *filename, float *slice, int channel,
 		{
 			oldColor = QColor(loadedImage.pixel(x, y));
 			slice[counter] = (unsigned char)(redFactor * oldColor.red() +
-																			 greenFactor * oldColor.green() +
-																			 blueFactor * oldColor.blue() +
-																			 alphaFactor * oldColor.alpha());
+											 greenFactor * oldColor.green() +
+											 blueFactor * oldColor.blue() +
+											 alphaFactor * oldColor.alpha());
 			counter++;
 		}
 	}

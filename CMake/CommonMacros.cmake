@@ -2,29 +2,12 @@
 # use OpenMP features
 #
 MACRO(USE_OPENMP)
-	IF (${CMAKE_C_COMPILER} MATCHES "icc.*$")
-		SET(USING_INTEL ON)
+	FIND_PACKAGE(OpenMP)
+	IF(OpenMP_FOUND)
+		ADD_COMPILE_OPTIONS(${OpenMP_CXX_FLAGS})
 	ELSE()
-		SET(USING_INTEL OFF)
-	ENDIF()
-
-	IF(WIN32)
-		IF(USING_INTEL)
-			# Intel  
-			ADD_COMPILE_OPTIONS( "-Qopenmp" )
-		ELSEIF(MSVC)
-			ADD_COMPILE_OPTIONS( "/openmp" )
-		ENDIF()
-	ENDIF()
-
-	IF(UNIX)
-		# Gnu  
-		IF(USING_INTEL)
-			# Intel  
-			ADD_COMPILE_OPTIONS( "-openmp" )
-		ELSE(CMAKE_COMPILER_IS_GNUCXX)
-			ADD_COMPILE_OPTIONS( "-fopenmp" )
-		ENDIF()
+		MESSAGE("OpenMP not found. Disabling OpenMP parallelization.")
+		ADD_DEFINITIONS(-DNO_OPENMP_SUPPORT)
 	ENDIF()
 ENDMACRO()
 

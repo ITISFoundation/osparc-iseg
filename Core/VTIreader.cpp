@@ -7,8 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "VTIreader.h"
 #include "Precompiled.h"
+
+#include "VTIreader.h"
+
 #include <vtkDataArray.h>
 #include <vtkExecutive.h>
 #include <vtkFloatArray.h>
@@ -25,10 +27,12 @@
 
 #pragma warning(disable : 4018) // BL quiet compiler
 
-bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
-												 unsigned width, unsigned height)
+using namespace iseg;
+
+bool VTIreader::getSlice(const char* filename, float* slice, unsigned slicenr,
+						 unsigned width, unsigned height)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -39,7 +43,7 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 	int ext[6] = {0, 0, 0, 0, 0, 0};
 	double org[3] = {0.0, 0.0, 0.0};
 	double spc[3] = {0.0, 0.0, 0.0};
-	vtkImageData *img = reader->GetOutput();
+	vtkImageData* img = reader->GetOutput();
 	img->GetSpacing(spc);
 	img->GetExtent(ext);
 	img->GetOrigin(org);
@@ -55,8 +59,8 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 
 	if (className == "vtkUnsignedCharArray")
 	{
-		unsigned char *ptr = (unsigned char *)img->GetScalarPointer(
-				ext[0], ext[2], (int)slicenr + ext[4]);
+		unsigned char* ptr = (unsigned char*)img->GetScalarPointer(
+			ext[0], ext[2], (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -67,8 +71,8 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 	}
 	else if (className == "vtkFloatArray")
 	{
-		float *ptr =
-				(float *)img->GetScalarPointer(ext[0], ext[2], (int)slicenr + ext[4]);
+		float* ptr = (float*)img->GetScalarPointer(ext[0], ext[2],
+												   (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -79,8 +83,8 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 	}
 	else if (className == "vtkDoubleArray")
 	{
-		double *ptr =
-				(double *)img->GetScalarPointer(ext[0], ext[2], (int)slicenr + ext[4]);
+		double* ptr = (double*)img->GetScalarPointer(ext[0], ext[2],
+													 (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -95,8 +99,8 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
 			{
-				slice[pos] =
-						img->GetScalarComponentAsFloat(i, j, (int)slicenr + ext[4], 0);
+				slice[pos] = img->GetScalarComponentAsFloat(
+					i, j, (int)slicenr + ext[4], 0);
 			}
 		}
 	}
@@ -105,13 +109,13 @@ bool VTIreader::getSlice(const char *filename, float *slice, unsigned slicenr,
 	return true;
 }
 
-float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
-															 unsigned &width, unsigned &height)
+float* VTIreader::getSliceInfo(const char* filename, unsigned slicenr,
+							   unsigned& width, unsigned& height)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 	reader->SetFileName(filename);
 	reader->Update();
@@ -119,24 +123,24 @@ float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
 	int ext[6] = {0, 0, 0, 0, 0, 0};
 	double org[3] = {0.0, 0.0, 0.0};
 	double spc[3] = {0.0, 0.0, 0.0};
-	vtkImageData *img = reader->GetOutput();
+	vtkImageData* img = reader->GetOutput();
 	img->GetSpacing(spc);
 	img->GetExtent(ext);
 	img->GetOrigin(org);
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
 
 	if (slicenr < 0 || slicenr > ext[5] - ext[4])
-		return false;
+		return nullptr;
 	height = (unsigned)ext[3] - ext[2] + 1;
 	width = (unsigned)ext[1] - ext[0] + 1;
 
-	float *slice = new float[height * (unsigned long)width];
+	float* slice = new float[height * (unsigned long)width];
 	unsigned long long pos = 0;
 
 	if (className == "vtkUnsignedCharArray")
 	{
-		unsigned char *ptr = (unsigned char *)img->GetScalarPointer(
-				ext[0], ext[2], (int)slicenr + ext[4]);
+		unsigned char* ptr = (unsigned char*)img->GetScalarPointer(
+			ext[0], ext[2], (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -147,8 +151,8 @@ float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
 	}
 	else if (className == "vtkFloatArray")
 	{
-		float *ptr =
-				(float *)img->GetScalarPointer(ext[0], ext[2], (int)slicenr + ext[4]);
+		float* ptr = (float*)img->GetScalarPointer(ext[0], ext[2],
+												   (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -159,8 +163,8 @@ float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
 	}
 	else if (className == "vtkDoubleArray")
 	{
-		double *ptr =
-				(double *)img->GetScalarPointer(ext[0], ext[2], (int)slicenr + ext[4]);
+		double* ptr = (double*)img->GetScalarPointer(ext[0], ext[2],
+													 (int)slicenr + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -175,8 +179,8 @@ float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
 			{
-				slice[pos] =
-						img->GetScalarComponentAsFloat(i, j, (int)slicenr + ext[4], 0);
+				slice[pos] = img->GetScalarComponentAsFloat(
+					i, j, (int)slicenr + ext[4], 0);
 			}
 		}
 	}
@@ -185,14 +189,15 @@ float *VTIreader::getSliceInfo(const char *filename, unsigned slicenr,
 	return slice;
 }
 
-bool VTIreader::getVolume(const char *filename, float **slices,
-													unsigned nrslices, unsigned width, unsigned height,
-													const std::string &arrayName)
+bool VTIreader::getVolume(const char* filename, float** slices,
+						  unsigned nrslices, unsigned width, unsigned height,
+						  const std::string& arrayName)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
-		cerr << "VTIreader::getVolume() : can not read file " << filename << endl;
+		cerr << "VTIreader::getVolume() : can not read file " << filename
+			 << endl;
 		return false;
 	}
 	reader->SetFileName(filename);
@@ -201,14 +206,14 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 	int ext[6] = {0, 0, 0, 0, 0, 0};
 	double org[3] = {0.0, 0.0, 0.0};
 	double spc[3] = {0.0, 0.0, 0.0};
-	vtkImageData *img = reader->GetOutput();
+	vtkImageData* img = reader->GetOutput();
 	img->GetSpacing(spc);
 	img->GetExtent(ext);
 	img->GetOrigin(org);
 
 	img->GetPointData()->SetActiveScalars(
-			arrayName.c_str()); // for GetScalarPointer()
-	vtkDataArray *scalars = img->GetPointData()->GetScalars(arrayName.c_str());
+		arrayName.c_str()); // for GetScalarPointer()
+	vtkDataArray* scalars = img->GetPointData()->GetScalars(arrayName.c_str());
 	if (!scalars)
 	{
 		cerr << "no such array: " << arrayName << endl;
@@ -227,8 +232,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 		unsigned long long pos = 0;
 		if (className == "vtkUnsignedCharArray")
 		{
-			unsigned char *ptr =
-					(unsigned char *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+			unsigned char* ptr = (unsigned char*)img->GetScalarPointer(
+				ext[0], ext[2], k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -239,7 +244,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 		}
 		else if (className == "vtkFloatArray")
 		{
-			float *ptr = (float *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+			float* ptr =
+				(float*)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -250,7 +256,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 		}
 		else if (className == "vtkDoubleArray")
 		{
-			double *ptr = (double *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+			double* ptr =
+				(double*)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -265,7 +272,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
 				{
-					slices[k][pos] = img->GetScalarComponentAsFloat(i, j, k + ext[4], 0);
+					slices[k][pos] =
+						img->GetScalarComponentAsFloat(i, j, k + ext[4], 0);
 				}
 			}
 		}
@@ -274,11 +282,11 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 	return true;
 }
 
-bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
-														 float **sliceswork, tissues_size_t **slicestissue,
-														 unsigned nrslices, unsigned width, unsigned height)
+bool VTIreader::getVolumeAll(const char* filename, float** slicesbmp,
+							 float** sliceswork, tissues_size_t** slicestissue,
+							 unsigned nrslices, unsigned width, unsigned height)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -289,7 +297,7 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	int ext[6] = {0, 0, 0, 0, 0, 0};
 	double org[3] = {0.0, 0.0, 0.0};
 	double spc[3] = {0.0, 0.0, 0.0};
-	vtkImageData *img = reader->GetOutput();
+	vtkImageData* img = reader->GetOutput();
 	int index;
 	img->GetSpacing(spc);
 	img->GetExtent(ext);
@@ -302,21 +310,21 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	if (ext[5] + 1 - ext[4] != (int)nrslices)
 		return false;
 
-	vtkDataArray *arraybmp = img->GetPointData()->GetArray("Source", index);
+	vtkDataArray* arraybmp = img->GetPointData()->GetArray("Source", index);
 	if (arraybmp == 0)
 	{
 		reader->Delete();
 		cerr << "VTIreader::getVolumeAll() : no Source array" << endl;
 		return false;
 	}
-	vtkDataArray *arraywork = img->GetPointData()->GetArray("Target", index);
+	vtkDataArray* arraywork = img->GetPointData()->GetArray("Target", index);
 	if (arraywork == 0)
 	{
 		reader->Delete();
 		cerr << "VTIreader::getVolumeAll() : no Target array" << endl;
 		return false;
 	}
-	vtkDataArray *arraytissue = img->GetPointData()->GetArray("Tissue", index);
+	vtkDataArray* arraytissue = img->GetPointData()->GetArray("Tissue", index);
 	if (arraytissue == 0)
 	{
 		reader->Delete();
@@ -328,16 +336,17 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	std::string classNametissue = arraytissue->GetClassName();
 
 	bool tissueUnsignedChar =
-			(classNametissue.compare("vtkUnsignedCharArray") == 0);
+		(classNametissue.compare("vtkUnsignedCharArray") == 0);
 	bool tissueUnsignedShort =
-			(classNametissue.compare("vtkUnsignedShortArray") == 0);
+		(classNametissue.compare("vtkUnsignedShortArray") == 0);
 	if (!(tissueUnsignedChar || tissueUnsignedShort) ||
-			classNamebmp.compare("vtkFloatArray") != 0 ||
-			classNamework.compare("vtkFloatArray") != 0)
+		classNamebmp.compare("vtkFloatArray") != 0 ||
+		classNamework.compare("vtkFloatArray") != 0)
 	{
 		reader->Delete();
-		cerr << "VTIreader::getVolumeAll() : unsupported array types for the arrays"
-				 << endl;
+		cerr << "VTIreader::getVolumeAll() : unsupported array types for the "
+				"arrays"
+			 << endl;
 		return false;
 	}
 
@@ -345,8 +354,8 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	for (int k = 0; k < nrslices; k++)
 	{
 		unsigned long long pos = 0;
-		float *ptrfloat =
-				(float *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+		float* ptrfloat =
+			(float*)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -359,8 +368,8 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	for (int k = 0; k < nrslices; k++)
 	{
 		unsigned long long pos = 0;
-		float *ptrfloat =
-				(float *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+		float* ptrfloat =
+			(float*)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
 		for (int j = ext[2]; j <= ext[3]; j++)
 		{
 			for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -375,8 +384,8 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 		for (int k = 0; k < nrslices; k++)
 		{
 			unsigned long long pos = 0;
-			unsigned char *ptrchar =
-					(unsigned char *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+			unsigned char* ptrchar = (unsigned char*)img->GetScalarPointer(
+				ext[0], ext[2], k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -391,8 +400,8 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 		for (int k = 0; k < nrslices; k++)
 		{
 			unsigned long long pos = 0;
-			unsigned short *ptrshort =
-					(unsigned short *)img->GetScalarPointer(ext[0], ext[2], k + ext[4]);
+			unsigned short* ptrshort = (unsigned short*)img->GetScalarPointer(
+				ext[0], ext[2], k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -407,12 +416,12 @@ bool VTIreader::getVolumeAll(const char *filename, float **slicesbmp,
 	return true;
 }
 
-bool VTIreader::getVolume(const char *filename, float **slices,
-													unsigned startslice, unsigned nrslices,
-													unsigned width, unsigned height,
-													const std::string &arrayName)
+bool VTIreader::getVolume(const char* filename, float** slices,
+						  unsigned startslice, unsigned nrslices,
+						  unsigned width, unsigned height,
+						  const std::string& arrayName)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -423,14 +432,14 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 	int ext[6] = {0, 0, 0, 0, 0, 0};
 	double org[3] = {0.0, 0.0, 0.0};
 	double spc[3] = {0.0, 0.0, 0.0};
-	vtkImageData *img = reader->GetOutput();
+	vtkImageData* img = reader->GetOutput();
 	img->GetSpacing(spc);
 	img->GetExtent(ext);
 	img->GetOrigin(org);
 
 	img->GetPointData()->SetActiveScalars(
-			arrayName.c_str()); // for GetScalarPointer()
-	vtkDataArray *scalars = img->GetPointData()->GetScalars(arrayName.c_str());
+		arrayName.c_str()); // for GetScalarPointer()
+	vtkDataArray* scalars = img->GetPointData()->GetScalars(arrayName.c_str());
 	if (!scalars)
 	{
 		cerr << "no such array: " << arrayName << endl;
@@ -450,8 +459,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 
 		if (className == "vtkUnsignedCharArray")
 		{
-			unsigned char *ptr = (unsigned char *)img->GetScalarPointer(
-					ext[0], ext[2], startslice + k + ext[4]);
+			unsigned char* ptr = (unsigned char*)img->GetScalarPointer(
+				ext[0], ext[2], startslice + k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -462,8 +471,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 		}
 		else if (className == "vtkFloatArray")
 		{
-			float *ptr = (float *)img->GetScalarPointer(ext[0], ext[2],
-																									startslice + k + ext[4]);
+			float* ptr = (float*)img->GetScalarPointer(ext[0], ext[2],
+													   startslice + k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -474,8 +483,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 		}
 		else if (className == "vtkDoubleArray")
 		{
-			double *ptr = (double *)img->GetScalarPointer(ext[0], ext[2],
-																										startslice + k + ext[4]);
+			double* ptr = (double*)img->GetScalarPointer(
+				ext[0], ext[2], startslice + k + ext[4]);
 			for (int j = ext[2]; j <= ext[3]; j++)
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
@@ -490,8 +499,8 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 			{
 				for (int i = ext[0]; i <= ext[1]; i++, pos++)
 				{
-					slices[k][pos] =
-							img->GetScalarComponentAsFloat(i, j, startslice + k + ext[4], 0);
+					slices[k][pos] = img->GetScalarComponentAsFloat(
+						i, j, startslice + k + ext[4], 0);
 				}
 			}
 		}
@@ -501,11 +510,11 @@ bool VTIreader::getVolume(const char *filename, float **slices,
 	return true;
 }
 
-bool VTIreader::getInfo(const char *filename, unsigned &width, unsigned &height,
-												unsigned &nrslices, float *pixelsize, float *offset,
-												std::vector<std::string> &arrayNames)
+bool VTIreader::getInfo(const char* filename, unsigned& width, unsigned& height,
+						unsigned& nrslices, float* pixelsize, float* offset,
+						std::vector<std::string>& arrayNames)
 {
-	vtkXMLImageDataReader *reader = vtkXMLImageDataReader::New();
+	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -515,7 +524,7 @@ bool VTIreader::getInfo(const char *filename, unsigned &width, unsigned &height,
 	int extent[6];
 	double spacing[3];
 	double origin[3];
-	vtkInformation *outInfo = reader->GetExecutive()->GetOutputInformation(0);
+	vtkInformation* outInfo = reader->GetExecutive()->GetOutputInformation(0);
 
 	outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), extent);
 	width = extent[1] - extent[0] + 1;
@@ -551,30 +560,31 @@ bool VTIreader::getInfo(const char *filename, unsigned &width, unsigned &height,
 	return true;
 }
 
-bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
-															 float **sliceswork,
-															 tissues_size_t **slicestissue,
-															 tissues_size_t nrtissues, unsigned nrslices,
-															 unsigned width, unsigned height,
-															 float *pixelsize, float *offset, bool binary,
-															 bool compress)
+bool VTIwriter::writeVolumeAll(const char* filename, float** slicesbmp,
+							   float** sliceswork,
+							   tissues_size_t** slicestissue,
+							   tissues_size_t nrtissues, unsigned nrslices,
+							   unsigned width, unsigned height,
+							   float* pixelsize, float* offset, bool binary,
+							   bool compress)
 {
 	vtkSmartPointer<vtkImageData> input = vtkSmartPointer<vtkImageData>::New();
-	input->SetExtent(0, (int)width - 1, 0, (int)height - 1, 0, (int)nrslices - 1);
+	input->SetExtent(0, (int)width - 1, 0, (int)height - 1, 0,
+					 (int)nrslices - 1);
 	input->SetSpacing(pixelsize[0], pixelsize[1], pixelsize[2]);
 	input->SetOrigin((double)offset[0], (double)offset[1], (double)offset[2]);
 
 	vtkSmartPointer<vtkFloatArray> bmparray =
-			vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkFloatArray>::New();
 	bmparray->SetNumberOfValues((vtkIdType)width * (vtkIdType)height *
-															(vtkIdType)nrslices);
+								(vtkIdType)nrslices);
 	bmparray->SetNumberOfComponents(1);
 	bmparray->SetName("Source");
 	//bmparray->SetNumberOfTuples(xxx);
 	vtkSmartPointer<vtkFloatArray> workarray =
-			vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkFloatArray>::New();
 	workarray->SetNumberOfValues((vtkIdType)width * (vtkIdType)height *
-															 (vtkIdType)nrslices);
+								 (vtkIdType)nrslices);
 	workarray->SetNumberOfComponents(1);
 	workarray->SetName("Target");
 	input->GetPointData()->AddArray(bmparray);
@@ -582,9 +592,9 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 	if (nrtissues <= 255)
 	{
 		vtkSmartPointer<vtkUnsignedCharArray> tissuearray =
-				vtkSmartPointer<vtkUnsignedCharArray>::New();
+			vtkSmartPointer<vtkUnsignedCharArray>::New();
 		tissuearray->SetNumberOfValues((vtkIdType)width * (vtkIdType)height *
-																	 (vtkIdType)nrslices);
+									   (vtkIdType)nrslices);
 		tissuearray->SetNumberOfComponents(1);
 		tissuearray->SetName("Tissue");
 		input->GetPointData()->AddArray(tissuearray);
@@ -592,17 +602,18 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 	else if (sizeof(tissues_size_t) == sizeof(unsigned short))
 	{
 		vtkSmartPointer<vtkUnsignedShortArray> tissuearray =
-				vtkSmartPointer<vtkUnsignedShortArray>::New();
+			vtkSmartPointer<vtkUnsignedShortArray>::New();
 		tissuearray->SetNumberOfValues((vtkIdType)width * (vtkIdType)height *
-																	 (vtkIdType)nrslices);
+									   (vtkIdType)nrslices);
 		tissuearray->SetNumberOfComponents(1);
 		tissuearray->SetName("Tissue");
 		input->GetPointData()->AddArray(tissuearray);
 	}
 	else
 	{
-		cerr << "VTIwriter::writeVolumeAll: Error, tissues_size_t not implemented."
-				 << endl;
+		cerr << "VTIwriter::writeVolumeAll: Error, tissues_size_t not "
+				"implemented."
+			 << endl;
 		return false;
 	}
 	//BL? input->Update();
@@ -611,7 +622,7 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 	for (int k = 0; k < nrslices; k++)
 	{
 		unsigned long long pos = 0;
-		float *ptrfloat = (float *)input->GetScalarPointer(0, 0, k);
+		float* ptrfloat = (float*)input->GetScalarPointer(0, 0, k);
 		for (int j = 0; j < height; j++)
 		{
 			for (int i = 0; i < width; i++, pos++)
@@ -624,7 +635,7 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 	for (int k = 0; k < nrslices; k++)
 	{
 		unsigned long long pos = 0;
-		float *ptrfloat = (float *)input->GetScalarPointer(0, 0, k);
+		float* ptrfloat = (float*)input->GetScalarPointer(0, 0, k);
 		for (int j = 0; j < height; j++)
 		{
 			for (int i = 0; i < width; i++, pos++)
@@ -639,8 +650,8 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 		for (int k = 0; k < nrslices; k++)
 		{
 			unsigned long long pos = 0;
-			unsigned char *ptrchar =
-					(unsigned char *)input->GetScalarPointer(0, 0, k);
+			unsigned char* ptrchar =
+				(unsigned char*)input->GetScalarPointer(0, 0, k);
 			for (int j = 0; j < height; j++)
 			{
 				for (int i = 0; i < width; i++, pos++)
@@ -655,8 +666,8 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 		for (int k = 0; k < nrslices; k++)
 		{
 			unsigned long long pos = 0;
-			unsigned short *ptrshort =
-					(unsigned short *)input->GetScalarPointer(0, 0, k);
+			unsigned short* ptrshort =
+				(unsigned short*)input->GetScalarPointer(0, 0, k);
 			for (int j = 0; j < height; j++)
 			{
 				for (int i = 0; i < width; i++, pos++)
@@ -668,9 +679,9 @@ bool VTIwriter::writeVolumeAll(const char *filename, float **slicesbmp,
 	}
 
 	vtkSmartPointer<vtkZLibDataCompressor> compressor =
-			vtkSmartPointer<vtkZLibDataCompressor>::New();
+		vtkSmartPointer<vtkZLibDataCompressor>::New();
 	vtkSmartPointer<vtkXMLImageDataWriter> writer =
-			vtkSmartPointer<vtkXMLImageDataWriter>::New();
+		vtkSmartPointer<vtkXMLImageDataWriter>::New();
 	writer->SetInputData(input);
 	if (compress)
 		writer->SetCompressor(compressor);

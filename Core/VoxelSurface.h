@@ -12,6 +12,9 @@
 #include "iSegCore.h"
 
 class vtkPolyData;
+
+namespace iseg {
+
 class Transform;
 
 class iSegCore_API VoxelSurface
@@ -21,15 +24,17 @@ public:
 
 	enum eSurfaceImageOverlap { kNone, kPartial, kContained };
 
-	eSurfaceImageOverlap Run(const char *filename, const unsigned dims[3],
-													 const float spacing[3], const Transform &transform,
-													 float **slices, unsigned startslice,
-													 unsigned endslice) const;
-	eSurfaceImageOverlap Run(vtkPolyData *surface, const unsigned dims[3],
-													 const float spacing[3], const Transform &transform,
-													 float **slices, unsigned startslice,
-													 unsigned endslice) const;
+	eSurfaceImageOverlap Run(const char* filename, const unsigned dims[3],
+							 const float spacing[3], const Transform& transform,
+							 float** slices, unsigned startslice,
+							 unsigned endslice) const;
+	eSurfaceImageOverlap Run(vtkPolyData* surface, const unsigned dims[3],
+							 const float spacing[3], const Transform& transform,
+							 float** slices, unsigned startslice,
+							 unsigned endslice) const;
 
 private:
 	float m_ForeGroundValue;
 };
+
+} // namespace iseg

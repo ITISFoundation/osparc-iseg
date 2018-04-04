@@ -7,10 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "VoxelSurface.h"
 #include "Precompiled.h"
 
 #include "Transform.h"
+#include "VoxelSurface.h"
 
 #include <vtkBoundingBox.h>
 #include <vtkCutter.h>
@@ -28,10 +28,13 @@
 #include <vtkTransform.h>
 #include <vtkUnsignedCharArray.h>
 
+using namespace iseg;
+
 namespace {
-std::vector<double> to_double(const Transform &transform)
+
+std::vector<double> to_double(const Transform& transform)
 {
-	auto begin = static_cast<const float *>(transform[0]);
+	auto begin = static_cast<const float*>(transform[0]);
 	return std::vector<double>(begin, begin + 16);
 }
 
@@ -50,13 +53,14 @@ float round_me_dn(float n, const float to_what)
 	n /= (1 / to_what);
 	return n;
 }
+
 } // namespace
 
 VoxelSurface::eSurfaceImageOverlap
-		VoxelSurface::Run(const char *filename, const unsigned dims[3],
-											const float spacing[3], const Transform &transform,
-											float **slices, unsigned startslice,
-											unsigned endslice) const
+	VoxelSurface::Run(const char* filename, const unsigned dims[3],
+					  const float spacing[3], const Transform& transform,
+					  float** slices, unsigned startslice,
+					  unsigned endslice) const
 {
 	vtkNew<vtkSTLReader> reader;
 	reader->SetFileName(filename);
@@ -64,16 +68,16 @@ VoxelSurface::eSurfaceImageOverlap
 	if (reader->GetOutput())
 	{
 		return Run(reader->GetOutput(), dims, spacing, transform, slices,
-							 startslice, endslice);
+				   startslice, endslice);
 	}
 	return eSurfaceImageOverlap::kNone;
 }
 
 VoxelSurface::eSurfaceImageOverlap
-		VoxelSurface::Run(vtkPolyData *surface, const unsigned dims[3],
-											const float spacing[3], const Transform &transform,
-											float **slices, unsigned startslice,
-											unsigned endslice) const
+	VoxelSurface::Run(vtkPolyData* surface, const unsigned dims[3],
+					  const float spacing[3], const Transform& transform,
+					  float** slices, unsigned startslice,
+					  unsigned endslice) const
 {
 	// instead of applying the transform to the image, we inverse transform the surface
 	auto m = to_double(transform);
@@ -88,8 +92,8 @@ VoxelSurface::eSurfaceImageOverlap
 
 	// image wo transform
 	vtkBoundingBox image_bb(0, (dims[0] - 1) * spacing[0], 0,
-													(dims[1] - 1) * spacing[1], 0,
-													(dims[2] - 1) * spacing[2]);
+							(dims[1] - 1) * spacing[1], 0,
+							(dims[2] - 1) * spacing[2]);
 
 	eSurfaceImageOverlap result = kNone;
 	if (image_bb.Contains(surface_bb))
@@ -139,7 +143,7 @@ VoxelSurface::eSurfaceImageOverlap
 		stripper->SetInputConnection(cutter->GetOutputPort()); // valid circle
 		stripper->Update();
 
-		vtkPolyData *contour = stripper->GetOutput();
+		vtkPolyData* contour = stripper->GetOutput();
 
 		// check whether there is any contour
 		auto c_numberOfLines = contour->GetNumberOfLines();
@@ -164,18 +168,18 @@ VoxelSurface::eSurfaceImageOverlap
 			int ct_dim[3] = {};
 			for (int d = 0; d < 3; d++)
 			{
-				ct_dim[d] =
-						static_cast<int>(std::ceil(ct_bounds.GetLength(d) / spacing[d])) +
-						1;
+				ct_dim[d] = static_cast<int>(std::ceil(ct_bounds.GetLength(d) /
+													   spacing[d])) +
+							1;
 			}
-			const double *ct_origin = ct_bounds.GetMinPoint();
+			const double* ct_origin = ct_bounds.GetMinPoint();
 
 			imageData->SetDimensions(ct_dim[0], ct_dim[1], 1);
 			imageData->SetSpacing(spacing[0], spacing[1], spacing[2]);
 			imageData->SetOrigin(ct_origin[0], ct_origin[1], ct_origin[2]);
 			imageData->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
-			vtkUnsignedCharArray *scalars = vtkUnsignedCharArray::SafeDownCast(
-					imageData->GetPointData()->GetScalars());
+			vtkUnsignedCharArray* scalars = vtkUnsignedCharArray::SafeDownCast(
+				imageData->GetPointData()->GetScalars());
 
 			// Fill the image with foreground voxel values
 			unsigned char inval = 255;
@@ -194,7 +198,7 @@ VoxelSurface::eSurfaceImageOverlap
 			// polygonal data --> image stencil:
 			vtkNew<vtkPolyDataToImageStencil> pol2stenc;
 			pol2stenc->SetTolerance(
-					0); // important if extruder->SetVector(0, 0, 1) !!!
+				0); // important if extruder->SetVector(0, 0, 1) !!!
 			pol2stenc->SetInputConnection(extruder->GetOutputPort());
 			pol2stenc->SetOutputOrigin(imageData->GetOrigin());
 			pol2stenc->SetOutputSpacing(imageData->GetSpacing());
@@ -211,8 +215,8 @@ VoxelSurface::eSurfaceImageOverlap
 			imgstenc->Update();
 
 			// Add or overwrite the white pixels in the working array
-			vtkImageData *out = imgstenc->GetOutput();
-			float *workBits = slices[z];
+			vtkImageData* out = imgstenc->GetOutput();
+			float* workBits = slices[z];
 			if (out->GetNumberOfPoints() > 0)
 			{
 				int offset_x = (int)floor(abs(ct_origin[0] / spacing[0]) + 0.5);
@@ -222,8 +226,8 @@ VoxelSurface::eSurfaceImageOverlap
 				{
 					for (int ct_x = 0; ct_x < ct_dim[0] - 1; ct_x++)
 					{
-						unsigned char *pixel_val = static_cast<unsigned char *>(
-								out->GetScalarPointer(ct_x, ct_y, 0));
+						unsigned char* pixel_val = static_cast<unsigned char*>(
+							out->GetScalarPointer(ct_x, ct_y, 0));
 						if (pixel_val[0] == inval)
 						{
 							// Convert the relative x,y from the contour to the x,y of the dataset

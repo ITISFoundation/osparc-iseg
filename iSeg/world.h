@@ -10,22 +10,22 @@
 #pragma once
 
 //Disable annoying warning no 4786 that nobody understands why appears and MS says that can be ignored
-#pragma warning(disable: 4786)
+#pragma warning(disable : 4786)
 
 #include "SlicesHandler.h"
 
-#include "Core/vec3.h"
-#include "Core/branchTree-simplified.h"
+#include "Core/BranchTree.h"
+#include "Core/Vec3.h"
 
-#include <vector>
-#include <list>
 #include <iostream>
+#include <list>
+#include <vector>
 
+namespace iseg {
 
 class Node
 {
 public:
-
 	unsigned offset;
 	float intens;
 	float cost;
@@ -41,7 +41,6 @@ public:
 class PathElement
 {
 public:
-
 	unsigned offset;
 	bool cross;
 	bool seed;
@@ -51,12 +50,13 @@ public:
 	~PathElement();
 };
 
-class World {
-
+class World
+{
 	Node* nodes;
-	std::list<Node*> activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
+	std::list<Node*>
+		activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
 	std::list<Node*> activelistlowint;
-	std::vector<std::vector<PathElement> > paths;
+	std::vector<std::vector<PathElement>> paths;
 	int width;
 	int height;
 	int length;
@@ -76,33 +76,38 @@ public:
 	World();
 	~World();
 
-	vec3 getBBStart() { return _bbStart; };
-	vec3 getBBEnd() { return _bbEnd; };
-	void setBBStart(vec3 bbStart) { _bbStart = bbStart; };
-	void setBBEnd(vec3 bbEnd) { _bbEnd = bbEnd; };
+	Vec3 getBBStart() { return _bbStart; };
+	Vec3 getBBEnd() { return _bbEnd; };
+	void setBBStart(Vec3 bbStart) { _bbStart = bbStart; };
+	void setBBEnd(Vec3 bbEnd) { _bbEnd = bbEnd; };
 	bool isValid() { return _isValid; };
 	//		void init(vec3 bbStart, vec3 bbEnd, ml::TVirtualVolume<MLuint16>* vInVol, ml::TVirtualVolume<MLuint16>* vOutVol);
-	void getSeedBoundingBox(std::vector<vec3> *seeds, vec3 &bbStart, vec3 &bbEnd, SlicesHandler *handler3D);
-	bool init(vec3 bbStart, vec3 bbEnd, SlicesHandler *handler3D);
+	void getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
+							Vec3& bbEnd, SlicesHandler* handler3D);
+	bool init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D);
 	void clear();
-	void dijkstra(std::vector<vec3> seeds, vec3 end, BranchTree* _branchTree);
-	void paint(std::vector<vec3> seeds, vec3 cross, unsigned short int numofseeds);
+	void dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree);
+	void paint(std::vector<Vec3> seeds, Vec3 cross,
+			   unsigned short int numofseeds);
 	bool checkdiameter(unsigned currentoff, unsigned prevoff);
 	void solvelargearea();
 	unsigned solvelargearea2();
 	void changeintens(unsigned o);
 	void reduceactivelist();
-	int whoistheparent(std::vector<vec3> seeds, int parentintens);
-	void outputBranchTree(BranchItem* branchItem, std::string prefix, FILE *&fp);
+	int whoistheparent(std::vector<Vec3> seeds, int parentintens);
+	void outputBranchTree(BranchItem* branchItem, std::string prefix,
+						  FILE*& fp);
 	void storingtree(std::vector<BranchItem*> children, BranchItem* rootOne);
-	void set3dslicehandler(SlicesHandler *handler3D);
+	void set3dslicehandler(SlicesHandler* handler3D);
 
 private:
-	SlicesHandler *_handler3D;
+	SlicesHandler* _handler3D;
 	// start of bounding box
-	vec3 _bbStart;
+	Vec3 _bbStart;
 	// end of bounding box
-	vec3 _bbEnd;
+	Vec3 _bbEnd;
 	// is class valid/initialized
 	bool _isValid;
 };
+
+} // namespace iseg

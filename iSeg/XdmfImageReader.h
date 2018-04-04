@@ -10,14 +10,16 @@
 #ifndef XDMFIMAGEREADER_H
 #define XDMFIMAGEREADER_H
 
-#include "Core/Types.h"
 #include "Core/SetGetMacros.h"
 #include "Core/Transform.h"
+#include "Core/Types.h"
 
-#include <QStringList>
 #include <QMap>
+#include <QStringList>
 
 #include <memory>
+
+namespace iseg {
 
 class ColorLookupTable;
 
@@ -43,7 +45,10 @@ public:
 	SetMacro(ReadContiguousMemory, bool);
 	GetMacro(ReadContiguousMemory, bool);
 	QStringList GetArrayNames() const { return this->ArrayNames; };
-	QMap<QString, QString> GetMapArrayNames() const { return this->mapArrayNames; };
+	QMap<QString, QString> GetMapArrayNames() const
+	{
+		return this->mapArrayNames;
+	};
 	int ParseXML();
 	int Read();
 
@@ -81,7 +86,7 @@ public:
 	GetMacro(ReadContiguousMemory, bool);
 	/// returns array as if it were a float[16] array
 	/// transform is stored in row-major, i.e. column fastest
-	float* GetImageTransform() { return ImageTransform[0];	}
+	float* GetImageTransform() { return ImageTransform[0]; }
 	SetMacro(ImageSlices, float**);
 	GetMacro(ImageSlices, float**);
 	SetMacro(WorkSlices, float**);
@@ -89,7 +94,10 @@ public:
 	SetMacro(TissueSlices, tissues_size_t**);
 	GetMacro(TissueSlices, tissues_size_t**);
 	QStringList GetArrayNames() const { return this->ArrayNames; };
-	QMap<QString, QString> GetMapArrayNames() const { return this->mapArrayNames; };
+	QMap<QString, QString> GetMapArrayNames() const
+	{
+		return this->mapArrayNames;
+	};
 	int ParseHDF();
 	int Read();
 
@@ -110,5 +118,7 @@ private:
 	QStringList ArrayNames;
 	QMap<QString, QString> mapArrayNames;
 };
+
+} // namespace iseg
 
 #endif // XDMFIMAGEREADER_H

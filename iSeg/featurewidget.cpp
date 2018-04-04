@@ -9,16 +9,16 @@
  */
 #include "Precompiled.h"
 
+#include "FeatureWidget.h"
 #include "FormatTooltip.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
-#include "featurewidget.h"
-#include "tissueinfos.h"
 
-#include "Core/IFT2.h"
+#include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 #include "Core/Point.h"
-#include "Core/linedraw.h"
+#include "Core/addLine.h"
 
 #include <q3listbox.h>
 #include <q3vbox.h>
@@ -38,15 +38,17 @@
 #include <qstring.h>
 #include <qwidget.h>
 
-featurewidget::featurewidget(SlicesHandler *hand3D, QWidget *parent,
-														 const char *name, Qt::WindowFlags wFlags)
-		: QWidget1(parent, name, wFlags), handler3D(hand3D)
+using namespace iseg;
+
+FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
+							 const char* name, Qt::WindowFlags wFlags)
+	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(
-			Format("Obtain information about the gray value and tissue distribution."
-						 "<br>"
-						 "A rectangular area is marked by pressing down the left mouse "
-						 "button and moving the mouse."));
+	setToolTip(Format(
+		"Obtain information about the gray value and tissue distribution."
+		"<br>"
+		"A rectangular area is marked by pressing down the left mouse "
+		"button and moving the mouse."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -86,7 +88,7 @@ featurewidget::featurewidget(SlicesHandler *hand3D, QWidget *parent,
 	vbox2->setFixedSize(vbox2->sizeHint());
 	// BL: hack to make layout wide enought to show very long tissue names
 	vbox3->setFixedSize(3 * vbox3->sizeHint().width(),
-											vbox3->sizeHint().height());
+						vbox3->sizeHint().height());
 	hbox1->setFixedSize(hbox1->sizeHint());
 
 	lb_map_value->setText("Source:");
@@ -96,15 +98,15 @@ featurewidget::featurewidget(SlicesHandler *hand3D, QWidget *parent,
 	return;
 }
 
-QSize featurewidget::sizeHint() const { return hbox1->sizeHint(); }
+QSize FeatureWidget::sizeHint() const { return hbox1->sizeHint(); }
 
-void featurewidget::pt_clicked(Point p)
+void FeatureWidget::pt_clicked(Point p)
 {
 	selecting = true;
 	pstart = p;
 }
 
-void featurewidget::pt_moved(Point p)
+void FeatureWidget::pt_moved(Point p)
 {
 	if (selecting)
 	{
@@ -124,25 +126,25 @@ void featurewidget::pt_moved(Point p)
 	Pair psize = handler3D->get_pixelsize();
 
 	lb_pt_value->setText(QString::number(handler3D->return_width() - 1 - p.px) +
-											 QString(":") + QString::number(p.py));
+						 QString(":") + QString::number(p.py));
 	lb_work_pt_value->setText(
-			QString("(") +
-			QString::number((handler3D->return_width() - 1 - p.px) * psize.high) +
-			QString(":") + QString::number(p.py * psize.low) + QString(" mm)"));
+		QString("(") +
+		QString::number((handler3D->return_width() - 1 - p.px) * psize.high) +
+		QString(":") + QString::number(p.py * psize.low) + QString(" mm)"));
 	lb_grey_value->setText(QString::number(bmphand->bmp_pt(p)));
 	lb_work_grey_value->setText(QString::number(bmphand->work_pt(p)));
 	tissues_size_t tnr =
-			bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
+		bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
 	if (tnr == 0)
 		lb_tissuename->setText("- (0)");
 	else
 		lb_tissuename->setText(TissueInfos::GetTissueName(tnr) + QString(" (") +
-													 QString::number((int)tnr) + QString(")"));
+							   QString::number((int)tnr) + QString(")"));
 
 	return;
 }
 
-void featurewidget::pt_released(Point p)
+void FeatureWidget::pt_released(Point p)
 {
 	dynamic.clear();
 	emit vpdyn_changed(&dynamic);
@@ -169,7 +171,7 @@ void featurewidget::pt_released(Point p)
 	return;
 }
 
-void featurewidget::slicenr_changed()
+void FeatureWidget::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -177,9 +179,9 @@ void featurewidget::slicenr_changed()
 	//	}
 }
 
-void featurewidget::init() { slicenr_changed(); }
+void FeatureWidget::init() { slicenr_changed(); }
 
-void featurewidget::newloaded()
+void FeatureWidget::newloaded()
 {
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
