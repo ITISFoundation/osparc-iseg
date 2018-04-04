@@ -19,6 +19,9 @@ IF(PLUGIN_CONFIDENCE)
 		${MOCSrcscon}
 	)
 
-	TARGET_LINK_LIBRARIES( Confidence.ext Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
+	TARGET_LINK_LIBRARIES( Confidence.ext 
+		Plugin 
+		${MY_EXTERNAL_LINK_LIBRARIES}
+	)
 	VS_SET_PROPERTY(Confidence.ext "Plugins")
 ENDIF()

@@ -19,6 +19,9 @@ IF(PLUGIN_BIAS)
 		${MOCSrcsbias}
 	)
 	
-	TARGET_LINK_LIBRARIES( BiasCorrection.ext Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
+	TARGET_LINK_LIBRARIES( BiasCorrection.ext 
+		Plugin 
+		${MY_EXTERNAL_LINK_LIBRARIES}
+	)
 	VS_SET_PROPERTY(BiasCorrection.ext "Plugins")
 ENDIF()

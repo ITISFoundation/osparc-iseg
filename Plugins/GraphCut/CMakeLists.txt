@@ -30,6 +30,10 @@ IF(PLUGIN_GRAPHCUT)
 		${MOCSrcsext})
 
 	# todo check libs in linker command
-	TARGET_LINK_LIBRARIES( GraphCut.ext Plugin Gc ${MY_EXTERNAL_LINK_LIBRARIES} )
+	TARGET_LINK_LIBRARIES( GraphCut.ext
+		Plugin 
+		Gc 
+		${MY_EXTERNAL_LINK_LIBRARIES} 
+	)
 	VS_SET_PROPERTY(GraphCut.ext "Plugins")
 ENDIF()
