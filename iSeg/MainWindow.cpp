@@ -5950,7 +5950,7 @@ void MainWindow::execute_grouptissues()
 void MainWindow::execute_about()
 {
 	std::ostringstream ss;
-	ss << "\n\niSeg            \nOpen Source Version: " << std::string(xstr(ISEG_GIT_SHA1));
+	ss << "\n\niSeg\n" << std::string(xstr(ISEG_DESCRIPTION));
 	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 

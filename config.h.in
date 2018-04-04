@@ -14,5 +14,5 @@
  * This config file has been automatically generated. Do not modify.
  */
 
-#define ISEG_GIT_SHA1 @GIT_SHA1@
 #define ISEG_VERSION @ISEG_VERSION@
+#define ISEG_DESCRIPTION @ISEG_DESCRIPTION@
