@@ -19,6 +19,9 @@ IF(PLUGIN_LEVELSET)
 		${MOCSrcslevel}
 	)
 
-	TARGET_LINK_LIBRARIES( Levelset.ext Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
+	TARGET_LINK_LIBRARIES( Levelset.ext 
+		Plugin 
+		${MY_EXTERNAL_LINK_LIBRARIES} 
+	)
 	VS_SET_PROPERTY(Levelset.ext "Plugins")
 ENDIF()

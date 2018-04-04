@@ -11,10 +11,10 @@
 # Turn off optimization for predicates.cxx
 IF(MSVC)
 	SET_SOURCE_FILES_PROPERTIES(predicates.cxx PROPERTIES COMPILE_FLAGS "/Od")
-ELSE(MSVC)
+ELSE()
 	SET_SOURCE_FILES_PROPERTIES(predicates.cxx PROPERTIES COMPILE_FLAGS "-O0")
-ENDIF(MSVC)
+ENDIF()
 
-ADD_LIBRARY(predicates STATIC predicates.cxx predicates.h)
+ADD_LIBRARY(predicates STATIC predicates.cpp predicates.h)
 TARGET_LINK_LIBRARIES(predicates)
 VS_SET_PROPERTY(predicates Thirdparty)

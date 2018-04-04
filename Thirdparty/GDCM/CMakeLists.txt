@@ -10,16 +10,16 @@
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
-		vtkGDCMImageReader.cxx
-		vtkGDCMImageWriter.cxx
-		vtkGDCMMedicalImageProperties.cxx
-		vtkLookupTable16.cxx
-		vtkMyGDCMPolyDataReader.cxx 
+	vtkGDCMImageReader.cxx
+	vtkGDCMImageWriter.cxx
+	vtkGDCMMedicalImageProperties.cxx
+	vtkLookupTable16.cxx
+	vtkMyGDCMPolyDataReader.cxx 
 )
 
 USE_VTK()
 USE_ITK() # for gdcm
 
 ADD_LIBRARY(vtkGDCM ${SOURCES} ${HEADERS})
-TARGET_LINK_LIBRARIES(vtkGDCM ${VTK_LIBRARIES} ${ITK_LIBRARIES})
+TARGET_LINK_LIBRARIES(vtkGDCM ${MY_EXTERNAL_LINK_LIBRARIES})
 VS_SET_PROPERTY(vtkGDCM Thirdparty)
