@@ -58,7 +58,7 @@ The libraries below are required to be compiled and installed on the system in o
 
   1. Download and unzip the VTK folder
   2. CMake (source VTK folder, build in separate folder), press _Configure_
-  3. Select _CMAKE_CXX_MP_FLAG_, change _VTK_RENDERING_BACKEND_ to _OpenGL_ and press _Configure_ again
+  3. Select _CMAKE_CXX_MP_FLAG_, check that _VTK_RENDERING_BACKEND_ to _OpenGL2_ and press _Configure_ again
   4. Press _Generate_
   5. Press _Open Project_ and build the solution in Debug and Release
 
