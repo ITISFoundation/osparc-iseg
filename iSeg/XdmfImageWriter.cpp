@@ -324,21 +324,21 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		dimension[1] = dims[1];
 		dimension[2] = dims[2];
 		dim1[0] = 3;
-		if (!writer.write(dimension, dim1, std::string("/dimensions")))
+		if (!writer.write(dimension, dim1, std::string("dimensions")))
 		{
 			cerr << "error writing dimensions" << endl;
 		}
-		if (!writer.write(offset, dim1, std::string("/offset")))
+		if (!writer.write(offset, dim1, std::string("offset")))
 		{
 			cerr << "error writing offset" << endl;
 		}
-		if (!writer.write(pixelsize, dim1, std::string("/pixelsize")))
+		if (!writer.write(pixelsize, dim1, std::string("pixelsize")))
 		{
 			cerr << "error writing pixelsize" << endl;
 		}
 		dim1[0] = 6;
 
-		if (!writer.write(dc, dim1, std::string("/dc")))
+		if (!writer.write(dc, dim1, std::string("dc")))
 		{
 			cerr << "error writing dc" << endl;
 		}
@@ -351,7 +351,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 			rotation[k * 3 + 2] = ImageTransform[k][2];
 		}
 		dim1[0] = 9;
-		if (!writer.write(rotation, dim1, std::string("/rotation")))
+		if (!writer.write(rotation, dim1, std::string("rotation")))
 		{
 			cerr << "error writing rotation" << endl;
 		}

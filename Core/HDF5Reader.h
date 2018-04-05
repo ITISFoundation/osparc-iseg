@@ -22,7 +22,7 @@ class iSegCore_API HDF5Reader
 {
 public:
 	typedef unsigned long long size_type;
-	typedef int hid_type;
+	typedef long long hid_type;
 	HDF5Reader();
 	~HDF5Reader();
 	int open(const std::string&);

@@ -1,7 +1,5 @@
 #include "HDF5IO.h"
 
-#include <hdf5.h>
-
 namespace iseg {
 
 template<typename T>
@@ -155,8 +153,7 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 		datatype = H5Tcopy(getTypeValue<T>());
 		status = H5Tset_order(datatype, H5T_ORDER_LE);
 
-		dataset =
-			H5Dcreate(file, name.c_str(), datatype, dataspace, properties);
+		dataset = H5Dcreate(file, name.c_str(), datatype, dataspace, properties);
 	}
 	else // open existing
 	{

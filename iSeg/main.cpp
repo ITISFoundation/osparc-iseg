@@ -185,20 +185,26 @@ int main(int argc, char** argv)
 	{
 		QString qstr(argv[1]);
 		if (qstr.compare(QString("S4Llink")) == 0)
+		{
 			mainWindow = new MainWindow(
 				&h3Ds2, QString(locationpath.toAscii().data()), picpath, tmpdir,
 				true, 0, "new window",
 				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+		}
 	}
 	if (mainWindow == NULL)
+	{
 		mainWindow =
 			new MainWindow(&h3Ds2, QString(locationpath.toAscii().data()),
 						   picpath, tmpdir, false, 0, "new window",
 						   Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+	}
 
 	QFile qss(stylesheetpath.toAscii().data());
 	qss.open(QFile::ReadOnly);
-	mainWindow->setStyleSheet(qss.readAll());
+	//mainWindow->setStyleSheet(qss.readAll());
+	cerr << qss.fileName().toStdString() << endl;
+	mainWindow->setStyleSheet("color: white;");
 	qss.close();
 	//mainWindow->setStyleSheet("QDockWidget { color: black; } QDockWidget::title { background: lightgray; padding-left: 5px; padding-top: 3px;  } QDockWidget::close-button, QDockWidget::float-button { background: lightgray; } QMenuBar { background-color: gray; } QMenu::separator { background-color: lightgrey; height: 1px; margin-left: 10px; margin-right: 10px; } QMenu::item:disabled { color: darkgrey; }" );
 

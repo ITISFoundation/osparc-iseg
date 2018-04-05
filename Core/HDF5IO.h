@@ -11,6 +11,8 @@
 
 #include "iSegCore.h"
 
+#include <hdf5.h>
+
 #include <cstdint>
 #include <string>
 
@@ -19,7 +21,7 @@ namespace iseg {
 class iSegCore_API HDF5IO
 {
 public:
-	typedef long handle_id_type;
+	typedef hid_t handle_id_type;
 
 	int chunk_size = 0;
 

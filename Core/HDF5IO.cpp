@@ -50,6 +50,7 @@ HDF5IO::handle_id_type HDF5IO::open(const std::string& fname)
 
 HDF5IO::handle_id_type HDF5IO::create(const std::string& fname, bool append)
 {
+	static_assert(std::is_same<HDF5IO::handle_id_type, hid_t>::value, "hid_t mismatch. this will lead to runtime errors.");
 	if (append && !existsValidHdf5(fname.c_str()))
 	{
 		append = false;
