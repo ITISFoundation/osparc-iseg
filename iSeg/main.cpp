@@ -22,7 +22,7 @@
 #include "Core/Pair.h"
 #include "Core/Point.h"
 
-#include <QPlastiqueStyle.h>
+#include <QPlastiqueStyle>
 #include <QSplashScreen>
 #include <qapplication.h>
 #include <qdatetime.h>
@@ -82,9 +82,7 @@ int main(int argc, char** argv)
 	cerr << "starting iSeg..." << endl;
 	QFileInfo fileinfo(argv[0]);
 
-	cerr << "initializing tmp folder..." << endl;
 	QDir tmpdir = QDir::home();
-
 	if (!tmpdir.exists("iSeg"))
 	{
 		cerr << "iSeg folder does not exist, creating..." << endl;
@@ -116,18 +114,16 @@ int main(int argc, char** argv)
 	}
 
 	cerr << "intercepting application's output to a log file..." << endl;
-	if (!interceptOutput(tmpdir.absolutePath().toStdString() + "/iSeg.log"))
+	if (!interceptOutput(tmpdir.absFilePath(QString("iSeg.log")).toStdString()))
 	{
 		error("intercepting output failed");
 	}
 
 	QDir fileDirectory = fileinfo.dir();
-	cerr << "fileDirectory = " << fileDirectory.absolutePath().toAscii().data()
-		 << endl;
+	cerr << "fileDirectory = " << fileDirectory.absolutePath().toStdString() << endl;
 
 	QDir picpath = fileinfo.dir();
-	cerr << "picture path = " << picpath.absolutePath().toAscii().data()
-		 << endl;
+	cerr << "picture path = " << picpath.absolutePath().toStdString() << endl;
 	if (!picpath.cd("images"))
 	{
 		cerr << "images folder does not exist" << endl;
@@ -139,11 +135,7 @@ int main(int argc, char** argv)
 		cerr << "atlas folder does not exist" << endl;
 	}
 
-	QDir stylesheetdir = fileinfo.dir();
-
-#ifdef SHOWSPLASH
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
-#endif
 	QString locationpath = fileDirectory.absPath();
 	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
 	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
@@ -151,31 +143,33 @@ int main(int argc, char** argv)
 	TissueInfos::InitTissues();
 	BranchItem::init_availablelabels();
 
-	SlicesHandler h3Ds2;
+	SlicesHandler slice_handler;
 
-	QApplication ab1(argc, argv);
+	QApplication app(argc, argv);
 	QApplication::setStyle(new QPlastiqueStyle);
 
-	QPalette p;
-	p = ab1.palette();
-	p.setColor(QPalette::Window, QColor(40, 40, 40));
-	p.setColor(QPalette::Base, QColor(70, 70, 70));
-	p.setColor(QPalette::WindowText, QColor(255, 255, 255));
-	p.setColor(QPalette::Text, QColor(255, 255, 255));
-	p.setColor(QPalette::Button, QColor(70, 70, 70));
-	p.setColor(QPalette::Highlight, QColor(150, 150, 150));
-	p.setColor(QPalette::ButtonText, QColor(255, 255, 255));
-	qApp->setPalette(p);
+	QPalette palette;
+	palette = app.palette();
+	palette.setColor(QPalette::Window, QColor(40, 40, 40));
+	palette.setColor(QPalette::Base, QColor(70, 70, 70));
+	palette.setColor(QPalette::WindowText, QColor(255, 255, 255));
+	palette.setColor(QPalette::Text, QColor(255, 255, 255));
+	palette.setColor(QPalette::Button, QColor(70, 70, 70));
+	palette.setColor(QPalette::Highlight, QColor(150, 150, 150));
+	palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
+	palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));
+	qApp->setPalette(palette);
+	app.setPalette(palette);	
 
 #ifdef SHOWSPLASH
 	QString pixmapstr = QString(splashpicpath.toAscii().data());
-	QPixmap pixmap1(pixmapstr);
+	QPixmap pixmap(pixmapstr);
 
-	QSplashScreen splash1(pixmap1.scaledToHeight(600, Qt::SmoothTransformation));
-	splash1.show();
-#endif
+	QSplashScreen splash_screen(pixmap.scaledToHeight(600, Qt::SmoothTransformation));
+	splash_screen.show();
 	QTime now = QTime::currentTime();
-	ab1.processEvents();
+#endif
+	app.processEvents();
 
 	MainWindow* mainWindow = NULL;
 	if (argc > 1)
@@ -184,40 +178,36 @@ int main(int argc, char** argv)
 		if (qstr.compare(QString("S4Llink")) == 0)
 		{
 			mainWindow = new MainWindow(
-				&h3Ds2, QString(locationpath.toAscii().data()), picpath, tmpdir,
-				true, 0, "new window",
+				&slice_handler, locationpath, picpath, tmpdir,
+				true, nullptr, "MainWindow",
 				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 		}
 	}
-	if (mainWindow == NULL)
+	if (mainWindow == nullptr)
 	{
-		mainWindow =
-			new MainWindow(&h3Ds2, QString(locationpath.toAscii().data()),
-						   picpath, tmpdir, false, 0, "new window",
-						   Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+		mainWindow = new MainWindow(
+			&slice_handler, locationpath, picpath, tmpdir, 
+			false, nullptr, "MainWindow",
+			Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 	}
 
-	mainWindow->setStyleSheet("color: white;");
-	//mainWindow->setStyleSheet("QDockWidget { color: black; } QDockWidget::title { background: lightgray; padding-left: 5px; padding-top: 3px;  } QDockWidget::close-button, QDockWidget::float-button { background: lightgray; } QMenuBar { background-color: gray; } QMenu::separator { background-color: lightgrey; height: 1px; margin-left: 10px; margin-right: 10px; } QMenu::item:disabled { color: darkgrey; }" );
+	// needed on MacOS, but not WIN32?
+	mainWindow->setStyleSheet("QWidget { color: white; }");
 
-	QString latestprojpath1;
-	latestprojpath1.setAscii(latestprojpath.toAscii().data());
-	mainWindow->LoadLoadProj(latestprojpath1);
+	mainWindow->LoadLoadProj(latestprojpath);
 	mainWindow->LoadAtlas(atlasdir);
 	mainWindow->LoadSettings(settingspath.toAscii().data());
-	bool s4llink = false;
 	if (argc > 1)
 	{
 		QString qstr(argv[1]);
 		if (qstr.compare(QString("S4Llink")) != 0)
-			mainWindow->loadproj(qstr);
-		else
 		{
-			s4llink = true;
-			if (argc > 2)
-				mainWindow->loadS4Llink(QString(argv[2]));
+			mainWindow->loadproj(qstr);
 		}
-		//mainWindow->loadproj(QString("F:\\applications\\bifurcation\\bifurcation.prj"));xxxa
+		else if (argc > 2)
+		{
+			mainWindow->loadS4Llink(QString(argv[2]));
+		}
 	}
 
 #ifdef SHOWSPLASH
@@ -229,30 +219,7 @@ int main(int argc, char** argv)
 	mainWindow->showMaximized();
 	mainWindow->show();
 
-#ifdef NOSPLASH
-	splash1.finish(mainWindow);
-#endif
+	QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
-	QObject::connect(&ab1, SIGNAL(lastWindowClosed()), &ab1, SLOT(quit()));
-
-	int ok1 = ab1.exec();
-
-	return ok1;
-
-	TissueInfos::InitTissues();
-
-	//bmphandler image6;
-	SlicesHandler h3Ds1;
-
-	QApplication ab2(argc, argv);
-	MainWindow* tbw2 = new MainWindow(
-		&h3Ds1, locationpath, picpath, tmpdir, false, 0, "new window",
-		Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tbw2->show();
-
-	QObject::connect(&ab2, SIGNAL(lastWindowClosed()), &ab2, SLOT(quit()));
-
-	return ab2.exec();
-
-	return 1;
+	return app.exec();
 }
