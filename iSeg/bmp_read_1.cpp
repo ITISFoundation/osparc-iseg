@@ -750,7 +750,7 @@ int bmphandler::CheckBMPDepth(const char* filename)
 		return 0;
 	}
 
-	if (header.bfType != 'MB')
+	if (header.bfType != BF_TYPE)
 	{
 		fclose(fp);
 		return 0;
@@ -802,7 +802,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != BF_TYPE) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
@@ -1046,7 +1046,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != BF_TYPE) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
@@ -1376,7 +1376,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != BF_TYPE) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
@@ -1518,7 +1518,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != BF_TYPE) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
@@ -2877,7 +2877,7 @@ int /* O - 0 = success, -1 = failure */
 	size = sizeof(BITMAPFILEHEADER) + 1064 + bitsize + 2;
 
 	/* Write the file header, bitmap information, and bitmap pixel data... */
-	header.bfType = 'MB'; /* Non-portable... sigh */
+	header.bfType = BF_TYPE; /* Non-portable... sigh */
 	header.bfSize = size;
 	header.bfReserved1 = 0;
 	header.bfReserved2 = 0;
