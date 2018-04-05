@@ -1826,7 +1826,7 @@ void ChannelMixer::NewCenterPreview(QPoint newCenter)
 
 void ChannelMixer::ChangePreview()
 {
-	if ((redFactor != 0 + greenFactor != 0 + blueFactor != 0) > 1)
+	if ((redFactor != 0) + (greenFactor != 0) + (blueFactor != 0) > 1)
 	{
 		buttonRed->setChecked(false);
 		buttonGreen->setChecked(false);

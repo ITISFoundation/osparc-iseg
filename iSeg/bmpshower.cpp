@@ -984,10 +984,12 @@ void bmptissuemarklineshower::init(SlicesHandler* hand3D, bool bmporwork1)
 
 	reload_bits();
 	if (workborder)
+	{
 		if (bmporwork)
 			workborder_changed();
 		else
 			repaint();
+	}
 	show();
 	return;
 }

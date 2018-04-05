@@ -948,6 +948,7 @@ void RTDoseWriter::AdjustVRTypeString(gdcm::VR::VRType& vr, unsigned int vm,
 	case gdcm::VR::UL: break;
 	case gdcm::VR::UN: break;
 	case gdcm::VR::US: break;
+	default: break;
 	}
 
 	if (vm == 1)
