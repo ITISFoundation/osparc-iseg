@@ -100,7 +100,7 @@ int bmpimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
@@ -126,7 +126,7 @@ int pngimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
@@ -152,7 +152,7 @@ int jpgimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
