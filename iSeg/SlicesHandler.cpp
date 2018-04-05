@@ -11891,7 +11891,6 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 					{
 						for (int z = 0; z < offsetsSlices.size(); z++)
 						{
-							// BL: check if this should be int or size_t?
 							size_t neighborSlice = z - ((offsetsSlices.size() - 1) / 2);
 
 							//iterate through neighbors of pixel
@@ -11905,47 +11904,26 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 								tissues_size_t value = tissuesVector[k + neighborSlice][idx];
 								if (value == backgroundID)
 								{
-									for (int y = 0; y < offsetsSlices.size();
-										 y++)
+									for (int y = 0; y < offsetsSlices.size(); y++)
 									{
-										// BL: check if this should be int or size_t?
 										size_t neighborSlice2 = y - ((offsetsSlices.size() - 1) / 2);
 
 										//iterate through neighbors of pixel
 										//if any of these are not
-										for (int m = 0;
-											 m < offsetsSlices[y].size(); m++)
+										for (int m = 0; m < offsetsSlices[y].size(); m++)
 										{
-											int idx2 =
-												idx + offsetsSlices[y][m];
+											int idx2 = idx + offsetsSlices[y][m];
 											assert(idx2 >= 0 && idx2 < area);
-											if (k + neighborSlice +
-														neighborSlice2 >=
-													0 &&
-												k + neighborSlice +
-														neighborSlice2 <
-													dims[2])
+											if (k + neighborSlice + neighborSlice2 < dims[2]) // && k + neighborSlice + neighborSlice2 >= 0 (always true)
 											{
-												tissues_size_t value2 =
-													tissuesVector
-														[k + neighborSlice +
-														 neighborSlice2][idx2];
-												if (value2 != backgroundID &&
-													value2 != skinID)
+												tissues_size_t value2 = tissuesVector[k + neighborSlice + neighborSlice2][idx2];
+												if (value2 != backgroundID && value2 != skinID)
 												{
 													changesToMakeStruct changes;
-													changes.sliceNumber =
-														k + neighborSlice;
-													changes.positionConvert =
-														idx;
-													if (std::find(partialChanges
-																	  .begin(),
-																  partialChanges
-																	  .end(),
-																  changes) ==
-														partialChanges.end())
-														partialChanges
-															.push_back(changes);
+													changes.sliceNumber = k + neighborSlice;
+													changes.positionConvert = idx;
+													if (std::find(partialChanges.begin(), partialChanges.end(), changes) == partialChanges.end())
+														partialChanges.push_back(changes);
 													//image_slices[k+neighborSlice].return_work()[idx]=255.0f;
 													break;
 												}
@@ -11979,14 +11957,17 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 	}
 
 	for (int i = 0; i < partialChangesThreads.size(); i++)
+	{
 		for (int j = 0; j < partialChangesThreads[i].size(); j++)
+		{	
 			if (partialChangesThreads[i][j].sliceNumber != -1)
 			{
 				size_t slice = partialChangesThreads[i][j].sliceNumber;
 				int pos = partialChangesThreads[i][j].positionConvert;
 				image_slices[slice].return_work()[pos] = 255.0f;
 			}
-
+		}
+	}
 	for (int i = dims[2] - 1; i >= 0; i--)
 	{
 		float* bmp1 = image_slices[i].return_bmp();
