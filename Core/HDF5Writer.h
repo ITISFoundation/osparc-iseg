@@ -21,7 +21,7 @@ class iSegCore_API HDF5Writer
 {
 public:
 	typedef unsigned long long size_type;
-	typedef int hid_type;
+	typedef long long hid_type;
 	HDF5Writer();
 	~HDF5Writer();
 
