@@ -149,10 +149,7 @@ private:
 	QDir m_picpath;
 	QDir m_tmppath;
 	SlicesHandler* handler3D;
-	//	bmptissueshower *bmp_show;
 	bmptissuemarklineshower* bmp_show;
-	//	bmptissueshower *work_show;
-	//	bmptissuemarkshower *work_show;//xxxxxxxxxx
 	bmptissuemarklineshower* work_show;
 	QVBoxLayout* vboxtotal;
 	QHBoxLayout* hbox1;

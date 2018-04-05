@@ -144,8 +144,6 @@ int main(int argc, char** argv)
 #ifdef SHOWSPLASH
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
 #endif
-	QString stylesheetpath =
-		stylesheetdir.absFilePath(QString("S4L.stylesheet"));
 	QString locationpath = fileDirectory.absPath();
 	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
 	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
@@ -173,8 +171,7 @@ int main(int argc, char** argv)
 	QString pixmapstr = QString(splashpicpath.toAscii().data());
 	QPixmap pixmap1(pixmapstr);
 
-	QSplashScreen splash1(
-		pixmap1.scaledToHeight(600, Qt::SmoothTransformation));
+	QSplashScreen splash1(pixmap1.scaledToHeight(600, Qt::SmoothTransformation));
 	splash1.show();
 #endif
 	QTime now = QTime::currentTime();
@@ -200,12 +197,7 @@ int main(int argc, char** argv)
 						   Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 	}
 
-	QFile qss(stylesheetpath.toAscii().data());
-	qss.open(QFile::ReadOnly);
-	//mainWindow->setStyleSheet(qss.readAll());
-	cerr << qss.fileName().toStdString() << endl;
 	mainWindow->setStyleSheet("color: white;");
-	qss.close();
 	//mainWindow->setStyleSheet("QDockWidget { color: black; } QDockWidget::title { background: lightgray; padding-left: 5px; padding-top: 3px;  } QDockWidget::close-button, QDockWidget::float-button { background: lightgray; } QMenuBar { background-color: gray; } QMenu::separator { background-color: lightgrey; height: 1px; margin-left: 10px; margin-right: 10px; } QMenu::item:disabled { color: darkgrey; }" );
 
 	QString latestprojpath1;

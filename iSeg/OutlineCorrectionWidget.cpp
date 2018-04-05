@@ -40,6 +40,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 					  "segmentation operation and to correct frequently "
 					  "occurring segmentation "
 					  "deficiencies."));
+	setObjectName("OLC");
 
 	f = 255;
 	activeslice = handler3D->get_activeslice();

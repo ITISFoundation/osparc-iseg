@@ -141,10 +141,21 @@ IF(WIN32)
 	ENDFOREACH()
 ELSE()
 	IF(APPLE)
-		FILE(GLOB ICON_FILES images/*.png images/*.ico)
-		SET_SOURCE_FILES_PROPERTIES(${ICON_FILES}
-			PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/images		
+		# NOTE: Don't include the path in MACOSX_BUNDLE_ICON_FILE -- this is
+		# the property added to Info.plist
+		SET(MACOSX_BUNDLE_ICON_FILE isegicon64.icns)
+
+		# and this part tells CMake where to find and install the file itself
+		SET_SOURCE_FILES_PROPERTIES(images/isegicon64.icns
+			PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"		
 		)
+
+		# install other icons
+		FILE(GLOB PNG_FILES images/*.png)
+		SET_SOURCE_FILES_PROPERTIES(${ICON_FILES}
+			PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS/images"		
+		)
+		SET(ICON_FILES ${PNG_FILES} images/isegicon64.icns)
 	ENDIF()
 ENDIF()
 
