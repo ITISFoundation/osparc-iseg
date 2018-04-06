@@ -10,7 +10,7 @@
 #include "Precompiled.h"
 
 #include "bmp_read_1.h"
-#include "levelset.h"
+#include "Levelset.h"
 
 using namespace std;
 using namespace iseg;

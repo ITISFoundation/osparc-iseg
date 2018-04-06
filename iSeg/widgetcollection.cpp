@@ -2431,8 +2431,8 @@ TissueHierarchyWidget::TissueHierarchyWidget(TissueTreeWidget* tissueTree,
 	: QWidget(parent, wFlags), tissueTreeWidget(tissueTree)
 {
 	hboxOverall = new Q3HBoxLayout(this);
-	vboxOverall = new Q3VBoxLayout(this);
-	vboxHierarchyButtons = new Q3VBoxLayout(this);
+	vboxOverall = new Q3VBoxLayout();
+	vboxHierarchyButtons = new Q3VBoxLayout();
 	hboxOverall->addLayout(vboxOverall);
 
 	// Hierarchy selection combo box
@@ -2659,7 +2659,7 @@ bits_stack::bits_stack(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	bits_names = new QListWidget(this);
 	hbox1 = new Q3HBoxLayout(this);
 	hbox1->addWidget(bits_names);
-	vbox1 = new Q3VBoxLayout(this);
+	vbox1 = new Q3VBoxLayout(hbox1);
 	pushwork = new QPushButton("Copy Target...", this);
 	pushbmp = new QPushButton("Copy Source...", this);
 	pushtissue = new QPushButton("Copy Tissue...", this);
@@ -2678,7 +2678,6 @@ bits_stack::bits_stack(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	vbox1->addWidget(deletebtn);
 	vbox1->addWidget(saveitem);
 	vbox1->addWidget(loaditem);
-	hbox1->addLayout(vbox1);
 
 	bits_names->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	bits_names->setDragEnabled(true);
@@ -3204,9 +3203,9 @@ extoverlay_widget::extoverlay_widget(SlicesHandler* hand3D, QWidget* parent,
 	}
 
 	hboxOverall = new Q3HBoxLayout(this);
-	vboxOverall = new Q3VBoxLayout(this);
-	hboxAlpha = new Q3HBoxLayout(this);
-	hboxDisplaySrcTgt = new Q3HBoxLayout(this);
+	vboxOverall = new Q3VBoxLayout();
+	hboxAlpha = new Q3HBoxLayout();
+	hboxDisplaySrcTgt = new Q3HBoxLayout();
 	hboxOverall->addLayout(vboxOverall);
 
 	// Dataset selection combo box
@@ -3429,7 +3428,7 @@ MultiDataset_widget::MultiDataset_widget(SlicesHandler* hand3D, QWidget* parent,
 	: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
 {
 	hboxOverall = new Q3HBoxLayout(this);
-	vboxOverall = new Q3VBoxLayout(this);
+	vboxOverall = new Q3VBoxLayout();
 	hboxOverall->addLayout(vboxOverall);
 
 	// Add dataset button
@@ -3438,7 +3437,7 @@ MultiDataset_widget::MultiDataset_widget(SlicesHandler* hand3D, QWidget* parent,
 
 	// Dataset selection group box
 	m_DatasetsGroupBox = new QGroupBox("- Available datasets -");
-	m_VboxDatasets = new Q3VBoxLayout(this);
+	m_VboxDatasets = new Q3VBoxLayout(m_DatasetsGroupBox);
 	m_VboxDatasets->addStretch(1);
 	m_DatasetsGroupBox->setLayout(m_VboxDatasets);
 	vboxOverall->addWidget(m_DatasetsGroupBox);

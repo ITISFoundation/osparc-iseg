@@ -17,8 +17,8 @@ using namespace std;
 using namespace iseg;
 
 bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
-						  int nz, char* comment, int commentlength,
-						  char* varname, int varnamelength, bool complex)
+						  int nz, const char* comment, int commentlength,
+						  const char* varname, int varnamelength, bool complex)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -117,8 +117,8 @@ bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
 }
 
 bool matexport::print_matslices(const char* filename, float** matrix, int nx,
-								int ny, int nz, char* comment,
-								int commentlength, char* varname,
+								int ny, int nz, const char* comment,
+								int commentlength, const char* varname,
 								int varnamelength, bool complex)
 {
 	FILE* fp;
@@ -221,8 +221,8 @@ bool matexport::print_matslices(const char* filename, float** matrix, int nx,
 }
 
 bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
-						  int ny, int nz, char* comment, int commentlength,
-						  char* varname, int varnamelength)
+						  int ny, int nz, const char* comment, int commentlength,
+						  const char* varname, int varnamelength)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -311,8 +311,8 @@ bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
 	return true;
 }
 bool matexport::print_matslices(const char* filename, unsigned char** matrix,
-								int nx, int ny, int nz, char* comment,
-								int commentlength, char* varname,
+								int nx, int ny, int nz, const char* comment,
+								int commentlength, const char* varname,
 								int varnamelength)
 {
 	FILE* fp;
@@ -520,8 +520,8 @@ bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
 	return true;
 }
 bool matexport::print_matslices(const char* filename, tissues_size_t** matrix,
-								int nx, int ny, int nz, char* comment,
-								int commentlength, char* varname,
+								int nx, int ny, int nz, const char* comment,
+								int commentlength, const char* varname,
 								int varnamelength)
 {
 	FILE* fp;

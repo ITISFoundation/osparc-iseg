@@ -43,7 +43,7 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 	sl_h2 = new QSpinBox(0, 50, 1, hbox2);
 	sl_h2->setValue(1);
 	txt_h3 = new QLabel("Multiplier(*10-1) ", hbox3);
-	sl_h3 = new QSpinBox(0, 100, 0.1, hbox3);
+	sl_h3 = new QSpinBox(0, 100, 0, hbox3); // BL: todo this is wrong
 	sl_h3->setValue(25);
 	txt_h4 = new QLabel("Neighborhoodradius: ", hbox4);
 	sl_h4 = new QSpinBox(0, 10, 1, hbox4);

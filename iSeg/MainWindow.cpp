@@ -100,7 +100,7 @@ int bmpimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
@@ -126,7 +126,7 @@ int pngimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
@@ -152,7 +152,7 @@ int jpgimgnr(QString* s)
 		base *= 10;
 		pos--;
 	}
-	if (pos = 0 && (cdigit = s->at(0)).isDigit())
+	if (pos == 0 && (cdigit = s->at(0)).isDigit())
 		result += cdigit.digitValue() * base;
 
 	return result;
@@ -366,6 +366,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 					   Qt::WindowFlags wFlags, char** argv)
 	: QMainWindow(parent, name, wFlags)
 {
+	setObjectName("MainWindow");
+
 	undoStarted = false;
 	setContentsMargins(9, 4, 9, 4);
 	m_picpath = picpath;
@@ -1101,6 +1103,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 
 	QDockWidget* zoomdock = new QDockWidget(tr("Zoom"), this);
 	style_dockwidget(zoomdock);
+	zoomdock->setObjectName("Zoom");
 	zoomdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	zoomdock->setWidget(zoom_widget);
 	addDockWidget(Qt::RightDockWidgetArea, zoomdock);
@@ -1646,7 +1649,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 					 SLOT(setBmpContentsPos(int, int)));
 	QObject::connect(bmp_show, SIGNAL(setcenter_sign(int, int)), bmp_scroller,
 					 SLOT(center(int, int)));
-	QObject::connect(work_show, SIGNAL(setcenter_sign(int, int)), work_show,
+	QObject::connect(work_show, SIGNAL(setcenter_sign(int, int)), work_scroller,
 					 SLOT(center(int, int)));
 	tomove_scroller = true;
 
@@ -1670,10 +1673,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, QString locationstring,
 	QObject::connect(
 		this, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 		SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-		this, SIGNAL(end_datachange(QRect, QWidget*, iseg::EndUndoAction)),
-		this,
-		SLOT(handle_end_datachange(QRect, QWidget*, iseg::EndUndoAction)));
 	QObject::connect(
 		threshold_widget,
 		SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
@@ -7588,6 +7587,8 @@ void MainWindow::tab_changed(QWidget* qw)
 	//	int index=methodTab->currentPageIndex();
 	if (qw != tab_old)
 	{
+		std::cerr << "Starting widget: " << qw->metaObject()->className() << std::endl;
+
 		/*		if(qw==threshold_widget||qw==wshed_widget||qw==hyst_widget||qw==iftrg_widget||
 				 qw==FMF_widget||qw==OutlineCorrect_widget){
 					bmp_show->set_workbordervisible(true);

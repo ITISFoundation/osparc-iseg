@@ -36,7 +36,7 @@ static std::string ReadNameFromLine(const std::string& line,
 									const char separator)
 {
 	std::string result;
-	unsigned int pos = (unsigned int)line.find_last_of(separator);
+	auto pos = line.find_last_of(separator);
 	if (pos == std::string::npos)
 	{
 		return line;

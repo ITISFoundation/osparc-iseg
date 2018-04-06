@@ -26,7 +26,7 @@
 #include "ChannelExtractor.h"
 #include "DicomReader.h"
 #include "TissueInfos.h"
-#include "levelset.h"
+#include "Levelset.h"
 
 #include <vtkBMPWriter.h>
 #include <vtkImageData.h>
@@ -57,6 +57,9 @@ using namespace iseg;
 #	define M_PI 3.14159
 #endif
 
+#ifndef ID_BMP
+#define ID_BMP 0x4D42 /* "BM" */
+#endif
 #ifndef WIN32
 typedef struct /**** BMP file header structure ****/
 {
@@ -67,7 +70,7 @@ typedef struct /**** BMP file header structure ****/
 	unsigned int bfOffBits;		/* Offset to bitmap data */
 } BITMAPFILEHEADER;
 
-#	define BF_TYPE 0x4D42 /* "MB" */
+#	
 
 typedef struct /**** BMP file info structure ****/
 {
@@ -742,18 +745,18 @@ int bmphandler::CheckBMPDepth(const char* filename)
 	BITMAPFILEHEADER header;
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
-	if (header.bfType != 'MB')
+	if (header.bfType != ID_BMP)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	int infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
@@ -762,14 +765,14 @@ int bmphandler::CheckBMPDepth(const char* filename)
 	if ((bmpinfo = (BITMAPINFO*)malloc(infosize)) == NULL)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (fread(bmpinfo, 1, infosize, fp) < (unsigned int)infosize)
 	{
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	return bmpinfo->bmiHeader.biBitCount;
@@ -792,21 +795,21 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	/* Read the file header and any following bitmap information... */
 	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1)
 	{
 		/* Couldn't read the file header - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != ID_BMP) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	int infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
@@ -817,7 +820,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 	{
 		/* Couldn't allocate memory for bitmap info - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (fread(bmpinfo, 1, infosize, fp) < (unsigned int)infosize)
@@ -830,7 +833,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		//       free(*info);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	/* Now that we have all the header info read in, allocate memory for *
@@ -841,7 +844,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		//		free(*info);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	width = (short unsigned)bmpinfo->bmiHeader.biWidth;
@@ -882,7 +885,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -891,7 +894,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -900,7 +903,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -916,7 +919,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -925,7 +928,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -934,7 +937,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -950,7 +953,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		//		free(bits);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	//int result = fseek(fp,header.bfOffBits - sizeof(BITMAPFILEHEADER) - 40, SEEK_CUR);
@@ -964,7 +967,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			free(bits_tmp);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 		bitsize /= (bmpinfo->bmiHeader.biBitCount / 8);
 	}
@@ -978,7 +981,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 			free(bits_tmp);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 	}
 
@@ -1036,21 +1039,21 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	/* Read the file header and any following bitmap information... */
 	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1)
 	{
 		/* Couldn't read the file header - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != ID_BMP) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	int infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
@@ -1062,7 +1065,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 	{
 		/* Couldn't allocate memory for bitmap info - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (fread(bmpinfo, 1, infosize, fp) < (unsigned int)infosize)
@@ -1074,7 +1077,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		//       free(*info);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	/* Now that we have all the header info read in, allocate memory for *
@@ -1086,7 +1089,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		//		free(*info);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	w = (short unsigned)bmpinfo->bmiHeader.biWidth;
@@ -1126,7 +1129,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -1135,7 +1138,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -1144,7 +1147,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1160,7 +1163,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -1169,7 +1172,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -1178,7 +1181,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			//       free(*info);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1194,7 +1197,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		//		free(bits);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 #ifdef _MSC_VER
@@ -1215,7 +1218,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		free(bits_tmp);
 		fclose(fp);
 		free(bmpinfo);
-		return (NULL);
+		return 0;
 	}
 
 	for (unsigned short n = 0; n < dy; n++)
@@ -1233,7 +1236,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			free(bits_tmp);
 			fclose(fp);
 			free(bmpinfo);
-			return (NULL);
+			return 0;
 		}
 		if (n + 1 != dy)
 		{
@@ -1256,7 +1259,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 				free(bits_tmp);
 				fclose(fp);
 				free(bmpinfo);
-				return (NULL);
+				return 0;
 			}
 		}
 	}
@@ -1358,7 +1361,7 @@ int bmphandler::ConvertPNGImageTo8BitBMP(const char* filename,
 int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
 	unsigned int bitsize;	/* Size of bitmap */
@@ -1366,26 +1369,26 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	/* Read the file header and any following bitmap information... */
 	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1)
 	{
 		/* Couldn't read the file header - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != ID_BMP) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	/*	if(infosize != header.bfOffBits - sizeof(BITMAPFILEHEADER)){
 		fclose(fp);
-        return (NULL);
+        return 0;
 	}*/
 
 	int infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
@@ -1394,7 +1397,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 	if ((bmpinfo = (BITMAPINFO*)malloc(infosize)) == NULL)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 	//	BITMAPINFO *bmpinfo=(BITMAPINFO* )malloc(40);
 	if (fread(bmpinfo, 1, infosize, fp) < (unsigned int)infosize)
@@ -1406,7 +1409,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		//       free(*info);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	/* Now that we have all the header info read in, allocate memory for *
@@ -1418,7 +1421,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		//		free(*info);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (width != (short unsigned)bmpinfo->bmiHeader.biWidth ||
@@ -1426,7 +1429,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 	{
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if ((bitsize = bmpinfo->bmiHeader.biSizeImage) == 0)
@@ -1444,7 +1447,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		//		free(bits);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	//int result = fseek(fp,header.bfOffBits - sizeof(BITMAPFILEHEADER) - 40, SEEK_CUR);
@@ -1457,7 +1460,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		free(bmpinfo);
 		free(bits_tmp);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (bitsize == area)
@@ -1499,7 +1502,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
 	unsigned int bitsize;	/* Size of bitmap */
@@ -1508,26 +1511,26 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	/* Read the file header and any following bitmap information... */
 	if (fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) < 1)
 	{
 		/* Couldn't read the file header - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
-	if (header.bfType != 'MB') /* Check for BM reversed... */
+	if (header.bfType != ID_BMP) /* Check for BM reversed... */
 	{
 		/* Not a bitmap file - return NULL... */
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	/*	if(infosize != header.bfOffBits - sizeof(BITMAPFILEHEADER)){
 		fclose(fp);
-        return (NULL);
+        return 0;
 	}*/
 	int infosize = header.bfOffBits - sizeof(BITMAPFILEHEADER);
 
@@ -1535,7 +1538,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 	if ((bmpinfo = (BITMAPINFO*)malloc(infosize)) == NULL)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 	//	BITMAPINFO *bmpinfo=(BITMAPINFO *)malloc(40);
 	if (fread(bmpinfo, 1, infosize, fp) < (unsigned int)infosize)
@@ -1547,7 +1550,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		//       free(*info);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	h = (unsigned short)bmpinfo->bmiHeader.biHeight;
@@ -1564,7 +1567,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		//		free(*info);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	bitsize = area;
@@ -1576,7 +1579,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		//		free(bits);
 		free(bmpinfo);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	unsigned incr = 4 - w % 4;
@@ -1598,7 +1601,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		free(bmpinfo);
 		free(bits_tmp);
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	for (unsigned short n = 0; n < height; n++)
@@ -1611,7 +1614,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 			free(bmpinfo);
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 		if (n + 1 != height)
 		{
@@ -1628,7 +1631,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 				free(bmpinfo);
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 	}
@@ -1662,7 +1665,7 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 	QImage image(filename);
 	if (image.isNull())
 	{
-		return (NULL);
+		return 0;
 	}
 	width = (short unsigned)image.width();
 	height = (short unsigned)image.height();
@@ -1692,19 +1695,19 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 		if ((bmp_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1717,19 +1720,19 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 		if ((bmp_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1741,14 +1744,14 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 	if ((bits_tmp = (unsigned char*)malloc(bitsize)) == NULL)
 	{
 		/* Couldn't allocate memory - return NULL! */
-		return (NULL);
+		return 0;
 	}
 
 	int result = ConvertPNGImageTo8BitBMP(filename, bits_tmp);
 	if (result == 0)
 	{
 		free(bits_tmp);
-		return (NULL);
+		return 0;
 	}
 
 	if (bitsize == newarea)
@@ -1796,7 +1799,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 	unsigned newarea = height * (unsigned int)width;
 
 	if (newarea == 0)
-		return (NULL);
+		return 0;
 
 	if (area != newarea)
 	{
@@ -1822,21 +1825,21 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1850,21 +1853,21 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1939,21 +1942,21 @@ bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -1967,21 +1970,21 @@ bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -2015,7 +2018,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
 bool bmphandler::ReloadArray(float* bits)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	for (unsigned int i = 0; i < area; i++)
 	{
@@ -2030,11 +2033,11 @@ bool bmphandler::ReloadArray(float* bits, unsigned short w1, unsigned short h1,
 							 Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	if (width + p.px > w1 || height + p.py > h1)
 	{
-		return (NULL);
+		return 0;
 	}
 
 	unsigned int pos1;
@@ -2059,7 +2062,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 	DicomReader dcmread;
 
 	if (!dcmread.opendicom(filename))
-		return (NULL);
+		return 0;
 
 	width = dcmread.get_width();
 	height = dcmread.get_height();
@@ -2067,7 +2070,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 	unsigned newarea = height * (unsigned int)width;
 
 	if (newarea == 0)
-		return (NULL);
+		return 0;
 
 	if (area != newarea)
 	{
@@ -2094,7 +2097,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -2102,7 +2105,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -2110,7 +2113,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -2125,7 +2128,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -2133,7 +2136,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -2141,7 +2144,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -2155,7 +2158,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 		if (!dcmread.load_pictureGDCM(filename, bmp_bits))
 		{
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 	}
 
@@ -2232,7 +2235,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -2240,7 +2243,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -2248,7 +2251,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -2263,7 +2266,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -2271,7 +2274,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -2279,7 +2282,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			dcmread.closedicom();
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -2310,7 +2313,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 bool bmphandler::ReloadDICOM(const char* filename)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 	//FILE             *fp;          /* Open file pointer */
 	DicomReader dcmread;
 
@@ -2319,7 +2322,7 @@ bool bmphandler::ReloadDICOM(const char* filename)
 	if (width != dcmread.get_width() || height != dcmread.get_height())
 	{
 		dcmread.closedicom();
-		return (NULL);
+		return 0;
 	}
 
 	dcmread.load_picture(bmp_bits);
@@ -2337,7 +2340,7 @@ bool bmphandler::ReloadDICOM(const char* filename)
 bool bmphandler::ReloadDICOM(const char* filename, Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 	//FILE             *fp;          /* Open file pointer */
 	DicomReader dcmread;
 
@@ -2347,7 +2350,7 @@ bool bmphandler::ReloadDICOM(const char* filename, Point p)
 		height + p.py > dcmread.get_height())
 	{
 		dcmread.closedicom();
-		return (NULL);
+		return 0;
 	}
 
 	dcmread.load_picture(bmp_bits, p, width, height);
@@ -2877,7 +2880,7 @@ int /* O - 0 = success, -1 = failure */
 	size = sizeof(BITMAPFILEHEADER) + 1064 + bitsize + 2;
 
 	/* Write the file header, bitmap information, and bitmap pixel data... */
-	header.bfType = 'MB'; /* Non-portable... sigh */
+	header.bfType = ID_BMP; /* Non-portable... sigh */
 	header.bfSize = size;
 	header.bfReserved1 = 0;
 	header.bfReserved2 = 0;
@@ -3195,7 +3198,7 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 	void* data = avw::ReadData(filename, slicenr, w, h, type);
 	if (data == NULL)
 	{
-		return NULL;
+		return 0;
 	}
 
 	width = w;
@@ -3227,19 +3230,19 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 		if ((bmp_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3253,19 +3256,19 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 		if ((bmp_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
 		{
 			free(data);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3321,7 +3324,7 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 	}
 	else
 	{
-		return (NULL);
+		return 0;
 	}
 
 	clear_marks();
@@ -3339,7 +3342,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	width = w;
 	height = h;
@@ -3373,7 +3376,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3382,7 +3385,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3391,7 +3394,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3400,7 +3403,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 		clear_tissue(0);
 	}
@@ -3414,7 +3417,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3423,7 +3426,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3432,7 +3435,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			//       free(*info);
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3441,7 +3444,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 		clear_tissue(0);
 	}
@@ -3461,7 +3464,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		// int result = fseek(fp, (size_t)(bitsize)*slicenr, SEEK_SET);
@@ -3481,7 +3484,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				 << endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, bitsize, fp) < area)
@@ -3493,7 +3496,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				 << endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned int i = 0; i < bitsize; i++)
@@ -3514,7 +3517,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		// int result = fseek(fp, (size_t)(bitsize)*2*slicenr, SEEK_SET);
@@ -3534,7 +3537,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				 << endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, (size_t)(bitsize)*2, fp) < area * 2)
@@ -3546,7 +3549,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				 << endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned int i = 0; i < bitsize; i++)
@@ -3563,7 +3566,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		sliceprovide->take_back(help_bits);*/
 		cerr << "bmphandler::ReadRaw() : error, unsupported depth..." << endl;
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -3583,7 +3586,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	width = dx;
 	height = dy;
@@ -3617,7 +3620,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3625,7 +3628,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3633,7 +3636,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3649,7 +3652,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3657,7 +3660,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3665,7 +3668,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3687,7 +3690,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			free(work_bits);
 			free(help_bits);*/
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -3704,7 +3707,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			free(help_bits);*/
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned short n = 0; n < dy; n++)
@@ -3717,7 +3720,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				free(bits_tmp);
 				fclose(fp);
 
-				return (NULL);
+				return 0;
 			}
 #ifdef _MSC_VER
 			result = _fseeki64(fp, (__int64)w - dx, SEEK_CUR);
@@ -3731,7 +3734,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				free(help_bits);*/
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -3752,7 +3755,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			free(work_bits);
 			free(help_bits);*/
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -3771,7 +3774,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			free(help_bits);*/
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned short n = 0; n < dy; n++)
@@ -3784,7 +3787,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				free(help_bits);*/
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 #ifdef _MSC_VER
 			result = _fseeki64(fp, (__int64)(w - dx) * 2, SEEK_CUR);
@@ -3798,7 +3801,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				free(help_bits);*/
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -3815,7 +3818,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		free(work_bits);
 		free(help_bits);*/
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -3833,7 +3836,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	width = w;
 	height = h;
@@ -3866,7 +3869,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3874,7 +3877,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3882,7 +3885,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3898,7 +3901,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -3906,7 +3909,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -3914,7 +3917,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -3937,7 +3940,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		sliceprovide->take_back(work_bits);
 		sliceprovide->take_back(help_bits);*/
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (fread(bmp_bits, 1, bitsize * sizeof(float), fp) < area * sizeof(float))
@@ -3946,7 +3949,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		sliceprovide->take_back(work_bits);
 		sliceprovide->take_back(help_bits);*/
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	for (unsigned int i = 0; i < bitsize; i++)
@@ -3970,7 +3973,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	width = dx;
 	height = dy;
@@ -4004,7 +4007,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -4012,7 +4015,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -4020,7 +4023,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -4036,7 +4039,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((work_bits = sliceprovide->give_me()) == NULL)
@@ -4044,7 +4047,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if ((help_bits = sliceprovide->give_me()) == NULL)
@@ -4052,7 +4055,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			/* Couldn't allocate memory - return NULL! */
 			//       free(*info);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		tissuelayers.push_back(
@@ -4078,7 +4081,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		free(work_bits);
 		free(help_bits);*/
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	for (unsigned short n = 0; n < dy; n++)
@@ -4090,7 +4093,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			free(work_bits);
 			free(help_bits);*/
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 #ifdef _MSC_VER
 		result = _fseeki64(fp, (__int64)(w - dx) * sizeof(float), SEEK_CUR);
@@ -4103,7 +4106,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 			free(work_bits);
 			free(help_bits);*/
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 	}
 
@@ -4124,13 +4127,13 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 						  unsigned slicenr)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area;
 
@@ -4143,7 +4146,7 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4155,14 +4158,14 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, bitsize, fp) < area)
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned int i = 0; i < bitsize; i++)
@@ -4179,7 +4182,7 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4191,14 +4194,14 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, bitsize * 2, fp) < area * 2)
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned int i = 0; i < bitsize; i++)
@@ -4211,7 +4214,7 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 	else
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -4224,13 +4227,13 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 						  Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area;
 	unsigned long area2 = (unsigned long)(w)*h;
@@ -4244,7 +4247,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4258,7 +4261,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned short n = 0; n < height; n++)
@@ -4268,7 +4271,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 #ifdef _MSC_VER
 			result = _fseeki64(fp, (__int64)w - width, SEEK_CUR);
@@ -4279,7 +4282,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -4297,7 +4300,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4313,7 +4316,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (unsigned short n = 0; n < height; n++)
@@ -4323,7 +4326,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 #ifdef _MSC_VER
 			result = _fseeki64(fp, ((__int64)(w)-width) * 2, SEEK_CUR);
@@ -4334,7 +4337,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -4348,7 +4351,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 	else
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -4359,13 +4362,13 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 int bmphandler::ReloadRawFloat(const char* filename, unsigned slicenr)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area;
 
@@ -4379,13 +4382,13 @@ int bmphandler::ReloadRawFloat(const char* filename, unsigned slicenr)
 	if (result)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	if (fread(bmp_bits, 1, bitsize * sizeof(float), fp) < area * sizeof(float))
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -4399,7 +4402,7 @@ float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
 	FILE* fp; /* Open file pointer */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return nullptr;
 
 #ifdef _MSC_VER
 	int result =
@@ -4410,7 +4413,7 @@ float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
 	if (result)
 	{
 		fclose(fp);
-		return (NULL);
+		return nullptr;
 	}
 
 	float* bits_red;
@@ -4418,13 +4421,13 @@ float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
 	if ((bits_red = (float*)malloc(sizeof(float) * area)) == NULL)
 	{
 		fclose(fp);
-		return (NULL);
+		return nullptr;
 	}
 
 	if (fread(bits_red, 1, area * sizeof(float), fp) < area * sizeof(float))
 	{
 		fclose(fp);
-		return (NULL);
+		return nullptr;
 	}
 
 	fclose(fp);
@@ -4435,13 +4438,13 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 							   short unsigned h, unsigned slicenr, Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area;
 	unsigned long area2 = (unsigned long)(w)*h;
@@ -4459,7 +4462,7 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 	if (result)
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	for (unsigned short n = 0; n < height; n++)
@@ -4469,7 +4472,7 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 								  fp) < sizeof(float) * width)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 #ifdef _MSC_VER
 		result = _fseeki64(fp, (__int64)(w - width) * sizeof(float), SEEK_CUR);
@@ -4479,7 +4482,7 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 		if (result)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 	}
 
@@ -4492,13 +4495,13 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 								 unsigned slicenr)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap stack */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area * tissuelayers.size();
 
@@ -4511,7 +4514,7 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4523,14 +4526,14 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, bitsize, fp) < area)
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
@@ -4551,7 +4554,7 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4563,14 +4566,14 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, bitsize * 2, fp) < area * 2)
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
@@ -4587,7 +4590,7 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 	else
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -4599,13 +4602,13 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 								 unsigned slicenr, Point p)
 {
 	if (!loaded)
-		return (NULL);
+		return 0;
 
 	FILE* fp;			  /* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap stack */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	bitsize = area * tissuelayers.size();
 	unsigned long area2 = (unsigned long)(w)*h;
@@ -4619,7 +4622,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4637,7 +4640,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
@@ -4649,7 +4652,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 				{
 					free(bits_tmp);
 					fclose(fp);
-					return (NULL);
+					return 0;
 				}
 #ifdef _MSC_VER
 				result = _fseeki64(fp, (__int64)(w - width), SEEK_CUR);
@@ -4660,7 +4663,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 				{
 					free(bits_tmp);
 					fclose(fp);
-					return (NULL);
+					return 0;
 				}
 			}
 #ifdef _MSC_VER
@@ -4672,7 +4675,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -4694,7 +4697,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == NULL)
 		{
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 #ifdef _MSC_VER
@@ -4714,7 +4717,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 		{
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
@@ -4726,7 +4729,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 				{
 					free(bits_tmp);
 					fclose(fp);
-					return (NULL);
+					return 0;
 				}
 #ifdef _MSC_VER
 				result = _fseeki64(fp, (__int64)(w - width) * 2, SEEK_CUR);
@@ -4737,7 +4740,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 				{
 					free(bits_tmp);
 					fclose(fp);
-					return (NULL);
+					return 0;
 				}
 			}
 #ifdef _MSC_VER
@@ -4749,7 +4752,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 			{
 				free(bits_tmp);
 				fclose(fp);
-				return (NULL);
+				return 0;
 			}
 		}
 
@@ -4767,7 +4770,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 	else
 	{
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -7512,11 +7515,12 @@ void bmphandler::zero_crossings(
 		for (unsigned short j = 0; j < width; j++)
 		{
 			if (work_bits[i1] * work_bits[i1 + width] <= 0)
+			{
 				if (work_bits[i1] > 0)
 					results[i1 + width] = -1;
 				else if (work_bits[i1 + width] > 0)
 					results[i1] = -1;
-
+			}
 			i1++;
 		}
 	}
@@ -7528,11 +7532,12 @@ void bmphandler::zero_crossings(
 		for (unsigned short j = 0; j < (width - 1); j++)
 		{
 			if (work_bits[i1] * work_bits[i1 + 1] <= 0)
+			{
 				if (work_bits[i1] > 0)
 					results[i1 + 1] = -1;
 				else if (work_bits[i1 + 1] > 0)
 					results[i1] = -1;
-
+			}
 			i1++;
 		}
 		i1++;
@@ -7547,17 +7552,19 @@ void bmphandler::zero_crossings(
 			for (unsigned short j = 0; j < (width - 1); j++)
 			{
 				if (work_bits[i1] * work_bits[i1 + width + 1] <= 0)
+				{
 					if (work_bits[i1] > 0)
 						results[i1 + width + 1] = -1;
 					else if (work_bits[i1 + width + 1] > 0)
 						results[i1] = -1;
-
+				}
 				if (work_bits[i1 + 1] * work_bits[i1 + width] <= 0)
+				{
 					if (work_bits[i1 + 1] > 0)
 						results[i1 + width] = -1;
 					else if (work_bits[i1 + width] > 0)
 						results[i1 + 1] = -1;
-
+				}
 				i1++;
 			}
 			i1++;
@@ -7588,11 +7595,12 @@ void bmphandler::zero_crossings(
 		{
 			if (work_bits[i1] * work_bits[i1 + width] < 0 &&
 				abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+			{
 				if (work_bits[i1] > 0)
 					results[i1] = -1;
 				else
 					results[i1 + width] = -1;
-
+			}
 			i1++;
 		}
 	}
@@ -7605,11 +7613,12 @@ void bmphandler::zero_crossings(
 		{
 			if (work_bits[i1] * work_bits[i1 + 1] < 0 &&
 				abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+			{
 				if (work_bits[i1] > 0)
 					results[i1] = -1;
 				else
 					results[i1 + 1] = -1;
-
+			}
 			i1++;
 		}
 		i1++;
@@ -7625,18 +7634,20 @@ void bmphandler::zero_crossings(
 			{
 				if (work_bits[i1] * work_bits[i1 + width + 1] < 0 &&
 					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+				{
 					if (work_bits[i1] > 0)
 						results[i1] = -1;
 					else
 						results[i1 + width + 1] = -1;
-
+				}
 				if (work_bits[i1 + 1] * work_bits[i1 + width] < 0 &&
 					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+				{
 					if (work_bits[i1 + 1] > 0)
 						results[i1 + 1] = -1;
 					else
 						results[i1 + width] = -1;
-
+				}
 				i1++;
 			}
 			i1++;
@@ -17292,11 +17303,11 @@ void bmphandler::adaptwork2bmp(float f)
 				{
 					bool found = false;
 					size_t j = newline.size() - 1;
-					while (j > 0 && !found)
+					for (; j > 0 && !found; --j) // BL: fixed unsequenced modification and access to 'j' [-Wunsequenced]
 					{
-						if (newlinex[j] != newlinex[--j])
+						if (newlinex[j] != newlinex[j-1])
 						{
-							forward = newlinex[j + 1] > newlinex[j];
+							forward = newlinex[j] > newlinex[j - 1];
 							found = true;
 						}
 					}

@@ -889,7 +889,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 	int bitsize = area; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
-		return (NULL);
+		return 0;
 
 	unsigned bytedepth = (bitdepth + 7) / 8;
 
@@ -900,7 +900,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 		{
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		// int result = fseek(fp, (size_t)(bitsize)*slicenr, SEEK_SET);
@@ -920,7 +920,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 				<< endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		// Move to slice
@@ -937,7 +937,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 				<< endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (int i = 0; i < bitsize; i++)
@@ -956,7 +956,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 			cerr << "bmphandler::ReadRawOverlay() : error, allocation failed"
 				 << endl;
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		// int result = fseek(fp, (size_t)(bitsize)*2*slicenr, SEEK_SET);
@@ -974,7 +974,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 				<< endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		if (fread(bits_tmp, 1, (size_t)(bitsize)*2, fp) < area * 2)
@@ -984,7 +984,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 				<< endl;
 			free(bits_tmp);
 			fclose(fp);
-			return (NULL);
+			return 0;
 		}
 
 		for (int i = 0; i < bitsize; i++)
@@ -999,7 +999,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 		cerr << "bmphandler::ReadRawOverlay() : error, unsupported depth..."
 			 << endl;
 		fclose(fp);
-		return (NULL);
+		return 0;
 	}
 
 	fclose(fp);
@@ -11891,8 +11891,7 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 					{
 						for (int z = 0; z < offsetsSlices.size(); z++)
 						{
-							size_t neighborSlice =
-								z - ((offsetsSlices.size() - 1) / 2);
+							size_t neighborSlice = z - ((offsetsSlices.size() - 1) / 2);
 
 							//iterate through neighbors of pixel
 							//if any of these are not
@@ -11902,52 +11901,29 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 								assert(idx >= 0 && idx < area);
 								p.px = i;
 								p.py = j;
-								tissues_size_t value =
-									tissuesVector[k + neighborSlice][idx];
+								tissues_size_t value = tissuesVector[k + neighborSlice][idx];
 								if (value == backgroundID)
 								{
-									for (int y = 0; y < offsetsSlices.size();
-										 y++)
+									for (int y = 0; y < offsetsSlices.size(); y++)
 									{
-										size_t neighborSlice2 =
-											y -
-											((offsetsSlices.size() - 1) / 2);
+										size_t neighborSlice2 = y - ((offsetsSlices.size() - 1) / 2);
 
 										//iterate through neighbors of pixel
 										//if any of these are not
-										for (int m = 0;
-											 m < offsetsSlices[y].size(); m++)
+										for (int m = 0; m < offsetsSlices[y].size(); m++)
 										{
-											int idx2 =
-												idx + offsetsSlices[y][m];
+											int idx2 = idx + offsetsSlices[y][m];
 											assert(idx2 >= 0 && idx2 < area);
-											if (k + neighborSlice +
-														neighborSlice2 >=
-													0 &&
-												k + neighborSlice +
-														neighborSlice2 <
-													dims[2])
+											if (k + neighborSlice + neighborSlice2 < dims[2]) // && k + neighborSlice + neighborSlice2 >= 0 (always true)
 											{
-												tissues_size_t value2 =
-													tissuesVector
-														[k + neighborSlice +
-														 neighborSlice2][idx2];
-												if (value2 != backgroundID &&
-													value2 != skinID)
+												tissues_size_t value2 = tissuesVector[k + neighborSlice + neighborSlice2][idx2];
+												if (value2 != backgroundID && value2 != skinID)
 												{
 													changesToMakeStruct changes;
-													changes.sliceNumber =
-														k + neighborSlice;
-													changes.positionConvert =
-														idx;
-													if (std::find(partialChanges
-																	  .begin(),
-																  partialChanges
-																	  .end(),
-																  changes) ==
-														partialChanges.end())
-														partialChanges
-															.push_back(changes);
+													changes.sliceNumber = k + neighborSlice;
+													changes.positionConvert = idx;
+													if (std::find(partialChanges.begin(), partialChanges.end(), changes) == partialChanges.end())
+														partialChanges.push_back(changes);
 													//image_slices[k+neighborSlice].return_work()[idx]=255.0f;
 													break;
 												}
@@ -11981,14 +11957,17 @@ void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
 	}
 
 	for (int i = 0; i < partialChangesThreads.size(); i++)
+	{
 		for (int j = 0; j < partialChangesThreads[i].size(); j++)
+		{	
 			if (partialChangesThreads[i][j].sliceNumber != -1)
 			{
 				size_t slice = partialChangesThreads[i][j].sliceNumber;
 				int pos = partialChangesThreads[i][j].positionConvert;
 				image_slices[slice].return_work()[pos] = 255.0f;
 			}
-
+		}
+	}
 	for (int i = dims[2] - 1; i >= 0; i--)
 	{
 		float* bmp1 = image_slices[i].return_bmp();

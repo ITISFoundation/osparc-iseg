@@ -53,7 +53,7 @@ bool VTIreader::getSlice(const char* filename, float* slice, unsigned slicenr,
 		return false;
 	if (ext[1] - ext[0] + 1 != (int)width)
 		return false;
-	if (slicenr < 0 || slicenr > ext[5] - ext[4])
+	if (slicenr > ext[5] - ext[4])
 		return false;
 	unsigned long long pos = 0;
 
@@ -129,7 +129,7 @@ float* VTIreader::getSliceInfo(const char* filename, unsigned slicenr,
 	img->GetOrigin(org);
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
 
-	if (slicenr < 0 || slicenr > ext[5] - ext[4])
+	if (slicenr > ext[5] - ext[4])
 		return nullptr;
 	height = (unsigned)ext[3] - ext[2] + 1;
 	width = (unsigned)ext[1] - ext[0] + 1;
