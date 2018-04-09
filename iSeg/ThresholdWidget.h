@@ -49,13 +49,16 @@ public:
 	void init();
 	void newloaded();
 	void hideparams_changed();
-	std::string GetName() { return std::string("Threshold"); };
-	virtual QIcon GetIcon(QDir picdir)
+	std::string GetName() override { return std::string("Threshold"); }
+	virtual QIcon GetIcon(QDir picdir) override
 	{
 		return QIcon(picdir.absFilePath(QString("thresholding.png")).ascii());
-	};
+	}
 
 private:
+	virtual void on_tissuenr_changed(int i) override;
+	virtual void on_slicenr_changed() override;
+
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
@@ -136,15 +139,6 @@ private:
 	QPushButton* pushcenterFilename;
 	QString centerFilename;
 
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-public slots:
-	void slicenr_changed();
-
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void subsect_toggled();
@@ -153,7 +147,6 @@ private slots:
 	void getrange();
 	void dim_changed(int newval);
 	void nrtissues_changed(int newval);
-	void tissuenr_changed(int newval);
 	void slider_changed(int newval);
 	void slider_pressed();
 	void slider_released();

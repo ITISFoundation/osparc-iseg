@@ -50,8 +50,8 @@ public:
 	virtual std::string GetName() { return std::string(""); }
 	virtual QIcon GetIcon(QDir picdir) = 0;
 
-	virtual void on_tissuenr_changed(int i) {}
-	virtual void on_slicenr_changed() {}
+	virtual void on_tissuenr_changed(int i) {}//BL todo
+	virtual void on_slicenr_changed() {}	  //BL todo
 
 	virtual void on_mouse_clicked(Point p) {}
 	virtual void on_mouse_released(Point p) {}
@@ -67,16 +67,14 @@ signals:
 	void end_datachange(QWidget* sender = NULL,
 						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
-private slots:
+private slots :
 	void tissuenr_changed(int i) { on_tissuenr_changed(i); }
-	//TODOvoid slicenr_changed() { on_slicenr_changed(); }
+	void slicenr_changed() { on_slicenr_changed(); }
 
+	// \todo duplicate slots (and connections) and pass argument source_or_target to callbacks
 	void mouse_clicked(Point p) { on_mouse_clicked(p); }
 	void mouse_released(Point p) { on_mouse_released(p); }
 	void mouse_moved(Point p) { on_mouse_moved(p); }
-
-public slots:
-	virtual void slicenr_changed(){} // BL TODO
 
 protected:
 	static bool hideparams;

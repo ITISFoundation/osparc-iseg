@@ -47,13 +47,16 @@ public:
 	void newloaded();
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
-	std::string GetName() { return std::string("Interpol"); };
+	std::string GetName() { return std::string("Interpol"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("interpolate.png")).ascii());
-	};
+	}
 
 private:
+	virtual void on_tissuenr_changed(int i) override;
+	virtual void on_slicenr_changed() override;
+
 	SlicesHandler* handler3D;
 	Q3HBox* hboxoverall;
 	Q3VBox* vboxmethods;
@@ -85,15 +88,7 @@ private:
 	unsigned short nrslices;
 	unsigned short tissuenr;
 
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
 public slots:
-	void slicenr_changed();
-	void tissuenr_changed(int tissuetype);
 	void handler3D_changed();
 
 private slots:

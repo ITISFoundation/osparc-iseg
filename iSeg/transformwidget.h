@@ -48,11 +48,11 @@ public:
 	void GetDataSelection(bool& source, bool& target, bool& tissues);
 
 	QSize sizeHint() const;
-	std::string GetName() { return std::string("Transform"); };
+	std::string GetName() { return std::string("Transform"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("transform.png")).ascii());
-	};
+	}
 
 private:
 	struct TransformParametersStruct
@@ -71,6 +71,8 @@ private:
 	void BitsChanged();
 
 private:
+	virtual void on_mouse_clicked(Point p) override;
+
 	// Image data
 	SlicesHandler* handler3D;
 
@@ -128,15 +130,8 @@ private:
 	double updateParameter2;
 	TransformParametersStruct transformParameters;
 
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
 public slots:
 	void slicenr_changed();
-	void pt_clicked(Point p);
 	void bmp_changed();
 	void work_changed();
 	void tissues_changed();

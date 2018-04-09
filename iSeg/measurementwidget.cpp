@@ -212,7 +212,7 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void MeasurementWidget::pt_clicked(Point p)
+void MeasurementWidget::on_mouse_clicked(Point p)
 {
 	if (rb_pts->isOn())
 	{
@@ -439,6 +439,16 @@ void MeasurementWidget::pt_clicked(Point p)
 								'g', 3) +
 				QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
+	}
+}
+
+void MeasurementWidget::on_mouse_moved(Point p)
+{
+	if (drawing)
+	{
+		dynamic.clear();
+		addLine(&dynamic, p1, p);
+		emit vpdyn_changed(&dynamic);
 	}
 }
 
@@ -879,16 +889,6 @@ float MeasurementWidget::calculatevec(unsigned short orient)
 		value = (pt[1][2] - pt[0][2]) * thick;
 
 	return value;
-}
-
-void MeasurementWidget::pt_moved(Point p)
-{
-	if (drawing)
-	{
-		dynamic.clear();
-		addLine(&dynamic, p1, p);
-		emit vpdyn_changed(&dynamic);
-	}
 }
 
 void MeasurementWidget::cleanup()

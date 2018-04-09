@@ -48,12 +48,11 @@ public:
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("picker.png")).ascii());
-	};
-
-public slots:
-	void slicenr_changed();
+	}
 
 private:
+	virtual void on_mouse_clicked(Point p) override;
+
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned int width;
@@ -85,10 +84,9 @@ private:
 
 signals:
 	void vp1_changed(std::vector<Point>* vp1);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
+
+public slots:
+	void slicenr_changed();
 
 private slots:
 	void copy_pressed();
@@ -98,7 +96,6 @@ private slots:
 
 	void worktissue_changed(int);
 	void bmphand_changed(bmphandler* bmph);
-	void pt_clicked(Point);
 
 protected:
 	void keyPressEvent(QKeyEvent* event);

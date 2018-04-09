@@ -304,7 +304,7 @@ void FastmarchingFuzzyWidget::getrange()
 	return;
 }
 
-void FastmarchingFuzzyWidget::mouse_clicked(Point p)
+void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 {
 	if (rb_fastmarch->isOn())
 	{
@@ -355,7 +355,7 @@ void FastmarchingFuzzyWidget::mouse_clicked(Point p)
 	}
 }
 
-void FastmarchingFuzzyWidget::mouse_released(Point p)
+void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 {
 	if (rb_drag->isOn())
 	{
@@ -377,7 +377,7 @@ void FastmarchingFuzzyWidget::mouse_released(Point p)
 	}
 }
 
-void FastmarchingFuzzyWidget::mouse_moved(Point p)
+void FastmarchingFuzzyWidget::on_mouse_moved(Point p)
 {
 	if (rb_drag->isOn())
 	{

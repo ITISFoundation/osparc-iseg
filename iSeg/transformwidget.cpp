@@ -576,7 +576,7 @@ void TransformWidget::GetDataSelection(bool& source, bool& target,
 	tissues = transformTissuesCheckBox->isChecked();
 }
 
-void TransformWidget::pt_clicked(Point p)
+void TransformWidget::on_mouse_clicked(Point p)
 {
 	if (centerSelectPushButton->isChecked())
 	{

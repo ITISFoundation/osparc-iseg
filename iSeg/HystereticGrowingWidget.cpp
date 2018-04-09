@@ -185,7 +185,7 @@ void HystereticGrowingWidget::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void HystereticGrowingWidget::pt_clicked(Point p)
+void HystereticGrowingWidget::on_mouse_clicked(Point p)
 {
 	if (limitdrawing)
 	{
@@ -461,7 +461,7 @@ void HystereticGrowingWidget::clean_up()
 	return;
 }
 
-void HystereticGrowingWidget::pt_moved(Point p)
+void HystereticGrowingWidget::on_mouse_moved(Point p)
 {
 	if (limitdrawing)
 	{
@@ -471,7 +471,7 @@ void HystereticGrowingWidget::pt_moved(Point p)
 	}
 }
 
-void HystereticGrowingWidget::pt_released(Point p)
+void HystereticGrowingWidget::on_mouse_released(Point p)
 {
 	if (limitdrawing)
 	{

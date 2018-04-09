@@ -574,11 +574,11 @@ private slots:
 								 QWidget* sender = NULL, bool beginUndo = true);
 	void handle_end_datachange(QWidget* sender = NULL,
 							   iseg::EndUndoAction undoAction = iseg::EndUndo);
-	void handle_end_datachange(QRect rect, QWidget* sender = NULL,
-							   iseg::EndUndoAction undoAction = iseg::EndUndo);
+
 	void handle_begin_dataexport(iseg::DataSelection& dataSelection,
 								 QWidget* sender = NULL);
 	void handle_end_dataexport(QWidget* sender = NULL);
+
 	void DatasetChanged();
 
 	void provide_selected_tissue_BG();

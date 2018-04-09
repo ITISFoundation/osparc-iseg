@@ -44,13 +44,16 @@ public:
 	void getlabels();
 	float calculate();
 	float calculatevec(unsigned short orient);
-	std::string GetName() { return std::string("Measurement"); };
+	std::string GetName() { return std::string("Measurement"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("measurement.png")).ascii());
-	};
+	}
 
 private:
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
+
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	std::vector<augmentedmark> labels;
@@ -97,8 +100,6 @@ signals:
 private slots:
 	void marks_changed();
 	void bmphand_changed(bmphandler* bmph);
-	void pt_clicked(Point);
-	void pt_moved(Point);
 	void cbb_changed(int);
 	void method_changed(int);
 	void inputtype_changed(int);

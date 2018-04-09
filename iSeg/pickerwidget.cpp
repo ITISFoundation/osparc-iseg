@@ -192,7 +192,7 @@ FILE* PickerWidget::LoadParams(FILE* fp, int version)
 	return fp;
 }
 
-void PickerWidget::pt_clicked(Point p)
+void PickerWidget::on_mouse_clicked(Point p)
 {
 	if (!shiftpressed)
 	{

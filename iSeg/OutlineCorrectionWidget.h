@@ -46,14 +46,19 @@ public:
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
-	std::string GetName() { return std::string("OLC"); };
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("olc.png")).ascii());
-	};
+	std::string GetName() { return std::string("OLC"); }
+	virtual QIcon GetIcon(QDir picdir) { return QIcon(picdir.absFilePath(QString("olc.png")).ascii()); }
 
 	void Select_selected_tissue_BG(QString tissueName, tissues_size_t nr);
 	void Select_selected_tissue_TS(QString tissueName, tissues_size_t nr);
+
+protected:
+	virtual void on_tissuenr_changed(int i) override;
+	virtual void on_slicenr_changed() override;
+
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_released(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
 
 private:
 	tissues_size_t tissuenr;
@@ -135,12 +140,6 @@ public:
 
 signals:
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-	void end_datachange(QRect rect, QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 	void signal_request_selected_tissue_TS();
 	void signal_request_selected_tissue_BG();
@@ -148,19 +147,13 @@ signals:
 public slots:
 	void pixmm_changed();
 	void workbits_changed();
-	void slicenr_changed();
-	void tissuenr_changed(int tissuenr1);
 
 	void request_selected_tissue_BG();
 	void request_selected_tissue_TS();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	void mouse_clicked(Point p);
-	void mouse_released(Point p);
-	void mouse_moved(Point p);
 	void method_changed();
-	//	void target_changed();
 	void removeholes_pushed();
 	void selectobj_pushed();
 };

@@ -44,13 +44,15 @@ public:
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
-	std::string GetName() { return std::string("Watershed"); };
+	std::string GetName() { return std::string("Watershed"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("watershed.png")).ascii());
-	};
+	}
 
 private:
+	void recalc1();
+
 	unsigned int* usp;
 	int sbh_old;
 	bmphandler* bmphand;
@@ -64,14 +66,6 @@ private:
 	QSpinBox* sb_h;
 	QSlider* sl_h;
 	QPushButton* btn_exec;
-
-	void recalc1();
-
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();

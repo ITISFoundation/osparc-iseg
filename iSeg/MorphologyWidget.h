@@ -72,12 +72,6 @@ private:
 	QButtonGroup* modegroup;
 	QCheckBox* allslices;
 
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
 public slots:
 	void slicenr_changed();
 

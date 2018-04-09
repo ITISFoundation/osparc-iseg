@@ -135,7 +135,7 @@ livewire_widget::~livewire_widget()
 
 QSize livewire_widget::sizeHint() const { return hboxoverall->sizeHint(); }
 
-void livewire_widget::pt_clicked(Point p)
+void livewire_widget::on_mouse_clicked(Point p)
 {
 	if (!drawing)
 	{
@@ -331,7 +331,7 @@ void livewire_widget::pt_doubleclickedmid(Point p)
 	}
 }
 
-void livewire_widget::pt_released(Point p)
+void livewire_widget::on_mouse_released(Point p)
 {
 	if (freedraw->isOn() && drawing)
 	{
@@ -360,7 +360,7 @@ void livewire_widget::pt_released(Point p)
 	}
 }
 
-void livewire_widget::pt_moved(Point p)
+void livewire_widget::on_mouse_moved(Point p)
 {
 	if (drawing)
 	{

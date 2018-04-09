@@ -49,9 +49,19 @@ public:
 		return QIcon(picdir.absFilePath(QString("iftrg.png")).ascii());
 	}
 
+protected:
+	virtual void on_tissuenr_changed(int i) override;
+	virtual void on_slicenr_changed() override;
+
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_released(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
+
 private:
 	void init1();
 	void removemarks(Point p);
+	void getrange();
+
 	float* lbmap;
 	ImageForestingTransformRegionGrowing* IFTrg;
 	Point last_pt;
@@ -66,38 +76,22 @@ private:
 	QPushButton* pushexec;
 	QPushButton* pushclear;
 	QPushButton* pushremove;
-	void getrange();
 	unsigned tissuenr;
-	//	unsigned maxim;
 	float thresh;
 	float maxthresh;
 	std::vector<Mark> vm;
 	std::vector<Mark> vmempty;
 	std::vector<Point> vmdyn;
-	//	std::vector<vector<mark> > vvm;
 	unsigned area;
 
 signals:
 	void vm_changed(std::vector<Mark>* vm1);
 	void vmdyn_changed(std::vector<Point>* vmdyn1);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-public slots:
-	void tissuenr_changed(int i);
-	void slicenr_changed();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	//	void tissuenr_changed(int i);
-	void mouse_clicked(Point p);
-	void mouse_released(Point p);
-	void mouse_moved(Point p);
 	void execute();
 	void clearmarks();
-	//	void removepressed();
 	void slider_changed(int i);
 	void slider_pressed();
 	void slider_released();

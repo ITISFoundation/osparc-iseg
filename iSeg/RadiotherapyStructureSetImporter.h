@@ -68,7 +68,6 @@ private:
 	int currentitem;
 
 signals:
-	//	void rtstruct_loaded();
 	void begin_datachange(iseg::DataSelection& dataSelection,
 						  QWidget* sender = NULL, bool beginUndo = true);
 	void end_datachange(QWidget* sender = NULL,

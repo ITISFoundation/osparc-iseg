@@ -99,13 +99,13 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 
 QSize FeatureWidget::sizeHint() const { return hbox1->sizeHint(); }
 
-void FeatureWidget::pt_clicked(Point p)
+void FeatureWidget::on_mouse_clicked(Point p)
 {
 	selecting = true;
 	pstart = p;
 }
 
-void FeatureWidget::pt_moved(Point p)
+void FeatureWidget::on_mouse_moved(Point p)
 {
 	if (selecting)
 	{
@@ -143,7 +143,7 @@ void FeatureWidget::pt_moved(Point p)
 	return;
 }
 
-void FeatureWidget::pt_released(Point p)
+void FeatureWidget::on_mouse_released(Point p)
 {
 	dynamic.clear();
 	emit vpdyn_changed(&dynamic);

@@ -57,13 +57,17 @@ public:
 	QSize sizeHint() const;
 	ImageForestingTransformLivewire* lw;
 	ImageForestingTransformLivewire* lwfirst;
-	std::string GetName() { return std::string("Contour"); };
+	std::string GetName() { return std::string("Contour"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("contour.png")).ascii());
-	};
+	}
 
 private:
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
+	virtual void on_mouse_released(Point p) override;
+
 	void init1();
 	//	bool isactive;
 	bool drawing;
@@ -102,10 +106,6 @@ signals:
 	void vp1_changed(std::vector<Point>* vp1);
 	void vpdyn_changed(std::vector<Point>* vpdyn);
 	void vp1dyn_changed(std::vector<Point>* vp1, std::vector<Point>* vpdyn);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
@@ -113,12 +113,9 @@ public slots:
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	//	void bmphand_changed(bmphandler *bmph);
-	void pt_clicked(Point p);
 	void pt_doubleclicked(Point p);
 	void pt_midclicked(Point p);
 	void pt_doubleclickedmid(Point p);
-	void pt_moved(Point p);
-	void pt_released(Point p);
 	void bmp_changed();
 	void mode_changed();
 	void freezing_changed();

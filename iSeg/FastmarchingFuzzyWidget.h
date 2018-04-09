@@ -48,11 +48,16 @@ public:
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
-	std::string GetName() { return std::string("Fuzzy"); };
+	std::string GetName() { return std::string("Fuzzy"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("fuzzy.png")).ascii());
-	};
+	}
+
+protected:
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_released(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
 
 private:
 	float* map;
@@ -105,19 +110,15 @@ private:
 
 signals:
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	void mouse_clicked(Point p);
-	void mouse_released(Point p);
-	void mouse_moved(Point p);
+	//void mouse_clicked(Point p);
+	//void mouse_released(Point p);
+	//void mouse_moved(Point p);
 	void slextend_changed(int i);
 	void slextend_pressed();
 	void slextend_released();

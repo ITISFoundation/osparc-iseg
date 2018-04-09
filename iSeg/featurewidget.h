@@ -54,6 +54,10 @@ public:
 	}
 
 private:
+	virtual void on_mouse_clicked(Point p) override;
+	virtual void on_mouse_moved(Point p) override;
+	virtual void on_mouse_released(Point p) override;
+
 	bool selecting;
 	std::vector<Point> dynamic;
 	bmphandler* bmphand;
@@ -94,11 +98,6 @@ signals:
 
 public slots:
 	void slicenr_changed();
-
-private slots:
-	void pt_clicked(Point p);
-	void pt_moved(Point p);
-	void pt_released(Point p);
 };
 
 } // namespace iseg
