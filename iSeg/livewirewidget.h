@@ -15,7 +15,6 @@
 
 #include "Plugin/WidgetInterface.h"
 
-#include "Core/DataSelection.h"
 #include "Core/ImageForestingTransform.h"
 
 #include <q3listbox.h>

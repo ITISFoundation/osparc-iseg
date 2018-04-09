@@ -45,12 +45,11 @@ public:
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
-	std::string GetName() { return std::string("Edge"); };
-	//virtual QIcon GetIcon() {return QIcon("images/edge.png");};
+	std::string GetName() { return std::string("Edge"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("edge.png")).ascii());
-	};
+	}
 
 private:
 	bmphandler* bmphand;

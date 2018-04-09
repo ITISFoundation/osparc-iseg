@@ -15,8 +15,6 @@
 
 #include "Plugin/WidgetInterface.h"
 
-#include "Core/DataSelection.h"
-
 #include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>

@@ -7,13 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef FMF_31March05
-#define FMF_31March05
+#pragma once
 
 #include "Plugin/WidgetInterface.h"
-
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
 
 #include <q3hbox.h>
 #include <q3mimefactory.h>
@@ -133,5 +129,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

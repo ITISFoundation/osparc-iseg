@@ -14,7 +14,8 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Core/Point.h"
+#include "Plugin/Point.h"
+
 #include "Core/addLine.h"
 
 #include <QLabel>

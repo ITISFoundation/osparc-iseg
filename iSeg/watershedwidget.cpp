@@ -14,8 +14,6 @@
 #include "WatershedWidget.h"
 #include "bmp_read_1.h"
 
-#include "Core/Point.h"
-
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>

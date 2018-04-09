@@ -13,8 +13,6 @@
 #include "SlicesHandler.h"
 #include "TransformWidget.h"
 
-#include "Core/Point.h"
-
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>

@@ -20,7 +20,6 @@
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
-#include "Core/Point.h"
 
 #include <QPlastiqueStyle>
 #include <QSplashScreen>

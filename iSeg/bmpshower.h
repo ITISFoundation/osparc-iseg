@@ -12,7 +12,6 @@
 
 #include "Core/Mark.h"
 #include "Core/Pair.h"
-#include "Core/Point.h"
 #include "Core/Types.h"
 
 #include <q3action.h>

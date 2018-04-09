@@ -10,8 +10,9 @@
 #ifndef WIDGETCOLLECTION
 #define WIDGETCOLLECTION
 
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
+#include "Plugin/DataSelection.h"
+#include "Plugin/Point.h"
+
 #include "Core/Types.h"
 
 #include <Q3HBoxLayout>

@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef Interpolate_20April05
-#define Interpolate_20April05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
@@ -106,4 +105,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

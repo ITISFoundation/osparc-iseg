@@ -7,16 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef IFTRG_29March05
-#define IFTRG_29March05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
 #include "Plugin/WidgetInterface.h"
-
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
 
 #include <q3hbox.h>
 #include <q3mimefactory.h>
@@ -47,11 +43,11 @@ public:
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 	void hideparams_changed();
-	std::string GetName() { return std::string("IFT"); };
+	std::string GetName() { return std::string("IFT"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("iftrg.png")).ascii());
-	};
+	}
 
 private:
 	void init1();
@@ -110,4 +106,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

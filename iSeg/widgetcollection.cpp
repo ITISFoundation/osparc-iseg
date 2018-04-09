@@ -17,8 +17,6 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
-#include "Core/Point.h"
-
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
 #include <QHeaderView>

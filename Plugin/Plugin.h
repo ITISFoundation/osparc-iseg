@@ -48,4 +48,5 @@ class ISEG_PLUGIN_API PluginRegistry
 public:
 	static std::vector<Plugin*> registered_plugins();
 };
+
 }} // namespace iseg::plugin

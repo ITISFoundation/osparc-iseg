@@ -14,8 +14,9 @@
 #include "bmpshower.h"
 #include "TissueInfos.h"
 
+#include "Plugin/Point.h"
+
 #include "Core/ColorLookupTable.h"
-#include "Core/Point.h"
 
 #include <QCloseEvent>
 #include <QContextMenuEvent>

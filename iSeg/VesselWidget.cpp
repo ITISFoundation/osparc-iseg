@@ -12,10 +12,7 @@
 #include "SlicesHandler.h"
 #include "VesselWidget.h"
 
-#include "Plugin/WidgetInterface.h"
-
 #include "Core/Pair.h"
-#include "Core/Point.h"
 #include "Core/Vec3.h"
 
 #include <q3filedialog.h>

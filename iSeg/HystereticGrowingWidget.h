@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef THRESHWIDGET_14March05
-#define THRESHWIDGET_14March05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
@@ -142,4 +141,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

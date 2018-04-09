@@ -9,7 +9,8 @@
  */
 #pragma once
 
-#include "Core/Point.h"
+#include "Plugin/Point.h"
+
 #include "Core/SliceProvider.h"
 
 #include <vector>

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Plugin/WidgetInterface.h"
+
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
@@ -46,11 +47,11 @@ public:
 	void init();
 	void newloaded();
 	QSize sizeHint() const;
-	std::string GetName() { return std::string("Feature"); };
+	std::string GetName() { return std::string("Feature"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("feature.png")).ascii());
-	};
+	}
 
 private:
 	bool selecting;

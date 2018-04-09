@@ -179,6 +179,8 @@ bool LoadPlugin(const std::string& plugin_file_path)
 
 bool LoadPlugins(const std::string& directory_path)
 {
+	std::cerr << "LoadPlugins: " << directory_path << std::endl;
+
 	bool ok = true;
 	try
 	{

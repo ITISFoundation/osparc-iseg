@@ -12,8 +12,9 @@
 
 #include "WidgetCollection.h"
 
+#include "Plugin/Point.h"
+
 #include "Core/Pair.h"
-#include "Core/Point.h"
 
 #include <QCloseEvent>
 #include <QContextMenuEvent>

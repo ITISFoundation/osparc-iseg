@@ -17,7 +17,6 @@
 
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
-#include "Core/Point.h"
 #include "Core/addLine.h"
 
 #include <q3listbox.h>

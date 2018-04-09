@@ -15,9 +15,6 @@
 #include "bmp_read_1.h"
 
 #include "Core/Pair.h"
-#include "Core/Point.h"
-
-#include "Plugin/WidgetInterface.h"
 
 #include <QButtonGroup>
 #include <QCheckBox>

@@ -10,9 +10,9 @@
 #ifndef SOW_19April05
 #define SOW_19April05
 
-#include "Core/Point.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
+
 #include <q3hbox.h>
 #include <q3listbox.h>
 #include <q3vbox.h>

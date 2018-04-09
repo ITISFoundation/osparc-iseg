@@ -7,13 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef TRANSFORM_17NOV11
-#define TRANSFORM_17NOV11
+#pragma once
 
 #include "SliceTransform.h"
-
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
 
 #include "Plugin/WidgetInterface.h"
 
@@ -161,4 +157,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

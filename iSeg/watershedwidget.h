@@ -7,12 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef WATERSHED_8MARCH05
-#define WATERSHED_8MARCH05
+#pragma once
 
 #include "Plugin/WidgetInterface.h"
-
-#include "Core/DataSelection.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>
@@ -92,4 +89,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

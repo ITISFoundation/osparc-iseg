@@ -9,10 +9,12 @@
  */
 #pragma once
 
-#include "Pair.h"
-#include "Point.h"
-#include "Types.h"
 #include "iSegCore.h"
+
+#include "Pair.h"
+#include "Types.h"
+
+#include "Plugin/Point.h"
 
 #include <map>
 #include <set>
