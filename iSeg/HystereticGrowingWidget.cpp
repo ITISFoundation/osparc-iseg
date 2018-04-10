@@ -39,8 +39,8 @@
 using namespace std;
 using namespace iseg;
 
-HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler *hand3D, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
@@ -164,25 +164,19 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler *hand3D, QWidget 
 	init1();
 }
 
-HystereticGrowingWidget::~HystereticGrowingWidget() { delete vbox1; }
-
-void HystereticGrowingWidget::slicenr_changed()
+void HystereticGrowingWidget::on_slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
-void HystereticGrowingWidget::bmphand_changed(bmphandler *bmph)
+void HystereticGrowingWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
 	getrange();
 
 	init1();
-
-	return;
 }
 
 void HystereticGrowingWidget::on_mouse_clicked(Point p)
@@ -425,7 +419,7 @@ void HystereticGrowingWidget::newloaded()
 	bmphand = handler3D->get_activebmphandler();
 	getrange();
 
-	vector<vector<Point>> *vvp = bmphand->return_limits();
+	vector<vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
 	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
 			 it++)
@@ -440,7 +434,7 @@ void HystereticGrowingWidget::init1()
 	limitdrawing = false;
 	drawlimit->setDown(false);
 
-	vector<vector<Point>> *vvp = bmphand->return_limits();
+	vector<vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
 	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
 			 it++)
@@ -548,7 +542,7 @@ void HystereticGrowingWidget::saveborders_execute()
 							 (upper_limit - lower_limit) * 0.005f * sl_upper->value();
 		float ul = ll + (uu - ll) * 0.005f * sl_lowerhyster->value();
 		float lu = ll + (uu - ll) * 0.005f * sl_upperhyster->value();
-		FILE *fp = fopen(savefilename.ascii(), "w");
+		FILE* fp = fopen(savefilename.ascii(), "w");
 		fprintf(fp, "%f %f %f %f \n", ll, ul, lu, uu);
 		fclose(fp);
 	}
@@ -563,7 +557,7 @@ void HystereticGrowingWidget::loadborders_execute()
 
 	if (!loadfilename.isEmpty())
 	{
-		FILE *fp = fopen(loadfilename.ascii(), "r");
+		FILE* fp = fopen(loadfilename.ascii(), "r");
 		if (fp != NULL)
 		{
 			float ll, uu, lu, ul;
@@ -758,7 +752,7 @@ void HystereticGrowingWidget::le_bordervaluh_returnpressed()
 	}
 }
 
-FILE *HystereticGrowingWidget::SaveParams(FILE *fp, int version)
+FILE* HystereticGrowingWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -783,7 +777,7 @@ FILE *HystereticGrowingWidget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *HystereticGrowingWidget::LoadParams(FILE *fp, int version)
+FILE* HystereticGrowingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{

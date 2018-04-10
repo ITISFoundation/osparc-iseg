@@ -38,8 +38,8 @@
 using namespace std;
 using namespace iseg;
 
-LivewireWidget::LivewireWidget(SlicesHandler *hand3D, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Use the Auto Trace to follow ideal contour path or draw "
@@ -571,21 +571,13 @@ void LivewireWidget::bmp_changed()
 	init1();
 }
 
-/*void livewire_widget::mode_changed()
+void LivewireWidget::on_slicenr_changed()
 {
-	if(autotrace->isOn()){
-	}
-}*/
-
-void LivewireWidget::slicenr_changed()
-{
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
-void LivewireWidget::bmphand_changed(bmphandler *bmph)
+void LivewireWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
@@ -661,7 +653,7 @@ void LivewireWidget::sbfreezing_changed(int i)
 	tlimit2 = (float(i) + 0.5f) * 1000;
 }
 
-FILE *LivewireWidget::SaveParams(FILE *fp, int version)
+FILE* LivewireWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
@@ -683,7 +675,7 @@ FILE *LivewireWidget::SaveParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *LivewireWidget::LoadParams(FILE *fp, int version)
+FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{

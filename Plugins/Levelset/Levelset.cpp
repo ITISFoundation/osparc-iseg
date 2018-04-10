@@ -19,8 +19,8 @@
 #include <sstream>
 
 LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
-							   const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->get_activeslice();
 
@@ -28,8 +28,8 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 
 	vbox1 = new Q3VBox(this);
 	bias_header = new QLabel(
-		"LevelSetSegmentation: (Pick with OLC Foreground 1 pixel to start)",
-		vbox1);
+			"LevelSetSegmentation: (Pick with OLC Foreground 1 pixel to start)",
+			vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
 	hbox4 = new Q3HBox(vbox1);
@@ -58,7 +58,7 @@ void LevelsetWidget::do_work()
 	typedef itk::Image<float, 3> TMask;
 	typedef TMask TOutput;
 	typedef itk::ThresholdSegmentationLevelSetImageFilter<TInput, TInput>
-		ThresholdSegmentationLevelSetImageFilterType;
+			ThresholdSegmentationLevelSetImageFilterType;
 	ThresholdSegmentationLevelSetImageFilterType::Pointer thresholdSegmentation;
 	thresholdSegmentation = ThresholdSegmentationLevelSetImageFilterType::New();
 
@@ -93,7 +93,7 @@ void LevelsetWidget::do_work()
 	fastMarching->SetOutputDirection(input->GetDirection());
 
 	typedef itk::BinaryThresholdImageFilter<TInput, TOutput>
-		ThresholdingFilterType;
+			ThresholdingFilterType;
 	ThresholdingFilterType::Pointer thresholder;
 	thresholder = ThresholdingFilterType::New();
 	thresholder->SetLowerThreshold(-5000.0);
@@ -128,14 +128,14 @@ LevelsetWidget::~LevelsetWidget()
 	free(usp);
 }
 
-void LevelsetWidget::slicenr_changed()
+void LevelsetWidget::on_slicenr_changed()
 {
 	activeslice = handler3D->get_activeslice();
 }
 
 void LevelsetWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 

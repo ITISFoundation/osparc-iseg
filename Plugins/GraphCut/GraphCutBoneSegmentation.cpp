@@ -45,7 +45,7 @@ public:
 	}
 
 	void Execute(const itk::Object* object,
-				 const itk::EventObject& event) ITK_OVERRIDE
+			const itk::EventObject& event) ITK_OVERRIDE
 	{
 		auto filter = dynamic_cast<const TFilter*>(object);
 
@@ -72,18 +72,18 @@ inline QString Format(const char* tooltip)
 } // namespace
 
 BoneSegmentationWidget::BoneSegmentationWidget(
-	iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
-	Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
-	  m_CurrentFilter(nullptr)
+		iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
+		Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
+			m_CurrentFilter(nullptr)
 {
 	setToolTip(
-		Format("A fully-automatic method for segmenting the femur from 3D CT "
-			   "scans, based on the graph-cut segmentation framework and bone "
-			   "enhancement filters "
-			   "<br>"
-			   "Krcah et al., 'Fully automatic and fast segmentation of the "
-			   "femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
+			Format("A fully-automatic method for segmenting the femur from 3D CT "
+						 "scans, based on the graph-cut segmentation framework and bone "
+						 "enhancement filters "
+						 "<br>"
+						 "Krcah et al., 'Fully automatic and fast segmentation of the "
+						 "femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
 
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 
@@ -93,7 +93,7 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 	m_LabelMaxFlowAlgorithm = new QLabel("Max-Flow Algorithm: ", m_HGrid1);
 	m_MaxFlowAlgorithm = new QComboBox(m_HGrid1);
 	m_MaxFlowAlgorithm->setToolTip(
-		QString("Choose Max-Flow algorithm used to perform Graph-Cut."));
+			QString("Choose Max-Flow algorithm used to perform Graph-Cut."));
 	m_MaxFlowAlgorithm->insertItem(QString("Kohli"));
 	m_MaxFlowAlgorithm->insertItem(QString("PushLabel-Fifo"));
 	m_MaxFlowAlgorithm->insertItem(QString("PushLabel-H_PRF"));
@@ -101,7 +101,7 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 
 	m_6Connectivity = new QCheckBox(QString("6-Connectivity"), m_VGrid);
 	m_6Connectivity->setToolTip(QString("Use fully connected neighborhood or "
-										"only city-block neighbors (26 vs 6)."));
+																			"only city-block neighbors (26 vs 6)."));
 
 	// TODO: this should re-use active-slices
 	m_UseSliceRange = new QCheckBox(QString("Use Slice Range"), m_VGrid);
@@ -123,7 +123,7 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 
 	QObject::connect(m_Execute, SIGNAL(clicked()), this, SLOT(do_work()));
 	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this,
-					 SLOT(showsliders()));
+			SLOT(showsliders()));
 }
 
 void BoneSegmentationWidget::showsliders()
@@ -157,7 +157,7 @@ void BoneSegmentationWidget::do_work()
 	typedef itk::Image<unsigned int, 3> TOutput;
 	typedef itk::Image<int, 3> TIntImage;
 	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput>
-		GraphCutFilterType;
+			GraphCutFilterType;
 
 	// get input image
 	auto input = TInput::New();
@@ -173,8 +173,8 @@ void BoneSegmentationWidget::do_work()
 	graphCutFilter->SetNumberOfRequiredInputs(1);
 	graphCutFilter->SetInputImage(input);
 	graphCutFilter->SetMaxFlowAlgorithm(
-		static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
-			m_MaxFlowAlgorithm->currentItem()));
+			static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
+					m_MaxFlowAlgorithm->currentItem()));
 	graphCutFilter->SetForegroundPixelValue(255);
 	graphCutFilter->SetBackgroundPixelValue(0);
 	graphCutFilter->SetSigma(0.2);
@@ -189,7 +189,7 @@ void BoneSegmentationWidget::do_work()
 
 		auto observer = CommandProgressUpdate<GraphCutFilterType>::New();
 		auto observer_id =
-			graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
+				graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
 		observer->SetProgressObject(&progress);
 
 		try
@@ -226,14 +226,14 @@ QSize BoneSegmentationWidget::sizeHint() const
 
 BoneSegmentationWidget::~BoneSegmentationWidget() { delete m_VGrid; }
 
-void BoneSegmentationWidget::slicenr_changed()
+void BoneSegmentationWidget::on_slicenr_changed()
 {
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 }
 
 void BoneSegmentationWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 

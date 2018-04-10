@@ -30,7 +30,7 @@ class BiasCorrectionWidget : public iseg::WidgetInterface
 	Q_OBJECT
 public:
 	BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
-						 const char* name = 0, Qt::WindowFlags wFlags = 0);
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~BiasCorrectionWidget();
 
 	QSize sizeHint() const override;
@@ -41,12 +41,13 @@ public:
 
 protected:
 	template<typename ImagePointer>
-	ImagePointer
-		DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
-						 const std::vector<unsigned int>& numIters,
-						 int shrinkFactor, double convergenceThreshold);
+	ImagePointer DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
+			const std::vector<unsigned int>& numIters,
+			int shrinkFactor, double convergenceThreshold);
 
 private:
+	void on_slicenr_changed() override;
+
 	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;
 	Q3VBox* vbox1;
@@ -63,9 +64,6 @@ private:
 	QSpinBox* edit_num_iterations;
 
 	itk::ProcessObject* m_CurrentFilter;
-
-public slots:
-	void slicenr_changed();
 
 private slots:
 	void do_work();

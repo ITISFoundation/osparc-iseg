@@ -22,9 +22,9 @@
 #include <itksys/SystemTools.hxx>
 
 TissueSeparatorWidget::TissueSeparatorWidget(
-	iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
-	Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+		iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
+		Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 
@@ -75,7 +75,7 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 
 	QObject::connect(m_Execute, SIGNAL(clicked()), this, SLOT(do_work()));
 	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this,
-					 SLOT(showsliders()));
+			SLOT(showsliders()));
 	/*
 	activeslice = handler3D->get_activeslice();
 
@@ -155,7 +155,7 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	typedef TMask TOutput;
 	typedef itk::Image<int, 3> TIntImage;
 	typedef itk::ImageGraphCutFilter<TInput, TForeground, TBackground, TOutput>
-		GraphCutFilterType;
+			GraphCutFilterType;
 	auto graphCutFilter = GraphCutFilterType::New();
 
 	auto input = TInput::New();
@@ -173,9 +173,9 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 		if (m_UseSliceRange->isChecked() == true)
 		{
 			m_Handler3D->GetITKImageFB(foreground, m_Start->value() - 1,
-									   m_End->value());
+					m_End->value());
 			m_Handler3D->GetITKImageFB(background, m_Start->value() - 1,
-									   m_End->value());
+					m_End->value());
 		}
 		else
 		{
@@ -189,8 +189,8 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	graphCutFilter->SetBackgroundImage(background);
 	// set parameters
 	graphCutFilter->SetMaxFlowAlgorithm(
-		static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
-			m_MaxFlowAlgorithm->currentItem()));
+			static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
+					m_MaxFlowAlgorithm->currentItem()));
 	graphCutFilter->SetForegroundPixelValue(255);
 	graphCutFilter->SetBackgroundPixelValue(-255);
 	graphCutFilter->SetSigma(0.2);
@@ -219,7 +219,7 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 
 		IteratorType iterator(rad, output, output->GetLargestPossibleRegion());
 		IteratorType2 iterator2(rad, foreground,
-								foreground->GetLargestPossibleRegion());
+				foreground->GetLargestPossibleRegion());
 		iterator.ClearActiveList();
 		iterator.ActivateOffset(center);
 		iterator2.ClearActiveList();
@@ -245,7 +245,7 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 		output->Update();
 		if (m_UseSliceRange->isChecked() == true)
 			m_Handler3D->ModifyWorkFloat(output, m_Start->value() - 1,
-										 m_End->value());
+					m_End->value());
 		else
 			m_Handler3D->ModifyWorkFloat(output);
 	}
@@ -258,14 +258,14 @@ QSize TissueSeparatorWidget::sizeHint() const
 
 TissueSeparatorWidget::~TissueSeparatorWidget() { delete m_VerticalGrid; }
 
-void TissueSeparatorWidget::slicenr_changed()
+void TissueSeparatorWidget::on_slicenr_changed()
 {
 	m_CurrentSlice = m_Handler3D->get_activeslice();
 }
 
 void TissueSeparatorWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 

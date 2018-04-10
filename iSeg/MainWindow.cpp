@@ -7262,6 +7262,8 @@ void MainWindow::tab_changed(QWidget* qw)
 
 		if (tab_old) // generic slots from WidgetInterface
 		{
+			tab_old->cleanup();
+
 			QObject::disconnect(bmp_show, SIGNAL(mousepressed_sign(Point)), tab_old,
 					SLOT(mouse_clicked(Point)));
 			QObject::disconnect(bmp_show, SIGNAL(mousemoved_sign(Point)), tab_old,
@@ -7283,8 +7285,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == measurement_widget)
 		{
-			measurement_widget->cleanup();
-			//		QObject::connect(this,SIGNAL(marks_changed()),work_show,SLOT(mark_changed()));
 			QObject::disconnect(this, SIGNAL(marks_changed()), measurement_widget,
 					SLOT(marks_changed()));
 			QObject::disconnect(measurement_widget,
@@ -7299,25 +7299,18 @@ void MainWindow::tab_changed(QWidget* qw)
 			QObject::disconnect(measurement_widget,
 					SIGNAL(vpdyn_changed(std::vector<Point>*)),
 					work_show, SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(
-					measurement_widget,
-					SIGNAL(
-							vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
-					bmp_show,
-					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
-			QObject::disconnect(
-					measurement_widget,
-					SIGNAL(
-							vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
-					work_show,
-					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
+			QObject::disconnect(measurement_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
+					bmp_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
+			QObject::disconnect(measurement_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
+					work_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
 
 			work_show->setMouseTracking(false);
 			bmp_show->setMouseTracking(false);
 		}
 		else if (tab_old == vesselextr_widget)
 		{
-			vesselextr_widget->cleanup();
 			QObject::disconnect(this, SIGNAL(marks_changed()), measurement_widget,
 					SLOT(marks_changed()));
 			QObject::disconnect(vesselextr_widget,
@@ -7326,14 +7319,11 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == wshed_widget)
 		{
-			//		QObject::connect(this,SIGNAL(marks_changed()),work_show,SLOT(mark_changed()));
 			QObject::disconnect(this, SIGNAL(marks_changed()), wshed_widget,
 					SLOT(marks_changed()));
 		}
 		else if (tab_old == hyst_widget)
 		{
-			hyst_widget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(bmp_changed()), hyst_widget,
 					SLOT(bmp_changed()));
 
@@ -7351,8 +7341,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == lw_widget)
 		{
-			lw_widget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(bmp_changed()), lw_widget,
 					SLOT(bmp_changed()));
 			QObject::disconnect(bmp_show, SIGNAL(mousedoubleclick_sign(Point)),
@@ -7376,8 +7364,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == iftrg_widget)
 		{
-			iftrg_widget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(bmp_changed()), iftrg_widget,
 					SLOT(bmp_changed()));
 
@@ -7389,8 +7375,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == FMF_widget)
 		{
-			FMF_widget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(bmp_changed()), FMF_widget,
 					SLOT(bmp_changed()));
 
@@ -7400,8 +7384,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == OutlineCorrect_widget)
 		{
-			OutlineCorrect_widget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(work_changed()), OutlineCorrect_widget,
 					SLOT(workbits_changed()));
 
@@ -7431,8 +7413,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == pickerwidget)
 		{
-			pickerwidget->cleanup();
-
 			QObject::disconnect(pickerwidget,
 					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1(std::vector<Point>*)));
@@ -7442,8 +7422,6 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (tab_old == transfrmWidget)
 		{
-			transfrmWidget->cleanup();
-
 			QObject::disconnect(this, SIGNAL(bmp_changed()), transfrmWidget,
 					SLOT(bmp_changed()));
 			QObject::disconnect(this, SIGNAL(work_changed()), transfrmWidget,
@@ -7454,7 +7432,7 @@ void MainWindow::tab_changed(QWidget* qw)
 
 		// connect signal-slots new widget
 
-		if (qw) // generic slots from WidgetInterface
+		if (auto widget = dynamic_cast<WidgetInterface*>(qw)) // generic slots from WidgetInterface
 		{
 			QObject::connect(bmp_show, SIGNAL(mousepressed_sign(Point)), qw,
 					SLOT(mouse_clicked(Point)));
@@ -7491,18 +7469,12 @@ void MainWindow::tab_changed(QWidget* qw)
 			QObject::connect(measurement_widget,
 					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(
-					measurement_widget,
-					SIGNAL(
-							vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
-					bmp_show,
-					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
-			QObject::connect(
-					measurement_widget,
-					SIGNAL(
-							vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
-					work_show,
-					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
+			QObject::connect(measurement_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
+					bmp_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
+			QObject::connect(measurement_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
+					work_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
 
 			work_show->setMouseTracking(true);
 			bmp_show->setMouseTracking(true);
@@ -7517,10 +7489,8 @@ void MainWindow::tab_changed(QWidget* qw)
 		}
 		else if (qw == wshed_widget)
 		{
-			//		QObject::disconnect(this,SIGNAL(marks_changed()),work_show,SLOT(mark_changed()));
 			QObject::connect(this, SIGNAL(marks_changed()), wshed_widget,
 					SLOT(marks_changed()));
-			//			wshed_widget->init();
 		}
 		else if (qw == hyst_widget)
 		{
@@ -7536,8 +7506,6 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
 					bmp_show,
 					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
-
-			//			hyst_widget->init();
 		}
 		else if (qw == lw_widget)
 		{
@@ -7553,13 +7521,10 @@ void MainWindow::tab_changed(QWidget* qw)
 					bmp_show, SLOT(set_vp1(std::vector<Point>*)));
 			QObject::connect(lw_widget, SIGNAL(vpdyn_changed(std::vector<Point>*)),
 					bmp_show, SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(
-					lw_widget,
+			QObject::connect(lw_widget,
 					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
-					bmp_show,
-					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
+					bmp_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
 
-			//			lw_widget->init();
 			bmp_show->setMouseTracking(true);
 		}
 		else if (qw == iftrg_widget)
@@ -7606,12 +7571,10 @@ void MainWindow::tab_changed(QWidget* qw)
 
 			work_show->setMouseTracking(true);
 			bmp_show->setMouseTracking(true);
-			//			feature_widget->init();
 		}
 		else if (qw == interpolwidget)
 		{
-			//			QObject::connect(tissueTreeWidget,SIGNAL(activated(int)),interpolwidget,SLOT(tissuenr_changed(int)));
-			//			QObject::connect(tissueTreeWidget,SIGNAL(activated(int)),this,SLOT(tissuenr_changed(int)));
+			// anything?
 		}
 		else if (qw == pickerwidget)
 		{

@@ -35,8 +35,8 @@ class TransformWidget : public WidgetInterface
 	Q_OBJECT
 
 public:
-	TransformWidget(SlicesHandler *hand3D, QWidget *parent = 0,
-			const char *name = 0, Qt::WindowFlags wFlags = 0);
+	TransformWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~TransformWidget();
 
 	void init() override;
@@ -48,7 +48,7 @@ public:
 	std::string GetName() override { return std::string("Transform"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("transform.png"))); }
 
-	void GetDataSelection(bool &source, bool &target, bool &tissues);
+	void GetDataSelection(bool& source, bool& target, bool& tissues);
 
 private:
 	struct TransformParametersStruct
@@ -69,58 +69,59 @@ private:
 	void BitsChanged();
 
 private:
+	void on_slicenr_changed() override;
 	void on_mouse_clicked(Point p) override;
 
 	// Image data
-	SlicesHandler *handler3D;
+	SlicesHandler* handler3D;
 
 	// Slice transform
-	SliceTransform *sliceTransform;
+	SliceTransform* sliceTransform;
 
 	// Widgets
-	Q3HBox *hBoxOverall;
-	Q3VBox *vBoxTransforms;
-	Q3VBox *vBoxParams;
-	Q3HBox *hBoxSelectData;
-	Q3HBox *hBoxSlider1;
-	Q3HBox *hBoxSlider2;
-	Q3HBox *hBoxFlip;
-	Q3HBox *hBoxAxisSelection;
-	Q3HBox *hBoxCenter;
-	Q3HBox *hBoxExecute;
+	Q3HBox* hBoxOverall;
+	Q3VBox* vBoxTransforms;
+	Q3VBox* vBoxParams;
+	Q3HBox* hBoxSelectData;
+	Q3HBox* hBoxSlider1;
+	Q3HBox* hBoxSlider2;
+	Q3HBox* hBoxFlip;
+	Q3HBox* hBoxAxisSelection;
+	Q3HBox* hBoxCenter;
+	Q3HBox* hBoxExecute;
 
-	QCheckBox *transformSourceCheckBox;
-	QCheckBox *transformTargetCheckBox;
-	QCheckBox *transformTissuesCheckBox;
+	QCheckBox* transformSourceCheckBox;
+	QCheckBox* transformTargetCheckBox;
+	QCheckBox* transformTissuesCheckBox;
 
-	QCheckBox *allSlicesCheckBox;
-	QPushButton *executePushButton;
-	QPushButton *cancelPushButton;
+	QCheckBox* allSlicesCheckBox;
+	QPushButton* executePushButton;
+	QPushButton* cancelPushButton;
 
-	QRadioButton *translateRadioButton;
-	QRadioButton *rotateRadioButton;
-	QRadioButton *scaleRadioButton;
-	QRadioButton *shearRadioButton;
-	QRadioButton *flipRadioButton;
+	QRadioButton* translateRadioButton;
+	QRadioButton* rotateRadioButton;
+	QRadioButton* scaleRadioButton;
+	QRadioButton* shearRadioButton;
+	QRadioButton* flipRadioButton;
 	//QRadioButton *matrixRadioButton;
-	QButtonGroup *transformButtonGroup;
+	QButtonGroup* transformButtonGroup;
 
-	QLabel *slider1Label;
-	QLabel *slider2Label;
-	QSlider *slider1;
-	QSlider *slider2;
-	QLineEdit *lineEdit1;
-	QLineEdit *lineEdit2;
+	QLabel* slider1Label;
+	QLabel* slider2Label;
+	QSlider* slider1;
+	QSlider* slider2;
+	QLineEdit* lineEdit1;
+	QLineEdit* lineEdit2;
 
-	QRadioButton *xAxisRadioButton;
-	QRadioButton *yAxisRadioButton;
-	QButtonGroup *axisButtonGroup;
+	QRadioButton* xAxisRadioButton;
+	QRadioButton* yAxisRadioButton;
+	QButtonGroup* axisButtonGroup;
 
-	QPushButton *flipPushButton;
+	QPushButton* flipPushButton;
 
-	QLabel *centerLabel;
-	QLabel *centerCoordsLabel;
-	QPushButton *centerSelectPushButton;
+	QLabel* centerLabel;
+	QLabel* centerCoordsLabel;
+	QPushButton* centerSelectPushButton;
 
 	// Transform parameters
 	bool disableUpdatePreview;
@@ -129,7 +130,6 @@ private:
 	TransformParametersStruct transformParameters;
 
 public slots:
-	void slicenr_changed();
 	void bmp_changed();
 	void work_changed();
 	void tissues_changed();

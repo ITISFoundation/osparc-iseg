@@ -40,14 +40,14 @@
 using namespace iseg;
 
 FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
-							 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
-		"Obtain information about the gray value and tissue distribution."
-		"<br>"
-		"A rectangular area is marked by pressing down the left mouse "
-		"button and moving the mouse."));
+			"Obtain information about the gray value and tissue distribution."
+			"<br>"
+			"A rectangular area is marked by pressing down the left mouse "
+			"button and moving the mouse."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -87,7 +87,7 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 	vbox2->setFixedSize(vbox2->sizeHint());
 	// BL: hack to make layout wide enought to show very long tissue names
 	vbox3->setFixedSize(3 * vbox3->sizeHint().width(),
-						vbox3->sizeHint().height());
+			vbox3->sizeHint().height());
 	hbox1->setFixedSize(hbox1->sizeHint());
 
 	lb_map_value->setText("Source:");
@@ -125,20 +125,20 @@ void FeatureWidget::on_mouse_moved(Point p)
 	Pair psize = handler3D->get_pixelsize();
 
 	lb_pt_value->setText(QString::number(handler3D->return_width() - 1 - p.px) +
-						 QString(":") + QString::number(p.py));
+											 QString(":") + QString::number(p.py));
 	lb_work_pt_value->setText(
-		QString("(") +
-		QString::number((handler3D->return_width() - 1 - p.px) * psize.high) +
-		QString(":") + QString::number(p.py * psize.low) + QString(" mm)"));
+			QString("(") +
+			QString::number((handler3D->return_width() - 1 - p.px) * psize.high) +
+			QString(":") + QString::number(p.py * psize.low) + QString(" mm)"));
 	lb_grey_value->setText(QString::number(bmphand->bmp_pt(p)));
 	lb_work_grey_value->setText(QString::number(bmphand->work_pt(p)));
 	tissues_size_t tnr =
-		bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
+			bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
 	if (tnr == 0)
 		lb_tissuename->setText("- (0)");
 	else
 		lb_tissuename->setText(TissueInfos::GetTissueName(tnr) + QString(" (") +
-							   QString::number((int)tnr) + QString(")"));
+													 QString::number((int)tnr) + QString(")"));
 
 	return;
 }
@@ -166,19 +166,18 @@ void FeatureWidget::on_mouse_released(Point p)
 	lb_work_stddev_value->setText(QString::number(stddev));
 	lb_work_min_value->setText(QString::number(extrema.low));
 	lb_work_max_value->setText(QString::number(extrema.high));
-
-	return;
 }
 
-void FeatureWidget::slicenr_changed()
+void FeatureWidget::on_slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
-	//	}
 }
 
-void FeatureWidget::init() { slicenr_changed(); }
+void FeatureWidget::init()
+{
+	on_slicenr_changed();
+}
 
 void FeatureWidget::newloaded()
 {

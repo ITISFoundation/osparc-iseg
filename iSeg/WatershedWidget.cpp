@@ -32,18 +32,18 @@
 using namespace iseg;
 
 WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
-								 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
-		Format("Segment a tissue (2D) by selecting points in the current slice "
-			   "based on the Watershed method."
-			   "<br>"
-			   "The method: the gradient of the slightly smoothed image is "
-			   "calculated. High values are interpreted as mountains and "
-			   "low values as valleys. Subsequently, a flooding with water is "
-			   "simulated resulting in thousands of basins. "
-			   "Higher water causes adjacent basins to merge. "));
+			Format("Segment a tissue (2D) by selecting points in the current slice "
+						 "based on the Watershed method."
+						 "<br>"
+						 "The method: the gradient of the slightly smoothed image is "
+						 "calculated. High values are interpreted as mountains and "
+						 "low values as valleys. Subsequently, a flooding with water is "
+						 "simulated resulting in thousands of basins. "
+						 "Higher water causes adjacent basins to merge. "));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -69,13 +69,13 @@ WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 	sbh_old = sb_h->value();
 
 	QObject::connect(sl_h, SIGNAL(valueChanged(int)), this,
-					 SLOT(hsl_changed()));
+			SLOT(hsl_changed()));
 	QObject::connect(sl_h, SIGNAL(sliderPressed()), this,
-					 SLOT(slider_pressed()));
+			SLOT(slider_pressed()));
 	QObject::connect(sl_h, SIGNAL(sliderReleased()), this,
-					 SLOT(slider_released()));
+			SLOT(slider_released()));
 	QObject::connect(sb_h, SIGNAL(valueChanged(int)), this,
-					 SLOT(hsb_changed(int)));
+			SLOT(hsb_changed(int)));
 	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
 }
 
@@ -156,7 +156,7 @@ void WatershedWidget::recalc1()
 	if (usp != NULL)
 	{
 		bmphand->construct_regions(
-			(unsigned int)(sb_h->value() * sl_h->value() * 0.005f), usp);
+				(unsigned int)(sb_h->value() * sl_h->value() * 0.005f), usp);
 	}
 
 	return;
@@ -171,12 +171,10 @@ WatershedWidget::~WatershedWidget()
 	free(usp);
 }
 
-void WatershedWidget::slicenr_changed()
+void WatershedWidget::on_slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
 void WatershedWidget::bmphand_changed(bmphandler* bmph)
@@ -193,7 +191,7 @@ void WatershedWidget::bmphand_changed(bmphandler* bmph)
 
 void WatershedWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 
@@ -240,9 +238,9 @@ FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		QObject::disconnect(sl_h, SIGNAL(valueChanged(int)), this,
-							SLOT(hsl_changed()));
+				SLOT(hsl_changed()));
 		QObject::disconnect(sb_h, SIGNAL(valueChanged(int)), this,
-							SLOT(hsb_changed(int)));
+				SLOT(hsb_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -253,9 +251,9 @@ FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 		fread(&sbh_old, sizeof(float), 1, fp);
 
 		QObject::connect(sl_h, SIGNAL(valueChanged(int)), this,
-						 SLOT(hsl_changed()));
+				SLOT(hsl_changed()));
 		QObject::connect(sb_h, SIGNAL(valueChanged(int)), this,
-						 SLOT(hsb_changed(int)));
+				SLOT(hsb_changed(int)));
 	}
 	return fp;
 }

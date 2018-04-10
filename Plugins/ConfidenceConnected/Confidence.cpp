@@ -24,8 +24,8 @@
 #include <sstream>
 
 ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
-								   const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->get_activeslice();
 
@@ -33,8 +33,8 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 
 	vbox1 = new Q3VBox(this);
 	bias_header = new QLabel("ConfidenceConnected Algorithm:(Pick with OLC "
-							 "Foreground 1 pixel to start) ",
-							 vbox1);
+													 "Foreground 1 pixel to start) ",
+			vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
 	hbox4 = new Q3HBox(vbox1);
@@ -71,11 +71,11 @@ void ConfidenceWidget::do_work()
 	typedef TMask TOutput;
 
 	typedef itk::CurvatureFlowImageFilter<TInput, TInput>
-		CurvatureFlowImageFilterType;
+			CurvatureFlowImageFilterType;
 	CurvatureFlowImageFilterType::Pointer smoothing;
 	smoothing = CurvatureFlowImageFilterType::New();
 	typedef itk::ConfidenceConnectedImageFilter<TInput, TOutput>
-		ConnectedFilterType;
+			ConnectedFilterType;
 	ConnectedFilterType::Pointer confidenceConnected;
 	confidenceConnected = ConnectedFilterType::New();
 
@@ -111,14 +111,14 @@ ConfidenceWidget::~ConfidenceWidget()
 	free(usp);
 }
 
-void ConfidenceWidget::slicenr_changed()
+void ConfidenceWidget::on_slicenr_changed()
 {
 	activeslice = handler3D->get_activeslice();
 }
 
 void ConfidenceWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 

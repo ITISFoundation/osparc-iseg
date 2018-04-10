@@ -35,45 +35,44 @@ class MorphologyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	MorphologyWidget(SlicesHandler *hand3D, QWidget *parent = 0,
-			const char *name = 0, Qt::WindowFlags wFlags = 0);
+	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~MorphologyWidget();
 	QSize sizeHint() const override;
 	void init() override;
 	void newloaded() override;
-	FILE *SaveParams(FILE *fp, int version) override;
-	FILE *LoadParams(FILE *fp, int version) override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	void hideparams_changed() override;
 	std::string GetName() override { return std::string("Morpho"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("morphology.png"))); }
 
 private:
-	bmphandler *bmphand;
-	SlicesHandler *handler3D;
-	unsigned short activeslice;
-	Q3HBox *hboxoverall;
-	Q3VBox *vboxmethods;
-	Q3HBox *hbox1;
-	Q3HBox *hbox2;
-	Q3VBox *vbox1;
-	QLabel *txt_n;
-	QSpinBox *sb_n;
-	QPushButton *btn_exec;
-	QRadioButton *rb_8connect;
-	QRadioButton *rb_4connect;
-	QButtonGroup *connectgroup;
-	QRadioButton *rb_open;
-	QRadioButton *rb_close;
-	QRadioButton *rb_erode;
-	QRadioButton *rb_dilate;
-	QButtonGroup *modegroup;
-	QCheckBox *allslices;
+	void on_slicenr_changed() override;
 
-public slots:
-	void slicenr_changed();
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
+	unsigned short activeslice;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3VBox* vbox1;
+	QLabel* txt_n;
+	QSpinBox* sb_n;
+	QPushButton* btn_exec;
+	QRadioButton* rb_8connect;
+	QRadioButton* rb_4connect;
+	QButtonGroup* connectgroup;
+	QRadioButton* rb_open;
+	QRadioButton* rb_close;
+	QRadioButton* rb_erode;
+	QRadioButton* rb_dilate;
+	QButtonGroup* modegroup;
+	QCheckBox* allslices;
 
 private slots:
-	void bmphand_changed(bmphandler *bmph);
+	void bmphand_changed(bmphandler* bmph);
 	void execute();
 };
 

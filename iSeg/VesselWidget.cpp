@@ -25,8 +25,8 @@
 using namespace std;
 using namespace iseg;
 
-VesselWidget::VesselWidget(SlicesHandler *hand3D, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
@@ -95,13 +95,13 @@ void VesselWidget::init()
 	emit vp1_changed(&vp);
 }
 
-FILE *VesselWidget::SaveParams(FILE *fp, int version)
+FILE* VesselWidget::SaveParams(FILE* fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
-FILE *VesselWidget::LoadParams(FILE *fp, int version)
+FILE* VesselWidget::LoadParams(FILE* fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
@@ -250,10 +250,7 @@ void VesselWidget::execute()
 		{
 			_world.dijkstra(seeds, end, &branchTree);
 			pb_store->setEnabled(true);
-			slicenr_changed();
-			/*FILE *fp=fopen("D:\\test100.txt","a");
-			_world.outputBranchTree(branchTree.getItem(),"vessel",fp);
-			fclose(fp);*/
+			on_slicenr_changed(); // BL Why?
 		}
 	}
 
@@ -320,7 +317,7 @@ void VesselWidget::reset_branchTree()
 	pb_store->setEnabled(false);
 }
 
-void VesselWidget::slicenr_changed()
+void VesselWidget::on_slicenr_changed()
 {
 	branchTree.resetIterator();
 	vp.clear();
@@ -348,7 +345,7 @@ void VesselWidget::savevessel()
 		float epsilon = max(max(pair1.high, pair1.low), thick);
 		branchTree.getItem()->doug_peuck_inclchildren(epsilon, pair1.high,
 				pair1.low, thick, vp);
-		FILE *fp = fopen(savefilename.ascii(), "w");
+		FILE* fp = fopen(savefilename.ascii(), "w");
 		int version = 2;
 		unsigned short w = handler3D->return_width();
 		unsigned short h = handler3D->return_height();
