@@ -34,14 +34,14 @@ public:
 	VesselWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 				 const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~VesselWidget();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	QSize sizeHint() const;
-	void init();
-	void newloaded();
+	void init() override;
+	void newloaded() override;
 	void slicenr_changed();
-	std::string GetName() { return std::string("Vessel"); };
-	virtual QIcon GetIcon(QDir picdir)
+	std::string GetName() override { return std::string("Vessel"); };
+	virtual QIcon GetIcon(QDir picdir) override
 	{
 		return QIcon(picdir.absFilePath(QString("vessel.png")).ascii());
 	};

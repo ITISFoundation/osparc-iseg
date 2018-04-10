@@ -34,32 +34,22 @@ public:
 	}
 	virtual void init() {}
 	virtual void newloaded() {}
-	virtual FILE* SaveParams(FILE* fp, int version)
-	{
-		UNREFERENCED_PARAMETER(version);
-		return fp;
-	}
-	virtual FILE* LoadParams(FILE* fp, int version)
-	{
-		UNREFERENCED_PARAMETER(version);
-		return fp;
-	}
+	virtual FILE* SaveParams(FILE* fp, int version) { return fp; };
+	virtual FILE* LoadParams(FILE* fp, int version) { return fp; };
 	virtual void hideparams_changed() {}
 	static void set_hideparams(bool hide) { hideparams = hide; }
 	static bool get_hideparams() { return hideparams; }
 	virtual std::string GetName() { return std::string(""); }
 	virtual QIcon GetIcon(QDir picdir) = 0;
 
-	virtual void on_tissuenr_changed(int i) {}//BL todo
-	virtual void on_slicenr_changed() {}	  //BL todo
+	virtual void on_tissuenr_changed(int i) {}
+	virtual void on_slicenr_changed() {}
 
 	virtual void on_mouse_clicked(Point p) {}
 	virtual void on_mouse_released(Point p) {}
 	virtual void on_mouse_moved(Point p) {}
 
-public:
-	QCursor* m_cursor;
-
+	QCursor* get_cursor() { return m_cursor; }
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
@@ -77,6 +67,8 @@ private slots :
 	void mouse_moved(Point p) { on_mouse_moved(p); }
 
 protected:
+	QCursor* m_cursor;
+
 	static bool hideparams;
 };
 

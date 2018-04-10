@@ -40,6 +40,9 @@ public:
 	~RadiotherapyStructureSetImporter();
 
 private:
+	void storeparams();
+	void updatevisibility();
+	
 	SlicesHandler* handler3D;
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
@@ -63,8 +66,6 @@ private:
 	std::vector<tissues_size_t> vectissuenrs;
 	std::vector<int> vecpriorities;
 	std::vector<std::string> vectissuenames;
-	void storeparams();
-	void updatevisibility();
 	int currentitem;
 
 signals:

@@ -616,7 +616,6 @@ bool VTIwriter::writeVolumeAll(const char* filename, float** slicesbmp,
 			 << endl;
 		return false;
 	}
-	//BL? input->Update();
 
 	int info = input->GetPointData()->SetActiveScalars("Source");
 	for (int k = 0; k < nrslices; k++)

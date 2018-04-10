@@ -115,11 +115,11 @@ void ImageForestingTransformRegionGrowingWidget::init()
 		}
 	}
 	else
+	{
 		init1();
+	}
 
 	hideparams_changed();
-
-	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::newloaded()
@@ -136,7 +136,6 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 		 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
-		;
 	}
 	emit vm_changed(&vm);
 	area = bmphand->return_height() * (unsigned)bmphand->return_width();

@@ -41,23 +41,23 @@ public:
 	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 							const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~FastmarchingFuzzyWidget();
-	void init();
-	void newloaded();
+	void init() override;
+	void newloaded() override;
 	void cleanup();
 	QSize sizeHint() const;
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("Fuzzy"); }
-	virtual QIcon GetIcon(QDir picdir)
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("Fuzzy"); }
+	virtual QIcon GetIcon(QDir picdir) override
 	{
 		return QIcon(picdir.absFilePath(QString("fuzzy.png")).ascii());
 	}
 
 protected:
-	virtual void on_mouse_clicked(Point p) override;
-	virtual void on_mouse_released(Point p) override;
-	virtual void on_mouse_moved(Point p) override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_released(Point p) override;
+	void on_mouse_moved(Point p) override;
 
 private:
 	float* map;

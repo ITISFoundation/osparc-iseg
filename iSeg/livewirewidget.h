@@ -48,27 +48,29 @@ public:
 	livewire_widget(SlicesHandler* hand3D, QWidget* parent = 0,
 					const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~livewire_widget();
-	void init();
-	void newloaded();
+	void init() override;
+	void newloaded() override;
 	void cleanup();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
 	QSize sizeHint() const;
-	ImageForestingTransformLivewire* lw;
-	ImageForestingTransformLivewire* lwfirst;
-	std::string GetName() { return std::string("Contour"); }
-	virtual QIcon GetIcon(QDir picdir)
+	std::string GetName() override { return std::string("Contour"); }
+	virtual QIcon GetIcon(QDir picdir) override
 	{
 		return QIcon(picdir.absFilePath(QString("contour.png")).ascii());
 	}
 
 private:
-	virtual void on_mouse_clicked(Point p) override;
-	virtual void on_mouse_moved(Point p) override;
-	virtual void on_mouse_released(Point p) override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_moved(Point p) override;
+	void on_mouse_released(Point p) override;
 
 	void init1();
+
+	ImageForestingTransformLivewire* lw;
+	ImageForestingTransformLivewire* lwfirst;
+	
 	//	bool isactive;
 	bool drawing;
 	std::vector<Point> clicks;

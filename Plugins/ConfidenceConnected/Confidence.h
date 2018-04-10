@@ -26,21 +26,21 @@ public:
 					 const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ConfidenceWidget();
 	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	std::string GetName() { return std::string("ConfidenceFilter"); }
+	void init() override;
+	void newloaded() override;
+	std::string GetName() override { return std::string("ConfidenceFilter"); }
 	virtual QIcon GetIcon(QDir picdir)
 	{
 		return QIcon(picdir.absFilePath(QString("Confidence.png")).ascii());
 	}
 
 protected:
-	virtual void on_tissuenr_changed(int i) { std::cerr << "tissue " << i << std::endl; }
-	virtual void on_slicenr_changed() { std::cerr << "slice changed " << std::endl; }
+	virtual void on_tissuenr_changed(int i) override { std::cerr << "tissue " << i << std::endl; }
+	virtual void on_slicenr_changed() override { std::cerr << "slice changed " << std::endl; }
 
-	virtual void on_mouse_clicked(iseg::Point p) { std::cerr << "on_mouse_clicked" << std::endl; }
-	virtual void on_mouse_released(iseg::Point p) { std::cerr << "on_mouse_released" << std::endl; }
-	virtual void on_mouse_moved(iseg::Point p) { std::cerr << "on_mouse_moved" << std::endl; }
+	virtual void on_mouse_clicked(iseg::Point p) override { std::cerr << "on_mouse_clicked" << std::endl; }
+	virtual void on_mouse_released(iseg::Point p) override { std::cerr << "on_mouse_released" << std::endl; }
+	virtual void on_mouse_moved(iseg::Point p) override { std::cerr << "on_mouse_moved" << std::endl; }
 
 private:
 	unsigned int* usp;

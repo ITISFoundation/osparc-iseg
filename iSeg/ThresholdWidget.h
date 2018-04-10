@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef THRESHWIDGET_24Feb05
-#define THRESHWIDGET_24Feb05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
@@ -43,21 +42,18 @@ public:
 	ThresholdWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 					const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ThresholdWidget();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	void hideparams_changed();
+	void init() override;
+	void newloaded() override;
+	void hideparams_changed() override;
 	std::string GetName() override { return std::string("Threshold"); }
-	virtual QIcon GetIcon(QDir picdir) override
-	{
-		return QIcon(picdir.absFilePath(QString("thresholding.png")).ascii());
-	}
+	virtual QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("thresholding.png"))); }
 
 private:
-	virtual void on_tissuenr_changed(int i) override;
-	virtual void on_slicenr_changed() override;
+	void on_tissuenr_changed(int i) override;
+	void on_slicenr_changed() override;
 
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
@@ -162,4 +158,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

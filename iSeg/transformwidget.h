@@ -71,7 +71,7 @@ private:
 	void BitsChanged();
 
 private:
-	virtual void on_mouse_clicked(Point p) override;
+	void on_mouse_clicked(Point p) override;
 
 	// Image data
 	SlicesHandler* handler3D;

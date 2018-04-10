@@ -36,26 +36,23 @@ public:
 	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 											   const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ImageForestingTransformRegionGrowingWidget();
-	void init();
-	void newloaded();
+	void init() override;
+	void newloaded() override;
 	void cleanup();
 	QSize sizeHint() const;
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("IFT"); }
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("iftrg.png")).ascii());
-	}
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("IFT"); }
+	virtual QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("iftrg.png"))); }
 
 protected:
-	virtual void on_tissuenr_changed(int i) override;
-	virtual void on_slicenr_changed() override;
+	void on_tissuenr_changed(int i) override;
+	void on_slicenr_changed() override;
 
-	virtual void on_mouse_clicked(Point p) override;
-	virtual void on_mouse_released(Point p) override;
-	virtual void on_mouse_moved(Point p) override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_released(Point p) override;
+	void on_mouse_moved(Point p) override;
 
 private:
 	void init1();

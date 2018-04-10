@@ -35,24 +35,26 @@ public:
 	MeasurementWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 					  const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~MeasurementWidget();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	QSize sizeHint() const;
-	void init();
+	void init() override;
 	void cleanup();
-	void newloaded();
+	void newloaded() override;
 	void getlabels();
 	float calculate();
 	float calculatevec(unsigned short orient);
-	std::string GetName() { return std::string("Measurement"); }
-	virtual QIcon GetIcon(QDir picdir)
+	std::string GetName() override { return std::string("Measurement"); }
+	virtual QIcon GetIcon(QDir picdir) override
 	{
-		return QIcon(picdir.absFilePath(QString("measurement.png")).ascii());
+		return QIcon(picdir.absFilePath(QString("measurement.png")));
 	}
 
 private:
-	virtual void on_mouse_clicked(Point p) override;
-	virtual void on_mouse_moved(Point p) override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_moved(Point p) override;
+
+	void set_coord(unsigned short posit, Point p, unsigned short slicenr);
 
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
@@ -89,7 +91,6 @@ private:
 	std::vector<Point> established;
 	std::vector<Point> dynamic;
 	Point p1;
-	void set_coord(unsigned short posit, Point p, unsigned short slicenr);
 
 signals:
 	void vp1_changed(std::vector<Point>* vp1);

@@ -43,19 +43,19 @@ public:
 						const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~InterpolationWidget();
 	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	std::string GetName() { return std::string("Interpol"); }
-	virtual QIcon GetIcon(QDir picdir)
+	void init() override;
+	void newloaded() override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	std::string GetName() override { return std::string("Interpol"); }
+	virtual QIcon GetIcon(QDir picdir) override
 	{
-		return QIcon(picdir.absFilePath(QString("interpolate.png")).ascii());
+		return QIcon(picdir.absFilePath(QString("interpolate.png")));
 	}
 
 private:
-	virtual void on_tissuenr_changed(int i) override;
-	virtual void on_slicenr_changed() override;
+	void on_tissuenr_changed(int i) override;
+	void on_slicenr_changed() override;
 
 	SlicesHandler* handler3D;
 	Q3HBox* hboxoverall;

@@ -17,14 +17,13 @@
 #include <q3action.h>
 #include <q3vbox.h>
 #include <qcheckbox.h>
-#include <qevent.h> // BL TODO
+#include <qevent.h>
 #include <qimage.h>
 #include <qlabel.h>
 #include <qpoint.h>
 #include <qpushbutton.h>
 #include <qslider.h>
 #include <qwidget.h>
-//Added by qt3to4:
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>

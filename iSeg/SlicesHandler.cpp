@@ -482,10 +482,10 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 	}
 }
 
+// TODO BL this function has a terrible impl, e.g. using member variables rgb, width/height, etc.
 int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 {
-	UpdateColorLookupTable(
-		nullptr); // BL: here we could quantize colors instead and build color
+	UpdateColorLookupTable(nullptr); // BL: here we could quantize colors instead and build color
 
 	activeslice = 0;
 	active_tissuelayer = 0;
@@ -500,10 +500,10 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	{
 		ChannelMixer channelMixer(filenames, NULL);
 		channelMixer.move(QCursor::pos());
-		if (!channelMixer.exec())
-			//return 0;
+		if (!channelMixer.exec()) // TODO BL check this works
+			return 0;
 
-			redFactor = channelMixer.GetRedFactor();
+		redFactor = channelMixer.GetRedFactor();
 		greenFactor = channelMixer.GetGreenFactor();
 		blueFactor = channelMixer.GetBlueFactor();
 

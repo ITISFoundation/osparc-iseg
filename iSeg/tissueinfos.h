@@ -11,8 +11,10 @@
 #define TISSUEINFOS
 
 #include "Core/Types.h"
-#include <map>
+
 #include <qstring.h> // BL TODO get rid of this
+
+#include <map>
 #include <set>
 #include <vector>
 

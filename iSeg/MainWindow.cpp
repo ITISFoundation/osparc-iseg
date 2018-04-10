@@ -1901,7 +1901,6 @@ MainWindow::MainWindow(SlicesHandler *hand3D, QString locationstring,
 	m_NewDataAfterSwap = false;
 
 	methodTab->raiseWidget(methodTab->visibleWidget());
-	return;
 }
 
 MainWindow::~MainWindow() {}
@@ -3245,92 +3244,6 @@ void MainWindow::execute_reloadnifti()
 
 	return;
 }
-
-//void MainWindow::execute_loadrtstruct()
-//{
-//	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null, "RTstruct (*.dcm)\n" "All(*.*)", this);//, filename);
-//
-//	if(loadfilename.isEmpty()) return;
-//
-//	gdcmvtk_rtstruct::tissuevec tissues;
-//	tissues.clear();
-//
-//	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii() , tissues);
-//
-//	bool *mask=new bool[handler3D->return_area()];
-//
-//	if(mask==0) return;
-//
-//	bool undoactive=false;
-//	if(handler3D->return_undo3D()&&handler3D->start_undoall(4)){
-//		undoactive=true;
-//	} else {
-//		do_clearundo();
-//	}
-//
-//	tissues_size_t tissuenr;
-//	std::string namedummy=std::string("");
-//	for(gdcmvtk_rtstruct::tissuevec::iterator it=tissues.begin();it!=tissues.end();it++) {
-//		bool caninsert=true;
-//		if((*it)->name!=namedummy) {
-//			for(tissuenr=0;tissuenr<tissuenames.size()&&(*it)->name!=tissuenames[tissuenr].toStdString();tissuenr++) {}
-//			if(tissuenr==(tissues_size_t)tissuenames.size()) {
-//				QString name1=QString((*it)->name.c_str());
-//				if(tissuenr<TISSUES_SIZE_MAX&&!name1.isEmpty()) {
-//					tissuecount++;
-//					tissuenames.append(name1);
-//					tissuelocked[tissuecount]=false;
-//					tissueopac[tissuecount]=0.5;
-//					tissuecolor[tissuecount][0]=(*it)->color[0];
-//					tissuecolor[tissuecount][1]=(*it)->color[1];
-//					tissuecolor[tissuecount][2]=(*it)->color[2];
-//					QPixmap abc(10,10);
-//					abc.fill(QColor((int)(255*(*it)->color[0]),(int)(255*(*it)->color[1]),(int)(255*(*it)->color[2])));
-//					tissueTreeWidget->insertItem(abc,name1);
-//				} else caninsert=false;
-//			}
-//			tissuenr++;
-//		}
-//		if(caninsert) {
-//			Pair p;
-//			p=handler3D->get_pixelsize();
-//			float thick=handler3D->get_slicethickness();
-//			float disp[3];
-//			handler3D->get_displacement(disp);
-//			size_t pospoints=0;
-//			size_t posoutlines=0;
-//			std::vector<float *> points;
-//			bool clockwisefill=false;
-//			while(posoutlines<(*it)->outlinelength.size()) {
-//				points.clear();
-//				unsigned int *nrpoints=&((*it)->outlinelength[posoutlines]);
-//				float zcoord=(*it)->points[pospoints+2];
-//				points.push_back(&((*it)->points[pospoints]));
-//				pospoints+=(*it)->outlinelength[posoutlines]*3;
-//				posoutlines++;
-//				while(posoutlines<(*it)->outlinelength.size()&&zcoord==(*it)->points[pospoints+2]) {
-//					points.push_back(&((*it)->points[pospoints]));
-//					pospoints+=(*it)->outlinelength[posoutlines]*3;
-//					posoutlines++;
-//				}
-//				int slicenr=handler3D->return_nrslices()-floor((zcoord-disp[2])/thick)-1;
-//				if(slicenr>=handler3D->return_startslice()&&slicenr<handler3D->return_endslice()) {
-//					fillcontours::fill_contour(mask, handler3D->return_width(), handler3D->return_height(), disp[0], disp[1], p.high, p.low, &(points[0]), nrpoints, points.size(), clockwisefill);
-//					handler3D->add2tissue(tissuenr,mask,(unsigned short)slicenr,true);
-//				}
-//			}
-//		}
-//	}
-//
-//	if(undoactive){
-//		do_undostepdone();
-//	}
-//
-//	tissuenr_changed(tissueTreeWidget->get_current_type());
-//	emit tissues_changed();
-//
-//	delete[] mask;
-//}
 
 void MainWindow::execute_loadsurface()
 {
@@ -6320,11 +6233,10 @@ void MainWindow::do_work2tissue_grouped()
 			tissues_size_t m;
 			handler3D->get_rangetissue(&m);
 			handler3D->buildmissingtissues(m);
-			//	handler3D->build255tissues();
 			tissueTreeWidget->update_tree_widget();
 
 			tissues_size_t currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType);
+			tissuenr_changed(currTissueType - 1); // TODO BL is this a bug? (I added the -1)
 
 			emit end_datachange(this);
 		}
@@ -6857,8 +6769,7 @@ void MainWindow::clearselected()
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this);
 
-		QList<QTreeWidgetItem *> list;
-		list = tissueTreeWidget->selectedItems();
+		auto list = tissueTreeWidget->selectedItems();
 		for (auto a = list.begin(); a != list.end(); ++a)
 		{
 			QTreeWidgetItem *item = *a;
@@ -7385,8 +7296,7 @@ void MainWindow::tab_changed(QWidget *qw)
 {
 	if (qw != tab_old)
 	{
-		std::cerr << "Starting widget: " << qw->metaObject()->className()
-							<< std::endl;
+		std::cerr << "Starting widget: " << qw->metaObject()->className() << std::endl;
 
 		// disconnect signal-slots of previous widget
 
@@ -7764,8 +7674,8 @@ void MainWindow::tab_changed(QWidget *qw)
 		tab_old->init();
 		tab_old->on_tissuenr_changed(tissueTreeWidget->get_current_type() - 1); // \todo BL: is this correct for all widgets?
 
-		bmp_show->setCursor(*(tab_old->m_cursor));
-		work_show->setCursor(*(tab_old->m_cursor));
+		bmp_show->setCursor(*(tab_old->get_cursor()));
+		work_show->setCursor(*(tab_old->get_cursor()));
 
 		updateMethodButtonsPressed(tab_old);
 	}

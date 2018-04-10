@@ -40,16 +40,13 @@ public:
 			   const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~EdgeWidget();
 	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("Edge"); }
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("edge.png")).ascii());
-	}
+	void init() override;
+	void newloaded() override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("Edge"); }
+	virtual QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("edge.png"))); }
 
 private:
 	bmphandler* bmphand;

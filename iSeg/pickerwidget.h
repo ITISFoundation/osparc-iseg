@@ -38,20 +38,23 @@ public:
 	PickerWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 				 const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~PickerWidget();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	QSize sizeHint() const;
-	void init();
+	void init() override;
 	void cleanup();
-	void newloaded();
-	std::string GetName() { return std::string("Picker"); };
-	virtual QIcon GetIcon(QDir picdir)
+	void newloaded() override;
+	std::string GetName() override { return std::string("Picker"); };
+	virtual QIcon GetIcon(QDir picdir) override
 	{
-		return QIcon(picdir.absFilePath(QString("picker.png")).ascii());
+		return QIcon(picdir.absFilePath(QString("picker.png")));
 	}
 
 private:
-	virtual void on_mouse_clicked(Point p) override;
+	void on_mouse_clicked(Point p) override;
+
+	void update_active();
+	void showborder();
 
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
@@ -79,8 +82,6 @@ private:
 	QRadioButton* rb_fill;
 	QButtonGroup* erasefillgroup;
 	std::vector<Point> selection;
-	void update_active();
-	void showborder();
 
 signals:
 	void vp1_changed(std::vector<Point>* vp1);

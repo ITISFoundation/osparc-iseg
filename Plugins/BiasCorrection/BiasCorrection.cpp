@@ -179,6 +179,7 @@ void BiasCorrectionWidget::do_work()
 				handler3D->ModifyWorkFloat(output); // BL: todo
 
 				// BL: todo signal to 2D view to refresh display
+				// -> begin/end_data_change ...
 			}
 		}
 		catch (itk::ExceptionObject&)

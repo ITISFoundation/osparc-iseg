@@ -54,9 +54,9 @@ public:
 	}
 
 private:
-	virtual void on_mouse_clicked(Point p) override;
-	virtual void on_mouse_moved(Point p) override;
-	virtual void on_mouse_released(Point p) override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_moved(Point p) override;
+	void on_mouse_released(Point p) override;
 
 	bool selecting;
 	std::vector<Point> dynamic;
