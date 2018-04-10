@@ -23,8 +23,13 @@ BOOST_AUTO_TEST_SUITE(HDF5IO_suite);
 
 BOOST_AUTO_TEST_CASE(WriteRead)
 {
-	//std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
-	std::string fname = (fs::path("C:/temp") / fs::path("foo.h5")).string();
+	boost::system::error_code ec;
+	std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
+	if (fs::exists(fname, ec))
+	{
+		fs::remove(fname, ec);
+	}
+
 	std::string dname = "MyArray";
 	size_t slice_size = 4;
 	std::vector<float> data1(slice_size, 1.2f);
@@ -69,6 +74,11 @@ BOOST_AUTO_TEST_CASE(WriteRead)
 
 		BOOST_CHECK(io.close(fid));
 	}
+
+	if (fs::exists(fname, ec))
+	{
+		fs::remove(fname, ec);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(IO_Performance)
@@ -94,7 +104,7 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 	{
 		iseg::HDF5IO io(1);
 		{
-			std::string fname = (fs::path("C:/temp") / fs::path("foo1.h5")).string();
+			std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
 			auto fid = io.create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
@@ -115,11 +125,17 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			BOOST_TEST_MESSAGE("Time " << ms << "[ms]");
 
 			BOOST_TEST_MESSAGE("Errors: " << io.dumpErrorStack());
+
+			boost::system::error_code ec;
+			if (fs::exists(fname, ec))
+			{
+				fs::remove(fname, ec);
+			}
 		}
 
 		io.chunk_size = 1500;
 		{
-			std::string fname = (fs::path("C:/temp") / fs::path("foo2.h5")).string();
+			std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
 			auto fid = io.create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
@@ -140,6 +156,12 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			BOOST_TEST_MESSAGE("Time " << ms << "[ms]");
 
 			BOOST_TEST_MESSAGE("Errors: " << io.dumpErrorStack());
+
+			boost::system::error_code ec;
+			if (fs::exists(fname, ec))
+			{
+				fs::remove(fname, ec);
+			}
 		}
 	}
 }
