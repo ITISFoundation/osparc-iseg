@@ -7,24 +7,24 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "ConfidenceAddon.h"
+#include "LevelsetPlugin.h"
 
-#include "Confidence.h"
+#include "Levelset.h"
 
 namespace iseg { namespace plugin {
 
 namespace {
-ConfidencePlugin _register_addon;
+LevelsetPlugin _register_addon;
 }
 
-ConfidencePlugin::ConfidencePlugin() {}
+LevelsetPlugin::LevelsetPlugin() {}
 
-ConfidencePlugin::~ConfidencePlugin() {}
+LevelsetPlugin::~LevelsetPlugin() {}
 
-WidgetInterface* ConfidencePlugin::create_widget(QWidget* parent, const char* name,
-												 Qt::WindowFlags wFlags) const
+WidgetInterface* LevelsetPlugin::create_widget(QWidget* parent, const char* name,
+		Qt::WindowFlags wFlags) const
 {
-	return new ConfidenceWidget(slice_handler(), parent, name, wFlags);
+	return new LevelsetWidget(slice_handler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

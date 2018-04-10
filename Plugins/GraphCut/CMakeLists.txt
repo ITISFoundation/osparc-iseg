@@ -19,8 +19,8 @@ IF(PLUGIN_GRAPHCUT)
 	)
 
 	ADD_LIBRARY(GraphCut.ext SHARED 
-		GraphCutAddon.cpp 
-		GraphCutAddon.h 
+		GraphCutPlugin.cpp 
+		GraphCutPlugin.h 
 		GraphCutBoneSegmentation.cpp 
 		GraphCutBoneSegmentation.h 
 		GraphCutTissueSeparator.cpp

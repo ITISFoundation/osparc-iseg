@@ -12,8 +12,8 @@ IF(PLUGIN_LEVELSET)
 	QT4_WRAP_CPP(MOCSrcslevel Levelset.h)
 
 	ADD_LIBRARY(Levelset.ext SHARED 
-		LevelsetAddon.cpp 
-		LevelsetAddon.h 
+		LevelsetPlugin.cpp 
+		LevelsetPlugin.h 
 		Levelset.cpp 
 		Levelset.h 
 		${MOCSrcslevel}

@@ -7,7 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "BiasCorrectionAddon.h"
+#include "BiasCorrectionPlugin.h"
 
 #include "BiasCorrection.h"
 
@@ -22,7 +22,7 @@ BiasCorrectionPlugin::BiasCorrectionPlugin() {}
 BiasCorrectionPlugin::~BiasCorrectionPlugin() {}
 
 WidgetInterface* BiasCorrectionPlugin::create_widget(QWidget* parent, const char* name,
-													 Qt::WindowFlags wFlags) const
+		Qt::WindowFlags wFlags) const
 {
 	return new BiasCorrectionWidget(slice_handler(), parent, name, wFlags);
 }

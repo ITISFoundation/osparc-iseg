@@ -12,8 +12,8 @@ IF(PLUGIN_CONFIDENCE)
 	QT4_WRAP_CPP(MOCSrcscon Confidence.h)
 
 	ADD_LIBRARY(Confidence.ext SHARED 
-		ConfidenceAddon.cpp 
-		ConfidenceAddon.h 
+		ConfidencePlugin.cpp 
+		ConfidencePlugin.h 
 		Confidence.cpp 
 		Confidence.h 
 		${MOCSrcscon}

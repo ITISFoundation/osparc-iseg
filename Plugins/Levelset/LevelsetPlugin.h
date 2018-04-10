@@ -19,11 +19,9 @@ public:
 	LevelsetPlugin();
 	~LevelsetPlugin();
 
-	virtual std::string name() const { return "Levelset"; }
-
-	virtual std::string description() const { return "LevelSet Plugin"; }
-
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-										   Qt::WindowFlags wFlags) const;
+	std::string name() const override { return "Levelset"; }
+	std::string description() const override { return "LevelSet Plugin"; }
+	WidgetInterface* create_widget(QWidget* parent, const char* name,
+			Qt::WindowFlags wFlags) const override;
 };
 }} // namespace iseg::plugin

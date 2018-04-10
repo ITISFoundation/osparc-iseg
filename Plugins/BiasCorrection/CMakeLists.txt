@@ -12,8 +12,8 @@ IF(PLUGIN_BIAS)
 	QT4_WRAP_CPP(MOCSrcsbias BiasCorrection.h)
 
 	ADD_LIBRARY(BiasCorrection.ext SHARED 
-		BiasCorrectionAddon.cpp 
-		BiasCorrectionAddon.h 
+		BiasCorrectionPlugin.cpp 
+		BiasCorrectionPlugin.h 
 		BiasCorrection.cpp 
 		BiasCorrection.h 
 		${MOCSrcsbias}

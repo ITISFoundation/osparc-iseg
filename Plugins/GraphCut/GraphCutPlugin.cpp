@@ -7,7 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "GraphCutAddon.h"
+#include "GraphCutPlugin.h"
 
 #include "GraphCutBoneSegmentation.h"
 #include "GraphCutTissueSeparator.h"
@@ -29,8 +29,8 @@ std::string GCBoneSegmentationPlugin::description() const
 }
 
 WidgetInterface* GCBoneSegmentationPlugin::create_widget(QWidget* parent,
-														 const char* name,
-														 Qt::WindowFlags wFlags) const
+		const char* name,
+		Qt::WindowFlags wFlags) const
 {
 	return new BoneSegmentationWidget(slice_handler(), parent, name, wFlags);
 }
@@ -46,8 +46,8 @@ std::string CGCTissueSeparatorPlugin::description() const
 }
 
 WidgetInterface* CGCTissueSeparatorPlugin::create_widget(QWidget* parent,
-														 const char* name,
-														 Qt::WindowFlags wFlags) const
+		const char* name,
+		Qt::WindowFlags wFlags) const
 {
 	return new TissueSeparatorWidget(slice_handler(), parent, name, wFlags);
 }

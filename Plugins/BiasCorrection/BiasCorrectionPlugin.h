@@ -19,11 +19,9 @@ public:
 	BiasCorrectionPlugin();
 	~BiasCorrectionPlugin();
 
-	virtual std::string name() const { return "Bias Addon "; }
-
-	virtual std::string description() const { return "Bias Plugin"; }
-
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-										   Qt::WindowFlags wFlags) const;
+	std::string name() const override { return "Bias Addon "; }
+	std::string description() const override { return "Bias Plugin"; }
+	WidgetInterface* create_widget(QWidget* parent, const char* name,
+			Qt::WindowFlags wFlags) const override;
 };
 }} // namespace iseg::plugin
