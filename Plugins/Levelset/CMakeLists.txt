@@ -20,7 +20,7 @@ IF(PLUGIN_LEVELSET)
 	)
 
 	TARGET_LINK_LIBRARIES( Levelset.ext 
-		Plugin 
+		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES} 
 	)
 	VS_SET_PROPERTY(Levelset.ext "Plugins")

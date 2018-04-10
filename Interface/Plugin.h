@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "PluginApi.h"
+#include "InterfaceApi.h"
 
 #include "SlicesHandlerInterface.h"
 #include "WidgetInterface.h"
@@ -23,7 +23,7 @@ class SliceHandlerInterface;
 
 namespace iseg { namespace plugin {
 
-class ISEG_PLUGIN_API Plugin
+class ISEG_INTERFACE_API Plugin
 {
 public:
 	Plugin();
@@ -36,14 +36,14 @@ public:
 
 	virtual std::string description() const = 0;
 
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-										   Qt::WindowFlags wFlags) const = 0;
+	virtual WidgetInterface* create_widget(QWidget* parent,
+			const char* name, Qt::WindowFlags wFlags) const = 0;
 
 private:
 	SliceHandlerInterface* _slice_handler;
 };
 
-class ISEG_PLUGIN_API PluginRegistry
+class ISEG_INTERFACE_API PluginRegistry
 {
 public:
 	static std::vector<Plugin*> registered_plugins();

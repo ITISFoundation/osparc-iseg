@@ -11,7 +11,7 @@
 
 #include "SliceTransform.h"
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>

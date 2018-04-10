@@ -14,8 +14,8 @@
 #include "Mark.h"
 #include "Types.h"
 
-#include "Plugin/Point.h"
-#include "Plugin/DataSelection.h"
+#include "Interface/Point.h"
+#include "Interface/DataSelection.h"
 
 #include <vector>
 

@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "PluginApi.h"
+#include "InterfaceApi.h"
 
 #include <itkImage.h> // BL TODO get rid of this
 #include <itkSliceContiguousImage.h>
@@ -20,7 +20,7 @@ class SliceHandlerInterface
 {
 public:
 	typedef unsigned short tissue_type;
-	typedef float          pixel_type;
+	typedef float pixel_type;
 
 	virtual unsigned short return_startslice() = 0;
 	virtual unsigned short return_endslice() = 0;

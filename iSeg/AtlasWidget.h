@@ -12,7 +12,7 @@
 
 #include "WidgetCollection.h"
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 #include "Core/Pair.h"
 

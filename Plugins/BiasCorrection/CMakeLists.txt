@@ -20,7 +20,7 @@ IF(PLUGIN_BIAS)
 	)
 	
 	TARGET_LINK_LIBRARIES( BiasCorrection.ext 
-		Plugin 
+		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
 	VS_SET_PROPERTY(BiasCorrection.ext "Plugins")

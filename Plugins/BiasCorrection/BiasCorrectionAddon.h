@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Plugin/Plugin.h"
+#include "Interface/Plugin.h"
 
 namespace iseg { namespace plugin {
 

@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 #include "Core/IndexPriorityQueue.h"
 

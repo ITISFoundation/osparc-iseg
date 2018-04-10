@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "Plugin/SlicesHandlerInterface.h"
-#include "Plugin/WidgetInterface.h"
+#include "Interface/SlicesHandlerInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>

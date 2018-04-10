@@ -31,7 +31,7 @@ IF(PLUGIN_GRAPHCUT)
 
 	# todo check libs in linker command
 	TARGET_LINK_LIBRARIES( GraphCut.ext
-		Plugin 
+		iSegInterface 
 		Gc 
 		${MY_EXTERNAL_LINK_LIBRARIES} 
 	)

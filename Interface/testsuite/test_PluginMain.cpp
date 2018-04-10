@@ -7,8 +7,8 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#define BOOST_TEST_MODULE Plugin
+#define BOOST_TEST_MODULE Interface
 #define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 
-#include "../PluginApi.h"
+#include "../InterfaceApi.h"

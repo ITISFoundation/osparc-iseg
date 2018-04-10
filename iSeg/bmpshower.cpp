@@ -14,7 +14,7 @@
 #include "bmpshower.h"
 #include "TissueInfos.h"
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 #include "Core/ColorLookupTable.h"
 

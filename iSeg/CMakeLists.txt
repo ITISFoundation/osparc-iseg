@@ -162,8 +162,8 @@ ENDIF()
 ADD_EXECUTABLE(iSeg WIN32 MACOSX_BUNDLE ${ViewerSrcs} ${MOCSrcs} ${ViewerHeaders} ${RCCSrcs} ${CMAKE_BINARY_DIR}/config.h iSeg.rc ${ICON_FILES})
 TARGET_COMPILE_DEFINITIONS(iSeg PRIVATE ${ISEG_DEFINITIONS})
 TARGET_LINK_LIBRARIES(iSeg 
+	iSegInterface
 	iSegCore
-	Plugin
 	QVTK
 	predicates
 	vtkGDCM

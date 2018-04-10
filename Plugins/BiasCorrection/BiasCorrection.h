@@ -11,8 +11,8 @@
 
 #include <vector>
 
-#include "Plugin/SlicesHandlerInterface.h"
-#include "Plugin/WidgetInterface.h"
+#include "Interface/SlicesHandlerInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -39,14 +39,13 @@ public:
 	std::string GetName() override;
 	QIcon GetIcon(QDir picdir) override;
 
-protected:
+private:
+	void on_slicenr_changed() override;
+
 	template<typename ImagePointer>
 	ImagePointer DoBiasCorrection(ImagePointer inputImage, ImagePointer maskImage,
 			const std::vector<unsigned int>& numIters,
 			int shrinkFactor, double convergenceThreshold);
-
-private:
-	void on_slicenr_changed() override;
 
 	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;

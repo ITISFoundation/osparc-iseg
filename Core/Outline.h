@@ -14,7 +14,7 @@
 #include "Pair.h"
 #include "Types.h"
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 #include <map>
 #include <set>

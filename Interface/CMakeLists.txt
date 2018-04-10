@@ -15,13 +15,12 @@ USE_ITK()
 SET(SOURCES
 	Plugin.cpp
 	Plugin.h
-	PluginApi.h
+	InterfaceApi.h
 	SlicesHandlerInterface.h
 	WidgetInterface.h
 	WidgetInterface.cpp
 )
 
 QT4_WRAP_CPP(MOCSrcs WidgetInterface.h)
-ADD_LIBRARY(Plugin SHARED  ${SOURCES} ${MOCSrcs})
-TARGET_LINK_LIBRARIES(Plugin ${MY_EXTERNAL_LINK_LIBRARIES} )
-VS_SET_PROPERTY(Plugin "Plugins")
+ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${MOCSrcs})
+TARGET_LINK_LIBRARIES(iSegInterface ${MY_EXTERNAL_LINK_LIBRARIES} )

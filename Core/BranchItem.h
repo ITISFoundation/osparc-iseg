@@ -13,7 +13,7 @@
 
 #include "Vec3.h"
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 #include <list>
 #include <sstream>

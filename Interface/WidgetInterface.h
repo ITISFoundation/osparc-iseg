@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "PluginApi.h"
+#include "InterfaceApi.h"
 
 #include "DataSelection.h"
 #include "Point.h"
@@ -19,20 +19,18 @@
 #include <qicon.h>
 #include <qwidget.h>
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 namespace iseg {
 
-class ISEG_PLUGIN_API WidgetInterface : public QWidget
+class ISEG_INTERFACE_API WidgetInterface : public QWidget
 {
 	Q_OBJECT
 public:
-	WidgetInterface(QWidget *parent, const char *name, Qt::WindowFlags wFlags);
+	WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags);
 	virtual void init() {}
 	virtual void newloaded() {}
 	virtual void cleanup() {}
-	virtual FILE *SaveParams(FILE *fp, int version) { return fp; };
-	virtual FILE *LoadParams(FILE *fp, int version) { return fp; };
+	virtual FILE* SaveParams(FILE* fp, int version) { return fp; };
+	virtual FILE* LoadParams(FILE* fp, int version) { return fp; };
 	virtual void hideparams_changed() {}
 	static void set_hideparams(bool hide) { hideparams = hide; }
 	static bool get_hideparams() { return hideparams; }
@@ -46,12 +44,12 @@ public:
 	virtual void on_mouse_released(Point p) {}
 	virtual void on_mouse_moved(Point p) {}
 
-	QCursor *get_cursor() { return m_cursor; }
+	QCursor* get_cursor() { return m_cursor; }
 
 signals:
-	void begin_datachange(iseg::DataSelection &dataSelection,
-			QWidget *sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget *sender = NULL,
+	void begin_datachange(iseg::DataSelection& dataSelection,
+			QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 private slots:
@@ -64,7 +62,7 @@ private slots:
 	void mouse_moved(Point p) { on_mouse_moved(p); }
 
 protected:
-	QCursor *m_cursor;
+	QCursor* m_cursor;
 
 	static bool hideparams;
 };

@@ -45,7 +45,7 @@
 #	include "RadiotherapyStructureSetImporter.h"
 #endif
 
-#include "Plugin/Plugin.h"
+#include "Interface/Plugin.h"
 
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"

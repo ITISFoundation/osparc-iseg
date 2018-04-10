@@ -18,10 +18,10 @@ IF(ISEG_BUILD_TESTING)
 		test_iSegImageAdaptor.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_Plugin ${SOURCES} ${HEADERS})
-	TARGET_LINK_LIBRARIES(TestSuite_Plugin
-		Plugin
+	ADD_LIBRARY(TestSuite_iSegInterface ${SOURCES} ${HEADERS})
+	TARGET_LINK_LIBRARIES(TestSuite_iSegInterface
+		iSegInterface
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_Plugin "TestSuite")
+	VS_SET_PROPERTY(TestSuite_iSegInterface "TestSuite")
 ENDIF()

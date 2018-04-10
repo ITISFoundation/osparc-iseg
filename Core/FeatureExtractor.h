@@ -13,7 +13,7 @@
 
 #include "Pair.h"
 
-#include "Plugin/Point.h"
+#include "Interface/Point.h"
 
 namespace iseg {
 

@@ -10,8 +10,8 @@
 #ifndef WIDGETCOLLECTION
 #define WIDGETCOLLECTION
 
-#include "Plugin/DataSelection.h"
-#include "Plugin/Point.h"
+#include "Interface/DataSelection.h"
+#include "Interface/Point.h"
 
 #include "Core/Types.h"
 

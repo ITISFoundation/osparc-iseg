@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
