@@ -35,20 +35,17 @@ class PickerWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	PickerWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	PickerWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+			const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~PickerWidget();
-	FILE* SaveParams(FILE* fp, int version) override;
-	FILE* LoadParams(FILE* fp, int version) override;
-	QSize sizeHint() const;
+	FILE *SaveParams(FILE *fp, int version) override;
+	FILE *LoadParams(FILE *fp, int version) override;
+	QSize sizeHint() const override;
 	void init() override;
-	void cleanup();
+	void cleanup() override;
 	void newloaded() override;
 	std::string GetName() override { return std::string("Picker"); };
-	virtual QIcon GetIcon(QDir picdir) override
-	{
-		return QIcon(picdir.absFilePath(QString("picker.png")));
-	}
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("picker.png"))); }
 
 private:
 	void on_mouse_clicked(Point p) override;
@@ -56,35 +53,35 @@ private:
 	void update_active();
 	void showborder();
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
+	bmphandler *bmphand;
+	SlicesHandler *handler3D;
 	unsigned int width;
 	unsigned int height;
 	bool hasclipboard;
 	bool shiftpressed;
 	bool clipboardworkortissue;
-	bool* mask;
-	bool* currentselection;
-	float* valuedistrib;
+	bool *mask;
+	bool *currentselection;
+	float *valuedistrib;
 	unsigned char mode;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3VBox* vbox1;
-	QPushButton* pb_copy;
-	QPushButton* pb_paste;
-	QPushButton* pb_cut;
-	QPushButton* pb_delete;
-	QRadioButton* rb_work;
-	QRadioButton* rb_tissue;
-	QButtonGroup* worktissuegroup;
-	QRadioButton* rb_erase;
-	QRadioButton* rb_fill;
-	QButtonGroup* erasefillgroup;
+	Q3HBox *hbox1;
+	Q3HBox *hbox2;
+	Q3HBox *hbox3;
+	Q3VBox *vbox1;
+	QPushButton *pb_copy;
+	QPushButton *pb_paste;
+	QPushButton *pb_cut;
+	QPushButton *pb_delete;
+	QRadioButton *rb_work;
+	QRadioButton *rb_tissue;
+	QButtonGroup *worktissuegroup;
+	QRadioButton *rb_erase;
+	QRadioButton *rb_fill;
+	QButtonGroup *erasefillgroup;
 	std::vector<Point> selection;
 
 signals:
-	void vp1_changed(std::vector<Point>* vp1);
+	void vp1_changed(std::vector<Point> *vp1);
 
 public slots:
 	void slicenr_changed();
@@ -96,11 +93,11 @@ private slots:
 	void delete_pressed();
 
 	void worktissue_changed(int);
-	void bmphand_changed(bmphandler* bmph);
+	void bmphand_changed(bmphandler *bmph);
 
 protected:
-	void keyPressEvent(QKeyEvent* event);
-	void keyReleaseEvent(QKeyEvent* event);
+	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
 };
 
 } // namespace iseg

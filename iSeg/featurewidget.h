@@ -42,16 +42,13 @@ class FeatureWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FeatureWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-				  const char* name = 0, Qt::WindowFlags wFlags = 0);
+	FeatureWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+			const char *name = 0, Qt::WindowFlags wFlags = 0);
 	void init();
 	void newloaded();
-	QSize sizeHint() const;
+	QSize sizeHint() const override;
 	std::string GetName() { return std::string("Feature"); }
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("feature.png")).ascii());
-	}
+	QIcon GetIcon(QDir picdir) { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
 
 private:
 	void on_mouse_clicked(Point p) override;
@@ -60,41 +57,41 @@ private:
 
 	bool selecting;
 	std::vector<Point> dynamic;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
+	bmphandler *bmphand;
+	SlicesHandler *handler3D;
 	unsigned short activeslice;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	Q3HBox* hbox1;
-	QLabel* lb_map;
-	QLabel* lb_av;
-	QLabel* lb_stddev;
-	QLabel* lb_min;
-	QLabel* lb_max;
-	QLabel* lb_pt;
-	QLabel* lb_tissue;
-	QLabel* lb_grey;
-	QLabel* lb_map_value;
-	QLabel* lb_av_value;
-	QLabel* lb_stddev_value;
-	QLabel* lb_min_value;
-	QLabel* lb_max_value;
-	QLabel* lb_pt_value;
-	QLabel* lb_grey_value;
-	QLabel* lb_work_map_value;
-	QLabel* lb_work_av_value;
-	QLabel* lb_work_stddev_value;
-	QLabel* lb_work_min_value;
-	QLabel* lb_work_max_value;
-	QLabel* lb_work_pt_value;
-	QLabel* lb_work_grey_value;
-	QLabel* lb_tissuename;
-	QLabel* lb_dummy;
+	Q3VBox *vbox1;
+	Q3VBox *vbox2;
+	Q3VBox *vbox3;
+	Q3HBox *hbox1;
+	QLabel *lb_map;
+	QLabel *lb_av;
+	QLabel *lb_stddev;
+	QLabel *lb_min;
+	QLabel *lb_max;
+	QLabel *lb_pt;
+	QLabel *lb_tissue;
+	QLabel *lb_grey;
+	QLabel *lb_map_value;
+	QLabel *lb_av_value;
+	QLabel *lb_stddev_value;
+	QLabel *lb_min_value;
+	QLabel *lb_max_value;
+	QLabel *lb_pt_value;
+	QLabel *lb_grey_value;
+	QLabel *lb_work_map_value;
+	QLabel *lb_work_av_value;
+	QLabel *lb_work_stddev_value;
+	QLabel *lb_work_min_value;
+	QLabel *lb_work_max_value;
+	QLabel *lb_work_pt_value;
+	QLabel *lb_work_grey_value;
+	QLabel *lb_tissuename;
+	QLabel *lb_dummy;
 	Point pstart;
 
 signals:
-	void vpdyn_changed(std::vector<Point>* vpdyn);
+	void vpdyn_changed(std::vector<Point> *vpdyn);
 
 public slots:
 	void slicenr_changed();

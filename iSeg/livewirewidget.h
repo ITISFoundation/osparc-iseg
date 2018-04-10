@@ -45,21 +45,18 @@ class livewire_widget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	livewire_widget(SlicesHandler* hand3D, QWidget* parent = 0,
-					const char* name = 0, Qt::WindowFlags wFlags = 0);
+	livewire_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+			const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~livewire_widget();
 	void init() override;
 	void newloaded() override;
-	void cleanup();
-	FILE* SaveParams(FILE* fp, int version) override;
-	FILE* LoadParams(FILE* fp, int version) override;
+	void cleanup() override;
+	FILE *SaveParams(FILE *fp, int version) override;
+	FILE *LoadParams(FILE *fp, int version) override;
 	void hideparams_changed() override;
-	QSize sizeHint() const;
+	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Contour"); }
-	virtual QIcon GetIcon(QDir picdir) override
-	{
-		return QIcon(picdir.absFilePath(QString("contour.png")).ascii());
-	}
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("contour.png"))); }
 
 private:
 	void on_mouse_clicked(Point p) override;
@@ -68,9 +65,9 @@ private:
 
 	void init1();
 
-	ImageForestingTransformLivewire* lw;
-	ImageForestingTransformLivewire* lwfirst;
-	
+	ImageForestingTransformLivewire *lw;
+	ImageForestingTransformLivewire *lwfirst;
+
 	//	bool isactive;
 	bool drawing;
 	std::vector<Point> clicks;
@@ -82,38 +79,38 @@ private:
 	int tlimit1;
 	int tlimit2;
 	bool cooling;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
+	bmphandler *bmphand;
+	SlicesHandler *handler3D;
 	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3VBox* vbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	QCheckBox* cb_freezing;
-	QCheckBox* cb_closing;
-	QSpinBox* sb_freezing;
-	QLabel* lb_freezing1;
-	QLabel* lb_freezing2;
-	QPushButton* pushexec;
+	Q3HBox *hboxoverall;
+	Q3VBox *vboxmethods;
+	Q3VBox *vbox1;
+	Q3HBox *hbox2;
+	Q3HBox *hbox3;
+	QCheckBox *cb_freezing;
+	QCheckBox *cb_closing;
+	QSpinBox *sb_freezing;
+	QLabel *lb_freezing1;
+	QLabel *lb_freezing2;
+	QPushButton *pushexec;
 	bool straightmode;
-	QRadioButton* autotrace;
-	QRadioButton* straight;
-	QRadioButton* freedraw;
-	QButtonGroup* drawmode;
+	QRadioButton *autotrace;
+	QRadioButton *straight;
+	QRadioButton *freedraw;
+	QButtonGroup *drawmode;
 	Point p1, p2;
 	std::vector<int> establishedlengths;
 
 signals:
-	void vp1_changed(std::vector<Point>* vp1);
-	void vpdyn_changed(std::vector<Point>* vpdyn);
-	void vp1dyn_changed(std::vector<Point>* vp1, std::vector<Point>* vpdyn);
+	void vp1_changed(std::vector<Point> *vp1);
+	void vpdyn_changed(std::vector<Point> *vpdyn);
+	void vp1dyn_changed(std::vector<Point> *vp1, std::vector<Point> *vpdyn);
 
 public slots:
 	void slicenr_changed();
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
+	void bmphand_changed(bmphandler *bmph);
 	//	void bmphand_changed(bmphandler *bmph);
 	void pt_doubleclicked(Point p);
 	void pt_midclicked(Point p);

@@ -25,9 +25,9 @@
 using namespace std;
 using namespace iseg;
 
-VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
-						   const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+VesselWidget::VesselWidget(SlicesHandler *hand3D, QWidget *parent,
+		const char *name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -66,15 +66,15 @@ VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
 	marks_changed();
 
 	QObject::connect(sb_nrend, SIGNAL(valueChanged(int)), this,
-					 SLOT(nrend_changed(int)));
+			SLOT(nrend_changed(int)));
 	QObject::connect(sb_endnr, SIGNAL(valueChanged(int)), this,
-					 SLOT(endnr_changed(int)));
+			SLOT(endnr_changed(int)));
 	QObject::connect(pb_exec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(pb_store, SIGNAL(clicked()), this, SLOT(savevessel()));
 	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-					 SLOT(cbb1_changed(int)));
+			SLOT(cbb1_changed(int)));
 	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-					 SLOT(cbb2_changed(int)));
+			SLOT(cbb2_changed(int)));
 }
 
 VesselWidget::~VesselWidget() { delete vbox1; }
@@ -90,18 +90,18 @@ void VesselWidget::init()
 	if (branchTree.getSize() > 0)
 	{
 		branchTree.getItem()->getCenterListSlice_inclchildren(
-			handler3D->get_activeslice(), vp);
+				handler3D->get_activeslice(), vp);
 	}
 	emit vp1_changed(&vp);
 }
 
-FILE* VesselWidget::SaveParams(FILE* fp, int version)
+FILE *VesselWidget::SaveParams(FILE *fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
-FILE* VesselWidget::LoadParams(FILE* fp, int version)
+FILE *VesselWidget::LoadParams(FILE *fp, int version)
 {
 	UNREFERENCED_PARAMETER(version);
 	return fp;
@@ -111,9 +111,9 @@ void VesselWidget::getlabels()
 {
 	handler3D->get_labels(&labels);
 	QObject::disconnect(cbb_lb1, SIGNAL(activated(int)), this,
-						SLOT(cbb1_changed(int)));
+			SLOT(cbb1_changed(int)));
 	QObject::disconnect(cbb_lb2, SIGNAL(activated(int)), this,
-						SLOT(cbb2_changed(int)));
+			SLOT(cbb2_changed(int)));
 	cbb_lb1->clear();
 	cbb_lb2->clear();
 
@@ -165,9 +165,9 @@ void VesselWidget::getlabels()
 	}
 
 	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-					 SLOT(cbb1_changed(int)));
+			SLOT(cbb1_changed(int)));
 	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-					 SLOT(cbb2_changed(int)));
+			SLOT(cbb2_changed(int)));
 
 	if (labels.empty())
 	{
@@ -200,7 +200,7 @@ void VesselWidget::execute()
 	end[1] = selectedlabels[0].p.py;
 	end[2] = selectedlabels[0].slicenr;
 
-	std::vector<Vec3> seeds;	// only distal seeds
+	std::vector<Vec3> seeds;		// only distal seeds
 	std::vector<Vec3> allSeeds; // seeds + end point
 
 	// save all start seeds in s
@@ -223,7 +223,7 @@ void VesselWidget::execute()
 	allSeeds.push_back(end);
 
 	if (!seeds.empty() && (handler3D->return_nrslices() > 0) &&
-		(handler3D->return_width() > 0) && (handler3D->return_height() > 0))
+			(handler3D->return_width() > 0) && (handler3D->return_height() > 0))
 	{
 		Vec3 tmpbbStart;
 		//tmpbbStart[0]=0;
@@ -289,7 +289,7 @@ void VesselWidget::nrend_changed(int newval)
 void VesselWidget::endnr_changed(int newval)
 {
 	QObject::disconnect(cbb_lb2, SIGNAL(activated(int)), this,
-						SLOT(cbb2_changed(int)));
+			SLOT(cbb2_changed(int)));
 
 	size_t i = 0;
 	while ((i < labels.size()) && (labels[i] != selectedlabels[newval]))
@@ -297,7 +297,7 @@ void VesselWidget::endnr_changed(int newval)
 	cbb_lb2->setCurrentItem(i);
 
 	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-					 SLOT(cbb2_changed(int)));
+			SLOT(cbb2_changed(int)));
 }
 
 void VesselWidget::cbb1_changed(int newval)
@@ -327,7 +327,7 @@ void VesselWidget::slicenr_changed()
 	if (branchTree.getSize() > 0)
 	{
 		branchTree.getItem()->getCenterListSlice_inclchildren(
-			handler3D->get_activeslice(), vp);
+				handler3D->get_activeslice(), vp);
 	}
 	emit vp1_changed(&vp);
 }
@@ -335,7 +335,7 @@ void VesselWidget::slicenr_changed()
 void VesselWidget::savevessel()
 {
 	QString savefilename = Q3FileDialog::getSaveFileName(
-		QString::null, "Vessel-Tracks (*.txt)\n", this); //, filename);
+			QString::null, "Vessel-Tracks (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
@@ -347,8 +347,8 @@ void VesselWidget::savevessel()
 		float thick = handler3D->get_slicethickness();
 		float epsilon = max(max(pair1.high, pair1.low), thick);
 		branchTree.getItem()->doug_peuck_inclchildren(epsilon, pair1.high,
-													  pair1.low, thick, vp);
-		FILE* fp = fopen(savefilename.ascii(), "w");
+				pair1.low, thick, vp);
+		FILE *fp = fopen(savefilename.ascii(), "w");
 		int version = 2;
 		unsigned short w = handler3D->return_width();
 		unsigned short h = handler3D->return_height();
@@ -372,8 +372,13 @@ void VesselWidget::savevessel()
 	}
 }
 
-void VesselWidget::clean_up()
+void VesselWidget::cleanup()
 {
 	vp.clear();
 	emit vp1_changed(&vp);
+}
+
+QIcon iseg::VesselWidget::GetIcon(QDir picdir)
+{
+	return QIcon(picdir.absFilePath(QString("vessel.png")));
 }

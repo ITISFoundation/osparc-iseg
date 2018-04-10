@@ -33,18 +33,18 @@ class ImageForestingTransformRegionGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-											   const char* name = 0, Qt::WindowFlags wFlags = 0);
+	ImageForestingTransformRegionGrowingWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+			const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~ImageForestingTransformRegionGrowingWidget();
 	void init() override;
 	void newloaded() override;
-	void cleanup();
-	QSize sizeHint() const;
-	FILE* SaveParams(FILE* fp, int version) override;
-	FILE* LoadParams(FILE* fp, int version) override;
+	void cleanup() override;
+	QSize sizeHint() const override;
+	FILE *SaveParams(FILE *fp, int version) override;
+	FILE *LoadParams(FILE *fp, int version) override;
 	void hideparams_changed() override;
 	std::string GetName() override { return std::string("IFT"); }
-	virtual QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("iftrg.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("iftrg.png"))); }
 
 protected:
 	void on_tissuenr_changed(int i) override;
@@ -59,20 +59,20 @@ private:
 	void removemarks(Point p);
 	void getrange();
 
-	float* lbmap;
-	ImageForestingTransformRegionGrowing* IFTrg;
+	float *lbmap;
+	ImageForestingTransformRegionGrowing *IFTrg;
 	Point last_pt;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
+	bmphandler *bmphand;
+	SlicesHandler *handler3D;
 	unsigned short activeslice;
-	Q3HBox* hbox1;
-	Q3VBox* vbox1;
-	QLabel* txt_lower;
-	QLabel* txt_upper;
-	QSlider* sl_thresh;
-	QPushButton* pushexec;
-	QPushButton* pushclear;
-	QPushButton* pushremove;
+	Q3HBox *hbox1;
+	Q3VBox *vbox1;
+	QLabel *txt_lower;
+	QLabel *txt_upper;
+	QSlider *sl_thresh;
+	QPushButton *pushexec;
+	QPushButton *pushclear;
+	QPushButton *pushremove;
 	unsigned tissuenr;
 	float thresh;
 	float maxthresh;
@@ -82,11 +82,11 @@ private:
 	unsigned area;
 
 signals:
-	void vm_changed(std::vector<Mark>* vm1);
-	void vmdyn_changed(std::vector<Point>* vmdyn1);
+	void vm_changed(std::vector<Mark> *vm1);
+	void vmdyn_changed(std::vector<Point> *vmdyn1);
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
+	void bmphand_changed(bmphandler *bmph);
 	void execute();
 	void clearmarks();
 	void slider_changed(int i);
@@ -96,4 +96,3 @@ private slots:
 };
 
 } // namespace iseg
-

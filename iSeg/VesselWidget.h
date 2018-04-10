@@ -31,48 +31,45 @@ class VesselWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	VesselWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	VesselWidget(SlicesHandler *hand3D, QWidget *parent = 0, const char *name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~VesselWidget();
-	FILE* SaveParams(FILE* fp, int version) override;
-	FILE* LoadParams(FILE* fp, int version) override;
-	QSize sizeHint() const;
+	FILE *SaveParams(FILE *fp, int version) override;
+	FILE *LoadParams(FILE *fp, int version) override;
+	QSize sizeHint() const override;
 	void init() override;
 	void newloaded() override;
 	void slicenr_changed();
-	std::string GetName() override { return std::string("Vessel"); };
-	virtual QIcon GetIcon(QDir picdir) override
-	{
-		return QIcon(picdir.absFilePath(QString("vessel.png")).ascii());
-	};
-	void clean_up();
+	std::string GetName() override { return std::string("Vessel"); }
+	QIcon GetIcon(QDir picdir) override;
+	void cleanup() override;
 
 private:
 	BranchTree branchTree;
 	void getlabels();
 	void reset_branchTree();
-	SlicesHandler* handler3D;
+	SlicesHandler *handler3D;
 	std::vector<augmentedmark> labels;
 	std::vector<augmentedmark> selectedlabels;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3VBox* vbox1;
-	QLabel* txt_start;
-	QLabel* txt_nrend;
-	QLabel* txt_endnr;
-	QLabel* txt_end;
-	QLabel* txt_info;
-	QComboBox* cbb_lb1;
-	QComboBox* cbb_lb2;
-	QSpinBox* sb_nrend;
-	QSpinBox* sb_endnr;
-	QPushButton* pb_exec;
-	QPushButton* pb_store;
+	Q3HBox *hbox1;
+	Q3HBox *hbox2;
+	Q3HBox *hbox3;
+	Q3VBox *vbox1;
+	QLabel *txt_start;
+	QLabel *txt_nrend;
+	QLabel *txt_endnr;
+	QLabel *txt_end;
+	QLabel *txt_info;
+	QComboBox *cbb_lb1;
+	QComboBox *cbb_lb2;
+	QSpinBox *sb_nrend;
+	QSpinBox *sb_endnr;
+	QPushButton *pb_exec;
+	QPushButton *pb_store;
 	std::vector<Point> vp;
 
 signals:
-	void vp1_changed(std::vector<Point>* vp1);
+	void vp1_changed(std::vector<Point> *vp1);
 
 private slots:
 	void marks_changed();
