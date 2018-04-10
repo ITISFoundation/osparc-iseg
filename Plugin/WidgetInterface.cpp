@@ -13,7 +13,7 @@ namespace iseg {
 
 bool WidgetInterface::hideparams = false;
 
-WidgetInterface::WidgetInterface(QWidget *parent, const char *name, Qt::WindowFlags wFlags)
+WidgetInterface::WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
 	m_cursor = new QCursor(Qt::CrossCursor);

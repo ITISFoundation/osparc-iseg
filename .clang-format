@@ -25,6 +25,7 @@ BraceWrapping:
   SplitEmptyFunction: true
 BreakBeforeInheritanceComma: true
 BreakConstructorInitializers: BeforeColon
+PointerAlignment: Left
 CompactNamespaces: true
 Cpp11BracedListStyle: true
 FixNamespaceComments: true

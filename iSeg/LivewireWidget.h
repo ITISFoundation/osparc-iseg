@@ -41,13 +41,13 @@
 
 namespace iseg {
 
-class livewire_widget : public WidgetInterface
+class LivewireWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	livewire_widget(SlicesHandler *hand3D, QWidget *parent = 0,
+	LivewireWidget(SlicesHandler *hand3D, QWidget *parent = 0,
 			const char *name = 0, Qt::WindowFlags wFlags = 0);
-	~livewire_widget();
+	~LivewireWidget();
 	void init() override;
 	void newloaded() override;
 	void cleanup() override;
