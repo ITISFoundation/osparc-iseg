@@ -14,7 +14,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Core/Point.h"
+#include "Interface/Point.h"
 
 #include <q3vbox.h>
 #include <qbuttongroup.h>
@@ -34,17 +34,17 @@
 using namespace iseg;
 
 MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
-								   const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(
-		Format("Apply morphological operations to the Target image. "
-			   "Morphological operations are "
-			   "based on expanding or shrinking (Dilate/Erode) regions by "
-			   "a given number of pixel layers (n)."
-			   "<br>"
-			   "The functions act on the Target image (to modify a tissue "
-			   "use Get Tissue and Adder)."));
+			Format("Apply morphological operations to the Target image. "
+						 "Morphological operations are "
+						 "based on expanding or shrinking (Dilate/Erode) regions by "
+						 "a given number of pixel layers (n)."
+						 "<br>"
+						 "The functions act on the Target image (to modify a tissue "
+						 "use Get Tissue and Adder)."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -63,30 +63,30 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	connectgroup = new QButtonGroup(this);
 	connectgroup->insert(
-		rb_4connect = new QRadioButton(QString("4-connectivity"), hbox2));
+			rb_4connect = new QRadioButton(QString("4-connectivity"), hbox2));
 	connectgroup->insert(
-		rb_8connect = new QRadioButton(QString("8-connectivity"), hbox2));
+			rb_8connect = new QRadioButton(QString("8-connectivity"), hbox2));
 	rb_4connect->setChecked(TRUE);
 
 	modegroup = new QButtonGroup(this);
 	modegroup->insert(rb_open = new QRadioButton(QString("Open"), vboxmethods));
 	modegroup->insert(rb_close =
-						  new QRadioButton(QString("Close"), vboxmethods));
+												new QRadioButton(QString("Close"), vboxmethods));
 	modegroup->insert(rb_erode =
-						  new QRadioButton(QString("Erode"), vboxmethods));
+												new QRadioButton(QString("Erode"), vboxmethods));
 	modegroup->insert(rb_dilate =
-						  new QRadioButton(QString("Dilate"), vboxmethods));
+												new QRadioButton(QString("Dilate"), vboxmethods));
 	rb_open->setChecked(TRUE);
 
 	rb_open->setToolTip(Format(
-		"First shrinking before growing is called Open and results in the "
-		"deletion of small islands and thin links between structures."));
+			"First shrinking before growing is called Open and results in the "
+			"deletion of small islands and thin links between structures."));
 	rb_close->setToolTip(Format("Growing followed by shrinking results in the "
-								"closing of small (< 2n) gaps and holes."));
+															"closing of small (< 2n) gaps and holes."));
 	rb_erode->setToolTip(Format(
-		"Erode or shrink the boundaries of regions of foreground pixels."));
+			"Erode or shrink the boundaries of regions of foreground pixels."));
 	rb_dilate->setToolTip(
-		Format("Enlarge the boundaries of regions of foreground pixels."));
+			Format("Enlarge the boundaries of regions of foreground pixels."));
 
 	vboxmethods->setMargin(5);
 	vbox1->setMargin(5);
@@ -169,18 +169,15 @@ void MorphologyWidget::execute()
 
 QSize MorphologyWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void MorphologyWidget::slicenr_changed()
+void MorphologyWidget::on_slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
 void MorphologyWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
-	return;
 }
 
 void MorphologyWidget::init()

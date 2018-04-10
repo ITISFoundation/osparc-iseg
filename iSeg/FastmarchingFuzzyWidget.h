@@ -7,13 +7,9 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef FMF_31March05
-#define FMF_31March05
+#pragma once
 
-#include "Plugin/WidgetInterface.h"
-
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3hbox.h>
 #include <q3mimefactory.h>
@@ -43,20 +39,23 @@ class FastmarchingFuzzyWidget : public WidgetInterface
 	Q_OBJECT
 public:
 	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-							const char* name = 0, Qt::WindowFlags wFlags = 0);
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~FastmarchingFuzzyWidget();
-	void init();
-	void newloaded();
-	void cleanup();
-	QSize sizeHint() const;
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("Fuzzy"); };
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("fuzzy.png")).ascii());
-	};
+	void init() override;
+	void newloaded() override;
+	void cleanup() override;
+	QSize sizeHint() const override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("Fuzzy"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("fuzzy.png"))); }
+
+protected:
+	void on_slicenr_changed() override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_released(Point p) override;
+	void on_mouse_moved(Point p) override;
 
 private:
 	float* map;
@@ -109,19 +108,12 @@ private:
 
 signals:
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-public slots:
-	void slicenr_changed();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	void mouse_clicked(Point p);
-	void mouse_released(Point p);
-	void mouse_moved(Point p);
+	//void mouse_clicked(Point p);
+	//void mouse_released(Point p);
+	//void mouse_moved(Point p);
 	void slextend_changed(int i);
 	void slextend_pressed();
 	void slextend_released();
@@ -133,5 +125,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

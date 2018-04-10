@@ -12,7 +12,8 @@
 #include "iSegCore.h"
 
 #include "Pair.h"
-#include "Point.h"
+
+#include "Interface/Point.h"
 
 namespace iseg {
 

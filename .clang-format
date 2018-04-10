@@ -7,7 +7,7 @@ AllowShortFunctionsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlignEscapedNewlines: Right
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: DontAlign
 AlwaysBreakAfterReturnType: None
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
@@ -23,7 +23,9 @@ BraceWrapping:
   BeforeElse: true
   IndentBraces: false
   SplitEmptyFunction: true
-BreakBeforeInheritanceComma: false
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializers: BeforeColon
+PointerAlignment: Left
 CompactNamespaces: true
 Cpp11BracedListStyle: true
 FixNamespaceComments: true
@@ -32,7 +34,7 @@ SortIncludes: true
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentWrappedFunctionNames: true
-KeepEmptyLinesAtTheStartOfBlocks: false
+KeepEmptyLinesAtTheStartOfBlocks: true
 NamespaceIndentation: None
 ReflowComments: false
 IndentWidth: 2
@@ -47,3 +49,4 @@ SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInAngles: false
 MaxEmptyLinesToKeep: 1
+ColumnLimit: 0

@@ -14,7 +14,8 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Core/Point.h"
+#include "Interface/Point.h"
+
 #include "Core/addLine.h"
 
 #include <QLabel>
@@ -377,7 +378,7 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 	vpdyn.clear();
 }
 
-void OutlineCorrectionWidget::mouse_clicked(Point p)
+void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 {
 	if (selectobj)
 	{
@@ -472,7 +473,7 @@ void OutlineCorrectionWidget::mouse_clicked(Point p)
 	}
 }
 
-void OutlineCorrectionWidget::mouse_moved(Point p)
+void OutlineCorrectionWidget::on_mouse_moved(Point p)
 {
 	if (!selectobj)
 	{
@@ -542,13 +543,13 @@ void OutlineCorrectionWidget::mouse_moved(Point p)
 			rect.setTop(max(0, dummy1 - sb_radius->value()));
 			rect.setBottom(min((int)bmphand->return_height() - 1,
 							   dummy2 + sb_radius->value()));
-			emit end_datachange(rect, this, iseg::NoUndo);
+			emit end_datachange(this, iseg::NoUndo);
 			last_pt = p;
 		}
 	}
 }
 
-void OutlineCorrectionWidget::mouse_released(Point p)
+void OutlineCorrectionWidget::on_mouse_released(Point p)
 {
 	if (selectobj)
 	{
@@ -1130,7 +1131,7 @@ void OutlineCorrectionWidget::workbits_changed()
 	}
 }
 
-void OutlineCorrectionWidget::slicenr_changed()
+void OutlineCorrectionWidget::on_slicenr_changed()
 {
 	if (activeslice != handler3D->get_activeslice())
 	{
@@ -1152,7 +1153,7 @@ void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
 
 void OutlineCorrectionWidget::init()
 {
-	slicenr_changed();
+	on_slicenr_changed();
 	hideparams_changed();
 }
 
@@ -1163,7 +1164,7 @@ void OutlineCorrectionWidget::newloaded()
 	bmphand = handler3D->get_activebmphandler();
 }
 
-void OutlineCorrectionWidget::tissuenr_changed(int tissuenr1)
+void OutlineCorrectionWidget::on_tissuenr_changed(int tissuenr1)
 {
 	tissuenr = (tissues_size_t)(tissuenr1 + 1);
 }

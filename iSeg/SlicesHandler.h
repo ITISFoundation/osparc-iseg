@@ -10,7 +10,7 @@
 #ifndef HANDLER3DSLICES
 #define HANDLER3DSLICES
 
-#include "Plugin/SlicesHandlerInterface.h"
+#include "Interface/SlicesHandlerInterface.h"
 
 #include "Core/Outline.h" // BL TODO get rid of this
 #include "Core/RGB.h"

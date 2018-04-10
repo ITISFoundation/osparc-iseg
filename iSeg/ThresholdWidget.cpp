@@ -15,9 +15,6 @@
 #include "bmp_read_1.h"
 
 #include "Core/Pair.h"
-#include "Core/Point.h"
-
-#include "Plugin/WidgetInterface.h"
 
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -607,7 +604,7 @@ void ThresholdWidget::getrange()
 	return;
 }
 
-void ThresholdWidget::tissuenr_changed(int newval)
+void ThresholdWidget::on_tissuenr_changed(int newval)
 {
 	if (rb_manual->isOn())
 	{
@@ -766,7 +763,7 @@ void ThresholdWidget::bmp_changed()
 
 QSize ThresholdWidget::sizeHint() const { return vbox1->sizeHint(); }
 
-void ThresholdWidget::slicenr_changed()
+void ThresholdWidget::on_slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
@@ -1029,7 +1026,7 @@ FILE* ThresholdWidget::LoadParams(FILE* fp, int version)
 		nrtissues_changed(sb_nrtissues->value());
 		dim_changed(sb_dim->value());
 		sb_tissuenr->setValue(dummy);
-		tissuenr_changed(dummy);
+		on_tissuenr_changed(dummy);
 
 		QObject::connect(subsect, SIGNAL(clicked()), this,
 						 SLOT(subsect_toggled()));

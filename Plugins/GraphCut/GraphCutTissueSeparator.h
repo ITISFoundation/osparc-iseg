@@ -9,8 +9,8 @@
  */
 #pragma once
 
-#include "Plugin/SlicesHandlerInterface.h"
-#include "Plugin/WidgetInterface.h"
+#include "Interface/SlicesHandlerInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
 #include <qcheckbox.h>
@@ -24,19 +24,18 @@ class TissueSeparatorWidget : public iseg::WidgetInterface
 	Q_OBJECT
 public:
 	TissueSeparatorWidget(iseg::SliceHandlerInterface* hand3D,
-						  QWidget* parent = 0, const char* name = 0,
-						  Qt::WindowFlags wFlags = 0);
+			QWidget* parent = 0, const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~TissueSeparatorWidget();
-	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	std::string GetName() { return std::string("Separate Tissue"); }
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("graphcut.png")).ascii());
-	}
+	QSize sizeHint() const override;
+	void init() override;
+	void newloaded() override;
+	std::string GetName() override { return std::string("Separate Tissue"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
 
 private:
+	void on_slicenr_changed() override;
+
 	iseg::SliceHandlerInterface* m_Handler3D;
 	unsigned short m_CurrentSlice;
 	Q3VBox* m_VerticalGrid;
@@ -60,9 +59,6 @@ private:
 	QSpinBox* m_Start;
 	QSpinBox* m_End;
 	QPushButton* m_Execute;
-
-public slots:
-	void slicenr_changed();
 
 private slots:
 	void do_work();

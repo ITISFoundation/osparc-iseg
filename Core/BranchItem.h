@@ -11,8 +11,9 @@
 
 #include "iSegCore.h"
 
-#include "Point.h"
 #include "Vec3.h"
+
+#include "Interface/Point.h"
 
 #include <list>
 #include <sstream>

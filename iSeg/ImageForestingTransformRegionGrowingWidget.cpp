@@ -115,11 +115,11 @@ void ImageForestingTransformRegionGrowingWidget::init()
 		}
 	}
 	else
+	{
 		init1();
+	}
 
 	hideparams_changed();
-
-	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::newloaded()
@@ -136,7 +136,6 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 		 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
-		;
 	}
 	emit vm_changed(&vm);
 	area = bmphand->return_height() * (unsigned)bmphand->return_width();
@@ -179,13 +178,15 @@ void ImageForestingTransformRegionGrowingWidget::cleanup()
 	emit vm_changed(&vmempty);
 }
 
-void ImageForestingTransformRegionGrowingWidget::tissuenr_changed(int i)
+void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 {
+	// \todo B
+	cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
 	tissuenr = (unsigned)i + 1;
 	return;
 }
 
-void ImageForestingTransformRegionGrowingWidget::mouse_clicked(Point p)
+void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
 {
 	last_pt = p;
 	if (pushremove->isOn())
@@ -194,7 +195,7 @@ void ImageForestingTransformRegionGrowingWidget::mouse_clicked(Point p)
 	}
 }
 
-void ImageForestingTransformRegionGrowingWidget::mouse_moved(Point p)
+void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 {
 	if (!pushremove->isOn())
 	{
@@ -204,7 +205,7 @@ void ImageForestingTransformRegionGrowingWidget::mouse_moved(Point p)
 	}
 }
 
-void ImageForestingTransformRegionGrowingWidget::mouse_released(Point p)
+void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 {
 	if (!pushremove->isOn())
 	{
@@ -309,7 +310,7 @@ void ImageForestingTransformRegionGrowingWidget::bmp_changed()
 	init1();
 }
 
-void ImageForestingTransformRegionGrowingWidget::slicenr_changed()
+void ImageForestingTransformRegionGrowingWidget::on_slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();

@@ -12,8 +12,8 @@
 #include "Atlas.h"
 #include "Project.h"
 
-#include "Core/DataSelection.h"
-#include "Core/Point.h"
+#include "Interface/DataSelection.h"
+#include "Interface/Point.h"
 
 #include <qdir.h>
 #include <qmainwindow.h>
@@ -55,7 +55,7 @@ class MultiDataset_widget;
 class ScaleWork;
 class ImageMath;
 class ImageOverlay;
-class zoomer_widget;
+class ZoomWidget;
 class CheckBoneConnectivityDialog;
 class SliceViewerWidget;
 class PickerWidget;
@@ -65,7 +65,7 @@ class OutlineCorrectionWidget;
 class ImageForestingTransformRegionGrowingWidget;
 class TransformWidget;
 class FastmarchingFuzzyWidget;
-class livewire_widget;
+class LivewireWidget;
 class EdgeWidget;
 class MorphologyWidget;
 class HystereticGrowingWidget;
@@ -90,18 +90,18 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(SlicesHandler* hand3D, QString locationstring, QDir picpath,
-			   QDir tmppath, bool editingmode = false, QWidget* parent = 0,
-			   const char* name = 0, Qt::WindowFlags wFlags = 0,
-			   char** argv = NULL);
+	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath,
+			const QDir& tmppath, bool editingmode = false, QWidget* parent = 0,
+			const char* name = 0, Qt::WindowFlags wFlags = 0,
+			char** argv = NULL);
 	~MainWindow();
 
 	friend class Settings;
 
-	void LoadLoadProj(QString path1);
-	void LoadAtlas(QDir path1);
-	void AddLoadProj(QString path1);
-	void SaveLoadProj(QString latestprojpath);
+	void LoadLoadProj(const QString& path1);
+	void LoadAtlas(const QDir& path1);
+	void AddLoadProj(const QString& path1);
+	void SaveLoadProj(const QString& latestprojpath);
 	void SaveSettings();
 	void LoadSettings(const char* loadfilename);
 	void loadproj(const QString& loadfilename);
@@ -133,11 +133,11 @@ signals:
 	void tissues_changed();
 	void drawing_changed();
 	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
+			QWidget* sender = NULL, bool beginUndo = true);
 	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
+			iseg::EndUndoAction undoAction = iseg::EndUndo);
 	void begin_dataexport(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL);
+			QWidget* sender = NULL);
 	void end_dataexport(QWidget* sender = NULL);
 
 private:
@@ -207,10 +207,10 @@ private:
 	Q3PopupMenu* hidemenu;
 	Q3PopupMenu* hidesubmenu;
 	TissueTreeWidget*
-		tissueTreeWidget; // Widget visualizing the tissue hierarchy
+			tissueTreeWidget; // Widget visualizing the tissue hierarchy
 	QLineEdit* tissueFilter;
 	TissueHierarchyWidget*
-		tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
+			tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
 	QCheckBox* cb_tissuelock;
 	QPushButton* lockTissues;
 	QPushButton* addTissue;
@@ -245,7 +245,7 @@ private:
 	MorphologyWidget* morph_widget;
 	WatershedWidget* wshed_widget;
 	HystereticGrowingWidget* hyst_widget;
-	livewire_widget* lw_widget;
+	LivewireWidget* lw_widget;
 	ImageForestingTransformRegionGrowingWidget* iftrg_widget;
 	FastmarchingFuzzyWidget* FMF_widget;
 	OutlineCorrectionWidget* OutlineCorrect_widget;
@@ -283,7 +283,7 @@ private:
 	Q3ScrollView* bmp_scroller;
 	Q3ScrollView* work_scroller;
 	bool tomove_scroller;
-	zoomer_widget* zoom_widget;
+	ZoomWidget* zoom_widget;
 	//	float thickness;
 	SliceViewerWidget* xsliceshower;
 	SliceViewerWidget* ysliceshower;
@@ -350,13 +350,8 @@ private:
 
 private slots:
 	void update_bmp();
-	void update_bmp(QRect rect);
 	void update_work();
-	void update_work(QRect rect);
 	void update_tissue();
-	void update_tissue(QRect rect);
-	//	void marks_changed();
-	//	void drawing_changed();
 	void execute_bmp2work();
 	void execute_work2bmp();
 	void execute_swap_bmpwork();
@@ -568,17 +563,16 @@ private slots:
 	void bmpcrosshairvisible_changed();
 	void workcrosshairvisible_changed();
 	void wheelrotated(int delta);
-	void mousePosZoom_changed(QPoint point);
+	void mousePosZoom_changed(const QPoint& point);
 
 	void handle_begin_datachange(iseg::DataSelection& dataSelection,
-								 QWidget* sender = NULL, bool beginUndo = true);
+			QWidget* sender = NULL, bool beginUndo = true);
 	void handle_end_datachange(QWidget* sender = NULL,
-							   iseg::EndUndoAction undoAction = iseg::EndUndo);
-	void handle_end_datachange(QRect rect, QWidget* sender = NULL,
-							   iseg::EndUndoAction undoAction = iseg::EndUndo);
-	void handle_begin_dataexport(iseg::DataSelection& dataSelection,
-								 QWidget* sender = NULL);
+			iseg::EndUndoAction undoAction = iseg::EndUndo);
+
+	void handle_begin_dataexport(iseg::DataSelection& dataSelection, QWidget* sender = NULL);
 	void handle_end_dataexport(QWidget* sender = NULL);
+
 	void DatasetChanged();
 
 	void provide_selected_tissue_BG();

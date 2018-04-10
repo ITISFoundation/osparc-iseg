@@ -13,7 +13,7 @@
 #include "SlicesHandler.h"
 #include "World.h"
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>
@@ -31,26 +31,25 @@ class VesselWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	VesselWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	VesselWidget(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~VesselWidget();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	void slicenr_changed();
-	std::string GetName() { return std::string("Vessel"); };
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("vessel.png")).ascii());
-	};
-	void clean_up();
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	QSize sizeHint() const override;
+	void init() override;
+	void newloaded() override;
+	std::string GetName() override { return std::string("Vessel"); }
+	QIcon GetIcon(QDir picdir) override;
+	void cleanup() override;
 
 private:
-	BranchTree branchTree;
+	void on_slicenr_changed() override;
+
 	void getlabels();
 	void reset_branchTree();
+
+	BranchTree branchTree;
 	SlicesHandler* handler3D;
 	std::vector<augmentedmark> labels;
 	std::vector<augmentedmark> selectedlabels;

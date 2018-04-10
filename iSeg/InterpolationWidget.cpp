@@ -179,9 +179,9 @@ void InterpolationWidget::init()
 
 void InterpolationWidget::newloaded() {}
 
-void InterpolationWidget::slicenr_changed() {}
+void InterpolationWidget::on_slicenr_changed() {}
 
-void InterpolationWidget::tissuenr_changed(int tissuetype)
+void InterpolationWidget::on_tissuenr_changed(int tissuetype)
 {
 	tissuenr = (tissues_size_t)tissuetype + 1;
 }

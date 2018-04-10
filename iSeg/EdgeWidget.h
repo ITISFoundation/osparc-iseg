@@ -13,7 +13,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3mimefactory.h>
 #include <q3vbox.h>
@@ -37,22 +37,20 @@ class EdgeWidget : public WidgetInterface
 	Q_OBJECT
 public:
 	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			   const char* name = 0, Qt::WindowFlags wFlags = 0);
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~EdgeWidget();
-	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("Edge"); };
-	//virtual QIcon GetIcon() {return QIcon("images/edge.png");};
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("edge.png")).ascii());
-	};
+	QSize sizeHint() const override;
+	void init() override;
+	void newloaded() override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("Edge"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("edge.png"))); }
 
 private:
+	void on_slicenr_changed() override;
+
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
@@ -80,15 +78,6 @@ private:
 	QRadioButton* rb_canny;
 	QRadioButton* rb_laplacianzero;
 	QButtonGroup* modegroup;
-
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-public slots:
-	void slicenr_changed();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);

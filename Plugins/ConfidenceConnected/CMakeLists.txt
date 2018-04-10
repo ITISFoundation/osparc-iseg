@@ -12,16 +12,18 @@ IF(PLUGIN_CONFIDENCE)
 	QT4_WRAP_CPP(MOCSrcscon Confidence.h)
 
 	ADD_LIBRARY(Confidence.ext SHARED 
-		ConfidenceAddon.cpp 
-		ConfidenceAddon.h 
+		ConfidencePlugin.cpp 
+		ConfidencePlugin.h 
 		Confidence.cpp 
 		Confidence.h 
 		${MOCSrcscon}
 	)
 
 	TARGET_LINK_LIBRARIES( Confidence.ext 
-		Plugin 
+		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
 	VS_SET_PROPERTY(Confidence.ext "Plugins")
+
+	SET(PLUGIN_NAMES ${PLUGIN_NAMES};Confidence.ext CACHE INTERNAL "")
 ENDIF()

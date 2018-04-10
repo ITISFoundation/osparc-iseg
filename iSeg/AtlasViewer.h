@@ -7,13 +7,11 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef ATLAS_VIEWER
-#define ATLAS_VIEWER
+#pragma once
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/Point.h"
 
 #include "Core/Pair.h"
-#include "Core/Point.h"
 #include "Core/Types.h"
 
 #include <QCloseEvent>
@@ -98,4 +96,3 @@ public slots:
 };
 
 } // namespace iseg
-#endif //ATLAS_VIEWER

@@ -7,13 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef Interpolate_20April05
-#define Interpolate_20April05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3listbox.h>
 #include <q3mimefactory.h>
@@ -40,61 +39,53 @@ class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	InterpolationWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-						const char* name = 0, Qt::WindowFlags wFlags = 0);
+	InterpolationWidget(SlicesHandler *hand3D, QWidget *parent = 0,
+			const char *name = 0, Qt::WindowFlags wFlags = 0);
 	~InterpolationWidget();
-	QSize sizeHint() const;
-	void init();
-	void newloaded();
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	std::string GetName() { return std::string("Interpol"); };
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("interpolate.png")).ascii());
-	};
+	QSize sizeHint() const override;
+	void init() override;
+	void newloaded() override;
+	FILE *SaveParams(FILE *fp, int version) override;
+	FILE *LoadParams(FILE *fp, int version) override;
+	std::string GetName() override { return std::string("Interpol"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("interpolate.png"))); }
 
 private:
-	SlicesHandler* handler3D;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3VBox* vboxdataselect;
-	Q3VBox* vboxparams;
-	Q3VBox* vboxexecute;
-	Q3HBox* hboxextra;
-	Q3HBox* hboxbatch;
-	QLabel* txt_slicenr;
-	QSpinBox* sb_slicenr;
-	QLabel* txt_batchstride;
-	QSpinBox* sb_batchstride;
-	QPushButton* pushexec;
-	QPushButton* pushstart;
-	QRadioButton* rb_tissue;
-	QRadioButton* rb_tissueall;
-	QRadioButton* rb_work;
-	QButtonGroup* sourcegroup;
-	QRadioButton* rb_inter;
+	void on_tissuenr_changed(int i) override;
+	void on_slicenr_changed() override;
+
+	SlicesHandler *handler3D;
+	Q3HBox *hboxoverall;
+	Q3VBox *vboxmethods;
+	Q3VBox *vboxdataselect;
+	Q3VBox *vboxparams;
+	Q3VBox *vboxexecute;
+	Q3HBox *hboxextra;
+	Q3HBox *hboxbatch;
+	QLabel *txt_slicenr;
+	QSpinBox *sb_slicenr;
+	QLabel *txt_batchstride;
+	QSpinBox *sb_batchstride;
+	QPushButton *pushexec;
+	QPushButton *pushstart;
+	QRadioButton *rb_tissue;
+	QRadioButton *rb_tissueall;
+	QRadioButton *rb_work;
+	QButtonGroup *sourcegroup;
+	QRadioButton *rb_inter;
 	//	QRadioButton *rb_intergrey;
-	QRadioButton* rb_extra;
-	QRadioButton* rb_batchinter;
-	QButtonGroup* modegroup;
-	QRadioButton* rb_4connectivity;
-	QRadioButton* rb_8connectivity;
-	QButtonGroup* connectivitygroup;
-	QCheckBox* cb_medianset;
+	QRadioButton *rb_extra;
+	QRadioButton *rb_batchinter;
+	QButtonGroup *modegroup;
+	QRadioButton *rb_4connectivity;
+	QRadioButton *rb_8connectivity;
+	QButtonGroup *connectivitygroup;
+	QCheckBox *cb_medianset;
 	unsigned short startnr;
 	unsigned short nrslices;
 	unsigned short tissuenr;
 
-signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
 public slots:
-	void slicenr_changed();
-	void tissuenr_changed(int tissuetype);
 	void handler3D_changed();
 
 private slots:
@@ -105,5 +96,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

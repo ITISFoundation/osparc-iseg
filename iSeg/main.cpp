@@ -20,7 +20,6 @@
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
-#include "Core/Point.h"
 
 #include <QPlastiqueStyle>
 #include <QSplashScreen>
@@ -55,25 +54,25 @@ namespace {
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
 public:
-	static vtkCustomOutputWindow* New();
+	static vtkCustomOutputWindow *New();
 	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream& os, vtkIndent indent) {}
+	virtual void PrintSelf(ostream &os, vtkIndent indent) {}
 
 	// Put the text into the output stream.
-	virtual void DisplayText(const char* msg) { std::cerr << msg << std::endl; }
+	virtual void DisplayText(const char *msg) { std::cerr << msg << std::endl; }
 
 protected:
 	vtkCustomOutputWindow() {}
 
 private:
-	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
-	void operator=(const vtkCustomOutputWindow&);		 // Not implemented.
+	vtkCustomOutputWindow(const vtkCustomOutputWindow &); // Not implemented.
+	void operator=(const vtkCustomOutputWindow &);				// Not implemented.
 };
 
 vtkStandardNewMacro(vtkCustomOutputWindow);
 } // namespace
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	auto eow = vtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
@@ -159,7 +158,7 @@ int main(int argc, char** argv)
 	palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
 	palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));
 	qApp->setPalette(palette);
-	app.setPalette(palette);	
+	app.setPalette(palette);
 
 #ifdef SHOWSPLASH
 	QString pixmapstr = QString(splashpicpath.toAscii().data());
@@ -171,24 +170,24 @@ int main(int argc, char** argv)
 #endif
 	app.processEvents();
 
-	MainWindow* mainWindow = NULL;
+	MainWindow *mainWindow = NULL;
 	if (argc > 1)
 	{
 		QString qstr(argv[1]);
 		if (qstr.compare(QString("S4Llink")) == 0)
 		{
 			mainWindow = new MainWindow(
-				&slice_handler, locationpath, picpath, tmpdir,
-				true, nullptr, "MainWindow",
-				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+					&slice_handler, locationpath, picpath, tmpdir,
+					true, nullptr, "MainWindow",
+					Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 		}
 	}
 	if (mainWindow == nullptr)
 	{
 		mainWindow = new MainWindow(
-			&slice_handler, locationpath, picpath, tmpdir, 
-			false, nullptr, "MainWindow",
-			Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
+				&slice_handler, locationpath, picpath, tmpdir,
+				false, nullptr, "MainWindow",
+				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
 	}
 
 	// needed on MacOS, but not WIN32?
@@ -211,13 +210,17 @@ int main(int argc, char** argv)
 	}
 
 #ifdef SHOWSPLASH
-	while (now.msecsTo(QTime::currentTime()) < 2000)
+	while (now.msecsTo(QTime::currentTime()) < 1000)
 	{
 	}
 #endif
 
 	mainWindow->showMaximized();
 	mainWindow->show();
+
+#ifdef SHOWSPLASH
+	splash_screen.finish(mainWindow);
+#endif
 
 	QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 

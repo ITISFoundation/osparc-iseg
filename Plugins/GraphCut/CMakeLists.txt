@@ -19,8 +19,8 @@ IF(PLUGIN_GRAPHCUT)
 	)
 
 	ADD_LIBRARY(GraphCut.ext SHARED 
-		GraphCutAddon.cpp 
-		GraphCutAddon.h 
+		GraphCutPlugin.cpp 
+		GraphCutPlugin.h 
 		GraphCutBoneSegmentation.cpp 
 		GraphCutBoneSegmentation.h 
 		GraphCutTissueSeparator.cpp
@@ -31,9 +31,11 @@ IF(PLUGIN_GRAPHCUT)
 
 	# todo check libs in linker command
 	TARGET_LINK_LIBRARIES( GraphCut.ext
-		Plugin 
+		iSegInterface 
 		Gc 
 		${MY_EXTERNAL_LINK_LIBRARIES} 
 	)
 	VS_SET_PROPERTY(GraphCut.ext "Plugins")
+
+	SET(PLUGIN_NAMES ${PLUGIN_NAMES};GraphCut.ext CACHE INTERNAL "")
 ENDIF()

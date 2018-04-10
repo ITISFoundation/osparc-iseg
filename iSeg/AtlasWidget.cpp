@@ -32,9 +32,9 @@
 
 using namespace iseg;
 
-AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
-						 const char* name, Qt::WindowFlags wFlags)
-	: QWidget(parent, name, wFlags)
+AtlasWidget::AtlasWidget(const char *filename, QDir picpath, QWidget *parent,
+		const char *name, Qt::WindowFlags wFlags)
+		: QWidget(parent, name, wFlags)
 {
 	isOK = false;
 	QString title("Atlas - ");
@@ -49,10 +49,10 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
 	isOK = true;
 	m_picpath = picpath;
 
-	QVBoxLayout* vbox1 = new QVBoxLayout;
-	QHBoxLayout* hbox1 = new QHBoxLayout;
-	QHBoxLayout* hbox2 = new QHBoxLayout;
-	QHBoxLayout* hbox3 = new QHBoxLayout;
+	QVBoxLayout *vbox1 = new QVBoxLayout;
+	QHBoxLayout *hbox1 = new QHBoxLayout;
+	QHBoxLayout *hbox2 = new QHBoxLayout;
+	QHBoxLayout *hbox3 = new QHBoxLayout;
 
 	sl_contrast = new QSlider(Qt::Horizontal, this);
 	sl_contrast->setRange(0, 99);
@@ -62,12 +62,12 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
 	sl_brightness->setValue(50);
 	lb_contrast = new QLabel("C:", this);
 	lb_contrast->setPixmap(
-		QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii())
-			.pixmap());
+			QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii())
+					.pixmap());
 	lb_brightness = new QLabel("B:", this);
 	lb_brightness->setPixmap(
-		QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii())
-			.pixmap());
+			QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii())
+					.pixmap());
 	hbox1->addWidget(lb_contrast);
 	hbox1->addWidget(sl_contrast);
 	hbox1->addWidget(lb_brightness);
@@ -78,7 +78,7 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
 	vbox1->addLayout(hbox1);
 	sa_viewer = new QScrollArea(this);
 	atlasViewer = new AtlasViewer(image, tissue, 2, dimx, dimy, dimz, dx, dy,
-								  dz, &color_r, &color_g, &color_b, this);
+			dz, &color_r, &color_g, &color_b, this);
 	sa_viewer->setWidget(atlasViewer);
 	vbox1->addWidget(sa_viewer);
 	scb_slicenr = new QScrollBar(0, dimz - 1, 1, 5, 0, Qt::Horizontal, this);
@@ -106,7 +106,7 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
 
 	vbox1->addLayout(hbox2);
 	vbox1->addLayout(hbox3);
-	zoomer = new zoomer_widget(1.0, m_picpath, this);
+	zoomer = new ZoomWidget(1.0, m_picpath, this);
 	zoomer->setFixedSize(zoomer->sizeHint());
 	vbox1->addWidget(zoomer);
 	lb_name = new QLabel(QString("jljlfds"), this);
@@ -114,20 +114,20 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent,
 	setLayout(vbox1);
 
 	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-					 SLOT(scb_slicenr_changed()));
+			SLOT(scb_slicenr_changed()));
 	QObject::connect(sl_transp, SIGNAL(valueChanged(int)), this,
-					 SLOT(sl_transp_changed()));
+			SLOT(sl_transp_changed()));
 	QObject::connect(bg_orient, SIGNAL(buttonClicked(int)), this,
-					 SLOT(xyz_changed()));
+			SLOT(xyz_changed()));
 	QObject::connect(zoomer, SIGNAL(set_zoom(double)), atlasViewer,
-					 SLOT(set_zoom(double)));
+			SLOT(set_zoom(double)));
 	QObject::connect(sl_brightness, SIGNAL(valueChanged(int)), this,
-					 SLOT(sl_brightcontr_moved()));
+			SLOT(sl_brightcontr_moved()));
 	QObject::connect(sl_contrast, SIGNAL(valueChanged(int)), this,
-					 SLOT(sl_brightcontr_moved()));
+			SLOT(sl_brightcontr_moved()));
 
 	QObject::connect(atlasViewer, SIGNAL(mousemoved_sign(tissues_size_t)), this,
-					 SLOT(pt_moved(tissues_size_t)));
+			SLOT(pt_moved(tissues_size_t)));
 	atlasViewer->setMouseTracking(true);
 }
 
@@ -137,7 +137,7 @@ AtlasWidget::~AtlasWidget()
 	delete[] image;
 }
 
-bool AtlasWidget::loadfile(const char* filename)
+bool AtlasWidget::loadfile(const char *filename)
 {
 	dimx = dimy = dimz = 10;
 	dx = dy = dz = 1.0;
@@ -200,17 +200,17 @@ bool AtlasWidget::loadfile(const char* filename)
 	{
 		for (unsigned short i = 0; i < dimz; i++)
 		{
-			in.readRawData((char*)&(image[area * i]), area * sizeof(float));
-			in.readRawData((char*)&(tissue[area * i]),
-						   area * sizeof(tissues_size_t));
+			in.readRawData((char *)&(image[area * i]), area * sizeof(float));
+			in.readRawData((char *)&(tissue[area * i]),
+					area * sizeof(tissues_size_t));
 		}
 	}
 	else
 	{
-		char* charBuffer = new char[area];
+		char *charBuffer = new char[area];
 		for (unsigned short i = 0; i < dimz; i++)
 		{
-			in.readRawData((char*)&(image[area * i]), area * sizeof(float));
+			in.readRawData((char *)&(image[area * i]), area * sizeof(float));
 			in.readRawData(charBuffer, area);
 			for (int j = 0; j < area; j++)
 			{
@@ -321,7 +321,7 @@ void AtlasWidget::sl_brightcontr_moved()
 	float factor, offset;
 	factor = 255.0f * (1 + sl_contrast->value()) / (maxval - minval);
 	offset =
-		(127.5f - maxval * factor) * (1.0f - sl_brightness->value() * 0.01f) +
-		0.01f * (127.5f - minval * factor) * sl_brightness->value();
+			(127.5f - maxval * factor) * (1.0f - sl_brightness->value() * 0.01f) +
+			0.01f * (127.5f - minval * factor) * sl_brightness->value();
 	atlasViewer->set_scale(offset, factor);
 }

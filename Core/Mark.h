@@ -11,7 +11,8 @@
 
 #include "iSegCore.h"
 
-#include "Point.h"
+#include "Interface/Point.h"
+
 #include <string>
 
 namespace iseg {

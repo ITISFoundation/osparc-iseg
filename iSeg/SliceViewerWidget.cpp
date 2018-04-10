@@ -13,7 +13,6 @@
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
 
-#include "Core/Point.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>

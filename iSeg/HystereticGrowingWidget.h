@@ -7,13 +7,12 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef THRESHWIDGET_14March05
-#define THRESHWIDGET_14March05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Plugin/WidgetInterface.h"
+#include "Interface/WidgetInterface.h"
 
 #include <q3listbox.h>
 #include <q3mimefactory.h>
@@ -43,22 +42,24 @@ class HystereticGrowingWidget : public WidgetInterface
 	Q_OBJECT
 public:
 	HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-							const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~HystereticGrowingWidget();
-	void init();
-	void newloaded();
-	void clean_up();
-	QSize sizeHint() const;
-	FILE* SaveParams(FILE* fp, int version);
-	FILE* LoadParams(FILE* fp, int version);
-	void hideparams_changed();
-	std::string GetName() { return std::string("Growing"); };
-	virtual QIcon GetIcon(QDir picdir)
-	{
-		return QIcon(picdir.absFilePath(QString("growing.png")).ascii());
-	};
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
+	~HystereticGrowingWidget() {}
+	void init() override;
+	void newloaded() override;
+	void cleanup() override;
+	QSize sizeHint() const override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
+	void hideparams_changed() override;
+	std::string GetName() override { return std::string("Growing"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("growing.png"))); }
 
 private:
+	void on_slicenr_changed() override;
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_moved(Point p) override;
+	void on_mouse_released(Point p) override;
+
 	void init1();
 	Point p1;
 	Point last_pt;
@@ -109,20 +110,10 @@ signals:
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
 	void vp1_changed(std::vector<Point>* vp1_arg);
 	void vp1dyn_changed(std::vector<Point>* vp1_arg,
-						std::vector<Point>* vpdyn_arg);
-	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-						iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-public slots:
-	void slicenr_changed();
+			std::vector<Point>* vpdyn_arg);
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	void pt_clicked(Point p);
-	void pt_moved(Point p);
-	void pt_released(Point p);
 	void auto_toggled();
 	void update_visible();
 	void execute();
@@ -141,5 +132,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

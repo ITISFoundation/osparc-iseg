@@ -12,16 +12,18 @@ IF(PLUGIN_BIAS)
 	QT4_WRAP_CPP(MOCSrcsbias BiasCorrection.h)
 
 	ADD_LIBRARY(BiasCorrection.ext SHARED 
-		BiasCorrectionAddon.cpp 
-		BiasCorrectionAddon.h 
+		BiasCorrectionPlugin.cpp 
+		BiasCorrectionPlugin.h 
 		BiasCorrection.cpp 
 		BiasCorrection.h 
 		${MOCSrcsbias}
 	)
 	
 	TARGET_LINK_LIBRARIES( BiasCorrection.ext 
-		Plugin 
+		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
 	VS_SET_PROPERTY(BiasCorrection.ext "Plugins")
+
+	SET(PLUGIN_NAMES ${PLUGIN_NAMES};BiasCorrection.ext CACHE INTERNAL "")
 ENDIF()

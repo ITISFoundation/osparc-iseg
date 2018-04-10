@@ -9,8 +9,9 @@
  */
 #pragma once
 
+#include "Interface/Point.h"
+
 #include "Core/IndexPriorityQueue.h"
-#include "Core/Point.h"
 
 #include <algorithm>
 #include <functional>
