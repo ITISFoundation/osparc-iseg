@@ -59,28 +59,19 @@ inline handle open(std::string const& file_name)
 	return LoadLibrary(file_name.c_str());
 }
 
-//_________________________________________________________________//
-
 template<typename TargType>
-inline TargType
-		locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(GetProcAddress(h, symbol.c_str()));
 }
 
-//_________________________________________________________________//
-
-inline void
-		close(handle h)
+inline void close(handle h)
 {
 	if (h)
 		FreeLibrary(h);
 }
 
-//_________________________________________________________________//
-
-inline std::string
-		error()
+inline std::string error()
 {
 	LPTSTR msg = NULL;
 
@@ -111,8 +102,6 @@ fs::path get_exe_dir()
 	return exe_path.branch_path();
 }
 
-//_________________________________________________________________//
-
 #elif defined(BOOST_HAS_UNISTD_H) // POSIX API
 
 #	include <dlfcn.h>
@@ -131,16 +120,14 @@ inline handle open(std::string const& file_name)
 //_________________________________________________________________//
 
 template<typename TargType>
-inline TargType
-		locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(dlsym(h, symbol.c_str()));
 }
 
 //_________________________________________________________________//
 
-inline void
-		close(handle h)
+inline void close(handle h)
 {
 	if (h)
 		dlclose(h);
@@ -148,8 +135,7 @@ inline void
 
 //_________________________________________________________________//
 
-inline std::string
-		error()
+inline std::string error()
 {
 	return dlerror();
 }
@@ -168,8 +154,6 @@ fs::path get_exe_dir()
 		return path;
 	}
 }
-
-//_________________________________________________________________//
 
 #else
 
@@ -243,7 +227,6 @@ int SEH_unit_test_main(boost::unit_test::init_unit_test_func init_func, int argc
 }
 } // namespace
 
-//____________________________________________________________________________//
 
 int BOOST_TEST_CALL_DECL main(int argc, char* argv[])
 {
