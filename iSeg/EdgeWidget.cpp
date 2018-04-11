@@ -280,10 +280,7 @@ void EdgeWidget::method_changed(int)
 
 void EdgeWidget::slider_changed(int newval)
 {
-	UNREFERENCED_PARAMETER(newval);
 	execute();
-
-	return;
 }
 
 QSize EdgeWidget::sizeHint() const { return vbox1->sizeHint(); }

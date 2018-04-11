@@ -16,12 +16,13 @@
 #include <itkRecursiveGaussianImageFilter.h>
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
-BOOST_AUTO_TEST_SUITE(Addon_suite);
+BOOST_AUTO_TEST_SUITE(Plugin_suite);
 
 BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 {
 	size_t slice_shape[2] = {12, 24};
-	std::vector<float*> slices(12, nullptr);
+	std::vector<float> data(slice_shape[0] * slice_shape[1], 1.0);
+	std::vector<float*> slices(12, data.data());
 
 	typedef itk::SliceContiguousImage<float> ImageType;
 
@@ -41,13 +42,13 @@ BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 	bool container_manage_memory = false;
 	ImageType::PixelContainerPointer container = ImageType::PixelContainer::New();
 	container->SetImportPointersForSlices(slices, size[0] * size[1],
-										  container_manage_memory);
+			container_manage_memory);
 	image->SetPixelContainer(container);
 
 	{
 		typedef itk::Image<float, 3> OutputImageType;
 		typedef itk::RecursiveGaussianImageFilter<ImageType, OutputImageType>
-			GaussianFilterType;
+				GaussianFilterType;
 		auto gaussian = GaussianFilterType::New();
 		gaussian->SetSigma(1.0);
 		gaussian->SetInput(image);
