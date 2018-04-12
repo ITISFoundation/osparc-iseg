@@ -7297,22 +7297,22 @@ void MainWindow::tab_changed(QWidget* qw)
 
 		if (auto widget = dynamic_cast<WidgetInterface*>(qw)) // generic slots from WidgetInterface
 		{
-			QObject::connect(tab_old, SIGNAL(vm_changed(std::vector<Mark>*)), bmp_show,
+			QObject::connect(widget, SIGNAL(vm_changed(std::vector<Mark>*)), bmp_show,
 					SLOT(set_vm(std::vector<Mark>*)));
-			QObject::connect(tab_old, SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+			QObject::connect(widget, SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
 
-			QObject::connect(bmp_show, SIGNAL(mousepressed_sign(Point)), qw,
+			QObject::connect(bmp_show, SIGNAL(mousepressed_sign(Point)), widget,
 					SLOT(mouse_clicked(Point)));
-			QObject::connect(bmp_show, SIGNAL(mousemoved_sign(Point)), qw,
+			QObject::connect(bmp_show, SIGNAL(mousemoved_sign(Point)), widget,
 					SLOT(mouse_moved(Point)));
-			QObject::connect(bmp_show, SIGNAL(mousereleased_sign(Point)), qw,
+			QObject::connect(bmp_show, SIGNAL(mousereleased_sign(Point)), widget,
 					SLOT(mouse_released(Point)));
-			QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), qw,
+			QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), widget,
 					SLOT(mouse_clicked(Point)));
-			QObject::connect(work_show, SIGNAL(mousemoved_sign(Point)), qw,
+			QObject::connect(work_show, SIGNAL(mousemoved_sign(Point)), widget,
 					SLOT(mouse_moved(Point)));
-			QObject::connect(work_show, SIGNAL(mousereleased_sign(Point)), qw,
+			QObject::connect(work_show, SIGNAL(mousereleased_sign(Point)), widget,
 					SLOT(mouse_released(Point)));
 		}
 
@@ -7957,8 +7957,7 @@ void MainWindow::handle_begin_datachange(iseg::DataSelection& dataSelection,
 		if (changeData.allSlices)
 		{
 			// Start undo for all slices
-			canUndo3D =
-					handler3D->return_undo3D() && handler3D->start_undoall(changeData);
+			canUndo3D = handler3D->return_undo3D() && handler3D->start_undoall(changeData);
 		}
 		else
 		{
