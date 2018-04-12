@@ -9,9 +9,7 @@
  */
 #pragma once
 
-#include "iSegCore.h"
-
-#include "Interface/Point.h"
+#include "Point.h"
 
 #include <string>
 

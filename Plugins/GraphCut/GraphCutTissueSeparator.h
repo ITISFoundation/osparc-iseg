@@ -27,11 +27,11 @@ public:
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
 	~TissueSeparatorWidget();
-	QSize sizeHint() const override;
 	void init() override;
 	void newloaded() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
+	QSize sizeHint() const override;
 
 private:
 	void on_slicenr_changed() override;
@@ -55,12 +55,10 @@ private:
 	QCheckBox* m_UseIntensity;
 	QComboBox* m_MaxFlowAlgorithm;
 	QCheckBox* m_6Connectivity;
-	QCheckBox* m_UseSliceRange;
 	QSpinBox* m_Start;
 	QSpinBox* m_End;
 	QPushButton* m_Execute;
 
 private slots:
 	void do_work();
-	void showsliders();
 };

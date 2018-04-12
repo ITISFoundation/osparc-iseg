@@ -53,9 +53,6 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 
 	m_6Connectivity = new QCheckBox(QString("6-Connectivity"), m_VerticalGrid);
 
-	// TODO: this should re-use active-slices
-	m_UseSliceRange = new QCheckBox(QString("Slice Range:"), m_VerticalGrid);
-
 	m_Horizontal4 = new Q3HBox(m_VerticalGrid);
 	m_LabelStart = new QLabel("Start-slice: ", m_Horizontal4);
 	m_Start = new QSpinBox(1, 100000, 1, m_Horizontal4);
@@ -74,8 +71,7 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 	m_VerticalGrid->setFixedHeight(m_VerticalGrid->sizeHint().height());
 
 	QObject::connect(m_Execute, SIGNAL(clicked()), this, SLOT(do_work()));
-	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this,
-			SLOT(showsliders()));
+
 	/*
 	activeslice = handler3D->get_activeslice();
 

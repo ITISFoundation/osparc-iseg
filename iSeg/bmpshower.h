@@ -7,10 +7,10 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef BMPSHOWER
-#define BMPSHOWER
+#pragma once
 
-#include "Core/Mark.h"
+#include "Interface/Mark.h"
+
 #include "Core/Pair.h"
 #include "Core/Types.h"
 
@@ -82,126 +82,6 @@ namespace iseg {
 
 class bmphandler;
 class SlicesHandler;
-
-class bmpshower : public QWidget
-{
-	Q_OBJECT
-public:
-	bmpshower(QWidget* parent = 0, const char* name = 0,
-			  Qt::WindowFlags wFlags = 0);
-	void init(float** bmpbits1, unsigned short w, unsigned short h);
-	void update();
-	void update(unsigned short w, unsigned short h);
-
-protected:
-	void paintEvent(QPaintEvent* e);
-
-private:
-	void reload_bits();
-	QImage image;
-
-	unsigned short width, height;
-	float** bmpbits;
-
-private slots:
-	void bmp_changed();
-	void size_changed(unsigned short w, unsigned short h);
-};
-
-class bmptissueshower : public QWidget
-{
-	Q_OBJECT
-public:
-	bmptissueshower(QWidget* parent = 0, const char* name = 0,
-					Qt::WindowFlags wFlags = 0);
-	void init(float** bmpbits1, tissues_size_t** tissue1, unsigned short w,
-			  unsigned short h);
-	void update();
-	void update(unsigned short w, unsigned short h);
-	bool toggle_tissuevisible();
-	void set_tissuevisible(bool on);
-
-protected:
-	void paintEvent(QPaintEvent* e);
-
-private:
-	void reload_bits();
-	QImage image;
-
-	unsigned short width, height;
-	float** bmpbits;
-	tissues_size_t** tissue;
-	bool tissuevisible;
-
-private slots:
-	void bmp_changed();
-	void size_changed(unsigned short w, unsigned short h);
-	void tissue_changed();
-};
-
-class bmptissuemarkshower : public QWidget
-{
-	Q_OBJECT
-public:
-	bmptissuemarkshower(QWidget* parent = 0, const char* name = 0,
-						Qt::WindowFlags wFlags = 0);
-	~bmptissuemarkshower();
-	void init(bmphandler* bmph1, tissuelayers_size_t layeridx, bool bmporwork1);
-	void update();
-	bool toggle_tissuevisible();
-	bool toggle_markvisible();
-	void set_tissuevisible(bool on);
-	void set_markvisible(bool on);
-
-protected:
-	void paintEvent(QPaintEvent* e);
-	void contextMenuEvent(QContextMenuEvent* event);
-
-signals:
-	//	void marks_changed();
-	//	void tissues_changed();
-	void addmark_sign(Point p);
-	void addlabel_sign(Point p, std::string str);
-	void removemark_sign(Point p);
-	void addtissue_sign(Point p);
-	void addtissueconnected_sign(Point p);
-	void addtissuelarger_sign(Point p);
-	void subtissue_sign(Point p);
-
-private:
-	void reload_bits();
-	QImage image;
-
-	unsigned short width, height;
-	bmphandler* bmphand;
-	float** bmpbits;
-	tissues_size_t** tissue;
-	bool tissuevisible;
-	bool markvisible;
-	bool bmporwork;
-	std::vector<Mark>* marks;
-	int eventx, eventy;
-	Q3Action* addmark;
-	Q3Action* addlabel;
-	Q3Action* removemark;
-	Q3Action* addtissue;
-	Q3Action* subtissue;
-	Q3Action* addtissueconnected;
-	Q3Action* addtissuelarger;
-
-private slots:
-	void add_mark();
-	void add_label();
-	//	void clear_marks();
-	void remove_mark();
-	void add_tissue();
-	void sub_tissue();
-	void add_tissue_connected();
-	void add_tissuelarger();
-	void mark_changed();
-	void bmp_changed();
-	void tissue_changed();
-};
 
 class bmptissuemarklineshower : public QWidget
 {
@@ -590,5 +470,3 @@ public:
 };
 
 } // namespace iseg
-
-#endif
