@@ -24,8 +24,8 @@ namespace {
 class TestIO
 {
 public:
-	TestIO(const std::string &fname, bool non_trivial_transform,
-				 float tolerance = 1e-2f)
+	TestIO(const std::string& fname, bool non_trivial_transform,
+			float tolerance = 1e-2f)
 			: _file_name(fname), _tolerance(tolerance)
 	{
 		_dims[0] = 4;
@@ -56,6 +56,12 @@ public:
 		{
 			_data[i] = static_cast<float>(i);
 		}
+
+		boost::system::error_code ec;
+		if (boost::filesystem::exists(_file_name, ec))
+		{
+			boost::filesystem::remove(_file_name, ec);
+		}
 	}
 	~TestIO()
 	{
@@ -68,15 +74,15 @@ public:
 
 	void Write()
 	{
-		std::vector<const float *> slices(_dims[2]);
+		std::vector<const float*> slices(_dims[2]);
 		for (unsigned s = 0; s < _dims[2]; s++)
 		{
 			slices[s] = _data.data() + s * _dims[0] * _dims[1];
 		}
 
 		BOOST_REQUIRE(ImageWriter().writeVolume(_file_name.string().c_str(),
-																						slices.data(), _dims[0], _dims[1],
-																						_dims[2], _spacing, _transform));
+				slices.data(), _dims[0], _dims[1],
+				_dims[2], _spacing, _transform));
 	}
 
 	void Read()
@@ -85,7 +91,7 @@ public:
 		float spacing1[3];
 		Transform transform1;
 		BOOST_REQUIRE(ImageReader::getInfo(_file_name.string().c_str(), width,
-																			 height, nrslices, spacing1, transform1));
+				height, nrslices, spacing1, transform1));
 
 		BOOST_CHECK_EQUAL(width, _dims[0]);
 		BOOST_CHECK_EQUAL(height, _dims[1]);
@@ -97,8 +103,8 @@ public:
 
 		for (int r = 0; r < 4; r++)
 		{
-			float *tr = _transform[r];
-			float *tr1 = transform1[r];
+			float* tr = _transform[r];
+			float* tr1 = transform1[r];
 			BOOST_CHECK_CLOSE(tr[0], tr1[0], _tolerance);
 			BOOST_CHECK_CLOSE(tr[1], tr1[1], _tolerance);
 			BOOST_CHECK_CLOSE(tr[2], tr1[2], _tolerance);
@@ -107,14 +113,14 @@ public:
 
 		{
 			std::vector<float> data(_data.size());
-			std::vector<float *> slices(_dims[2]);
+			std::vector<float*> slices(_dims[2]);
 			for (unsigned s = 0; s < _dims[2]; s++)
 			{
 				slices[s] = data.data() + s * _dims[0] * _dims[1];
 			}
 			BOOST_REQUIRE(ImageReader::getVolume(_file_name.string().c_str(),
-																					 slices.data(), 0, nrslices, width,
-																					 height));
+					slices.data(), 0, nrslices, width,
+					height));
 
 			bool ok = true;
 			for (size_t i = 0; i < data.size(); i++)
@@ -130,7 +136,7 @@ public:
 		{
 			std::vector<float> data(_dims[0] * _dims[1]);
 			BOOST_REQUIRE(ImageReader::getSlice(_file_name.string().c_str(),
-																					data.data(), 2, width, height));
+					data.data(), 2, width, height));
 
 			bool ok = true;
 			size_t shift = 2 * _dims[0] * _dims[1];

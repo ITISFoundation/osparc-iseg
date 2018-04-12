@@ -69,11 +69,12 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_SOURCE_DIR}/Thirdparty/IJ/AlternativeMemoryModels
 )
 
-ADD_SUBDIRECTORY(Thirdparty)
 ADD_SUBDIRECTORY(Interface)
 ADD_SUBDIRECTORY(Core)
 ADD_SUBDIRECTORY(iSeg)
 ADD_SUBDIRECTORY(Plugins)
+ADD_SUBDIRECTORY(TestRunner)
+ADD_SUBDIRECTORY(Thirdparty)
 
 
 # copy dlls and images to build folder
