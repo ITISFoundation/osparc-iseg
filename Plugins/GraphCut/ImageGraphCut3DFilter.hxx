@@ -38,8 +38,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::GenerateDat
 	ImageContainer images;
 	images.input = GetInputImage();
 	images.inputRegion = images.input->GetLargestPossibleRegion();
-	images.foreground = GetForegroundImage();
-	images.background = GetBackgroundImage();
+	images.foreground = this->GetInput(1);
+	images.background = this->GetInput(2);
 	images.output = this->GetOutput();
 	images.outputRegion = images.output->GetRequestedRegion();
 
@@ -101,7 +101,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::GenerateDat
 	InitializeGraph(graph, images, progress);
 	timer.Stop("Graph init");
 
-	if (GetAbortGenerateData())
+	if (this->GetAbortGenerateData())
 	{
 		return;
 	}
@@ -147,7 +147,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		filterType;
 
 	//Gaussian Filter for Edge enhancement
-	filterType::Pointer gaussianFilter = filterType::New();
+	auto gaussianFilter = filterType::New();
 	gaussianFilter->SetInput(images.input);
 	gaussianFilter->SetVariance(1);
 
@@ -305,16 +305,16 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 				InputImageType>
 				FilterType;
 
-			DuplicatorType::Pointer duplicator = DuplicatorType::New();
-			DuplicatorType::Pointer duplicator2 = DuplicatorType::New();
-			DuplicatorType::Pointer duplicator3 = DuplicatorType::New();
-			DuplicatorType::Pointer duplicator4 = DuplicatorType::New();
-			DuplicatorType::Pointer duplicator5 = DuplicatorType::New();
-			DuplicatorType::Pointer duplicator6 = DuplicatorType::New();
+			auto duplicator = DuplicatorType::New();
+			auto duplicator2 = DuplicatorType::New();
+			auto duplicator3 = DuplicatorType::New();
+			auto duplicator4 = DuplicatorType::New();
+			auto duplicator5 = DuplicatorType::New();
+			auto duplicator6 = DuplicatorType::New();
 
-			FilterType::Pointer ga = FilterType::New();
-			FilterType::Pointer gb = FilterType::New();
-			FilterType::Pointer gc = FilterType::New();
+			auto ga = FilterType::New();
+			auto gb = FilterType::New();
+			auto gc = FilterType::New();
 			ga->SetDirection(0);
 			gb->SetDirection(1);
 			gc->SetDirection(2);
@@ -393,7 +393,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			Ixy->Update();
 
 			typedef itk::GradientMagnitudeImageFilter<InputImageType, InputImageType> GradFilterType;
-			GradFilterType::Pointer gradfilter = GradFilterType::New();
+			auto gradfilter = GradFilterType::New();
 			gradfilter->SetInput(images.input);
 			InputImageType* Igrad;
 			Igrad = gradfilter->GetOutput();
@@ -531,7 +531,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 
 	unsigned int const con = m_6Connected ? 6 : 26;
 
-	const bool& abort = GetAbortGenerateData();
+	const bool& abort = this->GetAbortGenerateData(); // use reference (alias) to original flag!
 	for (iterator.GoToBegin(); !iterator.IsAtEnd() && !abort; ++iterator)
 	{
 		progress.CompletedPixel();
@@ -624,7 +624,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		itk::Size<3> rad;
 		rad.Fill(1);
 		typedef itk::ShapedNeighborhoodIterator<ForegroundImageType> IteratorTypefb;
-		IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
+		typename IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
 
 		IteratorTypefb iteratorfb(rad, images.foreground, images.foreground->GetLargestPossibleRegion());
 		IteratorTypefb iteratorbg(rad, images.background, images.background->GetLargestPossibleRegion());
@@ -636,8 +636,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		iteratorbg.GoToBegin();
 		for (iteratorfb.GoToBegin(); !iteratorfb.IsAtEnd(); ++iteratorfb)
 		{
-			ForegroundImageType::PixelType centerPixel = iteratorfb.GetPixel(centerfb);
-			ForegroundImageType::PixelType centerPixelbg = iteratorbg.GetPixel(centerfb);
+			typename ForegroundImageType::PixelType centerPixel = iteratorfb.GetPixel(centerfb);
+			typename ForegroundImageType::PixelType centerPixelbg = iteratorbg.GetPixel(centerfb);
 			if ((int)centerPixelbg < -4000)
 			{
 				unsigned int sinkIndex = ConvertIndexToVertexDescriptor(iteratorbg.GetIndex(center), images.inputRegion);
@@ -657,7 +657,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		itk::Size<3> rad;
 		rad.Fill(1);
 		typedef itk::ShapedNeighborhoodIterator<ForegroundImageType> IteratorTypefb;
-		IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
+		typename IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
 
 		IteratorTypefb iteratorfb(rad, images.foreground, images.foreground->GetLargestPossibleRegion());
 		IteratorTypefb iteratorbg(rad, images.background, images.background->GetLargestPossibleRegion());
@@ -669,8 +669,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		iteratorbg.GoToBegin();
 		for (iteratorfb.GoToBegin(); !iteratorfb.IsAtEnd(); ++iteratorfb)
 		{
-			ForegroundImageType::PixelType centerPixel = iteratorfb.GetPixel(centerfb);
-			ForegroundImageType::PixelType centerPixelbg = iteratorbg.GetPixel(centerfb);
+			auto centerPixel = iteratorfb.GetPixel(centerfb);
+			auto centerPixelbg = iteratorbg.GetPixel(centerfb);
 			if ((int)centerPixelbg < -4000)
 			{
 				unsigned int sinkIndex = ConvertIndexToVertexDescriptor(iteratorbg.GetIndex(center), images.inputRegion);
@@ -696,7 +696,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::CutGraph(Gr
 	outputImageIterator.GoToBegin();
 
 	//int sourceGroup = graph->groupOfSource();
-	const bool& abort = GetAbortGenerateData();
+	const bool& abort = this->GetAbortGenerateData();
 	while (!outputImageIterator.IsAtEnd() && !abort)
 	{
 		unsigned int voxelIndex = ConvertIndexToVertexDescriptor(outputImageIterator.GetIndex(), images.outputRegion);

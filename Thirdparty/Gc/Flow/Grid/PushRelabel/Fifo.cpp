@@ -63,7 +63,7 @@ namespace Gc
                     // Initialize node array
                     m_node_list.ZeroFillMemory();
 
-                    InitBase(dim, nb);
+                    this->InitBase(dim, nb);
 
                     if (MASK)
                     {

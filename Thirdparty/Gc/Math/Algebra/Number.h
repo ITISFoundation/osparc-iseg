@@ -29,6 +29,7 @@
 #define GC_MATH_ALGEBRA_NUMBER_H
 
 #include "../../Type.h"
+#include "../Basic.h"
 
 namespace Gc
 {
