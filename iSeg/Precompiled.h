@@ -9,12 +9,12 @@
  */
 #pragma once
 
-#include <vtkSmartPointer.h>
 #include <vtkImageData.h>
+#include <vtkSmartPointer.h>
 
 #include <q3hbox.h>
-#include <q3vbox.h>
 #include <q3listbox.h>
+#include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qcolor.h>
@@ -22,7 +22,7 @@
 #include <qimage.h>
 #include <qinputdialog.h>
 #include <qlabel.h>
-#include <qlayout.h> 
+#include <qlayout.h>
 #include <qlineedit.h>
 #include <qmessagebox.h>
 #include <qpainter.h>
@@ -34,12 +34,12 @@
 #include <qstring.h>
 #include <qwidget.h>
 
+#include <algorithm>
 #include <cassert>
-#include <iostream>
-#include <fstream>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+#include <fstream>
+#include <iostream>
 #include <list>
 #include <vector>
-#include <algorithm>

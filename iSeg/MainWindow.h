@@ -74,9 +74,9 @@ class WatershedWidget;
 class SmoothingWidget;
 class ThresholdWidget;
 class MeasurementWidget;
-class bmptissuemarklineshower;
-class surfaceviewer3D;
-class volumeviewer3D;
+class ImageViewerWidget;
+class SurfaceViewerWidget;
+class VolumeViewerWidget;
 
 class MenuWTT : public QMenu
 {
@@ -149,8 +149,8 @@ private:
 	QDir m_picpath;
 	QDir m_tmppath;
 	SlicesHandler* handler3D;
-	bmptissuemarklineshower* bmp_show;
-	bmptissuemarklineshower* work_show;
+	ImageViewerWidget* bmp_show;
+	ImageViewerWidget* work_show;
 	QVBoxLayout* vboxtotal;
 	QHBoxLayout* hbox1;
 	QVBoxLayout* vbox1;
@@ -287,10 +287,10 @@ private:
 	//	float thickness;
 	SliceViewerWidget* xsliceshower;
 	SliceViewerWidget* ysliceshower;
-	surfaceviewer3D* SV3D;
-	surfaceviewer3D* SV3Dbmp;
-	volumeviewer3D* VV3D;
-	volumeviewer3D* VV3Dbmp;
+	SurfaceViewerWidget* SV3D;
+	SurfaceViewerWidget* SV3Dbmp;
+	VolumeViewerWidget* VV3D;
+	VolumeViewerWidget* VV3Dbmp;
 	int undonr;
 	int redonr;
 	QString m_saveprojfilename;

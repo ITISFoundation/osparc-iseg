@@ -26,7 +26,7 @@ public:
 	TissueSeparatorWidget(iseg::SliceHandlerInterface* hand3D,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
-	~TissueSeparatorWidget();
+	~TissueSeparatorWidget() {}
 	void init() override;
 	void newloaded() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }

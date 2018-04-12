@@ -40,7 +40,7 @@ SET(ViewerSrcs
 	AtlasWidget.cpp
 	AvwReader.cpp
 	bmp_read_1.cpp
-	bmpshower.cpp
+	ImageViewerWidget.cpp
 	ChannelExtractor.cpp
 	DicomReader.cpp
 	EdgeWidget.cpp
@@ -68,6 +68,7 @@ SET(ViewerSrcs
 	SliceTransform.cpp
 	SliceViewerWidget.cpp
 	SmoothingWidget.cpp
+	SurfaceViewerWidget.cpp
 	ThresholdWidget.cpp
 	TissueCleaner.cpp
 	TissueHierarchy.cpp
@@ -80,6 +81,7 @@ SET(ViewerSrcs
 	vtkGenericDataSetWriter.cpp
 	vtkImageExtractCompatibleMesher.cpp
 	vtkTemplateTriangulator.cpp
+	VolumeViewerWidget.cpp 
 	WatershedWidget.cpp
 	WidgetCollection.cpp
 	World.cpp
@@ -92,13 +94,13 @@ SET(MyMocHeaders
 	ActiveslicesConfigWidget.h
 	AtlasViewer.h
 	AtlasWidget.h
-	bmpshower.h
 	EdgeWidget.h
 	FastmarchingFuzzyWidget.h
 	FeatureWidget.h
 	HystereticGrowingWidget.h
 	ImageForestingTransformRegionGrowingWidget.h
 	ImageInformationDialogs.h
+	ImageViewerWidget.h
 	InterpolationWidget.h
 	LivewireWidget.h
 	LoaderWidgets.h
@@ -112,10 +114,12 @@ SET(MyMocHeaders
 	Settings.h
 	SliceViewerWidget.h
 	SmoothingWidget.h
+	SurfaceViewerWidget.h
 	ThresholdWidget.h
 	TransformWidget.h
 	UndoConfigurationDialog.h
 	VesselWidget.h
+	VolumeViewerWidget.h
 	WatershedWidget.h
 	WidgetCollection.h
 )

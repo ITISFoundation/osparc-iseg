@@ -20,6 +20,7 @@
 #include "HystereticGrowingWidget.h"
 #include "ImageForestingTransformRegionGrowingWidget.h"
 #include "ImageInformationDialogs.h"
+#include "ImageViewerWidget.h"
 #include "InterpolationWidget.h"
 #include "LivewireWidget.h"
 #include "LoaderWidgets.h"
@@ -32,14 +33,15 @@
 #include "Settings.h"
 #include "SliceViewerWidget.h"
 #include "SmoothingWidget.h"
+#include "SurfaceViewerWidget.h"
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
 #include "TransformWidget.h"
 #include "UndoConfigurationDialog.h"
 #include "VesselWidget.h"
+#include "VolumeViewerWidget.h"
 #include "WatershedWidget.h"
-#include "bmpshower.h"
 
 #ifndef NORTSTRUCTSUPPORT
 #	include "RadiotherapyStructureSetImporter.h"
@@ -401,7 +403,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_workpicturevisible = new QCheckBox("Show Image", this);
 	cb_workpicturevisible->setChecked(true);
 
-	bmp_show = new bmptissuemarklineshower(
+	bmp_show = new ImageViewerWidget(
 			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	lb_source = new QLabel("Source", this);
 	lb_target = new QLabel("Target", this);
@@ -454,7 +456,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			QIcon(m_picpath.absFilePath(QString("swap.png")).ascii()), "3D", this);
 	swapAllBtn->setFixedWidth(50);
 
-	work_show = new bmptissuemarklineshower(
+	work_show = new ImageViewerWidget(
 			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	sl_contrastwork = new QSlider(Qt::Horizontal, this);
 	sl_contrastwork->setRange(0, 100);
@@ -4820,7 +4822,7 @@ void MainWindow::execute_3Dsurfaceviewer()
 
 	if (SV3D == NULL)
 	{
-		SV3D = new surfaceviewer3D(handler3D, false, 0);
+		SV3D = new SurfaceViewerWidget(handler3D, false, 0);
 		QObject::connect(SV3D, SIGNAL(hasbeenclosed()), this, SLOT(SV3D_closed()));
 	}
 
@@ -4838,7 +4840,7 @@ void MainWindow::execute_3Dsurfaceviewerbmp()
 
 	if (SV3Dbmp == NULL)
 	{
-		SV3Dbmp = new surfaceviewer3D(handler3D, true, 0);
+		SV3Dbmp = new SurfaceViewerWidget(handler3D, true, 0);
 		QObject::connect(SV3Dbmp, SIGNAL(hasbeenclosed()), this,
 				SLOT(SV3Dbmp_closed()));
 	}
@@ -4857,7 +4859,7 @@ void MainWindow::execute_3Dvolumeviewertissue()
 
 	if (VV3D == NULL)
 	{
-		VV3D = new volumeviewer3D(handler3D, false, true, true, 0);
+		VV3D = new VolumeViewerWidget(handler3D, false, true, true, 0);
 		QObject::connect(VV3D, SIGNAL(hasbeenclosed()), this, SLOT(VV3D_closed()));
 	}
 
@@ -4875,7 +4877,7 @@ void MainWindow::execute_3Dvolumeviewerbmp()
 
 	if (VV3Dbmp == NULL)
 	{
-		VV3Dbmp = new volumeviewer3D(handler3D, true, true, true, 0);
+		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, 0);
 		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
 				SLOT(VV3Dbmp_closed()));
 	}
