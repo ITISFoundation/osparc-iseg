@@ -176,16 +176,12 @@ private:
 	QPushButton* pb_sub;
 	QPushButton* pb_addhold;
 	QPushButton* pb_subhold;
-	//	QPushButton *pb_stophold;
-	//	QPushButton *pb_add3D;
-	//	QPushButton *pb_addconn;
 	QPushButton* toworkBtn;
 	QPushButton* tobmpBtn;
 	QPushButton* swapBtn;
 	QPushButton* swapAllBtn;
 	QPushButton* pb_work2tissue;
 	QMenuBar* menubar;
-	//QMenu *file;
 	MenuWTT* file;
 	QMenu* imagemenu;
 	QMenu* viewmenu;
@@ -193,24 +189,17 @@ private:
 	QMenu* atlasmenu;
 	QMenu* helpmenu;
 	QMenu* editmenu;
-	//	Q3PopupMenu *file;
 	Q3PopupMenu* loadmenu;
 	Q3PopupMenu* reloadmenu;
 	Q3PopupMenu* exportmenu;
 	Q3PopupMenu* saveprojasmenu;
 	Q3PopupMenu* saveprojmenu;
 	Q3PopupMenu* saveactiveslicesmenu;
-	//	Q3PopupMenu *imagemenu;
-	//	Q3PopupMenu *editmenu;
-	//	Q3PopupMenu *toolmenu;
-	//	Q3PopupMenu *helpmenu;
 	Q3PopupMenu* hidemenu;
 	Q3PopupMenu* hidesubmenu;
-	TissueTreeWidget*
-			tissueTreeWidget; // Widget visualizing the tissue hierarchy
+	TissueTreeWidget* tissueTreeWidget; // Widget visualizing the tissue hierarchy
 	QLineEdit* tissueFilter;
-	TissueHierarchyWidget*
-			tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
+	TissueHierarchyWidget* tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
 	QCheckBox* cb_tissuelock;
 	QPushButton* lockTissues;
 	QPushButton* addTissue;
@@ -234,29 +223,29 @@ private:
 	std::vector<Q3Action*> showtab_action;
 	QCheckBox* tissue3Dopt;
 	Q3WidgetStack* methodTab;
-	bits_stack* bitstack_widget;
-	extoverlay_widget* overlay_widget;
-	MultiDataset_widget* m_MultiDataset_widget;
 	ThresholdWidget* threshold_widget;
 	MeasurementWidget* measurement_widget;
 	VesselWidget* vesselextr_widget;
 	SmoothingWidget* smoothing_widget;
-	EdgeWidget* edge_widg;
-	MorphologyWidget* morph_widget;
-	WatershedWidget* wshed_widget;
+	EdgeWidget* edge_widget;
+	MorphologyWidget* morphology_widget;
+	WatershedWidget* watershed_widget;
 	HystereticGrowingWidget* hyst_widget;
-	LivewireWidget* lw_widget;
+	LivewireWidget* livewire_widget;
 	ImageForestingTransformRegionGrowingWidget* iftrg_widget;
-	FastmarchingFuzzyWidget* FMF_widget;
-	OutlineCorrectionWidget* OutlineCorrect_widget;
-	ScaleWork* scalewidget;
-	ImageMath* imagemathwidget;
-	ImageOverlay* imageoverlaywidget;
+	FastmarchingFuzzyWidget* fastmarching_widget;
+	OutlineCorrectionWidget* olc_widget;
 	FeatureWidget* feature_widget;
-	InterpolationWidget* interpolwidget;
-	PickerWidget* pickerwidget;
-	TransformWidget* transfrmWidget;
+	InterpolationWidget* interpolation_widget;
+	PickerWidget* picker_widget;
+	TransformWidget* transform_widget;
 	WidgetInterface* tab_old;
+	ScaleWork* scale_dialog;
+	ImageMath* imagemath_dialog;
+	ImageOverlay* imageoverlay_dialog;
+	bits_stack* bitstack_widget;
+	extoverlay_widget* overlay_widget;
+	MultiDataset_widget* multidataset_widget;
 	QCheckBox* cb_bmptissuevisible;
 	QCheckBox* cb_bmpcrosshairvisible;
 	QCheckBox* cb_bmpoutlinevisible;

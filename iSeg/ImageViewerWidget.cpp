@@ -544,11 +544,6 @@ bool ImageViewerWidget::toggle_overlayvisible()
 	return overlayvisible;
 }
 
-/*bool bmptissuemarklineshower::toggle_outlinevisible()
-{
-xxxxxxxxxxxxxxxx
-}*/
-
 void ImageViewerWidget::set_tissuevisible(bool on)
 {
 	tissuevisible = on;
@@ -584,10 +579,6 @@ void ImageViewerWidget::set_overlayalpha(float alpha)
 	return;
 }
 
-/*void bmptissuemarklineshower::set_outlinevisible(bool on){
-xxxxxxxxxxxxx
-}*/
-
 void ImageViewerWidget::add_mark()
 {
 	Point p;
@@ -600,9 +591,7 @@ void ImageViewerWidget::add_mark()
 void ImageViewerWidget::add_label()
 {
 	bool ok;
-	QString newText = QInputDialog::getText(
-			"Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok,
-			this);
+	QString newText = QInputDialog::getText("Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok, this);
 	if (ok)
 	{
 		Point p;
@@ -680,13 +669,8 @@ double ImageViewerWidget::return_zoom() { return zoom; }
 
 void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-	//	eventx=(event->x()/(zoom*pixelsize.high));
-	//	eventy=height-1-(event->y()/(zoom*pixelsize.low));
-	eventx =
-			(int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
-	eventy = (int)max(
-			min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))),
-			0.0);
+	eventx = (int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
+	eventy = (int)max(min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
 
 	Q3PopupMenu contextMenu(this);
 	addmark->addTo(&contextMenu);
@@ -706,8 +690,7 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	contextMenu.exec(event->globalPos());
 }
 
-void ImageViewerWidget::set_brightnesscontrast(float bright, float contr,
-		bool paint)
+void ImageViewerWidget::set_brightnesscontrast(float bright, float contr, bool paint)
 {
 	brightness = bright;
 	contrast = contr;
@@ -732,30 +715,21 @@ void ImageViewerWidget::update_scaleoffsetfactor()
 	{
 		// Mode 2 assumes the range [0, 255]
 		scalefactor = contrast;
-		scaleoffset = (127.5f - 255 * scalefactor) * (1.0f - brightness) +
-									127.5f * brightness;
+		scaleoffset = (127.5f - 255 * scalefactor) * (1.0f - brightness) + 127.5f * brightness;
 	}
 	else if (bmphand->return_mode(bmporwork) == 1)
 	{
 		// Mode 1 assumes an arbitrary range --> scale to range [0, 255]
-
 		auto r = range_mode1;
 		if (r.high == r.low)
 		{
 			r.high = r.low + 1.f;
 		}
 		scalefactor = 255.0f * contrast / (r.high - r.low);
-		scaleoffset = (127.5f - r.high * scalefactor) * (1.0f - brightness) +
-									(127.5f - r.low * scalefactor) * brightness;
+		scaleoffset = (127.5f - r.high * scalefactor) * (1.0f - brightness) + (127.5f - r.low * scalefactor) * brightness;
 	}
 	emit scaleoffsetfactor_changed(scaleoffset, scalefactor, bmporwork);
 }
-
-/*void bmptissuemarklineshower::mP(QPaintEvent?*e)
-{
-e;
-return;
-}*/
 
 void ImageViewerWidget::mousePressEvent(QMouseEvent* e)
 {
@@ -797,7 +771,6 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {
-	//	if(e->button() == Qt::LeftButton){
 	Point p;
 	//		p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 	//		p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
@@ -815,17 +788,13 @@ void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 	{
 		emit mousedoubleclickmid_sign(p);
 	}
-	//	}
 }
 
 void ImageViewerWidget::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-			0.0);
+	p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	emit mousemoved_sign(p);
 }
@@ -841,7 +810,9 @@ void ImageViewerWidget::wheelEvent(QWheelEvent* e)
 		emit wheelrotatedctrl_sign(delta);
 	}
 	else
+	{
 		e->ignore();
+	}
 }
 
 void ImageViewerWidget::recompute_workborder()
@@ -1178,12 +1149,6 @@ void ImageViewerWidget::set_vp1(vector<Point>* vp1_arg)
 	vp_changed();
 }
 
-void ImageViewerWidget::clear_vp1()
-{
-	vp1.clear();
-	vp_changed();
-}
-
 void ImageViewerWidget::set_vm(vector<Mark>* vm_arg)
 {
 	vm.clear();
@@ -1191,22 +1156,10 @@ void ImageViewerWidget::set_vm(vector<Mark>* vm_arg)
 	vp_changed();
 }
 
-void ImageViewerWidget::clear_vm()
-{
-	vm.clear();
-	vp_changed();
-}
-
 void ImageViewerWidget::set_vpdyn(vector<Point>* vpdyn_arg)
 {
 	vpdyn.clear();
 	vpdyn.insert(vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
-	vpdyn_changed();
-}
-
-void ImageViewerWidget::clear_vpdyn()
-{
-	vpdyn.clear();
 	vpdyn_changed();
 }
 

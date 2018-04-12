@@ -610,71 +610,58 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 
 	lb_slicethick = new QLabel("Slice Thickness (mm): ", this);
-	le_slicethick =
-			new QLineEdit(QString::number(handler3D->get_slicethickness()), this);
+	le_slicethick = new QLineEdit(QString::number(handler3D->get_slicethickness()), this);
 	le_slicethick->setFixedWidth(80);
 
-	threshold_widget =
-			new ThresholdWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(threshold_widget);
-	hyst_widget =
-			new HystereticGrowingWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(hyst_widget);
-	lw_widget = new LivewireWidget(handler3D, this, "new window",
+	threshold_widget = new ThresholdWidget(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(lw_widget);
+	tabwidgets.push_back(threshold_widget);
+	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(hyst_widget);
+	livewire_widget = new LivewireWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(livewire_widget);
 	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(
 			handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(iftrg_widget);
-	FMF_widget =
-			new FastmarchingFuzzyWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(FMF_widget);
-	wshed_widget =
-			new WatershedWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(wshed_widget);
-	OutlineCorrect_widget =
-			new OutlineCorrectionWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(OutlineCorrect_widget);
-	interpolwidget =
-			new InterpolationWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(interpolwidget);
-	smoothing_widget =
-			new SmoothingWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
+	fastmarching_widget = new FastmarchingFuzzyWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(fastmarching_widget);
+	watershed_widget = new WatershedWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(watershed_widget);
+	olc_widget = new OutlineCorrectionWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(olc_widget);
+	interpolation_widget = new InterpolationWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(interpolation_widget);
+	smoothing_widget = new SmoothingWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(smoothing_widget);
-	morph_widget =
-			new MorphologyWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(morph_widget);
-	edge_widg = new EdgeWidget(handler3D, this, "new window",
+	morphology_widget = new MorphologyWidget(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(edge_widg);
-	feature_widget =
-			new FeatureWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(morphology_widget);
+	edge_widget = new EdgeWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(edge_widget);
+	feature_widget = new FeatureWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(feature_widget);
-	measurement_widget =
-			new MeasurementWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(measurement_widget);
-	vesselextr_widget =
-			new VesselWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(vesselextr_widget);
-	pickerwidget = new PickerWidget(handler3D, this, "new window",
+	measurement_widget = new MeasurementWidget(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(pickerwidget);
-	transfrmWidget =
-			new TransformWidget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	tabwidgets.push_back(transfrmWidget);
+	tabwidgets.push_back(measurement_widget);
+	vesselextr_widget = new VesselWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(vesselextr_widget);
+	picker_widget = new PickerWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(picker_widget);
+	transform_widget = new TransformWidget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(transform_widget);
 
 	boost::filesystem::path this_exe(argv[0]);
 
@@ -753,25 +740,21 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		//		pb_tab[i]->setFixedHeight(height_max*2/nrtabbuttons);
 	}
 
-	scalewidget = new ScaleWork(handler3D, m_picpath, this, "new window",
+	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imagemathwidget = new ImageMath(handler3D, this, "new window",
+	imagemath_dialog = new ImageMath(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imageoverlaywidget =
-			new ImageOverlay(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
+	imageoverlay_dialog = new ImageOverlay(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
 
 	bitstack_widget = new bits_stack(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	overlay_widget =
-			new extoverlay_widget(handler3D, this, "new window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
-	m_MultiDataset_widget =
-			new MultiDataset_widget(handler3D, this, "multi dataset window",
-					Qt::WDestructiveClose | Qt::WResizeNoErase);
+	overlay_widget = new extoverlay_widget(handler3D, this, "new window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window",
+			Qt::WDestructiveClose | Qt::WResizeNoErase);
+
 	int height_max1 = height_max;
-	//	methodTab->setFixedHeight(height_max1);
-	//	bitstack_widget->setFixedHeight(height_max1);
 
 	m_lb_notes = new QLabel("Notes:", this);
 	m_notes = new QTextEdit(this);
@@ -1017,7 +1000,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	multiDatasetDock->setObjectName("Multi Dataset");
 	multiDatasetDock->setAllowedAreas(Qt::TopDockWidgetArea |
 																		Qt::BottomDockWidgetArea);
-	multiDatasetDock->setWidget(m_MultiDataset_widget);
+	multiDatasetDock->setWidget(multidataset_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, multiDatasetDock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
@@ -1631,151 +1614,55 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(zoom_widget, SIGNAL(set_zoom(double)), work_show,
 			SLOT(set_zoom(double)));
 
-	QObject::connect(
-			this, SIGNAL(begin_dataexport(iseg::DataSelection&, QWidget*)), this,
+	QObject::connect(this,
+			SIGNAL(begin_dataexport(iseg::DataSelection&, QWidget*)), this,
 			SLOT(handle_begin_dataexport(iseg::DataSelection&, QWidget*)));
 	QObject::connect(this, SIGNAL(end_dataexport(QWidget*)), this,
 			SLOT(handle_end_dataexport(QWidget*)));
 
-	QObject::connect(
-			this, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
-			this,
+	QObject::connect(this,
+			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(this, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
-			this,
+	QObject::connect(this,
+			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
-	QObject::connect(
-			threshold_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(threshold_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			OutlineCorrect_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(OutlineCorrect_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(OutlineCorrect_widget,
+	QObject::connect(olc_widget,
 			SIGNAL(signal_request_selected_tissue_TS()), this,
 			SLOT(provide_selected_tissue_TS()));
-	QObject::connect(OutlineCorrect_widget,
+	QObject::connect(olc_widget,
 			SIGNAL(signal_request_selected_tissue_BG()), this,
 			SLOT(provide_selected_tissue_BG()));
-	QObject::connect(
-			smoothing_widget,
+
+	QObject::connect(scale_dialog,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(smoothing_widget,
+	QObject::connect(scale_dialog,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			edge_widg,
+	QObject::connect(imagemath_dialog,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(edge_widg,
+	QObject::connect(imagemath_dialog,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			morph_widget,
+	QObject::connect(imageoverlay_dialog,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(morph_widget,
+	QObject::connect(imageoverlay_dialog,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			wshed_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(wshed_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			lw_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(lw_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			iftrg_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(iftrg_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			FMF_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(FMF_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			interpolwidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(interpolwidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			scalewidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(scalewidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			imagemathwidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(imagemathwidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			imageoverlaywidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(imageoverlaywidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			bitstack_widget,
+	QObject::connect(bitstack_widget,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
 	QObject::connect(bitstack_widget,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			bitstack_widget,
+	QObject::connect(bitstack_widget,
 			SIGNAL(begin_dataexport(iseg::DataSelection&, QWidget*)), this,
 			SLOT(handle_begin_dataexport(iseg::DataSelection&, QWidget*)));
 	QObject::connect(bitstack_widget, SIGNAL(end_dataexport(QWidget*)), this,
 			SLOT(handle_end_dataexport(QWidget*)));
-	QObject::connect(
-			hyst_widget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(hyst_widget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			pickerwidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(pickerwidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	QObject::connect(
-			transfrmWidget,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(transfrmWidget,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 	QObject::connect(overlay_widget, SIGNAL(overlay_changed()), bmp_show,
 			SLOT(overlay_changed()));
 	QObject::connect(overlay_widget, SIGNAL(overlay_changed()), work_show,
@@ -1789,17 +1676,16 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(overlay_widget, SIGNAL(workoverlayvisible_changed(bool)),
 			work_show, SLOT(set_overlayvisible(bool)));
 
-	QObject::connect(m_MultiDataset_widget, SIGNAL(dataset_changed()), bmp_show,
+	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), bmp_show,
 			SLOT(overlay_changed()));
-	QObject::connect(m_MultiDataset_widget, SIGNAL(dataset_changed()), work_show,
+	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), work_show,
 			SLOT(overlay_changed()));
-	QObject::connect(m_MultiDataset_widget, SIGNAL(dataset_changed()), this,
+	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), this,
 			SLOT(DatasetChanged()));
-	QObject::connect(
-			m_MultiDataset_widget,
+	QObject::connect(multidataset_widget,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(m_MultiDataset_widget,
+	QObject::connect(multidataset_widget,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
@@ -1835,6 +1721,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		QObject::connect(m_widget_signal_mapper, SIGNAL(mapped(int)), this,
 				SLOT(pb_tab_pressed(int)));
 	}
+	for (auto widget : tabwidgets)
+	{
+		QObject::connect(widget,
+				SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
+				SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+		QObject::connect(widget,
+				SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+				SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+	}
 
 	QObject::connect(bmp_show, SIGNAL(wheelrotatedctrl_sign(int)), this,
 			SLOT(wheelrotated(int)));
@@ -1849,36 +1744,28 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	//	QObject::connect(pb_work2tissue,SIGNAL(clicked()),this,SLOT(do_work2tissue()));
 
 	m_acc_sliceup = new Q3Accel(this);
-	m_acc_sliceup->connectItem(
-			m_acc_sliceup->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Right)), this,
+	m_acc_sliceup->connectItem(m_acc_sliceup->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Right)), this,
 			SLOT(slicenr_up()));
 	m_acc_slicedown = new Q3Accel(this);
-	m_acc_slicedown->connectItem(
-			m_acc_slicedown->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Left)), this,
+	m_acc_slicedown->connectItem(m_acc_slicedown->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Left)), this,
 			SLOT(slicenr_down()));
 	m_acc_sliceup1 = new Q3Accel(this);
-	m_acc_sliceup->connectItem(
-			m_acc_sliceup->insertItem(QKeySequence(Qt::Key_Next)), this,
+	m_acc_sliceup->connectItem(m_acc_sliceup->insertItem(QKeySequence(Qt::Key_Next)), this,
 			SLOT(slicenr_up()));
 	m_acc_slicedown1 = new Q3Accel(this);
-	m_acc_slicedown->connectItem(
-			m_acc_slicedown->insertItem(QKeySequence(Qt::Key_Prior)), this,
+	m_acc_slicedown->connectItem(m_acc_slicedown->insertItem(QKeySequence(Qt::Key_Prior)), this,
 			SLOT(slicenr_down()));
 	m_acc_zoomin = new Q3Accel(this);
-	m_acc_zoomin->connectItem(
-			m_acc_zoomin->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Up)), this,
+	m_acc_zoomin->connectItem(m_acc_zoomin->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Up)), this,
 			SLOT(zoom_in()));
 	m_acc_zoomout = new Q3Accel(this);
-	m_acc_zoomout->connectItem(
-			m_acc_zoomout->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Down)), this,
+	m_acc_zoomout->connectItem(m_acc_zoomout->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Down)), this,
 			SLOT(zoom_out()));
 	m_acc_add = new Q3Accel(this);
-	m_acc_add->connectItem(
-			m_acc_add->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Plus)), this,
+	m_acc_add->connectItem(m_acc_add->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Plus)), this,
 			SLOT(add_tissue_shortkey()));
 	m_acc_sub = new Q3Accel(this);
-	m_acc_sub->connectItem(
-			m_acc_sub->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Minus)), this,
+	m_acc_sub->connectItem(m_acc_sub->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Minus)), this,
 			SLOT(subtract_tissue_shortkey()));
 	m_acc_undo = new Q3Accel(this);
 	m_acc_undo->connectItem(m_acc_undo->insertItem(QKeySequence(Qt::Key_Escape)),
@@ -1889,8 +1776,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	m_acc_redo = new Q3Accel(this);
 	m_acc_redo->connectItem(m_acc_redo->insertItem(QKeySequence("Ctrl+Y")), this,
 			SLOT(execute_redo()));
-	//	setCentralWidget(hbox);
-	//	vbox->insertChild(hbox2);
 
 	update_brightnesscontrast(true);
 	update_brightnesscontrast(false);
@@ -2032,7 +1917,7 @@ void MainWindow::provide_selected_tissue_BG()
 		return;
 	}
 
-	OutlineCorrect_widget->Select_selected_tissue_BG(
+	olc_widget->Select_selected_tissue_BG(
 			tissueTreeWidget->get_current_name(),
 			tissueTreeWidget->get_current_type());
 }
@@ -2048,7 +1933,7 @@ void MainWindow::provide_selected_tissue_TS()
 		return;
 	}
 
-	OutlineCorrect_widget->Select_selected_tissue_TS(
+	olc_widget->Select_selected_tissue_TS(
 			tissueTreeWidget->get_current_name(),
 			tissueTreeWidget->get_current_type());
 }
@@ -2149,30 +2034,30 @@ void MainWindow::execute_swapxy()
 
 	// Swap also the other datasets
 	bool swapExtraDatasets = false;
-	if (m_MultiDataset_widget->isVisible() && swapExtraDatasets)
+	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
 		w = handler3D->return_height();
 		h = handler3D->return_width();
 		nrslices = handler3D->return_nrslices();
 		QString str1;
-		for (int i = 0; i < m_MultiDataset_widget->GetNumberOfDatasets(); i++)
+		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
-			if (!m_MultiDataset_widget->IsActive(i))
+			if (!multidataset_widget->IsActive(i))
 			{
 				std::string tempFileName =
 						"bmp_float_eds_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_xy_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetBmpData(i), w, h,
+								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
 				tempFileName = "work_float_eds_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_xy_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetWorkingData(i), w, h,
+								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
@@ -2181,7 +2066,7 @@ void MainWindow::execute_swapxy()
 					tempFileName = "work_float_eds_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					str1 = QDir::temp().absFilePath(QString("work_float.raw"));
-					m_MultiDataset_widget->SetWorkingData(
+					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -2192,7 +2077,7 @@ void MainWindow::execute_swapxy()
 					tempFileName = "bmp_float_eds_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
-					m_MultiDataset_widget->SetBmpData(
+					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -2226,29 +2111,29 @@ void MainWindow::execute_swapxz()
 
 	// Swap also the other datasets
 	bool swapExtraDatasets = false;
-	if (m_MultiDataset_widget->isVisible() && swapExtraDatasets)
+	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
 		w = handler3D->return_nrslices();
 		h = handler3D->return_height();
 		nrslices = handler3D->return_width();
 		QString str1;
-		for (int i = 0; i < m_MultiDataset_widget->GetNumberOfDatasets(); i++)
+		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
-			if (!m_MultiDataset_widget->IsActive(i))
+			if (!multidataset_widget->IsActive(i))
 			{
 				std::string tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_xz_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetBmpData(i), w, h,
+								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
 				tempFileName = "work_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_xz_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetWorkingData(i), w, h,
+								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
@@ -2256,7 +2141,7 @@ void MainWindow::execute_swapxz()
 				{
 					tempFileName = "work_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					m_MultiDataset_widget->SetWorkingData(
+					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -2266,7 +2151,7 @@ void MainWindow::execute_swapxz()
 				{
 					tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					m_MultiDataset_widget->SetBmpData(
+					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -2304,29 +2189,29 @@ void MainWindow::execute_swapyz()
 
 	// Swap also the other datasets
 	bool swapExtraDatasets = false;
-	if (m_MultiDataset_widget->isVisible() && swapExtraDatasets)
+	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
 		w = handler3D->return_width();
 		h = handler3D->return_nrslices();
 		nrslices = handler3D->return_height();
 		QString str1;
-		for (int i = 0; i < m_MultiDataset_widget->GetNumberOfDatasets(); i++)
+		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
-			if (!m_MultiDataset_widget->IsActive(i))
+			if (!multidataset_widget->IsActive(i))
 			{
 				std::string tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_yz_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetBmpData(i), w, h,
+								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
 				tempFileName = "work_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 				if (SlicesHandler::SaveRaw_yz_swapped(
-								str1.ascii(), m_MultiDataset_widget->GetWorkingData(i), w, h,
+								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
 								nrslices) != 0)
 					ok = false;
 
@@ -2334,7 +2219,7 @@ void MainWindow::execute_swapyz()
 				{
 					tempFileName = "work_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					m_MultiDataset_widget->SetWorkingData(
+					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -2344,7 +2229,7 @@ void MainWindow::execute_swapyz()
 				{
 					tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					m_MultiDataset_widget->SetBmpData(
+					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
 										 str1.ascii(), handler3D->return_startslice(),
 										 handler3D->return_endslice(), 0, w * h));
@@ -3501,19 +3386,19 @@ void MainWindow::execute_saveprojas()
 		}*/
 		threshold_widget->SaveParams(fp, saveProjVersion);
 		hyst_widget->SaveParams(fp, saveProjVersion);
-		lw_widget->SaveParams(fp, saveProjVersion);
+		livewire_widget->SaveParams(fp, saveProjVersion);
 		iftrg_widget->SaveParams(fp, saveProjVersion);
-		FMF_widget->SaveParams(fp, saveProjVersion);
-		wshed_widget->SaveParams(fp, saveProjVersion);
-		OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-		interpolwidget->SaveParams(fp, saveProjVersion);
+		fastmarching_widget->SaveParams(fp, saveProjVersion);
+		watershed_widget->SaveParams(fp, saveProjVersion);
+		olc_widget->SaveParams(fp, saveProjVersion);
+		interpolation_widget->SaveParams(fp, saveProjVersion);
 		smoothing_widget->SaveParams(fp, saveProjVersion);
-		morph_widget->SaveParams(fp, saveProjVersion);
-		edge_widg->SaveParams(fp, saveProjVersion);
+		morphology_widget->SaveParams(fp, saveProjVersion);
+		edge_widget->SaveParams(fp, saveProjVersion);
 		feature_widget->SaveParams(fp, saveProjVersion);
 		measurement_widget->SaveParams(fp, saveProjVersion);
 		vesselextr_widget->SaveParams(fp, saveProjVersion);
-		pickerwidget->SaveParams(fp, saveProjVersion);
+		picker_widget->SaveParams(fp, saveProjVersion);
 		tissueTreeWidget->SaveParams(fp, saveProjVersion);
 		fp = TissueInfos::SaveTissueLocks(fp);
 		fp = save_notes(fp, saveProjVersion);
@@ -3571,19 +3456,19 @@ void MainWindow::execute_savecopyas()
 		}*/
 		threshold_widget->SaveParams(fp, saveProjVersion);
 		hyst_widget->SaveParams(fp, saveProjVersion);
-		lw_widget->SaveParams(fp, saveProjVersion);
+		livewire_widget->SaveParams(fp, saveProjVersion);
 		iftrg_widget->SaveParams(fp, saveProjVersion);
-		FMF_widget->SaveParams(fp, saveProjVersion);
-		wshed_widget->SaveParams(fp, saveProjVersion);
-		OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-		interpolwidget->SaveParams(fp, saveProjVersion);
+		fastmarching_widget->SaveParams(fp, saveProjVersion);
+		watershed_widget->SaveParams(fp, saveProjVersion);
+		olc_widget->SaveParams(fp, saveProjVersion);
+		interpolation_widget->SaveParams(fp, saveProjVersion);
 		smoothing_widget->SaveParams(fp, saveProjVersion);
-		morph_widget->SaveParams(fp, saveProjVersion);
-		edge_widg->SaveParams(fp, saveProjVersion);
+		morphology_widget->SaveParams(fp, saveProjVersion);
+		edge_widget->SaveParams(fp, saveProjVersion);
 		feature_widget->SaveParams(fp, saveProjVersion);
 		measurement_widget->SaveParams(fp, saveProjVersion);
 		vesselextr_widget->SaveParams(fp, saveProjVersion);
-		pickerwidget->SaveParams(fp, saveProjVersion);
+		picker_widget->SaveParams(fp, saveProjVersion);
 		tissueTreeWidget->SaveParams(fp, saveProjVersion);
 		fp = TissueInfos::SaveTissueLocks(fp);
 		fp = save_notes(fp, saveProjVersion);
@@ -3629,19 +3514,19 @@ void MainWindow::SaveSettings()
 	}*/
 	threshold_widget->SaveParams(fp, saveProjVersion);
 	hyst_widget->SaveParams(fp, saveProjVersion);
-	lw_widget->SaveParams(fp, saveProjVersion);
+	livewire_widget->SaveParams(fp, saveProjVersion);
 	iftrg_widget->SaveParams(fp, saveProjVersion);
-	FMF_widget->SaveParams(fp, saveProjVersion);
-	wshed_widget->SaveParams(fp, saveProjVersion);
-	OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-	interpolwidget->SaveParams(fp, saveProjVersion);
+	fastmarching_widget->SaveParams(fp, saveProjVersion);
+	watershed_widget->SaveParams(fp, saveProjVersion);
+	olc_widget->SaveParams(fp, saveProjVersion);
+	interpolation_widget->SaveParams(fp, saveProjVersion);
 	smoothing_widget->SaveParams(fp, saveProjVersion);
-	morph_widget->SaveParams(fp, saveProjVersion);
-	edge_widg->SaveParams(fp, saveProjVersion);
+	morphology_widget->SaveParams(fp, saveProjVersion);
+	edge_widget->SaveParams(fp, saveProjVersion);
 	feature_widget->SaveParams(fp, saveProjVersion);
 	measurement_widget->SaveParams(fp, saveProjVersion);
 	vesselextr_widget->SaveParams(fp, saveProjVersion);
-	pickerwidget->SaveParams(fp, saveProjVersion);
+	picker_widget->SaveParams(fp, saveProjVersion);
 	tissueTreeWidget->SaveParams(fp, saveProjVersion);
 
 	fclose(fp);
@@ -3755,19 +3640,19 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	}*/
 	threshold_widget->LoadParams(fp, loadProjVersion);
 	hyst_widget->LoadParams(fp, loadProjVersion);
-	lw_widget->LoadParams(fp, loadProjVersion);
+	livewire_widget->LoadParams(fp, loadProjVersion);
 	iftrg_widget->LoadParams(fp, loadProjVersion);
-	FMF_widget->LoadParams(fp, loadProjVersion);
-	wshed_widget->LoadParams(fp, loadProjVersion);
-	OutlineCorrect_widget->LoadParams(fp, loadProjVersion);
-	interpolwidget->LoadParams(fp, loadProjVersion);
+	fastmarching_widget->LoadParams(fp, loadProjVersion);
+	watershed_widget->LoadParams(fp, loadProjVersion);
+	olc_widget->LoadParams(fp, loadProjVersion);
+	interpolation_widget->LoadParams(fp, loadProjVersion);
 	smoothing_widget->LoadParams(fp, loadProjVersion);
-	morph_widget->LoadParams(fp, loadProjVersion);
-	edge_widg->LoadParams(fp, loadProjVersion);
+	morphology_widget->LoadParams(fp, loadProjVersion);
+	edge_widget->LoadParams(fp, loadProjVersion);
 	feature_widget->LoadParams(fp, loadProjVersion);
 	measurement_widget->LoadParams(fp, loadProjVersion);
 	vesselextr_widget->LoadParams(fp, loadProjVersion);
-	pickerwidget->LoadParams(fp, loadProjVersion);
+	picker_widget->LoadParams(fp, loadProjVersion);
 	tissueTreeWidget->LoadParams(fp, loadProjVersion);
 	fclose(fp);
 
@@ -3831,19 +3716,19 @@ void MainWindow::execute_saveactiveslicesas()
 		}*/
 		threshold_widget->SaveParams(fp, saveProjVersion);
 		hyst_widget->SaveParams(fp, saveProjVersion);
-		lw_widget->SaveParams(fp, saveProjVersion);
+		livewire_widget->SaveParams(fp, saveProjVersion);
 		iftrg_widget->SaveParams(fp, saveProjVersion);
-		FMF_widget->SaveParams(fp, saveProjVersion);
-		wshed_widget->SaveParams(fp, saveProjVersion);
-		OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-		interpolwidget->SaveParams(fp, saveProjVersion);
+		fastmarching_widget->SaveParams(fp, saveProjVersion);
+		watershed_widget->SaveParams(fp, saveProjVersion);
+		olc_widget->SaveParams(fp, saveProjVersion);
+		interpolation_widget->SaveParams(fp, saveProjVersion);
 		smoothing_widget->SaveParams(fp, saveProjVersion);
-		morph_widget->SaveParams(fp, saveProjVersion);
-		edge_widg->SaveParams(fp, saveProjVersion);
+		morphology_widget->SaveParams(fp, saveProjVersion);
+		edge_widget->SaveParams(fp, saveProjVersion);
 		feature_widget->SaveParams(fp, saveProjVersion);
 		measurement_widget->SaveParams(fp, saveProjVersion);
 		vesselextr_widget->SaveParams(fp, saveProjVersion);
-		pickerwidget->SaveParams(fp, saveProjVersion);
+		picker_widget->SaveParams(fp, saveProjVersion);
 		tissueTreeWidget->SaveParams(fp, saveProjVersion);
 		fp = TissueInfos::SaveTissueLocks(fp);
 		fp = save_notes(fp, saveProjVersion);
@@ -3922,19 +3807,19 @@ void MainWindow::execute_saveproj()
 			}*/
 			threshold_widget->SaveParams(fp, saveProjVersion);
 			hyst_widget->SaveParams(fp, saveProjVersion);
-			lw_widget->SaveParams(fp, saveProjVersion);
+			livewire_widget->SaveParams(fp, saveProjVersion);
 			iftrg_widget->SaveParams(fp, saveProjVersion);
-			FMF_widget->SaveParams(fp, saveProjVersion);
-			wshed_widget->SaveParams(fp, saveProjVersion);
-			OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-			interpolwidget->SaveParams(fp, saveProjVersion);
+			fastmarching_widget->SaveParams(fp, saveProjVersion);
+			watershed_widget->SaveParams(fp, saveProjVersion);
+			olc_widget->SaveParams(fp, saveProjVersion);
+			interpolation_widget->SaveParams(fp, saveProjVersion);
 			smoothing_widget->SaveParams(fp, saveProjVersion);
-			morph_widget->SaveParams(fp, saveProjVersion);
-			edge_widg->SaveParams(fp, saveProjVersion);
+			morphology_widget->SaveParams(fp, saveProjVersion);
+			edge_widget->SaveParams(fp, saveProjVersion);
 			feature_widget->SaveParams(fp, saveProjVersion);
 			measurement_widget->SaveParams(fp, saveProjVersion);
 			vesselextr_widget->SaveParams(fp, saveProjVersion);
-			pickerwidget->SaveParams(fp, saveProjVersion);
+			picker_widget->SaveParams(fp, saveProjVersion);
 			tissueTreeWidget->SaveParams(fp, saveProjVersion);
 			fp = TissueInfos::SaveTissueLocks(fp);
 			fp = save_notes(fp, saveProjVersion);
@@ -4074,19 +3959,19 @@ void MainWindow::loadproj(const QString& loadfilename)
 			}*/
 			threshold_widget->LoadParams(fp, loadProjVersion);
 			hyst_widget->LoadParams(fp, loadProjVersion);
-			lw_widget->LoadParams(fp, loadProjVersion);
+			livewire_widget->LoadParams(fp, loadProjVersion);
 			iftrg_widget->LoadParams(fp, loadProjVersion);
-			FMF_widget->LoadParams(fp, loadProjVersion);
-			wshed_widget->LoadParams(fp, loadProjVersion);
-			OutlineCorrect_widget->LoadParams(fp, loadProjVersion);
-			interpolwidget->LoadParams(fp, loadProjVersion);
+			fastmarching_widget->LoadParams(fp, loadProjVersion);
+			watershed_widget->LoadParams(fp, loadProjVersion);
+			olc_widget->LoadParams(fp, loadProjVersion);
+			interpolation_widget->LoadParams(fp, loadProjVersion);
 			smoothing_widget->LoadParams(fp, loadProjVersion);
-			morph_widget->LoadParams(fp, loadProjVersion);
-			edge_widg->LoadParams(fp, loadProjVersion);
+			morphology_widget->LoadParams(fp, loadProjVersion);
+			edge_widget->LoadParams(fp, loadProjVersion);
 			feature_widget->LoadParams(fp, loadProjVersion);
 			measurement_widget->LoadParams(fp, loadProjVersion);
 			vesselextr_widget->LoadParams(fp, loadProjVersion);
-			pickerwidget->LoadParams(fp, loadProjVersion);
+			picker_widget->LoadParams(fp, loadProjVersion);
 			tissueTreeWidget->LoadParams(fp, loadProjVersion);
 
 			if (loadProjVersion >= 3)
@@ -4200,19 +4085,19 @@ void MainWindow::execute_mergeprojects()
 		}*/
 		threshold_widget->SaveParams(fp, saveProjVersion);
 		hyst_widget->SaveParams(fp, saveProjVersion);
-		lw_widget->SaveParams(fp, saveProjVersion);
+		livewire_widget->SaveParams(fp, saveProjVersion);
 		iftrg_widget->SaveParams(fp, saveProjVersion);
-		FMF_widget->SaveParams(fp, saveProjVersion);
-		wshed_widget->SaveParams(fp, saveProjVersion);
-		OutlineCorrect_widget->SaveParams(fp, saveProjVersion);
-		interpolwidget->SaveParams(fp, saveProjVersion);
+		fastmarching_widget->SaveParams(fp, saveProjVersion);
+		watershed_widget->SaveParams(fp, saveProjVersion);
+		olc_widget->SaveParams(fp, saveProjVersion);
+		interpolation_widget->SaveParams(fp, saveProjVersion);
 		smoothing_widget->SaveParams(fp, saveProjVersion);
-		morph_widget->SaveParams(fp, saveProjVersion);
-		edge_widg->SaveParams(fp, saveProjVersion);
+		morphology_widget->SaveParams(fp, saveProjVersion);
+		edge_widget->SaveParams(fp, saveProjVersion);
 		feature_widget->SaveParams(fp, saveProjVersion);
 		measurement_widget->SaveParams(fp, saveProjVersion);
 		vesselextr_widget->SaveParams(fp, saveProjVersion);
-		pickerwidget->SaveParams(fp, saveProjVersion);
+		picker_widget->SaveParams(fp, saveProjVersion);
 		tissueTreeWidget->SaveParams(fp, saveProjVersion);
 		fp = TissueInfos::SaveTissueLocks(fp);
 		fp = save_notes(fp, saveProjVersion);
@@ -5426,11 +5311,11 @@ void MainWindow::execute_multidataset(bool checked)
 {
 	if (!checked)
 	{
-		m_MultiDataset_widget->hide();
+		multidataset_widget->hide();
 	}
 	else
 	{
-		m_MultiDataset_widget->show();
+		multidataset_widget->show();
 	}
 }
 
@@ -6815,9 +6700,9 @@ void MainWindow::slice_changed()
 			SLOT(sb_slicenr_changed()));
 	bmp_show->slicenr_changed();
 	work_show->slicenr_changed();
-	scalewidget->slicenr_changed();
-	imagemathwidget->slicenr_changed();
-	imageoverlaywidget->slicenr_changed();
+	scale_dialog->slicenr_changed();
+	imagemath_dialog->slicenr_changed();
+	imageoverlay_dialog->slicenr_changed();
 	overlay_widget->slicenr_changed();
 	if (handler3D->return_startslice() >= slicenr ||
 			handler3D->return_endslice() + 1 <= slicenr)
@@ -6849,7 +6734,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 		bitstack_widget->newloaded();
 	}
 	overlay_widget->newloaded();
-	imageoverlaywidget->newloaded();
+	imageoverlay_dialog->newloaded();
 
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
@@ -6872,7 +6757,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 				SLOT(sb_slicenr_changed()));
 		lb_slicenr->setText(QString(" of ") +
 												QString::number((int)handler3D->return_nrslices()));
-		interpolwidget->handler3D_changed();
+		interpolation_widget->handler3D_changed();
 		nrslices = handler3D->return_nrslices();
 	}
 
@@ -7038,8 +6923,8 @@ void MainWindow::tissue_selection_changed()
 	{
 		showpb_tab[6] = false;
 		showpb_tab[14] = false;
-		OutlineCorrect_widget->setDisabled(true);
-		pickerwidget->setDisabled(true);
+		olc_widget->setDisabled(true);
+		picker_widget->setDisabled(true);
 		cb_bmpoutlinevisible->setChecked(false);
 		bmpoutlinevisible_changed();
 		updateTabvisibility();
@@ -7048,8 +6933,8 @@ void MainWindow::tissue_selection_changed()
 	{
 		showpb_tab[6] = true;
 		showpb_tab[14] = true;
-		OutlineCorrect_widget->setDisabled(false);
-		pickerwidget->setDisabled(false);
+		olc_widget->setDisabled(false);
+		picker_widget->setDisabled(false);
 		updateTabvisibility();
 	}
 
@@ -7173,11 +7058,11 @@ void MainWindow::execute_undo()
 	if (handler3D->return_nrundo() > 0)
 	{
 		iseg::DataSelection selectedData;
-		if (methodTab->visibleWidget() == transfrmWidget)
+		if (methodTab->visibleWidget() == transform_widget)
 		{
 			cancel_transform_helper();
 			selectedData = handler3D->undo();
-			transfrmWidget->init();
+			transform_widget->init();
 		}
 		else
 		{
@@ -7202,11 +7087,11 @@ void MainWindow::execute_undo()
 void MainWindow::execute_redo()
 {
 	iseg::DataSelection selectedData;
-	if (methodTab->visibleWidget() == transfrmWidget)
+	if (methodTab->visibleWidget() == transform_widget)
 	{
 		cancel_transform_helper();
 		selectedData = handler3D->redo();
-		transfrmWidget->init();
+		transform_widget->init();
 	}
 	else
 	{
@@ -7266,6 +7151,12 @@ void MainWindow::tab_changed(QWidget* qw)
 		{
 			tab_old->cleanup();
 
+			// always connect to bmp_show, but not always to work_show
+			QObject::disconnect(tab_old, SIGNAL(vm_changed(std::vector<Mark>*)), bmp_show,
+					SLOT(set_vm(std::vector<Mark>*)));
+			QObject::disconnect(tab_old, SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+					SLOT(set_vpdyn(std::vector<Point>*)));
+
 			QObject::disconnect(bmp_show, SIGNAL(mousepressed_sign(Point)), tab_old,
 					SLOT(mouse_clicked(Point)));
 			QObject::disconnect(bmp_show, SIGNAL(mousemoved_sign(Point)), tab_old,
@@ -7296,11 +7187,8 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 			QObject::disconnect(measurement_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(measurement_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					work_show, SLOT(set_vpdyn(std::vector<Point>*)));
 			QObject::disconnect(measurement_widget,
 					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*, bool)),
 					bmp_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*, bool)));
@@ -7319,9 +7207,9 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 		}
-		else if (tab_old == wshed_widget)
+		else if (tab_old == watershed_widget)
 		{
-			QObject::disconnect(this, SIGNAL(marks_changed()), wshed_widget,
+			QObject::disconnect(this, SIGNAL(marks_changed()), watershed_widget,
 					SLOT(marks_changed()));
 		}
 		else if (tab_old == hyst_widget)
@@ -7333,33 +7221,23 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 			QObject::disconnect(hyst_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(
-					hyst_widget,
-					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
-					bmp_show,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
 		}
-		else if (tab_old == lw_widget)
+		else if (tab_old == livewire_widget)
 		{
-			QObject::disconnect(this, SIGNAL(bmp_changed()), lw_widget,
+			QObject::disconnect(this, SIGNAL(bmp_changed()), livewire_widget,
 					SLOT(bmp_changed()));
 			QObject::disconnect(bmp_show, SIGNAL(mousedoubleclick_sign(Point)),
-					lw_widget, SLOT(pt_doubleclicked(Point)));
+					livewire_widget, SLOT(pt_doubleclicked(Point)));
 			QObject::disconnect(bmp_show, SIGNAL(mousepressedmid_sign(Point)),
-					lw_widget, SLOT(pt_midclicked(Point)));
+					livewire_widget, SLOT(pt_midclicked(Point)));
 			QObject::disconnect(bmp_show, SIGNAL(mousedoubleclickmid_sign(Point)),
-					lw_widget, SLOT(pt_doubleclickedmid(Point)));
-			QObject::disconnect(lw_widget, SIGNAL(vp1_changed(std::vector<Point>*)),
+					livewire_widget, SLOT(pt_doubleclickedmid(Point)));
+			QObject::disconnect(livewire_widget, SIGNAL(vp1_changed(std::vector<Point>*)),
 					bmp_show, SLOT(set_vp1(std::vector<Point>*)));
-			QObject::disconnect(lw_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(
-					lw_widget,
-					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
-					bmp_show,
+			QObject::disconnect(livewire_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
 
 			bmp_show->setMouseTracking(false);
@@ -7368,67 +7246,50 @@ void MainWindow::tab_changed(QWidget* qw)
 		{
 			QObject::disconnect(this, SIGNAL(bmp_changed()), iftrg_widget,
 					SLOT(bmp_changed()));
-
-			QObject::disconnect(iftrg_widget, SIGNAL(vm_changed(std::vector<Mark>*)),
-					bmp_show, SLOT(set_vm(std::vector<Mark>*)));
-			QObject::disconnect(iftrg_widget,
-					SIGNAL(vmdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
 		}
-		else if (tab_old == FMF_widget)
+		else if (tab_old == fastmarching_widget)
 		{
-			QObject::disconnect(this, SIGNAL(bmp_changed()), FMF_widget,
+			QObject::disconnect(this, SIGNAL(bmp_changed()), fastmarching_widget,
 					SLOT(bmp_changed()));
-
-			QObject::disconnect(FMF_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
 		}
-		else if (tab_old == OutlineCorrect_widget)
+		else if (tab_old == olc_widget)
 		{
-			QObject::disconnect(this, SIGNAL(work_changed()), OutlineCorrect_widget,
+			QObject::disconnect(this, SIGNAL(work_changed()), olc_widget,
 					SLOT(workbits_changed()));
 
-			QObject::disconnect(OutlineCorrect_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+			QObject::disconnect(olc_widget,
+					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(OutlineCorrect_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					work_show, SLOT(set_vpdyn(std::vector<Point>*)));
 		}
 		else if (tab_old == feature_widget)
 		{
 			QObject::disconnect(feature_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::disconnect(feature_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					work_show, SLOT(set_vpdyn(std::vector<Point>*)));
 
 			work_show->setMouseTracking(false);
 			bmp_show->setMouseTracking(false);
 		}
-		else if (tab_old == interpolwidget)
+		else if (tab_old == interpolation_widget)
 		{
-			//			QObject::disconnect(tissueTreeWidget,SIGNAL(activated(int)),interpolwidget,SLOT(tissuenr_changed(int)));
-			//			QObject::disconnect(tissueTreeWidget,SIGNAL(activated(int)),this,SLOT(tissuenr_changed(int)));
+			// nothing
 		}
-		else if (tab_old == pickerwidget)
+		else if (tab_old == picker_widget)
 		{
-			QObject::disconnect(pickerwidget,
+			QObject::disconnect(picker_widget,
 					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1(std::vector<Point>*)));
-			QObject::disconnect(pickerwidget,
+			QObject::disconnect(picker_widget,
 					SIGNAL(vp1_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 		}
-		else if (tab_old == transfrmWidget)
+		else if (tab_old == transform_widget)
 		{
-			QObject::disconnect(this, SIGNAL(bmp_changed()), transfrmWidget,
+			QObject::disconnect(this, SIGNAL(bmp_changed()), transform_widget,
 					SLOT(bmp_changed()));
-			QObject::disconnect(this, SIGNAL(work_changed()), transfrmWidget,
+			QObject::disconnect(this, SIGNAL(work_changed()), transform_widget,
 					SLOT(work_changed()));
-			QObject::disconnect(this, SIGNAL(tissues_changed()), transfrmWidget,
+			QObject::disconnect(this, SIGNAL(tissues_changed()), transform_widget,
 					SLOT(tissues_changed()));
 		}
 
@@ -7436,6 +7297,11 @@ void MainWindow::tab_changed(QWidget* qw)
 
 		if (auto widget = dynamic_cast<WidgetInterface*>(qw)) // generic slots from WidgetInterface
 		{
+			QObject::connect(tab_old, SIGNAL(vm_changed(std::vector<Mark>*)), bmp_show,
+					SLOT(set_vm(std::vector<Mark>*)));
+			QObject::connect(tab_old, SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
+					SLOT(set_vpdyn(std::vector<Point>*)));
+
 			QObject::connect(bmp_show, SIGNAL(mousepressed_sign(Point)), qw,
 					SLOT(mouse_clicked(Point)));
 			QObject::connect(bmp_show, SIGNAL(mousemoved_sign(Point)), qw,
@@ -7466,9 +7332,6 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 			QObject::connect(measurement_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(measurement_widget,
 					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
 			QObject::connect(measurement_widget,
@@ -7489,9 +7352,9 @@ void MainWindow::tab_changed(QWidget* qw)
 					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1(std::vector<Point>*)));
 		}
-		else if (qw == wshed_widget)
+		else if (qw == watershed_widget)
 		{
-			QObject::connect(this, SIGNAL(marks_changed()), wshed_widget,
+			QObject::connect(this, SIGNAL(marks_changed()), watershed_widget,
 					SLOT(marks_changed()));
 		}
 		else if (qw == hyst_widget)
@@ -7501,31 +7364,26 @@ void MainWindow::tab_changed(QWidget* qw)
 
 			QObject::connect(hyst_widget, SIGNAL(vp1_changed(std::vector<Point>*)),
 					bmp_show, SLOT(set_vp1(std::vector<Point>*)));
-			QObject::connect(hyst_widget, SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					bmp_show, SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(
-					hyst_widget,
-					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
-					bmp_show,
+			QObject::connect(hyst_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)), bmp_show,
 					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
 		}
-		else if (qw == lw_widget)
+		else if (qw == livewire_widget)
 		{
-			QObject::connect(this, SIGNAL(bmp_changed()), lw_widget,
+			QObject::connect(this, SIGNAL(bmp_changed()), livewire_widget,
 					SLOT(bmp_changed()));
 			QObject::connect(bmp_show, SIGNAL(mousedoubleclick_sign(Point)),
-					lw_widget, SLOT(pt_doubleclicked(Point)));
-			QObject::connect(bmp_show, SIGNAL(mousepressedmid_sign(Point)), lw_widget,
+					livewire_widget, SLOT(pt_doubleclicked(Point)));
+			QObject::connect(bmp_show, SIGNAL(mousepressedmid_sign(Point)), livewire_widget,
 					SLOT(pt_midclicked(Point)));
 			QObject::connect(bmp_show, SIGNAL(mousedoubleclickmid_sign(Point)),
-					lw_widget, SLOT(pt_doubleclickedmid(Point)));
-			QObject::connect(lw_widget, SIGNAL(vp1_changed(std::vector<Point>*)),
-					bmp_show, SLOT(set_vp1(std::vector<Point>*)));
-			QObject::connect(lw_widget, SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					bmp_show, SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(lw_widget,
-					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)),
-					bmp_show, SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
+					livewire_widget, SLOT(pt_doubleclickedmid(Point)));
+			QObject::connect(livewire_widget,
+					SIGNAL(vp1_changed(std::vector<Point>*)), bmp_show,
+					SLOT(set_vp1(std::vector<Point>*)));
+			QObject::connect(livewire_widget,
+					SIGNAL(vp1dyn_changed(std::vector<Point>*, std::vector<Point>*)), bmp_show,
+					SLOT(set_vp1_dyn(std::vector<Point>*, std::vector<Point>*)));
 
 			bmp_show->setMouseTracking(true);
 		}
@@ -7533,40 +7391,25 @@ void MainWindow::tab_changed(QWidget* qw)
 		{
 			QObject::connect(this, SIGNAL(bmp_changed()), iftrg_widget,
 					SLOT(bmp_changed()));
-
-			QObject::connect(iftrg_widget, SIGNAL(vm_changed(std::vector<Mark>*)),
-					bmp_show, SLOT(set_vm(std::vector<Mark>*)));
-			QObject::connect(iftrg_widget,
-					SIGNAL(vmdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
 		}
-		else if (qw == FMF_widget)
+		else if (qw == fastmarching_widget)
 		{
-			QObject::connect(this, SIGNAL(bmp_changed()), FMF_widget,
+			QObject::connect(this, SIGNAL(bmp_changed()), fastmarching_widget,
 					SLOT(bmp_changed()));
-
-			QObject::connect(FMF_widget, SIGNAL(vpdyn_changed(std::vector<Point>*)),
-					bmp_show, SLOT(set_vpdyn(std::vector<Point>*)));
 		}
-		else if (qw == OutlineCorrect_widget)
+		else if (qw == olc_widget)
 		{
-			QObject::connect(this, SIGNAL(work_changed()), OutlineCorrect_widget,
+			QObject::connect(this, SIGNAL(work_changed()), olc_widget,
 					SLOT(workbits_changed()));
 
-			QObject::connect(OutlineCorrect_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
-			QObject::connect(OutlineCorrect_widget,
+			QObject::connect(olc_widget,
 					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
 
-			OutlineCorrect_widget->workbits_changed();
+			olc_widget->workbits_changed();
 		}
 		else if (qw == feature_widget)
 		{
-			QObject::connect(feature_widget,
-					SIGNAL(vpdyn_changed(std::vector<Point>*)), bmp_show,
-					SLOT(set_vpdyn(std::vector<Point>*)));
 			QObject::connect(feature_widget,
 					SIGNAL(vpdyn_changed(std::vector<Point>*)), work_show,
 					SLOT(set_vpdyn(std::vector<Point>*)));
@@ -7574,24 +7417,24 @@ void MainWindow::tab_changed(QWidget* qw)
 			work_show->setMouseTracking(true);
 			bmp_show->setMouseTracking(true);
 		}
-		else if (qw == interpolwidget)
+		else if (qw == interpolation_widget)
 		{
 			// anything?
 		}
-		else if (qw == pickerwidget)
+		else if (qw == picker_widget)
 		{
-			QObject::connect(pickerwidget, SIGNAL(vp1_changed(vector<Point>*)),
+			QObject::connect(picker_widget, SIGNAL(vp1_changed(vector<Point>*)),
 					bmp_show, SLOT(set_vp1(vector<Point>*)));
-			QObject::connect(pickerwidget, SIGNAL(vp1_changed(vector<Point>*)),
+			QObject::connect(picker_widget, SIGNAL(vp1_changed(vector<Point>*)),
 					work_show, SLOT(set_vp1(vector<Point>*)));
 		}
-		else if (qw == transfrmWidget)
+		else if (qw == transform_widget)
 		{
-			QObject::connect(this, SIGNAL(bmp_changed()), transfrmWidget,
+			QObject::connect(this, SIGNAL(bmp_changed()), transform_widget,
 					SLOT(bmp_changed()));
-			QObject::connect(this, SIGNAL(work_changed()), transfrmWidget,
+			QObject::connect(this, SIGNAL(work_changed()), transform_widget,
 					SLOT(work_changed()));
-			QObject::connect(this, SIGNAL(tissues_changed()), transfrmWidget,
+			QObject::connect(this, SIGNAL(tissues_changed()), transform_widget,
 					SLOT(tissues_changed()));
 		}
 
@@ -8103,7 +7946,7 @@ void MainWindow::handle_begin_datachange(iseg::DataSelection& dataSelection,
 	changeData = dataSelection;
 
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transfrmWidget && sender != transfrmWidget)
+	if (methodTab->visibleWidget() == transform_widget && sender != transform_widget)
 	{
 		cancel_transform_helper();
 	}
@@ -8225,7 +8068,7 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 		}
 		else
 		{
-			m_MultiDataset_widget->NewLoaded();
+			multidataset_widget->NewLoaded();
 		}
 	}
 
@@ -8280,24 +8123,24 @@ void MainWindow::update_ranges_helper()
 void MainWindow::cancel_transform_helper()
 {
 	QObject::disconnect(
-			transfrmWidget,
+			transform_widget,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
 	QObject::disconnect(
-			transfrmWidget, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
+			transform_widget, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
 			this, SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-	transfrmWidget->CancelPushButtonClicked();
+	transform_widget->CancelPushButtonClicked();
 	QObject::connect(
-			transfrmWidget,
+			transform_widget,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(transfrmWidget,
+	QObject::connect(transform_widget,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
 	// Signal changed data
 	bool bmp, work, tissues;
-	transfrmWidget->GetDataSelection(bmp, work, tissues);
+	transform_widget->GetDataSelection(bmp, work, tissues);
 	if (bmp)
 	{
 		emit bmp_changed();
@@ -8316,7 +8159,7 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 		QWidget* sender)
 {
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transfrmWidget &&
+	if (methodTab->visibleWidget() == transform_widget &&
 			(dataSelection.bmp || dataSelection.work || dataSelection.tissues))
 	{
 		cancel_transform_helper();

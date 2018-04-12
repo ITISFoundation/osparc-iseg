@@ -194,13 +194,10 @@ private slots:
 	void workborder_changed(QRect rect);
 	void recompute_workborder();
 	void set_vp1(std::vector<Point>* vp1_arg);
-	void clear_vp1();
 	void set_vm(std::vector<Mark>* vm_arg);
-	void clear_vm();
 	void set_vpdyn(std::vector<Point>* vpdyn_arg);
 	void set_vp1_dyn(std::vector<Point>* vp1_arg, std::vector<Point>* vpdyn_arg,
 			const bool also_points = false);
-	void clear_vpdyn();
 
 public slots:
 	void color_changed(int tissue);

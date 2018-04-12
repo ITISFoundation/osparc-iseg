@@ -90,9 +90,6 @@ private:
 	QLabel* lb_tissuename;
 	QLabel* lb_dummy;
 	Point pstart;
-
-signals:
-	void vpdyn_changed(std::vector<Point>* vpdyn);
 };
 
 } // namespace iseg

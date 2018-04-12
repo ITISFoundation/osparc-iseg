@@ -107,7 +107,6 @@ private:
 	QPushButton* pb_loadborders;
 
 signals:
-	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
 	void vp1_changed(std::vector<Point>* vp1_arg);
 	void vp1dyn_changed(std::vector<Point>* vp1_arg,
 			std::vector<Point>* vpdyn_arg);
