@@ -63,7 +63,7 @@ namespace Gc
                     m_node_list.ZeroFillMemory();
                     m_layer_list.ZeroFillMemory();
 
-                    InitBase(dim, nb);
+                    this->InitBase(dim, nb);
 
                     if (MASK)
                     {

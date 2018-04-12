@@ -162,22 +162,6 @@ private:
 			this->ProcessObject::GetInput(0));
 	}
 
-	const ForegroundImageType* GetForegroundImage()
-	{
-		if (GetNumberOfRequiredInputs() == 1)
-			return nullptr;
-		return static_cast<const ForegroundImageType*>(
-			this->ProcessObject::GetInput(1));
-	}
-
-	const BackgroundImageType* GetBackgroundImage()
-	{
-		if (GetNumberOfRequiredInputs() == 1)
-			return nullptr;
-		return static_cast<const BackgroundImageType*>(
-			this->ProcessObject::GetInput(2));
-	}
-
 	// parameters
 	bool m_UseForegroundBackground;
 	bool m_UseIntensity;
