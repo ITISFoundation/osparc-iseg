@@ -37,6 +37,7 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 	// create options
 	all_slices = new QCheckBox;
 	use_source = new QCheckBox;
+	use_source->setToolTip(QString("Use information from Source image, or split purely based on minimum cut through segmentation."));
 	sigma_edit = new QLineEdit(QString::number(1.0));
 	execute_button = new QPushButton("Execute");
 
@@ -118,5 +119,21 @@ void TissueSeparatorWidget::on_mouse_released(Point p)
 
 void TissueSeparatorWidget::do_work() //Code for special GC for division
 {
-	assert(false);
+	// get source [optional]
+
+	// get segmentation
+
+	// create mask from selected tissue [how to select tissue?]
+
+	// build "speed-function" from gradient magnitude [scale?]
+
+	// build graph, ignoring connections outside mask
+
+	// sparse graph or grid-based?
+
+	// label nodes in graph, based on marks
+
+	// solve graph-cut
+
+	// copy result to target [tissue?], use e.g. 255 and 127
 }
