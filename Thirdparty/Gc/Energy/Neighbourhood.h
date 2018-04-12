@@ -110,7 +110,7 @@ namespace Gc
                 n.Resize(Elements());
                 for (Size i = 0; i < Elements(); i++)
                 {
-                    n[i] = m_data[i].Convert<CN,CT>(pad_val);
+                    n[i] = m_data[i].template Convert<CN,CT>(pad_val);
                 }
 
                 return n;
@@ -368,7 +368,7 @@ namespace Gc
 
                 // Generate neighbours
                 Size n = 0, k, zi = with_center ? num : num / 2;
-                Math::Algebra::Vector<N,Int32> ncur = -sz.Convert<N,Int32>();
+                Math::Algebra::Vector<N,Int32> ncur = -sz.template Convert<N,Int32>();
 
                 while (n < num)
                 {
@@ -376,7 +376,7 @@ namespace Gc
                     {
                         if (!unique || ncur.Gcd() == 1)
                         {
-                            ab.Push(ncur.Convert<N,T>());
+                            ab.Push(ncur.template Convert<N,T>());
                         }
                     }
                              
