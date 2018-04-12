@@ -19,9 +19,14 @@
 class QVTKWidget;
 class QVTKInteractor;
 class Q3VBox;
+class Q3HBox;
+class QSlider;
+class QLabel;
+class QPushButton;
 
 class vtkActor;
 class vtkInteractorStyleTrackballCamera;
+class vtkImageData;
 class vtkImageAccumulate;
 class vtkMarchingCubes;
 class vtkDiscreteMarchingCubes;

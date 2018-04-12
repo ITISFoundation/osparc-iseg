@@ -18,6 +18,12 @@
 
 class QVTKWidget;
 class QVTKInteractor;
+class Q3VBox;
+class Q3HBox;
+class QSlider;
+class QLabel;
+class QCheckBox;
+class QPushButton;
 
 class vtkLookupTable;
 class vtkImplicitPlaneWidget;
@@ -25,6 +31,7 @@ class vtkActor;
 class vtkPiecewiseFunction;
 class vtkColorTransferFunction;
 class vtkScalarBarActor;
+class vtkImageData;
 class vtkVolume;
 class vtkVolumeProperty;
 class vtkSmartVolumeMapper;
