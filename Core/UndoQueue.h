@@ -15,7 +15,7 @@
 
 namespace iseg {
 
-class iSegCore_API UndoQueue
+class ISEG_CORE_API UndoQueue
 {
 public:
 	UndoQueue();

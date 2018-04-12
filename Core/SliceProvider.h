@@ -17,7 +17,7 @@
 
 namespace iseg {
 
-class iSegCore_API SliceProvider
+class ISEG_CORE_API SliceProvider
 {
 public:
 	SliceProvider(unsigned area1);
@@ -40,7 +40,7 @@ struct spobj
 	unsigned short installnr;
 };
 
-class iSegCore_API SliceProviderInstaller
+class ISEG_CORE_API SliceProviderInstaller
 {
 public:
 	static SliceProviderInstaller* getinst();

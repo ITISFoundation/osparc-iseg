@@ -14,8 +14,9 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Interface/addLine.h"
+
 #include "Core/ImageForestingTransform.h"
-#include "Core/addLine.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -183,7 +184,6 @@ void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 	// \todo B
 	cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
 	tissuenr = (unsigned)i + 1;
-	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)

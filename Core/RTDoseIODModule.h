@@ -39,7 +39,7 @@ enum CharacterSetEnum {
 	// TODO: Support other character sets
 };
 
-class iSegCore_API RTDoseIODModule
+class ISEG_CORE_API RTDoseIODModule
 {
 public:
 	RTDoseIODModule();

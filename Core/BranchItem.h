@@ -22,7 +22,7 @@
 namespace iseg {
 
 //!
-class iSegCore_API BranchItem
+class ISEG_CORE_API BranchItem
 {
 public:
 	BranchItem(void) { Initialize(); }

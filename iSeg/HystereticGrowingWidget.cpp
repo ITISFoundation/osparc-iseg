@@ -14,8 +14,9 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Interface/addLine.h"
+
 #include "Core/Pair.h"
-#include "Core/addLine.h"
 
 #include <q3filedialog.h>
 #include <q3listbox.h>

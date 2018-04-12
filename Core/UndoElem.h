@@ -21,7 +21,7 @@
 
 namespace iseg {
 
-class iSegCore_API UndoElem
+class ISEG_CORE_API UndoElem
 {
 public:
 	bool multi;
@@ -48,7 +48,7 @@ public:
 	virtual unsigned arraynr();
 };
 
-class iSegCore_API MultiUndoElem : public UndoElem
+class ISEG_CORE_API MultiUndoElem : public UndoElem
 {
 public:
 	//abcd vector<unsigned short> vslicenr;

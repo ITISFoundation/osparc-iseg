@@ -25,7 +25,7 @@ class SequenceOfItems;
 
 namespace iseg {
 
-class iSegCore_API RTDoseWriter
+class ISEG_CORE_API RTDoseWriter
 {
 public:
 	RTDoseWriter();

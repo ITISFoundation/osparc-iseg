@@ -12,12 +12,10 @@
 #include "Interface/SlicesHandlerInterface.h"
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <qcheckbox.h>
-#include <qcombobox.h>
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QCheckBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 
 class TissueSeparatorWidget : public iseg::WidgetInterface
 {
@@ -31,34 +29,29 @@ public:
 	void newloaded() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
-	QSize sizeHint() const override;
 
 private:
+	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
 
-	iseg::SliceHandlerInterface* m_Handler3D;
-	unsigned short m_CurrentSlice;
-	Q3VBox* m_VerticalGrid;
-	Q3HBox* m_Horizontal1;
-	Q3HBox* m_Horizontal2;
-	Q3HBox* m_Horizontal3;
-	Q3HBox* m_Horizontal4;
-	Q3HBox* m_Horizontal5;
-	QLabel* m_LabelForeground;
-	QLabel* m_LabelBackground;
-	QLabel* m_LabelMaxFlowAlgorithm;
-	QLabel* m_LabelStart;
-	QLabel* m_LabelEnd;
-	QSpinBox* m_ForegroundValue;
-	QSpinBox* m_BackgroundValue;
-	QCheckBox* USE_FB; // ?
-	QCheckBox* m_UseIntensity;
-	QComboBox* m_MaxFlowAlgorithm;
-	QCheckBox* m_6Connectivity;
-	QSpinBox* m_Start;
-	QSpinBox* m_End;
-	QPushButton* m_Execute;
+	void on_mouse_clicked(iseg::Point p) override;
+	void on_mouse_released(iseg::Point p) override;
+	void on_mouse_moved(iseg::Point p) override;
 
 private slots:
 	void do_work();
+
+private:
+	iseg::SliceHandlerInterface* slice_handler;
+	unsigned short current_slice;
+	unsigned tissuenr;
+	iseg::Point last_pt;
+	std::vector<iseg::Point> vpdyn;
+	std::vector<iseg::Mark> vm;
+
+	//QWidget* vertical_grid;
+	QCheckBox* all_slices;
+	QCheckBox* use_source;
+	QLineEdit* sigma_edit;
+	QPushButton* execute_button;
 };

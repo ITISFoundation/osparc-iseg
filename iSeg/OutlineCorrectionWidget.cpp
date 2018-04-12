@@ -15,8 +15,7 @@
 #include "bmp_read_1.h"
 
 #include "Interface/Point.h"
-
-#include "Core/addLine.h"
+#include "Interface/addLine.h"
 
 #include <QLabel>
 #include <q3vbox.h>
@@ -33,14 +32,14 @@ using namespace std;
 using namespace iseg;
 
 OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent,
-												 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("OutLine Correction routines that can be used to modify "
-					  "the result of a "
-					  "segmentation operation and to correct frequently "
-					  "occurring segmentation "
-					  "deficiencies."));
+										"the result of a "
+										"segmentation operation and to correct frequently "
+										"occurring segmentation "
+										"deficiencies."));
 	setObjectName("OLC");
 
 	f = 255;
@@ -98,35 +97,35 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	olcorr = new QRadioButton(QString("Outline Corr"), hboxmethods1);
 	olcorr->setToolTip(
-		Format("Draw an alternative boundary segment for a region.This segment "
-			   "will be connected to the region using the "
-			   "shortest possible lines and will replace the boundary segment "
-			   "between the connection points."));
+			Format("Draw an alternative boundary segment for a region.This segment "
+						 "will be connected to the region using the "
+						 "shortest possible lines and will replace the boundary segment "
+						 "between the connection points."));
 	brush = new QRadioButton(QString("Brush"), hboxmethods1);
 	brush->setToolTip(
-		Format("Manual correction and segmentation tool: a brush."));
+			Format("Manual correction and segmentation tool: a brush."));
 	holefill = new QRadioButton(QString("Fill Holes"), hboxmethods1);
 	holefill->setToolTip(
-		Format("Close all holes in the selected region or tissue that have a "
-			   "size smaller than the number of "
-			   "pixels specified by the Hole Size option."));
+			Format("Close all holes in the selected region or tissue that have a "
+						 "size smaller than the number of "
+						 "pixels specified by the Hole Size option."));
 	removeislands = new QRadioButton(QString("Remove Islands"), hboxmethods2);
 	removeislands->setToolTip(
-		Format("Remove all islands (speckles and outliers) with the selected "
-			   "gray value or tissue assignment."));
+			Format("Remove all islands (speckles and outliers) with the selected "
+						 "gray value or tissue assignment."));
 	gapfill = new QRadioButton(QString("Fill Gaps"), hboxmethods2);
 	gapfill->setToolTip(Format(
-		"Close gaps between multiple disconnected regions having the same "
-		"gray value or belonging to the same tissue."));
+			"Close gaps between multiple disconnected regions having the same "
+			"gray value or belonging to the same tissue."));
 	addskin = new QRadioButton(QString("Add Skin"), hboxmethods2);
 	addskin->setToolTip(Format("Add a skin layer to a segmentation with a "
-							   "specified Thickness (in pixels)."));
+														 "specified Thickness (in pixels)."));
 	fillskin = new QRadioButton(QString("Fill Skin"), hboxmethods3);
 	fillskin->setToolTip(
-		Format("Thicken a skin layer to ensure it has a minimum Thickness."));
+			Format("Thicken a skin layer to ensure it has a minimum Thickness."));
 	allfill = new QRadioButton(QString("Fill All"), hboxmethods3);
 	allfill->setToolTip(Format("Make sure that there are no unassigned regions "
-							   "inside the segmented model."));
+														 "inside the segmented model."));
 	adapt = new QRadioButton(QString("Adapt"), hboxmethods3);
 
 	method->insert(olcorr);
@@ -161,21 +160,21 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	modifybrush = new QRadioButton(QString("Modify"), hbox3a);
 	modifybrush->setToolTip(Format(
-		"The Modify mode depends on where the mouse is initially pressed "
-		"down. If it is pressed down within the selected region or tissue, it "
-		"acts "
-		"as a drawing brush. In contrast, when it is pressed down outside, it "
-		"will overwrite the selected region or tissue with the gray value or "
-		"tissue "
-		"assignment of the point where the mouse has initially been pressed "
-		"down."));
+			"The Modify mode depends on where the mouse is initially pressed "
+			"down. If it is pressed down within the selected region or tissue, it "
+			"acts "
+			"as a drawing brush. In contrast, when it is pressed down outside, it "
+			"will overwrite the selected region or tissue with the gray value or "
+			"tissue "
+			"assignment of the point where the mouse has initially been pressed "
+			"down."));
 	drawbrush = new QRadioButton(QString("Draw"), hbox3a);
 	drawbrush->setToolTip(
-		Format("Use the brush to draw with the currently selected gray "
-			   "value(TargetPict) or tissue assignment (Tissue)."));
+			Format("Use the brush to draw with the currently selected gray "
+						 "value(TargetPict) or tissue assignment (Tissue)."));
 	erasebrush = new QRadioButton(QString("Erase"), hbox3a);
 	erasebrush->setToolTip(
-		Format("Erase a region leaving black or no tissue assignment behind."));
+			Format("Erase a region leaving black or no tissue assignment behind."));
 
 	brushtype->insert(modifybrush);
 	brushtype->insert(drawbrush);
@@ -198,8 +197,8 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	pb_selectobj = new QPushButton("Select Object", hbox5o);
 	pb_selectobj->show();
 	pb_selectobj->setToolTip(
-		"Press this button and select the object in the target image. This "
-		"object will be considered as foreground by the current operation.");
+			"Press this button and select the object in the target image. This "
+			"object will be considered as foreground by the current operation.");
 	fb = new QCheckBox(QString("Foreground"), hbox6);
 	bg = new QCheckBox(QString("Background"), hbox6);
 
@@ -244,22 +243,22 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	method_changed();
 
 	QObject::connect(method, SIGNAL(buttonClicked(int)), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(target, SIGNAL(buttonClicked(int)), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(allslices, SIGNAL(clicked()), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(pixelormm, SIGNAL(buttonClicked(int)), this,
-					 SLOT(pixmm_changed()));
+			SLOT(pixmm_changed()));
 	QObject::connect(pb_removeholes, SIGNAL(clicked()), this,
-					 SLOT(removeholes_pushed()));
+			SLOT(removeholes_pushed()));
 	QObject::connect(pb_selectobj, SIGNAL(clicked()), this,
-					 SLOT(selectobj_pushed()));
+			SLOT(selectobj_pushed()));
 
 	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this,
-					 SLOT(request_selected_tissue_BG()));
+			SLOT(request_selected_tissue_BG()));
 	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this,
-					 SLOT(request_selected_tissue_TS()));
+			SLOT(request_selected_tissue_TS()));
 
 	selectobj = false;
 
@@ -289,7 +288,7 @@ void OutlineCorrectionWidget::request_selected_tissue_TS()
 }
 
 void OutlineCorrectionWidget::Select_selected_tissue_BG(QString tissueName,
-														tissues_size_t nr)
+		tissues_size_t nr)
 {
 	backgroundText->clear();
 	backgroundText->setText(tissueName);
@@ -304,7 +303,7 @@ void OutlineCorrectionWidget::Select_selected_tissue_BG(QString tissueName,
 }
 
 void OutlineCorrectionWidget::Select_selected_tissue_TS(QString tissueName,
-														tissues_size_t nr)
+		tissues_size_t nr)
 {
 	skinText->clear();
 	skinText->setText(tissueName);
@@ -328,24 +327,24 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 	{
 		float const radius = mm_radius->text().toFloat();
 		float const radius_corrected =
-			spacing[0] > spacing[1]
-				? std::ceil(radius / spacing[0] + 0.5f) * spacing[0]
-				: std::ceil(radius / spacing[1] + 0.5f) * spacing[1];
+				spacing[0] > spacing[1]
+						? std::ceil(radius / spacing[0] + 0.5f) * spacing[0]
+						: std::ceil(radius / spacing[1] + 0.5f) * spacing[1];
 
 		int const xradius = std::ceil(radius_corrected / spacing[0]);
 		int const yradius = std::ceil(radius_corrected / spacing[1]);
 		for (p1.px = max(0, p.px - xradius);
-			 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
-			 p1.px++)
+				 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
+				 p1.px++)
 		{
 			for (p1.py = max(0, p.py - yradius);
-				 p1.py <=
-				 min((int)bmphand->return_height() - 1, p.py + yradius);
-				 p1.py++)
+					 p1.py <=
+					 min((int)bmphand->return_height() - 1, p.py + yradius);
+					 p1.py++)
 			{
 				if (std::pow(spacing[0] * (p.px - p1.px), 2.f) +
-						std::pow(spacing[1] * (p.py - p1.py), 2.f) <=
-					radius_corrected * radius_corrected)
+								std::pow(spacing[1] * (p.py - p1.py), 2.f) <=
+						radius_corrected * radius_corrected)
 				{
 					vpdyn.push_back(p1);
 				}
@@ -357,16 +356,16 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 		int const xradius = sb_radius->value();
 		int const yradius = sb_radius->value();
 		for (p1.px = max(0, p.px - xradius);
-			 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
-			 p1.px++)
+				 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
+				 p1.px++)
 		{
 			for (p1.py = max(0, p.py - yradius);
-				 p1.py <= min((int)bmphand->return_width() - 1, p.py + yradius);
-				 p1.py++)
+					 p1.py <= min((int)bmphand->return_width() - 1, p.py + yradius);
+					 p1.py++)
 			{
 				if ((p.px - p1.px) * (p.px - p1.px) +
-						(p.py - p1.py) * (p.py - p1.py) <=
-					sb_radius->value() * sb_radius->value())
+								(p.py - p1.py) * (p.py - p1.py) <=
+						sb_radius->value() * sb_radius->value())
 				{
 					vpdyn.push_back(p1);
 				}
@@ -415,7 +414,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 			else
 			{
 				if (bmphand->tissues_pt(handler3D->get_active_tissuelayer(),
-										p) == tissuenr)
+								p) == tissuenr)
 				{
 					draw = true;
 				}
@@ -423,7 +422,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 				{
 					draw = false;
 					tissuenrnew = bmphand->tissues_pt(
-						handler3D->get_active_tissuelayer(), p);
+							handler3D->get_active_tissuelayer(), p);
 				}
 			}
 		}
@@ -435,11 +434,11 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		{
 			draw = false;
 			if (bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p) ==
-				tissuenr)
+					tissuenr)
 				tissuenrnew = 0;
 			else
 				tissuenrnew =
-					bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
+						bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
 		}
 
 		emit begin_datachange(dataSelection, this);
@@ -452,7 +451,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 
 			if (mm->isOn())
 				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0],
-							   spacing[1], draw);
+						spacing[1], draw);
 			else
 				bmphand->brush(f, p, sb_radius->value(), draw);
 		}
@@ -461,11 +460,11 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 			auto idx = handler3D->get_active_tissuelayer();
 			if (mm->isOn())
 				bmphand->brushtissue(idx, tissuenr, p,
-									 mm_radius->text().toFloat(), spacing[0],
-									 spacing[1], draw, tissuenrnew);
+						mm_radius->text().toFloat(), spacing[0],
+						spacing[1], draw, tissuenrnew);
 			else
 				bmphand->brushtissue(idx, tissuenr, p, sb_radius->value(), draw,
-									 tissuenrnew);
+						tissuenrnew);
 		}
 		emit end_datachange(this, iseg::NoUndo);
 
@@ -492,13 +491,13 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 			vps.clear();
 			addLine(&vps, last_pt, p);
 			for (vector<Point>::iterator it = ++(vps.begin()); it != vps.end();
-				 it++)
+					 it++)
 			{
 				if (work->isOn())
 				{
 					if (mm->isOn())
 						bmphand->brush(f, *it, mm_radius->text().toFloat(),
-									   spacing[0], spacing[1], draw);
+								spacing[0], spacing[1], draw);
 					else
 						bmphand->brush(f, *it, sb_radius->value(), draw);
 				}
@@ -507,12 +506,12 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 					auto idx = handler3D->get_active_tissuelayer();
 					if (mm->isOn())
 						bmphand->brushtissue(
-							idx, tissuenr, *it, mm_radius->text().toFloat(),
-							spacing[0], spacing[1], draw, tissuenrnew);
+								idx, tissuenr, *it, mm_radius->text().toFloat(),
+								spacing[0], spacing[1], draw, tissuenrnew);
 					else
 						bmphand->brushtissue(idx, tissuenr, *it,
-											 sb_radius->value(), draw,
-											 tissuenrnew);
+								sb_radius->value(), draw,
+								tissuenrnew);
 				}
 			}
 			int dummy1, dummy2;
@@ -529,7 +528,7 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 			}
 			rect.setLeft(max(0, dummy1 - sb_radius->value()));
 			rect.setRight(min((int)bmphand->return_width() - 1,
-							  dummy2 + sb_radius->value()));
+					dummy2 + sb_radius->value()));
 			if (p.py < last_pt.py)
 			{
 				dummy1 = (int)p.py;
@@ -542,7 +541,7 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 			}
 			rect.setTop(max(0, dummy1 - sb_radius->value()));
 			rect.setBottom(min((int)bmphand->return_height() - 1,
-							   dummy2 + sb_radius->value()));
+					dummy2 + sb_radius->value()));
 			emit end_datachange(this, iseg::NoUndo);
 			last_pt = p;
 		}
@@ -565,7 +564,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 				bmphand->correct_outline(f, &vpdyn);
 			else
 				bmphand->correct_outlinetissue(
-					handler3D->get_active_tissuelayer(), tissuenr, &vpdyn);
+						handler3D->get_active_tissuelayer(), tissuenr, &vpdyn);
 			emit end_datachange(this);
 
 			vpdyn.clear();
@@ -581,7 +580,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 				{
 					if (mm->isOn())
 						bmphand->brush(f, *it, mm_radius->text().toFloat(),
-									   spacing[0], spacing[1], draw);
+								spacing[0], spacing[1], draw);
 					else
 						bmphand->brush(f, *it, sb_radius->value(), draw);
 				}
@@ -590,12 +589,12 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 					auto idx = handler3D->get_active_tissuelayer();
 					if (mm->isOn())
 						bmphand->brushtissue(
-							idx, tissuenr, *it, mm_radius->text().toFloat(),
-							spacing[0], spacing[1], draw, tissuenrnew);
+								idx, tissuenr, *it, mm_radius->text().toFloat(),
+								spacing[0], spacing[1], draw, tissuenrnew);
 					else
 						bmphand->brushtissue(idx, tissuenr, *it,
-											 sb_radius->value(), draw,
-											 tissuenrnew);
+								sb_radius->value(), draw,
+								tissuenrnew);
 				}
 			}
 			emit end_datachange(this);
@@ -854,7 +853,7 @@ void OutlineCorrectionWidget::removeholes_pushed()
 				bmphand->fill_holes(f, sb_holesize->value());
 			else
 				bmphand->fill_holestissue(handler3D->get_active_tissuelayer(),
-										  tissuenr, sb_holesize->value());
+						tissuenr, sb_holesize->value());
 		}
 	}
 	else if (removeislands->isOn())
@@ -872,8 +871,8 @@ void OutlineCorrectionWidget::removeholes_pushed()
 				bmphand->remove_islands(f, sb_holesize->value());
 			else
 				bmphand->remove_islandstissue(
-					handler3D->get_active_tissuelayer(), tissuenr,
-					sb_holesize->value());
+						handler3D->get_active_tissuelayer(), tissuenr,
+						sb_holesize->value());
 		}
 	}
 	else if (gapfill->isOn())
@@ -891,7 +890,7 @@ void OutlineCorrectionWidget::removeholes_pushed()
 				bmphand->fill_gaps(sb_gapsize->value(), false);
 			else
 				bmphand->fill_gapstissue(handler3D->get_active_tissuelayer(),
-										 sb_gapsize->value(), false);
+						sb_gapsize->value(), false);
 		}
 	}
 	else if (addskin->isOn())
@@ -909,19 +908,19 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					if (work->isOn())
 					{
 						float setto = handler3D->add_skin3D_outside2(
-							int(sb_radius->value() / ps1.high + 0.1f),
-							int(sb_radius->value() / ps1.low + 0.1f),
-							int(sb_radius->value() / thick1 + 0.1f));
+								int(sb_radius->value() / ps1.high + 0.1f),
+								int(sb_radius->value() / ps1.low + 0.1f),
+								int(sb_radius->value() / thick1 + 0.1f));
 						atBoundary = handler3D->value_at_boundary3D(setto);
 					}
 					else
 					{
 						handler3D->add_skintissue3D_outside2(
-							int(sb_radius->value() / ps1.high + 0.1f),
-							int(sb_radius->value() / ps1.low + 0.1f),
-							int(sb_radius->value() / thick1 + 0.1f), tissuenr);
+								int(sb_radius->value() / ps1.high + 0.1f),
+								int(sb_radius->value() / ps1.low + 0.1f),
+								int(sb_radius->value() / thick1 + 0.1f), tissuenr);
 						atBoundary =
-							handler3D->tissuevalue_at_boundary3D(tissuenr);
+								handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 				else
@@ -929,15 +928,15 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					if (work->isOn())
 					{
 						float setto =
-							handler3D->add_skin3D_outside(sb_radius->value());
+								handler3D->add_skin3D_outside(sb_radius->value());
 						atBoundary = handler3D->value_at_boundary3D(setto);
 					}
 					else
 					{
 						handler3D->add_skintissue3D_outside(sb_radius->value(),
-															tissuenr);
+								tissuenr);
 						atBoundary =
-							handler3D->tissuevalue_at_boundary3D(tissuenr);
+								handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 			}
@@ -951,10 +950,10 @@ void OutlineCorrectionWidget::removeholes_pushed()
 				else
 				{
 					bmphand->add_skintissue_outside(
-						handler3D->get_active_tissuelayer(), sb_radius->value(),
-						tissuenr);
+							handler3D->get_active_tissuelayer(), sb_radius->value(),
+							tissuenr);
 					atBoundary = bmphand->tissuevalue_at_boundary(
-						handler3D->get_active_tissuelayer(), tissuenr);
+							handler3D->get_active_tissuelayer(), tissuenr);
 				}
 			}
 		}
@@ -972,19 +971,19 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					{
 						//convert mm into pixels
 						float setto =
-							handler3D->add_skin3D(int(mm_rad / ps1.high + 0.1f),
-												  int(mm_rad / ps1.low + 0.1f),
-												  int(mm_rad / thick1 + 0.1f));
+								handler3D->add_skin3D(int(mm_rad / ps1.high + 0.1f),
+										int(mm_rad / ps1.low + 0.1f),
+										int(mm_rad / thick1 + 0.1f));
 						atBoundary = handler3D->value_at_boundary3D(setto);
 					}
 					else
 					{
 						handler3D->add_skintissue3D(
-							int(mm_rad / ps1.high + 0.1f),
-							int(mm_rad / ps1.low + 0.1f),
-							int(mm_rad / thick1 + 0.1f), tissuenr);
+								int(mm_rad / ps1.high + 0.1f),
+								int(mm_rad / ps1.low + 0.1f),
+								int(mm_rad / thick1 + 0.1f), tissuenr);
 						atBoundary =
-							handler3D->tissuevalue_at_boundary3D(tissuenr);
+								handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 				else
@@ -997,10 +996,10 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					else
 					{
 						handler3D->add_skintissue3D(
-							sb_radius->value(), sb_radius->value(),
-							sb_radius->value(), tissuenr);
+								sb_radius->value(), sb_radius->value(),
+								sb_radius->value(), tissuenr);
 						atBoundary =
-							handler3D->tissuevalue_at_boundary3D(tissuenr);
+								handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 			}
@@ -1013,16 +1012,16 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					if (work->isOn())
 					{
 						float setto =
-							bmphand->add_skin(int(mm_rad / ps1.high + 0.1f));
+								bmphand->add_skin(int(mm_rad / ps1.high + 0.1f));
 						atBoundary = bmphand->value_at_boundary(setto);
 					}
 					else
 					{
 						bmphand->add_skintissue(
-							handler3D->get_active_tissuelayer(),
-							int(mm_rad / ps1.high + 0.1f), tissuenr);
+								handler3D->get_active_tissuelayer(),
+								int(mm_rad / ps1.high + 0.1f), tissuenr);
 						atBoundary = bmphand->tissuevalue_at_boundary(
-							handler3D->get_active_tissuelayer(), tissuenr);
+								handler3D->get_active_tissuelayer(), tissuenr);
 					}
 				}
 				else
@@ -1035,10 +1034,10 @@ void OutlineCorrectionWidget::removeholes_pushed()
 					else
 					{
 						bmphand->add_skintissue(
-							handler3D->get_active_tissuelayer(),
-							sb_radius->value(), tissuenr);
+								handler3D->get_active_tissuelayer(),
+								sb_radius->value(), tissuenr);
 						atBoundary = bmphand->tissuevalue_at_boundary(
-							handler3D->get_active_tissuelayer(), tissuenr);
+								handler3D->get_active_tissuelayer(), tissuenr);
 					}
 				}
 			}
@@ -1046,8 +1045,8 @@ void OutlineCorrectionWidget::removeholes_pushed()
 		if (atBoundary)
 		{
 			QMessageBox::information(this, "iSeg",
-									 "Information:\nThe skin partially touches "
-									 "or\nintersects with the boundary.");
+					"Information:\nThe skin partially touches "
+					"or\nintersects with the boundary.");
 		}
 	}
 	else if (fillskin->isOn())
@@ -1070,10 +1069,10 @@ void OutlineCorrectionWidget::removeholes_pushed()
 
 		if (allslices->isChecked())
 			handler3D->fill_skin_3d(xThick, yThick, zThick, selectedBacgroundID,
-									selectedSkinID);
+					selectedSkinID);
 		else
 			bmphand->fill_skin(xThick, yThick, selectedBacgroundID,
-							   selectedSkinID);
+					selectedSkinID);
 	}
 	else if (allfill->isOn())
 	{
@@ -1090,7 +1089,7 @@ void OutlineCorrectionWidget::removeholes_pushed()
 				bmphand->fill_unassigned();
 			else
 				bmphand->fill_unassignedtissue(
-					handler3D->get_active_tissuelayer(), tissuenr);
+						handler3D->get_active_tissuelayer(), tissuenr);
 		}
 	}
 	else if (adapt->isOn())
@@ -1119,7 +1118,7 @@ void OutlineCorrectionWidget::workbits_changed()
 	bmphand = handler3D->get_activebmphandler();
 	float* workbits = bmphand->return_work();
 	unsigned area =
-		unsigned(bmphand->return_width()) * bmphand->return_height();
+			unsigned(bmphand->return_width()) * bmphand->return_height();
 	unsigned i = 0;
 	while (i < area && workbits[i] != f)
 		i++;
@@ -1228,9 +1227,9 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		QObject::disconnect(method, SIGNAL(buttonClicked(int)), this,
-							SLOT(method_changed()));
+				SLOT(method_changed()));
 		QObject::disconnect(target, SIGNAL(buttonClicked(int)), this,
-							SLOT(method_changed()));
+				SLOT(method_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -1277,9 +1276,9 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		method_changed();
 
 		QObject::connect(method, SIGNAL(buttonClicked(int)), this,
-						 SLOT(method_changed()));
+				SLOT(method_changed()));
 		QObject::connect(target, SIGNAL(buttonClicked(int)), this,
-						 SLOT(method_changed()));
+				SLOT(method_changed()));
 	}
 	return fp;
 }

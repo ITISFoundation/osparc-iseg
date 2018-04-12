@@ -9,14 +9,14 @@
  */
 #include "GraphCutPlugin.h"
 
-#include "GraphCutBoneSegmentation.h"
-#include "GraphCutTissueSeparator.h"
+#include "BoneSegmentationWidget.h"
+#include "TissueSeparatorWidget.h"
 
 namespace iseg { namespace plugin {
 
 namespace {
 GCBoneSegmentationPlugin _register_bone_seg;
-//CGCTissueSeparatorAddon  _register_tissue_sep;
+GCTissueSeparatorPlugin _register_tissue_sep;
 } // namespace
 
 GCBoneSegmentationPlugin::GCBoneSegmentationPlugin() {}
@@ -36,16 +36,16 @@ WidgetInterface* GCBoneSegmentationPlugin::create_widget(QWidget* parent,
 }
 
 //////////////////////////////////////////////////////////////////////////
-CGCTissueSeparatorPlugin::CGCTissueSeparatorPlugin() {}
+GCTissueSeparatorPlugin::GCTissueSeparatorPlugin() {}
 
-CGCTissueSeparatorPlugin::~CGCTissueSeparatorPlugin() {}
+GCTissueSeparatorPlugin::~GCTissueSeparatorPlugin() {}
 
-std::string CGCTissueSeparatorPlugin::description() const
+std::string GCTissueSeparatorPlugin::description() const
 {
 	return "Separate tissue using only minor user-input.";
 }
 
-WidgetInterface* CGCTissueSeparatorPlugin::create_widget(QWidget* parent,
+WidgetInterface* GCTissueSeparatorPlugin::create_widget(QWidget* parent,
 		const char* name,
 		Qt::WindowFlags wFlags) const
 {

@@ -30,7 +30,7 @@ struct Point_type2
 	float py;
 };
 
-class iSegCore_API OutlineLine
+class ISEG_CORE_API OutlineLine
 {
 public:
 	void add_point(Point_type P);
@@ -49,7 +49,7 @@ private:
 						const unsigned int p2, std::vector<bool>* v1_p);
 };
 
-class iSegCore_API OutlineSlice
+class ISEG_CORE_API OutlineSlice
 {
 public:
 	OutlineSlice();
@@ -85,7 +85,7 @@ private:
 	TissueOutlineMap_type inner_lines;
 };
 
-class iSegCore_API OutlineSlices
+class ISEG_CORE_API OutlineSlices
 {
 public:
 	OutlineSlices();

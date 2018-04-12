@@ -17,7 +17,7 @@
 
 namespace iseg {
 
-class iSegCore_API FeatureExtractor
+class ISEG_CORE_API FeatureExtractor
 {
 public:
 	void init(float* bit, Point p1, Point p2, short unsigned w,

@@ -17,7 +17,7 @@ namespace iseg {
 
 class Transform;
 
-class iSegCore_API VoxelSurface
+class ISEG_CORE_API VoxelSurface
 {
 public:
 	VoxelSurface(float fg = 255.f) : m_ForeGroundValue(fg) {}

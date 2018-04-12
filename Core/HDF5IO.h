@@ -18,7 +18,7 @@
 
 namespace iseg {
 
-class iSegCore_API HDF5IO
+class ISEG_CORE_API HDF5IO
 {
 public:
 	typedef hid_t handle_id_type;

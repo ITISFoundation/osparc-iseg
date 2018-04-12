@@ -21,7 +21,7 @@ class Transform;
 
 /** \brief Image writer based on ITK image writer factory
 	*/
-class iSegCore_API ImageWriter
+class ISEG_CORE_API ImageWriter
 {
 public:
 	ImageWriter(bool binary = true) : m_Binary(binary) {}
@@ -35,11 +35,11 @@ private:
 	bool m_Binary;
 };
 
-iSegCore_TEMPLATE template iSegCore_API bool ImageWriter::writeVolume<float>(
+iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<float>(
 	const char* filename, const float** data, unsigned width, unsigned height,
 	unsigned nrslices, const float spacing[3], const Transform& transform);
 
-iSegCore_TEMPLATE template iSegCore_API bool
+iSegCore_TEMPLATE template ISEG_CORE_API bool
 	ImageWriter::writeVolume<tissues_size_t>(const char* filename,
 											 const tissues_size_t** data,
 											 unsigned width, unsigned height,

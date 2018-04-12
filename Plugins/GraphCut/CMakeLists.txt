@@ -14,17 +14,17 @@ IF(PLUGIN_GRAPHCUT)
 	)
 
 	QT4_WRAP_CPP(MOCSrcsext 
-		GraphCutBoneSegmentation.h
-		GraphCutTissueSeparator.h
+		BoneSegmentationWidget.h
+		TissueSeparatorWidget.h
 	)
 
 	ADD_LIBRARY(GraphCut.ext SHARED 
 		GraphCutPlugin.cpp 
 		GraphCutPlugin.h 
-		GraphCutBoneSegmentation.cpp 
-		GraphCutBoneSegmentation.h 
-		GraphCutTissueSeparator.cpp
-		GraphCutTissueSeparator.h
+		BoneSegmentationWidget.cpp 
+		BoneSegmentationWidget.h 
+		TissueSeparatorWidget.cpp
+		TissueSeparatorWidget.h
 		ImageGraphCut3DFilter.h 
 		ImageGraphCut3DFilter.hxx 
 		${MOCSrcsext})

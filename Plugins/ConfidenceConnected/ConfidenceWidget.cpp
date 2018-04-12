@@ -7,7 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "Confidence.h"
+#include "ConfidenceWidget.h"
 
 #include <itkConfidenceConnectedImageFilter.h>
 #include <itkConnectedComponentImageFilter.h>

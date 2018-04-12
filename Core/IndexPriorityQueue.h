@@ -18,7 +18,7 @@
 
 namespace iseg {
 
-class iSegCore_API IndexPriorityQueue
+class ISEG_CORE_API IndexPriorityQueue
 {
 public:
 	IndexPriorityQueue(unsigned size2, float* valuemap1);

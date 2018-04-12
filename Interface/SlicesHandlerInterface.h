@@ -22,6 +22,9 @@ public:
 	typedef unsigned short tissue_type;
 	typedef float pixel_type;
 
+	virtual unsigned short return_width() = 0;
+	virtual unsigned short return_height() = 0;
+	virtual unsigned short return_nrslices() = 0;
 	virtual unsigned short return_startslice() = 0;
 	virtual unsigned short return_endslice() = 0;
 	virtual unsigned short get_activeslice() = 0;

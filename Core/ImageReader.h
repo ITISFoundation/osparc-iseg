@@ -20,7 +20,7 @@ class Transform;
 
 /** \brief Image reader based on ITK image reader factory
 	*/
-class iSegCore_API ImageReader
+class ISEG_CORE_API ImageReader
 {
 public:
 	/// get image size, spacing and transform

@@ -17,7 +17,6 @@ USE_VTK()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
-	addLine.cpp
 	BranchItem.cpp
 	ColorLookupTable.cpp
 	Contour.cpp

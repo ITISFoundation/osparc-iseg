@@ -15,7 +15,7 @@
 
 namespace iseg {
 
-class iSegCore_API SmoothSteps
+class ISEG_CORE_API SmoothSteps
 {
 public:
 	SmoothSteps();
