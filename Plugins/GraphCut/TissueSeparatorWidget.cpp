@@ -9,6 +9,7 @@
  */
 #include "TissueSeparatorWidget.h"
 
+//#define DEBUG_GC
 #include "GraphCutAlgorithms.h"
 
 #include "Interface/ItkUtils.h"
@@ -153,27 +154,23 @@ void dump_image(TImage* img, const std::string& file_path)
 void TissueSeparatorWidget::do_work() //Code for special GC for division
 {
 	using tissue_value_type = SliceHandlerInterface::tissue_type;
-	using tissue_type = itk::SliceContiguousImage<tissue_value_type>;
-	using mask_type = itk::Image<unsigned char, 3>;
-	using source_type = itk::SliceContiguousImage<float>;
-	using gc_filter_type = itk::GraphCutLabelSeparator<mask_type, mask_type, source_type>;
-
 	tissue_value_type const OBJECT_1 = 127;
 	tissue_value_type const OBJECT_2 = 255;
 	bool has_sigma;
 	auto sigma = sigma_edit->text().toDouble(&has_sigma);
 	bool use_gradient_magnitude = use_source->isChecked();
 	bool use_full_neighborhood = true;
-
-	auto tissues = slice_handler->GetTissues(false);
 	auto source = slice_handler->GetImage(SliceHandlerInterface::kSource, false);
 	auto target = slice_handler->GetImage(SliceHandlerInterface::kTarget, false);
 
+	using mask_type = itk::Image<unsigned char, 3>;
+	using source_type = itk::SliceContiguousImage<float>;
+	using gc_filter_type = itk::GraphCutLabelSeparator<mask_type, mask_type, source_type>;
+
 	// create mask from selected tissue [use current selection, or initial selection?]
-	auto threshold = itk::BinaryThresholdImageFilter<tissue_type, mask_type>::New();
-	threshold->SetInput(tissues);
-	threshold->SetLowerThreshold(tissuenr);
-	threshold->SetUpperThreshold(tissuenr);
+	auto threshold = itk::BinaryThresholdImageFilter<source_type, mask_type>::New();
+	threshold->SetInput(target);
+	threshold->SetLowerThreshold(0.5f);
 	threshold->SetInsideValue(1);
 	threshold->SetOutsideValue(0);
 	threshold->Update();

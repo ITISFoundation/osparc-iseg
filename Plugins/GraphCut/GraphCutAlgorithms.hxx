@@ -9,7 +9,6 @@
  */
 #pragma once
 
-#define DEBUG_GC
 #ifdef DEBUG_GC
 #	include <itkRescaleIntensityImageFilter.h>
 #	include <itkImageFileWriter.h>
@@ -67,23 +66,24 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GenerateData
 	GraphType* graph = nullptr;
 	if (m_MaxFlowAlgorithm == kKohli)
 	{
-		graph = new Gc::Flow::Grid::Kohli<3, Gc::Float32, Gc::Float32, Gc::Float32, false>;
+		graph = new Gc::Flow::Grid::Kohli<NDimension, Gc::Float32, Gc::Float32, Gc::Float32, false>;
 	}
 	else if (m_MaxFlowAlgorithm == kPushLabelFifo)
 	{
-		graph = new Gc::Flow::Grid::PushRelabel::Fifo<3, Gc::Float32, Gc::Float32, false>;
+		graph = new Gc::Flow::Grid::PushRelabel::Fifo<NDimension, Gc::Float32, Gc::Float32, false>;
 	}
 	else if (m_MaxFlowAlgorithm == kPushLabelHighestLevel)
 	{
-		graph = new Gc::Flow::Grid::PushRelabel::HighestLevel<3, Gc::Float32, Gc::Float32, false>;
+		graph = new Gc::Flow::Grid::PushRelabel::HighestLevel<NDimension, Gc::Float32, Gc::Float32, false>;
 	}
 
-	Gc::Math::Algebra::Vector<3, Gc::Size> sizing;
-	sizing[0] = size[0];
-	sizing[1] = size[1];
-	sizing[2] = size[2];
+	Gc::Math::Algebra::Vector<NDimension, Gc::Size> sizing;
+	for (unsigned int i = 0; i < NDimension; ++i)
+	{
+		sizing[i] = size[i];
+	}
 	Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
-	nb.Common((m_Connectivity == eConnectivity::k6) ? 6 : 26, false);
+	nb.Common((m_Connectivity == eConnectivity::k6) ? 6 : 26, false); // \todo BL dimension specific
 	Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
 	graph->Init(sizing, nb);
 	timer.Stop("Graph creation");
@@ -106,12 +106,6 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GenerateData
 	CutGraph(graph, progress); //&
 	timer.Stop("Query results");
 
-	std::ofstream ofile("C:/Temp/gc_timer.log");
-	if (ofile.is_open())
-	{
-		timer.Report(ofile);
-	}
-
 	if (m_PrintTimer)
 	{
 		timer.Report(std::cout);
@@ -129,10 +123,13 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 
 	const bool& abort = this->GetAbortGenerateData(); // use reference (alias) to original flag!
 	auto input = GetMaskInput();
-	OffsetType center = {{0, 0, 0}};
-	unsigned int const con = (m_Connectivity == eConnectivity::k6) ? 6 : 26;
+	OffsetType center;
+	center.Fill(0);
+	itk::Size<NDimension> radius;
+	radius.Fill(1);
 
 	// Setup neighborhood (graph connectivity)
+	unsigned int const con = (m_Connectivity == eConnectivity::k6) ? 6 : 26; // \todo BL dimension specific
 	std::vector<OffsetType> neighbors;
 	{
 		Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
@@ -201,9 +198,6 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 			neighbors.push_back(graph6r);
 		}
 	}
-
-	itk::Size<3> radius;
-	radius.Fill(3);
 
 	auto input_region = input->GetLargestPossibleRegion();
 	MaskIteratorType iterator(radius, input, input_region);
