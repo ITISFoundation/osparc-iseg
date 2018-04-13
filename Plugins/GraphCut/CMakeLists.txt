@@ -18,15 +18,13 @@ IF(PLUGIN_GRAPHCUT)
 		TissueSeparatorWidget.h
 	)
 
+	FILE(GLOB PLUGIN_HEADERS *h *.hxx)
+
 	ADD_LIBRARY(GraphCut.ext SHARED 
 		GraphCutPlugin.cpp 
-		GraphCutPlugin.h 
 		BoneSegmentationWidget.cpp 
-		BoneSegmentationWidget.h 
 		TissueSeparatorWidget.cpp
-		TissueSeparatorWidget.h
-		ImageGraphCut3DFilter.h 
-		ImageGraphCut3DFilter.hxx 
+		${PLUGIN_HEADERS}
 		${MOCSrcsext})
 
 	# todo check libs in linker command

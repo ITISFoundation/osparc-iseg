@@ -27,6 +27,7 @@ public:
 	~TissueSeparatorWidget() {}
 	void init() override;
 	void newloaded() override;
+	void cleanup() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
 
@@ -40,6 +41,7 @@ private:
 
 private slots:
 	void do_work();
+	void clearmarks();
 
 private:
 	iseg::SliceHandlerInterface* slice_handler;
@@ -53,5 +55,6 @@ private:
 	QCheckBox* all_slices;
 	QCheckBox* use_source;
 	QLineEdit* sigma_edit;
+	QPushButton* clear_lines;
 	QPushButton* execute_button;
 };
