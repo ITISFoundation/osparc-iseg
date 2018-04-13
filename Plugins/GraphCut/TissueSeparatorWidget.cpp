@@ -124,6 +124,10 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	// get segmentation
 
 	// create mask from selected tissue [how to select tissue?]
+	// -> BG_VALUE = 0
+	// -> MASK_VALUE = 1
+	// -> OBJECT1_VALUE = 127
+	// -> OBJECT2_VALUE = 255
 
 	// build "speed-function" from gradient magnitude [scale?]
 
@@ -131,7 +135,7 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 
 	// sparse graph or grid-based?
 
-	// label nodes in graph, based on marks
+	// label nodes in graph, based on marks [graph->SetTerminalArcCap]
 
 	// solve graph-cut
 

@@ -142,17 +142,12 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 	typedef itk::ShapedNeighborhoodIterator<InputImageType> IteratorType;
 	typename IteratorType::OffsetType center = {{0, 0, 0}};
 
-	typedef itk::DiscreteGaussianImageFilter<
-		InputImageType, InputImageType>
-		filterType;
-
 	//Gaussian Filter for Edge enhancement
+	typedef itk::DiscreteGaussianImageFilter<InputImageType, InputImageType> filterType;
 	auto gaussianFilter = filterType::New();
 	gaussianFilter->SetInput(images.input);
 	gaussianFilter->SetVariance(1);
-
-	InputImageType* filtered = gaussianFilter->GetOutput();
-	filtered->Update();
+	auto filtered = gaussianFilter->GetOutput();
 
 	Gc::Energy::Neighbourhood<3, Gc::Int32> nb(26);
 	nb.Common(26, false);
@@ -278,12 +273,12 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		for (iterator.GoToBegin(); !iterator.IsAtEnd(); ++iterator)
 		{
 			bool pixelIsValid;
-			typename InputImageType::PixelType centerPixel = iterator.GetPixel(center, pixelIsValid);
+			auto centerPixel = iterator.GetPixel(center, pixelIsValid);
 			if (!pixelIsValid)
 			{
 				continue;
 			}
-			typename InputImageType::PixelType centerPixelfilter = iterator2.GetPixel(center);
+			auto centerPixelfilter = iterator2.GetPixel(center);
 			iterator.SetCenterPixel(centerPixel + 10 * (centerPixel - centerPixelfilter));
 			++iterator2;
 		}
@@ -300,10 +295,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		{
 			double sigma = sigmas[i];
 			typedef itk::ImageDuplicator<InputImageType> DuplicatorType;
-			typedef itk::RecursiveGaussianImageFilter<
-				InputImageType,
-				InputImageType>
-				FilterType;
+			typedef itk::RecursiveGaussianImageFilter<InputImageType, InputImageType> FilterType;
 
 			auto duplicator = DuplicatorType::New();
 			auto duplicator2 = DuplicatorType::New();
@@ -331,27 +323,21 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			duplicator->SetInputImage(gc->GetOutput());
 			gc->Update();
 			duplicator->Update();
-			InputImageType* Izz;
-			Izz = duplicator->GetOutput();
-			Izz->Update();
+			auto Izz = duplicator->GetOutput();
 
 			gc->SetDirection(1);
 			gb->SetDirection(2);
 			gc->Update();
 			duplicator2->SetInputImage(gc->GetOutput());
 			duplicator2->Update();
-			InputImageType* Iyy;
-			Iyy = duplicator2->GetOutput();
-			Iyy->Update();
+			auto Iyy = duplicator2->GetOutput();
 
 			gc->SetDirection(0);
 			ga->SetDirection(1);
 			gc->Update();
 			duplicator3->SetInputImage(gc->GetOutput());
 			duplicator3->Update();
-			InputImageType* Ixx;
-			Ixx = duplicator3->GetOutput();
-			Ixx->Update();
+			auto Ixx = duplicator3->GetOutput();
 
 			ga->SetDirection(0);
 			gb->SetDirection(1);
@@ -362,9 +348,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			gc->Update();
 			duplicator4->SetInputImage(gc->GetOutput());
 			duplicator4->Update();
-			InputImageType* Iyz;
-			Iyz = duplicator4->GetOutput();
-			Iyz->Update();
+			auto Iyz = duplicator4->GetOutput();
 
 			ga->SetDirection(1);
 			gb->SetDirection(0);
@@ -375,9 +359,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			gc->Update();
 			duplicator5->SetInputImage(gc->GetOutput());
 			duplicator5->Update();
-			InputImageType* Ixz;
-			Ixz = duplicator5->GetOutput();
-			Ixz->Update();
+			auto Ixz = duplicator5->GetOutput();
 
 			ga->SetDirection(2);
 			gb->SetDirection(0);
@@ -388,16 +370,12 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			gc->Update();
 			duplicator6->SetInputImage(gc->GetOutput());
 			duplicator6->Update();
-			InputImageType* Ixy;
-			Ixy = duplicator6->GetOutput();
-			Ixy->Update();
+			auto Ixy = duplicator6->GetOutput();
 
 			typedef itk::GradientMagnitudeImageFilter<InputImageType, InputImageType> GradFilterType;
 			auto gradfilter = GradFilterType::New();
 			gradfilter->SetInput(images.input);
-			InputImageType* Igrad;
-			Igrad = gradfilter->GetOutput();
-			Igrad->Update();
+			auto Igrad = gradfilter->GetOutput();
 
 			std::cout << "Hessiancomplete";
 			//Now we have all the components and need to compute the eigenvalues somehow. Store them in lambda1-3. Also compute GM-Vector
@@ -437,16 +415,16 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 				for (iterator3.GoToBegin(); !iterator3.IsAtEnd(); ++iterator3)
 				{
 					bool pixelIsValid;
-					typename InputImageType::PixelType Ixx_value = iterator3.GetPixel(center, pixelIsValid);
+					auto Ixx_value = iterator3.GetPixel(center, pixelIsValid);
 					if (!pixelIsValid)
 					{
 						continue;
 					}
-					typename InputImageType::PixelType Iyy_value = iterator4.GetPixel(center);
-					typename InputImageType::PixelType Izz_value = iterator5.GetPixel(center);
-					typename InputImageType::PixelType Ixy_value = iterator6.GetPixel(center);
-					typename InputImageType::PixelType Ixz_value = iterator7.GetPixel(center);
-					typename InputImageType::PixelType Iyz_value = iterator8.GetPixel(center);
+					auto Iyy_value = iterator4.GetPixel(center);
+					auto Izz_value = iterator5.GetPixel(center);
+					auto Ixy_value = iterator6.GetPixel(center);
+					auto Ixz_value = iterator7.GetPixel(center);
+					auto Iyz_value = iterator8.GetPixel(center);
 
 					MatrixType Hessian;
 					Hessian(0, 0) = Ixx_value;
@@ -466,7 +444,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 					eig.SetOrderEigenMagnitudes(true);
 					eig.ComputeEigenValues(Hessian, eigenvalues);
 
-					unsigned int nodeIndex = ConvertIndexToVertexDescriptor(iterator3.GetIndex(center), Ixx->GetLargestPossibleRegion());
+					auto nodeIndex = ConvertIndexToVertexDescriptor(iterator3.GetIndex(center), Ixx->GetLargestPossibleRegion());
 					lambda1[nodeIndex] = eigenvalues[0];
 					lambda2[nodeIndex] = eigenvalues[1];
 					lambda3[nodeIndex] = eigenvalues[2];
@@ -475,8 +453,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 					++iterator6;
 					++iterator7;
 					++iterator8;
-					typename InputImageType::PixelType Igrad_value = iterator9.GetPixel(center);
-					if ((double)abs((double)Igrad_value) > abs((double)GradientMag[nodeIndex]))
+					auto Igrad_value = static_cast<double>(iterator9.GetPixel(center));
+					if (abs(Igrad_value) > abs((double)GradientMag[nodeIndex]))
 					{
 						GradientMag[nodeIndex] = Igrad_value;
 					}
@@ -684,8 +662,6 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			++iteratorbg;
 		}
 	}
-
-	std::cout << "Initcomplete";
 }
 
 template<typename TImage, typename TForeground, typename TBackground, typename TOutput>
