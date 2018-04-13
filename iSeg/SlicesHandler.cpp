@@ -5800,7 +5800,7 @@ void SlicesHandler::erosion(int n, bool connectivity)
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kErode, startslice, endslice);
 
-	morpho::Paste<float>(output, all_slices, startslice, endslice);
+	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
 #endif
 }
 
@@ -5821,7 +5821,7 @@ void SlicesHandler::dilation(int n, bool connectivity)
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kDilate, startslice, endslice);
 
-	morpho::Paste<float>(output, all_slices, startslice, endslice);
+	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
 #endif
 }
 
@@ -5842,7 +5842,7 @@ void SlicesHandler::closure(int n, bool connectivity)
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kClose, startslice, endslice);
 
-	morpho::Paste<float>(output, all_slices, startslice, endslice);
+	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
 #endif
 }
 
@@ -5863,7 +5863,7 @@ void SlicesHandler::open(int n, bool connectivity)
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kOpen, startslice, endslice);
 
-	morpho::Paste<float>(output, all_slices, startslice, endslice);
+	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
 #endif
 }
 

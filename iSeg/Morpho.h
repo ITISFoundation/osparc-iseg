@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "itkSliceContiguousImage.h"
+#include "Interface/ItkUtils.h"
 
 #include <itkBinaryDilateImageFilter.h>
 #include <itkBinaryErodeImageFilter.h>
@@ -38,7 +38,7 @@ unsigned NextOddInteger(double v)
 
 template<typename T>
 typename itk::Image<T, 3>::Pointer
-	MakeBall(const itk::ImageBase<3>::SpacingType& spacing, double radius)
+		MakeBall(const itk::ImageBase<3>::SpacingType& spacing, double radius)
 {
 	typedef typename itk::Image<T, 3> image_type;
 
@@ -57,9 +57,9 @@ typename itk::Image<T, 3>::Pointer
 	img->SetSpacing(spacing);
 
 	int center[3] = {
-		static_cast<int>(size[0] / 2),
-		static_cast<int>(size[1] / 2),
-		static_cast<int>(size[2] / 2),
+			static_cast<int>(size[0] / 2),
+			static_cast<int>(size[1] / 2),
+			static_cast<int>(size[2] / 2),
 	};
 
 	double radius2 = radius * radius;
@@ -88,7 +88,7 @@ typename itk::Image<T, 3>::Pointer
 } // namespace detail
 
 itk::FlatStructuringElement<3>
-	MakeBall(const itk::ImageBase<3>::SpacingType& spacing, double radius)
+		MakeBall(const itk::ImageBase<3>::SpacingType& spacing, double radius)
 {
 	auto ball = detail::MakeBall<bool>(spacing, radius);
 	return itk::FlatStructuringElement<3>::FromImage(ball);
@@ -101,16 +101,16 @@ itk::FlatStructuringElement<3> MakeBall(const itk::Size<3>& radius)
 }
 
 enum eOperation { kErode,
-				  kDilate,
-				  kClose,
-				  kOpen };
+	kDilate,
+	kClose,
+	kOpen };
 
 template<typename T>
 itk::Image<unsigned char, 3>::Pointer
-	MorphologicalOperation(typename itk::SliceContiguousImage<T>::Pointer input,
-						   itk::FlatStructuringElement<3> structuringElement,
-						   eOperation operation, size_t startslice,
-						   size_t endslice)
+		MorphologicalOperation(typename itk::SliceContiguousImage<T>::Pointer input,
+				itk::FlatStructuringElement<3> structuringElement,
+				eOperation operation, size_t startslice,
+				size_t endslice)
 {
 	typedef itk::SliceContiguousImage<T> input_image_type;
 	typedef itk::Image<unsigned char, 3> image_type;
@@ -119,7 +119,7 @@ itk::Image<unsigned char, 3>::Pointer
 	unsigned char foreground_value = 255;
 
 	auto threshold =
-		itk::BinaryThresholdImageFilter<input_image_type, image_type>::New();
+			itk::BinaryThresholdImageFilter<input_image_type, image_type>::New();
 	threshold->SetInput(input);
 	threshold->SetLowerThreshold(0.5f); // background is '0'
 	threshold->SetInsideValue(foreground_value);
@@ -128,7 +128,7 @@ itk::Image<unsigned char, 3>::Pointer
 	if (operation == eOperation::kErode || operation == eOperation::kOpen)
 	{
 		auto erode =
-			itk::BinaryErodeImageFilter<image_type, image_type, kernel_type>::New();
+				itk::BinaryErodeImageFilter<image_type, image_type, kernel_type>::New();
 		erode->SetInput(threshold->GetOutput());
 		erode->SetKernel(structuringElement);
 		erode->SetErodeValue(foreground_value);
@@ -138,7 +138,7 @@ itk::Image<unsigned char, 3>::Pointer
 		if (operation == kOpen)
 		{
 			auto dilate = itk::BinaryDilateImageFilter<image_type, image_type,
-													   kernel_type>::New();
+					kernel_type>::New();
 			dilate->SetInput(erode->GetOutput());
 			dilate->SetKernel(structuringElement);
 			dilate->SetDilateValue(foreground_value);
@@ -148,7 +148,7 @@ itk::Image<unsigned char, 3>::Pointer
 	else
 	{
 		auto dilate = itk::BinaryDilateImageFilter<image_type, image_type,
-												   kernel_type>::New();
+				kernel_type>::New();
 		dilate->SetInput(threshold->GetOutput());
 		dilate->SetKernel(structuringElement);
 		dilate->SetDilateValue(foreground_value);
@@ -157,7 +157,7 @@ itk::Image<unsigned char, 3>::Pointer
 		if (operation == kClose)
 		{
 			auto erode = itk::BinaryErodeImageFilter<image_type, image_type,
-													 kernel_type>::New();
+					kernel_type>::New();
 			erode->SetInput(erode->GetOutput());
 			erode->SetKernel(structuringElement);
 			erode->SetErodeValue(foreground_value);
@@ -173,43 +173,9 @@ itk::Image<unsigned char, 3>::Pointer
 	size[2] = endslice - startslice;
 
 	filters.back()->GetOutput()->SetRequestedRegion(
-		image_type::RegionType(start, size));
+			image_type::RegionType(start, size));
 	filters.back()->Update();
 	return filters.back()->GetOutput();
 }
 
-template<typename T>
-bool Paste(itk::Image<unsigned char, 3>* source,
-		   itk::SliceContiguousImage<T>* destination, size_t startslice,
-		   size_t endslice)
-{
-	if (source->GetLargestPossibleRegion() ==
-		destination->GetLargestPossibleRegion())
-	{
-		// copy only startslice-endslice from source
-		auto start = source->GetLargestPossibleRegion().GetIndex();
-		start[2] = startslice;
-
-		auto size = source->GetLargestPossibleRegion().GetSize();
-		size[2] = endslice - startslice;
-
-		// copy active slices into destination, starting at startslice
-		auto active_region = itk::ImageBase<3>::RegionType(start, size);
-
-		typedef itk::ImageRegionIterator<itk::SliceContiguousImage<T>>
-			slice_image_iterator;
-		typedef itk::ImageRegionIterator<itk::Image<unsigned char, 3>>
-			image_iterator;
-		image_iterator sit(source, active_region);
-		slice_image_iterator dit(destination, active_region);
-
-		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd();
-			 ++sit, ++dit)
-		{
-			dit.Set(sit.Get());
-		}
-		return true;
-	}
-	return false;
-}
 } // namespace morpho
