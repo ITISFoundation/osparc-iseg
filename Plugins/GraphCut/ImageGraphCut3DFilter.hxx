@@ -10,22 +10,13 @@
 #ifndef __ImageGraphCut3DFilter_hxx_
 #define __ImageGraphCut3DFilter_hxx_
 
-#include "itkTimeProbesCollectorBase.h"
-
-#include <fstream>
-
 namespace itk {
 
 template<typename TImage, typename TForeground, typename TBackground, typename TOutput>
 ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::ImageGraphCutFilter()
-	: m_Sigma(0.2), m_ForegroundPixelValue(255), m_BackgroundPixelValue(0), m_PrintTimer(true), m_6Connected(false), m_UseForegroundBackground(false), m_UseGradientMagnitude(false), m_MaxFlowAlgorithm(kKohli), m_UseIntensity(false), m_ForegroundValue(400), m_BackgroundValue(-50)
+		: m_Sigma(0.2), m_ForegroundPixelValue(255), m_BackgroundPixelValue(0), m_PrintTimer(true), m_6Connected(false), m_UseForegroundBackground(false), m_UseGradientMagnitude(false), m_MaxFlowAlgorithm(kKohli), m_UseIntensity(false), m_ForegroundValue(400), m_BackgroundValue(-50)
 {
 	this->SetNumberOfRequiredInputs(3);
-}
-
-template<typename TImage, typename TForeground, typename TBackground, typename TOutput>
-ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::~ImageGraphCutFilter()
-{
 }
 
 template<typename TImage, typename TForeground, typename TBackground, typename TOutput>
@@ -55,14 +46,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::GenerateDat
 	images.output->SetBufferedRegion(images.outputRegion);
 	images.output->Allocate();
 
-	// init samples and histogram
-	typename SampleType::Pointer foregroundSample = SampleType::New();
-	typename SampleType::Pointer backgroundSample = SampleType::New();
-	typename SampleToHistogramFilterType::Pointer foregroundHistogramFilter = SampleToHistogramFilterType::New();
-	typename SampleToHistogramFilterType::Pointer backgroundHistogramFilter = SampleToHistogramFilterType::New();
-
 	// get the total image size
-	typename InputImageType::SizeType size = images.inputRegion.GetSize();
+	auto size = images.inputRegion.GetSize();
 	timer.Stop("ITK init");
 
 	// create graph
@@ -108,7 +93,6 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::GenerateDat
 
 	// cut graph
 	timer.Start("Graph cut");
-	//graph.calculateMaxFlow();
 	graph->FindMaxFlow();
 	timer.Stop("Graph cut");
 
@@ -671,18 +655,15 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::CutGraph(Gr
 	itk::ImageRegionIterator<OutputImageType> outputImageIterator(images.output, images.outputRegion);
 	outputImageIterator.GoToBegin();
 
-	//int sourceGroup = graph->groupOfSource();
+	// \todo BL iterate over flat indices to avoid convertig ijk to voxelIndex
 	const bool& abort = this->GetAbortGenerateData();
 	while (!outputImageIterator.IsAtEnd() && !abort)
 	{
 		unsigned int voxelIndex = ConvertIndexToVertexDescriptor(outputImageIterator.GetIndex(), images.outputRegion);
-		if (graph->NodeOrigin(voxelIndex) == Gc::Flow::Source) //->groupOf(voxelIndex) == sourceGroup
+		if (graph->NodeOrigin(voxelIndex) == Gc::Flow::Source)
 		{
 			outputImageIterator.Set(m_ForegroundPixelValue);
 		}
-		// Libraries differ to some degree in how they define the terminal groups. however, the tested ones
-		// (kolmogorvs MAXFLOW, boost graph, IBFS) use a fixed value for the source group and define other
-		// values as background.
 		else
 		{
 			outputImageIterator.Set(m_BackgroundPixelValue);

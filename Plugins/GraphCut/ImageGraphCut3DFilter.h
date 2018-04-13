@@ -13,21 +13,21 @@
 // ITK
 #include <itkDiscreteGaussianImageFilter.h>
 #include <itkGradientMagnitudeImageFilter.h>
-#include <itkHistogram.h>
 #include <itkImage.h>
 #include <itkImageDuplicator.h>
 #include <itkImageRegionIterator.h>
 #include <itkImageRegionIteratorWithIndex.h>
 #include <itkImageToImageFilter.h>
-#include <itkListSample.h>
 #include <itkMatrix.h>
 #include <itkProgressReporter.h>
 #include <itkRecursiveGaussianImageFilter.h>
-#include <itkSampleToHistogramFilter.h>
 #include <itkShapedNeighborhoodIterator.h>
 #include <itkSymmetricEigenAnalysis.h>
+#include <itkTimeProbesCollectorBase.h>
+//#include <itkMultiScaleHessianBasedMeasureImageFilter>
 
 // STL
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -59,14 +59,13 @@ public:
 	typedef TBackground BackgroundImageType;
 	typedef TOutput OutputImageType;
 
-	typedef itk::Statistics::Histogram<short,
-									   itk::Statistics::DenseFrequencyContainer2>
-		HistogramType;
-	typedef std::vector<itk::Index<3>>
-		IndexContainerType; // container for sinks / sources
-	typedef enum { NoDirection,
-				   BrightDark,
-				   DarkBright } BoundaryDirectionType;
+	typedef std::vector<itk::Index<3>> IndexContainerType; // container for sinks / sources
+
+	enum BoundaryDirectionType {
+		NoDirection,
+		BrightDark,
+		DarkBright
+	} BoundaryDirectionType;
 
 	enum eMaxFlowAlgorithm {
 		kKohli = 0,
@@ -123,7 +122,7 @@ public:
 
 private:
 	ImageGraphCutFilter();
-	virtual ~ImageGraphCutFilter();
+	virtual ~ImageGraphCutFilter() {}
 
 	virtual void GenerateData() override;
 
@@ -137,29 +136,19 @@ private:
 		typename OutputImageType::Pointer output;
 		typename InputImageType::RegionType outputRegion;
 	};
-	typedef itk::Vector<typename InputImageType::PixelType, 1>
-		ListSampleMeasurementVectorType;
-	typedef itk::Statistics::ListSample<ListSampleMeasurementVectorType>
-		SampleType;
-	typedef itk::Statistics::SampleToHistogramFilter<SampleType, HistogramType>
-		SampleToHistogramFilterType;
-	typedef Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32>
-		GraphType;
+	typedef Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32> GraphType;
 
 	void InitializeGraph(GraphType*, ImageContainer, ProgressReporter& progress);
 
 	void CutGraph(GraphType*, ImageContainer, ProgressReporter& progress);
 
 	// convert 3d itk indices to a continously numbered indices
-	unsigned int
-		ConvertIndexToVertexDescriptor(const itk::Index<3>,
-									   typename InputImageType::RegionType);
+	unsigned int ConvertIndexToVertexDescriptor(const itk::Index<3>, typename InputImageType::RegionType);
 
 	// image getters
 	const InputImageType* GetInputImage()
 	{
-		return static_cast<const InputImageType*>(
-			this->ProcessObject::GetInput(0));
+		return dynamic_cast<const InputImageType*>(this->ProcessObject::GetInput(0));
 	}
 
 	// parameters
@@ -170,7 +159,7 @@ private:
 	bool m_6Connected;
 	int m_ForegroundValue;
 	int m_BackgroundValue;
-	double m_Sigma;				 // noise in boundary term
+	double m_Sigma;							 // noise in boundary term
 	int m_NumberOfHistogramBins; // bins per dimension of histograms
 	typename OutputImageType::PixelType m_ForegroundPixelValue;
 	typename OutputImageType::PixelType m_BackgroundPixelValue;
@@ -178,7 +167,7 @@ private:
 
 private:
 	ImageGraphCutFilter(const Self&); // intentionally not implemented
-	void operator=(const Self&);	  // intentionally not implemented
+	void operator=(const Self&);			// intentionally not implemented
 };
 } // namespace itk
 
