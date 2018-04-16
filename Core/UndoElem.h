@@ -11,17 +11,17 @@
 
 #include "iSegCore.h"
 
-#include "Mark.h"
 #include "Types.h"
 
 #include "Interface/Point.h"
+#include "Interface/Mark.h"
 #include "Interface/DataSelection.h"
 
 #include <vector>
 
 namespace iseg {
 
-class iSegCore_API UndoElem
+class ISEG_CORE_API UndoElem
 {
 public:
 	bool multi;
@@ -48,7 +48,7 @@ public:
 	virtual unsigned arraynr();
 };
 
-class iSegCore_API MultiUndoElem : public UndoElem
+class ISEG_CORE_API MultiUndoElem : public UndoElem
 {
 public:
 	//abcd vector<unsigned short> vslicenr;

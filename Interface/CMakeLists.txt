@@ -13,6 +13,7 @@ USE_QT4()
 USE_ITK()
 
 SET(SOURCES
+	addLine.cpp
 	Plugin.cpp
 	Plugin.h
 	InterfaceApi.h

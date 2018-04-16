@@ -14,19 +14,17 @@ IF(PLUGIN_GRAPHCUT)
 	)
 
 	QT4_WRAP_CPP(MOCSrcsext 
-		GraphCutBoneSegmentation.h
-		GraphCutTissueSeparator.h
+		BoneSegmentationWidget.h
+		TissueSeparatorWidget.h
 	)
+
+	FILE(GLOB PLUGIN_HEADERS *h *.hxx)
 
 	ADD_LIBRARY(GraphCut.ext SHARED 
 		GraphCutPlugin.cpp 
-		GraphCutPlugin.h 
-		GraphCutBoneSegmentation.cpp 
-		GraphCutBoneSegmentation.h 
-		GraphCutTissueSeparator.cpp
-		GraphCutTissueSeparator.h
-		ImageGraphCut3DFilter.h 
-		ImageGraphCut3DFilter.hxx 
+		BoneSegmentationWidget.cpp 
+		TissueSeparatorWidget.cpp
+		${PLUGIN_HEADERS}
 		${MOCSrcsext})
 
 	# todo check libs in linker command

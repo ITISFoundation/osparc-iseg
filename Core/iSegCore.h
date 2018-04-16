@@ -11,12 +11,12 @@
 
 #if defined(WIN32)
 #	if defined(iSegCore_EXPORTS)
-#		define iSegCore_API __declspec(dllexport)
+#		define ISEG_CORE_API __declspec(dllexport)
 #	else
-#		define iSegCore_API __declspec(dllimport)
+#		define ISEG_CORE_API __declspec(dllimport)
 #	endif
 #else
-#	define iSegCore_API
+#	define ISEG_CORE_API
 #endif
 
 #if defined(iSegCore_EXPORTS)

@@ -14,8 +14,9 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Interface/addLine.h"
+
 #include "Core/ImageForestingTransform.h"
-#include "Core/addLine.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -31,24 +32,24 @@ using namespace std;
 using namespace iseg;
 
 ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
-																					   const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
-		"Segment multiple tissues by drawing lines in the current slice based "
-		"on "
-		"the Image Foresting Transform. "
-		"These lines are drawn with the color of the currently selected "
-		"tissue. "
-		"Multiple lines of different colours can be drawn "
-		"and they are subsequently used as seeds to grow regions based on a "
-		"local homogeneity criterion. Through competitive growing the best "
-		"boundaries "
-		"between regions grown from lines with different colours are "
-		"identified."
-		"<br>"
-		"The result is stored in the Target. To assign a segmented region to a "
-		"tissue the 'Adder' must be used."));
+			"Segment multiple tissues by drawing lines in the current slice based "
+			"on "
+			"the Image Foresting Transform. "
+			"These lines are drawn with the color of the currently selected "
+			"tissue. "
+			"Multiple lines of different colours can be drawn "
+			"and they are subsequently used as seeds to grow regions based on a "
+			"local homogeneity criterion. Through competitive growing the best "
+			"boundaries "
+			"between regions grown from lines with different colours are "
+			"identified."
+			"<br>"
+			"The result is stored in the Target. To assign a segmented region to a "
+			"tissue the 'Adder' must be used."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -61,11 +62,11 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 	pushremove = new QPushButton("Remove Line", vbox1);
 	pushremove->setToggleButton(true);
 	pushremove->setToolTip(Format(
-		"Remove Line followed by a click on a line deletes "
-		"this line and automatically updates the segmentation. If Remove "
-		"Line has "
-		"been pressed accidentally, a second press will deactivate the "
-		"function again."));
+			"Remove Line followed by a click on a line deletes "
+			"this line and automatically updates the segmentation. If Remove "
+			"Line has "
+			"been pressed accidentally, a second press will deactivate the "
+			"function again."));
 
 	hbox1 = new Q3HBox(vbox1);
 
@@ -84,11 +85,11 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 
 	QObject::connect(pushclear, SIGNAL(clicked()), this, SLOT(clearmarks()));
 	QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-					 SLOT(slider_changed(int)));
+			SLOT(slider_changed(int)));
 	QObject::connect(sl_thresh, SIGNAL(sliderPressed()), this,
-					 SLOT(slider_pressed()));
+			SLOT(slider_pressed()));
 	QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this,
-					 SLOT(slider_released()));
+			SLOT(slider_released()));
 }
 
 ImageForestingTransformRegionGrowingWidget::~ImageForestingTransformRegionGrowingWidget()
@@ -133,7 +134,7 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
 	for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
-		 it++)
+			 it++)
 	{
 		vm.insert(vm.end(), it->begin(), it->end());
 	}
@@ -174,7 +175,7 @@ void ImageForestingTransformRegionGrowingWidget::cleanup()
 	IFTrg = NULL;
 	lbmap = NULL;
 	sl_thresh->setEnabled(false);
-	emit vmdyn_changed(&vmdyn);
+	emit vpdyn_changed(&vmdyn);
 	emit vm_changed(&vmempty);
 }
 
@@ -183,7 +184,6 @@ void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 	// \todo B
 	cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
 	tissuenr = (unsigned)i + 1;
-	return;
 }
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
@@ -201,7 +201,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 	{
 		addLine(&vmdyn, last_pt, p);
 		last_pt = p;
-		emit vmdyn_changed(&vmdyn);
+		emit vpdyn_changed(&vmdyn);
 	}
 }
 
@@ -216,7 +216,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 		vector<Mark> vmdummy;
 		vmdummy.clear();
 		for (vector<Point>::iterator it = vmdyn.begin(); it != vmdyn.end();
-			 it++)
+				 it++)
 		{
 			m.p = *it;
 			vmdummy.push_back(m);
@@ -233,7 +233,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 		bmphand->add_vm(&vmdummy);
 
 		vmdyn.clear();
-		emit vmdyn_changed(&vmdyn);
+		emit vpdyn_changed(&vmdyn);
 		emit vm_changed(&vm);
 		execute();
 
@@ -276,7 +276,7 @@ void ImageForestingTransformRegionGrowingWidget::clearmarks()
 	vm.clear();
 	vmdyn.clear();
 	bmphand->clear_vvm();
-	emit vmdyn_changed(&vmdyn);
+	emit vpdyn_changed(&vmdyn);
 	emit vm_changed(&vm);
 }
 
@@ -304,7 +304,6 @@ void ImageForestingTransformRegionGrowingWidget::slider_changed(int i)
 
 void ImageForestingTransformRegionGrowingWidget::bmp_changed()
 {
-	//	cleanup();
 	bmphand = handler3D->get_activebmphandler();
 	sl_thresh->setEnabled(false);
 	init1();
@@ -312,10 +311,8 @@ void ImageForestingTransformRegionGrowingWidget::bmp_changed()
 
 void ImageForestingTransformRegionGrowingWidget::on_slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->get_activeslice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
 void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmph)
@@ -323,24 +320,19 @@ void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmp
 	bmphand = bmph;
 
 	unsigned width = (unsigned)bmphand->return_width();
-	/*	for(vector<mark>::iterator it=vm.begin();it!=vm.end();it++){
-		lbmap[width*it->p.py+it->p.px]=0;
-	}*/
 
 	vector<vector<Mark>>* vvm = bmphand->return_vvm();
 	vm.clear();
-	for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
-		 it++)
+	for (auto& line : *vvm)
 	{
-		vm.insert(vm.end(), it->begin(), it->end());
-		;
+		vm.insert(vm.end(), line.begin(), line.end());
 	}
 
 	for (unsigned i = 0; i < area; i++)
 		lbmap[i] = 0;
-	for (vector<Mark>::iterator it = vm.begin(); it != vm.end(); it++)
+	for (auto& m : vm)
 	{
-		lbmap[width * it->p.py + it->p.px] = (float)it->mark;
+		lbmap[width * m.p.py + m.p.px] = static_cast<float>(m.mark);
 	}
 
 	if (IFTrg != NULL)
@@ -394,7 +386,7 @@ void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 		vector<vector<Mark>>* vvm = bmphand->return_vvm();
 		vm.clear();
 		for (vector<vector<Mark>>::iterator it = vvm->begin(); it != vvm->end();
-			 it++)
+				 it++)
 		{
 			vm.insert(vm.end(), it->begin(), it->end());
 			;
@@ -444,7 +436,7 @@ FILE* ImageForestingTransformRegionGrowingWidget::LoadParams(FILE* fp, int versi
 	if (version >= 2)
 	{
 		QObject::disconnect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-							SLOT(slider_changed(int)));
+				SLOT(slider_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -453,7 +445,7 @@ FILE* ImageForestingTransformRegionGrowingWidget::LoadParams(FILE* fp, int versi
 		fread(&maxthresh, sizeof(float), 1, fp);
 
 		QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-						 SLOT(slider_changed(int)));
+				SLOT(slider_changed(int)));
 	}
 	return fp;
 }

@@ -13,7 +13,7 @@
 
 namespace iseg {
 
-class iSegCore_API RTDoseReader
+class ISEG_CORE_API RTDoseReader
 {
 public:
 	RTDoseReader();

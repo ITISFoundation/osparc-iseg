@@ -16,7 +16,7 @@ class vtkLookupTable;
 
 namespace iseg {
 
-class iSegCore_API ColorLookupTable
+class ISEG_CORE_API ColorLookupTable
 {
 public:
 	ColorLookupTable();

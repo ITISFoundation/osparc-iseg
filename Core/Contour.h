@@ -18,7 +18,7 @@
 
 namespace iseg {
 
-class iSegCore_API Contour
+class ISEG_CORE_API Contour
 {
 public:
 	Contour();
@@ -40,7 +40,7 @@ private:
 						const unsigned int p2, std::vector<bool>* v1_p);
 };
 
-class iSegCore_API Contour2
+class ISEG_CORE_API Contour2
 {
 public:
 	//abcd void doug_peuck(float epsilon,vector<Point> *Pt_vec,vector<unsigned short> *Meetings_vec,vector<Point> *Result_vec);

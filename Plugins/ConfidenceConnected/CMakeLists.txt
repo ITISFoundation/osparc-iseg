@@ -9,13 +9,13 @@
 ##
 OPTION(PLUGIN_CONFIDENCE "Build confidence connected segmentation plugin" OFF)
 IF(PLUGIN_CONFIDENCE)
-	QT4_WRAP_CPP(MOCSrcscon Confidence.h)
+	QT4_WRAP_CPP(MOCSrcscon ConfidenceWidget.h)
 
 	ADD_LIBRARY(Confidence.ext SHARED 
 		ConfidencePlugin.cpp 
 		ConfidencePlugin.h 
-		Confidence.cpp 
-		Confidence.h 
+		ConfidenceWidget.cpp 
+		ConfidenceWidget.h 
 		${MOCSrcscon}
 	)
 

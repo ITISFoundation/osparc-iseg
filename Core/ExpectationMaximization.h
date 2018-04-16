@@ -14,7 +14,7 @@
 namespace iseg {
 
 // Warning: devs should really be matrices. But this would necessitate a matrix inversion...
-class iSegCore_API ExpectationMaximization
+class ISEG_CORE_API ExpectationMaximization
 {
 public:
 	~ExpectationMaximization();

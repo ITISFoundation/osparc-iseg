@@ -105,7 +105,6 @@ private:
 
 signals:
 	void vp1_changed(std::vector<Point>* vp1);
-	void vpdyn_changed(std::vector<Point>* vpdyn);
 	void vp1dyn_changed(std::vector<Point>* vp1, std::vector<Point>* vpdyn);
 
 private slots:

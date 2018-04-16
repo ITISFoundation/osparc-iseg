@@ -39,7 +39,7 @@ public:
 	~SlicesHandler();
 
 	void newbmp(unsigned short width1, unsigned short height1,
-				unsigned short nrofslices);
+			unsigned short nrofslices);
 	void freebmp();
 	void clear_bmp();
 	void clear_work();
@@ -57,40 +57,40 @@ public:
 	void copyfromtissue(unsigned short slicenr, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
 	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits,
-							  unsigned short padding);
+			unsigned short padding);
 	//		void transparent_add(float *pict2);
 	int LoadDIBitmap(
-		const char* filename, unsigned short slicenr,
-		unsigned short
-			nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			const char* filename, unsigned short slicenr,
+			unsigned short
+					nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDIBitmap(const char* filename, unsigned short slicenr,
-					 unsigned short nrofslices, Point p, unsigned short dx,
-					 unsigned short dy);
+			unsigned short nrofslices, Point p, unsigned short dx,
+			unsigned short dy);
 	int LoadDIBitmap(std::vector<const char*> filenames);
 	int LoadDIBitmap(std::vector<const char*> filenames, double refFactor,
-					 double blueFactor, double greenFactor);
+			double blueFactor, double greenFactor);
 	int LoadDIBitmap(std::vector<const char*> filenames, Point p,
-					 unsigned short dx, unsigned short dy);
+			unsigned short dx, unsigned short dy);
 	int LoadPng(std::vector<const char*> filenames);
 	int LoadPng(std::vector<const char*> filenames, double refFactor,
-				double blueFactor, double greenFactor);
+			double blueFactor, double greenFactor);
 	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx,
-				unsigned short dy);
+			unsigned short dy);
 	int LoadDIJpg(
-		const char* filename, unsigned short slicenr,
-		unsigned short
-			nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			const char* filename, unsigned short slicenr,
+			unsigned short
+					nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDIJpg(const char* filename, unsigned short slicenr,
-				  unsigned short nrofslices, Point p, unsigned short dx,
-				  unsigned short dy);
+			unsigned short nrofslices, Point p, unsigned short dx,
+			unsigned short dy);
 	int LoadDIJpg(std::vector<const char*> filenames);
 	int LoadDIJpg(std::vector<const char*> filenames, Point p,
-				  unsigned short dx, unsigned short dy);
+			unsigned short dx, unsigned short dy);
 	int LoadDICOM(
-		std::vector<const char*>
-			lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			std::vector<const char*>
+					lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDICOM(std::vector<const char*> lfilename, Point p,
-				  unsigned short dx, unsigned short dy);
+			unsigned short dx, unsigned short dy);
 	//		int SaveDIBitmap(const char *filename);
 	//		int SaveWorkBitmap(const char *filename);
 	int ReadImage(const char* filename);
@@ -103,7 +103,7 @@ public:
 	int LoadAllHDF(const char* filename);
 
 	void UpdateColorLookupTable(
-		std::shared_ptr<ColorLookupTable> new_lut = nullptr);
+			std::shared_ptr<ColorLookupTable> new_lut = nullptr);
 	std::shared_ptr<ColorLookupTable> GetColorLookupTable()
 	{
 		return color_lookup_table;
@@ -112,46 +112,46 @@ public:
 	// Description: write project data into an Xdmf file
 	int SaveAllXdmf(const char* filename, int compression, bool naked = false);
 	bool SaveMarkersHDF(const char* filename, bool naked,
-						unsigned short version);
+			unsigned short version);
 	int SaveMergeAllXdmf(const char* filename,
-						 std::vector<QString>& mergeImagefilenames,
-						 unsigned short nrslicesTotal, int compression);
+			std::vector<QString>& mergeImagefilenames,
+			unsigned short nrslicesTotal, int compression);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-				unsigned bitdepth, unsigned short slicenr,
-				unsigned short nrofslices);
+			unsigned bitdepth, unsigned short slicenr,
+			unsigned short nrofslices);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-				unsigned bitdepth, unsigned short slicenr,
-				unsigned short nrofslices, Point p, unsigned short dx,
-				unsigned short dy);
+			unsigned bitdepth, unsigned short slicenr,
+			unsigned short nrofslices, Point p, unsigned short dx,
+			unsigned short dy);
 	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					 unsigned short slicenr, unsigned short nrofslices);
+			unsigned short slicenr, unsigned short nrofslices);
 	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					 unsigned short slicenr, unsigned short nrofslices, Point p,
-					 unsigned short dx, unsigned short dy);
+			unsigned short slicenr, unsigned short nrofslices, Point p,
+			unsigned short dx, unsigned short dy);
 	int ReadRawOverlay(const char* filename, unsigned bitdepth,
-					   unsigned short slicenr);
+			unsigned short slicenr);
 	int SaveRaw_resized(const char* filename, int dxm, int dxp, int dym,
-						int dyp, int dzm, int dzp, bool work);
+			int dyp, int dzm, int dzp, bool work);
 	int SaveTissuesRaw_resized(const char* filename, int dxm, int dxp, int dym,
-							   int dyp, int dzm, int dzp);
+			int dyp, int dzm, int dzp);
 	bool SwapXY();
 	bool SwapYZ();
 	bool SwapXZ();
 	int SaveRaw_xy_swapped(const char* filename, bool work);
 	static int SaveRaw_xy_swapped(const char* filename,
-								  std::vector<float*> bits_to_swap,
-								  short unsigned width, short unsigned height,
-								  short unsigned nrslices);
+			std::vector<float*> bits_to_swap,
+			short unsigned width, short unsigned height,
+			short unsigned nrslices);
 	int SaveRaw_xz_swapped(const char* filename, bool work);
 	static int SaveRaw_xz_swapped(const char* filename,
-								  std::vector<float*> bits_to_swap,
-								  short unsigned width, short unsigned height,
-								  short unsigned nrslices);
+			std::vector<float*> bits_to_swap,
+			short unsigned width, short unsigned height,
+			short unsigned nrslices);
 	int SaveRaw_yz_swapped(const char* filename, bool work);
 	static int SaveRaw_yz_swapped(const char* filename,
-								  std::vector<float*> bits_to_swap,
-								  short unsigned width, short unsigned height,
-								  short unsigned nrslices);
+			std::vector<float*> bits_to_swap,
+			short unsigned width, short unsigned height,
+			short unsigned nrslices);
 	int SaveTissuesRaw(const char* filename);
 	int SaveTissuesRaw_xy_swapped(const char* filename);
 	int SaveTissuesRaw_xz_swapped(const char* filename);
@@ -163,34 +163,34 @@ public:
 	int ReloadDICOM(std::vector<const char*> lfilename);
 	int ReloadDICOM(std::vector<const char*> lfilename, Point p);
 	int ReloadRaw(const char* filename, unsigned bitdepth,
-				  unsigned short slicenr);
+			unsigned short slicenr);
 	int ReloadRaw(const char* filename, short unsigned w, short unsigned h,
-				  unsigned bitdepth, unsigned short slicenr, Point p);
+			unsigned bitdepth, unsigned short slicenr, Point p);
 	int ReloadRawFloat(const char* filename, unsigned short slicenr);
 	int ReloadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					   unsigned short slicenr, Point p);
+			unsigned short slicenr, Point p);
 	static std::vector<float*> LoadRawFloat(const char* filename,
-											unsigned short startslice,
-											unsigned short endslice,
-											unsigned short slicenr,
-											unsigned int area);
+			unsigned short startslice,
+			unsigned short endslice,
+			unsigned short slicenr,
+			unsigned int area);
 	int ReloadRawTissues(const char* filename, unsigned bitdepth,
-						 unsigned short slicenr);
+			unsigned short slicenr);
 	int ReloadRawTissues(const char* filename, short unsigned w,
-						 short unsigned h, unsigned bitdepth,
-						 unsigned short slicenr, Point p);
+			short unsigned h, unsigned bitdepth,
+			unsigned short slicenr, Point p);
 	int ReloadImage(const char* filename, unsigned short slicenr);
 	int ReloadRTdose(const char* filename, unsigned short slicenr);
 	int ReloadAVW(const char* filename, unsigned short slicenr);
 	FILE* SaveHeader(FILE* fp, short unsigned nr_slices_to_write,
-					 Transform transform_to_write);
+			Transform transform_to_write);
 	FILE* SaveProject(const char* filename, const char* imageFileExtension);
 	bool SaveCommunicationFile(const char* filename);
 	FILE* SaveActiveSlices(const char* filename,
-						   const char* imageFileExtension);
+			const char* imageFileExtension);
 	void LoadHeader(FILE* fp, int& tissuesVersion, int& version);
 	FILE* MergeProjects(const char* savefilename,
-						std::vector<QString>& mergeFilenames);
+			std::vector<QString>& mergeFilenames);
 	FILE* LoadProject(const char* filename, int& tissuesVersion);
 	bool LoadS4Llink(const char* filename, int& tissuesVersion);
 	int SaveBmpRaw(const char* filename);
@@ -205,7 +205,7 @@ public:
 	void resetextrusion_contours();
 	FILE* save_contourprologue(const char* filename, unsigned nr_slices);
 	FILE* save_contoursection(FILE* fp, unsigned startslice1,
-							  unsigned endslice1, unsigned offset);
+			unsigned endslice1, unsigned offset);
 	FILE* save_tissuenamescolors(FILE* fp);
 	void work2bmp();
 	void bmp2work();
@@ -221,12 +221,12 @@ public:
 	std::vector<const float*> get_work() const;
 	std::vector<float*> get_work();
 	std::vector<const tissues_size_t*>
-		get_tissues(tissuelayers_size_t layeridx) const;
+			get_tissues(tissuelayers_size_t layeridx) const;
 	std::vector<tissues_size_t*> get_tissues(tissuelayers_size_t layeridx);
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
 	tissues_size_t* return_tissues(tissuelayers_size_t layeridx,
-								   unsigned short slicenr1);
+			unsigned short slicenr1);
 	float* return_overlay();
 	float get_work_pt(Point p, unsigned short slicenr);
 	void set_work_pt(Point p, unsigned short slicenr, float f);
@@ -237,9 +237,9 @@ public:
 	unsigned int make_histogram(bool includeoutofrange);
 	unsigned int* return_histogram();
 	unsigned int return_area();
-	unsigned short return_width();
-	unsigned short return_height();
-	unsigned short return_nrslices();
+	unsigned short return_width() override;
+	unsigned short return_height() override;
+	unsigned short return_nrslices() override;
 	unsigned short return_startslice() override;
 	unsigned short return_endslice() override;
 	void set_startslice(unsigned short startslice1);
@@ -267,26 +267,26 @@ public:
 	void average(unsigned short n);
 	void median_interquartile(bool median);
 	void aniso_diff(float dt, int n, float (*f)(float, float), float k,
-					float restraint);
+			float restraint);
 	void cont_anisodiff(float dt, int n, float (*f)(float, float), float k,
-						float restraint);
+			float restraint);
 	void stepsmooth_z(unsigned short n);
 	void smooth_tissues(unsigned short n);
 	void sigmafilter(float sigma, unsigned short nx, unsigned short ny);
 	void hysteretic(float thresh_low, float thresh_high, bool connectivity,
-					unsigned short nrpasses);
+			unsigned short nrpasses);
 	void double_hysteretic(float thresh_low_l, float thresh_low_h,
-						   float thresh_high_l, float thresh_high_h,
-						   bool connectivity, unsigned short nrpasses);
+			float thresh_high_l, float thresh_high_h,
+			bool connectivity, unsigned short nrpasses);
 	void double_hysteretic_allslices(float thresh_low_l, float thresh_low_h,
-									 float thresh_high_l, float thresh_high_h,
-									 bool connectivity, float set_to);
+			float thresh_high_l, float thresh_high_h,
+			bool connectivity, float set_to);
 	void thresholded_growing(short unsigned slicenr, Point p,
-							 float threshfactor_low, float threshfactor_high,
-							 bool connectivity, unsigned short nrpasses);
+			float threshfactor_low, float threshfactor_high,
+			bool connectivity, unsigned short nrpasses);
 	void thresholded_growing(short unsigned slicenr, Point p, float thresh_low,
-							 float thresh_high,
-							 float set_to); //bool connectivity,float set_to);
+			float thresh_high,
+			float set_to); //bool connectivity,float set_to);
 	void erosion(int n, bool connectivity);
 	void dilation(int n, bool connectivity);
 	void closure(int n, bool connectivity);
@@ -297,7 +297,7 @@ public:
 	bool remove_mark(Point p, unsigned radius);
 	void add_mark(Point p, unsigned label, unsigned short slicenr);
 	void add_mark(Point p, unsigned label, std::string str,
-				  unsigned short slicenr);
+			unsigned short slicenr);
 	bool remove_mark(Point p, unsigned radius, unsigned short slicenr);
 	void get_labels(std::vector<augmentedmark>* labels);
 	void add_vm(std::vector<Mark>* vm1);
@@ -311,47 +311,47 @@ public:
 	void zero_crossings(bool connectivity);
 	void dougpeuck_line(float epsilon);
 	void kmeans(unsigned short slicenr, short nrtissues, unsigned int iternr,
-				unsigned int converge);
+			unsigned int converge);
 	void kmeans_mhd(unsigned short slicenr, short nrtissues, short dim,
-					std::vector<std::string> mhdfiles, float* weights,
-					unsigned int iternr, unsigned int converge);
+			std::vector<std::string> mhdfiles, float* weights,
+			unsigned int iternr, unsigned int converge);
 	void kmeans_png(unsigned short slicenr, short nrtissues, short dim,
-					std::vector<std::string> pngfiles,
-					std::vector<int> exctractChannel, float* weights,
-					unsigned int iternr, unsigned int converge,
-					const std::string initCentersFile = "");
+			std::vector<std::string> pngfiles,
+			std::vector<int> exctractChannel, float* weights,
+			unsigned int iternr, unsigned int converge,
+			const std::string initCentersFile = "");
 	void em(unsigned short slicenr, short nrtissues, unsigned int iternr,
 			unsigned int converge);
 	void extract_contours(int minsize, std::vector<tissues_size_t>& tissuevec);
 	void extract_contours2_xmirrored(int minsize,
-									 std::vector<tissues_size_t>& tissuevec);
+			std::vector<tissues_size_t>& tissuevec);
 	void extract_contours2_xmirrored(int minsize,
-									 std::vector<tissues_size_t>& tissuevec,
-									 float epsilon);
+			std::vector<tissues_size_t>& tissuevec,
+			float epsilon);
 	void extract_contours(float f, int minsize, tissues_size_t tissuetype);
 	void extractinterpolatesave_contours(int minsize,
-										 std::vector<tissues_size_t>& tissuevec,
-										 unsigned short between, bool dp,
-										 float epsilon, const char* filename);
+			std::vector<tissues_size_t>& tissuevec,
+			unsigned short between, bool dp,
+			float epsilon, const char* filename);
 	void extractinterpolatesave_contours2_xmirrored(
-		int minsize, std::vector<tissues_size_t>& tissuevec,
-		unsigned short between, bool dp, float epsilon, const char* filename);
+			int minsize, std::vector<tissues_size_t>& tissuevec,
+			unsigned short between, bool dp, float epsilon, const char* filename);
 	void add2tissue(tissues_size_t tissuetype, Point p, bool override);
 	void add2tissueall(tissues_size_t tissuetype, Point p, bool override);
 	void add2tissueall(tissues_size_t tissuetype, Point p,
-					   unsigned short slicenr, bool override);
+			unsigned short slicenr, bool override);
 	void add2tissueall(tissues_size_t tissuetype, float f, bool override);
 	void add2tissue_connected(tissues_size_t tissuetype, Point p,
-							  bool override);
+			bool override);
 	void add2tissueall_connected(tissues_size_t tissuetype, Point p,
-								 bool override);
+			bool override);
 	void add2tissue_thresh(tissues_size_t tissuetype, Point p);
 	void add2tissue(tissues_size_t tissuetype, bool* mask,
-					unsigned short slicenr, bool override);
+			unsigned short slicenr, bool override);
 	void subtract_tissue(tissues_size_t tissuetype, Point p);
 	void subtract_tissueall(tissues_size_t tissuetype, Point p);
 	void subtract_tissueall(tissues_size_t tissuetype, Point p,
-							unsigned short slicenr);
+			unsigned short slicenr);
 	void subtract_tissueall(tissues_size_t tissuetype, float f);
 	void subtract_tissue_connected(tissues_size_t tissuetype, Point p);
 	void subtract_tissueall_connected(tissues_size_t tissuetype, Point p);
@@ -366,31 +366,31 @@ public:
 	void cleartissues();
 	void cleartissues3D();
 	void interpolatetissue(unsigned short slice1, unsigned short slice2,
-						   tissues_size_t tissuetype);
+			tissues_size_t tissuetype);
 	void interpolatetissue_medianset(unsigned short slice1,
-									 unsigned short slice2,
-									 tissues_size_t tissuetype,
-									 bool connectivity,
-									 bool handleVanishingComp = true);
+			unsigned short slice2,
+			tissues_size_t tissuetype,
+			bool connectivity,
+			bool handleVanishingComp = true);
 	void extrapolatetissue(unsigned short origin1, unsigned short origin2,
-						   unsigned short target, tissues_size_t tissuetype);
+			unsigned short target, tissues_size_t tissuetype);
 	void interpolatework(unsigned short slice1, unsigned short slice2);
 	void extrapolatework(unsigned short origin1, unsigned short origin2,
-						 unsigned short target);
+			unsigned short target);
 	void interpolatetissuegrey(unsigned short slice1, unsigned short slice2);
 	void interpolatetissuegrey_medianset(unsigned short slice1,
-										 unsigned short slice2,
-										 bool connectivity,
-										 bool handleVanishingComp = true);
+			unsigned short slice2,
+			bool connectivity,
+			bool handleVanishingComp = true);
 	void interpolateworkgrey(unsigned short slice1, unsigned short slice2);
 	void interpolateworkgrey_medianset(unsigned short slice1,
-									   unsigned short slice2, bool connectivity,
-									   bool handleVanishingComp = true);
+			unsigned short slice2, bool connectivity,
+			bool handleVanishingComp = true);
 	void interpolate(unsigned short slice1, unsigned short slice2);
 	void extrapolate(unsigned short origin1, unsigned short origin2,
-					 unsigned short target);
+			unsigned short target);
 	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1,
-					 float* bmp2);
+			float* bmp2);
 	void set_slicethickness(float t);
 	float get_slicethickness();
 	void set_pixelsize(float dx1, float dy1);
@@ -409,18 +409,18 @@ public:
 	tissues_size_t* slicetissue_y(unsigned short ycoord);
 	void slicework_z(unsigned short slicenr);
 	int extract_tissue_surfaces(const QString& filename,
-								std::vector<tissues_size_t>& tissuevec,
-								bool usediscretemc = false, float ratio = 1.0f,
-								unsigned smoothingiterations = 15,
-								float passBand = 0.1f,
-								float featureAngle = 180);
+			std::vector<tissues_size_t>& tissuevec,
+			bool usediscretemc = false, float ratio = 1.0f,
+			unsigned smoothingiterations = 15,
+			float passBand = 0.1f,
+			float featureAngle = 180);
 	void triangulate(const char* filename,
-					 std::vector<tissues_size_t>& tissuevec);
+			std::vector<tissues_size_t>& tissuevec);
 	void triangulate(const char* filename,
-					 std::vector<tissues_size_t>& tissuevec,
-					 std::vector<RGB>& colorvec);
+			std::vector<tissues_size_t>& tissuevec,
+			std::vector<RGB>& colorvec);
 	void triangulatesimpl(const char* filename,
-						  std::vector<tissues_size_t>& tissuevec, float ratio);
+			std::vector<tissues_size_t>& tissuevec, float ratio);
 	void set_activeslice(unsigned int actslice);
 	void next_slice();
 	void prev_slice();
@@ -446,7 +446,7 @@ public:
 	void getstack_help(unsigned i);
 	void getstack_tissue(unsigned i, tissues_size_t tissuenr, bool override);
 	void getstack_tissue(unsigned int slice, unsigned i,
-						 tissues_size_t tissuenr, bool override);
+			tissues_size_t tissuenr, bool override);
 	void popstack_bmp();
 	void popstack_work();
 	void popstack_help();
@@ -476,16 +476,16 @@ public:
 	bool value_at_boundary3D(float value);
 	bool tissuevalue_at_boundary3D(tissues_size_t value);
 	void fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,
-					  tissues_size_t backgroundID, tissues_size_t skinID);
+			tissues_size_t backgroundID, tissues_size_t skinID);
 	void gamma_mhd(unsigned short slicenr, short nrtissues, short dim,
-				   std::vector<std::string> mhdfiles, float* weights,
-				   float** centers, float* tol_f, float* tol_d);
+			std::vector<std::string> mhdfiles, float* weights,
+			float** centers, float* tol_f, float* tol_d);
 	void fill_unassigned();
 	void fill_unassignedtissue(tissues_size_t f);
 	void start_undo(iseg::DataSelection& dataSelection);
 	bool start_undoall(iseg::DataSelection& dataSelection);
 	bool start_undo(iseg::DataSelection& dataSelection,
-					std::vector<unsigned> vslicenr1);
+			std::vector<unsigned> vslicenr1);
 	void abort_undo();
 	void end_undo();
 	void merge_undo();
@@ -509,10 +509,10 @@ public:
 	void build255tissues();
 	void buildmissingtissues(tissues_size_t j);
 	void group_tissues(std::vector<tissues_size_t>& olds,
-					   std::vector<tissues_size_t>& news);
+			std::vector<tissues_size_t>& news);
 	void GetDICOMseriesnr(std::vector<const char*>* vnames,
-						  std::vector<unsigned>* dicomseriesnr,
-						  std::vector<unsigned>* dicomseriesnrlist);
+			std::vector<unsigned>* dicomseriesnr,
+			std::vector<unsigned>* dicomseriesnrlist);
 	void set_modeall(unsigned char mode, bool bmporwork);
 	bool print_amascii(const char* filename);
 	bool print_tissuemat(const char* filename);
@@ -524,9 +524,9 @@ public:
 	bool export_work(const char* filename, bool binary) const;
 
 	bool print_xmlregionextent(const char* filename, bool onlyactiveslices,
-							   const char* projname = NULL);
+			const char* projname = NULL);
 	bool print_tissueindex(const char* filename, bool onlyactiveslices,
-						   const char* projname = NULL);
+			const char* projname = NULL);
 	bool print_atlas(const char* filename);
 	vtkImageData* make_vtktissueimage();
 	float calculate_volume(Point p, unsigned short slicenr);
@@ -543,9 +543,9 @@ public:
 	void set_direction_cosines(const float dc[6]);
 
 	bool get_extent(tissues_size_t tissuenr, bool onlyactiveslices,
-					unsigned short extent[3][2]);
+			unsigned short extent[3][2]);
 	void regrow(unsigned short sourceslicenr, unsigned short targetslicenr,
-				int n);
+			int n);
 	bool unwrap(float jumpratio, float shift = 0);
 	unsigned GetNumberOfUndoSteps();
 	void SetNumberOfUndoSteps(unsigned);
@@ -563,9 +563,9 @@ public:
 	void GetITKImageFB(itk::Image<float, 3>*, int startslice, int endslice);
 	void GetITKImageGM(itk::Image<float, 3>*, int startslice, int endslice);
 	void ModifyWork(itk::Image<unsigned int, 3>* output, int startslice,
-					int endslice);
+			int endslice);
 	void ModifyWorkFloat(itk::Image<float, 3>* output, int startslice,
-						 int endslice);
+			int endslice);
 
 	void GetITKImage(itk::Image<float, 3>*);
 	void GetITKImageFB(itk::Image<float, 3>*);
@@ -576,10 +576,10 @@ public:
 	void GetSeed(itk::Image<float, 3>::IndexType*);
 	void selectedtissue2mc(tissues_size_t tissuetype, unsigned char** voxels);
 
-	virtual itk::SliceContiguousImage<float>::Pointer
-		GetImage(eImageType type, bool active_slices) override;
-	virtual itk::SliceContiguousImage<unsigned short>::Pointer
-		GetTissues(bool active_slices) override;
+	itk::SliceContiguousImage<float>::Pointer GetImage(eImageType type, bool active_slices) override;
+	itk::SliceContiguousImage<unsigned short>::Pointer GetTissues(bool active_slices) override;
+	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) override;
+	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() override;
 
 private:
 	unsigned short activeslice;

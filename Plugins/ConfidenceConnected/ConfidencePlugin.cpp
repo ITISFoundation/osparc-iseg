@@ -9,7 +9,7 @@
  */
 #include "ConfidencePlugin.h"
 
-#include "Confidence.h"
+#include "ConfidenceWidget.h"
 
 namespace iseg { namespace plugin {
 

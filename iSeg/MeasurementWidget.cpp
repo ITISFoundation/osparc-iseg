@@ -16,9 +16,9 @@
 #include "bmp_read_1.h"
 
 #include "Interface/Point.h"
+#include "Interface/addLine.h"
 
 #include "Core/Pair.h"
-#include "Core/addLine.h"
 
 #include <QLabel>
 
@@ -27,11 +27,11 @@
 using namespace iseg;
 
 MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
-									 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format(
-		"Perform different types of distance, angle or volume measurements"));
+			"Perform different types of distance, angle or volume measurements"));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
@@ -101,17 +101,17 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 	emit vp1dyn_changed(&established, &dynamic);
 
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-					 SLOT(method_changed(int)));
+			SLOT(method_changed(int)));
 	QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-					 SLOT(inputtype_changed(int)));
+			SLOT(inputtype_changed(int)));
 	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb3, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb4, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 }
 
 MeasurementWidget::~MeasurementWidget()
@@ -178,9 +178,9 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 	if (version >= 3)
 	{
 		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(method_changed(int)));
+				SLOT(method_changed(int)));
 		QObject::disconnect(inputgroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(inputtype_changed(int)));
+				SLOT(inputtype_changed(int)));
 
 		int dummy;
 		if (version >= 4)
@@ -205,9 +205,9 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 		inputtype_changed(0);
 
 		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(method_changed(int)));
+				SLOT(method_changed(int)));
 		QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(inputtype_changed(int)));
+				SLOT(inputtype_changed(int)));
 	}
 	return fp;
 }
@@ -238,10 +238,10 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				dynamic.clear();
 				emit vp1dyn_changed(&established, &dynamic);
 				txt_displayer->setText(
-					QString("(") + QString::number(calculatevec(0), 'g', 3) +
-					QString(",") + QString::number(calculatevec(1), 'g', 3) +
-					QString(",") + QString::number(calculatevec(2), 'g', 3) +
-					QString(") mm (Mark new start point.)"));
+						QString("(") + QString::number(calculatevec(0), 'g', 3) +
+						QString(",") + QString::number(calculatevec(1), 'g', 3) +
+						QString(",") + QString::number(calculatevec(2), 'g', 3) +
+						QString(") mm (Mark new start point.)"));
 			}
 		}
 		else if (rb_dist->isOn())
@@ -266,7 +266,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				dynamic.clear();
 				emit vp1dyn_changed(&established, &dynamic, true);
 				txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-									   QString(" mm (Mark new start point.)"));
+															 QString(" mm (Mark new start point.)"));
 			}
 		}
 		else if (rb_thick->isOn())
@@ -291,7 +291,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				dynamic.clear();
 				emit vp1dyn_changed(&established, &dynamic);
 				txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-									   QString(" mm Mark new start point.)"));
+															 QString(" mm Mark new start point.)"));
 			}
 		}
 		else if (rb_angle->isOn())
@@ -326,7 +326,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				dynamic.clear();
 				emit vp1dyn_changed(&established, &dynamic);
 				txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-									   QString(" deg (Mark new first point.)"));
+															 QString(" deg (Mark new first point.)"));
 			}
 		}
 		else if (rb_4ptangle->isOn())
@@ -373,7 +373,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				dynamic.clear();
 				emit vp1dyn_changed(&established, &dynamic);
 				txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-									   QString(" deg (Mark new first point.)"));
+															 QString(" deg (Mark new first point.)"));
 			}
 		}
 		else if (rb_vol->isOn())
@@ -384,27 +384,27 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			emit vp1dyn_changed(&established, &dynamic);
 			QString tissuename1;
 			tissues_size_t tnr =
-				handler3D->get_tissue_pt(p, handler3D->get_activeslice());
+					handler3D->get_tissue_pt(p, handler3D->get_activeslice());
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = TissueInfos::GetTissueName(tnr);
 			QString note = QString("");
 			if (!(handler3D->return_startslice() == 0 &&
-				  handler3D->return_endslice() == handler3D->return_nrslices()))
+							handler3D->return_endslice() == handler3D->return_nrslices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
 			txt_displayer->setText(
-				QString("Tissue '") + tissuename1 + QString("': ") +
-				QString::number(handler3D->calculate_tissuevolume(
-									p, handler3D->get_activeslice()),
-								'g', 3) +
-				QString(" mm^3\n") + QString("'Target': ") +
-				QString::number(handler3D->calculate_volume(
-									p, handler3D->get_activeslice()),
-								'g', 3) +
-				QString(" mm^3") + note + QString("\n(Select new object.)"));
+					QString("Tissue '") + tissuename1 + QString("': ") +
+					QString::number(handler3D->calculate_tissuevolume(
+															p, handler3D->get_activeslice()),
+							'g', 3) +
+					QString(" mm^3\n") + QString("'Target': ") +
+					QString::number(handler3D->calculate_volume(
+															p, handler3D->get_activeslice()),
+							'g', 3) +
+					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
 	}
 	else if (rb_lbls->isOn())
@@ -417,27 +417,27 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			emit vp1dyn_changed(&established, &dynamic);
 			QString tissuename1;
 			tissues_size_t tnr =
-				handler3D->get_tissue_pt(p, handler3D->get_activeslice());
+					handler3D->get_tissue_pt(p, handler3D->get_activeslice());
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = TissueInfos::GetTissueName(tnr);
 			QString note = QString("");
 			if (!(handler3D->return_startslice() == 0 &&
-				  handler3D->return_endslice() == handler3D->return_nrslices()))
+							handler3D->return_endslice() == handler3D->return_nrslices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
 			txt_displayer->setText(
-				QString("Tissue '") + tissuename1 + QString("': ") +
-				QString::number(handler3D->calculate_tissuevolume(
-									p, handler3D->get_activeslice()),
-								'g', 3) +
-				QString(" mm^3\n") + QString("'Target': ") +
-				QString::number(handler3D->calculate_volume(
-									p, handler3D->get_activeslice()),
-								'g', 3) +
-				QString(" mm^3") + note + QString("\n(Select new object.)"));
+					QString("Tissue '") + tissuename1 + QString("': ") +
+					QString::number(handler3D->calculate_tissuevolume(
+															p, handler3D->get_activeslice()),
+							'g', 3) +
+					QString(" mm^3\n") + QString("'Target': ") +
+					QString::number(handler3D->calculate_volume(
+															p, handler3D->get_activeslice()),
+							'g', 3) +
+					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
 	}
 }
@@ -453,7 +453,7 @@ void MeasurementWidget::on_mouse_moved(Point p)
 }
 
 void MeasurementWidget::set_coord(unsigned short posit, Point p,
-								  unsigned short slicenr)
+		unsigned short slicenr)
 {
 	pt[posit][0] = (int)p.px;
 	pt[posit][1] = (int)p.py;
@@ -484,7 +484,7 @@ void MeasurementWidget::cbb_changed(int)
 				p2 = labels[cbb_lb2->currentItem() - 1].p;
 			addLine(&established, p1, p2);
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-								   QString(" mm"));
+														 QString(" mm"));
 		}
 		else if (rb_thick->isOn())
 		{
@@ -502,7 +502,7 @@ void MeasurementWidget::cbb_changed(int)
 				p2 = labels[cbb_lb2->currentItem() - 1].p;
 			addLine(&established, p1, p2);
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-								   QString(" mm"));
+														 QString(" mm"));
 		}
 		else if (rb_vector->isOn())
 		{
@@ -520,10 +520,10 @@ void MeasurementWidget::cbb_changed(int)
 				p2 = labels[cbb_lb2->currentItem() - 1].p;
 			addLine(&established, p1, p2);
 			txt_displayer->setText(
-				QString("(") + QString::number(calculatevec(0), 'g', 3) +
-				QString(",") + QString::number(calculatevec(1), 'g', 3) +
-				QString(",") + QString::number(calculatevec(2), 'g', 3) +
-				QString(") mm (Mark new start point.)"));
+					QString("(") + QString::number(calculatevec(0), 'g', 3) +
+					QString(",") + QString::number(calculatevec(1), 'g', 3) +
+					QString(",") + QString::number(calculatevec(2), 'g', 3) +
+					QString(") mm (Mark new start point.)"));
 		}
 		else if (rb_angle->isOn())
 		{
@@ -546,7 +546,7 @@ void MeasurementWidget::cbb_changed(int)
 			addLine(&established, p1, p2);
 			addLine(&established, p2, p3);
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-								   QString(" deg"));
+														 QString(" deg"));
 		}
 		else if (rb_4ptangle->isOn())
 		{
@@ -574,7 +574,7 @@ void MeasurementWidget::cbb_changed(int)
 			addLine(&established, p2, p3);
 			addLine(&established, p3, p4);
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-								   QString(" deg"));
+														 QString(" deg"));
 		}
 		emit vp1dyn_changed(&established, &dynamic);
 	}
@@ -589,12 +589,12 @@ void MeasurementWidget::update_visualization()
 	if (labels.empty())
 	{
 		QObject::disconnect(inputgroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(inputtype_changed(int)));
+				SLOT(inputtype_changed(int)));
 		hbox2->hide();
 		rb_pts->setChecked(true);
 		rb_lbls->setChecked(false);
 		QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(inputtype_changed(int)));
+				SLOT(inputtype_changed(int)));
 	}
 	else
 	{
@@ -675,13 +675,13 @@ void MeasurementWidget::getlabels()
 	cbb_lb4->clear();
 
 	QObject::disconnect(cbb_lb1, SIGNAL(activated(int)), this,
-						SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::disconnect(cbb_lb2, SIGNAL(activated(int)), this,
-						SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::disconnect(cbb_lb3, SIGNAL(activated(int)), this,
-						SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::disconnect(cbb_lb4, SIGNAL(activated(int)), this,
-						SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 
 	cbb_lb1->insertItem(QString("Center"));
 	cbb_lb2->insertItem(QString("Center"));
@@ -697,13 +697,13 @@ void MeasurementWidget::getlabels()
 	}
 
 	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb3, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 	QObject::connect(cbb_lb4, SIGNAL(activated(int)), this,
-					 SLOT(cbb_changed(int)));
+			SLOT(cbb_changed(int)));
 
 	update_visualization();
 }
@@ -773,9 +773,9 @@ float MeasurementWidget::calculate()
 	if (rb_dist->isOn())
 	{
 		value = sqrt(
-			(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
-			(pt[0][1] - pt[1][1]) * (pt[0][1] - pt[1][1]) * p1.low * p1.low +
-			(pt[0][2] - pt[1][2]) * (pt[0][2] - pt[1][2]) * thick * thick);
+				(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
+				(pt[0][1] - pt[1][1]) * (pt[0][1] - pt[1][1]) * p1.low * p1.low +
+				(pt[0][2] - pt[1][2]) * (pt[0][2] - pt[1][2]) * thick * thick);
 	}
 	else if (rb_thick->isOn())
 	{
@@ -791,55 +791,55 @@ float MeasurementWidget::calculate()
 		if (!(xDist || yDist || zDist))
 			xDist = 1;
 		value = sqrt((xDist) * (xDist)*p1.high * p1.high +
-					 (yDist) * (yDist)*p1.low * p1.low +
-					 (zDist) * (zDist)*thick * thick);
+								 (yDist) * (yDist)*p1.low * p1.low +
+								 (zDist) * (zDist)*thick * thick);
 	}
 	else if (rb_angle->isOn())
 	{
 		float l1square =
-			(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
-			(pt[0][1] - pt[1][1]) * (pt[0][1] - pt[1][1]) * p1.low * p1.low +
-			(pt[0][2] - pt[1][2]) * (pt[0][2] - pt[1][2]) * thick * thick;
+				(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
+				(pt[0][1] - pt[1][1]) * (pt[0][1] - pt[1][1]) * p1.low * p1.low +
+				(pt[0][2] - pt[1][2]) * (pt[0][2] - pt[1][2]) * thick * thick;
 		float l2square =
-			(pt[2][0] - pt[1][0]) * (pt[2][0] - pt[1][0]) * p1.high * p1.high +
-			(pt[2][1] - pt[1][1]) * (pt[2][1] - pt[1][1]) * p1.low * p1.low +
-			(pt[2][2] - pt[1][2]) * (pt[2][2] - pt[1][2]) * thick * thick;
+				(pt[2][0] - pt[1][0]) * (pt[2][0] - pt[1][0]) * p1.high * p1.high +
+				(pt[2][1] - pt[1][1]) * (pt[2][1] - pt[1][1]) * p1.low * p1.low +
+				(pt[2][2] - pt[1][2]) * (pt[2][2] - pt[1][2]) * thick * thick;
 		if (l1square * l2square > 0)
 			value = acos(((pt[0][0] - pt[1][0]) * (pt[2][0] - pt[1][0]) *
-							  p1.high * p1.high +
-						  (pt[0][1] - pt[1][1]) * (pt[2][1] - pt[1][1]) *
-							  p1.low * p1.low +
-						  (pt[0][2] - pt[1][2]) * (pt[2][2] - pt[1][2]) *
-							  thick * thick) /
-						 sqrt(l1square * l2square)) *
-					180 / 3.141592f;
+													 p1.high * p1.high +
+											 (pt[0][1] - pt[1][1]) * (pt[2][1] - pt[1][1]) *
+													 p1.low * p1.low +
+											 (pt[0][2] - pt[1][2]) * (pt[2][2] - pt[1][2]) *
+													 thick * thick) /
+									 sqrt(l1square * l2square)) *
+							180 / 3.141592f;
 	}
 	else if (rb_4ptangle->isOn())
 	{
 		float d1[3];
 		float d2[3];
 		d1[0] = (pt[0][1] - pt[1][1]) * (pt[1][2] - pt[2][2]) * thick * p1.low -
-				(pt[0][2] - pt[1][2]) * (pt[1][1] - pt[2][1]) * thick * p1.low;
+						(pt[0][2] - pt[1][2]) * (pt[1][1] - pt[2][1]) * thick * p1.low;
 		d1[1] =
-			(pt[0][2] - pt[1][2]) * (pt[1][0] - pt[2][0]) * thick * p1.high -
-			(pt[0][0] - pt[1][0]) * (pt[1][2] - pt[2][2]) * thick * p1.high;
+				(pt[0][2] - pt[1][2]) * (pt[1][0] - pt[2][0]) * thick * p1.high -
+				(pt[0][0] - pt[1][0]) * (pt[1][2] - pt[2][2]) * thick * p1.high;
 		d1[2] =
-			(pt[0][0] - pt[1][0]) * (pt[1][1] - pt[2][1]) * p1.high * p1.low -
-			(pt[0][1] - pt[1][1]) * (pt[1][0] - pt[2][0]) * p1.high * p1.low;
+				(pt[0][0] - pt[1][0]) * (pt[1][1] - pt[2][1]) * p1.high * p1.low -
+				(pt[0][1] - pt[1][1]) * (pt[1][0] - pt[2][0]) * p1.high * p1.low;
 		d2[0] = (pt[1][1] - pt[2][1]) * (pt[2][2] - pt[3][2]) * thick * p1.low -
-				(pt[1][2] - pt[2][2]) * (pt[2][1] - pt[3][1]) * thick * p1.low;
+						(pt[1][2] - pt[2][2]) * (pt[2][1] - pt[3][1]) * thick * p1.low;
 		d2[1] =
-			(pt[1][2] - pt[2][2]) * (pt[2][0] - pt[3][0]) * thick * p1.high -
-			(pt[1][0] - pt[2][0]) * (pt[2][2] - pt[3][2]) * thick * p1.high;
+				(pt[1][2] - pt[2][2]) * (pt[2][0] - pt[3][0]) * thick * p1.high -
+				(pt[1][0] - pt[2][0]) * (pt[2][2] - pt[3][2]) * thick * p1.high;
 		d2[2] =
-			(pt[1][0] - pt[2][0]) * (pt[2][1] - pt[3][1]) * p1.high * p1.low -
-			(pt[1][1] - pt[2][1]) * (pt[2][0] - pt[3][0]) * p1.high * p1.low;
+				(pt[1][0] - pt[2][0]) * (pt[2][1] - pt[3][1]) * p1.high * p1.low -
+				(pt[1][1] - pt[2][1]) * (pt[2][0] - pt[3][0]) * p1.high * p1.low;
 		float l1square = (d1[0] * d1[0] + d1[1] * d1[1] + d1[2] * d1[2]);
 		float l2square = (d2[0] * d2[0] + d2[1] * d2[1] + d2[2] * d2[2]);
 		if (l1square * l2square > 0)
 			value = acos((d1[0] * d2[0] + d1[1] * d2[1] + d1[2] * d2[2]) /
-						 sqrt(l1square * l2square)) *
-					180 / 3.141592f;
+									 sqrt(l1square * l2square)) *
+							180 / 3.141592f;
 	}
 
 	return value;

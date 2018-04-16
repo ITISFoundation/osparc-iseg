@@ -7,7 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#include "GraphCutBoneSegmentation.h"
+#include "BoneSegmentationWidget.h"
 
 #include "ImageGraphCut3DFilter.h"
 

@@ -22,6 +22,9 @@ public:
 	typedef unsigned short tissue_type;
 	typedef float pixel_type;
 
+	virtual unsigned short return_width() = 0;
+	virtual unsigned short return_height() = 0;
+	virtual unsigned short return_nrslices() = 0;
 	virtual unsigned short return_startslice() = 0;
 	virtual unsigned short return_endslice() = 0;
 	virtual unsigned short get_activeslice() = 0;
@@ -44,6 +47,9 @@ public:
 	};
 	virtual itk::SliceContiguousImage<pixel_type>::Pointer GetImage(eImageType type, bool active_slices) = 0;
 	virtual itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices) = 0;
+
+	virtual itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) = 0;
+	virtual itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() = 0;
 };
 
 } // namespace iseg

@@ -19,9 +19,9 @@ namespace iseg {
 
 static std::ofstream flog;
 
-iSegCore_API void quit(const std::string& msg = "", const int code = EXIT_SUCCESS);
-iSegCore_API void error(const std::string& msg = "", const int code = EXIT_FAILURE);
-iSegCore_API void warning(const std::string& msg);
-iSegCore_API bool interceptOutput(const std::string& logname);
+ISEG_CORE_API void quit(const std::string& msg = "", const int code = EXIT_SUCCESS);
+ISEG_CORE_API void error(const std::string& msg = "", const int code = EXIT_FAILURE);
+ISEG_CORE_API void warning(const std::string& msg);
+ISEG_CORE_API bool interceptOutput(const std::string& logname);
 
 } // namespace iseg

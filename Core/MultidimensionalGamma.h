@@ -13,7 +13,7 @@
 
 namespace iseg {
 
-class iSegCore_API MultidimensionalGamma
+class ISEG_CORE_API MultidimensionalGamma
 {
 public:
 	MultidimensionalGamma();

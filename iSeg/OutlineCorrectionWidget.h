@@ -140,8 +140,6 @@ private:
 	QCheckBox* bg;
 
 signals:
-	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-
 	void signal_request_selected_tissue_TS(); // TODO BL hack
 	void signal_request_selected_tissue_BG();
 

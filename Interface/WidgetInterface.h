@@ -12,7 +12,7 @@
 #include "InterfaceApi.h"
 
 #include "DataSelection.h"
-#include "Point.h"
+#include "Mark.h"
 
 #include <qcursor.h>
 #include <qdir.h>
@@ -47,6 +47,9 @@ public:
 	QCursor* get_cursor() { return m_cursor; }
 
 signals:
+	void vm_changed(std::vector<Mark>* vm1);
+	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
+
 	void begin_datachange(iseg::DataSelection& dataSelection,
 			QWidget* sender = NULL, bool beginUndo = true);
 	void end_datachange(QWidget* sender = NULL,

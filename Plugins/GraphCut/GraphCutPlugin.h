@@ -25,11 +25,11 @@ public:
 			Qt::WindowFlags wFlags) const override;
 };
 
-class CGCTissueSeparatorPlugin : public Plugin
+class GCTissueSeparatorPlugin : public Plugin
 {
 public:
-	CGCTissueSeparatorPlugin();
-	~CGCTissueSeparatorPlugin();
+	GCTissueSeparatorPlugin();
+	~GCTissueSeparatorPlugin();
 
 	std::string name() const override { return "Tissue Separator"; }
 	std::string description() const override;

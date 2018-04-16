@@ -14,8 +14,8 @@
 /// Common definitions for iSeg project.
 namespace iseg {
 
-iSegCore_API int CombineTissuesVersion(const int version, const int tissuesVersion);
+ISEG_CORE_API int CombineTissuesVersion(const int version, const int tissuesVersion);
 
-iSegCore_API void ExtractTissuesVersion(const int combinedVersion, int& version, int& tissuesVersion);
+ISEG_CORE_API void ExtractTissuesVersion(const int combinedVersion, int& version, int& tissuesVersion);
 
 } // namespace iseg

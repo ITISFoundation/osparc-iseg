@@ -12,21 +12,22 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
+#include "Interface/addLine.h"
+
 #include "Core/ExpectationMaximization.h"
 #include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
 #include "Core/KMeans.h"
 #include "Core/MultidimensionalGamma.h"
 #include "Core/SliceProvider.h"
-#include "Core/addLine.h"
 
 #define cimg_display 0
 #include "AvwReader.h"
 #include "CImg.h"
 #include "ChannelExtractor.h"
 #include "DicomReader.h"
-#include "TissueInfos.h"
 #include "Levelset.h"
+#include "TissueInfos.h"
 
 #include <vtkBMPWriter.h>
 #include <vtkImageData.h>
@@ -58,52 +59,52 @@ using namespace iseg;
 #endif
 
 #ifndef ID_BMP
-#define ID_BMP 0x4D42 /* "BM" */
+#	define ID_BMP 0x4D42 /* "BM" */
 #endif
 #ifndef WIN32
 typedef struct /**** BMP file header structure ****/
 {
-	unsigned short bfType;		/* Magic number for file */
-	unsigned int bfSize;		/* Size of file */
+	unsigned short bfType;			/* Magic number for file */
+	unsigned int bfSize;				/* Size of file */
 	unsigned short bfReserved1; /* Reserved */
 	unsigned short bfReserved2; /* ... */
-	unsigned int bfOffBits;		/* Offset to bitmap data */
+	unsigned int bfOffBits;			/* Offset to bitmap data */
 } BITMAPFILEHEADER;
 
-#	
+#
 
 typedef struct /**** BMP file info structure ****/
 {
-	unsigned int biSize;		 /* Size of info header */
-	int biWidth;				 /* Width of image */
-	int biHeight;				 /* Height of image */
-	unsigned short biPlanes;	 /* Number of color planes */
-	unsigned short biBitCount;   /* Number of bits per pixel */
-	unsigned int biCompression;  /* Type of compression to use */
-	unsigned int biSizeImage;	/* Size of image data */
-	int biXPelsPerMeter;		 /* X pixels per meter */
-	int biYPelsPerMeter;		 /* Y pixels per meter */
-	unsigned int biClrUsed;		 /* Number of colors used */
+	unsigned int biSize;				 /* Size of info header */
+	int biWidth;								 /* Width of image */
+	int biHeight;								 /* Height of image */
+	unsigned short biPlanes;		 /* Number of color planes */
+	unsigned short biBitCount;	 /* Number of bits per pixel */
+	unsigned int biCompression;	/* Type of compression to use */
+	unsigned int biSizeImage;		 /* Size of image data */
+	int biXPelsPerMeter;				 /* X pixels per meter */
+	int biYPelsPerMeter;				 /* Y pixels per meter */
+	unsigned int biClrUsed;			 /* Number of colors used */
 	unsigned int biClrImportant; /* Number of important colors */
 } BITMAPINFOHEADER;
 
-#	define BI_RGB 0	   /* No compression - straight BGR data */
-#	define BI_RLE8 1	  /* 8-bit run-length compression */
-#	define BI_RLE4 2	  /* 4-bit run-length compression */
+#	define BI_RGB 0			 /* No compression - straight BGR data */
+#	define BI_RLE8 1			 /* 8-bit run-length compression */
+#	define BI_RLE4 2			 /* 4-bit run-length compression */
 #	define BI_BITFIELDS 3 /* RGB bitmap with RGB masks */
 
 typedef struct /**** Colormap entry structure ****/
 {
-	unsigned char rgbBlue;	 /* Blue value */
-	unsigned char rgbGreen;	/* Green value */
-	unsigned char rgbRed;	  /* Red value */
+	unsigned char rgbBlue;		 /* Blue value */
+	unsigned char rgbGreen;		 /* Green value */
+	unsigned char rgbRed;			 /* Red value */
 	unsigned char rgbReserved; /* Reserved */
 } RGBQUAD;
 
 typedef struct /**** Bitmap information structure ****/
 {
 	BITMAPINFOHEADER bmiHeader; /* Image header */
-	RGBQUAD bmiColors[256];		/* Image colormap */
+	RGBQUAD bmiColors[256];			/* Image colormap */
 } BITMAPINFO;
 #endif /* !WIN32 */
 
@@ -184,7 +185,7 @@ bmphandler::~bmphandler()
 void bmphandler::clear_stack()
 {
 	for (list<float*>::iterator it = bits_stack.begin(); it != bits_stack.end();
-		 it++)
+			 it++)
 		sliceprovide->take_back(*it);
 	bits_stack.clear();
 	stackindex.clear();
@@ -309,7 +310,7 @@ float* bmphandler::swap_work_pointer(float* bits)
 }
 
 tissues_size_t* bmphandler::swap_tissues_pointer(tissuelayers_size_t idx,
-												 tissues_size_t* bits)
+		tissues_size_t* bits)
 {
 	tissues_size_t* tmp = tissuelayers[idx];
 	tissuelayers[idx] = bits;
@@ -354,7 +355,7 @@ void bmphandler::copy2work(float* bits, bool* mask, unsigned char mode)
 }
 
 void bmphandler::copy2tissue(tissuelayers_size_t idx, tissues_size_t* bits,
-							 bool* mask)
+		bool* mask)
 {
 	if (loaded)
 	{
@@ -424,15 +425,15 @@ void bmphandler::copyfromtissue(tissuelayers_size_t idx, unsigned char* bits)
 #endif // TISSUES_SIZE_TYPEDEF
 
 void bmphandler::copyfromtissuepadded(tissuelayers_size_t idx,
-									  tissues_size_t* bits,
-									  unsigned short padding)
+		tissues_size_t* bits,
+		unsigned short padding)
 {
 	if (loaded)
 	{
 		unsigned int pos1 = 0;
 		unsigned int pos2 = 0;
 		for (; pos1 < (unsigned int)(width + 2 * padding) * padding + padding;
-			 pos1++)
+				 pos1++)
 			bits[pos1] = 0;
 		tissues_size_t* tissues = tissuelayers[idx];
 		for (unsigned short j = 0; j < height; j++)
@@ -445,7 +446,7 @@ void bmphandler::copyfromtissuepadded(tissuelayers_size_t idx,
 				bits[pos1] = 0;
 		}
 		unsigned int maxval = area + 2 * padding * width +
-							  2 * padding * height + padding * padding;
+													2 * padding * height + padding * padding;
 		for (; pos1 < maxval; pos1++)
 			bits[pos1] = 0;
 	}
@@ -571,7 +572,7 @@ float* bmphandler::copy_bmp()
 tissues_size_t* bmphandler::copy_tissue(tissuelayers_size_t idx)
 {
 	tissues_size_t* results =
-		(tissues_size_t*)malloc(sizeof(tissues_size_t) * area);
+			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area);
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned i = 0; i < area; i++)
 		results[i] = tissues[i];
@@ -630,7 +631,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1)
 		work_bits = sliceprovide->give_me();
 		help_bits = sliceprovide->give_me();
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else
@@ -642,7 +643,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1)
 			work_bits = sliceprovide->give_me();
 			help_bits = sliceprovide->give_me();
 			tissuelayers.push_back(
-				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+					(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 			clear_tissue(0);
 		}
 	}
@@ -663,7 +664,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1)
 }
 
 void bmphandler::newbmp(unsigned short width1, unsigned short height1,
-						float* bits)
+		float* bits)
 {
 	unsigned areanew = unsigned(width1) * height1;
 	width = width1;
@@ -689,7 +690,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1,
 		work_bits = sliceprovide->give_me();
 		help_bits = sliceprovide->give_me();
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else
@@ -701,7 +702,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1,
 			work_bits = sliceprovide->give_me();
 			help_bits = sliceprovide->give_me();
 			tissuelayers.push_back(
-				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+					(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 			clear_tissue(0);
 		}
 	}
@@ -779,7 +780,7 @@ int bmphandler::CheckBMPDepth(const char* filename)
 }
 
 void bmphandler::SetConverterFactors(int newRedFactor, int newGreenFactor,
-									 int newBlueFactor)
+		int newBlueFactor)
 {
 	redFactor = newRedFactor / 100.00;
 	greenFactor = newGreenFactor / 100.00;
@@ -790,7 +791,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 {
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
-	unsigned int bitsize;	/* Size of bitmap */
+	unsigned int bitsize;		 /* Size of bitmap */
 	BITMAPFILEHEADER header; /* File header */
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
@@ -907,7 +908,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -941,7 +942,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -959,7 +960,7 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 	//int result = fseek(fp,header.bfOffBits - sizeof(BITMAPFILEHEADER) - 40, SEEK_CUR);
 
 	if (bmpinfo->bmiHeader.biBitCount == 24 ||
-		bmpinfo->bmiHeader.biBitCount == 32)
+			bmpinfo->bmiHeader.biBitCount == 32)
 	{
 		int result = ConvertImageTo8BitBMP(filename, bits_tmp);
 		if (result == 0)
@@ -1025,11 +1026,11 @@ int bmphandler::LoadDIBitmap(const char* filename) /* I - File to load */
 }
 
 int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
-							 unsigned short dy) /* I - File to load */
+		unsigned short dy) /* I - File to load */
 {
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
-	unsigned int bitsize;	/* Size of bitmap */
+	unsigned int bitsize;		 /* Size of bitmap */
 	BITMAPFILEHEADER header; /* File header */
 
 	width = dx;
@@ -1084,7 +1085,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
      * the bitmap and read *it* in...                                    */
 
 	if (bmpinfo->bmiHeader.biBitCount != 8 ||
-		bmpinfo->bmiHeader.biCompression != 0)
+			bmpinfo->bmiHeader.biCompression != 0)
 	{
 		//		free(*info);
 		fclose(fp);
@@ -1151,7 +1152,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -1185,7 +1186,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -1251,7 +1252,7 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 				sliceprovide->take_back(work_bits);
 				sliceprovide->take_back(help_bits);
 				for (tissuelayers_size_t idx = 0; idx < tissuelayers.size();
-					 ++idx)
+						 ++idx)
 				{
 					free(tissuelayers[idx]);
 				}
@@ -1283,8 +1284,8 @@ int bmphandler::LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 }
 
 void bmphandler::SetRGBtoGrayScaleFactors(double newRedFactor,
-										  double newGreenFactor,
-										  double newBlueFactor)
+		double newGreenFactor,
+		double newBlueFactor)
 {
 	redFactor = newRedFactor;
 	greenFactor = newGreenFactor;
@@ -1292,7 +1293,7 @@ void bmphandler::SetRGBtoGrayScaleFactors(double newRedFactor,
 }
 
 int bmphandler::ConvertImageTo8BitBMP(const char* filename,
-									  unsigned char*& bits_tmp)
+		unsigned char*& bits_tmp)
 {
 	//Construct image from reading an image file.
 	//cimg_library::CImg<unsigned char> src(filename);
@@ -1327,8 +1328,8 @@ int bmphandler::ConvertImageTo8BitBMP(const char* filename,
 			b = src(i, j, 0, 2); // Third channel BLUE
 
 			bits_tmp[counter] = (unsigned char)(redFactor * ((double)r) +
-												greenFactor * ((double)g) +
-												blueFactor * ((double)b));
+																					greenFactor * ((double)g) +
+																					blueFactor * ((double)b));
 			counter++;
 		}
 	}
@@ -1337,7 +1338,7 @@ int bmphandler::ConvertImageTo8BitBMP(const char* filename,
 }
 
 int bmphandler::ConvertPNGImageTo8BitBMP(const char* filename,
-										 unsigned char*& bits_tmp)
+		unsigned char*& bits_tmp)
 {
 	QImage sourceImage(filename);
 
@@ -1349,8 +1350,8 @@ int bmphandler::ConvertPNGImageTo8BitBMP(const char* filename,
 		{
 			oldColor = QColor(sourceImage.pixel(x, y));
 			bits_tmp[counter] = (unsigned char)(redFactor * oldColor.red() +
-												greenFactor * oldColor.green() +
-												blueFactor * oldColor.blue());
+																					greenFactor * oldColor.green() +
+																					blueFactor * oldColor.blue());
 			counter++;
 		}
 	}
@@ -1364,7 +1365,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 		return 0;
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
-	unsigned int bitsize;	/* Size of bitmap */
+	unsigned int bitsize;		 /* Size of bitmap */
 	BITMAPFILEHEADER header; /* File header */
 
 	/* Try opening the file; use "rb" mode to read this *binary* file. */
@@ -1416,7 +1417,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
      * the bitmap and read *it* in...                                    */
 
 	if (bmpinfo->bmiHeader.biBitCount != 8 ||
-		bmpinfo->bmiHeader.biCompression != 0)
+			bmpinfo->bmiHeader.biCompression != 0)
 	{
 		//		free(*info);
 		free(bmpinfo);
@@ -1425,7 +1426,7 @@ int bmphandler::ReloadDIBitmap(const char* filename) /* I - File to load */
 	}
 
 	if (width != (short unsigned)bmpinfo->bmiHeader.biWidth ||
-		height != (short unsigned)abs(bmpinfo->bmiHeader.biHeight))
+			height != (short unsigned)abs(bmpinfo->bmiHeader.biHeight))
 	{
 		free(bmpinfo);
 		fclose(fp);
@@ -1505,7 +1506,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 		return 0;
 	FILE* fp; /* Open file pointer */
 	unsigned char* bits_tmp;
-	unsigned int bitsize;	/* Size of bitmap */
+	unsigned int bitsize;		 /* Size of bitmap */
 	BITMAPFILEHEADER header; /* File header */
 	unsigned short w, h;
 
@@ -1562,7 +1563,7 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
      * the bitmap and read *it* in...                                    */
 
 	if (bmpinfo->bmiHeader.biBitCount != 8 ||
-		bmpinfo->bmiHeader.biCompression != 0)
+			bmpinfo->bmiHeader.biCompression != 0)
 	{
 		//		free(*info);
 		free(bmpinfo);
@@ -1588,10 +1589,10 @@ int bmphandler::ReloadDIBitmap(const char* filename, Point p)
 
 #ifdef _MSC_VER
 	int result = _fseeki64(
-		fp, (__int64)(w + incr) * p.py + p.px + header.bfOffBits, SEEK_CUR);
+			fp, (__int64)(w + incr) * p.py + p.px + header.bfOffBits, SEEK_CUR);
 #else
 	int result = fseek(fp, (size_t)(w + incr) * p.py + p.px + header.bfOffBits,
-					   SEEK_CUR);
+			SEEK_CUR);
 #endif
 	if (result)
 	{
@@ -1711,7 +1712,7 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -1736,7 +1737,7 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -1843,7 +1844,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -1871,7 +1872,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -1893,7 +1894,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w1, unsigned short h1)
 }
 
 bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
-						   Point p, unsigned short dx, unsigned short dy)
+		Point p, unsigned short dx, unsigned short dy)
 {
 	if (p.px > w)
 	{
@@ -1960,7 +1961,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -1988,7 +1989,7 @@ bool bmphandler::LoadArray(float* bits, unsigned short w, unsigned short h,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -2030,7 +2031,7 @@ bool bmphandler::ReloadArray(float* bits)
 }
 
 bool bmphandler::ReloadArray(float* bits, unsigned short w1, unsigned short h1,
-							 Point p)
+		Point p)
 {
 	if (!loaded)
 		return 0;
@@ -2117,7 +2118,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -2148,7 +2149,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -2180,7 +2181,7 @@ bool bmphandler::LoadDICOM(const char* filename)
 }
 
 bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
-						   unsigned short dy)
+		unsigned short dy)
 {
 	DicomReader dcmread;
 	dcmread.opendicom(filename);
@@ -2255,7 +2256,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -2286,7 +2287,7 @@ bool bmphandler::LoadDICOM(const char* filename, Point p, unsigned short dx,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
@@ -2347,7 +2348,7 @@ bool bmphandler::ReloadDICOM(const char* filename, Point p)
 	dcmread.opendicom(filename);
 
 	if (width + p.px > dcmread.get_width() ||
-		height + p.py > dcmread.get_height())
+			height + p.py > dcmread.get_height())
 	{
 		dcmread.closedicom();
 		return 0;
@@ -2458,7 +2459,7 @@ FILE* bmphandler::save_proj(FILE* fp, bool inclpics)
 			fwrite(bmp_bits, 1, area * sizeof(float), fp);
 			fwrite(work_bits, 1, area * sizeof(float), fp);
 			fwrite(tissuelayers[0], 1, area * sizeof(tissues_size_t),
-				   fp); // TODO
+					fp); // TODO
 		}
 		int size = -1 - int(marks.size());
 		fwrite(&size, 1, sizeof(int), fp);
@@ -2480,12 +2481,12 @@ FILE* bmphandler::save_proj(FILE* fp, bool inclpics)
 		fwrite(&size, 1, sizeof(int), fp);
 
 		for (vector<vector<Mark>>::iterator it1 = vvm.begin(); it1 != vvm.end();
-			 it1++)
+				 it1++)
 		{
 			size = int(it1->size());
 			fwrite(&size, 1, sizeof(int), fp);
 			for (vector<Mark>::iterator it = it1->begin(); it != it1->end();
-				 it++)
+					 it++)
 			{
 				fwrite(&(it->mark), 1, sizeof(unsigned), fp);
 				fwrite(&(it->p.px), 1, sizeof(unsigned short), fp);
@@ -2495,12 +2496,12 @@ FILE* bmphandler::save_proj(FILE* fp, bool inclpics)
 		size = int(limits.size());
 		fwrite(&size, 1, sizeof(int), fp);
 		for (vector<vector<Point>>::iterator it1 = limits.begin();
-			 it1 != limits.end(); it1++)
+				 it1 != limits.end(); it1++)
 		{
 			size = int(it1->size());
 			fwrite(&size, 1, sizeof(int), fp);
 			for (vector<Point>::iterator it = it1->begin(); it != it1->end();
-				 it++)
+					 it++)
 			{
 				fwrite(&(it->px), 1, sizeof(unsigned short), fp);
 				fwrite(&(it->py), 1, sizeof(unsigned short), fp);
@@ -2524,7 +2525,7 @@ FILE* bmphandler::save_stack(FILE* fp)
 		int stackVersion = 1;
 		fwrite(&stackVersion, 1, sizeof(int), fp);
 		for (list<unsigned>::iterator it = stackindex.begin();
-			 it != stackindex.end(); it++)
+				 it != stackindex.end(); it++)
 		{
 			fwrite(&(*it), 1, sizeof(unsigned), fp);
 		}
@@ -2532,7 +2533,7 @@ FILE* bmphandler::save_stack(FILE* fp)
 		size = int(bits_stack.size());
 		fwrite(&size, 1, sizeof(int), fp);
 		for (list<float*>::iterator it = bits_stack.begin();
-			 it != bits_stack.end(); it++)
+				 it != bits_stack.end(); it++)
 		{
 			fwrite(*it, 1, sizeof(float) * area, fp);
 		}
@@ -2540,7 +2541,7 @@ FILE* bmphandler::save_stack(FILE* fp)
 		size = int(mode_stack.size());
 		fwrite(&size, 1, sizeof(int), fp);
 		for (list<unsigned char>::iterator it = mode_stack.begin();
-			 it != mode_stack.end(); it++)
+				 it != mode_stack.end(); it++)
 		{
 			fwrite(&(*it), 1, sizeof(unsigned char), fp);
 		}
@@ -2815,12 +2816,12 @@ FILE* bmphandler::load_stack(FILE* fp)
 //    return (0);
 //}
 int /* O - 0 = success, -1 = failure */
-	bmphandler::SaveDIBitmap(const char* filename,
-							 float* p_bits) /* I - File to load */
+		bmphandler::SaveDIBitmap(const char* filename,
+				float* p_bits) /* I - File to load */
 {
-	FILE* fp;				 /* Open file pointer */
-	unsigned int size;		 /* Size of file */
-	unsigned int bitsize;	/* Size of bitmap pixels */
+	FILE* fp;								 /* Open file pointer */
+	unsigned int size;			 /* Size of file */
+	unsigned int bitsize;		 /* Size of bitmap pixels */
 	BITMAPFILEHEADER header; /* File header */
 	unsigned char* bits_tmp;
 
@@ -2854,7 +2855,7 @@ int /* O - 0 = success, -1 = failure */
 		for (unsigned short i = 0; i < width; i++, pos++, pos2++)
 		{
 			bits_tmp[pos] =
-				(unsigned char)(min(255.0, max(0.0, p_bits[pos2] + 0.5)));
+					(unsigned char)(min(255.0, max(0.0, p_bits[pos2] + 0.5)));
 		}
 		for (unsigned int i = 0; i < padding; i++, pos++)
 		{
@@ -2887,7 +2888,7 @@ int /* O - 0 = success, -1 = failure */
 	header.bfOffBits = sizeof(BITMAPFILEHEADER) + 1064;
 
 	if (fwrite(&header, 1, sizeof(BITMAPFILEHEADER), fp) <
-		sizeof(BITMAPFILEHEADER))
+			sizeof(BITMAPFILEHEADER))
 	{
 		/* Couldn't write the file header - return... */
 		fclose(fp);
@@ -2909,7 +2910,7 @@ int /* O - 0 = success, -1 = failure */
 	for (unsigned i1 = 1; i1 < 255; i1++)
 	{
 		cp[i1 * 4 + 40] = cp[i1 * 4 + 41] = cp[i1 * 4 + 42] =
-			(unsigned char)(i1 + 1);
+				(unsigned char)(i1 + 1);
 		cp[i1 * 4 + 43] = 0;
 	}
 
@@ -3150,11 +3151,11 @@ int bmphandler::SaveTissueBitmap(tissuelayers_size_t idx, const char *filename)
 int bmphandler::SaveTissueBitmap(tissuelayers_size_t idx, const char* filename)
 {
 	vtkSmartPointer<vtkImageData> imageSource =
-		vtkSmartPointer<vtkImageData>::New();
+			vtkSmartPointer<vtkImageData>::New();
 	imageSource->SetExtent(0, width - 1, 0, height - 1, 0, 0);
 	imageSource->AllocateScalars(VTK_UNSIGNED_CHAR, 4); // 32bpp RGBA
 	unsigned char* field =
-		(unsigned char*)imageSource->GetScalarPointer(0, 0, 0);
+			(unsigned char*)imageSource->GetScalarPointer(0, 0, 0);
 
 	float* tissueColor;
 	tissues_size_t* tissues = tissuelayers[idx];
@@ -3168,7 +3169,7 @@ int bmphandler::SaveTissueBitmap(tissuelayers_size_t idx, const char* filename)
 	}
 
 	vtkSmartPointer<vtkBMPWriter> bmpWriter =
-		vtkSmartPointer<vtkBMPWriter>::New();
+			vtkSmartPointer<vtkBMPWriter>::New();
 	bmpWriter->SetFileName(filename);
 	bmpWriter->SetInputData(imageSource);
 	bmpWriter->Write();
@@ -3246,7 +3247,7 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else if (!loaded)
@@ -3272,7 +3273,7 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 
@@ -3335,10 +3336,10 @@ int bmphandler::ReadAvw(const char* filename, short unsigned slicenr)
 }
 
 int bmphandler::ReadRaw(const char* filename, short unsigned w,
-						short unsigned h, unsigned bitdepth,
-						unsigned short slicenr)
+		short unsigned h, unsigned bitdepth,
+		unsigned short slicenr)
 {
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -3398,7 +3399,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		if (!tissuelayers[0])
 		{
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
@@ -3439,7 +3440,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		if (!tissuelayers[0])
 		{
 			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
@@ -3481,7 +3482,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, file operation failed"
-				 << endl;
+					 << endl;
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -3493,7 +3494,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, file operation failed"
-				 << endl;
+					 << endl;
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -3534,7 +3535,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, file operation failed"
-				 << endl;
+					 << endl;
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -3546,7 +3547,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
 			cerr << "bmphandler::ReadRaw() : error, file operation failed"
-				 << endl;
+					 << endl;
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -3578,11 +3579,11 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 }
 
 int bmphandler::ReadRaw(const char* filename, short unsigned w,
-						short unsigned h, unsigned bitdepth,
-						unsigned short slicenr, Point p, unsigned short dx,
-						unsigned short dy)
+		short unsigned h, unsigned bitdepth,
+		unsigned short slicenr, Point p, unsigned short dx,
+		unsigned short dy)
 {
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -3640,7 +3641,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else if (!loaded)
@@ -3672,7 +3673,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 
@@ -3695,10 +3696,10 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(
-			fp, (__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px, SEEK_SET);
+				fp, (__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px, SEEK_SET);
 #else
 		int result = fseek(
-			fp, (size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px, SEEK_SET);
+				fp, (size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px, SEEK_SET);
 #endif
 		if (result)
 		{
@@ -3760,12 +3761,12 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(
-			fp, ((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * 2,
-			SEEK_SET);
+				fp, ((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * 2,
+				SEEK_SET);
 #else
 		int result =
-			fseek(fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * 2,
-				  SEEK_SET);
+				fseek(fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * 2,
+						SEEK_SET);
 #endif
 		if (result)
 		{
@@ -3780,7 +3781,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		for (unsigned short n = 0; n < dy; n++)
 		{
 			if ((unsigned short)fread(bits_tmp + n * dx, 1, dx * 2, fp) <
-				2 * dx)
+					2 * dx)
 			{
 				/*				free(bmp_bits);
 				free(work_bits);
@@ -3830,9 +3831,9 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 }
 
 int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
-							 short unsigned h, unsigned short slicenr)
+		short unsigned h, unsigned short slicenr)
 {
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -3889,7 +3890,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else if (!loaded)
@@ -3921,7 +3922,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 
@@ -3929,10 +3930,10 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 	int result =
-		_fseeki64(fp, (__int64)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
+			_fseeki64(fp, (__int64)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
 #else
 	int result =
-		fseek(fp, (size_t)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
+			fseek(fp, (size_t)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
 #endif
 	if (result)
 	{
@@ -3966,10 +3967,10 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 }
 
 int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
-							 short unsigned h, unsigned short slicenr, Point p,
-							 unsigned short dx, unsigned short dy)
+		short unsigned h, unsigned short slicenr, Point p,
+		unsigned short dx, unsigned short dy)
 {
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4027,7 +4028,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 	else if (!loaded)
@@ -4059,7 +4060,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 		}
 
 		tissuelayers.push_back(
-			(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		clear_tissue(0);
 	}
 
@@ -4067,13 +4068,13 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 	int result = _fseeki64(
-		fp,
-		((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * sizeof(float),
-		SEEK_SET);
+			fp,
+			((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * sizeof(float),
+			SEEK_SET);
 #else
 	int result = fseek(
-		fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * sizeof(float),
-		SEEK_SET);
+			fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * sizeof(float),
+			SEEK_SET);
 #endif
 	if (result)
 	{
@@ -4087,7 +4088,7 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 	for (unsigned short n = 0; n < dy; n++)
 	{
 		if ((unsigned short)fread(bmp_bits + n * dx, 1, dx * sizeof(float),
-								  fp) < sizeof(float) * dx)
+						fp) < sizeof(float) * dx)
 		{
 			/*				free(bmp_bits);
 			free(work_bits);
@@ -4124,12 +4125,12 @@ int bmphandler::ReadRawFloat(const char* filename, short unsigned w,
 }
 
 int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
-						  unsigned slicenr)
+		unsigned slicenr)
 {
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4223,13 +4224,13 @@ int bmphandler::ReloadRaw(const char* filename, unsigned bitdepth,
 }
 
 int bmphandler::ReloadRaw(const char* filename, short unsigned w,
-						  short unsigned h, unsigned bitdepth, unsigned slicenr,
-						  Point p)
+		short unsigned h, unsigned bitdepth, unsigned slicenr,
+		Point p)
 {
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4252,10 +4253,10 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(
-			fp, (__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px, SEEK_SET);
+				fp, (__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px, SEEK_SET);
 #else
 		int result = fseek(
-			fp, (size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px, SEEK_SET);
+				fp, (size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px, SEEK_SET);
 #endif
 		if (result)
 		{
@@ -4267,7 +4268,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		for (unsigned short n = 0; n < height; n++)
 		{
 			if ((unsigned short)fread(bits_tmp + n * width, 1, width, fp) <
-				width)
+					width)
 			{
 				free(bits_tmp);
 				fclose(fp);
@@ -4305,12 +4306,12 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(
-			fp, ((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * 2,
-			SEEK_SET);
+				fp, ((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * 2,
+				SEEK_SET);
 #else
 		int result =
-			fseek(fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * 2,
-				  SEEK_SET);
+				fseek(fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * 2,
+						SEEK_SET);
 #endif
 		if (result)
 		{
@@ -4322,7 +4323,7 @@ int bmphandler::ReloadRaw(const char* filename, short unsigned w,
 		for (unsigned short n = 0; n < height; n++)
 		{
 			if ((unsigned short)fread(bits_tmp + n * width, 1, width * 2, fp) <
-				2 * width)
+					2 * width)
 			{
 				free(bits_tmp);
 				fclose(fp);
@@ -4364,7 +4365,7 @@ int bmphandler::ReloadRawFloat(const char* filename, unsigned slicenr)
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4374,10 +4375,10 @@ int bmphandler::ReloadRawFloat(const char* filename, unsigned slicenr)
 
 #ifdef _MSC_VER
 	int result =
-		_fseeki64(fp, (__int64)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
+			_fseeki64(fp, (__int64)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
 #else
 	int result =
-		fseek(fp, (size_t)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
+			fseek(fp, (size_t)(bitsize) * sizeof(float) * slicenr, SEEK_SET);
 #endif
 	if (result)
 	{
@@ -4397,7 +4398,7 @@ int bmphandler::ReloadRawFloat(const char* filename, unsigned slicenr)
 }
 
 float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
-								unsigned int area)
+		unsigned int area)
 {
 	FILE* fp; /* Open file pointer */
 
@@ -4406,7 +4407,7 @@ float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
 
 #ifdef _MSC_VER
 	int result =
-		_fseeki64(fp, (__int64)(area) * sizeof(float) * slicenr, SEEK_SET);
+			_fseeki64(fp, (__int64)(area) * sizeof(float) * slicenr, SEEK_SET);
 #else
 	int result = fseek(fp, (size_t)(area) * sizeof(float) * slicenr, SEEK_SET);
 #endif
@@ -4435,12 +4436,12 @@ float* bmphandler::ReadRawFloat(const char* filename, unsigned slicenr,
 }
 
 int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
-							   short unsigned h, unsigned slicenr, Point p)
+		short unsigned h, unsigned slicenr, Point p)
 {
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4451,13 +4452,13 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 	int result = _fseeki64(
-		fp,
-		((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * sizeof(float),
-		SEEK_SET);
+			fp,
+			((__int64)(area2)*slicenr + (__int64)(w)*p.py + p.px) * sizeof(float),
+			SEEK_SET);
 #else
 	int result = fseek(
-		fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * sizeof(float),
-		SEEK_SET);
+			fp, ((size_t)(area2)*slicenr + (size_t)(w)*p.py + p.px) * sizeof(float),
+			SEEK_SET);
 #endif
 	if (result)
 	{
@@ -4468,8 +4469,8 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 	for (unsigned short n = 0; n < height; n++)
 	{
 		if ((unsigned short)fread(bmp_bits + n * width, 1,
-								  width * sizeof(float),
-								  fp) < sizeof(float) * width)
+						width * sizeof(float),
+						fp) < sizeof(float) * width)
 		{
 			fclose(fp);
 			return 0;
@@ -4492,12 +4493,12 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 }
 
 int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
-								 unsigned slicenr)
+		unsigned slicenr)
 {
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap stack */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4598,13 +4599,13 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 }
 
 int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
-								 short unsigned h, unsigned bitdepth,
-								 unsigned slicenr, Point p)
+		short unsigned h, unsigned bitdepth,
+		unsigned slicenr, Point p)
 {
 	if (!loaded)
 		return 0;
 
-	FILE* fp;			  /* Open file pointer */
+	FILE* fp;							/* Open file pointer */
 	unsigned int bitsize; /* Size of bitmap stack */
 
 	if ((fp = fopen(filename, "rb")) == NULL)
@@ -4627,14 +4628,14 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(fp,
-							   (__int64)(area2)*slicenr * tissuelayers.size() +
-								   (__int64)(w)*p.py + p.px,
-							   SEEK_SET);
+				(__int64)(area2)*slicenr * tissuelayers.size() +
+						(__int64)(w)*p.py + p.px,
+				SEEK_SET);
 #else
 		int result = fseek(fp,
-						   (size_t)(area2)*slicenr * tissuelayers.size() +
-							   (size_t)(w)*p.py + p.px,
-						   SEEK_SET);
+				(size_t)(area2)*slicenr * tissuelayers.size() +
+						(size_t)(w)*p.py + p.px,
+				SEEK_SET);
 #endif
 		if (result)
 		{
@@ -4648,7 +4649,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 			for (unsigned short n = 0; n < height; n++)
 			{
 				if ((unsigned short)fread(bits_tmp + area * idx + n * width, 1,
-										  width, fp) < width)
+								width, fp) < width)
 				{
 					free(bits_tmp);
 					fclose(fp);
@@ -4702,16 +4703,16 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 
 #ifdef _MSC_VER
 		int result = _fseeki64(fp,
-							   ((__int64)(area2)*slicenr * tissuelayers.size() +
-								(__int64)(w)*p.py + p.px) *
-								   2,
-							   SEEK_SET);
+				((__int64)(area2)*slicenr * tissuelayers.size() +
+						(__int64)(w)*p.py + p.px) *
+						2,
+				SEEK_SET);
 #else
 		int result = fseek(fp,
-						   ((size_t)(area2)*slicenr * tissuelayers.size() +
-							(size_t)(w)*p.py + p.px) *
-							   2,
-						   SEEK_SET);
+				((size_t)(area2)*slicenr * tissuelayers.size() +
+						(size_t)(w)*p.py + p.px) *
+						2,
+				SEEK_SET);
 #endif
 		if (result)
 		{
@@ -4725,7 +4726,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 			for (unsigned short n = 0; n < height; n++)
 			{
 				if ((unsigned short)fread(bits_tmp + area * idx + n * width, 1,
-										  width * 2, fp) < 2 * width)
+								width * 2, fp) < 2 * width)
 				{
 					free(bits_tmp);
 					fclose(fp);
@@ -4828,7 +4829,7 @@ int bmphandler::SaveTissueRaw(tissuelayers_size_t idx, const char* filename)
 	unsigned int bitsize = width * (unsigned)height;
 
 	if ((TissueInfos::GetTissueCount() <= 255) &&
-		(sizeof(tissues_size_t) > sizeof(unsigned char)))
+			(sizeof(tissues_size_t) > sizeof(unsigned char)))
 	{
 		unsigned char* ucharBuffer = new unsigned char[bitsize];
 		tissues_size_t* tissues = tissuelayers[idx];
@@ -4847,7 +4848,7 @@ int bmphandler::SaveTissueRaw(tissuelayers_size_t idx, const char* filename)
 	else
 	{
 		if (fwrite(tissuelayers[idx], sizeof(tissues_size_t), bitsize, fp) <
-			bitsize)
+				bitsize)
 		{
 			fclose(fp);
 			return (-1);
@@ -4876,7 +4877,7 @@ void bmphandler::set_bmp_pt(Point p, float f)
 }
 
 void bmphandler::set_tissue_pt(tissuelayers_size_t idx, Point p,
-							   tissues_size_t f)
+		tissues_size_t f)
 {
 	tissuelayers[idx][width * p.py + p.px] = f;
 	return;
@@ -4944,7 +4945,7 @@ unsigned int bmphandler::make_histogram(bool includeoutofrange)
 }
 
 unsigned int bmphandler::make_histogram(float* mask, float f,
-										bool includeoutofrange)
+		bool includeoutofrange)
 {
 	unsigned int j = 0;
 	float k;
@@ -4971,8 +4972,8 @@ unsigned int bmphandler::make_histogram(float* mask, float f,
 }
 
 unsigned int bmphandler::make_histogram(Point p, unsigned short dx,
-										unsigned short dy,
-										bool includeoutofrange)
+		unsigned short dy,
+		bool includeoutofrange)
 {
 	unsigned int i, l;
 	l = 0;
@@ -5041,7 +5042,7 @@ void bmphandler::threshold(float* thresholds)
 }
 
 void bmphandler::threshold(float* thresholds, Point p, unsigned short dx,
-						   unsigned short dy)
+		unsigned short dy)
 {
 	dx = min(int(dx), width - p.px);
 	dy = min(int(dy), width - p.py);
@@ -5260,7 +5261,7 @@ void bmphandler::convolute(float* mask, unsigned short direction)
 					for (unsigned o = 0; o < m; o++)
 					{
 						dummy +=
-							mask[l + n * o + 2] * bmp_bits[i + l + o * width];
+								mask[l + n * o + 2] * bmp_bits[i + l + o * width];
 					}
 				}
 				work_bits[i + n / 2 + (m / 2) * width] = dummy;
@@ -5498,9 +5499,9 @@ void bmphandler::laplacian1()
 	laplacianfilter[0] = 11;
 	laplacianfilter[1] = laplacianfilter[2] = 3;
 	laplacianfilter[3] = laplacianfilter[5] = laplacianfilter[9] =
-		laplacianfilter[11] = -1.0f / 12;
+			laplacianfilter[11] = -1.0f / 12;
 	laplacianfilter[4] = laplacianfilter[6] = laplacianfilter[8] =
-		laplacianfilter[10] = -2.0f / 12;
+			laplacianfilter[10] = -2.0f / 12;
 	laplacianfilter[7] = 12.0f / 12;
 
 	convolute(laplacianfilter, 2);
@@ -5662,14 +5663,14 @@ float* bmphandler::direction_map(float* sobelx, float* sobely)
 					direct_map[i] = 90;
 			}
 			else if ((sobelx[i] < 0 && sobely[i] > 0) ||
-					 (sobelx[i] > 0 && sobely[i] < 0))
+							 (sobelx[i] > 0 && sobely[i] < 0))
 			{
 				direct_map[i] = 180.0f - (180.0f / 3.141592f *
-										  atan(-sobely[i] / sobelx[i]));
+																		 atan(-sobely[i] / sobelx[i]));
 			}
 			else
 				direct_map[i] =
-					180.0f / 3.141592f * atan(sobely[i] / sobelx[i]);
+						180.0f / 3.141592f * atan(sobely[i] / sobelx[i]);
 
 			i++;
 		}
@@ -5838,12 +5839,12 @@ void bmphandler::canny_line(float sigma, float thresh_low, float thresh_high)
 }*/
 
 void bmphandler::hysteretic(float thresh_low, float thresh_high,
-							bool connectivity, float set_to)
+		bool connectivity, float set_to)
 {
 	unsigned char dummymode = mode1;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -5920,13 +5921,13 @@ void bmphandler::hysteretic(float thresh_low, float thresh_high,
 }
 
 void bmphandler::hysteretic(float thresh_low, float thresh_high,
-							bool connectivity, float* mask, float f,
-							float set_to)
+		bool connectivity, float* mask, float f,
+		float set_to)
 {
 	unsigned char dummymode = mode1;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6012,13 +6013,13 @@ void bmphandler::hysteretic(float thresh_low, float thresh_high,
 }
 
 void bmphandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
-								   float thresh_high_l, float thresh_high_h,
-								   bool connectivity, float set_to)
+		float thresh_high_l, float thresh_high_h,
+		bool connectivity, float set_to)
 {
 	unsigned char dummymode = mode1;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6095,14 +6096,14 @@ void bmphandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
 }
 
 void bmphandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
-								   float thresh_high_l, float thresh_high_h,
-								   bool connectivity, float* mask, float f,
-								   float set_to)
+		float thresh_high_l, float thresh_high_h,
+		bool connectivity, float* mask, float f,
+		float set_to)
 {
 	unsigned char dummymode = mode1;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6200,14 +6201,14 @@ void bmphandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
 }
 
 void bmphandler::thresholded_growing(Point p, float thresh_low,
-									 float thresh_high, bool connectivity,
-									 float set_to)
+		float thresh_high, bool connectivity,
+		float set_to)
 {
 	unsigned char dummymode = mode1;
 	unsigned position = pt2coord(p);
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6263,14 +6264,14 @@ void bmphandler::thresholded_growing(Point p, float thresh_low,
 }
 
 void bmphandler::thresholded_growing(Point p, float thresh_low,
-									 float thresh_high, bool connectivity,
-									 float set_to, vector<Point>* limits1)
+		float thresh_high, bool connectivity,
+		float set_to, vector<Point>* limits1)
 {
 	unsigned char dummymode = mode1;
 	unsigned position = pt2coord(p);
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6291,7 +6292,7 @@ void bmphandler::thresholded_growing(Point p, float thresh_low,
 
 	unsigned w = (unsigned)width + 2;
 	for (vector<Point>::iterator it = limits1->begin(); it != limits1->end();
-		 it++)
+			 it++)
 		results[(it->py + 1) * w + it->px + 1] = 0;
 
 	for (int j = 0; j < width + 2; j++)
@@ -6331,14 +6332,14 @@ void bmphandler::thresholded_growing(Point p, float thresh_low,
 }
 
 void bmphandler::thresholded_growinglimit(Point p, float thresh_low,
-										  float thresh_high, bool connectivity,
-										  float set_to)
+		float thresh_high, bool connectivity,
+		float set_to)
 {
 	unsigned char dummymode = mode1;
 	unsigned position = pt2coord(p);
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6359,7 +6360,7 @@ void bmphandler::thresholded_growinglimit(Point p, float thresh_low,
 
 	unsigned w = (unsigned)width + 2;
 	for (vector<vector<Point>>::iterator vit = limits.begin();
-		 vit != limits.end(); vit++)
+			 vit != limits.end(); vit++)
 	{
 		for (vector<Point>::iterator it = vit->begin(); it != vit->end(); it++)
 			results[(it->py + 1) * w + it->px + 1] = 0;
@@ -6402,8 +6403,8 @@ void bmphandler::thresholded_growinglimit(Point p, float thresh_low,
 }
 
 void bmphandler::thresholded_growing(Point p, float threshfactor_low,
-									 float threshfactor_high, bool connectivity,
-									 float set_to, Pair* tp)
+		float threshfactor_high, bool connectivity,
+		float set_to, Pair* tp)
 {
 	unsigned char dummymode = mode1;
 	unsigned position = pt2coord(p);
@@ -6414,7 +6415,7 @@ void bmphandler::thresholded_growing(Point p, float threshfactor_low,
 
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6487,14 +6488,14 @@ void bmphandler::thresholded_growing(Point p, float threshfactor_low,
 }
 
 void bmphandler::thresholded_growing(float thresh_low, float thresh_high,
-									 bool connectivity, float* mask, float f,
-									 float set_to)
+		bool connectivity, float* mask, float f,
+		float set_to)
 {
 	unsigned char dummymode = mode1;
 	f = f - f_tol;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -6559,8 +6560,8 @@ void bmphandler::thresholded_growing(float thresh_low, float thresh_high,
 }
 
 void bmphandler::hysteretic_growth(float* results, vector<int>* s,
-								   unsigned short w, unsigned short h,
-								   bool connectivity, float set_to)
+		unsigned short w, unsigned short h,
+		bool connectivity, float set_to)
 {
 	unsigned char dummymode = mode1;
 	int i;
@@ -6625,8 +6626,8 @@ void bmphandler::hysteretic_growth(float* results, vector<int>* s,
 }
 
 void bmphandler::hysteretic_growth(float* results, vector<int>* s,
-								   unsigned short w, unsigned short h,
-								   bool connectivity, float set_to, int nr)
+		unsigned short w, unsigned short h,
+		bool connectivity, float set_to, int nr)
 {
 	vector<int> sta;
 	vector<int>* s1 = &sta;
@@ -6775,7 +6776,7 @@ void bmphandler::sobel_finer()
 	bmp_bits = dummy;
 	for (unsigned i = 0; i < area; i++)
 		work_bits[i] =
-			sqrt(work_bits[i] * work_bits[i] + bmp_bits[i] * bmp_bits[i]);
+				sqrt(work_bits[i] * work_bits[i] + bmp_bits[i] * bmp_bits[i]);
 	sliceprovide->take_back(bmp_bits);
 	bmp_bits = tmp;
 
@@ -6921,7 +6922,7 @@ void bmphandler::sigmafilter(float sigma, unsigned short nx, unsigned short ny)
 				for (int o = 0; o < ny; o++)
 				{
 					if (bmp_bits[i + l + o * width] < dummy + sigma &&
-						bmp_bits[i + l + o * width] > dummy - sigma)
+							bmp_bits[i + l + o * width] > dummy - sigma)
 					{
 						summa += bmp_bits[i + l + o * width];
 						counter++;
@@ -7074,7 +7075,7 @@ float* bmphandler::find_modal(unsigned int thresh1, float thresh2)
 				lastmin = i;
 			}
 			if ((float)temp_hist > float(lastmin_h) / thresh2 &&
-				temp_hist >= thresh1)
+					temp_hist >= thresh1)
 			{
 				threshes.push_back(lastmin);
 				n++;
@@ -7112,7 +7113,7 @@ float* bmphandler::find_modal(unsigned int thresh1, float thresh2)
 }
 
 void bmphandler::subthreshold(int n1, int n2, unsigned int thresh1,
-							  float thresh2, float sigma)
+		float thresh2, float sigma)
 {
 	unsigned char dummymode = mode1;
 	int dx = (width + n1 - 1) / n1;
@@ -7151,7 +7152,7 @@ void bmphandler::subthreshold(int n1, int n2, unsigned int thresh1,
 }
 
 void bmphandler::erosion1(
-	int n, bool connectivity) // true for 8-, false for 4-connectivity
+		int n, bool connectivity) // true for 8-, false for 4-connectivity
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -7243,7 +7244,7 @@ void bmphandler::erosion1(
 }
 
 void bmphandler::erosion(
-	int n, bool connectivity) // true for 8-, false for 4-connectivity
+		int n, bool connectivity) // true for 8-, false for 4-connectivity
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -7313,7 +7314,7 @@ void bmphandler::erosion(
 }
 
 void bmphandler::dilation(
-	int n, bool connectivity) // true for 8-, false for 4-connectivity
+		int n, bool connectivity) // true for 8-, false for 4-connectivity
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -7433,7 +7434,7 @@ void bmphandler::open(int n, bool connectivity)
 }
 
 void bmphandler::mark_border(
-	bool connectivity) // true for 8-, false for 4-connectivity
+		bool connectivity) // true for 8-, false for 4-connectivity
 {
 	float* results = sliceprovide->give_me();
 
@@ -7501,7 +7502,7 @@ void bmphandler::mark_border(
 }
 
 void bmphandler::zero_crossings(
-	bool connectivity) // true for 8-, false for 4-connectivity
+		bool connectivity) // true for 8-, false for 4-connectivity
 {
 	float* results = sliceprovide->give_me();
 
@@ -7580,7 +7581,7 @@ void bmphandler::zero_crossings(
 }
 
 void bmphandler::zero_crossings(
-	float thresh, bool connectivity) // true for 8-, false for 4-connectivity
+		float thresh, bool connectivity) // true for 8-, false for 4-connectivity
 {
 	float* results = sliceprovide->give_me();
 
@@ -7594,7 +7595,7 @@ void bmphandler::zero_crossings(
 		for (unsigned short j = 0; j < width; j++)
 		{
 			if (work_bits[i1] * work_bits[i1 + width] < 0 &&
-				abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
 			{
 				if (work_bits[i1] > 0)
 					results[i1] = -1;
@@ -7612,7 +7613,7 @@ void bmphandler::zero_crossings(
 		for (unsigned short j = 0; j < (width - 1); j++)
 		{
 			if (work_bits[i1] * work_bits[i1 + 1] < 0 &&
-				abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
 			{
 				if (work_bits[i1] > 0)
 					results[i1] = -1;
@@ -7633,7 +7634,7 @@ void bmphandler::zero_crossings(
 			for (unsigned short j = 0; j < (width - 1); j++)
 			{
 				if (work_bits[i1] * work_bits[i1 + width + 1] < 0 &&
-					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+						abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
 				{
 					if (work_bits[i1] > 0)
 						results[i1] = -1;
@@ -7641,7 +7642,7 @@ void bmphandler::zero_crossings(
 						results[i1 + width + 1] = -1;
 				}
 				if (work_bits[i1 + 1] * work_bits[i1 + width] < 0 &&
-					abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
+						abs(work_bits[i1] - work_bits[i1 + width]) > thresh)
 				{
 					if (work_bits[i1 + 1] > 0)
 						results[i1 + 1] = -1;
@@ -7723,13 +7724,13 @@ void bmphandler::n_moment(short unsigned n, short unsigned p)
 				for (unsigned short l = 0; l < n; l++)
 				{
 					results[(i + n / 2) * width + j + n / 2] +=
-						pow(abs(bmp_bits[(i + k) * width + j + l] -
-								work_bits[(i + n / 2) * width + j + n / 2]),
-							p);
+							pow(abs(bmp_bits[(i + k) * width + j + l] -
+											work_bits[(i + n / 2) * width + j + n / 2]),
+									p);
 				}
 			}
 			results[(i + n / 2) * width + j + n / 2] =
-				results[(i + n / 2) * width + j + n / 2] / (n * n);
+					results[(i + n / 2) * width + j + n / 2] / (n * n);
 		}
 	}
 
@@ -7767,17 +7768,17 @@ void bmphandler::n_moment_sigma(short unsigned n, short unsigned p, float sigma)
 				for (unsigned short l = 0; l < n; l++)
 				{
 					dummy = abs(bmp_bits[(i + k) * width + j + l] -
-								work_bits[(i + n / 2) * width + j + n / 2]);
+											work_bits[(i + n / 2) * width + j + n / 2]);
 					if (dummy < sigma)
 					{
 						count++;
 						results[(i + n / 2) * width + j + n / 2] +=
-							pow(dummy, p);
+								pow(dummy, p);
 					}
 				}
 			}
 			results[(i + n / 2) * width + j + n / 2] =
-				results[(i + n / 2) * width + j + n / 2] / (count);
+					results[(i + n / 2) * width + j + n / 2] / (count);
 		}
 	}
 
@@ -7791,7 +7792,7 @@ void bmphandler::n_moment_sigma(short unsigned n, short unsigned p, float sigma)
 }
 
 void bmphandler::aniso_diff(float dt, int n, float (*f)(float, float), float k,
-							float restraint)
+		float restraint)
 {
 	unsigned char dummymode = mode1;
 	bmp2work();
@@ -7801,7 +7802,7 @@ void bmphandler::aniso_diff(float dt, int n, float (*f)(float, float), float k,
 }
 
 void bmphandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
-								float k, float restraint)
+		float k, float restraint)
 {
 	float* flowx = sliceprovide->give_me(); // only area-height of it is used
 	float* flowy = sliceprovide->give_me(); // only area-width of it is used
@@ -7815,7 +7816,7 @@ void bmphandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
 			for (unsigned short j = 0; j < width - 1; j++)
 			{
 				dummy =
-					(work_bits[i * width + j + 1] - work_bits[i * width + j]);
+						(work_bits[i * width + j + 1] - work_bits[i * width + j]);
 				flowx[i * (width - 1) + j] = f(dummy, k) * dummy;
 			}
 		}
@@ -7825,7 +7826,7 @@ void bmphandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
 			for (unsigned short j = 0; j < width; j++)
 			{
 				dummy =
-					(work_bits[(i + 1) * width + j] - work_bits[i * width + j]);
+						(work_bits[(i + 1) * width + j] - work_bits[i * width + j]);
 				flowy[i * width + j] = f(dummy, k) * dummy;
 			}
 		}
@@ -7927,16 +7928,16 @@ unsigned* bmphandler::watershed(bool connectivity)
 			if (connectivity)
 			{
 				if (p % width != 0 && p >= width &&
-					Y[p - 1 - width] != unvisited)
+						Y[p - 1 - width] != unvisited)
 					Bp.push_back(Y[p - 1 - width]);
 				if (p % width != 0 && (p + width) < area &&
-					Y[p - 1 + width] != unvisited)
+						Y[p - 1 + width] != unvisited)
 					Bp.push_back(Y[p + width - 1]);
 				if ((p + 1) % width != 0 && p >= width &&
-					Y[p - width + 1] != unvisited)
+						Y[p - width + 1] != unvisited)
 					Bp.push_back(Y[p - width + 1]);
 				if ((p + 1) % width != 0 && (p + width) < area &&
-					Y[p + width + 1] != unvisited)
+						Y[p + width + 1] != unvisited)
 					Bp.push_back(Y[p + width + 1]);
 			}
 
@@ -7966,7 +7967,7 @@ unsigned* bmphandler::watershed(bool connectivity)
 					if (deepest_con_bas(*it1) != deepest_con_bas(minbase_nr))
 					{
 						wshedobj.B[deepest_con_bas(*it1)].r =
-							deepest_con_bas(minbase_nr);
+								deepest_con_bas(minbase_nr);
 						m.k = *it1;
 						m.a = minbase_nr;
 						m.g = i;
@@ -8060,8 +8061,8 @@ bool bmphandler::remove_mark(Point p, unsigned radius)
 
 	vector<Mark>::iterator it = marks.begin();
 	while (it != marks.end() &&
-		   (unsigned int)((it->p.px - p.px) * (it->p.px - p.px) +
-						  (it->p.py - p.py) * (it->p.py - p.py)) > radius)
+				 (unsigned int)((it->p.px - p.px) * (it->p.px - p.px) +
+												(it->p.py - p.py) * (it->p.py - p.py)) > radius)
 		it++;
 
 	if (it != marks.end())
@@ -8095,7 +8096,7 @@ void bmphandler::cond_merge(unsigned m, unsigned h)
 	if (h >= (wshedobj.M[m].g - wshedobj.B[k].g))
 	{
 		if (wshedobj.B[a].l == 0 || wshedobj.B[k].l == 0 ||
-			wshedobj.B[a].l == wshedobj.B[k].l)
+				wshedobj.B[a].l == wshedobj.B[k].l)
 		{
 			wshedobj.B[k].r = a;
 			//			cout << a << ":"<<wshedobj.M[m].a<<" " << k <<":"<<wshedobj.M[m].k<< endl;
@@ -8191,9 +8192,9 @@ void bmphandler::plot_line() // very temporary solution...
 	for (unsigned i = 0; i < n - 1; i++)
 	{
 		dx = max(p_vec[i].px, p_vec[i + 1].px) -
-			 min(p_vec[i].px, p_vec[i + 1].px);
+				 min(p_vec[i].px, p_vec[i + 1].px);
 		dy = max(p_vec[i].py, p_vec[i + 1].py) -
-			 min(p_vec[i].py, p_vec[i + 1].py);
+				 min(p_vec[i].py, p_vec[i + 1].py);
 		P.px = p_vec[i].px;
 		P.py = p_vec[i].py;
 		work_bits[pt2coord(P)] = 0;
@@ -8202,13 +8203,13 @@ void bmphandler::plot_line() // very temporary solution...
 			for (unsigned j = 1; j < dx; j++)
 			{
 				P.px = short(0.5 +
-							 ((float)p_vec[i + 1].px - (float)p_vec[i].px) * j /
-								 dx +
-							 (float)p_vec[i].px);
+										 ((float)p_vec[i + 1].px - (float)p_vec[i].px) * j /
+												 dx +
+										 (float)p_vec[i].px);
 				P.py = short(0.5 +
-							 ((float)p_vec[i + 1].py - (float)p_vec[i].py) * j /
-								 dx +
-							 (float)p_vec[i].py);
+										 ((float)p_vec[i + 1].py - (float)p_vec[i].py) * j /
+												 dx +
+										 (float)p_vec[i].py);
 				work_bits[pt2coord(P)] = 255;
 			}
 		}
@@ -8217,13 +8218,13 @@ void bmphandler::plot_line() // very temporary solution...
 			for (unsigned j = 1; j < dy; j++)
 			{
 				P.px = short(0.5 +
-							 ((float)p_vec[i + 1].px - (float)p_vec[i].px) * j /
-								 dy +
-							 (float)p_vec[i].px);
+										 ((float)p_vec[i + 1].px - (float)p_vec[i].px) * j /
+												 dy +
+										 (float)p_vec[i].px);
 				P.py = short(0.5 +
-							 ((float)p_vec[i + 1].py - (float)p_vec[i].py) * j /
-								 dy +
-							 (float)p_vec[i].py);
+										 ((float)p_vec[i + 1].py - (float)p_vec[i].py) * j /
+												 dy +
+										 (float)p_vec[i].py);
 				work_bits[pt2coord(P)] = 255;
 			}
 		}
@@ -8239,11 +8240,11 @@ void bmphandler::plot_line() // very temporary solution...
 		for (unsigned j = 1; j < dx; j++)
 		{
 			P.px = short(
-				0.5 + ((float)p_vec[0].px - (float)p_vec[n - 1].px) * j / dx +
-				(float)p_vec[n - 1].px);
+					0.5 + ((float)p_vec[0].px - (float)p_vec[n - 1].px) * j / dx +
+					(float)p_vec[n - 1].px);
 			P.py = short(
-				0.5 + ((float)p_vec[0].py - (float)p_vec[n - 1].py) * j / dx +
-				(float)p_vec[n - 1].py);
+					0.5 + ((float)p_vec[0].py - (float)p_vec[n - 1].py) * j / dx +
+					(float)p_vec[n - 1].py);
 			work_bits[pt2coord(P)] = 255;
 		}
 	}
@@ -8252,11 +8253,11 @@ void bmphandler::plot_line() // very temporary solution...
 		for (unsigned j = 1; j < dy; j++)
 		{
 			P.px = short(
-				0.5 + ((float)p_vec[0].px - (float)p_vec[n - 1].px) * j / dy +
-				(float)p_vec[n - 1].px);
+					0.5 + ((float)p_vec[0].px - (float)p_vec[n - 1].px) * j / dy +
+					(float)p_vec[n - 1].px);
 			P.py = short(
-				0.5 + ((float)p_vec[0].py - (float)p_vec[n - 1].py) * j / dy +
-				(float)p_vec[n - 1].py);
+					0.5 + ((float)p_vec[0].py - (float)p_vec[n - 1].py) * j / dy +
+					(float)p_vec[n - 1].py);
 			work_bits[pt2coord(P)] = 255;
 		}
 	}
@@ -8292,17 +8293,17 @@ void bmphandler::connected_components(bool connectivity)
 				if (temp[i1] == temp[i1 - width - 1])
 				{
 					maps[(int)base_connection(work_bits[i2 - width], &maps)] =
-						work_bits[i2];
+							work_bits[i2];
 				}
 			}
 			else
 			{
 				if (temp[i1] == temp[i1 - width - 1])
 					work_bits[i2] =
-						base_connection(work_bits[i2 - width], &maps);
+							base_connection(work_bits[i2 - width], &maps);
 				else if (connectivity && temp[i1] == temp[i1 - width - 2])
 					work_bits[i2] =
-						base_connection(work_bits[i2 - width - 1], &maps);
+							base_connection(work_bits[i2 - width - 1], &maps);
 				else
 				{
 					maps.push_back(newest);
@@ -8313,7 +8314,7 @@ void bmphandler::connected_components(bool connectivity)
 
 			if (connectivity && temp[i1 - 1] == temp[i1 - width - 1])
 				maps[(int)base_connection(work_bits[i2 - 1], &maps)] =
-					base_connection(work_bits[i2 - width], &maps);
+						base_connection(work_bits[i2 - width], &maps);
 
 			i1++;
 			i2++;
@@ -8371,17 +8372,17 @@ void bmphandler::connected_components(bool connectivity, set<float>& components)
 				if (temp[i1] == temp[i1 - width - 1])
 				{
 					maps[(int)base_connection(work_bits[i2 - width], &maps)] =
-						work_bits[i2];
+							work_bits[i2];
 				}
 			}
 			else
 			{
 				if (temp[i1] == temp[i1 - width - 1])
 					work_bits[i2] =
-						base_connection(work_bits[i2 - width], &maps);
+							base_connection(work_bits[i2 - width], &maps);
 				else if (connectivity && temp[i1] == temp[i1 - width - 2])
 					work_bits[i2] =
-						base_connection(work_bits[i2 - width - 1], &maps);
+							base_connection(work_bits[i2 - width - 1], &maps);
 				else
 				{
 					maps.push_back(newest);
@@ -8392,7 +8393,7 @@ void bmphandler::connected_components(bool connectivity, set<float>& components)
 
 			if (connectivity && temp[i1 - 1] == temp[i1 - width - 1])
 				maps[(int)base_connection(work_bits[i2 - 1], &maps)] =
-					base_connection(work_bits[i2 - width], &maps);
+						base_connection(work_bits[i2 - width], &maps);
 
 			i1++;
 			i2++;
@@ -8587,7 +8588,7 @@ void bmphandler::fill_gaps(short unsigned n, bool connectivity)
 					if (isinterfaceold[i1] && (bmp_bits[i1 + width + 1] == 0))
 						isinterface[i1 + width + 1] = true;
 					else if (isinterfaceold[i1 + width + 1] &&
-							 (bmp_bits[i1] == 0))
+									 (bmp_bits[i1] == 0))
 						isinterface[i1] = true;
 
 					if (work_bits[i1 + 1] != work_bits[i1 + width])
@@ -8617,7 +8618,7 @@ void bmphandler::fill_gaps(short unsigned n, bool connectivity)
 					if (isinterfaceold[i1 + 1] && (bmp_bits[i1 + width] == 0))
 						isinterface[i1 + width] = true;
 					else if (isinterfaceold[i1 + width] &&
-							 (bmp_bits[i1 + 1] == 0))
+									 (bmp_bits[i1 + 1] == 0))
 						isinterface[i1 + 1] = true;
 
 					i1++;
@@ -8683,13 +8684,13 @@ void bmphandler::fill_gaps(short unsigned n, bool connectivity)
 					if (isinterfaceold[i1] && (bmp_bits[i1 + width + 1] == 0))
 						isinterface[i1 + width + 1] = true;
 					else if (isinterfaceold[i1 + width + 1] &&
-							 (bmp_bits[i1] == 0))
+									 (bmp_bits[i1] == 0))
 						isinterface[i1] = true;
 
 					if (isinterfaceold[i1 + 1] && (bmp_bits[i1 + width] == 0))
 						isinterface[i1 + width] = true;
 					else if (isinterfaceold[i1 + width] &&
-							 (bmp_bits[i1 + 1] == 0))
+									 (bmp_bits[i1 + 1] == 0))
 						isinterface[i1 + 1] = true;
 
 					i1++;
@@ -8732,7 +8733,7 @@ void bmphandler::fill_gaps(short unsigned n, bool connectivity)
 }
 
 void bmphandler::fill_gapstissue(tissuelayers_size_t idx, short unsigned n,
-								 bool connectivity)
+		bool connectivity)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -8759,9 +8760,9 @@ void bmphandler::fill_gapstissue(tissuelayers_size_t idx, short unsigned n,
 }
 
 void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
-									vector<vector<Point>>* outer_line,
-									vector<vector<Point>>* inner_line,
-									int minsize)
+		vector<vector<Point>>* outer_line,
+		vector<vector<Point>>* inner_line,
+		int minsize)
 {
 	minsize = 2 * minsize;
 	float bubble_size;
@@ -8769,7 +8770,7 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 	short directionchange;
 
 	tissues_size_t* tmp_bits = (tissues_size_t*)malloc(
-		sizeof(tissues_size_t) * (width + 2) * (height + 2));
+			sizeof(tissues_size_t) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -8781,12 +8782,12 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -8806,20 +8807,20 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = TISSUES_SIZE_MAX;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = TISSUES_SIZE_MAX;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = TISSUES_SIZE_MAX;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = TISSUES_SIZE_MAX;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -8831,11 +8832,11 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				vec_pt.push_back(p);
 				if (1 >= minsize)
@@ -8845,7 +8846,7 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -8885,15 +8886,15 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -8931,7 +8932,7 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 					{
 						//						cout << bubble_size+linelength <<", ";
 						for (vector<Point>::iterator it1 = vec_pt.begin();
-							 it1 != vec_pt.end(); it1++)
+								 it1 != vec_pt.end(); it1++)
 						{
 							bmp_bits[it1->px + (unsigned)width * it1->py] = 255;
 							//							cout << it1->px << ":" << it1->py << "."<<it1->px+(unsigned)width*it1->py <<" ";
@@ -8947,7 +8948,7 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 					{
 						//						cout << bubble_size <<"; ";
 						for (vector<Point>::iterator it1 = vec_pt.begin();
-							 it1 != vec_pt.end(); it1++)
+								 it1 != vec_pt.end(); it1++)
 						{
 							bmp_bits[it1->px + (unsigned)width * it1->py] = 255;
 							//							cout << it1->px << ":" << it1->py << "."<<it1->px+(unsigned)width*it1->py <<" ";
@@ -8966,9 +8967,9 @@ void bmphandler::get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
 }
 
 void bmphandler::get_tissuecontours2_xmirrored(
-	tissuelayers_size_t idx, tissues_size_t f,
-	vector<vector<Point>>* outer_line, vector<vector<Point>>* inner_line,
-	int minsize)
+		tissuelayers_size_t idx, tissues_size_t f,
+		vector<vector<Point>>* outer_line, vector<vector<Point>>* inner_line,
+		int minsize)
 {
 	//int w=(int)width;
 	//int h=(int)height;
@@ -8985,9 +8986,9 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
 	unsigned* tmp_bits =
-		(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
 	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-													(width + 2) * (height + 2));
+																									(width + 2) * (height + 2));
 
 	unsigned f1 = (unsigned)f;
 
@@ -9009,20 +9010,20 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = setto;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = setto;
 	tmp_bits[1] = tmp_bits[width] =
-		tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-			tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
+					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
 	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-		tmp_bits[unsigned(width + 2) * (height)] =
-			tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+			tmp_bits[unsigned(width + 2) * (height)] =
+					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -9033,17 +9034,17 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
 			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-				(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-				(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-				(tmp_bits[pos + width + 2] == f1 ||
-				 tmp_bits[pos + width + 3] == f1))
+					(tmp_bits[pos + width + 2] == f1 ||
+							tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-				(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -9201,7 +9202,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					break;
 				case 5:
 					if (tmp_bits[pos + width + 2] != tmp_bits[pos + 1] ||
-						tmp_bits[pos + 1] > f1)
+							tmp_bits[pos + 1] > f1)
 					{
 						if (direction == 0)
 						{
@@ -9334,7 +9335,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					break;
 				case 10:
 					if (tmp_bits[pos] != tmp_bits[pos + width + 3] ||
-						tmp_bits[pos] > f1)
+							tmp_bits[pos] > f1)
 					{
 						if (direction == 0)
 						{
@@ -9478,9 +9479,9 @@ void bmphandler::get_tissuecontours2_xmirrored(
 }
 
 void bmphandler::get_tissuecontours2_xmirrored(
-	tissuelayers_size_t idx, tissues_size_t f,
-	vector<vector<Point>>* outer_line, vector<vector<Point>>* inner_line,
-	int minsize, float disttol)
+		tissuelayers_size_t idx, tissues_size_t f,
+		vector<vector<Point>>* outer_line, vector<vector<Point>>* inner_line,
+		int minsize, float disttol)
 {
 	//int w=(int)width;
 	//int h=(int)height;
@@ -9497,10 +9498,10 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
 	unsigned* tmp_bits =
-		(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
 	unsigned f1 = (unsigned)f;
 	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-													(width + 2) * (height + 2));
+																									(width + 2) * (height + 2));
 
 	vector<Point> vec_pt;
 	//abcd vector<unsigned short> vec_meetings;
@@ -9522,20 +9523,20 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = setto;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = setto;
 	tmp_bits[1] = tmp_bits[width] =
-		tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-			tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
+					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
 	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-		tmp_bits[unsigned(width + 2) * (height)] =
-			tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+			tmp_bits[unsigned(width + 2) * (height)] =
+					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -9546,17 +9547,17 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
 			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-				(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-				(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-				(tmp_bits[pos + width + 2] == f1 ||
-				 tmp_bits[pos + width + 3] == f1))
+					(tmp_bits[pos + width + 2] == f1 ||
+							tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-				(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -9679,7 +9680,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					if (direction == 0)
 					{
 						if (tmp_bits[pos + width + 2] !=
-							tmp_bits[pos + width + 3])
+								tmp_bits[pos + width + 3])
 						{
 							p.px--;
 							vec_meetings.push_back(vec_pt.size());
@@ -9695,7 +9696,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					else
 					{
 						if (tmp_bits[pos + width + 2] !=
-							tmp_bits[pos + width + 3])
+								tmp_bits[pos + width + 3])
 						{
 							p.px++;
 							vec_meetings.push_back(vec_pt.size());
@@ -9745,7 +9746,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					break;
 				case 5:
 					if (tmp_bits[pos + width + 2] != tmp_bits[pos + 1] ||
-						tmp_bits[pos + 1] > f1)
+							tmp_bits[pos + 1] > f1)
 					{
 						if (direction == 0)
 						{
@@ -9920,7 +9921,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 					break;
 				case 10:
 					if (tmp_bits[pos] != tmp_bits[pos + width + 3] ||
-						tmp_bits[pos] > f1)
+							tmp_bits[pos] > f1)
 					{
 						if (direction == 0)
 						{
@@ -10093,7 +10094,7 @@ void bmphandler::get_tissuecontours2_xmirrored(
 }
 
 void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
-							  vector<vector<Point>>* inner_line, int minsize)
+		vector<vector<Point>>* inner_line, int minsize)
 {
 	minsize = 2 * minsize;
 	float bubble_size;
@@ -10101,7 +10102,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 	short directionchange;
 
 	float* tmp_bits =
-		(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
+			(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -10113,12 +10114,12 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -10137,20 +10138,20 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -10162,11 +10163,11 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				vec_pt.push_back(p);
 				if (1 >= minsize)
@@ -10176,7 +10177,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -10216,15 +10217,15 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -10262,7 +10263,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 					{
 						//						cout << bubble_size+linelength <<", ";
 						for (vector<Point>::iterator it1 = vec_pt.begin();
-							 it1 != vec_pt.end(); it1++)
+								 it1 != vec_pt.end(); it1++)
 						{
 							bmp_bits[it1->px + (unsigned)width * it1->py] = 255;
 							//							cout << it1->px << ":" << it1->py << "."<<it1->px+(unsigned)width*it1->py <<" ";
@@ -10278,7 +10279,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 					{
 						//						cout << bubble_size <<"; ";
 						for (vector<Point>::iterator it1 = vec_pt.begin();
-							 it1 != vec_pt.end(); it1++)
+								 it1 != vec_pt.end(); it1++)
 						{
 							bmp_bits[it1->px + (unsigned)width * it1->py] = 255;
 							//							cout << it1->px << ":" << it1->py << "."<<it1->px+(unsigned)width*it1->py <<" ";
@@ -10297,7 +10298,7 @@ void bmphandler::get_contours(float f, vector<vector<Point>>* outer_line,
 }
 
 void bmphandler::get_contours(Point p, vector<vector<Point>>* outer_line,
-							  vector<vector<Point>>* inner_line, int minsize)
+		vector<vector<Point>>* inner_line, int minsize)
 {
 	get_contours(work_pt(p), outer_line, inner_line, minsize);
 	return;
@@ -10364,25 +10365,25 @@ void bmphandler::distance_map(bool connectivity)
 				if (connectivity)
 				{
 					if (p % width != 0 && p >= width &&
-						work_bits[p - 1 - width] < wbp - 1)
+							work_bits[p - 1 - width] < wbp - 1)
 					{
 						work_bits[p - 1 - width] = wbp - 1;
 						sorted[i - 1].push_back(p - 1 - width);
 					}
 					if (p % width != 0 && (p + width) < area &&
-						work_bits[p - 1 + width] < wbp - 1)
+							work_bits[p - 1 + width] < wbp - 1)
 					{
 						work_bits[p - 1 + width] = wbp - 1;
 						sorted[i - 1].push_back(p - 1 + width);
 					}
 					if ((p + 1) % width != 0 && p >= width &&
-						work_bits[p - width + 1] < wbp - 1)
+							work_bits[p - width + 1] < wbp - 1)
 					{
 						work_bits[p - width + 1] = wbp - 1;
 						sorted[i - 1].push_back(p - width + 1);
 					}
 					if ((p + 1) % width != 0 && (p + width) < area &&
-						work_bits[p + width + 1] < wbp - 1)
+							work_bits[p + width + 1] < wbp - 1)
 					{
 						work_bits[p + width + 1] = wbp - 1;
 						sorted[i - 1].push_back(p + width + 1);
@@ -10399,7 +10400,7 @@ void bmphandler::distance_map(bool connectivity)
 }
 
 void bmphandler::distance_map(bool connectivity, float f,
-							  short unsigned levlset)
+		short unsigned levlset)
 {
 	unsigned char dummymode = mode1;
 	vector<unsigned> v1, v2;
@@ -10508,7 +10509,7 @@ void bmphandler::distance_map(bool connectivity, float f,
 			if (connectivity)
 			{
 				if (p % width != 0 && p >= width &&
-					work_bits[p - 1 - width] == background)
+						work_bits[p - 1 - width] == background)
 				{
 					if (bmp_bits[p - 1 - width] == f)
 					{
@@ -10523,7 +10524,7 @@ void bmphandler::distance_map(bool connectivity, float f,
 				}
 
 				if (p % width != 0 && (p + width) < area &&
-					work_bits[p - 1 + width] == background)
+						work_bits[p - 1 + width] == background)
 				{
 					if (bmp_bits[p - 1 + width] == f)
 					{
@@ -10538,7 +10539,7 @@ void bmphandler::distance_map(bool connectivity, float f,
 				}
 
 				if ((p + 1) % width != 0 && p >= width &&
-					work_bits[p - width + 1] == background)
+						work_bits[p - width + 1] == background)
 				{
 					if (bmp_bits[p - width + 1] == f)
 					{
@@ -10553,7 +10554,7 @@ void bmphandler::distance_map(bool connectivity, float f,
 				}
 
 				if ((p + 1) % width != 0 && (p + width) < area &&
-					work_bits[p + width + 1] == background)
+						work_bits[p + width + 1] == background)
 				{
 					if (bmp_bits[p + width + 1] == f)
 					{
@@ -10634,25 +10635,25 @@ unsigned* bmphandler::dead_reckoning(float f)
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10660,8 +10661,8 @@ unsigned* bmphandler::dead_reckoning(float f)
 			{
 				P[j] = P[j - 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -10678,8 +10679,8 @@ unsigned* bmphandler::dead_reckoning(float f)
 			{
 				P[j] = P[j + 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			if ((k + 1) != height)
@@ -10688,25 +10689,25 @@ unsigned* bmphandler::dead_reckoning(float f)
 				{
 					P[j] = P[j - 1 + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j + width] + d1 < work_bits[j])
 				{
 					P[j] = P[j + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 + width] + d2 < work_bits[j])
+						work_bits[j + 1 + width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10726,25 +10727,25 @@ unsigned* bmphandler::dead_reckoning(float f)
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10752,8 +10753,8 @@ unsigned* bmphandler::dead_reckoning(float f)
 			{
 				P[j] = P[j - 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -10838,25 +10839,25 @@ void bmphandler::dead_reckoning()
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10864,8 +10865,8 @@ void bmphandler::dead_reckoning()
 			{
 				P[j] = P[j - 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -10882,8 +10883,8 @@ void bmphandler::dead_reckoning()
 			{
 				P[j] = P[j + 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			if ((k + 1) != height)
@@ -10892,25 +10893,25 @@ void bmphandler::dead_reckoning()
 				{
 					P[j] = P[j - 1 + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j + width] + d1 < work_bits[j])
 				{
 					P[j] = P[j + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 + width] + d2 < work_bits[j])
+						work_bits[j + 1 + width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 + width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10930,25 +10931,25 @@ void bmphandler::dead_reckoning()
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-								   (k - P[j] / width) * (k - P[j] / width)));
+							sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+												 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -10956,8 +10957,8 @@ void bmphandler::dead_reckoning()
 			{
 				P[j] = P[j - 1];
 				work_bits[j] =
-					sqrt(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+						sqrt(float((l - P[j] % width) * (l - P[j] % width) +
+											 (k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -11027,25 +11028,25 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -11053,7 +11054,7 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 			{
 				P[j] = P[j - 1];
 				work_bits[j] = (float((l - P[j] % width) * (l - P[j] % width) +
-									  (k - P[j] / width) * (k - P[j] / width)));
+															(k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -11070,7 +11071,7 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 			{
 				P[j] = P[j + 1];
 				work_bits[j] = (float((l - P[j] % width) * (l - P[j] % width) +
-									  (k - P[j] / width) * (k - P[j] / width)));
+															(k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			if ((k + 1) != height)
@@ -11079,25 +11080,25 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 				{
 					P[j] = P[j - 1 + width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j + width] + d1 < work_bits[j])
 				{
 					P[j] = P[j + width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 + width] + d2 < work_bits[j])
+						work_bits[j + 1 + width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 + width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -11117,25 +11118,25 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 				{
 					P[j] = P[j - 1 - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if (work_bits[j - width] + d1 < work_bits[j])
 				{
 					P[j] = P[j - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 
 				if ((l + 1) != width &&
-					work_bits[j + 1 - width] + d2 < work_bits[j])
+						work_bits[j + 1 - width] + d2 < work_bits[j])
 				{
 					P[j] = P[j + 1 - width];
 					work_bits[j] =
-						(float((l - P[j] % width) * (l - P[j] % width) +
-							   (k - P[j] / width) * (k - P[j] / width)));
+							(float((l - P[j] % width) * (l - P[j] % width) +
+										 (k - P[j] / width) * (k - P[j] / width)));
 				}
 			}
 
@@ -11143,7 +11144,7 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 			{
 				P[j] = P[j - 1];
 				work_bits[j] = (float((l - P[j] % width) * (l - P[j] % width) +
-									  (k - P[j] / width) * (k - P[j] / width)));
+															(k - P[j] / width) * (k - P[j] / width)));
 			}
 
 			j++;
@@ -11219,7 +11220,7 @@ void bmphandler::rgIFT(float* lb_map, float thresh)
 ImageForestingTransformRegionGrowing* bmphandler::IFTrg_init(float* lb_map)
 {
 	ImageForestingTransformRegionGrowing* IFTrg =
-		new ImageForestingTransformRegionGrowing;
+			new ImageForestingTransformRegionGrowing;
 
 	//	float *tmp=work_bits;
 	//	work_bits=sliceprovide->give_me();
@@ -11342,7 +11343,7 @@ ImageForestingTransformLivewire* bmphandler::livewireinit(Point pt)
 	if (p.high != 0)
 		for (unsigned i = 0; i < area; i++)
 			sobelx[i] = (0.43f * (1 - sobely[i] / p.high) +
-						 0.43f * ((work_bits[i] + 1) / 256));
+									 0.43f * ((work_bits[i] + 1) / 256));
 	else
 		for (unsigned i = 0; i < area; i++)
 			sobelx[i] = 0.43f * ((work_bits[i] + 1) / 256);
@@ -11393,7 +11394,7 @@ void bmphandler::livewire_test()
 
 	for (unsigned i = 0; i < area; i++)
 		work_bits[i] = (0.43f * (1 - grad[i] / p.high) +
-						0.43f * ((work_bits[i] + 1) / 256));
+										0.43f * ((work_bits[i] + 1) / 256));
 
 	ImageForestingTransformLivewire lw;
 
@@ -11439,7 +11440,7 @@ void bmphandler::fill_contour(vector<Point>* vp, bool continuous)
 	{
 		vector<int> s;
 		float* results =
-			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+				(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 		int i = width + 3;
 		int i1 = 0;
@@ -11474,7 +11475,7 @@ void bmphandler::fill_contour(vector<Point>* vp, bool continuous)
 			}
 		}
 		for (unsigned int j = area + 2 * height + 1;
-			 j < area + width + 2 * height + 1; j++)
+				 j < area + width + 2 * height + 1; j++)
 		{
 			if (results[j] == -1)
 			{
@@ -11483,7 +11484,7 @@ void bmphandler::fill_contour(vector<Point>* vp, bool continuous)
 			}
 		}
 		for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-			 j += width + 2)
+				 j += width + 2)
 		{
 			if (results[j] == -1)
 			{
@@ -11492,7 +11493,7 @@ void bmphandler::fill_contour(vector<Point>* vp, bool continuous)
 			}
 		}
 		for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-			 j += width + 2)
+				 j += width + 2)
 		{
 			if (results[j] == -1)
 			{
@@ -11777,7 +11778,7 @@ void bmphandler::add_skin_outside(unsigned i4, float setto)
 	vector<int> s;
 	vector<int> s1;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -11813,7 +11814,7 @@ void bmphandler::add_skin_outside(unsigned i4, float setto)
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -11822,7 +11823,7 @@ void bmphandler::add_skin_outside(unsigned i4, float setto)
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -11831,7 +11832,7 @@ void bmphandler::add_skin_outside(unsigned i4, float setto)
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -11873,11 +11874,11 @@ void bmphandler::add_skin_outside(unsigned i4, float setto)
 }
 
 void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
-								tissues_size_t setto)
+		tissues_size_t setto)
 {
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -11911,7 +11912,7 @@ void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -11920,7 +11921,7 @@ void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -11929,7 +11930,7 @@ void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12032,7 +12033,7 @@ void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
 		for (int k = 0; k < width; k++)
 		{
 			if (results[i] == 256.0f &&
-				(!TissueInfos::GetTissueLocked(tissues[i2])))
+					(!TissueInfos::GetTissueLocked(tissues[i2])))
 				tissues[i2] = setto;
 			//			work_bits[i2]=results[i];
 			i++;
@@ -12046,12 +12047,12 @@ void bmphandler::add_skintissue(tissuelayers_size_t idx, unsigned i4,
 }
 
 void bmphandler::add_skintissue_outside(tissuelayers_size_t idx, unsigned i4,
-										tissues_size_t setto)
+		tissues_size_t setto)
 {
 	vector<int> s;
 	vector<int> s1;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -12088,7 +12089,7 @@ void bmphandler::add_skintissue_outside(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -12097,7 +12098,7 @@ void bmphandler::add_skintissue_outside(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12106,7 +12107,7 @@ void bmphandler::add_skintissue_outside(tissuelayers_size_t idx, unsigned i4,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12171,7 +12172,7 @@ bool bmphandler::value_at_boundary(float value)
 }
 
 bool bmphandler::tissuevalue_at_boundary(tissuelayers_size_t idx,
-										 tissues_size_t value)
+		tissues_size_t value)
 {
 	// Top
 	tissues_size_t* tissues = tissuelayers[idx];
@@ -12250,7 +12251,7 @@ float bmphandler::add_skin_outside(unsigned i)
 }
 
 void bmphandler::fill_skin(int thicknessX, int thicknessY,
-						   tissues_size_t backgroundID, tissues_size_t skinID)
+		tissues_size_t backgroundID, tissues_size_t skinID)
 {
 	//BL recommendation
 	int skinThick = thicknessX;
@@ -12325,7 +12326,7 @@ void bmphandler::fill_skin(int thicknessX, int thicknessY,
 						}
 						*/
 						if (tissues[idx] != backgroundID &&
-							tissues[idx] != skinID)
+								tissues[idx] != skinID)
 							work_bits[pos] = 255.0f;
 					}
 				}
@@ -12360,7 +12361,7 @@ void bmphandler::fill_skin(int thicknessX, int thicknessY,
 						assert(idx >= 0 && idx < area);
 
 						if (tissues[idx] != backgroundID &&
-							tissues[idx] != skinID)
+								tissues[idx] != skinID)
 						{
 							tissues[pos] = skinID;
 							break;
@@ -12451,7 +12452,7 @@ void bmphandler::flood_exterior(float setto)
 	unsigned char dummymode2 = mode2;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -12484,7 +12485,7 @@ void bmphandler::flood_exterior(float setto)
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -12493,7 +12494,7 @@ void bmphandler::flood_exterior(float setto)
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12502,7 +12503,7 @@ void bmphandler::flood_exterior(float setto)
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12535,13 +12536,13 @@ void bmphandler::flood_exterior(float setto)
 }
 
 void bmphandler::flood_exteriortissue(tissuelayers_size_t idx,
-									  tissues_size_t setto)
+		tissues_size_t setto)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -12575,7 +12576,7 @@ void bmphandler::flood_exteriortissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -12584,7 +12585,7 @@ void bmphandler::flood_exteriortissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12593,7 +12594,7 @@ void bmphandler::flood_exteriortissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12652,7 +12653,7 @@ void bmphandler::fill_unassigned(float setto)
 {
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -12685,7 +12686,7 @@ void bmphandler::fill_unassigned(float setto)
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -12694,7 +12695,7 @@ void bmphandler::fill_unassigned(float setto)
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12703,7 +12704,7 @@ void bmphandler::fill_unassigned(float setto)
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12733,11 +12734,11 @@ void bmphandler::fill_unassigned(float setto)
 }
 
 void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
-									   tissues_size_t setto)
+		tissues_size_t setto)
 {
 	vector<int> s;
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i3 = 0;
@@ -12771,7 +12772,7 @@ void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (results[j] == -1)
 		{
@@ -12780,7 +12781,7 @@ void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12789,7 +12790,7 @@ void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (results[j] == -1)
 		{
@@ -12819,7 +12820,7 @@ void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
 }
 
 void bmphandler::adaptive_fuzzy(Point p, float m1, float s1, float s2,
-								float thresh)
+		float thresh)
 {
 	UNREFERENCED_PARAMETER(thresh);
 	ImageForestingTransformAdaptFuzzy af;
@@ -12879,12 +12880,12 @@ void bmphandler::fast_marching(Point p, float sigma, float thresh)
 }
 
 ImageForestingTransformFastMarching*
-	bmphandler::fastmarching_init(Point p, float sigma, float thresh)
+		bmphandler::fastmarching_init(Point p, float sigma, float thresh)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
 	ImageForestingTransformFastMarching* fm =
-		new ImageForestingTransformFastMarching;
+			new ImageForestingTransformFastMarching;
 
 	float* dummy;
 	float* work_store = work_bits;
@@ -12943,7 +12944,7 @@ Pair bmphandler::return_extrema()
 }
 
 void bmphandler::classify(short nrclasses, short dim, float** bits,
-						  float* weights, float* centers, float maxdist)
+		float* weights, float* centers, float maxdist)
 {
 	short k;
 	float dist, distmin;
@@ -12958,7 +12959,7 @@ void bmphandler::classify(short nrclasses, short dim, float** bits,
 		for (short m = 0; m < dim; m++)
 		{
 			distmin += (bits[m][i] - centers[cindex]) *
-					   (bits[m][i] - centers[cindex]) * weights[m];
+								 (bits[m][i] - centers[cindex]) * weights[m];
 			cindex++;
 		}
 		for (short l = 1; l < nrclasses; l++)
@@ -12967,7 +12968,7 @@ void bmphandler::classify(short nrclasses, short dim, float** bits,
 			for (short m = 0; m < dim; m++)
 			{
 				dist += (bits[m][i] - centers[cindex]) *
-						(bits[m][i] - centers[cindex]) * weights[m];
+								(bits[m][i] - centers[cindex]) * weights[m];
 				cindex++;
 			}
 			if (dist < distmin)
@@ -13069,8 +13070,8 @@ float* bmphandler::classifytest1()
 }
 
 void bmphandler::kmeans(short nrtissues, short dim, float** bits,
-						float* weights, unsigned int iternr,
-						unsigned int converge)
+		float* weights, unsigned int iternr,
+		unsigned int converge)
 {
 	float w = 0;
 	for (short i = 0; i < dim; i++)
@@ -13091,9 +13092,9 @@ void bmphandler::kmeans(short nrtissues, short dim, float** bits,
 }
 
 void bmphandler::kmeans_mhd(short nrtissues, short dim,
-							std::vector<std::string> mhdfiles,
-							unsigned short slicenr, float* weights,
-							unsigned int iternr, unsigned int converge)
+		std::vector<std::string> mhdfiles,
+		unsigned short slicenr, float* weights,
+		unsigned int iternr, unsigned int converge)
 {
 	float** bits = new float*[dim];
 	for (unsigned short j = 0; j + 1 < dim; j++)
@@ -13105,7 +13106,7 @@ void bmphandler::kmeans_mhd(short nrtissues, short dim,
 	for (unsigned short i = 0; i + 1 < dim; i++)
 	{
 		if (!ImageReader::getSlice(mhdfiles[i].c_str(), bits[i + 1], slicenr,
-								   width, height))
+						width, height))
 		{
 			for (unsigned short j = 1; j < dim; j++)
 				sliceprovide->take_back(bits[j]);
@@ -13138,11 +13139,11 @@ void bmphandler::kmeans_mhd(short nrtissues, short dim,
 }
 
 void bmphandler::kmeans_png(short nrtissues, short dim,
-							std::vector<std::string> pngfiles,
-							std::vector<int> exctractChannel,
-							unsigned short slicenr, float* weights,
-							unsigned int iternr, unsigned int converge,
-							const std::string initCentersFile)
+		std::vector<std::string> pngfiles,
+		std::vector<int> exctractChannel,
+		unsigned short slicenr, float* weights,
+		unsigned int iternr, unsigned int converge,
+		const std::string initCentersFile)
 {
 	float** bits = new float*[dim];
 	for (unsigned short j = 0; j + 1 < dim; j++)
@@ -13154,8 +13155,8 @@ void bmphandler::kmeans_png(short nrtissues, short dim,
 	for (unsigned short i = 0; i + 1 < dim; i++)
 	{
 		if (!ChannelExtractor::getSlice(pngfiles[0].c_str(), bits[i + 1],
-										exctractChannel[i], slicenr, width,
-										height))
+						exctractChannel[i], slicenr, width,
+						height))
 		{
 			for (unsigned short j = 1; j < dim; j++)
 				sliceprovide->take_back(bits[j]);
@@ -13182,12 +13183,12 @@ void bmphandler::kmeans_png(short nrtissues, short dim,
 		int dimensions;
 		int nrClasses;
 		if (kmeans.get_centers_from_file(initCentersFile, centers, dimensions,
-										 nrClasses))
+						nrClasses))
 		{
 			dim = dimensions;
 			nrtissues = nrClasses;
 			kmeans.init(width, height, nrtissues, dim, bits, weightsnew,
-						centers);
+					centers);
 		}
 		else
 		{
@@ -13213,10 +13214,10 @@ void bmphandler::kmeans_png(short nrtissues, short dim,
 }
 
 void bmphandler::gamma_mhd(short nrtissues, short dim,
-						   std::vector<std::string> mhdfiles,
-						   unsigned short slicenr, float* weights,
-						   float** centers, float* tol_f, float* tol_d,
-						   Pair pixelsize)
+		std::vector<std::string> mhdfiles,
+		unsigned short slicenr, float* weights,
+		float** centers, float* tol_f, float* tol_d,
+		Pair pixelsize)
 {
 	float** bits = new float*[dim];
 	for (unsigned short j = 0; j + 1 < dim; j++)
@@ -13228,7 +13229,7 @@ void bmphandler::gamma_mhd(short nrtissues, short dim,
 	for (unsigned short i = 0; i + 1 < dim; i++)
 	{
 		if (!ImageReader::getSlice(mhdfiles[i].c_str(), bits[i + 1], slicenr,
-								   width, height))
+						width, height))
 		{
 			for (unsigned short j = 1; j < dim; j++)
 				sliceprovide->take_back(bits[j]);
@@ -13239,7 +13240,7 @@ void bmphandler::gamma_mhd(short nrtissues, short dim,
 
 	MultidimensionalGamma mdg;
 	mdg.init(width, height, nrtissues, dim, bits, weights, centers, tol_f,
-			 tol_d, pixelsize.high, pixelsize.low);
+			tol_d, pixelsize.high, pixelsize.low);
 	mdg.execute();
 	mdg.return_image(work_bits);
 
@@ -13251,7 +13252,7 @@ void bmphandler::gamma_mhd(short nrtissues, short dim,
 }
 
 void bmphandler::em(short nrtissues, short dim, float** bits, float* weights,
-					unsigned int iternr, unsigned int converge)
+		unsigned int iternr, unsigned int converge)
 {
 	ExpectationMaximization em;
 	em.init(width, height, nrtissues, dim, bits, weights);
@@ -13261,8 +13262,8 @@ void bmphandler::em(short nrtissues, short dim, float** bits, float* weights,
 }
 
 void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
-							  float beta, float stepsize, unsigned nrsteps,
-							  unsigned reinitfreq)
+		float beta, float stepsize, unsigned nrsteps,
+		unsigned reinitfreq)
 {
 	unsigned char dummymode = mode1;
 	float* tmp = sliceprovide->give_me();
@@ -13296,7 +13297,7 @@ void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
 	/*	Pt.px=215;
 	Pt.py=266;*/
 	levset.init(height, width, Pt, bmp_bits, work_bits, 1.0f, epsilon,
-				stepsize);
+			stepsize);
 	levset.iterate(nrsteps, reinitfreq);
 	levset.return_levelset(bmp_bits);
 	float thresh[2];
@@ -13326,8 +13327,8 @@ void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
 }
 
 void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
-							   float beta, float stepsize, unsigned nrsteps,
-							   unsigned reinitfreq)
+		float beta, float stepsize, unsigned nrsteps,
+		unsigned reinitfreq)
 {
 	unsigned char dummymode = mode1;
 	float* tmp = sliceprovide->give_me();
@@ -13361,7 +13362,7 @@ void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
 	/*	Pt.px=215;
 	Pt.py=266;*/
 	levset.init(height, width, dummy1, 256.0f, bmp_bits, work_bits, 1.0f,
-				epsilon, stepsize);
+			epsilon, stepsize);
 	levset.iterate(nrsteps, reinitfreq);
 	levset.return_levelset(bmp_bits);
 	float thresh[2];
@@ -13392,9 +13393,9 @@ void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
 }
 
 void bmphandler::cannylevelset(float* initlev, float f, float sigma,
-							   float thresh_low, float thresh_high,
-							   float epsilon, float stepsize, unsigned nrsteps,
-							   unsigned reinitfreq)
+		float thresh_low, float thresh_high,
+		float epsilon, float stepsize, unsigned nrsteps,
+		unsigned reinitfreq)
 {
 	unsigned char dummymode = mode1;
 	float* tmp = sliceprovide->give_me();
@@ -13428,7 +13429,7 @@ void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 
 	Levelset levset;
 	levset.init(height, width, initlev, f, tmp, work_bits, 0.0f, epsilon,
-				stepsize);
+			stepsize);
 	levset.iterate(nrsteps, reinitfreq);
 	levset.return_levelset(work_bits);
 	//	SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump1.bmp");
@@ -13455,9 +13456,9 @@ void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 }
 
 void bmphandler::cannylevelsettest(float sigma, float thresh_low,
-								   float thresh_high, float epsilon,
-								   float stepsize, unsigned nrsteps,
-								   unsigned reinitfreq)
+		float thresh_high, float epsilon,
+		float stepsize, unsigned nrsteps,
+		unsigned reinitfreq)
 {
 	unsigned char dummymode = mode1;
 
@@ -13523,8 +13524,8 @@ void bmphandler::cannylevelsettest(float sigma, float thresh_low,
 }
 
 void bmphandler::threshlevelset(float thresh_low, float thresh_high,
-								float epsilon, float stepsize, unsigned nrsteps,
-								unsigned reinitfreq)
+		float epsilon, float stepsize, unsigned nrsteps,
+		unsigned reinitfreq)
 {
 	float mean = (thresh_high + thresh_low) / 2;
 	float halfdiff = (thresh_high - thresh_low) / 2;
@@ -13613,13 +13614,13 @@ bool bmphandler::savestack(unsigned i, const char* filename)
 		if (fp == NULL)
 			return false;
 		if (fwrite(&width, 1, sizeof(short unsigned), fp) <
-			sizeof(short unsigned))
+				sizeof(short unsigned))
 		{
 			fclose(fp);
 			return false;
 		}
 		if (fwrite(&height, 1, sizeof(short unsigned), fp) <
-			sizeof(short unsigned))
+				sizeof(short unsigned))
 		{
 			fclose(fp);
 			return false;
@@ -13631,7 +13632,7 @@ bool bmphandler::savestack(unsigned i, const char* filename)
 			return false;
 		}
 		if (fwrite(&(*it2), 1, sizeof(unsigned char), fp) <
-			sizeof(unsigned char))
+				sizeof(unsigned char))
 		{
 			fclose(fp);
 			return false;
@@ -13651,15 +13652,15 @@ unsigned bmphandler::loadstack(const char* filename)
 
 	short unsigned width1, height1;
 	if (fread(&width1, 1, sizeof(short unsigned), fp) <
-			sizeof(short unsigned) ||
-		width1 != width)
+					sizeof(short unsigned) ||
+			width1 != width)
 	{
 		fclose(fp);
 		return 123456;
 	}
 	if (fread(&height1, 1, sizeof(short unsigned), fp) <
-			sizeof(short unsigned) ||
-		height1 != height)
+					sizeof(short unsigned) ||
+			height1 != height)
 	{
 		fclose(fp);
 		return 123456;
@@ -13687,7 +13688,7 @@ unsigned bmphandler::loadstack(const char* filename)
 }
 
 unsigned bmphandler::pushstack_tissue(tissuelayers_size_t idx,
-									  tissues_size_t tissuenr)
+		tissues_size_t tissuenr)
 {
 	float* bits = sliceprovide->give_me();
 
@@ -13811,7 +13812,7 @@ void bmphandler::getstack_work(unsigned i)
 }
 
 void bmphandler::getstack_tissue(tissuelayers_size_t idx, unsigned i,
-								 tissues_size_t tissuenr, bool override)
+		tissues_size_t tissuenr, bool override)
 {
 	//	sliceprovide->take_back(work_bits);
 
@@ -13833,7 +13834,7 @@ void bmphandler::getstack_tissue(tissuelayers_size_t idx, unsigned i,
 			for (unsigned i = 0; i < area; i++)
 			{
 				if (((*it)[i] != 0) &&
-					(!TissueInfos::GetTissueLocked(tissues[i])))
+						(!TissueInfos::GetTissueLocked(tissues[i])))
 					tissues[i] = tissuenr;
 			}
 		}
@@ -13987,14 +13988,14 @@ bool bmphandler::has_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype)
 }
 
 void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-							float f, bool override)
+		float f, bool override)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	if (override)
 	{
 		for (unsigned int i = 0; i < area; i++)
 			if (work_bits[i] == f &&
-				TissueInfos::GetTissueLocked(tissues[i]) == false)
+					TissueInfos::GetTissueLocked(tissues[i]) == false)
 			{
 				tissues[i] = tissuetype;
 			}
@@ -14013,7 +14014,7 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 }
 
 void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-							bool* mask, bool override)
+		bool* mask, bool override)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	if (override)
@@ -14038,15 +14039,15 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 }
 
 void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
-									  tissues_size_t tissuetype, Point p,
-									  bool override)
+		tissues_size_t tissuetype, Point p,
+		bool override)
 {
 	unsigned position = pt2coord(p);
 	vector<int> s;
 
 	float f = work_bits[position];
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14057,8 +14058,8 @@ void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
 		{
 			//if(work_bits[i1]==f&&(override||tissues[i1]==0)) results[i]=-1;
 			if (work_bits[i1] == f &&
-				(tissues[i1] == 0 || (override && TissueInfos::GetTissueLocked(
-													  tissues[i1]) == false)))
+					(tissues[i1] == 0 || (override && TissueInfos::GetTissueLocked(
+																								tissues[i1]) == false)))
 				results[i] = -1;
 			else
 				results[i] = 0;
@@ -14127,7 +14128,7 @@ void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
 }
 
 void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-							Point p, bool override)
+		Point p, bool override)
 {
 	float f = work_pt(p);
 	tissues_size_t* tissues = tissuelayers[idx];
@@ -14135,7 +14136,7 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 	{
 		for (unsigned int i = 0; i < area; i++)
 			if (work_bits[i] == f &&
-				TissueInfos::GetTissueLocked(tissues[i]) == false)
+					TissueInfos::GetTissueLocked(tissues[i]) == false)
 				tissues[i] = tissuetype;
 	}
 	else
@@ -14150,7 +14151,7 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 }
 
 void bmphandler::add2tissue_thresh(tissuelayers_size_t idx,
-								   tissues_size_t tissuetype, Point p)
+		tissues_size_t tissuetype, Point p)
 {
 	float f = work_pt(p);
 	tissues_size_t* tissues = tissuelayers[idx];
@@ -14162,7 +14163,7 @@ void bmphandler::add2tissue_thresh(tissuelayers_size_t idx,
 }
 
 void bmphandler::subtract_tissue(tissuelayers_size_t idx,
-								 tissues_size_t tissuetype, Point p)
+		tissues_size_t tissuetype, Point p)
 {
 	float f = work_pt(p);
 	subtract_tissue(idx, tissuetype, f);
@@ -14171,14 +14172,14 @@ void bmphandler::subtract_tissue(tissuelayers_size_t idx,
 }
 
 void bmphandler::subtract_tissue_connected(tissuelayers_size_t idx,
-										   tissues_size_t tissuetype, Point p)
+		tissues_size_t tissuetype, Point p)
 {
 	unsigned position = pt2coord(p);
 	vector<int> s;
 
 	float f = work_bits[position];
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14260,7 +14261,7 @@ void bmphandler::subtract_tissue_connected(tissuelayers_size_t idx,
 }*/
 
 void bmphandler::subtract_tissue(tissuelayers_size_t idx,
-								 tissues_size_t tissuetype, float f)
+		tissues_size_t tissuetype, float f)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < area; i++)
@@ -14277,7 +14278,7 @@ void bmphandler::change2mask_connectedwork(bool* mask, Point p, bool addorsub)
 
 	float f = work_bits[position];
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14354,7 +14355,7 @@ void bmphandler::change2mask_connectedwork(bool* mask, Point p, bool addorsub)
 }
 
 void bmphandler::change2mask_connectedtissue(tissuelayers_size_t idx,
-											 bool* mask, Point p, bool addorsub)
+		bool* mask, Point p, bool addorsub)
 {
 	unsigned position = pt2coord(p);
 	vector<int> s;
@@ -14362,7 +14363,7 @@ void bmphandler::change2mask_connectedtissue(tissuelayers_size_t idx,
 	tissues_size_t* tissues = tissuelayers[idx];
 	tissues_size_t f = tissues[position];
 	float* results =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14455,7 +14456,7 @@ void bmphandler::tissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype)
 }
 
 void bmphandler::setissue2work(tissuelayers_size_t idx,
-							   tissues_size_t tissuetype)
+		tissues_size_t tissuetype)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < area; i++)
@@ -14470,7 +14471,7 @@ void bmphandler::setissue2work(tissuelayers_size_t idx,
 }
 
 void bmphandler::tissue2mc(tissuelayers_size_t idx, tissues_size_t tissuetype,
-						   unsigned char** voxels, int k)
+		unsigned char** voxels, int k)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < area; i++)
@@ -14574,9 +14575,9 @@ void bmphandler::floodwork(bool* mask)
 	queue<unsigned int> s;
 
 	float* values =
-		(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
+			(float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 	bool* bigmask =
-		(bool*)malloc(sizeof(bool) * (area + 2 * width + 2 * height + 4));
+			(bool*)malloc(sizeof(bool) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14687,9 +14688,9 @@ void bmphandler::floodtissue(tissuelayers_size_t idx, bool* mask)
 	queue<unsigned int> s;
 
 	tissues_size_t* values = (tissues_size_t*)malloc(
-		sizeof(tissues_size_t) * (area + 2 * width + 2 * height + 4));
+			sizeof(tissues_size_t) * (area + 2 * width + 2 * height + 4));
 	bool* bigmask =
-		(bool*)malloc(sizeof(bool) * (area + 2 * width + 2 * height + 4));
+			(bool*)malloc(sizeof(bool) * (area + 2 * width + 2 * height + 4));
 
 	int i = width + 3;
 	int i1 = 0;
@@ -14884,7 +14885,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 
 			vector<Point> oldline, oldline1;
 			if (counter2 - counter1 + 1 <
-				(int)vvPit->size() - counter2 + counter1)
+					(int)vvPit->size() - counter2 + counter1)
 			{
 				oldline.insert(oldline.begin(), startP, ++endP);
 				oldline1.insert(oldline1.begin(), startP, endP);
@@ -14988,7 +14989,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 			if (order)
 			{
 				for (vector<Point>::iterator it1 = oldline1.begin();
-					 it1 != oldline1.end(); it1++)
+						 it1 != oldline1.end(); it1++)
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
@@ -15004,11 +15005,11 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 						dontdraw = true;
 					}
 					else if (!in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									  (it1->px == p3.px && it1->py == p3.py)))
+															 (it1->px == p3.px && it1->py == p3.py)))
 					{
 						it1++;
 						if (it1 == oldline1.end() || it1->px != p1.px ||
-							it1->py != p1.py)
+								it1->py != p1.py)
 						{
 							//							fprintf(fp3,"b%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
@@ -15023,7 +15024,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 						dontdraw = true;
 					}
 					else if (in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									 (it1->px == p3.px && it1->py == p3.py)))
+															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
 						//						fprintf(fp3,"c%i %i\n",(int)it1->px,(int)it1->py);
@@ -15045,7 +15046,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 			else
 			{
 				for (vector<Point>::reverse_iterator it1 = oldline1.rbegin();
-					 it1 != oldline1.rend(); it1++)
+						 it1 != oldline1.rend(); it1++)
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
@@ -15061,11 +15062,11 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 						dontdraw = true;
 					}
 					else if (!in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									  (it1->px == p3.px && it1->py == p3.py)))
+															 (it1->px == p3.px && it1->py == p3.py)))
 					{
 						it1++;
 						if (it1 == oldline1.rend() || it1->px != p1.px ||
-							it1->py != p1.py)
+								it1->py != p1.py)
 						{
 							//							fprintf(fp3,"e%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
@@ -15080,7 +15081,7 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 						dontdraw = true;
 					}
 					else if (in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									 (it1->px == p3.px && it1->py == p3.py)))
+															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
 						//						fprintf(fp3,"f%i %i\n",(int)it1->px,(int)it1->py);
@@ -15112,8 +15113,8 @@ void bmphandler::correct_outline(float f, vector<Point>* newline)
 }
 
 void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
-									   tissues_size_t f1,
-									   vector<Point>* newline)
+		tissues_size_t f1,
+		vector<Point>* newline)
 {
 	unsigned char dummymode1 = mode1;
 	unsigned char dummymode2 = mode2;
@@ -15208,7 +15209,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 
 			vector<Point> oldline, oldline1;
 			if (counter2 - counter1 + 1 <
-				(int)vvPit->size() - counter2 + counter1)
+					(int)vvPit->size() - counter2 + counter1)
 			{
 				oldline.insert(oldline.begin(), startP, ++endP);
 				oldline1.insert(oldline1.begin(), startP, endP);
@@ -15312,7 +15313,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 			if (order)
 			{
 				for (vector<Point>::iterator it1 = oldline1.begin();
-					 it1 != oldline1.end(); it1++)
+						 it1 != oldline1.end(); it1++)
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
@@ -15328,11 +15329,11 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						dontdraw = true;
 					}
 					else if (!in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									  (it1->px == p3.px && it1->py == p3.py)))
+															 (it1->px == p3.px && it1->py == p3.py)))
 					{
 						it1++;
 						if (it1 == oldline1.end() || it1->px != p1.px ||
-							it1->py != p1.py)
+								it1->py != p1.py)
 						{
 							//							fprintf(fp3,"b%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
@@ -15347,7 +15348,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						dontdraw = true;
 					}
 					else if (in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									 (it1->px == p3.px && it1->py == p3.py)))
+															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
 						//						fprintf(fp3,"c%i %i\n",(int)it1->px,(int)it1->py);
@@ -15369,7 +15370,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 			else
 			{
 				for (vector<Point>::reverse_iterator it1 = oldline1.rbegin();
-					 it1 != oldline1.rend(); it1++)
+						 it1 != oldline1.rend(); it1++)
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
@@ -15385,11 +15386,11 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						dontdraw = true;
 					}
 					else if (!in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									  (it1->px == p3.px && it1->py == p3.py)))
+															 (it1->px == p3.px && it1->py == p3.py)))
 					{
 						it1++;
 						if (it1 == oldline1.rend() || it1->px != p1.px ||
-							it1->py != p1.py)
+								it1->py != p1.py)
 						{
 							//							fprintf(fp3,"e%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
@@ -15404,7 +15405,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						dontdraw = true;
 					}
 					else if (in1 && ((it1->px == p2.px && it1->py == p2.py) ||
-									 (it1->px == p3.px && it1->py == p3.py)))
+															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
 						//						fprintf(fp3,"f%i %i\n",(int)it1->px,(int)it1->py);
@@ -15442,7 +15443,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 
 template<typename T, typename F>
 void bmphandler::_brush(T* data, T f, Point p, int radius, bool draw, T f1,
-						F is_locked)
+		F is_locked)
 {
 	unsigned short dist = radius * radius;
 
@@ -15483,26 +15484,26 @@ void bmphandler::_brush(T* data, T f, Point p, int radius, bool draw, T f1,
 
 template<typename T, typename F>
 void bmphandler::_brush(T* data, T f, Point p, float const radius, float dx,
-						float dy, bool draw, T f1, F is_locked)
+		float dy, bool draw, T f1, F is_locked)
 {
 	float const radius_corrected = dx > dy ? std::ceil(radius / dx + 0.5f) * dx
-										   : std::ceil(radius / dy + 0.5f) * dy;
+																				 : std::ceil(radius / dy + 0.5f) * dy;
 
 	int const xradius = std::ceil(radius_corrected / dx);
 	int const yradius = std::ceil(radius_corrected / dy);
 	for (int x = max(0, p.px - xradius);
-		 x <= min(static_cast<int>(width) - 1, p.px + xradius); x++)
+			 x <= min(static_cast<int>(width) - 1, p.px + xradius); x++)
 	{
 		for (int y = max(0, p.py - yradius);
-			 y <= min(static_cast<int>(height) - 1, p.py + yradius); y++)
+				 y <= min(static_cast<int>(height) - 1, p.py + yradius); y++)
 		{
 			// don't modify locked pixels
 			if (is_locked(data[y * unsigned(width) + x]))
 				continue;
 
 			if (std::pow(dx * (p.px - x), 2.f) +
-					std::pow(dy * (p.py - y), 2.f) <=
-				radius_corrected * radius_corrected)
+							std::pow(dy * (p.py - y), 2.f) <=
+					radius_corrected * radius_corrected)
 			{
 				if (draw)
 				{
@@ -15524,25 +15525,25 @@ void bmphandler::brush(float f, Point p, int radius, bool draw)
 }
 
 void bmphandler::brush(float f, Point p, float radius, float dx, float dy,
-					   bool draw)
+		bool draw)
 {
 	_brush(work_bits, f, p, radius, dx, dy, draw, 0.f,
-		   [](float v) { return false; });
+			[](float v) { return false; });
 }
 
 void bmphandler::brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p,
-							 int radius, bool draw, tissues_size_t f1)
+		int radius, bool draw, tissues_size_t f1)
 {
 	_brush(tissuelayers[idx], f, p, radius, draw, f1,
-		   [](tissues_size_t v) { return TissueInfos::GetTissueLocked(v); });
+			[](tissues_size_t v) { return TissueInfos::GetTissueLocked(v); });
 }
 
 void bmphandler::brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p,
-							 float radius, float dx, float dy, bool draw,
-							 tissues_size_t f1)
+		float radius, float dx, float dy, bool draw,
+		tissues_size_t f1)
 {
 	_brush(tissuelayers[idx], f, p, radius, dx, dy, draw, f1,
-		   [](tissues_size_t v) { return TissueInfos::GetTissueLocked(v); });
+			[](tissues_size_t v) { return TissueInfos::GetTissueLocked(v); });
 }
 
 void bmphandler::fill_holes(float f, int minsize)
@@ -15554,7 +15555,7 @@ void bmphandler::fill_holes(float f, int minsize)
 	short directionchange;
 
 	float* tmp_bits =
-		(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
+			(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -15566,12 +15567,12 @@ void bmphandler::fill_holes(float f, int minsize)
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -15590,20 +15591,20 @@ void bmphandler::fill_holes(float f, int minsize)
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -15615,18 +15616,18 @@ void bmphandler::fill_holes(float f, int minsize)
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				visited[pos] = true;
 			}
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -15666,15 +15667,15 @@ void bmphandler::fill_holes(float f, int minsize)
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -15733,7 +15734,7 @@ void bmphandler::fill_holes(float f, int minsize)
 	}
 
 	for (vector<vector<Point>>::iterator it1 = inner_line.begin();
-		 it1 != inner_line.end(); it1++)
+			 it1 != inner_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -15755,7 +15756,7 @@ void bmphandler::fill_holes(float f, int minsize)
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -15764,7 +15765,7 @@ void bmphandler::fill_holes(float f, int minsize)
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -15773,7 +15774,7 @@ void bmphandler::fill_holes(float f, int minsize)
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -15806,7 +15807,7 @@ void bmphandler::fill_holes(float f, int minsize)
 }
 
 void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
-								  int minsize)
+		int minsize)
 {
 	vector<vector<Point>> inner_line;
 	minsize = 2 * minsize;
@@ -15815,7 +15816,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	short directionchange;
 
 	tissues_size_t* tmp_bits = (tissues_size_t*)malloc(
-		sizeof(tissues_size_t) * (width + 2) * (height + 2));
+			sizeof(tissues_size_t) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -15827,12 +15828,12 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -15855,20 +15856,20 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = unvis;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = unvis;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvis;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvis;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -15880,18 +15881,18 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				visited[pos] = true;
 			}
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -15931,15 +15932,15 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -15997,7 +15998,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 	}
 
 	for (vector<vector<Point>>::iterator it1 = inner_line.begin();
-		 it1 != inner_line.end(); it1++)
+			 it1 != inner_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -16019,7 +16020,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16028,7 +16029,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16037,7 +16038,7 @@ void bmphandler::fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16101,7 +16102,7 @@ void bmphandler::remove_islands(float f, int minsize)
 	short directionchange;
 
 	float* tmp_bits =
-		(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
+			(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -16113,12 +16114,12 @@ void bmphandler::remove_islands(float f, int minsize)
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -16137,20 +16138,20 @@ void bmphandler::remove_islands(float f, int minsize)
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = unvisited;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvisited;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -16162,11 +16163,11 @@ void bmphandler::remove_islands(float f, int minsize)
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				visited[pos] = true;
 				vec_pt.push_back(p);
@@ -16176,7 +16177,7 @@ void bmphandler::remove_islands(float f, int minsize)
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -16216,15 +16217,15 @@ void bmphandler::remove_islands(float f, int minsize)
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -16283,7 +16284,7 @@ void bmphandler::remove_islands(float f, int minsize)
 	}
 
 	for (vector<vector<Point>>::iterator it1 = outer_line.begin();
-		 it1 != outer_line.end(); it1++)
+			 it1 != outer_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -16305,7 +16306,7 @@ void bmphandler::remove_islands(float f, int minsize)
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -16314,7 +16315,7 @@ void bmphandler::remove_islands(float f, int minsize)
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -16323,7 +16324,7 @@ void bmphandler::remove_islands(float f, int minsize)
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == -1)
 		{
@@ -16350,7 +16351,7 @@ void bmphandler::remove_islands(float f, int minsize)
 		i4 += 2;
 	}
 	for (vector<vector<Point>>::iterator it1 = outer_line.begin();
-		 it1 != outer_line.end(); it1++)
+			 it1 != outer_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -16364,7 +16365,7 @@ void bmphandler::remove_islands(float f, int minsize)
 }
 
 void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
-									  int minsize)
+		int minsize)
 {
 	vector<vector<Point>> outer_line;
 	minsize = 2 * minsize;
@@ -16373,7 +16374,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	short directionchange;
 
 	tissues_size_t* tmp_bits = (tissues_size_t*)malloc(
-		sizeof(tissues_size_t) * (width + 2) * (height + 2));
+			sizeof(tissues_size_t) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -16385,12 +16386,12 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	bool done;
 	short inner; //1 for outer, 7 for inner border
 	short direction,
-		directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
+			directionold; // 0:rechts, 1:rechts oben, 2:oben, ... 7:rechts unten.
 	Point p;
 
 	vector<Point> vec_pt;
 	int offset[8] = {1, width + 3, width + 2, width + 1,
-					 -1, -width - 3, -width - 2, -width - 1};
+			-1, -width - 3, -width - 2, -width - 1};
 	float dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 	float dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 	float bordervolume[8] = {1, 0.75f, 0.5f, 0.25f, 2, 1.75f, 1.5f, 1.25f};
@@ -16413,20 +16414,20 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = unvis;
 	for (unsigned i = unsigned(width + 2) * (height + 1);
-		 i < unsigned(width + 2) * (height + 2); i++)
+			 i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = unvis;
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvis;
 	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-		 i += (width + 2))
+			 i += (width + 2))
 		tmp_bits[i] = unvis;
 
 	pos = width + 2;
 	while (pos < unsigned(width + 2) * (height + 1))
 	{
 		while ((tmp_bits[pos] != f || tmp_bits[pos - 1] == f || visited[pos]) &&
-			   pos < unsigned(width + 2) * (height + 1))
+					 pos < unsigned(width + 2) * (height + 1))
 			pos++;
 
 		if (pos < unsigned(width + 2) * (height + 1))
@@ -16438,11 +16439,11 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 			//			vec_pt.push_back(p);
 
 			if (tmp_bits[pos + 1] != f && tmp_bits[pos + width + 3] != f &&
-				tmp_bits[pos + width + 2] != f &&
-				tmp_bits[pos + width + 1] != f &&
-				tmp_bits[pos - width - 1] != f &&
-				tmp_bits[pos - width - 2] != f &&
-				tmp_bits[pos - width - 3] != f)
+					tmp_bits[pos + width + 2] != f &&
+					tmp_bits[pos + width + 1] != f &&
+					tmp_bits[pos - width - 1] != f &&
+					tmp_bits[pos - width - 2] != f &&
+					tmp_bits[pos - width - 3] != f)
 			{
 				visited[pos] = true;
 				vec_pt.push_back(p);
@@ -16452,7 +16453,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 			else
 			{
 				if (tmp_bits[pos - width - 3] == f)
-				{			   // tricky criteria
+				{						 // tricky criteria
 					inner = 7; // inner line
 					directionold = direction = 1;
 				}
@@ -16492,15 +16493,15 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 					//						bmp_bits[p.px+(unsigned)width*p.py]=255-bmp_bits[p.px+(unsigned)width*p.py];//xxxxxxxxxxxxxxxxxx
 					//					if(direction<5||inner==1||tmp_bits[pos1-1]==f||directionold<4)
 					if (tmp_bits[pos1 - 1] == f ||
-						(inner == 7 &&
-						 !(((direction + 6) % 8 > 2 && directionold > 3 &&
-							(directionchange + 5) % 8 > 2) ||
-						   (direction == 5 && directionold == 3))) ||
-						(inner == 1 && !(((direction + 4) % 8 > 2 &&
-										  (directionold + 7) % 8 < 4 &&
-										  (directionchange + 5) % 8 > 2) ||
-										 (direction == 3 && directionold == 5)))
-						//					 (inner==1&&!(||(direction==3&&directionold==5)))
+							(inner == 7 &&
+									!(((direction + 6) % 8 > 2 && directionold > 3 &&
+												(directionchange + 5) % 8 > 2) ||
+											(direction == 5 && directionold == 3))) ||
+							(inner == 1 && !(((direction + 4) % 8 > 2 &&
+																	 (directionold + 7) % 8 < 4 &&
+																	 (directionchange + 5) % 8 > 2) ||
+																 (direction == 3 && directionold == 5)))
+							//					 (inner==1&&!(||(direction==3&&directionold==5)))
 					)
 						visited[pos1] = true;
 					pos1 = pos2;
@@ -16558,7 +16559,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 	}
 
 	for (vector<vector<Point>>::iterator it1 = outer_line.begin();
-		 it1 != outer_line.end(); it1++)
+			 it1 != outer_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -16580,7 +16581,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = area + 2 * height + 1;
-		 j < area + width + 2 * height + 1; j++)
+			 j < area + width + 2 * height + 1; j++)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16589,7 +16590,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = 2 * width + 5; j <= area + 2 * height + 1;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16598,7 +16599,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 		}
 	}
 	for (unsigned int j = 3 * width + 4; j <= area + width + 2 * height;
-		 j += width + 2)
+			 j += width + 2)
 	{
 		if (tmp_bits[j] == 2)
 		{
@@ -16648,7 +16649,7 @@ void bmphandler::remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
 		i4 += 2;
 	}
 	for (vector<vector<Point>>::iterator it1 = outer_line.begin();
-		 it1 != outer_line.end(); it1++)
+			 it1 != outer_line.end(); it1++)
 	{
 		for (vector<Point>::iterator it = it1->begin(); it != it1->end(); it++)
 		{
@@ -16766,13 +16767,13 @@ bool bmphandler::del_vm(Point p, short radius)
 	{
 		it = vit->begin();
 		while (it != vit->end() &&
-			   (it->p.px - p.px) * (it->p.px - p.px) +
-					   (it->p.py - p.py) * (it->p.py - p.py) >
-				   radius2)
+					 (it->p.px - p.px) * (it->p.px - p.px) +
+									 (it->p.py - p.py) * (it->p.py - p.py) >
+							 radius2)
 			it++;
 		if (it != vit->end() && (it->p.px - p.px) * (it->p.px - p.px) +
-										(it->p.py - p.py) * (it->p.py - p.py) <=
-									radius2)
+																		(it->p.py - p.py) * (it->p.py - p.py) <=
+																radius2)
 			found = true;
 		else
 			vit++;
@@ -16842,12 +16843,12 @@ bool bmphandler::del_limit(Point p, short radius)
 	{
 		it = vit->begin();
 		while (it != vit->end() && (it->px - p.px) * (it->px - p.px) +
-										   (it->py - p.py) * (it->py - p.py) >
-									   radius2)
+																			 (it->py - p.py) * (it->py - p.py) >
+																	 radius2)
 			it++;
 		if (it != vit->end() && (it->px - p.px) * (it->px - p.px) +
-										(it->py - p.py) * (it->py - p.py) <=
-									radius2)
+																		(it->py - p.py) * (it->py - p.py) <=
+																radius2)
 			found = true;
 		else
 			vit++;
@@ -16895,9 +16896,9 @@ void bmphandler::permute_tissue_indices(tissues_size_t* indexMap)
 }
 
 void bmphandler::remove_tissue(
-	tissues_size_t tissuenr,
-	tissues_size_t
-		tissuecount1) //assumes tissue[tissuecount] has not been erased yet
+		tissues_size_t tissuenr,
+		tissues_size_t
+				tissuecount1) //assumes tissue[tissuecount] has not been erased yet
 {
 	for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
 	{
@@ -16917,8 +16918,8 @@ void bmphandler::remove_tissue(
 }
 
 void bmphandler::group_tissues(tissuelayers_size_t idx,
-							   vector<tissues_size_t>& olds,
-							   vector<tissues_size_t>& news)
+		vector<tissues_size_t>& olds,
+		vector<tissues_size_t>& news)
 {
 	tissues_size_t crossref[TISSUES_SIZE_MAX + 1];
 	for (int i = 0; i < TISSUES_SIZE_MAX + 1; i++)
@@ -16972,7 +16973,7 @@ void bmphandler::set_mode(unsigned char mode, bool bmporwork)
 }
 
 bool bmphandler::print_amascii_slice(tissuelayers_size_t idx,
-									 std::ofstream& streamname)
+		std::ofstream& streamname)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned i = 0; i < area; i++)
@@ -16993,7 +16994,7 @@ bool bmphandler::print_amascii_slice(tissuelayers_size_t idx,
 }
 
 bool bmphandler::print_vtkascii_slice(tissuelayers_size_t idx,
-									  std::ofstream& streamname)
+		std::ofstream& streamname)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned i = 0; i < area; i++)
@@ -17005,7 +17006,7 @@ bool bmphandler::print_vtkascii_slice(tissuelayers_size_t idx,
 }
 
 bool bmphandler::print_vtkbinary_slice(tissuelayers_size_t idx,
-									   std::ofstream& streamname)
+		std::ofstream& streamname)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	if (TissueInfos::GetTissueCount() <= 255)
@@ -17131,7 +17132,7 @@ void bmphandler::adaptwork2bmp(float f)
 				for (size_t j = 0; j < outerline[i].size(); j++)
 				{
 					newline[j] = outerline[i][j].px +
-								 unsigned(width) * outerline[i][j].py;
+											 unsigned(width) * outerline[i][j].py;
 				}
 				outerlinenew.push_back(newline);
 			}
@@ -17141,27 +17142,27 @@ void bmphandler::adaptwork2bmp(float f)
 				for (int ni = 0; ni < n; ni += 2)
 				{
 					unsigned p1 =
-						outerline[i][(ni * outerline[i].size()) / n].px +
-						unsigned(width) *
-							outerline[i][(ni * outerline[i].size()) / n].py;
+							outerline[i][(ni * outerline[i].size()) / n].px +
+							unsigned(width) *
+									outerline[i][(ni * outerline[i].size()) / n].py;
 					if (ni == 0)
 						pts[0] =
-							outerline[i][((n - 1) * outerline[i].size()) / n]
-								.px +
-							outerline[i][((n - 1) * outerline[i].size()) / n]
-									.py *
-								width;
+								outerline[i][((n - 1) * outerline[i].size()) / n]
+										.px +
+								outerline[i][((n - 1) * outerline[i].size()) / n]
+												.py *
+										width;
 					else
 						pts[0] =
-							outerline[i][((ni - 1) * outerline[i].size()) / n]
-								.px +
-							outerline[i][((ni - 1) * outerline[i].size()) / n]
-									.py *
-								width;
+								outerline[i][((ni - 1) * outerline[i].size()) / n]
+										.px +
+								outerline[i][((ni - 1) * outerline[i].size()) / n]
+												.py *
+										width;
 					pts[1] =
-						outerline[i][((ni + 1) * outerline[i].size()) / n].px +
-						outerline[i][((ni + 1) * outerline[i].size()) / n].py *
-							width;
+							outerline[i][((ni + 1) * outerline[i].size()) / n].px +
+							outerline[i][((ni + 1) * outerline[i].size()) / n].py *
+									width;
 					lw->change_pt(p1, pts);
 					lw->append_path(pts[0], &newline);
 					lw->return_path(pts[1], &newline1);
@@ -17204,12 +17205,12 @@ void bmphandler::adaptwork2bmp(float f)
 					if (newlinex[j] != newlinex[j + 1])
 					{
 						counterarray[newline[j + 1]] =
-							!counterarray[newline[j + 1]];
+								!counterarray[newline[j + 1]];
 						if ((newlinex[j + 1] > newlinex[j]) != forwardnew)
 						{
 							forwardnew = !forwardnew;
 							counterarray[newline[j]] =
-								!counterarray[newline[j]];
+									!counterarray[newline[j]];
 						}
 					}
 				}
@@ -17217,11 +17218,11 @@ void bmphandler::adaptwork2bmp(float f)
 				{
 					counterarray[newline[0]] = !counterarray[newline[0]];
 					if ((newlinex[0] > newlinex[newline.size() - 1]) !=
-						forwardnew)
+							forwardnew)
 					{
 						forwardnew = !forwardnew;
 						counterarray[newline[newline.size() - 1]] =
-							!counterarray[newline[newline.size() - 1]];
+								!counterarray[newline[newline.size() - 1]];
 					}
 				}
 			}
@@ -17248,7 +17249,7 @@ void bmphandler::adaptwork2bmp(float f)
 				for (size_t j = 0; j < innerline[i].size(); j++)
 				{
 					newline[j] = innerline[i][j].px +
-								 unsigned(width) * innerline[i][j].py;
+											 unsigned(width) * innerline[i][j].py;
 				}
 				innerlinenew.push_back(newline);
 			}
@@ -17258,27 +17259,27 @@ void bmphandler::adaptwork2bmp(float f)
 				for (int ni = 0; ni < n; ni += 2)
 				{
 					unsigned p1 =
-						innerline[i][(ni * innerline[i].size()) / n].px +
-						unsigned(width) *
-							innerline[i][(ni * innerline[i].size()) / n].py;
+							innerline[i][(ni * innerline[i].size()) / n].px +
+							unsigned(width) *
+									innerline[i][(ni * innerline[i].size()) / n].py;
 					if (ni == 0)
 						pts[0] =
-							innerline[i][((n - 1) * innerline[i].size()) / n]
-								.px +
-							innerline[i][((n - 1) * innerline[i].size()) / n]
-									.py *
-								width;
+								innerline[i][((n - 1) * innerline[i].size()) / n]
+										.px +
+								innerline[i][((n - 1) * innerline[i].size()) / n]
+												.py *
+										width;
 					else
 						pts[0] =
-							innerline[i][((ni - 1) * innerline[i].size()) / n]
-								.px +
-							innerline[i][((ni - 1) * innerline[i].size()) / n]
-									.py *
-								width;
+								innerline[i][((ni - 1) * innerline[i].size()) / n]
+										.px +
+								innerline[i][((ni - 1) * innerline[i].size()) / n]
+												.py *
+										width;
 					pts[1] =
-						innerline[i][((ni + 1) * innerline[i].size()) / n].px +
-						innerline[i][((ni + 1) * innerline[i].size()) / n].py *
-							width;
+							innerline[i][((ni + 1) * innerline[i].size()) / n].px +
+							innerline[i][((ni + 1) * innerline[i].size()) / n].py *
+									width;
 					lw->change_pt(p1, pts);
 					lw->append_path(pts[0], &newline);
 					lw->return_path(pts[1], &newline1);
@@ -17305,7 +17306,7 @@ void bmphandler::adaptwork2bmp(float f)
 					size_t j = newline.size() - 1;
 					for (; j > 0 && !found; --j) // BL: fixed unsequenced modification and access to 'j' [-Wunsequenced]
 					{
-						if (newlinex[j] != newlinex[j-1])
+						if (newlinex[j] != newlinex[j - 1])
 						{
 							forward = newlinex[j] > newlinex[j - 1];
 							found = true;
@@ -17319,12 +17320,12 @@ void bmphandler::adaptwork2bmp(float f)
 					if (newlinex[j] != newlinex[j + 1])
 					{
 						counterarray[newline[j + 1]] =
-							!counterarray[newline[j + 1]];
+								!counterarray[newline[j + 1]];
 						if ((newlinex[j + 1] > newlinex[j]) != forwardnew)
 						{
 							forwardnew = !forwardnew;
 							counterarray[newline[j]] =
-								!counterarray[newline[j]];
+									!counterarray[newline[j]];
 						}
 					}
 				}
@@ -17332,11 +17333,11 @@ void bmphandler::adaptwork2bmp(float f)
 				{
 					counterarray[newline[0]] = !counterarray[newline[0]];
 					if ((newlinex[0] > newlinex[newline.size() - 1]) !=
-						forwardnew)
+							forwardnew)
 					{
 						forwardnew = !forwardnew;
 						counterarray[newline[newline.size() - 1]] =
-							!counterarray[newline[newline.size() - 1]];
+								!counterarray[newline[newline.size() - 1]];
 					}
 				}
 			}
@@ -17556,7 +17557,7 @@ unsigned long bmphandler::return_workpixelcount(float f)
 }
 
 unsigned long bmphandler::return_tissuepixelcount(tissuelayers_size_t idx,
-												  tissues_size_t c)
+		tissues_size_t c)
 {
 	unsigned long pos = 0;
 	unsigned long counter = 0;
@@ -17574,7 +17575,7 @@ unsigned long bmphandler::return_tissuepixelcount(tissuelayers_size_t idx,
 }
 
 bool bmphandler::get_extent(tissuelayers_size_t idx, tissues_size_t tissuenr,
-							unsigned short extent[2][2])
+		unsigned short extent[2][2])
 {
 	if (area == 0)
 		return false;

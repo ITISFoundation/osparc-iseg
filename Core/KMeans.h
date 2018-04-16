@@ -16,7 +16,7 @@
 
 namespace iseg {
 
-class iSegCore_API KMeans
+class ISEG_CORE_API KMeans
 {
 public:
 	KMeans();

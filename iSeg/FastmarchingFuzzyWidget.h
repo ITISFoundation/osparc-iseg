@@ -106,14 +106,8 @@ private:
 	void execute();
 	std::vector<Point> vpdyn_arg;
 
-signals:
-	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-
 private slots:
 	void bmphand_changed(bmphandler* bmph);
-	//void mouse_clicked(Point p);
-	//void mouse_released(Point p);
-	//void mouse_moved(Point p);
 	void slextend_changed(int i);
 	void slextend_pressed();
 	void slextend_released();

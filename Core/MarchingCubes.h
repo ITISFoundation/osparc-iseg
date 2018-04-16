@@ -1567,6 +1567,6 @@ private:
 	}
 };
 
-iSegCore_API vectissuedescr* hypermeshascii_read(const char* filename);
+ISEG_CORE_API vectissuedescr* hypermeshascii_read(const char* filename);
 
 } // namespace iseg

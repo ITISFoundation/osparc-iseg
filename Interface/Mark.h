@@ -9,9 +9,7 @@
  */
 #pragma once
 
-#include "iSegCore.h"
-
-#include "Interface/Point.h"
+#include "Point.h"
 
 #include <string>
 
@@ -19,7 +17,7 @@ namespace iseg {
 
 struct Mark
 {
-	Mark() {}
+	Mark(unsigned label = 0) : mark(label) {}
 	Mark(const Mark& r) : p(r.p), mark(r.mark), name(r.name) {}
 
 	Point p;
@@ -38,7 +36,7 @@ struct augmentedmark
 inline bool operator!=(augmentedmark a, augmentedmark b)
 {
 	return (a.p.px != b.p.px) || (a.p.py != b.p.py) ||
-		   (a.slicenr != b.slicenr) || (a.mark != b.mark) || (a.name != b.name);
+				 (a.slicenr != b.slicenr) || (a.mark != b.mark) || (a.name != b.name);
 }
 
 } // namespace iseg

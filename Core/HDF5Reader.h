@@ -18,7 +18,7 @@
 
 namespace iseg {
 
-class iSegCore_API HDF5Reader
+class ISEG_CORE_API HDF5Reader
 {
 public:
 	typedef unsigned long long size_type;

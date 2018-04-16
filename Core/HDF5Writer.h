@@ -17,7 +17,7 @@
 
 namespace iseg {
 
-class iSegCore_API HDF5Writer
+class ISEG_CORE_API HDF5Writer
 {
 public:
 	typedef unsigned long long size_type;

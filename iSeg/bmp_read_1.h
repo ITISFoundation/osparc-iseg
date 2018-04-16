@@ -9,9 +9,10 @@
  */
 #pragma once
 
+#include "Interface/Mark.h"
+
 #include "Core/Contour.h"
 #include "Core/FeatureExtractor.h"
-#include "Core/Mark.h"
 #include "Core/Pair.h"
 #include "Core/Types.h"
 
