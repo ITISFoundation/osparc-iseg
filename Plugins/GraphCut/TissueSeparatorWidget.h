@@ -12,10 +12,14 @@
 #include "Interface/SlicesHandlerInterface.h"
 #include "Interface/WidgetInterface.h"
 
+#include <itkImage.h>
+
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+
+#include <map>
 
 class TissueSeparatorWidget : public iseg::WidgetInterface
 {
@@ -40,18 +44,24 @@ private:
 	void on_mouse_moved(iseg::Point p) override;
 
 private slots:
-	void do_work();
+	void execute();
 	void clearmarks();
 
 private:
+	void do_work_all_slices();
+	void do_work_current_slice();
+
+	template<unsigned int Dim, typename TInput>
+	typename itk::Image<unsigned char, Dim>::Pointer do_work(TInput* source, TInput* target,
+			const typename itk::Image<unsigned char, Dim>::RegionType& requested_region);
+
 	iseg::SliceHandlerInterface* slice_handler;
-	unsigned short current_slice;
+	unsigned current_slice;
 	unsigned tissuenr;
 	iseg::Point last_pt;
 	std::vector<iseg::Point> vpdyn;
-	std::vector<iseg::Mark> vm;
+	std::map<unsigned, std::vector<iseg::Mark>> vm;
 
-	//QWidget* vertical_grid;
 	QCheckBox* all_slices;
 	QCheckBox* use_source;
 	QLineEdit* sigma_edit;

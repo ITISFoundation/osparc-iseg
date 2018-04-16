@@ -47,6 +47,9 @@ public:
 	};
 	virtual itk::SliceContiguousImage<pixel_type>::Pointer GetImage(eImageType type, bool active_slices) = 0;
 	virtual itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices) = 0;
+
+	virtual itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) = 0;
+	virtual itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() = 0;
 };
 
 } // namespace iseg

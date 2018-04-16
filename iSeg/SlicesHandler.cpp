@@ -12615,7 +12615,7 @@ itk::SliceContiguousImage<float>::Pointer
 	return _GetITKView(slices, dims, spacing);
 }
 
-itk::SliceContiguousImage<unsigned short>::Pointer
+itk::SliceContiguousImage<tissues_size_t>::Pointer
 		SlicesHandler::GetTissues(bool active_slices)
 {
 	size_t dims[3] = {
@@ -12635,4 +12635,49 @@ itk::SliceContiguousImage<unsigned short>::Pointer
 		slices.push_back(all_slices[i]);
 	}
 	return _GetITKView(slices, dims, spacing);
+}
+
+template<typename T>
+typename itk::Image<T>::Pointer
+		_GetITKView2D(T* slice, size_t dims[2], double spacing[2])
+{
+	typedef itk::Image<T, 2> image_type;
+
+	typename image_type::IndexType start;
+	start[0] = 0; // first index on X
+	start[1] = 0; // first index on Y
+	typename image_type::SizeType size;
+	size[0] = dims[0]; // size along X
+	size[1] = dims[1]; // size along Y
+
+	auto image = itk::Image<T>::New();
+	image->SetRegions(image_type::RegionType(start, size));
+	image->SetSpacing(spacing);
+	// \warning transform is ignored
+	//image->SetOrigin(origin);
+	//image->SetDirection(direction);
+
+	bool const manage_memory = false;
+	image->GetPixelContainer()->SetImportPointer(slice, size[0] * size[1], manage_memory);
+	return image;
+}
+
+itk::Image<float, 2>::Pointer
+		SlicesHandler::GetImageSlice(eImageType type)
+{
+	size_t dims[2] = {width, height};
+	double spacing[2] = {dx, dy};
+
+	auto all_slices = (type == eImageType::kSource) ? get_bmp() : get_work();
+	return _GetITKView2D(all_slices[activeslice], dims, spacing);
+}
+
+itk::Image<tissues_size_t, 2>::Pointer
+		SlicesHandler::GetTissuesSlice()
+{
+	size_t dims[2] = {width, height};
+	double spacing[2] = {dx, dy};
+
+	auto all_slices = get_tissues(active_tissuelayer);
+	return _GetITKView2D(all_slices[activeslice], dims, spacing);
 }

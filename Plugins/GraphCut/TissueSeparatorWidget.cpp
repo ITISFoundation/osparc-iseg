@@ -16,9 +16,11 @@
 #include "Interface/addLine.h"
 
 #include <itkBinaryThresholdImageFilter.h>
-#include <itkImageFileWriter.h>
 
+#include <QApplication>
 #include <QFormLayout>
+#include <QProgressDialog>
+#include <QStyleFactory>
 
 #include <algorithm>
 #include <sstream>
@@ -53,7 +55,7 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 
 	// connect signals
 	QObject::connect(clear_lines, SIGNAL(clicked()), this, SLOT(clearmarks()));
-	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
+	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(execute()));
 }
 
 void TissueSeparatorWidget::init()
@@ -82,7 +84,9 @@ void TissueSeparatorWidget::clearmarks()
 	vm.clear();
 	//bmphand->clear_vvm();  \todo BL is this needed?
 	emit vpdyn_changed(&vpdyn);
-	emit vm_changed(&vm);
+
+	std::vector<Mark> dummy;
+	emit vm_changed(&dummy);
 }
 
 void TissueSeparatorWidget::on_tissuenr_changed(int i)
@@ -93,6 +97,9 @@ void TissueSeparatorWidget::on_tissuenr_changed(int i)
 void TissueSeparatorWidget::on_slicenr_changed()
 {
 	current_slice = slice_handler->get_activeslice();
+
+	auto& vm_slice = vm[current_slice];
+	emit vm_changed(&vm_slice);
 }
 
 void TissueSeparatorWidget::on_mouse_clicked(Point p)
@@ -117,41 +124,116 @@ void TissueSeparatorWidget::on_mouse_released(Point p)
 		m.p = p;
 		vmdummy.push_back(m);
 
-		// \write directly into image, e.g. for automatic update
-		//lbmap[p.px + width * p.py] = tissuenr;
+		// \note I could write directly into image, e.g. for automatic update
 	}
-	vm.insert(vm.end(), vmdummy.begin(), vmdummy.end());
+	auto& vm_slice = vm[current_slice];
+	vm_slice.insert(vm_slice.end(), vmdummy.begin(), vmdummy.end());
 	vpdyn.clear();
+
+	std::set<unsigned> labels;
+	for (auto& m : vm_slice)
+	{
+		labels.insert(m.mark);
+	}
+	bool const auto_update = (!all_slices->isChecked()) && labels.size() >= 2;
 
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = slice_handler->get_activeslice();
-	dataSelection.work = false;
+	dataSelection.work = auto_update;
 	dataSelection.vvm = true;
 	emit begin_datachange(dataSelection, this);
 	emit vpdyn_changed(&vpdyn);
-	emit vm_changed(&vm);
+	emit vm_changed(&vm_slice);
 
-	// here run algorithm
+	// run 2d (current slice) algorithm
+	if (auto_update)
+	{
+		do_work_current_slice();
+	}
 
 	emit end_datachange(this);
 }
 
-namespace {
-
-template<typename TImage>
-void dump_image(TImage* img, const std::string& file_path)
+void TissueSeparatorWidget::execute()
 {
-#if 0
-	auto writer = itk::ImageFileWriter<TImage>::New();
-	writer->SetInput(img);
-	writer->SetFileName(file_path);
-	writer->Update();
-#endif
+	if (all_slices->isChecked())
+	{
+		do_work_all_slices();
+	}
+	else
+	{
+		do_work_current_slice();
+	}
 }
 
-} // namespace
+void TissueSeparatorWidget::do_work_all_slices()
+{
+	QProgressDialog progress("Running Graph Cut...", "Abort", 0, 0, this);
+	progress.setCancelButton(0);
+	progress.setMinimum(0);
+	progress.setMaximum(0);
+	progress.setWindowModality(Qt::WindowModal);
+	//progress.setStyle(QStyleFactory::create("Fusion"));
+	progress.show();
 
-void TissueSeparatorWidget::do_work() //Code for special GC for division
+	QApplication::processEvents();
+
+	using source_type = itk::SliceContiguousImage<float>;
+	using mask_type = itk::Image<unsigned char, 3>;
+
+	auto source = slice_handler->GetImage(SliceHandlerInterface::kSource, false);
+	auto target = slice_handler->GetImage(SliceHandlerInterface::kTarget, false);
+
+	auto start = target->GetLargestPossibleRegion().GetIndex();
+	start[2] = slice_handler->return_startslice();
+
+	auto size = target->GetLargestPossibleRegion().GetSize();
+	size[2] = slice_handler->return_endslice() - start[2];
+
+	auto output = do_work<3, source_type>(source, target, mask_type::RegionType(start, size));
+	if (output)
+	{
+		iseg::DataSelection dataSelection;
+		dataSelection.allSlices = true;
+		dataSelection.work = true;
+		emit begin_datachange(dataSelection, this);
+
+		iseg::Paste<unsigned char, float>(output, target, slice_handler->return_startslice(), slice_handler->return_endslice());
+
+		emit end_datachange(this);
+	}
+	else
+	{
+		std::cerr << "No result. GC failed.\n";
+	}
+
+	progress.setMaximum(1);
+	progress.setValue(1);
+}
+
+void TissueSeparatorWidget::do_work_current_slice()
+{
+	using source_type = itk::Image<float, 2>;
+
+	auto source = slice_handler->GetImageSlice(SliceHandlerInterface::kSource);
+	auto target = slice_handler->GetImageSlice(SliceHandlerInterface::kTarget);
+
+	auto output = do_work<2, source_type>(source, target, target->GetLargestPossibleRegion());
+	if (output)
+	{
+		auto buffer_size = target->GetPixelContainer()->Size();
+		auto target_buffer = target->GetPixelContainer()->GetImportPointer();
+		auto output_buffer = output->GetPixelContainer()->GetImportPointer();
+		std::transform(output_buffer, output_buffer + buffer_size, target_buffer,
+				[](unsigned char v) { return static_cast<float>(v); });
+
+		std::cerr << "Computed GC in 2D\n";
+	}
+}
+
+template<unsigned int Dim, typename TInput>
+typename itk::Image<unsigned char, Dim>::Pointer
+		TissueSeparatorWidget::do_work(TInput* source, TInput* target, const typename itk::Image<unsigned char, Dim>::RegionType& requested_region)
 {
 	using tissue_value_type = SliceHandlerInterface::tissue_type;
 	tissue_value_type const OBJECT_1 = 127;
@@ -160,11 +242,9 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	auto sigma = sigma_edit->text().toDouble(&has_sigma);
 	bool use_gradient_magnitude = use_source->isChecked();
 	bool use_full_neighborhood = true;
-	auto source = slice_handler->GetImage(SliceHandlerInterface::kSource, false);
-	auto target = slice_handler->GetImage(SliceHandlerInterface::kTarget, false);
 
-	using mask_type = itk::Image<unsigned char, 3>;
-	using source_type = itk::SliceContiguousImage<float>;
+	using source_type = TInput;
+	using mask_type = itk::Image<unsigned char, Dim>;
 	using gc_filter_type = itk::GraphCutLabelSeparator<mask_type, mask_type, source_type>;
 
 	// create mask from selected tissue [use current selection, or initial selection?]
@@ -176,22 +256,30 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	threshold->Update();
 
 	auto mask = threshold->GetOutput();
-	{
-		auto mask_buffer = mask->GetPixelContainer()->GetImportPointer();
-		unsigned const first_mark = vm.front().mark;
-		size_t const width = slice_handler->return_width();
-		size_t const height = slice_handler->return_width();
-		size_t const zoffset = current_slice * width * height;
-		bool found_other_mark = false;
-		for (auto& m : vm)
-		{
-			mask_buffer[m.p.px + m.p.py * width + zoffset] = (m.mark == first_mark) ? OBJECT_1 : OBJECT_2;
-			found_other_mark = found_other_mark || (m.mark != first_mark);
-		}
+	auto mask_buffer = mask->GetPixelContainer()->GetImportPointer();
+	size_t const width = slice_handler->return_width();
+	size_t const height = slice_handler->return_width();
 
-		std::cerr << "Found other mark: " << found_other_mark << "\n";
+	unsigned first_mark = -1;
+	bool found_other_mark = false;
+	for (auto slice_marks : vm)
+	{
+		auto slice = slice_marks.first;
+		if (slice == current_slice || Dim == 3)
+		{
+			size_t const zoffset = (Dim == 3) ? slice * width * height : 0;
+			for (auto& m : slice_marks.second)
+			{
+				if (first_mark == -1)
+				{
+					first_mark = m.mark;
+				}
+				mask_buffer[m.p.px + m.p.py * width + zoffset] = (m.mark == first_mark) ? OBJECT_1 : OBJECT_2;
+				found_other_mark = found_other_mark || (m.mark != first_mark);
+			}
+		}
 	}
-	dump_image(mask, "E:/temp/_gc_input.nii.gz");
+	std::cerr << "Found other mark: " << found_other_mark << "\n";
 
 	auto cutter = gc_filter_type::New();
 	cutter->SetBackgroundValue(0);
@@ -212,8 +300,10 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 
 	try
 	{
+		cutter->GetOutput()->SetRequestedRegion(requested_region);
 		cutter->Update();
-		std::cerr << "Success TissueSeparator finished\n";
+		std::cerr << "TissueSeparator finished\n";
+		return cutter->GetOutput();
 	}
 	catch (itk::ExceptionObject e)
 	{
@@ -223,16 +313,5 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	{
 		std::cerr << "Error: " << e.what() << "\n";
 	}
-
-	// \todo copy result to target [tissue?], use e.g. 255 and 127
-	dump_image(cutter->GetOutput(), "E:/temp/_gc_output.nii.gz");
-
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
-
-	iseg::Paste<unsigned char, float>(cutter->GetOutput(), target, slice_handler->return_startslice(), slice_handler->return_endslice());
-
-	emit end_datachange(this);
+	return nullptr;
 }

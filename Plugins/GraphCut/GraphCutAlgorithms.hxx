@@ -9,11 +9,6 @@
  */
 #pragma once
 
-#ifdef DEBUG_GC
-#	include <itkRescaleIntensityImageFilter.h>
-#	include <itkImageFileWriter.h>
-#endif
-
 namespace itk {
 
 template<int NDim>
@@ -21,14 +16,17 @@ struct NeighborInfo
 {
 	static unsigned int numberOfNeighbors(eGcConnectivity type)
 	{
+		static_assert(NDim == 3, "default implementation assumes DNim==3");
 		return (type == eGcConnectivity::kFaceNeighbors) ? 6 : 26;
 	}
 
 	template<class OffsetType>
 	static void buildNeighbors(std::vector<OffsetType>& neighbors, eGcConnectivity connectivity)
 	{
-		Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
-		nb.Common(numberOfNeighbors(connectivity), false);
+		auto con = numberOfNeighbors(connectivity);
+
+		Gc::Energy::Neighbourhood<NDim, Gc::Int32> nb;
+		nb.Common(con, false);
 		Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
 
 		// Traverses the image adding the following bidirectional edges:
@@ -37,60 +35,9 @@ struct NeighborInfo
 		// 3. currentPixel <-> pixel in front of it
 		// This prevents duplicate edges (i.e. we cannot add an edge to all 6-connected neighbors of every pixel or
 		// almost every edge would be duplicated.
-		OffsetType frontbottomrightr = {{nb.m_data[0][0], nb.m_data[0][1], nb.m_data[0][2]}};
-		neighbors.push_back(frontbottomrightr);
-		OffsetType graph4r = {{nb.m_data[1][0], nb.m_data[1][1], nb.m_data[1][2]}};
-		neighbors.push_back(graph4r);
-		OffsetType bottom = {{nb.m_data[2][0], nb.m_data[2][1], nb.m_data[2][2]}};
-		neighbors.push_back(bottom);
-		OffsetType right = {{nb.m_data[3][0], nb.m_data[3][1], nb.m_data[3][2]}};
-		neighbors.push_back(right);
-		OffsetType front = {{nb.m_data[4][0], nb.m_data[4][1], nb.m_data[4][2]}};
-		neighbors.push_back(front);
-		OffsetType frontright = {{nb.m_data[5][0], nb.m_data[5][1], nb.m_data[5][2]}};
-		neighbors.push_back(frontright);
-		if (connectivity == eGcConnectivity::kNodeNeighbors)
+		for (unsigned int i = 0; i < con; ++i)
 		{
-			OffsetType frontbottom = {{nb.m_data[6][0], nb.m_data[6][1], nb.m_data[6][2]}};
-			neighbors.push_back(frontbottom);
-			OffsetType bottomright = {{nb.m_data[7][0], nb.m_data[7][1], nb.m_data[7][2]}};
-			neighbors.push_back(bottomright);
-			OffsetType frontbottomright = {{nb.m_data[8][0], nb.m_data[8][1], nb.m_data[8][2]}};
-			neighbors.push_back(frontbottomright);
-			OffsetType graph1 = {{nb.m_data[9][0], nb.m_data[9][1], nb.m_data[9][2]}};
-			neighbors.push_back(graph1);
-			OffsetType graph2 = {{nb.m_data[10][0], nb.m_data[10][1], nb.m_data[10][2]}};
-			neighbors.push_back(graph2);
-			OffsetType graph3 = {{nb.m_data[11][0], nb.m_data[11][1], nb.m_data[11][2]}};
-			neighbors.push_back(graph3);
-			OffsetType graph4 = {{nb.m_data[12][0], nb.m_data[0][1], nb.m_data[12][2]}};
-			neighbors.push_back(graph4);
-			OffsetType graph5 = {{nb.m_data[13][0], nb.m_data[13][1], nb.m_data[13][2]}};
-			neighbors.push_back(graph5);
-			OffsetType graph6 = {{nb.m_data[14][0], nb.m_data[14][1], nb.m_data[14][2]}};
-			neighbors.push_back(graph6);
-			OffsetType bottomr = {{nb.m_data[15][0], nb.m_data[15][1], nb.m_data[15][2]}};
-			neighbors.push_back(bottomr);
-			OffsetType rightr = {{nb.m_data[16][0], nb.m_data[16][1], nb.m_data[16][2]}};
-			neighbors.push_back(rightr);
-			OffsetType frontr = {{nb.m_data[17][0], nb.m_data[17][1], nb.m_data[17][2]}};
-			neighbors.push_back(frontr);
-			OffsetType frontrightr = {{nb.m_data[18][0], nb.m_data[18][1], nb.m_data[18][2]}};
-			neighbors.push_back(frontrightr);
-			OffsetType frontbottomr = {{nb.m_data[19][0], nb.m_data[19][1], nb.m_data[19][2]}};
-			neighbors.push_back(frontbottomr);
-			OffsetType bottomrightr = {{nb.m_data[20][0], nb.m_data[20][1], nb.m_data[20][2]}};
-			neighbors.push_back(bottomrightr);
-			OffsetType graph1r = {{nb.m_data[21][0], nb.m_data[21][1], nb.m_data[21][2]}};
-			neighbors.push_back(graph1r);
-			OffsetType graph2r = {{nb.m_data[22][0], nb.m_data[22][1], nb.m_data[22][2]}};
-			neighbors.push_back(graph2r);
-			OffsetType graph3r = {{nb.m_data[23][0], nb.m_data[23][1], nb.m_data[23][2]}};
-			neighbors.push_back(graph3r);
-			OffsetType graph5r = {{nb.m_data[24][0], nb.m_data[24][1], nb.m_data[24][2]}};
-			neighbors.push_back(graph5r);
-			OffsetType graph6r = {{nb.m_data[25][0], nb.m_data[25][1], nb.m_data[25][2]}};
-			neighbors.push_back(graph6r);
+			neighbors.push_back(OffsetType{nb.m_data[i][0], nb.m_data[i][1], nb.m_data[i][2]});
 		}
 	}
 };
@@ -100,24 +47,30 @@ struct NeighborInfo<2>
 {
 	static unsigned int numberOfNeighbors(eGcConnectivity type)
 	{
-		return (type == eGcConnectivity::kFaceNeighbors) ? 6 : 26;
+		return (type == eGcConnectivity::kFaceNeighbors) ? 4 : 8;
+	}
+
+	template<class OffsetType>
+	static void buildNeighbors(std::vector<OffsetType>& neighbors, eGcConnectivity connectivity)
+	{
+		auto con = numberOfNeighbors(connectivity);
+
+		Gc::Energy::Neighbourhood<2, Gc::Int32> nb;
+		nb.Common(con, false);
+		Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
+
+		// Traverses the image adding the following bidirectional edges:
+		// 1. currentPixel <-> pixel below it
+		// 2. currentPixel <-> pixel to the right of it
+		// 3. currentPixel <-> pixel in front of it
+		// This prevents duplicate edges (i.e. we cannot add an edge to all 6-connected neighbors of every pixel or
+		// almost every edge would be duplicated.
+		for (unsigned int i = 0; i < con; ++i)
+		{
+			neighbors.push_back(OffsetType{nb.m_data[i][0], nb.m_data[i][1]});
+		}
 	}
 };
-
-namespace {
-
-template<typename TImage>
-void dump_image(TImage* img, const std::string& file_path)
-{
-#ifdef DEBUG_GC
-	auto writer = itk::ImageFileWriter<TImage>::New();
-	writer->SetInput(img);
-	writer->SetFileName(file_path);
-	writer->Update();
-#endif
-}
-
-} // namespace
 
 template<typename TInput, typename TOutput, typename TInputIntensityImage>
 GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GraphCutLabelSeparator()
@@ -132,21 +85,20 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GenerateData
 
 	timer.Start("ITK init");
 	auto input = GetMaskInput();
-	auto inputRegion = input->GetLargestPossibleRegion();
 	auto output = this->GetOutput();
-	auto outputRegion = output->GetRequestedRegion();
+	auto output_region = output->GetRequestedRegion();
 
 	// init ITK progress reporter
-	// InitializeGraph() traverses the input image once
+	// InitializeGraph() traverses the input image once, but only output requested region
 	// CutGraph() traverses the output image once
-	ProgressReporter progress(this, 0, inputRegion.GetNumberOfPixels() + outputRegion.GetNumberOfPixels());
+	ProgressReporter progress(this, 0, output_region.GetNumberOfPixels() + output_region.GetNumberOfPixels());
 
 	// allocate output
-	output->SetBufferedRegion(outputRegion);
+	output->SetBufferedRegion(output_region); // \todo Is this correct?
 	output->Allocate();
 
 	// get the total image size
-	auto size = inputRegion.GetSize();
+	auto size = input->GetLargestPossibleRegion().GetSize();
 	timer.Stop("ITK init");
 
 	// create graph
@@ -170,7 +122,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GenerateData
 	{
 		sizing[i] = size[i];
 	}
-	Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
+	Gc::Energy::Neighbourhood<NDimension, Gc::Int32> nb;
 	nb.Common(NeighborInfo<NDimension>::numberOfNeighbors(m_Connectivity), false);
 	Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
 	graph->Init(sizing, nb);
@@ -211,6 +163,8 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 
 	const bool& abort = this->GetAbortGenerateData(); // use reference (alias) to original flag!
 	auto input = GetMaskInput();
+	auto output = this->GetOutput();
+	auto output_region = output->GetRequestedRegion();
 	OffsetType center;
 	center.Fill(0);
 	itk::Size<NDimension> radius;
@@ -221,8 +175,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 	NeighborInfo<NDimension>::buildNeighbors(neighbors, m_Connectivity);
 	auto const num_neighbors = neighbors.size();
 
-	auto input_region = input->GetLargestPossibleRegion();
-	MaskIteratorType iterator(radius, input, input_region);
+	MaskIteratorType iterator(radius, input, output_region);
 	iterator.ClearActiveList();
 	for (size_t i = 0; i < neighbors.size(); ++i)
 	{
@@ -240,19 +193,9 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 		auto magnitude_filter = GradientMagnitudeFilter::New();
 		magnitude_filter->SetInput(GetIntensityInput());
 		magnitude_filter->SetSigma(m_Sigma);
-		magnitude_filter->UpdateLargestPossibleRegion();
+		magnitude_filter->GetOutput()->SetRequestedRegion(output_region);
+		magnitude_filter->Update();
 		auto gradient_magnitude = magnitude_filter->GetOutput();
-
-#ifdef DEBUG_GC
-		{
-			auto rescale = itk::RescaleIntensityImageFilter<RealImageType>::New();
-			rescale->SetInput(magnitude_filter->GetOutput());
-			rescale->SetOutputMinimum(0.0);
-			rescale->SetOutputMaximum(1.0);
-			rescale->UpdateLargestPossibleRegion();
-			dump_image(rescale->GetOutput(), "E:/temp/_gc_grad_mag.nii.gz");
-		}
-#endif
 
 		auto calculator = itk::MinimumMaximumImageCalculator<RealImageType>::New();
 		calculator->SetImage(gradient_magnitude);
@@ -282,7 +225,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 			return;
 		}
 
-		GradientMagnitudeIteratorType iterator2(radius, gradient_magnitude, input_region);
+		GradientMagnitudeIteratorType iterator2(radius, gradient_magnitude, output_region);
 		for (iterator.GoToBegin(), iterator2.GoToBegin(); !iterator.IsAtEnd() && !abort; ++iterator, ++iterator2)
 		{
 			progress.CompletedPixel();
@@ -294,7 +237,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 				continue;
 			}
 
-			unsigned int nodeIndex1 = ConvertIndexToVertexDescriptor(iterator.GetIndex(center), input_region);
+			unsigned int nodeIndex1 = input->ComputeOffset(iterator.GetIndex(center));
 
 			// Set weights on edges
 			for (size_t i = 0; i < num_neighbors; i++)
@@ -338,7 +281,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 				continue;
 			}
 
-			unsigned int nodeIndex1 = ConvertIndexToVertexDescriptor(iterator.GetIndex(center), input_region);
+			unsigned int nodeIndex1 = input->ComputeOffset(iterator.GetIndex(center));
 
 			// Set weights on edges
 			for (size_t i = 0; i < num_neighbors; i++)
@@ -387,7 +330,8 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::CutGraph(Gra
 		}
 		else
 		{
-			unsigned int voxelIndex = ConvertIndexToVertexDescriptor(output_iterator.GetIndex(), outputRegion); // \bug If we update less than LargestPossibleRegion, this is incorrect (I think ?)
+			// \warning If we update less than LargestPossibleRegion, this may be incorrect
+			unsigned int voxelIndex = input->ComputeOffset(input_iterator.GetIndex());
 			if (graph->NodeOrigin(voxelIndex) == Gc::Flow::Source)
 			{
 				output_iterator.Set(m_Object1Value);
@@ -401,10 +345,4 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::CutGraph(Gra
 	}
 }
 
-template<typename TInput, typename TOutput, typename TInputIntensityImage>
-unsigned int GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::ConvertIndexToVertexDescriptor(const itk::Index<3> index, typename TInput::RegionType region)
-{
-	auto size = region.GetSize();
-	return index[0] + index[1] * size[0] + index[2] * size[0] * size[1];
-}
 } // namespace itk

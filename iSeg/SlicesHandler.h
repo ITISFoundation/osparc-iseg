@@ -576,10 +576,10 @@ public:
 	void GetSeed(itk::Image<float, 3>::IndexType*);
 	void selectedtissue2mc(tissues_size_t tissuetype, unsigned char** voxels);
 
-	virtual itk::SliceContiguousImage<float>::Pointer
-			GetImage(eImageType type, bool active_slices) override;
-	virtual itk::SliceContiguousImage<unsigned short>::Pointer
-			GetTissues(bool active_slices) override;
+	itk::SliceContiguousImage<float>::Pointer GetImage(eImageType type, bool active_slices) override;
+	itk::SliceContiguousImage<unsigned short>::Pointer GetTissues(bool active_slices) override;
+	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) override;
+	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() override;
 
 private:
 	unsigned short activeslice;

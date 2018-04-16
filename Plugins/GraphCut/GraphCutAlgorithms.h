@@ -106,14 +106,11 @@ private:
 	virtual void GenerateData() override;
 
 private:
-	typedef Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32> GraphType;
+	typedef Gc::Flow::IGridMaxFlow<NDimension, Gc::Float32, Gc::Float32, Gc::Float32> GraphType;
 
 	void InitializeGraph(GraphType*, ProgressReporter& progress);
 
 	void CutGraph(GraphType*, ProgressReporter& progress);
-
-	// convert 3d itk indices to a continuously numbered indices
-	unsigned int ConvertIndexToVertexDescriptor(const itk::Index<3>, typename InputImageType::RegionType);
 
 	double m_Sigma = 1.0;
 	bool m_UseGradientMagnitude = false;
