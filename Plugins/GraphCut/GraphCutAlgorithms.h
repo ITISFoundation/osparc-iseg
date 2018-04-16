@@ -30,6 +30,16 @@
 
 namespace itk {
 
+enum eGcMaxFlowAlgorithm {
+	kKohli = 0,
+	kPushLabelFifo = 1,
+	kPushLabelHighestLevel = 2,
+};
+enum eGcConnectivity {
+	kFaceNeighbors,
+	kNodeNeighbors
+};
+
 template<typename TInput, typename TOutput, typename TInputIntensityImage = TInput>
 class ITK_EXPORT GraphCutLabelSeparator : public ImageToImageFilter<TInput, TOutput>
 {
@@ -50,24 +60,14 @@ public:
 	using OutputImageType = TOutput;
 	//using IndexContainerType = std::vector<itk::Index<3>>; // container for sinks / sources
 
-	enum eMaxFlowAlgorithm {
-		kKohli = 0,
-		kPushLabelFifo = 1,
-		kPushLabelHighestLevel = 2,
-	};
-	enum eConnectivity {
-		k6,
-		k26
-	};
-
 	using ProcessObject::SetNumberOfRequiredInputs;
 
 	// parameter setters
 	void SetSigma(double d) { m_Sigma = d; }
 
-	void SetConnectivity(eConnectivity type) { m_Connectivity = type; }
+	void SetConnectivity(eGcConnectivity type) { m_Connectivity = type; }
 
-	void SetMaxFlowAlgorithm(eMaxFlowAlgorithm alg) { m_MaxFlowAlgorithm = alg; }
+	void SetMaxFlowAlgorithm(eGcMaxFlowAlgorithm alg) { m_MaxFlowAlgorithm = alg; }
 
 	void SetObject1Value(typename InputImageType::PixelType v) { m_Object1Value = v; }
 
@@ -117,8 +117,8 @@ private:
 
 	double m_Sigma = 1.0;
 	bool m_UseGradientMagnitude = false;
-	eConnectivity m_Connectivity = eConnectivity::k26;
-	eMaxFlowAlgorithm m_MaxFlowAlgorithm = eMaxFlowAlgorithm::kKohli;
+	eGcConnectivity m_Connectivity = eGcConnectivity::kNodeNeighbors;
+	eGcMaxFlowAlgorithm m_MaxFlowAlgorithm = eGcMaxFlowAlgorithm::kKohli;
 
 	typename InputImageType::PixelType m_BackgroundValue = 0;
 	typename InputImageType::PixelType m_Object1Value = 127;

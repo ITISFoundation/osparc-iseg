@@ -12,6 +12,7 @@
 #include "itkSliceContiguousImage.h"
 
 #include <itkImage.h>
+#include <itkImageRegionIterator.h>
 
 namespace iseg {
 

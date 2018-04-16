@@ -203,7 +203,7 @@ void TissueSeparatorWidget::do_work() //Code for special GC for division
 	{
 		cutter->SetSigma(sigma);
 	}
-	cutter->SetConnectivity(use_full_neighborhood ? gc_filter_type::k26 : gc_filter_type::k6);
+	cutter->SetConnectivity(use_full_neighborhood ? itk::eGcConnectivity::kNodeNeighbors : itk::eGcConnectivity::kFaceNeighbors);
 	cutter->SetMaskInput(mask);
 	if (use_gradient_magnitude)
 	{

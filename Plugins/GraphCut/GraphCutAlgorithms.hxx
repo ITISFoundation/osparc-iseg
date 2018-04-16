@@ -16,6 +16,94 @@
 
 namespace itk {
 
+template<int NDim>
+struct NeighborInfo
+{
+	static unsigned int numberOfNeighbors(eGcConnectivity type)
+	{
+		return (type == eGcConnectivity::kFaceNeighbors) ? 6 : 26;
+	}
+
+	template<class OffsetType>
+	static void buildNeighbors(std::vector<OffsetType>& neighbors, eGcConnectivity connectivity)
+	{
+		Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
+		nb.Common(numberOfNeighbors(connectivity), false);
+		Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
+
+		// Traverses the image adding the following bidirectional edges:
+		// 1. currentPixel <-> pixel below it
+		// 2. currentPixel <-> pixel to the right of it
+		// 3. currentPixel <-> pixel in front of it
+		// This prevents duplicate edges (i.e. we cannot add an edge to all 6-connected neighbors of every pixel or
+		// almost every edge would be duplicated.
+		OffsetType frontbottomrightr = {{nb.m_data[0][0], nb.m_data[0][1], nb.m_data[0][2]}};
+		neighbors.push_back(frontbottomrightr);
+		OffsetType graph4r = {{nb.m_data[1][0], nb.m_data[1][1], nb.m_data[1][2]}};
+		neighbors.push_back(graph4r);
+		OffsetType bottom = {{nb.m_data[2][0], nb.m_data[2][1], nb.m_data[2][2]}};
+		neighbors.push_back(bottom);
+		OffsetType right = {{nb.m_data[3][0], nb.m_data[3][1], nb.m_data[3][2]}};
+		neighbors.push_back(right);
+		OffsetType front = {{nb.m_data[4][0], nb.m_data[4][1], nb.m_data[4][2]}};
+		neighbors.push_back(front);
+		OffsetType frontright = {{nb.m_data[5][0], nb.m_data[5][1], nb.m_data[5][2]}};
+		neighbors.push_back(frontright);
+		if (connectivity == eGcConnectivity::kNodeNeighbors)
+		{
+			OffsetType frontbottom = {{nb.m_data[6][0], nb.m_data[6][1], nb.m_data[6][2]}};
+			neighbors.push_back(frontbottom);
+			OffsetType bottomright = {{nb.m_data[7][0], nb.m_data[7][1], nb.m_data[7][2]}};
+			neighbors.push_back(bottomright);
+			OffsetType frontbottomright = {{nb.m_data[8][0], nb.m_data[8][1], nb.m_data[8][2]}};
+			neighbors.push_back(frontbottomright);
+			OffsetType graph1 = {{nb.m_data[9][0], nb.m_data[9][1], nb.m_data[9][2]}};
+			neighbors.push_back(graph1);
+			OffsetType graph2 = {{nb.m_data[10][0], nb.m_data[10][1], nb.m_data[10][2]}};
+			neighbors.push_back(graph2);
+			OffsetType graph3 = {{nb.m_data[11][0], nb.m_data[11][1], nb.m_data[11][2]}};
+			neighbors.push_back(graph3);
+			OffsetType graph4 = {{nb.m_data[12][0], nb.m_data[0][1], nb.m_data[12][2]}};
+			neighbors.push_back(graph4);
+			OffsetType graph5 = {{nb.m_data[13][0], nb.m_data[13][1], nb.m_data[13][2]}};
+			neighbors.push_back(graph5);
+			OffsetType graph6 = {{nb.m_data[14][0], nb.m_data[14][1], nb.m_data[14][2]}};
+			neighbors.push_back(graph6);
+			OffsetType bottomr = {{nb.m_data[15][0], nb.m_data[15][1], nb.m_data[15][2]}};
+			neighbors.push_back(bottomr);
+			OffsetType rightr = {{nb.m_data[16][0], nb.m_data[16][1], nb.m_data[16][2]}};
+			neighbors.push_back(rightr);
+			OffsetType frontr = {{nb.m_data[17][0], nb.m_data[17][1], nb.m_data[17][2]}};
+			neighbors.push_back(frontr);
+			OffsetType frontrightr = {{nb.m_data[18][0], nb.m_data[18][1], nb.m_data[18][2]}};
+			neighbors.push_back(frontrightr);
+			OffsetType frontbottomr = {{nb.m_data[19][0], nb.m_data[19][1], nb.m_data[19][2]}};
+			neighbors.push_back(frontbottomr);
+			OffsetType bottomrightr = {{nb.m_data[20][0], nb.m_data[20][1], nb.m_data[20][2]}};
+			neighbors.push_back(bottomrightr);
+			OffsetType graph1r = {{nb.m_data[21][0], nb.m_data[21][1], nb.m_data[21][2]}};
+			neighbors.push_back(graph1r);
+			OffsetType graph2r = {{nb.m_data[22][0], nb.m_data[22][1], nb.m_data[22][2]}};
+			neighbors.push_back(graph2r);
+			OffsetType graph3r = {{nb.m_data[23][0], nb.m_data[23][1], nb.m_data[23][2]}};
+			neighbors.push_back(graph3r);
+			OffsetType graph5r = {{nb.m_data[24][0], nb.m_data[24][1], nb.m_data[24][2]}};
+			neighbors.push_back(graph5r);
+			OffsetType graph6r = {{nb.m_data[25][0], nb.m_data[25][1], nb.m_data[25][2]}};
+			neighbors.push_back(graph6r);
+		}
+	}
+};
+
+template<>
+struct NeighborInfo<2>
+{
+	static unsigned int numberOfNeighbors(eGcConnectivity type)
+	{
+		return (type == eGcConnectivity::kFaceNeighbors) ? 6 : 26;
+	}
+};
+
 namespace {
 
 template<typename TImage>
@@ -83,7 +171,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::GenerateData
 		sizing[i] = size[i];
 	}
 	Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
-	nb.Common((m_Connectivity == eConnectivity::k6) ? 6 : 26, false); // \todo BL dimension specific
+	nb.Common(NeighborInfo<NDimension>::numberOfNeighbors(m_Connectivity), false);
 	Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
 	graph->Init(sizing, nb);
 	timer.Stop("Graph creation");
@@ -129,75 +217,9 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 	radius.Fill(1);
 
 	// Setup neighborhood (graph connectivity)
-	unsigned int const con = (m_Connectivity == eConnectivity::k6) ? 6 : 26; // \todo BL dimension specific
 	std::vector<OffsetType> neighbors;
-	{
-		Gc::Energy::Neighbourhood<3, Gc::Int32> nb;
-		nb.Common((m_Connectivity == eConnectivity::k6) ? 6 : 26, false);
-		Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
-
-		// Traverses the image adding the following bidirectional edges:
-		// 1. currentPixel <-> pixel below it
-		// 2. currentPixel <-> pixel to the right of it
-		// 3. currentPixel <-> pixel in front of it
-		// This prevents duplicate edges (i.e. we cannot add an edge to all 6-connected neighbors of every pixel or
-		// almost every edge would be duplicated.
-		OffsetType frontbottomrightr = {{nb.m_data[0][0], nb.m_data[0][1], nb.m_data[0][2]}};
-		neighbors.push_back(frontbottomrightr);
-		OffsetType graph4r = {{nb.m_data[1][0], nb.m_data[1][1], nb.m_data[1][2]}};
-		neighbors.push_back(graph4r);
-		OffsetType bottom = {{nb.m_data[2][0], nb.m_data[2][1], nb.m_data[2][2]}};
-		neighbors.push_back(bottom);
-		OffsetType right = {{nb.m_data[3][0], nb.m_data[3][1], nb.m_data[3][2]}};
-		neighbors.push_back(right);
-		OffsetType front = {{nb.m_data[4][0], nb.m_data[4][1], nb.m_data[4][2]}};
-		neighbors.push_back(front);
-		OffsetType frontright = {{nb.m_data[5][0], nb.m_data[5][1], nb.m_data[5][2]}};
-		neighbors.push_back(frontright);
-		if (m_Connectivity == eConnectivity::k26)
-		{
-			OffsetType frontbottom = {{nb.m_data[6][0], nb.m_data[6][1], nb.m_data[6][2]}};
-			neighbors.push_back(frontbottom);
-			OffsetType bottomright = {{nb.m_data[7][0], nb.m_data[7][1], nb.m_data[7][2]}};
-			neighbors.push_back(bottomright);
-			OffsetType frontbottomright = {{nb.m_data[8][0], nb.m_data[8][1], nb.m_data[8][2]}};
-			neighbors.push_back(frontbottomright);
-			OffsetType graph1 = {{nb.m_data[9][0], nb.m_data[9][1], nb.m_data[9][2]}};
-			neighbors.push_back(graph1);
-			OffsetType graph2 = {{nb.m_data[10][0], nb.m_data[10][1], nb.m_data[10][2]}};
-			neighbors.push_back(graph2);
-			OffsetType graph3 = {{nb.m_data[11][0], nb.m_data[11][1], nb.m_data[11][2]}};
-			neighbors.push_back(graph3);
-			OffsetType graph4 = {{nb.m_data[12][0], nb.m_data[0][1], nb.m_data[12][2]}};
-			neighbors.push_back(graph4);
-			OffsetType graph5 = {{nb.m_data[13][0], nb.m_data[13][1], nb.m_data[13][2]}};
-			neighbors.push_back(graph5);
-			OffsetType graph6 = {{nb.m_data[14][0], nb.m_data[14][1], nb.m_data[14][2]}};
-			neighbors.push_back(graph6);
-			OffsetType bottomr = {{nb.m_data[15][0], nb.m_data[15][1], nb.m_data[15][2]}};
-			neighbors.push_back(bottomr);
-			OffsetType rightr = {{nb.m_data[16][0], nb.m_data[16][1], nb.m_data[16][2]}};
-			neighbors.push_back(rightr);
-			OffsetType frontr = {{nb.m_data[17][0], nb.m_data[17][1], nb.m_data[17][2]}};
-			neighbors.push_back(frontr);
-			OffsetType frontrightr = {{nb.m_data[18][0], nb.m_data[18][1], nb.m_data[18][2]}};
-			neighbors.push_back(frontrightr);
-			OffsetType frontbottomr = {{nb.m_data[19][0], nb.m_data[19][1], nb.m_data[19][2]}};
-			neighbors.push_back(frontbottomr);
-			OffsetType bottomrightr = {{nb.m_data[20][0], nb.m_data[20][1], nb.m_data[20][2]}};
-			neighbors.push_back(bottomrightr);
-			OffsetType graph1r = {{nb.m_data[21][0], nb.m_data[21][1], nb.m_data[21][2]}};
-			neighbors.push_back(graph1r);
-			OffsetType graph2r = {{nb.m_data[22][0], nb.m_data[22][1], nb.m_data[22][2]}};
-			neighbors.push_back(graph2r);
-			OffsetType graph3r = {{nb.m_data[23][0], nb.m_data[23][1], nb.m_data[23][2]}};
-			neighbors.push_back(graph3r);
-			OffsetType graph5r = {{nb.m_data[24][0], nb.m_data[24][1], nb.m_data[24][2]}};
-			neighbors.push_back(graph5r);
-			OffsetType graph6r = {{nb.m_data[25][0], nb.m_data[25][1], nb.m_data[25][2]}};
-			neighbors.push_back(graph6r);
-		}
-	}
+	NeighborInfo<NDimension>::buildNeighbors(neighbors, m_Connectivity);
+	auto const num_neighbors = neighbors.size();
 
 	auto input_region = input->GetLargestPossibleRegion();
 	MaskIteratorType iterator(radius, input, input_region);
@@ -251,9 +273,6 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 		}
 		shift = -min_gm * scale;
 
-		std::cerr << "Shift: " << shift << "\n";
-		std::cerr << "Scale: " << scale << "\n";
-
 		auto rescale = [scale, shift](float v) {
 			return v * scale + shift;
 		};
@@ -278,7 +297,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 			unsigned int nodeIndex1 = ConvertIndexToVertexDescriptor(iterator.GetIndex(center), input_region);
 
 			// Set weights on edges
-			for (unsigned int i = 0; i < con; i++)
+			for (size_t i = 0; i < num_neighbors; i++)
 			{
 				bool pixelIsValid; // BL TODO, slow
 				auto neighborPixel = iterator.GetPixel(neighbors[i], pixelIsValid);
@@ -322,7 +341,7 @@ void GraphCutLabelSeparator<TInput, TOutput, TInputIntensityImage>::InitializeGr
 			unsigned int nodeIndex1 = ConvertIndexToVertexDescriptor(iterator.GetIndex(center), input_region);
 
 			// Set weights on edges
-			for (unsigned int i = 0; i < con; i++)
+			for (size_t i = 0; i < num_neighbors; i++)
 			{
 				bool pixelIsValid; // BL TODO, slow
 				auto neighborPixel = iterator.GetPixel(neighbors[i], pixelIsValid);
