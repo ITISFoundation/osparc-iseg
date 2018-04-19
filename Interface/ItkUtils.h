@@ -47,4 +47,23 @@ bool Paste(itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutput
 	return false;
 }
 
+template<class TInputImage, class TOutputImage>
+bool Paste(TInputImage* source, TOutputImage* destination)
+{
+	using OutputPixel = typename TOutputImage::PixelType;
+
+	if (source->GetBufferedRegion().GetSize() == destination->GetBufferedRegion().GetSize())
+	{
+		itk::ImageRegionIterator<TInputImage> sit(source, source->GetBufferedRegion());
+		itk::ImageRegionIterator<TOutputImage> dit(destination, destination->GetBufferedRegion());
+
+		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
+		{
+			dit.Set(static_cast<OutputPixel>(sit.Get()));
+		}
+		return true;
+	}
+	return false;
+}
+
 } // namespace iseg
