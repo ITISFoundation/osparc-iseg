@@ -5765,8 +5765,6 @@ void SlicesHandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
 	threshold(thresh);
 
 	//xxxa again. what happens to bmp? and what should we do with mode?
-
-	return;
 }
 
 void SlicesHandler::double_hysteretic_allslices(float thresh_low_l,
@@ -5777,94 +5775,80 @@ void SlicesHandler::double_hysteretic_allslices(float thresh_low_l,
 {
 	for (unsigned short i = startslice; i < endslice; i++)
 	{
-		(image_slices[i])
-				.double_hysteretic(thresh_low_l, thresh_low_h, thresh_high_l,
-						thresh_high_h, connectivity, set_to);
+		(image_slices[i]).double_hysteretic(thresh_low_l, thresh_low_h, thresh_high_l, thresh_high_h, connectivity, set_to);
 	}
 }
 
-void SlicesHandler::erosion(int n, bool connectivity)
+namespace {
+class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<3>>
 {
-#if 0
-	for(unsigned short i=startslice;i<endslice;i++){
-		(image_slices[i]).erosion(n,connectivity);
+public:
+	MyVisitor(const itk::ImageBase<3>::SpacingType& spacing) : _spacing(spacing) {}
+
+	itk::FlatStructuringElement<3> operator()(int r) const
+	{
+		itk::Size<3> radius;
+		radius.Fill(r);
+
+		return morpho::MakeBall<3>(radius);
 	}
-#else
+
+	itk::FlatStructuringElement<3> operator()(float r) const
+	{
+		return morpho::MakeBall<3>(_spacing, static_cast<double>(r));
+	}
+
+private:
+	itk::ImageBase<3>::SpacingType _spacing;
+};
+} // namespace
+
+void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
+{
 	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
-	itk::Size<3> radius;
-	radius.Fill(n);
-
-	auto ball = morpho::MakeBall(radius);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kErode, startslice, endslice);
 
 	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
-#endif
 }
 
-void SlicesHandler::dilation(int n, bool connectivity)
+void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 {
-#if 0
-	for(unsigned short i=startslice;i<endslice;i++){
-		(image_slices[i]).dilation(n,connectivity);
-	}
-#else
 	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
-	itk::Size<3> radius;
-	radius.Fill(n);
-
-	auto ball = morpho::MakeBall(radius);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kDilate, startslice, endslice);
 
 	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
-#endif
 }
 
-void SlicesHandler::closure(int n, bool connectivity)
+void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 {
-#if 0
-	for(unsigned short i=startslice;i<endslice;i++){
-		(image_slices[i]).closure(n,connectivity);
-	}
-#else
 	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
-	itk::Size<3> radius;
-	radius.Fill(n);
-
-	auto ball = morpho::MakeBall(radius);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kClose, startslice, endslice);
 
 	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
-#endif
 }
 
-void SlicesHandler::open(int n, bool connectivity)
+void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 {
-#if 0
-	for(unsigned short i=startslice;i<endslice;i++){
-		(image_slices[i]).open(n,connectivity);
-	}
-#else
 	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
 
-	itk::Size<3> radius;
-	radius.Fill(n);
-
-	auto ball = morpho::MakeBall(radius);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kOpen, startslice, endslice);
 
 	iseg::Paste<unsigned char, float>(output, all_slices, startslice, endslice);
-#endif
 }
 
 void SlicesHandler::interpolateworkgrey(unsigned short slice1,

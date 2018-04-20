@@ -15,19 +15,11 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3mimefactory.h>
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+class QRadioButton;
+class QButtonGroup;
+class QSpinBox;
+class QCheckBox;
+class QPushButton;
 
 namespace iseg {
 
@@ -37,8 +29,7 @@ class MorphologyWidget : public WidgetInterface
 public:
 	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~MorphologyWidget();
-	QSize sizeHint() const override;
+	~MorphologyWidget() {}
 	void init() override;
 	void newloaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
@@ -53,27 +44,23 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3VBox* vbox1;
-	QLabel* txt_n;
-	QSpinBox* sb_n;
-	QPushButton* btn_exec;
-	QRadioButton* rb_8connect;
-	QRadioButton* rb_4connect;
-	QButtonGroup* connectgroup;
+
 	QRadioButton* rb_open;
 	QRadioButton* rb_close;
 	QRadioButton* rb_erode;
 	QRadioButton* rb_dilate;
-	QButtonGroup* modegroup;
-	QCheckBox* allslices;
+	QWidget* mode_buttons;
+	QCheckBox* node_connectivity;
+	QLineEdit* operation_radius;
+	QCheckBox* pixel_units;
+	QCheckBox* all_slices;
+	QPushButton* execute_button;
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void execute();
+	void units_changed();
+	void all_slices_changed();
 };
 
 } // namespace iseg

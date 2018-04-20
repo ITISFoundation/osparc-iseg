@@ -1372,8 +1372,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hideparameters = new Q3Action("Simplified", 0, this);
 	hideparameters->setToggleAction(true);
 	hideparameters->setOn(WidgetInterface::get_hideparams());
-	connect(hideparameters, SIGNAL(toggled(bool)), this,
-			SLOT(execute_hideparameters(bool)));
+	connect(hideparameters, SIGNAL(toggled(bool)), this, SLOT(execute_hideparameters(bool)));
 	hidesubmenu->insertSeparator();
 	hideparameters->addTo(hidesubmenu);
 	viewmenu->insertItem("&Toolbars", hidemenu);

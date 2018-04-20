@@ -18,6 +18,8 @@
 #include "Core/UndoElem.h"
 #include "Core/UndoQueue.h"
 
+#include <boost/variant.hpp>
+
 #include <memory>
 #include <string>
 
@@ -38,8 +40,7 @@ public:
 	SlicesHandler();
 	~SlicesHandler();
 
-	void newbmp(unsigned short width1, unsigned short height1,
-			unsigned short nrofslices);
+	void newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices);
 	void freebmp();
 	void clear_bmp();
 	void clear_work();
@@ -56,13 +57,10 @@ public:
 #ifdef TISSUES_SIZE_TYPEDEF
 	void copyfromtissue(unsigned short slicenr, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
-	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits,
-			unsigned short padding);
-	//		void transparent_add(float *pict2);
+	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits, unsigned short padding);
 	int LoadDIBitmap(
 			const char* filename, unsigned short slicenr,
-			unsigned short
-					nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDIBitmap(const char* filename, unsigned short slicenr,
 			unsigned short nrofslices, Point p, unsigned short dx,
 			unsigned short dy);
@@ -78,8 +76,7 @@ public:
 			unsigned short dy);
 	int LoadDIJpg(
 			const char* filename, unsigned short slicenr,
-			unsigned short
-					nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDIJpg(const char* filename, unsigned short slicenr,
 			unsigned short nrofslices, Point p, unsigned short dx,
 			unsigned short dy);
@@ -87,35 +84,25 @@ public:
 	int LoadDIJpg(std::vector<const char*> filenames, Point p,
 			unsigned short dx, unsigned short dy);
 	int LoadDICOM(
-			std::vector<const char*>
-					lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+			std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDICOM(std::vector<const char*> lfilename, Point p,
 			unsigned short dx, unsigned short dy);
-	//		int SaveDIBitmap(const char *filename);
-	//		int SaveWorkBitmap(const char *filename);
 	int ReadImage(const char* filename);
 	int ReadOverlay(const char* filename, unsigned short slicenr);
 	int ReadAvw(const char* filename);
 	int ReadRTdose(const char* filename);
 	bool LoadSurface(const char* filename, const bool overwrite_working);
-	// Description: reads project data from an Xdmf file
+
 	int LoadAllXdmf(const char* filename);
 	int LoadAllHDF(const char* filename);
 
-	void UpdateColorLookupTable(
-			std::shared_ptr<ColorLookupTable> new_lut = nullptr);
-	std::shared_ptr<ColorLookupTable> GetColorLookupTable()
-	{
-		return color_lookup_table;
-	}
+	void UpdateColorLookupTable(std::shared_ptr<ColorLookupTable> new_lut = nullptr);
+	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return color_lookup_table; }
 
 	// Description: write project data into an Xdmf file
 	int SaveAllXdmf(const char* filename, int compression, bool naked = false);
-	bool SaveMarkersHDF(const char* filename, bool naked,
-			unsigned short version);
-	int SaveMergeAllXdmf(const char* filename,
-			std::vector<QString>& mergeImagefilenames,
-			unsigned short nrslicesTotal, int compression);
+	bool SaveMarkersHDF(const char* filename, bool naked, unsigned short version);
+	int SaveMergeAllXdmf(const char* filename, std::vector<QString>& mergeImagefilenames, unsigned short nrslicesTotal, int compression);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
 			unsigned bitdepth, unsigned short slicenr,
 			unsigned short nrofslices);
@@ -128,12 +115,9 @@ public:
 	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
 			unsigned short slicenr, unsigned short nrofslices, Point p,
 			unsigned short dx, unsigned short dy);
-	int ReadRawOverlay(const char* filename, unsigned bitdepth,
-			unsigned short slicenr);
-	int SaveRaw_resized(const char* filename, int dxm, int dxp, int dym,
-			int dyp, int dzm, int dzp, bool work);
-	int SaveTissuesRaw_resized(const char* filename, int dxm, int dxp, int dym,
-			int dyp, int dzm, int dzp);
+	int ReadRawOverlay(const char* filename, unsigned bitdepth, unsigned short slicenr);
+	int SaveRaw_resized(const char* filename, int dxm, int dxp, int dym, int dyp, int dzm, int dzp, bool work);
+	int SaveTissuesRaw_resized(const char* filename, int dxm, int dxp, int dym, int dyp, int dzm, int dzp);
 	bool SwapXY();
 	bool SwapYZ();
 	bool SwapXZ();
@@ -287,10 +271,10 @@ public:
 	void thresholded_growing(short unsigned slicenr, Point p, float thresh_low,
 			float thresh_high,
 			float set_to); //bool connectivity,float set_to);
-	void erosion(int n, bool connectivity);
-	void dilation(int n, bool connectivity);
-	void closure(int n, bool connectivity);
-	void open(int n, bool connectivity);
+	void erosion(boost::variant<int, float> radius, bool connectivity);
+	void dilation(boost::variant<int, float> radius, bool connectivity);
+	void closure(boost::variant<int, float> radius, bool connectivity);
+	void open(boost::variant<int, float> radius, bool connectivity);
 	void add_mark(Point p, unsigned label);
 	void add_mark(Point p, unsigned label, std::string str);
 	void clear_marks();

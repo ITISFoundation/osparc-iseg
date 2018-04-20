@@ -16,18 +16,8 @@
 
 #include "Interface/Point.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QFormLayout>
+#include <QProgressDialog>
 
 #include <algorithm>
 
@@ -37,137 +27,136 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(
-			Format("Apply morphological operations to the Target image. "
-						 "Morphological operations are "
-						 "based on expanding or shrinking (Dilate/Erode) regions by "
-						 "a given number of pixel layers (n)."
-						 "<br>"
-						 "The functions act on the Target image (to modify a tissue "
-						 "use Get Tissue and Adder)."));
+	setToolTip(Format(
+			"Apply morphological operations to the Target image. "
+			"Morphological operations are "
+			"based on expanding or shrinking (Dilate/Erode) regions by "
+			"a given number of pixel layers (n)."
+			"<br>"
+			"The functions act on the Target image (to modify a tissue "
+			"use Get Tissue and Adder)."));
 
 	activeslice = handler3D->get_activeslice();
 	bmphand = handler3D->get_activebmphandler();
 
-	hboxoverall = new Q3HBox(this);
-	vboxmethods = new Q3VBox(hboxoverall);
-	vbox1 = new Q3VBox(hboxoverall);
-	hbox1 = new Q3HBox(vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	allslices = new QCheckBox(QString("Apply to all slices"), vbox1);
-	btn_exec = new QPushButton("Execute", vbox1);
+	auto modegroup = new QButtonGroup(this);
+	modegroup->insert(rb_open = new QRadioButton(QString("Open")));
+	modegroup->insert(rb_close = new QRadioButton(QString("Close")));
+	modegroup->insert(rb_erode = new QRadioButton(QString("Erode")));
+	modegroup->insert(rb_dilate = new QRadioButton(QString("Dilate")));
+	rb_open->setChecked(true);
 
-	txt_n = new QLabel("Pixel Layers (n): ", hbox1);
-	sb_n = new QSpinBox(1, 10, 1, hbox1);
-	sb_n->setValue(1);
-
-	connectgroup = new QButtonGroup(this);
-	connectgroup->insert(
-			rb_4connect = new QRadioButton(QString("4-connectivity"), hbox2));
-	connectgroup->insert(
-			rb_8connect = new QRadioButton(QString("8-connectivity"), hbox2));
-	rb_4connect->setChecked(TRUE);
-
-	modegroup = new QButtonGroup(this);
-	modegroup->insert(rb_open = new QRadioButton(QString("Open"), vboxmethods));
-	modegroup->insert(rb_close =
-												new QRadioButton(QString("Close"), vboxmethods));
-	modegroup->insert(rb_erode =
-												new QRadioButton(QString("Erode"), vboxmethods));
-	modegroup->insert(rb_dilate =
-												new QRadioButton(QString("Dilate"), vboxmethods));
-	rb_open->setChecked(TRUE);
+	auto mode_layout = new QHBoxLayout;
+	for (auto child : modegroup->buttons())
+		mode_layout->addWidget(child);
+	mode_buttons = new QWidget;
+	mode_buttons->setLayout(mode_layout);
 
 	rb_open->setToolTip(Format(
 			"First shrinking before growing is called Open and results in the "
 			"deletion of small islands and thin links between structures."));
-	rb_close->setToolTip(Format("Growing followed by shrinking results in the "
-															"closing of small (< 2n) gaps and holes."));
-	rb_erode->setToolTip(Format(
-			"Erode or shrink the boundaries of regions of foreground pixels."));
-	rb_dilate->setToolTip(
-			Format("Enlarge the boundaries of regions of foreground pixels."));
+	rb_close->setToolTip(Format(
+			"Growing followed by shrinking results in the "
+			"closing of small (< 2n) gaps and holes."));
+	rb_erode->setToolTip(Format("Erode or shrink the boundaries of regions of foreground pixels."));
+	rb_dilate->setToolTip(Format("Enlarge the boundaries of regions of foreground pixels."));
 
-	vboxmethods->setMargin(5);
-	vbox1->setMargin(5);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
+	pixel_units = new QCheckBox;
+	pixel_units->setChecked(true);
 
-	hbox1->setMinimumSize(hbox1->sizeHint());
+	operation_radius = new QLineEdit(QString::number(1));
+	operation_radius->setValidator(new QIntValidator(0, 100, operation_radius));
+	operation_radius->setToolTip(Format("Radius of operation, either number of pixel layers or radius in length units."));
 
-	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
-	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());
-	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
+	node_connectivity = new QCheckBox;
+	node_connectivity->setToolTip(Format("Use chess-board (8 neighbors) or city-block (4 neighbors) neighborhood."));
 
-	return;
-}
+	all_slices = new QCheckBox;
+	all_slices->setToolTip(Format("Apply to active slices in 3D or to current slice"));
 
-MorphologyWidget::~MorphologyWidget()
-{
-	delete vbox1;
-	delete connectgroup;
-	delete modegroup;
+	execute_button = new QPushButton("Execute");
+
+	// setup layout
+	auto top_layout = new QFormLayout;
+	top_layout->addRow(mode_buttons);
+	top_layout->addRow(QString("Radius"), operation_radius);
+	top_layout->addRow(QString("Radius in pixels"), pixel_units);
+	top_layout->addRow(QString("Full connectivity"), node_connectivity);
+	top_layout->addRow(QString("Apply to all slices"), all_slices);
+	top_layout->addRow(execute_button);
+	setLayout(top_layout);
+
+	// connect signal-slots
+	QObject::connect(pixel_units, SIGNAL(stateChanged(int)), this, SLOT(units_changed()));
+	QObject::connect(all_slices, SIGNAL(stateChanged(int)), this, SLOT(all_slices_changed()));
+	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(execute()));
 }
 
 void MorphologyWidget::execute()
 {
-	bool connect8 = rb_8connect->isOn();
-
-	//xxxa	handler3D->regrow(handler3D->get_activeslice()-1,handler3D->get_activeslice(),sb_n->value());
-	//	emit work_changed();
-	//	return;
+	bool connect8 = node_connectivity->isChecked();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.work = true;
 
-	if (allslices->isChecked())
+	if (all_slices->isChecked())
 	{
+		boost::variant<int, float> radius;
+		if (pixel_units->isChecked())
+		{
+			radius = static_cast<int>(operation_radius->text().toFloat());
+		}
+		else
+		{
+			radius = operation_radius->text().toFloat();
+		}
+
 		dataSelection.allSlices = true;
 		emit begin_datachange(dataSelection, this);
 
 		if (rb_open->isOn())
 		{
-			handler3D->open(sb_n->value(), connect8);
+			handler3D->open(radius, connect8);
 		}
 		else if (rb_close->isOn())
 		{
-			handler3D->closure(sb_n->value(), connect8);
+			handler3D->closure(radius, connect8);
 		}
 		else if (rb_erode->isOn())
 		{
-			handler3D->erosion(sb_n->value(), connect8);
+			handler3D->erosion(radius, connect8);
 		}
 		else
 		{
-			handler3D->dilation(sb_n->value(), connect8);
+			handler3D->dilation(radius, connect8);
 		}
 	}
 	else
 	{
+		auto radius = static_cast<int>(operation_radius->text().toFloat());
+
 		dataSelection.sliceNr = handler3D->get_activeslice();
 		emit begin_datachange(dataSelection, this);
 
 		if (rb_open->isOn())
 		{
-			bmphand->open(sb_n->value(), connect8);
+			bmphand->open(radius, connect8);
 		}
 		else if (rb_close->isOn())
 		{
-			bmphand->closure(sb_n->value(), connect8);
+			bmphand->closure(radius, connect8);
 		}
 		else if (rb_erode->isOn())
 		{
-			bmphand->erosion(sb_n->value(), connect8);
+			bmphand->erosion(radius, connect8);
 		}
 		else
 		{
-			bmphand->dilation(sb_n->value(), connect8);
+			bmphand->dilation(radius, connect8);
 		}
 	}
 	emit end_datachange(this);
 }
-
-QSize MorphologyWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void MorphologyWidget::on_slicenr_changed()
 {
@@ -200,12 +189,15 @@ FILE* MorphologyWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
+		bool const connect8 = node_connectivity->isChecked();
+		int radius = operation_radius->text().toFloat();
+
 		int dummy;
-		dummy = sb_n->value();
+		dummy = static_cast<int>(radius);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_8connect->isOn());
+		dummy = (int)(connect8); // rb_8connect->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_4connect->isOn());
+		dummy = (int)(!connect8); // rb_4connect->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(rb_open->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -215,7 +207,7 @@ FILE* MorphologyWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(rb_dilate->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allslices->isOn());
+		dummy = (int)(all_slices->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -228,11 +220,11 @@ FILE* MorphologyWidget::LoadParams(FILE* fp, int version)
 	{
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_n->setValue(dummy);
+		operation_radius->setText(QString::number(dummy));
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_8connect->setChecked(dummy > 0);
+		node_connectivity->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_4connect->setChecked(dummy > 0);
+		// skip, is used to set a radio button state
 		fread(&dummy, sizeof(int), 1, fp);
 		rb_open->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
@@ -242,21 +234,66 @@ FILE* MorphologyWidget::LoadParams(FILE* fp, int version)
 		fread(&dummy, sizeof(int), 1, fp);
 		rb_dilate->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		allslices->setChecked(dummy > 0);
+		all_slices->setChecked(dummy > 0);
 	}
 	return fp;
 }
 
+namespace {
+
+int hide_row(QFormLayout* layout, QWidget* widget)
+{
+	int row = -1;
+	if (auto label = layout->labelForField(widget))
+	{
+		QFormLayout::ItemRole role;
+		layout->getWidgetPosition(widget, &row, &role);
+		widget->hide();
+		label->hide();
+		layout->removeWidget(widget);
+		layout->removeWidget(label);
+	}
+	return row;
+}
+
+} // namespace
+
 void MorphologyWidget::hideparams_changed()
 {
-	if (hideparams)
+	// \note this is the horrible side of using QFormLayout, show/hide row does not exist
+	auto top_layout = dynamic_cast<QFormLayout*>(layout());
+	if (top_layout)
 	{
-		hbox1->hide();
-		hbox2->hide();
+		if (hideparams)
+		{
+			hide_row(top_layout, operation_radius);
+			hide_row(top_layout, node_connectivity);
+		}
+		else if (node_connectivity->isHidden())
+		{
+			operation_radius->show();
+			node_connectivity->show();
+			top_layout->insertRow(1, QString("Pixel Layers (n)"), operation_radius);
+			top_layout->insertRow(2, QString("Full connectivity"), node_connectivity);
+		}
+	}
+}
+
+void iseg::MorphologyWidget::units_changed()
+{
+	if (pixel_units->isChecked())
+	{
+		auto radius = operation_radius->text().toFloat();
+		operation_radius->setValidator(new QIntValidator(0, 100, operation_radius));
+		operation_radius->setText(QString::number(static_cast<int>(radius)));
 	}
 	else
 	{
-		hbox1->show();
-		hbox2->show();
+		operation_radius->setValidator(new QDoubleValidator(0, 100, 2, operation_radius));
 	}
+}
+
+void iseg::MorphologyWidget::all_slices_changed()
+{
+	node_connectivity->setEnabled(!all_slices->isChecked());
 }
