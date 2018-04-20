@@ -1154,6 +1154,7 @@ void OutlineCorrectionWidget::init()
 {
 	on_slicenr_changed();
 	hideparams_changed();
+	handler3D->get_spacing(spacing);
 }
 
 void OutlineCorrectionWidget::newloaded()
@@ -1288,7 +1289,7 @@ void OutlineCorrectionWidget::hideparams_changed() { method_changed(); }
 void OutlineCorrectionWidget::pixmm_changed()
 {
 	bool add_skin_mm = mm->isOn() && addskin->isOn() && allslices->isChecked();
-	bool brush_mm = mm->isOn() && brush->isOn() && allslices->isChecked();
+	bool brush_mm = mm->isOn() && brush->isOn();
 	if (add_skin_mm || brush_mm)
 	{
 		mm_radius->show();
