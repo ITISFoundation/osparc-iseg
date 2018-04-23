@@ -12644,7 +12644,7 @@ typename itk::Image<T>::Pointer
 	size[1] = dims[1]; // size along Y
 
 	auto image = itk::Image<T>::New();
-	image->SetRegions(image_type::RegionType(start, size));
+	image->SetRegions(typename image_type::RegionType(start, size));
 	image->SetSpacing(spacing);
 	// \warning transform is ignored
 	//image->SetOrigin(origin);

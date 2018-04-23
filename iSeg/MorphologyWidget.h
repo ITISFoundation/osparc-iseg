@@ -19,6 +19,7 @@ class QRadioButton;
 class QButtonGroup;
 class QSpinBox;
 class QCheckBox;
+class QLineEdit;
 class QPushButton;
 
 namespace iseg {
