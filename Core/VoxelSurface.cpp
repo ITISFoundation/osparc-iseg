@@ -298,19 +298,20 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 			for (int d = 0; d < 3; ++d)
 			{
 				bbi[2 * d] = std::floor(std::max(0.0, bb[2 * d]) / spacing[d]);
-				bbi[2 * d + 1] = std::min<int>(static_cast<int>(dims[d]), std::ceil(std::max(0.0, bb[2 * d + 1]) / spacing[d]) + 1);
+				bbi[2 * d + 1] = std::min<int>(static_cast<int>(dims[d]), bb[2 * d + 1] / spacing[d] + 1);
 			}
 
 			vtkCell* cell = surface->GetCell(id);
 
 			// iterate over grid lines (X-lines, Y-lines, Z-lines)
-			auto test = [&](int dir[3]) {
+			auto test = [&](int const dir[3]) {
 				double pa[3] = {};
 				double pe[3] = {};
 				unsigned int ijk[3] = {};
 
 				pa[dir[2]] = bbi[dir[2] * 2] * spacing[dir[2]];
 				pe[dir[2]] = bbi[dir[2] * 2 + 1] * spacing[dir[2]];
+				double const scale = bbi[dir[2] * 2 + 1] - bbi[dir[2] * 2];
 
 				for (int i = bbi[dir[0] * 2]; i < bbi[dir[0] * 2 + 1]; ++i)
 				{
@@ -321,21 +322,13 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 
 						if (cell->IntersectWithLine(pa, pe, tol, t, x, pcoords, subId) != 0)
 						{
-							double scale = bbi[dir[2] * 2 + 1] - bbi[dir[2] * 2];
 							ijk[dir[0]] = i;
 							ijk[dir[1]] = j;
-							ijk[dir[2]] = std::floor(scale * t);
+							ijk[dir[2]] = bbi[dir[2] * 2] + std::floor(scale * t);
 
-							// mark voxel below
-							if (ijk[2] < dims[2] && ijk[0] < dims[0] && ijk[1] < dims[1])
-							{
-								float* slice = slices[ijk[2]];
-								slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
-							}
-
-							// mark voxel above
-							ijk[dir[2]]++;
-							if (ijk[2] < dims[2] && ijk[0] < dims[0] && ijk[1] < dims[1])
+							if (ijk[0] < dims[0] && 
+								ijk[1] < dims[1] &&
+								ijk[2] < dims[2])
 							{
 								float* slice = slices[ijk[2]];
 								slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
