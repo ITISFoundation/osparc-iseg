@@ -1137,7 +1137,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 }
 
 bool SlicesHandler::LoadSurface(const char* filename,
-		const bool overwrite_working)
+		const bool overwrite_working, const bool intersect)
 {
 	float spacing[3] = {dx, dy, thickness};
 	unsigned dims[3] = {width, height, nrslices};
@@ -1153,8 +1153,17 @@ bool SlicesHandler::LoadSurface(const char* filename,
 	}
 
 	VoxelSurface voxeler;
-	auto ret = voxeler.Run(filename, dims, spacing, transform, slices.data(),
-			startslice, endslice);
+	VoxelSurface::eSurfaceImageOverlap ret;
+	if (intersect)
+	{
+		ret = voxeler.Intersect(filename, dims, spacing, transform, slices.data(),
+				startslice, endslice);
+	}
+	else
+	{
+		ret = voxeler.Run(filename, dims, spacing, transform, slices.data(),
+				startslice, endslice);
+	}
 	return (ret != VoxelSurface::kNone);
 }
 

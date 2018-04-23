@@ -3142,18 +3142,24 @@ void MainWindow::execute_loadsurface()
 			this);
 	if (!loadfilename.isEmpty())
 	{
+		QCheckBox* cb = new QCheckBox("Intersect Only");
+		cb->setToolTip("If on, the intersection of the surface with the voxels will be computed, not the interior of a closed surface.");
+		cb->setChecked(false);
+
 		QMessageBox msgBox;
 		msgBox.setWindowTitle("Import Surface");
 		msgBox.setText("What would you like to do what with the imported surface?");
 		msgBox.addButton("Overwrite", QMessageBox::YesRole); //==0
 		msgBox.addButton("Add", QMessageBox::NoRole);				 //==1
+		msgBox.addButton(cb, QMessageBox::YesRole);					 //==1
 		msgBox.addButton("Cancel", QMessageBox::RejectRole); //==2
 		int overwrite = msgBox.exec();
+		bool intersect = cb->isChecked();
 
-		if (overwrite == 2)
-			return;
+		//if (overwrite == 2)
+		//	return;
 
-		ok = handler3D->LoadSurface(loadfilename.ascii(), overwrite == 0);
+		ok = handler3D->LoadSurface(loadfilename.ascii(), overwrite == 0, intersect);
 	}
 
 	reset_brightnesscontrast();
