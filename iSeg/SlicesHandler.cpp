@@ -1137,7 +1137,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 }
 
 bool SlicesHandler::LoadSurface(const char* filename,
-		const bool overwrite_working)
+		bool overwrite_working, bool intersect)
 {
 	float spacing[3] = {dx, dy, thickness};
 	unsigned dims[3] = {width, height, nrslices};
@@ -1145,16 +1145,21 @@ bool SlicesHandler::LoadSurface(const char* filename,
 
 	if (overwrite_working)
 	{
-		for (unsigned s = startslice; s < endslice; s++)
-		{
-			auto val = image_slices[s].return_work()[0];
-			image_slices[s].clear_work();
-		}
+		clear_work();
 	}
 
 	VoxelSurface voxeler;
-	auto ret = voxeler.Run(filename, dims, spacing, transform, slices.data(),
-			startslice, endslice);
+	VoxelSurface::eSurfaceImageOverlap ret;
+	if (intersect)
+	{
+		ret = voxeler.Intersect(filename, dims, spacing, transform, slices.data(),
+				startslice, endslice);
+	}
+	else
+	{
+		ret = voxeler.Run(filename, dims, spacing, transform, slices.data(),
+				startslice, endslice);
+	}
 	return (ret != VoxelSurface::kNone);
 }
 
@@ -3870,24 +3875,18 @@ void SlicesHandler::freebmp()
 		(image_slices[i]).freebmp();
 
 	loaded = false;
-
-	return;
 }
 
 void SlicesHandler::clear_bmp()
 {
 	for (unsigned short i = startslice; i < endslice; i++)
 		(image_slices[i]).clear_bmp();
-
-	return;
 }
 
 void SlicesHandler::clear_work()
 {
 	for (unsigned short i = startslice; i < endslice; i++)
 		(image_slices[i]).clear_work();
-
-	return;
 }
 
 void SlicesHandler::clear_overlay()
@@ -12635,7 +12634,7 @@ typename itk::Image<T>::Pointer
 	size[1] = dims[1]; // size along Y
 
 	auto image = itk::Image<T>::New();
-	image->SetRegions(image_type::RegionType(start, size));
+	image->SetRegions(typename image_type::RegionType(start, size));
 	image->SetSpacing(spacing);
 	// \warning transform is ignored
 	//image->SetOrigin(origin);

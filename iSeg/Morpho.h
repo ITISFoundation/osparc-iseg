@@ -120,7 +120,7 @@ typename TOutputImage::Pointer
 	threshold->SetLowerThreshold(0.5f); // background is '0'
 	threshold->SetInsideValue(foreground_value);
 
-	std::vector<itk::ImageSource<image_type>::Pointer> filters;
+	std::vector<typename itk::ImageSource<image_type>::Pointer> filters;
 	if (operation == eOperation::kErode || operation == eOperation::kOpen)
 	{
 		auto erode = itk::BinaryErodeImageFilter<image_type, image_type, kernel_type>::New();
@@ -128,7 +128,7 @@ typename TOutputImage::Pointer
 		erode->SetKernel(structuringElement);
 		erode->SetErodeValue(foreground_value);
 		erode->SetBackgroundValue(0);
-		filters.push_back(itk::ImageSource<image_type>::Pointer(erode));
+		filters.push_back(typename itk::ImageSource<image_type>::Pointer(erode));
 
 		if (operation == kOpen)
 		{
@@ -136,7 +136,7 @@ typename TOutputImage::Pointer
 			dilate->SetInput(erode->GetOutput());
 			dilate->SetKernel(structuringElement);
 			dilate->SetDilateValue(foreground_value);
-			filters.push_back(itk::ImageSource<image_type>::Pointer(dilate));
+			filters.push_back(typename itk::ImageSource<image_type>::Pointer(dilate));
 		}
 	}
 	else
@@ -145,7 +145,7 @@ typename TOutputImage::Pointer
 		dilate->SetInput(threshold->GetOutput());
 		dilate->SetKernel(structuringElement);
 		dilate->SetDilateValue(foreground_value);
-		filters.push_back(itk::ImageSource<image_type>::Pointer(dilate));
+		filters.push_back(typename itk::ImageSource<image_type>::Pointer(dilate));
 
 		if (operation == kClose)
 		{
@@ -154,7 +154,7 @@ typename TOutputImage::Pointer
 			erode->SetKernel(structuringElement);
 			erode->SetErodeValue(foreground_value);
 			erode->SetBackgroundValue(0);
-			filters.push_back(itk::ImageSource<image_type>::Pointer(erode));
+			filters.push_back(typename itk::ImageSource<image_type>::Pointer(erode));
 		}
 	}
 
