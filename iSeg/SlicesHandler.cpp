@@ -1145,11 +1145,7 @@ bool SlicesHandler::LoadSurface(const char* filename,
 
 	if (overwrite_working)
 	{
-		for (unsigned s = startslice; s < endslice; s++)
-		{
-			auto val = image_slices[s].return_work()[0];
-			image_slices[s].clear_work();
-		}
+		clear_work();
 	}
 
 	VoxelSurface voxeler;
@@ -3879,24 +3875,18 @@ void SlicesHandler::freebmp()
 		(image_slices[i]).freebmp();
 
 	loaded = false;
-
-	return;
 }
 
 void SlicesHandler::clear_bmp()
 {
 	for (unsigned short i = startslice; i < endslice; i++)
 		(image_slices[i]).clear_bmp();
-
-	return;
 }
 
 void SlicesHandler::clear_work()
 {
 	for (unsigned short i = startslice; i < endslice; i++)
 		(image_slices[i]).clear_work();
-
-	return;
 }
 
 void SlicesHandler::clear_overlay()

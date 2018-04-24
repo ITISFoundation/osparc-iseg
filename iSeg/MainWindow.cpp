@@ -3157,15 +3157,17 @@ void MainWindow::execute_loadsurface()
 		int overwrite = msgBox.exec();
 		bool intersect = cb.isChecked();
 
-		//if (overwrite == 2)
-		//	return;
+		if (overwrite == 2)
+			return;
 
 		ok = handler3D->LoadSurface(loadfilename.ascii(), overwrite == 0, intersect);
 	}
 
-	reset_brightnesscontrast();
-
-	if (!ok)
+	if (ok)
+	{
+		reset_brightnesscontrast();
+	}
+	else
 	{
 		QMessageBox::warning(this, "iSeg",
 				"Error: Surface does not overlap with image",

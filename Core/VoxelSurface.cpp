@@ -283,11 +283,10 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 	surface->BuildCells();
 	auto num_cells = surface->GetNumberOfCells();
 
-	double tol = std::max(spacing[0], spacing[1]) / 10.0;
+	double tol = (*std::min_element(spacing, spacing+3)) / 10.0;
 	vtkIdType *pts, npts;
 	double bb[6];
-	int bbi[6], subId;
-	double t, x[3], pcoords[3];
+	int bbi[6];
 	for (vtkIdType id = 0; id < num_cells; ++id)
 	{
 		surface->GetCellPoints(id, npts, pts);
@@ -304,10 +303,12 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 			vtkCell* cell = surface->GetCell(id);
 
 			// iterate over grid lines (X-lines, Y-lines, Z-lines)
-			auto test = [&](int const dir[3]) {
+			auto intersect = [&](int const dir[3]) {
 				double pa[3] = {};
 				double pe[3] = {};
 				unsigned int ijk[3] = {};
+				int subId;
+				double t, x[3], pcoords[3];
 
 				pa[dir[2]] = bbi[dir[2] * 2] * spacing[dir[2]];
 				pe[dir[2]] = bbi[dir[2] * 2 + 1] * spacing[dir[2]];
@@ -338,17 +339,14 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 				}
 			};
 
-			// along z
-			int ijk[3] = {0, 1, 2};
-			test(ijk);
+			int along_z[3] = {0, 1, 2};
+			intersect(along_z);
 
-			// along y
-			int ikj[3] = {0, 2, 1};
-			test(ikj);
+			int along_y[3] = {0, 2, 1};
+			intersect(along_y);
 
-			// along x
-			int jki[3] = {1, 2, 0};
-			test(jki);
+			int along_x[3] = {1, 2, 0};
+			intersect(along_x);
 		}
 	}
 	return result;
