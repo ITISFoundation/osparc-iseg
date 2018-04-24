@@ -3142,20 +3142,20 @@ void MainWindow::execute_loadsurface()
 			this);
 	if (!loadfilename.isEmpty())
 	{
-		QCheckBox cb("Intersect Only");
-		cb.setToolTip("If on, the intersection of the surface with the voxels will be computed, not the interior of a closed surface.");
-		cb.setChecked(false);
-		cb.blockSignals(true);
+		QCheckBox* cb = new QCheckBox("Intersect Only");
+		cb->setToolTip("If on, the intersection of the surface with the voxels will be computed, not the interior of a closed surface.");
+		cb->setChecked(false);
+		cb->blockSignals(true);
 
 		QMessageBox msgBox;
 		msgBox.setWindowTitle("Import Surface");
 		msgBox.setText("What would you like to do what with the imported surface?");
 		msgBox.addButton("Overwrite", QMessageBox::YesRole); //==0
-		msgBox.addButton("Add", QMessageBox::NoRole);		//==1
-		msgBox.addButton(&cb, QMessageBox::ResetRole);		//
+		msgBox.addButton("Add", QMessageBox::NoRole);				 //==1
+		msgBox.addButton(cb, QMessageBox::ResetRole);				 //
 		msgBox.addButton("Cancel", QMessageBox::RejectRole); //==2
 		int overwrite = msgBox.exec();
-		bool intersect = cb.isChecked();
+		bool intersect = cb->isChecked();
 
 		if (overwrite == 2)
 			return;
