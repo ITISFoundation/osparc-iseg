@@ -91,7 +91,7 @@ public:
 	int ReadOverlay(const char* filename, unsigned short slicenr);
 	int ReadAvw(const char* filename);
 	int ReadRTdose(const char* filename);
-	bool LoadSurface(const char* filename, const bool overwrite_working, bool intersect);
+	bool LoadSurface(const char* filename, bool overwrite_working, bool intersect);
 
 	int LoadAllXdmf(const char* filename);
 	int LoadAllHDF(const char* filename);

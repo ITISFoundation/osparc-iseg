@@ -1137,7 +1137,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 }
 
 bool SlicesHandler::LoadSurface(const char* filename,
-		const bool overwrite_working, const bool intersect)
+		bool overwrite_working, bool intersect)
 {
 	float spacing[3] = {dx, dy, thickness};
 	unsigned dims[3] = {width, height, nrslices};
