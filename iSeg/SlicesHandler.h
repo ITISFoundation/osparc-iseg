@@ -96,7 +96,7 @@ public:
 	int LoadAllHDF(const char* filename);
 
 	void UpdateColorLookupTable(std::shared_ptr<ColorLookupTable> new_lut = nullptr);
-	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return color_lookup_table; }
+	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return _color_lookup_table; }
 
 	// Description: write project data into an Xdmf file
 	int SaveAllXdmf(const char* filename, int compression, bool naked = false);
@@ -218,7 +218,6 @@ public:
 	tissues_size_t get_tissue_pt(Point p, unsigned short slicenr);
 	void set_tissue_pt(Point p, unsigned short slicenr, tissues_size_t f);
 	unsigned int make_histogram(bool includeoutofrange);
-	unsigned int* return_histogram();
 	unsigned int return_area();
 	unsigned short return_width() override;
 	unsigned short return_height() override;
@@ -534,13 +533,16 @@ public:
 	void SetNumberOfUndoSteps(unsigned);
 	unsigned GetNumberOfUndoArrays();
 	void SetNumberOfUndoArrays(unsigned);
-	int GetCompression() const { return this->Compression; };
-	void SetCompression(int c) { this->Compression = c; };
-	bool GetContiguousMemory() const { return ContiguousMemoryIO; }
-	void SetContiguousMemory(bool v) { ContiguousMemoryIO = v; }
+	int GetCompression() const { return this->_hdf5_compression; };
+	void SetCompression(int c) { this->_hdf5_compression = c; };
+	bool GetContiguousMemory() const { return _contiguous_memory_io; }
+	void SetContiguousMemory(bool v) { _contiguous_memory_io = v; }
 	std::vector<float> GetBoundingBox();
 
-	TissueHiearchy* get_tissue_hierachy() { return tissue_hierachy; }
+	int SaveRaw(const char* filename, bool work);
+	float DICOMsort(std::vector<const char*>* lfilename);
+
+	TissueHiearchy* get_tissue_hierachy() { return _tissue_hierachy; }
 
 	void GetITKImage(itk::Image<float, 3>*, int startslice, int endslice);
 	void GetITKImageFB(itk::Image<float, 3>*, int startslice, int endslice);
@@ -565,39 +567,32 @@ public:
 	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() override;
 
 private:
-	unsigned short activeslice;
-	std::vector<bmphandler> image_slices;
-	std::shared_ptr<ColorLookupTable> color_lookup_table;
-	TissueHiearchy* tissue_hierachy;
-	float* overlay;
-	std::vector<Pair> slice_ranges;
-	std::vector<Pair> slice_bmpranges;
-	OutlineSlices os;
-	float thickness;
-	float dx;
-	float dy;
-	Transform transform;
-	short unsigned width;
-	short unsigned height;
-	short unsigned startslice;
-	short unsigned endslice;
-	short unsigned nrslices;
-	unsigned int area;
-	tissuelayers_size_t active_tissuelayer;
-	int SaveRaw(const char* filename, bool work);
-	unsigned int histogram[256];
-	bool loaded;
-	UndoElem* uelem;
-	UndoQueue undoQueue;
-	bool undo3D;
-	float DICOMsort(std::vector<const char*>* lfilename);
-	int Compression;
-	bool ContiguousMemoryIO;
+	unsigned short _activeslice;
+	std::vector<bmphandler> _image_slices;
+	short unsigned _width;
+	short unsigned _height;
+	short unsigned _startslice;
+	short unsigned _endslice;
+	short unsigned _nrslices;
+	unsigned int _area;
+	float _thickness;
+	float _dx;
+	float _dy;
+	Transform _transform;
+	tissuelayers_size_t _active_tissuelayer;
+	std::shared_ptr<ColorLookupTable> _color_lookup_table;
+	TissueHiearchy* _tissue_hierachy;
+	float* _overlay;
+	std::vector<Pair> _slice_ranges;
+	std::vector<Pair> _slice_bmpranges;
+	OutlineSlices _os;
 
-protected:
-	int redFactor;
-	int greenFactor;
-	int blueFactor;
+	bool _loaded;
+	UndoElem* _uelem;
+	UndoQueue _undoQueue;
+	bool _undo3D;
+	int _hdf5_compression;
+	bool _contiguous_memory_io;
 };
 
 } // namespace iseg
