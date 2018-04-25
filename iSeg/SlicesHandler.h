@@ -201,6 +201,9 @@ public:
 	std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const override;
 	std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) override;
 
+	std::vector<std::string> tissue_names() const override;
+	std::vector<bool> tissue_locks() const override;
+
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
 	tissues_size_t* return_tissues(tissuelayers_size_t layeridx, unsigned short slicenr1);
@@ -213,11 +216,11 @@ public:
 	void set_tissue_pt(Point p, unsigned short slicenr, tissues_size_t f);
 	unsigned int make_histogram(bool includeoutofrange);
 	unsigned int return_area();
-	unsigned short width() override;
-	unsigned short height() override;
-	unsigned short num_slices() override;
-	unsigned short start_slice() override;
-	unsigned short end_slice() override;
+	unsigned short width() const override;
+	unsigned short height() const override;
+	unsigned short num_slices() const override;
+	unsigned short start_slice() const override;
+	unsigned short end_slice() const override;
 	void set_startslice(unsigned short startslice1);
 	void set_endslice(unsigned short endslice1);
 	bool isloaded();
@@ -401,9 +404,9 @@ public:
 	void next_slice();
 	void prev_slice();
 	unsigned short get_next_featuring_slice(tissues_size_t type, bool& found);
-	unsigned short active_slice() override;
+	unsigned short active_slice() const override;
 	bmphandler* get_activebmphandler();
-	tissuelayers_size_t active_tissuelayer() override;
+	tissuelayers_size_t active_tissuelayer() const override;
 	void set_active_tissuelayer(tissuelayers_size_t idx);
 	unsigned pushstack_bmp();
 	unsigned pushstack_bmp(unsigned int slice);

@@ -227,6 +227,27 @@ std::vector<tissues_size_t*> SlicesHandler::tissue_slices(tissuelayers_size_t la
 	return ptrs;
 }
 
+std::vector<std::string> SlicesHandler::tissue_names() const
+{
+	std::vector<std::string> names(TissueInfos::GetTissueCount()+1);
+	names[0] = "Background";
+	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
+	{
+		names.at(i) = TissueInfos::GetTissueName(i);
+	}
+	return names;
+}
+
+std::vector<bool> SlicesHandler::tissue_locks() const
+{
+	std::vector<bool> locks(TissueInfos::GetTissueCount()+1, false);
+	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
+	{
+		locks.at(i) = TissueInfos::GetTissueLocked(i);
+	}
+	return locks;
+}
+
 float* SlicesHandler::return_bmp(unsigned short slicenr1)
 {
 	return _image_slices[slicenr1].return_bmp();
@@ -3980,15 +4001,15 @@ unsigned int SlicesHandler::return_area()
 	return (_image_slices[0]).return_area();
 }
 
-unsigned short SlicesHandler::width() { return _width; }
+unsigned short SlicesHandler::width() const { return _width; }
 
-unsigned short SlicesHandler::height() { return _height; }
+unsigned short SlicesHandler::height() const { return _height; }
 
-unsigned short SlicesHandler::num_slices() { return _nrslices; }
+unsigned short SlicesHandler::num_slices() const { return _nrslices; }
 
-unsigned short SlicesHandler::start_slice() { return _startslice; }
+unsigned short SlicesHandler::start_slice() const { return _startslice; }
 
-unsigned short SlicesHandler::end_slice() { return _endslice; }
+unsigned short SlicesHandler::end_slice() const { return _endslice; }
 
 void SlicesHandler::set_startslice(unsigned short startslice1)
 {
@@ -7748,14 +7769,14 @@ unsigned short SlicesHandler::get_next_featuring_slice(tissues_size_t type,
 	return _activeslice;
 }
 
-unsigned short SlicesHandler::active_slice() { return _activeslice; }
+unsigned short SlicesHandler::active_slice() const { return _activeslice; }
 
 bmphandler* SlicesHandler::get_activebmphandler()
 {
 	return &(_image_slices[_activeslice]);
 }
 
-tissuelayers_size_t SlicesHandler::active_tissuelayer()
+tissuelayers_size_t SlicesHandler::active_tissuelayer() const
 {
 	return _active_tissuelayer;
 }
