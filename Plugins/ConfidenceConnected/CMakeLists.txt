@@ -20,6 +20,7 @@ IF(PLUGIN_CONFIDENCE)
 	)
 
 	TARGET_LINK_LIBRARIES( Confidence.ext 
+		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
