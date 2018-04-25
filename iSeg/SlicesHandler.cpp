@@ -2715,8 +2715,7 @@ int SlicesHandler::SaveRaw_resized(const char* filename, int dxm, int dxp,
 		int dym, int dyp, int dzm, int dzp,
 		bool work)
 {
-	if ((-(dxm + dxp) >= _width) || (-(dym + dyp) >= _height) ||
-			(-(dzm + dzp) >= _nrslices))
+	if ((-(dxm + dxp) >= _width) || (-(dym + dyp) >= _height) || (-(dzm + dzp) >= _nrslices))
 		return (-1);
 	FILE* fp;
 	float* bits_tmp;
@@ -2844,8 +2843,7 @@ int SlicesHandler::SaveTissuesRaw_resized(const char* filename, int dxm,
 		int dxp, int dym, int dyp, int dzm,
 		int dzp)
 {
-	if ((-(dxm + dxp) >= _width) || (-(dym + dyp) >= _height) ||
-			(-(dzm + dzp) >= _nrslices))
+	if ((-(dxm + dxp) >= _width) || (-(dym + dyp) >= _height) || (-(dzm + dzp) >= _nrslices))
 		return (-1);
 	FILE* fp;
 	tissues_size_t* bits_tmp;
@@ -4633,12 +4631,10 @@ void SlicesHandler::extractinterpolatesave_contours(
 
 	for (unsigned short j = 0; j + 1 < _nrslices; j++)
 	{
-		dummy3D.copy2tissue(0,
-				_image_slices[j].return_tissues(_active_tissuelayer));
+		dummy3D.copy2tissue(0, _image_slices[j].return_tissues(_active_tissuelayer));
 		dummy3D.copy2tissue(between + 1, _image_slices[j + 1].return_tissues(
 																				 _active_tissuelayer));
-		dummy3D.interpolatetissuegrey(
-				0, between + 1); // TODO: Use interpolatetissuegrey_medianset?
+		dummy3D.interpolatetissuegrey(0, between + 1); // TODO: Use interpolatetissuegrey_medianset?
 
 		dummy3D.extract_contours(minsize, tissuevec);
 		if (dp)
@@ -4651,12 +4647,6 @@ void SlicesHandler::extractinterpolatesave_contours(
 	fp = dummy3D.save_tissuenamescolors(fp);
 
 	fclose(fp);
-
-	/*	os.clear();
-	os.set_sizenr(nrslices);
-	os.set_thickness(thickness);*/
-
-	return;
 }
 
 void SlicesHandler::extractinterpolatesave_contours2_xmirrored(
@@ -6959,7 +6949,7 @@ Transform SlicesHandler::get_transform() const { return _transform; }
 
 Transform SlicesHandler::get_transform_active_slices() const
 {
-	int plo[3] = {0, 0, -_startslice};
+	int plo[3] = {0, 0, -static_cast<int>(_startslice)};
 	float spacing[3] = {_dx, _dy, _thickness};
 
 	Transform tr_corrected(_transform);
