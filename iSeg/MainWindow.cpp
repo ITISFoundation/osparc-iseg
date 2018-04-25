@@ -49,9 +49,10 @@
 
 #include "Interface/Plugin.h"
 
+#include "Data/Transform.h"
+
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
-#include "Core/Transform.h"
 
 #include <boost/filesystem.hpp>
 

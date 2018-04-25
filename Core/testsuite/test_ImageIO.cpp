@@ -11,8 +11,9 @@
 
 #include "../ImageReader.h"
 #include "../ImageWriter.h"
-#include "../Transform.h"
-#include "../Vec3.h"
+
+#include "Data/Transform.h"
+#include "Data/Vec3.h"
 
 #include <boost/filesystem.hpp>
 

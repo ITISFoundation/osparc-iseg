@@ -11,11 +11,10 @@
 
 #include "iSegCore.h"
 
-#include "Types.h"
-
-#include "Interface/Point.h"
-#include "Interface/Mark.h"
-#include "Interface/DataSelection.h"
+#include "Data/DataSelection.h"
+#include "Data/Mark.h"
+#include "Data/Point.h"
+#include "Data/Types.h"
 
 #include <vector>
 

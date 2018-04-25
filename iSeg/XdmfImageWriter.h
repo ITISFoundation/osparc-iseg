@@ -10,9 +10,10 @@
 #ifndef XDMFIMAGEWRITER_H
 #define XDMFIMAGEWRITER_H
 
+#include "Data/Transform.h"
+#include "Data/Types.h"
+
 #include "Core/SetGetMacros.h"
-#include "Core/Transform.h"
-#include "Core/Types.h"
 
 namespace iseg {
 
@@ -65,10 +66,10 @@ protected:
 
 private:
 	int InternalWrite(const char* filename, float** slicesbmp,
-					  float** sliceswork, tissues_size_t** slicestissue,
-					  unsigned nrslices, unsigned width, unsigned height,
-					  float* pixelsize, Transform& transform, int compression,
-					  bool naked);
+			float** sliceswork, tissues_size_t** slicestissue,
+			unsigned nrslices, unsigned width, unsigned height,
+			float* pixelsize, Transform& transform, int compression,
+			bool naked);
 };
 
 } // namespace iseg

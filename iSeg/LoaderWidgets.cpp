@@ -13,7 +13,7 @@
 #include "CImg.h"
 #include "LoaderWidgets.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <q3filedialog.h>
 #include <q3hbox.h>

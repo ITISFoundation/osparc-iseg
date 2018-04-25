@@ -9,12 +9,12 @@
  */
 #pragma once
 
-#include "Interface/Mark.h"
+#include "Data/Mark.h"
+#include "Data/Types.h"
 
 #include "Core/Contour.h"
 #include "Core/FeatureExtractor.h"
 #include "Core/Pair.h"
-#include "Core/Types.h"
 
 #include <list>
 #include <set>
@@ -86,24 +86,24 @@ public:
 	void clear_tissue(tissuelayers_size_t idx);
 	bool has_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
 	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p,
-					bool override);
+			bool override);
 	void add2tissue_connected(tissuelayers_size_t idx,
-							  tissues_size_t tissuetype, Point p,
-							  bool override);
+			tissues_size_t tissuetype, Point p,
+			bool override);
 	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f,
-					bool override);
+			bool override);
 	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-					bool* mask, bool override);
+			bool* mask, bool override);
 	void add2tissue_thresh(tissuelayers_size_t idx, tissues_size_t tissuetype,
-						   Point p);
+			Point p);
 	void subtract_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-						 Point p);
+			Point p);
 	void subtract_tissue_connected(tissuelayers_size_t idx,
-								   tissues_size_t tissuetype, Point p);
+			tissues_size_t tissuetype, Point p);
 	void subtract_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-						 float f);
+			float f);
 	void change2mask_connectedtissue(tissuelayers_size_t idx, bool* mask,
-									 Point p, bool addorsub);
+			Point p, bool addorsub);
 	void change2mask_connectedwork(bool* mask, Point p, bool addorsub);
 	void tissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype);
 	void setissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype);
@@ -119,7 +119,7 @@ public:
 	float* swap_bmp_pointer(float* bits);
 	float* swap_work_pointer(float* bits);
 	tissues_size_t* swap_tissues_pointer(tissuelayers_size_t idx,
-										 tissues_size_t* bits);
+			tissues_size_t* bits);
 	void copy2bmp(float* bits, unsigned char mode);
 	void copy2work(float* bits, unsigned char mode);
 	void copy2work(float* bits, bool* mask, unsigned char mode);
@@ -132,7 +132,7 @@ public:
 	void copyfromtissue(tissuelayers_size_t idx, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
 	void copyfromtissuepadded(tissuelayers_size_t idx, tissues_size_t* bits,
-							  unsigned short padding);
+			unsigned short padding);
 	void clear_bmp();
 	void clear_work();
 	void bmp_sum();
@@ -151,20 +151,20 @@ public:
 	void SetConverterFactors(int redFactor, int greenFactor, int blueFactor);
 	int LoadDIBitmap(const char* filename);
 	int LoadDIBitmap(const char* filename, Point p, unsigned short dx,
-					 unsigned short dy);
+			unsigned short dy);
 	int ReloadDIBitmap(const char* filename);
 	int ReloadDIBitmap(const char* filename, Point p);
 	int CheckPNGDepth(const char* filename);
 	int LoadPNGBitmap(const char* filename);
 	bool LoadArray(float* bits, unsigned short w1, unsigned short h1);
 	bool LoadArray(float* bits, unsigned short w1, unsigned short h1, Point p,
-				   unsigned short dx, unsigned short dy);
+			unsigned short dx, unsigned short dy);
 	bool ReloadArray(float* bits);
 	bool ReloadArray(float* bits, unsigned short w1, unsigned short h1,
-					 Point p);
+			Point p);
 	bool LoadDICOM(const char* filename);
 	bool LoadDICOM(const char* filename, Point p, unsigned short dx,
-				   unsigned short dy);
+			unsigned short dy);
 	bool ReloadDICOM(const char* filename);
 	bool ReloadDICOM(const char* filename, Point p);
 	FILE* save_proj(FILE* fp, bool inclpics = true);
@@ -175,28 +175,28 @@ public:
 	int SaveWorkBitmap(const char* filename);
 	int SaveTissueBitmap(tissuelayers_size_t idx, const char* filename);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-				unsigned bitdepth, unsigned short slicenr);
+			unsigned bitdepth, unsigned short slicenr);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-				unsigned bitdepth, unsigned short slicenr, Point p,
-				unsigned short dx, unsigned short dy);
+			unsigned bitdepth, unsigned short slicenr, Point p,
+			unsigned short dx, unsigned short dy);
 	int ReloadRaw(const char* filename, unsigned bitdepth, unsigned slicenr);
 	int ReloadRaw(const char* filename, short unsigned w, short unsigned h,
-				  unsigned bitdepth, unsigned slicenr, Point p);
+			unsigned bitdepth, unsigned slicenr, Point p);
 	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					 unsigned short slicenr);
+			unsigned short slicenr);
 	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					 unsigned short slicenr, Point p, unsigned short dx,
-					 unsigned short dy);
+			unsigned short slicenr, Point p, unsigned short dx,
+			unsigned short dy);
 	int ReloadRawFloat(const char* filename, unsigned slicenr);
 	static float* ReadRawFloat(const char* filename, unsigned slicenr,
-							   unsigned int area);
+			unsigned int area);
 	int ReloadRawFloat(const char* filename, short unsigned w, short unsigned h,
-					   unsigned slicenr, Point p);
+			unsigned slicenr, Point p);
 	int ReloadRawTissues(const char* filename, unsigned bitdepth,
-						 unsigned slicenr);
+			unsigned slicenr);
 	int ReloadRawTissues(const char* filename, short unsigned w,
-						 short unsigned h, unsigned bitdepth, unsigned slicenr,
-						 Point p);
+			short unsigned h, unsigned bitdepth, unsigned slicenr,
+			Point p);
 	int SaveBmpRaw(const char* filename);
 	int SaveWorkRaw(const char* filename);
 	int SaveTissueRaw(tissuelayers_size_t idx, const char* filename);
@@ -209,7 +209,7 @@ public:
 	unsigned int make_histogram(bool includeoutofrange);
 	unsigned int make_histogram(float* mask, float f, bool includeoutofrange);
 	unsigned int make_histogram(Point p, unsigned short dx, unsigned short dy,
-								bool includeoutofrange);
+			bool includeoutofrange);
 	unsigned int* return_histogram();
 	float* find_modal(unsigned int thresh1, float thresh2);
 	void print_info();
@@ -219,7 +219,7 @@ public:
 	unsigned int return_height();
 	void threshold(float* thresholds);
 	void threshold(float* thresholds, Point p, unsigned short dx,
-				   unsigned short dy);
+			unsigned short dy);
 	void convolute(float* mask, unsigned short direction); // x: 0, y: 1, xy: 2
 	void scale_colors(Pair p);
 	void crop_colors();
@@ -244,38 +244,38 @@ public:
 	void canny_line(float sigma, float thresh_low, float thresh_high);
 	//		void canny_line1(float sigma, float thresh_low, float thresh_high);
 	void subthreshold(int n1, int n2, unsigned int thresh1, float thresh2,
-					  float sigma);
+			float sigma);
 	void convolute_hist(float* mask);
 	void gaussian_hist(float sigma);
 	float* direction_map(float* sobelx, float* sobely);
 	void nonmaximum_supr(float* direct_map);
 	void hysteretic(float thresh_low, float thresh_high, bool connectivity,
-					float set_to);
+			float set_to);
 	void hysteretic(float thresh_low, float thresh_high, bool connectivity,
-					float* mask, float f, float set_to);
+			float* mask, float f, float set_to);
 	void double_hysteretic(float thresh_low_l, float thresh_low_h,
-						   float thresh_high_l, float thresh_high_h,
-						   bool connectivity, float set_to);
+			float thresh_high_l, float thresh_high_h,
+			bool connectivity, float set_to);
 	void double_hysteretic(float thresh_low_l, float thresh_low_h,
-						   float thresh_high_l, float thresh_high_h,
-						   bool connectivity, float* mask, float f,
-						   float set_to);
+			float thresh_high_l, float thresh_high_h,
+			bool connectivity, float* mask, float f,
+			float set_to);
 	void thresholded_growing(Point p, float thresh_low, float thresh_high,
-							 bool connectivity, float set_to);
+			bool connectivity, float set_to);
 	void thresholded_growing(Point p, float thresh_low, float thresh_high,
-							 bool connectivity, float set_to,
-							 std::vector<Point>* limits1);
+			bool connectivity, float set_to,
+			std::vector<Point>* limits1);
 	void thresholded_growinglimit(Point p, float thresh_low, float thresh_high,
-								  bool connectivity, float set_to);
+			bool connectivity, float set_to);
 	void thresholded_growing(Point p, float threshfactor_low,
-							 float threshfactor_high, bool connectivity,
-							 float set_to, Pair* tp);
+			float threshfactor_high, bool connectivity,
+			float set_to, Pair* tp);
 	void thresholded_growing(float thresh_low, float thresh_high,
-							 bool connectivity, float* mask, float f,
-							 float set_to);
+			bool connectivity, float* mask, float f,
+			float set_to);
 	void distance_map(bool connectivity);
 	void distance_map(bool connectivity, float f,
-					  short unsigned levlset); //0:outside,1:inside,2:both
+			short unsigned levlset); //0:outside,1:inside,2:both
 	void dead_reckoning();
 	unsigned* dead_reckoning(float f);
 	unsigned* dead_reckoning_squared(float f);
@@ -291,9 +291,9 @@ public:
 	void floodtissue(tissuelayers_size_t idx, bool* mask);
 	void mark_border(bool connectivity);
 	void aniso_diff(float dt, int n, float (*f)(float, float), float k,
-					float restraint);
+			float restraint);
 	void cont_anisodiff(float dt, int n, float (*f)(float, float), float k,
-						float restraint);
+			float restraint);
 	unsigned* watershed(bool connectivity);
 	unsigned* watershed_sobel(bool connectivity);
 	void construct_regions(unsigned h, unsigned* wshed);
@@ -312,28 +312,28 @@ public:
 	void connected_components(bool connectivity, std::set<float>& components);
 	void fill_gaps(short unsigned n, bool connectivity);
 	void fill_gapstissue(tissuelayers_size_t idx, short unsigned n,
-						 bool connectivity);
+			bool connectivity);
 	void wshed2work(unsigned* Y);
 	void labels2work(unsigned* Y, unsigned lnr);
 	//		change_island, remove_island s. 3D-slicer
 	//		registration: manual, mutual information s. 3D-slicer
 	void get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
-							std::vector<std::vector<Point>>* outer_line,
-							std::vector<std::vector<Point>>* inner_line,
-							int minsize);
+			std::vector<std::vector<Point>>* outer_line,
+			std::vector<std::vector<Point>>* inner_line,
+			int minsize);
 	void get_tissuecontours2_xmirrored(
-		tissuelayers_size_t idx, tissues_size_t f,
-		std::vector<std::vector<Point>>* outer_line,
-		std::vector<std::vector<Point>>* inner_line, int minsize);
+			tissuelayers_size_t idx, tissues_size_t f,
+			std::vector<std::vector<Point>>* outer_line,
+			std::vector<std::vector<Point>>* inner_line, int minsize);
 	void get_tissuecontours2_xmirrored(
-		tissuelayers_size_t idx, tissues_size_t f,
-		std::vector<std::vector<Point>>* outer_line,
-		std::vector<std::vector<Point>>* inner_line, int minsize,
-		float disttol);
+			tissuelayers_size_t idx, tissues_size_t f,
+			std::vector<std::vector<Point>>* outer_line,
+			std::vector<std::vector<Point>>* inner_line, int minsize,
+			float disttol);
 	void get_contours(float f, std::vector<std::vector<Point>>* outer_line,
-					  std::vector<std::vector<Point>>* inner_line, int minsize);
+			std::vector<std::vector<Point>>* inner_line, int minsize);
 	void get_contours(Point p, std::vector<std::vector<Point>>* outer_line,
-					  std::vector<std::vector<Point>>* inner_line, int minsize);
+			std::vector<std::vector<Point>>* inner_line, int minsize);
 	void load_line(std::vector<Point>* vec_pt);
 	void presimplify_line(float d);
 	void dougpeuck_line(float epsilon);
@@ -354,40 +354,40 @@ public:
 	void adaptive_fuzzy(Point p, float m1, float s1, float s2, float thresh);
 	void fast_marching(Point p, float sigma, float thresh);
 	ImageForestingTransformFastMarching* fastmarching_init(Point p, float sigma,
-														   float thresh);
+			float thresh);
 	void classify(short nrclasses, short dim, float** bits, float* weights,
-				  float* centers, float maxdist);
+			float* centers, float maxdist);
 	void classifytest();
 	void EMtest();
 	void em(short nrtissues, short dim, float** bits, float* weights,
 			unsigned int iternr, unsigned int converge);
 	float* classifytest1();
 	void kmeans(short nrtissues, short dim, float** bits, float* weights,
-				unsigned int iternr, unsigned int converge);
+			unsigned int iternr, unsigned int converge);
 	void kmeans_mhd(short nrtissues, short dim,
-					std::vector<std::string> mhdfiles, unsigned short slicenr,
-					float* weights, unsigned int iternr, unsigned int converge);
+			std::vector<std::string> mhdfiles, unsigned short slicenr,
+			float* weights, unsigned int iternr, unsigned int converge);
 	void kmeans_png(short nrtissues, short dim,
-					std::vector<std::string> pngfiles,
-					std::vector<int> exctractChannel, unsigned short slicenr,
-					float* weights, unsigned int iternr, unsigned int converge,
-					const std::string initCentersFile = "");
+			std::vector<std::string> pngfiles,
+			std::vector<int> exctractChannel, unsigned short slicenr,
+			float* weights, unsigned int iternr, unsigned int converge,
+			const std::string initCentersFile = "");
 	void gamma_mhd(short nrtissues, short dim,
-				   std::vector<std::string> mhdfiles, unsigned short slicenr,
-				   float* weights, float** centers, float* tol_f, float* tol_d,
-				   Pair pixelsize);
+			std::vector<std::string> mhdfiles, unsigned short slicenr,
+			float* weights, float** centers, float* tol_f, float* tol_d,
+			Pair pixelsize);
 	void levelsettest(float sigma, float epsilon, float alpha, float beta,
-					  float stepsize, unsigned nrsteps, unsigned reinitfreq);
+			float stepsize, unsigned nrsteps, unsigned reinitfreq);
 	void levelsettest1(float sigma, float epsilon, float alpha, float beta,
-					   float stepsize, unsigned nrsteps, unsigned reinitfreq);
+			float stepsize, unsigned nrsteps, unsigned reinitfreq);
 	void cannylevelset(float* initlev, float f, float sigma, float thresh_low,
-					   float thresh_high, float epsilon, float stepsize,
-					   unsigned nrsteps, unsigned reinitfreq);
+			float thresh_high, float epsilon, float stepsize,
+			unsigned nrsteps, unsigned reinitfreq);
 	void cannylevelsettest(float sigma, float thresh_low, float thresh_high,
-						   float epsilon, float stepsize, unsigned nrsteps,
-						   unsigned reinitfreq);
+			float epsilon, float stepsize, unsigned nrsteps,
+			unsigned reinitfreq);
 	void threshlevelset(float thresh_low, float thresh_high, float epsilon,
-						float stepsize, unsigned nrsteps, unsigned reinitfreq);
+			float stepsize, unsigned nrsteps, unsigned reinitfreq);
 	float extract_feature(Point p1, Point p2);
 	float extract_featurework(Point p1, Point p2);
 	float return_stdev();
@@ -404,7 +404,7 @@ public:
 	void getstack_work(unsigned i);
 	void getstack_help(unsigned i);
 	void getstack_tissue(tissuelayers_size_t idx, unsigned i,
-						 tissues_size_t tissuenr, bool override);
+			tissues_size_t tissuenr, bool override);
 	void popstack_bmp();
 	void popstack_work();
 	void popstack_help();
@@ -412,32 +412,32 @@ public:
 	bool isloaded();
 	void correct_outline(float f, std::vector<Point>* newline);
 	void correct_outlinetissue(tissuelayers_size_t idx, tissues_size_t f1,
-							   std::vector<Point>* newline);
+			std::vector<Point>* newline);
 	void brush(float f, Point p, int radius, bool draw);
 	void brush(float f, Point p, float radius, float dx, float dy, bool draw);
 	void brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p,
-					 int radius, bool draw, tissues_size_t f1);
+			int radius, bool draw, tissues_size_t f1);
 	void brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p,
-					 float radius, float dx, float dy, bool draw,
-					 tissues_size_t f1);
+			float radius, float dx, float dy, bool draw,
+			tissues_size_t f1);
 	void fill_holes(float f, int minsize);
 	void fill_holestissue(tissuelayers_size_t idx, tissues_size_t f,
-						  int minsize);
+			int minsize);
 	void remove_islands(float f, int minsize);
 	void remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f,
-							  int minsize);
+			int minsize);
 	float add_skin(unsigned i);
 	void add_skin(unsigned i, float setto);
 	void add_skintissue(tissuelayers_size_t idx, unsigned i4,
-						tissues_size_t setto);
+			tissues_size_t setto);
 	float add_skin_outside(unsigned i);
 	void add_skin_outside(unsigned i, float setto);
 	void add_skintissue_outside(tissuelayers_size_t idx, unsigned i4,
-								tissues_size_t setto);
+			tissues_size_t setto);
 	bool value_at_boundary(float value);
 	bool tissuevalue_at_boundary(tissuelayers_size_t idx, tissues_size_t value);
 	void fill_skin(int thicknessX, int thicknessY, tissues_size_t backgroundID,
-				   tissues_size_t skinID);
+			tissues_size_t skinID);
 	void flood_exterior(float setto);
 	void flood_exteriortissue(tissuelayers_size_t idx, tissues_size_t setto);
 	void fill_unassigned(float setto);
@@ -457,8 +457,8 @@ public:
 	void permute_tissue_indices(tissues_size_t* indexMap);
 	void remove_tissue(tissues_size_t tissuenr, tissues_size_t tissuecount1);
 	void group_tissues(tissuelayers_size_t idx,
-					   std::vector<tissues_size_t>& olds,
-					   std::vector<tissues_size_t>& news);
+			std::vector<tissues_size_t>& olds,
+			std::vector<tissues_size_t>& news);
 	/*		void locktissue(tissues_size_t nr);
 				void unlocktissue(tissues_size_t nr);
 				bool islockedtissue(tissues_size_t nr);
@@ -466,32 +466,32 @@ public:
 	unsigned char return_mode(bool bmporwork);
 	void set_mode(unsigned char mode, bool bmporwork);
 	bool print_amascii_slice(tissuelayers_size_t idx,
-							 std::ofstream& streamname);
+			std::ofstream& streamname);
 	bool print_vtkascii_slice(tissuelayers_size_t idx,
-							  std::ofstream& streamname);
+			std::ofstream& streamname);
 	bool print_vtkbinary_slice(tissuelayers_size_t idx,
-							   std::ofstream& streamname);
+			std::ofstream& streamname);
 	void adaptwork2bmp(float f);
 	void shifttissue();
 	void shiftbmp();
 	unsigned long return_workpixelcount(float f);
 	unsigned long return_tissuepixelcount(tissuelayers_size_t idx,
-										  tissues_size_t c);
+			tissues_size_t c);
 	void swap(bmphandler& bmph);
 	bool get_extent(tissuelayers_size_t idx, tissues_size_t tissuenr,
-					unsigned short extent[2][2]);
+			unsigned short extent[2][2]);
 	bool unwrap(float jumpratio, float range = 0, float shift = 0);
 
 	unsigned getfirststackindexxxxxxxxx();
 
 	int ConvertImageTo8BitBMP(const char* filename, unsigned char*& bits_tmp);
 	int ConvertPNGImageTo8BitBMP(const char* filename,
-								 unsigned char*& bits_tmp);
+			unsigned char*& bits_tmp);
 	void SetRGBtoGrayScaleFactors(double newRedFactor, double newGreenFactor,
-								  double newBlueFactor);
+			double newBlueFactor);
 	void mergetissue(tissues_size_t tissuetype, tissuelayers_size_t idx);
 	void tissue2mc(tissuelayers_size_t idx, tissues_size_t tissuetype,
-				   unsigned char** voxels, int k);
+			unsigned char** voxels, int k);
 
 protected:
 	//		static bool lockedtissues[TISSUES_SIZE_MAX+1];
@@ -514,15 +514,15 @@ protected:
 	void set_marker(unsigned* wshed);
 	float base_connection(float c, std::vector<float>* maps);
 	void hysteretic_growth(float* pict, std::vector<int>* s, unsigned short w,
-						   unsigned short h, bool connectivity, float set_to);
+			unsigned short h, bool connectivity, float set_to);
 	void hysteretic_growth(float* pict, std::vector<int>* s, unsigned short w,
-						   unsigned short h, bool connectivity, float set_to,
-						   int nr);
+			unsigned short h, bool connectivity, float set_to,
+			int nr);
 	template<typename T, typename F>
 	void _brush(T* data, T f, Point p, int radius, bool draw, T f1, F);
 	template<typename T, typename F>
 	void _brush(T* data, T f, Point p, float radius, float dx, float dy,
-				bool draw, T f1, F);
+			bool draw, T f1, F);
 
 	//		int infosize;
 	//		BITMAPINFO *bmpinfo;

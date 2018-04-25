@@ -11,8 +11,8 @@
 
 #include "InterfaceApi.h"
 
-#include "DataSelection.h"
-#include "Mark.h"
+#include "Data/DataSelection.h"
+#include "Data/Mark.h"
 
 #include <qcursor.h>
 #include <qdir.h>

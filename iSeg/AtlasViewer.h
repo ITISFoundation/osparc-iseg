@@ -9,10 +9,11 @@
  */
 #pragma once
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
+
+#include "Data/Types.h"
 
 #include "Core/Pair.h"
-#include "Core/Types.h"
 
 #include <QCloseEvent>
 #include <QContextMenuEvent>
@@ -40,11 +41,11 @@ class AtlasViewer : public QWidget
 	Q_OBJECT
 public:
 	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1,
-				unsigned short dimx1, unsigned short dimy1,
-				unsigned short dimz1, float dx1, float dy1, float dz1,
-				std::vector<float>* r, std::vector<float>* g,
-				std::vector<float>* b, QWidget* parent = 0,
-				const char* name = 0, Qt::WindowFlags wFlags = 0);
+			unsigned short dimx1, unsigned short dimy1,
+			unsigned short dimz1, float dx1, float dy1, float dz1,
+			std::vector<float>* r, std::vector<float>* g,
+			std::vector<float>* b, QWidget* parent = 0,
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasViewer();
 	void init();
 	void update();

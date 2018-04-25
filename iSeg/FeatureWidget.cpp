@@ -15,7 +15,7 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
-#include "Interface/addLine.h"
+#include "Data/addLine.h"
 
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"

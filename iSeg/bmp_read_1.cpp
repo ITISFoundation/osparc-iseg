@@ -12,7 +12,7 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
-#include "Interface/addLine.h"
+#include "Data/addLine.h"
 
 #include "Core/ExpectationMaximization.h"
 #include "Core/ImageForestingTransform.h"

@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Core/Types.h"
+#include "Data/Types.h"
 
 #include <vector>
 
@@ -19,7 +19,7 @@ class TissueCleaner
 {
 public:
 	TissueCleaner(tissues_size_t** slices1, unsigned short n1,
-				  unsigned short width1, unsigned short height1);
+			unsigned short width1, unsigned short height1);
 	~TissueCleaner();
 	bool Allocate();
 	void ConnectedComponents();

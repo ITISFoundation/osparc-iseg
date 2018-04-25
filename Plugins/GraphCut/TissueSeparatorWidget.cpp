@@ -12,8 +12,8 @@
 //#define DEBUG_GC
 #include "GraphCutAlgorithms.h"
 
-#include "Interface/ItkUtils.h"
-#include "Interface/addLine.h"
+#include "Data/ItkUtils.h"
+#include "Data/addLine.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 

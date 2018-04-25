@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include "Core/SliceProvider.h"
 

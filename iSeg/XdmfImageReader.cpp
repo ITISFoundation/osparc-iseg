@@ -11,9 +11,10 @@
 
 #include "XdmfImageReader.h"
 
+#include "Data/Transform.h"
+
 #include "Core/ColorLookupTable.h"
 #include "Core/HDF5Reader.h"
-#include "Core/Transform.h"
 
 #include <boost/algorithm/string/replace.hpp>
 
@@ -37,10 +38,10 @@ using namespace iseg;
 
 namespace {
 int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
-		  size_t Height, bool ReadContiguousMemory,
-		  const std::string& source_dname, float** ImageSlices,
-		  const std::string& target_dname, float** WorkSlices,
-		  const std::string& tissue_dname, tissues_size_t** TissueSlices)
+		size_t Height, bool ReadContiguousMemory,
+		const std::string& source_dname, float** ImageSlices,
+		const std::string& target_dname, float** WorkSlices,
+		const std::string& tissue_dname, tissues_size_t** TissueSlices)
 {
 	if (!reader.exists(source_dname))
 	{
@@ -96,8 +97,8 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		try
 		{
 			cerr << "N = " << N
-				 << ", bufferFloat.max_size() = " << bufferFloat.max_size()
-				 << endl;
+					 << ", bufferFloat.max_size() = " << bufferFloat.max_size()
+					 << endl;
 			bufferFloat.resize(N);
 		}
 		catch (length_error& le)
@@ -176,7 +177,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
 					cerr << "N = " << N << ", bufferUChar.max_size() = "
-						 << bufferUChar.max_size() << endl;
+							 << bufferUChar.max_size() << endl;
 					bufferUChar.resize(N);
 				}
 				catch (length_error& le)
@@ -198,7 +199,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 						for (int i = 0; i < Width; i++, pos++)
 						{
 							TissueSlices[k][pos] =
-								(tissues_size_t)bufferUChar[n];
+									(tissues_size_t)bufferUChar[n];
 							n++;
 						}
 					}
@@ -213,7 +214,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
 					cerr << "N = " << N << ", bufferUShort.max_size() = "
-						 << bufferUShort.max_size() << endl;
+							 << bufferUShort.max_size() << endl;
 					bufferUShort.resize(N);
 				}
 				catch (length_error& le)
@@ -235,7 +236,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 						for (int i = 0; i < Width; i++, pos++)
 						{
 							TissueSlices[k][pos] =
-								(tissues_size_t)bufferUShort[n];
+									(tissues_size_t)bufferUShort[n];
 							n++;
 						}
 					}
@@ -250,7 +251,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
 					cerr << "N = " << N << ", bufferUInt.max_size() = "
-						 << bufferUInt.max_size() << endl;
+							 << bufferUInt.max_size() << endl;
 					bufferUInt.resize(N);
 				}
 				catch (length_error& le)
@@ -272,7 +273,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 						for (int i = 0; i < Width; i++, pos++)
 						{
 							TissueSlices[k][pos] =
-								(tissues_size_t)bufferUInt[n];
+									(tissues_size_t)bufferUInt[n];
 							n++;
 						}
 					}
@@ -297,7 +298,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
 			{
 				ok = ok && reader.read(ImageSlices[k], offset, slice_size,
-									   source_dname);
+											 source_dname);
 			}
 		}
 		if (reader.exists(target_dname))
@@ -307,7 +308,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
 			{
 				ok = ok && reader.read(WorkSlices[k], offset, slice_size,
-									   target_dname);
+											 target_dname);
 			}
 		}
 		if (reader.exists(tissue_dname))
@@ -317,7 +318,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
 			{
 				ok = ok && reader.read(TissueSlices[k], offset, slice_size,
-									   tissue_dname);
+											 tissue_dname);
 			}
 		}
 	}
@@ -358,17 +359,17 @@ int XdmfImageReader::ParseXML()
 
 	QString msg;
 	if (!inputDocument.setContent(inputContent, false,
-								  &msg)) // This function is not reentrant.
+					&msg)) // This function is not reentrant.
 	{
 		cerr << "error assigning content of " << FileName << ": "
-			 << msg.toAscii().data() << endl;
+				 << msg.toAscii().data() << endl;
 	}
 
 	QDomElement root = inputDocument.documentElement();
 	if (root.tagName() != "Xdmf")
 	{
 		cerr << "invalid root element: " << root.tagName().toAscii().data()
-			 << endl;
+				 << endl;
 	}
 
 	QDomElement domain = root.firstChildElement(QString("Domain"));
@@ -384,16 +385,16 @@ int XdmfImageReader::ParseXML()
 			if (type != QString("Uniform"))
 			{
 				cerr << "error, unsupported grid type: "
-					 << type.toAscii().data() << endl;
+						 << type.toAscii().data() << endl;
 				return 0;
 			}
 
 			// Geometry
 			QDomElement geometry = e.firstChildElement(QString("Geometry"));
 			if (geometry.attribute(QString("Type")) !=
-					QString("ORIGIN_DXDYDZ") &&
-				geometry.attribute(QString("GeometryType")) !=
-					QString("ORIGIN_DXDYDZ"))
+							QString("ORIGIN_DXDYDZ") &&
+					geometry.attribute(QString("GeometryType")) !=
+							QString("ORIGIN_DXDYDZ"))
 			{
 				cerr << "error, unsupported geometry type..." << endl;
 				return 0;
@@ -439,15 +440,15 @@ int XdmfImageReader::ParseXML()
 			// Topology
 			QDomElement topology = e.firstChildElement(QString("Topology"));
 			if (topology.attribute(QString("Type")) !=
-					QString("3DCORECTMesh") &&
-				topology.attribute(QString("TopologyType")) !=
-					QString("3DCORECTMesh"))
+							QString("3DCORECTMesh") &&
+					topology.attribute(QString("TopologyType")) !=
+							QString("3DCORECTMesh"))
 			{
 				cerr << "error, unsupported topology type..." << endl;
 				return 0;
 			}
 			QStringList textList =
-				topology.attribute(QString("Dimensions")).split(QString(" "));
+					topology.attribute(QString("Dimensions")).split(QString(" "));
 			if (textList.size() != 3)
 			{
 				cerr << "error, invalid dimensions..." << endl;
@@ -465,12 +466,12 @@ int XdmfImageReader::ParseXML()
 				QString name = scalar.attribute(QString("Name"));
 				this->ArrayNames.append(name);
 				QDomElement dataitem =
-					scalar.firstChildElement(QString("DataItem"));
+						scalar.firstChildElement(QString("DataItem"));
 				QString text = dataitem.text().trimmed();
 				int idx = text.indexOf(":");
 				QString datasetname = text.remove(0, idx + 1);
 				cerr << "mapping " << name.toAscii().data() << " to "
-					 << datasetname.toAscii().data() << endl;
+						 << datasetname.toAscii().data() << endl;
 				this->mapArrayNames[name] = datasetname;
 			}
 
@@ -486,7 +487,7 @@ int XdmfImageReader::ParseXML()
 int XdmfImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
-					 (size_t)this->NumberOfSlices;
+									 (size_t)this->NumberOfSlices;
 	cerr << "XdmfImageReader::Read()" << endl;
 	cerr << "Width = " << this->Width << endl;
 	cerr << "Height = " << this->Height << endl;
@@ -503,12 +504,12 @@ int XdmfImageReader::Read()
 	// save working directory
 	QDir oldcwd = QDir::current();
 	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-		 << endl;
+			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	cerr << "changing current folder to "
-		 << fileInfo.absolutePath().toAscii().data() << endl;
+			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
@@ -519,16 +520,16 @@ int XdmfImageReader::Read()
 	}
 
 	int r = _Read(reader, NumberOfSlices, Width, Height, ReadContiguousMemory,
-				  this->mapArrayNames["Source"].toAscii().data(), ImageSlices,
-				  this->mapArrayNames["Target"].toAscii().data(), WorkSlices,
-				  this->mapArrayNames["Tissue"].toAscii().data(), TissueSlices);
+			this->mapArrayNames["Source"].toAscii().data(), ImageSlices,
+			this->mapArrayNames["Target"].toAscii().data(), WorkSlices,
+			this->mapArrayNames["Tissue"].toAscii().data(), TissueSlices);
 
 	reader.close();
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	cerr << "restored current folder "
-		 << QDir::current().absolutePath().toAscii().data() << endl;
+			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return r;
 }
@@ -573,14 +574,14 @@ int HDFImageReader::ParseHDF()
 	vector<int> dimensions;
 	dimensions.resize(3);
 	ok = ok && (reader.read(dimensions, "/dimensions") != 0) &&
-		 (dimensions.size() == 3);
+			 (dimensions.size() == 3);
 	this->Width = dimensions[0];
 	this->Height = dimensions[1];
 	this->NumberOfSlices = dimensions[2];
 
 	vector<float> pixelsize(3);
 	ok = ok && (reader.read(pixelsize, "/pixelsize") != 0) &&
-		 (pixelsize.size() == 3);
+			 (pixelsize.size() == 3);
 	for (unsigned short i = 0; i < 3; i++)
 		PixelSize[i] = pixelsize[i];
 
@@ -591,7 +592,7 @@ int HDFImageReader::ParseHDF()
 	{
 		vector<float> rotation(9);
 		ok = ok && (reader.read(rotation, "/rotation") != 0) &&
-			 (rotation.size() == 9);
+				 (rotation.size() == 9);
 
 		ImageTransform.setIdentity();
 		ImageTransform.setOffset(offset.data());
@@ -638,7 +639,7 @@ int HDFImageReader::ParseHDF()
 int HDFImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
-					 (size_t)this->NumberOfSlices;
+									 (size_t)this->NumberOfSlices;
 	cerr << "XdmfImageReader::Read()" << endl;
 	cerr << "Width = " << this->Width << endl;
 	cerr << "Height = " << this->Height << endl;
@@ -655,12 +656,12 @@ int HDFImageReader::Read()
 	// save working directory
 	QDir oldcwd = QDir::current();
 	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-		 << endl;
+			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	cerr << "changing current folder to "
-		 << fileInfo.absolutePath().toAscii().data() << endl;
+			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + "." + suffix;
@@ -671,16 +672,16 @@ int HDFImageReader::Read()
 	}
 
 	int r = _Read(reader, NumberOfSlices, Width, Height, ReadContiguousMemory,
-				  this->mapArrayNames["Source"].toAscii().data(), ImageSlices,
-				  this->mapArrayNames["Target"].toAscii().data(), WorkSlices,
-				  this->mapArrayNames["Tissue"].toAscii().data(), TissueSlices);
+			this->mapArrayNames["Source"].toAscii().data(), ImageSlices,
+			this->mapArrayNames["Target"].toAscii().data(), WorkSlices,
+			this->mapArrayNames["Tissue"].toAscii().data(), TissueSlices);
 
 	reader.close();
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	cerr << "restored current folder "
-		 << QDir::current().absolutePath().toAscii().data() << endl;
+			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return 1;
 }
@@ -728,8 +729,8 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 			if (version > 1)
 			{
 				std::cerr
-					<< "Error: could not load color lookup table. The file "
-					   "format is newer than this iSEG.\n";
+						<< "Error: could not load color lookup table. The file "
+							 "format is newer than this iSEG.\n";
 				return nullptr;
 			}
 
@@ -743,9 +744,9 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 					std::string const folder_name = "/Lut/" + name;
 
 					ok = ok &&
-						 (reader.read(&index, folder_name + "/index") != 0);
+							 (reader.read(&index, folder_name + "/index") != 0);
 					ok = ok &&
-						 (reader.read(float_rgb, folder_name + "/rgb") != 0);
+							 (reader.read(float_rgb, folder_name + "/rgb") != 0);
 
 					rgb[0] = static_cast<unsigned char>(float_rgb[0] * 255.0);
 					rgb[1] = static_cast<unsigned char>(float_rgb[1] * 255.0);

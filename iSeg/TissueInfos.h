@@ -10,7 +10,7 @@
 #ifndef TISSUEINFOS
 #define TISSUEINFOS
 
-#include "Core/Types.h"
+#include "Data/Types.h"
 
 #include <qstring.h> // BL TODO get rid of this
 
@@ -20,7 +20,7 @@
 
 namespace iseg {
 
-class SlicesHandler;	   // BL TODO get rid of this?
+class SlicesHandler;			 // BL TODO get rid of this?
 class TissueHierarchyItem; // BL TODO get rid of this?
 
 struct TissueInfoStruct
@@ -70,7 +70,7 @@ struct TissueInfoStruct
 	};
 
 	void GetColorBlendedRGB(unsigned char& r, unsigned char& g,
-							unsigned char& b, unsigned char offset = 0)
+			unsigned char& b, unsigned char offset = 0)
 	{
 		r = (unsigned char)(offset + opac * (255.0f * color[0] - offset));
 		g = (unsigned char)(offset + opac * (255.0f * color[1] - offset));
@@ -95,18 +95,18 @@ public:
 
 	static float* GetTissueColor(tissues_size_t tissuetype);
 	static void GetTissueColorRGB(tissues_size_t tissuetype, unsigned char& r,
-								  unsigned char& g, unsigned char& b);
+			unsigned char& g, unsigned char& b);
 	static void GetTissueColorBlendedRGB(tissues_size_t tissuetype,
-										 unsigned char& r, unsigned char& g,
-										 unsigned char& b,
-										 unsigned char offset = 0);
+			unsigned char& r, unsigned char& g,
+			unsigned char& b,
+			unsigned char offset = 0);
 	static float GetTissueOpac(tissues_size_t tissuetype);
 	static QString GetTissueName(tissues_size_t tissuetype);
 	static tissues_size_t GetTissueType(QString tissuename);
 	static bool GetTissueLocked(tissues_size_t tissuetype);
 
 	static void SetTissueColor(tissues_size_t tissuetype, float r, float g,
-							   float b);
+			float b);
 	static void SetTissueOpac(tissues_size_t tissuetype, float val);
 	static void SetTissueName(tissues_size_t tissuetype, QString val);
 	static void SetTissueLocked(tissues_size_t tissuetype, bool val);
@@ -126,14 +126,14 @@ public:
 	static FILE* LoadTissueLocks(FILE* fp);
 
 	static bool SaveTissuesHDF(const char* filename,
-							   TissueHierarchyItem* hiearchy, bool naked,
-							   unsigned short version);
+			TissueHierarchyItem* hiearchy, bool naked,
+			unsigned short version);
 
 	static bool SaveTissuesReadable(const char* filename,
-									unsigned short version);
+			unsigned short version);
 	static bool LoadTissuesReadable(const char* filename,
-									SlicesHandler* handler3D,
-									tissues_size_t& removeTissuesRange);
+			SlicesHandler* handler3D,
+			tissues_size_t& removeTissuesRange);
 
 	static bool SaveDefaultTissueList(const char* filename);
 	static bool LoadDefaultTissueList(const char* filename);

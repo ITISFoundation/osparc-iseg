@@ -13,7 +13,7 @@
 
 #include "Pair.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 namespace iseg {
 
@@ -21,7 +21,7 @@ class ISEG_CORE_API FeatureExtractor
 {
 public:
 	void init(float* bit, Point p1, Point p2, short unsigned w,
-			  short unsigned h);
+			short unsigned h);
 	void set_bits(float* bit);
 	void set_window(Point p1, Point p2);
 	float return_average();

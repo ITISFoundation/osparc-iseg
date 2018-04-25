@@ -28,6 +28,8 @@
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
+#include "Data/Transform.h"
+
 #include "Core/ExpectationMaximization.h"
 #include "Core/HDF5Writer.h"
 #include "Core/ImageForestingTransform.h"
@@ -45,7 +47,6 @@
 #include "Core/RTDoseWriter.h"
 #include "Core/SliceProvider.h"
 #include "Core/SmoothSteps.h"
-#include "Core/Transform.h"
 #include "Core/Treaps.h"
 #include "Core/VoxelSurface.h"
 

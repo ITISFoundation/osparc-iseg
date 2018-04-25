@@ -12,7 +12,7 @@
 
 #include "SlicesHandler.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>

@@ -7,14 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef HANDLER3DSLICES
-#define HANDLER3DSLICES
+#pragma once
 
-#include "Interface/SlicesHandlerInterface.h"
+#include "Data/SlicesHandlerInterface.h"
+#include "Data/Transform.h"
 
 #include "Core/Outline.h" // BL TODO get rid of this
 #include "Core/RGB.h"
-#include "Core/Transform.h"
 #include "Core/UndoElem.h"
 #include "Core/UndoQueue.h"
 
@@ -602,5 +601,3 @@ protected:
 };
 
 } // namespace iseg
-
-#endif

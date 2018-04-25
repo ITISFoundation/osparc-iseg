@@ -12,8 +12,9 @@
 #include "SlicesHandler.h"
 #include "VesselWidget.h"
 
+#include "Data/Vec3.h"
+
 #include "Core/Pair.h"
-#include "Core/Vec3.h"
 
 #include <q3filedialog.h>
 #include <qlabel.h>

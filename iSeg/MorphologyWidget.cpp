@@ -14,7 +14,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <QFormLayout>
 #include <QProgressDialog>

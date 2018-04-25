@@ -14,8 +14,9 @@
 
 #include "SlicesHandler.h"
 
+#include "Data/Vec3.h"
+
 #include "Core/BranchTree.h"
-#include "Core/Vec3.h"
 
 #include <iostream>
 #include <list>
@@ -54,7 +55,7 @@ class World
 {
 	Node* nodes;
 	std::list<Node*>
-		activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
+			activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
 	std::list<Node*> activelistlowint;
 	std::vector<std::vector<PathElement>> paths;
 	int width;
@@ -83,12 +84,12 @@ public:
 	bool isValid() { return _isValid; };
 	//		void init(vec3 bbStart, vec3 bbEnd, ml::TVirtualVolume<MLuint16>* vInVol, ml::TVirtualVolume<MLuint16>* vOutVol);
 	void getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
-							Vec3& bbEnd, SlicesHandler* handler3D);
+			Vec3& bbEnd, SlicesHandler* handler3D);
 	bool init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D);
 	void clear();
 	void dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree);
 	void paint(std::vector<Vec3> seeds, Vec3 cross,
-			   unsigned short int numofseeds);
+			unsigned short int numofseeds);
 	bool checkdiameter(unsigned currentoff, unsigned prevoff);
 	void solvelargearea();
 	unsigned solvelargearea2();
@@ -96,7 +97,7 @@ public:
 	void reduceactivelist();
 	int whoistheparent(std::vector<Vec3> seeds, int parentintens);
 	void outputBranchTree(BranchItem* branchItem, std::string prefix,
-						  FILE*& fp);
+			FILE*& fp);
 	void storingtree(std::vector<BranchItem*> children, BranchItem* rootOne);
 	void set3dslicehandler(SlicesHandler* handler3D);
 

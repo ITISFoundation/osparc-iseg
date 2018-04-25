@@ -11,8 +11,9 @@
 
 #include "InterfaceApi.h"
 
-#include "SlicesHandlerInterface.h"
 #include "WidgetInterface.h"
+
+#include "Data/SlicesHandlerInterface.h"
 
 #include <string>
 #include <vector>

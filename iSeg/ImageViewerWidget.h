@@ -9,10 +9,10 @@
  */
 #pragma once
 
-#include "Interface/Mark.h"
+#include "Data/Mark.h"
+#include "Data/Types.h"
 
 #include "Core/Pair.h"
-#include "Core/Types.h"
 
 #include <QWidget>
 

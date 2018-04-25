@@ -9,8 +9,9 @@
  */
 #pragma once
 
-#include "Types.h"
 #include "iSegCore.h"
+
+#include "Data/Types.h"
 
 #include <string>
 #include <vector>
@@ -28,23 +29,23 @@ public:
 
 	template<typename T>
 	bool writeVolume(const char* filename, const T** data, unsigned width,
-					 unsigned height, unsigned nrslices, const float spacing[3],
-					 const Transform& transform);
+			unsigned height, unsigned nrslices, const float spacing[3],
+			const Transform& transform);
 
 private:
 	bool m_Binary;
 };
 
 iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<float>(
-	const char* filename, const float** data, unsigned width, unsigned height,
-	unsigned nrslices, const float spacing[3], const Transform& transform);
+		const char* filename, const float** data, unsigned width, unsigned height,
+		unsigned nrslices, const float spacing[3], const Transform& transform);
 
 iSegCore_TEMPLATE template ISEG_CORE_API bool
-	ImageWriter::writeVolume<tissues_size_t>(const char* filename,
-											 const tissues_size_t** data,
-											 unsigned width, unsigned height,
-											 unsigned nrslices,
-											 const float spacing[3],
-											 const Transform& transform);
+		ImageWriter::writeVolume<tissues_size_t>(const char* filename,
+				const tissues_size_t** data,
+				unsigned width, unsigned height,
+				unsigned nrslices,
+				const float spacing[3],
+				const Transform& transform);
 
 } // namespace iseg

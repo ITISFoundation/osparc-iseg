@@ -9,8 +9,9 @@
  */
 #include "Precompiled.h"
 
-#include "Transform.h"
 #include "VoxelSurface.h"
+
+#include "Data/Transform.h"
 
 #include <vtkBoundingBox.h>
 #include <vtkCutter.h>
@@ -283,7 +284,7 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 	surface->BuildCells();
 	auto num_cells = surface->GetNumberOfCells();
 
-	double tol = (*std::min_element(spacing, spacing+3)) / 10.0;
+	double tol = (*std::min_element(spacing, spacing + 3)) / 10.0;
 	vtkIdType *pts, npts;
 	double bb[6];
 	int bbi[6];
@@ -327,9 +328,9 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 							ijk[dir[1]] = j;
 							ijk[dir[2]] = bbi[dir[2] * 2] + std::floor(scale * t);
 
-							if (ijk[0] < dims[0] && 
-								ijk[1] < dims[1] &&
-								ijk[2] < dims[2])
+							if (ijk[0] < dims[0] &&
+									ijk[1] < dims[1] &&
+									ijk[2] < dims[2])
 							{
 								float* slice = slices[ijk[2]];
 								slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;

@@ -13,15 +13,16 @@ IF(ISEG_BUILD_TESTING)
 	
 	FILE(GLOB HEADERS *.h)
 	SET(SOURCES
-		test_PluginMain.cpp
+		test_DataMain.cpp
 	
 		test_iSegImageAdaptor.cpp
+		test_Transform.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_iSegInterface ${SOURCES} ${HEADERS})
-	TARGET_LINK_LIBRARIES(TestSuite_iSegInterface
-		iSegInterface
+	ADD_LIBRARY(TestSuite_iSegData ${SOURCES} ${HEADERS})
+	TARGET_LINK_LIBRARIES(TestSuite_iSegData
+		iSegData
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_iSegInterface "TestSuite")
+	VS_SET_PROPERTY(TestSuite_iSegData "TestSuite")
 ENDIF()

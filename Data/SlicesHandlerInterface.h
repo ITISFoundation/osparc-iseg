@@ -9,8 +9,6 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
-
 #include <itkImage.h> // BL TODO get rid of this
 #include <itkSliceContiguousImage.h>
 

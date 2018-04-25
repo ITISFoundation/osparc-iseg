@@ -10,9 +10,10 @@
 #ifndef XDMFIMAGEREADER_H
 #define XDMFIMAGEREADER_H
 
+#include "Data/Transform.h"
+#include "Data/Types.h"
+
 #include "Core/SetGetMacros.h"
-#include "Core/Transform.h"
-#include "Core/Types.h"
 
 #include <QMap>
 #include <QStringList>

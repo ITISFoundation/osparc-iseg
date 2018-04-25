@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Interface/ItkUtils.h"
+#include "Data/ItkUtils.h"
 
 #include <itkBinaryDilateImageFilter.h>
 #include <itkBinaryErodeImageFilter.h>

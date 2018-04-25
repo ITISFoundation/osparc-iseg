@@ -9,13 +9,13 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegData.h"
 
-#include "Interface/Point.h"
+#include "Point.h"
 
 #include <vector>
 
 namespace iseg {
 
-ISEG_INTERFACE_API void addLine(std::vector<Point>* vP, Point p1, Point p2);
+ISEG_DATA_API void addLine(std::vector<Point>* vP, Point p1, Point p2);
 }
