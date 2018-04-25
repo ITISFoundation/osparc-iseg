@@ -67,6 +67,8 @@
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkWindowedSincPolyDataFilter.h>
 
+#include <boost/format.hpp>
+
 #include <qdir.h>
 #include <qfileinfo.h>
 #include <qmessagebox.h>
@@ -9045,7 +9047,7 @@ void SlicesHandler::build255tissues()
 		tissue.color[0] = (i % 7) * 0.166666666f;
 		tissue.color[1] = ((i / 7) % 7) * 0.166666666f;
 		tissue.color[2] = (i / 49) * 0.19f;
-		tissue.name = QString("Tissue") + sdummy.setNum(i + 1);
+		tissue.name = (boost::format("Tissue%d") % static_cast<int>(i+1)).str();
 		TissueInfos::AddTissue(tissue);
 	}
 }
@@ -9064,7 +9066,7 @@ void SlicesHandler::buildmissingtissues(tissues_size_t j)
 			tissue.color[0] = ((i - 1) % 7) * 0.166666666f;
 			tissue.color[1] = (((i - 1) / 7) % 7) * 0.166666666f;
 			tissue.color[2] = ((i - 1) / 49) * 0.19f;
-			tissue.name = QString("Tissue") + sdummy.setNum(i);
+			tissue.name = (boost::format("Tissue%d") % i).str();
 			TissueInfos::AddTissue(tissue);
 		}
 	}

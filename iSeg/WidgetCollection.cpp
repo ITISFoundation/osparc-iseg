@@ -2349,7 +2349,7 @@ void TissueAdder::add_pressed()
 				return;
 			}
 			TissueInfoStruct tissueInfo;
-			tissueInfo.name = nameField->text();
+			tissueInfo.name = ToStd(nameField->text());
 			tissueInfo.locked = false;
 			tissueInfo.opac = 1.0f - transp1;
 			tissueInfo.color[0] = fr1;
