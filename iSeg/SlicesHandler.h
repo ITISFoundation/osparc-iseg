@@ -165,15 +165,12 @@ public:
 	int ReloadImage(const char* filename, unsigned short slicenr);
 	int ReloadRTdose(const char* filename, unsigned short slicenr);
 	int ReloadAVW(const char* filename, unsigned short slicenr);
-	FILE* SaveHeader(FILE* fp, short unsigned nr_slices_to_write,
-			Transform transform_to_write);
+	FILE* SaveHeader(FILE* fp, short unsigned nr_slices_to_write, Transform transform_to_write);
 	FILE* SaveProject(const char* filename, const char* imageFileExtension);
 	bool SaveCommunicationFile(const char* filename);
-	FILE* SaveActiveSlices(const char* filename,
-			const char* imageFileExtension);
+	FILE* SaveActiveSlices(const char* filename, const char* imageFileExtension);
 	void LoadHeader(FILE* fp, int& tissuesVersion, int& version);
-	FILE* MergeProjects(const char* savefilename,
-			std::vector<QString>& mergeFilenames);
+	FILE* MergeProjects(const char* savefilename, std::vector<QString>& mergeFilenames);
 	FILE* LoadProject(const char* filename, int& tissuesVersion);
 	bool LoadS4Llink(const char* filename, int& tissuesVersion);
 	int SaveBmpRaw(const char* filename);
@@ -187,8 +184,7 @@ public:
 	void setextrusion_contours(int top, int bottom);
 	void resetextrusion_contours();
 	FILE* save_contourprologue(const char* filename, unsigned nr_slices);
-	FILE* save_contoursection(FILE* fp, unsigned startslice1,
-			unsigned endslice1, unsigned offset);
+	FILE* save_contoursection(FILE* fp, unsigned startslice1, unsigned endslice1, unsigned offset);
 	FILE* save_tissuenamescolors(FILE* fp);
 	void work2bmp();
 	void bmp2work();
@@ -197,19 +193,17 @@ public:
 	void bmp2workall();
 	void work2tissueall();
 	void swap_bmpworkall();
-	//		void swap_bmphelp();
-	//		void swap_workhelp();
-	std::vector<const float*> get_bmp() const;
-	std::vector<float*> get_bmp();
-	std::vector<const float*> get_work() const;
-	std::vector<float*> get_work();
-	std::vector<const tissues_size_t*>
-			get_tissues(tissuelayers_size_t layeridx) const;
-	std::vector<tissues_size_t*> get_tissues(tissuelayers_size_t layeridx);
+
+	std::vector<const float*> source_slices() const override;
+	std::vector<float*> source_slices() override;
+	std::vector<const float*> target_slices() const override;
+	std::vector<float*> target_slices() override;
+	std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const override;
+	std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) override;
+
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
-	tissues_size_t* return_tissues(tissuelayers_size_t layeridx,
-			unsigned short slicenr1);
+	tissues_size_t* return_tissues(tissuelayers_size_t layeridx, unsigned short slicenr1);
 	float* return_overlay();
 	float get_work_pt(Point p, unsigned short slicenr);
 	void set_work_pt(Point p, unsigned short slicenr, float f);
@@ -219,11 +213,11 @@ public:
 	void set_tissue_pt(Point p, unsigned short slicenr, tissues_size_t f);
 	unsigned int make_histogram(bool includeoutofrange);
 	unsigned int return_area();
-	unsigned short return_width() override;
-	unsigned short return_height() override;
-	unsigned short return_nrslices() override;
-	unsigned short return_startslice() override;
-	unsigned short return_endslice() override;
+	unsigned short width() override;
+	unsigned short height() override;
+	unsigned short num_slices() override;
+	unsigned short start_slice() override;
+	unsigned short end_slice() override;
 	void set_startslice(unsigned short startslice1);
 	void set_endslice(unsigned short endslice1);
 	bool isloaded();
@@ -407,9 +401,9 @@ public:
 	void next_slice();
 	void prev_slice();
 	unsigned short get_next_featuring_slice(tissues_size_t type, bool& found);
-	unsigned short get_activeslice() override;
+	unsigned short active_slice() override;
 	bmphandler* get_activebmphandler();
-	tissuelayers_size_t get_active_tissuelayer();
+	tissuelayers_size_t active_tissuelayer() override;
 	void set_active_tissuelayer(tissuelayers_size_t idx);
 	unsigned pushstack_bmp();
 	unsigned pushstack_bmp(unsigned int slice);
@@ -515,8 +509,8 @@ public:
 	float calculate_tissuevolume(Point p, unsigned short slicenr);
 	void inversesliceorder();
 
-	void get_spacing(float spacing[3]) const;
-	Transform get_transform() const;
+	Vec3 spacing() const override;
+	Transform transform() const override;
 	Transform get_transform_active_slices() const;
 	void set_transform(const Transform& tr);
 	void get_displacement(float disp[3]) const;

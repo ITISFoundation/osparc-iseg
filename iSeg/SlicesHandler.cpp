@@ -164,7 +164,7 @@ void SlicesHandler::set_tissue_pt(Point p, unsigned short slicenr,
 	_image_slices[slicenr].set_tissue_pt(_active_tissuelayer, p, f);
 }
 
-std::vector<const float*> SlicesHandler::get_bmp() const
+std::vector<const float*> SlicesHandler::source_slices() const
 {
 	std::vector<const float*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -174,7 +174,7 @@ std::vector<const float*> SlicesHandler::get_bmp() const
 	return ptrs;
 }
 
-std::vector<float*> SlicesHandler::get_bmp()
+std::vector<float*> SlicesHandler::source_slices()
 {
 	std::vector<float*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -184,7 +184,7 @@ std::vector<float*> SlicesHandler::get_bmp()
 	return ptrs;
 }
 
-std::vector<const float*> SlicesHandler::get_work() const
+std::vector<const float*> SlicesHandler::target_slices() const
 {
 	std::vector<const float*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -194,7 +194,7 @@ std::vector<const float*> SlicesHandler::get_work() const
 	return ptrs;
 }
 
-std::vector<float*> SlicesHandler::get_work()
+std::vector<float*> SlicesHandler::target_slices()
 {
 	std::vector<float*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -204,8 +204,7 @@ std::vector<float*> SlicesHandler::get_work()
 	return ptrs;
 }
 
-std::vector<const tissues_size_t*>
-		SlicesHandler::get_tissues(tissuelayers_size_t layeridx) const
+std::vector<const tissues_size_t*> SlicesHandler::tissue_slices(tissuelayers_size_t layeridx) const
 {
 	std::vector<const tissues_size_t*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -215,8 +214,7 @@ std::vector<const tissues_size_t*>
 	return ptrs;
 }
 
-std::vector<tissues_size_t*>
-		SlicesHandler::get_tissues(tissuelayers_size_t layeridx)
+std::vector<tissues_size_t*> SlicesHandler::tissue_slices(tissuelayers_size_t layeridx)
 {
 	std::vector<tissues_size_t*> ptrs(_nrslices);
 	for (unsigned short i = 0; i < _nrslices; i++)
@@ -1140,7 +1138,7 @@ bool SlicesHandler::LoadSurface(const char* filename,
 {
 	float spacing[3] = {_dx, _dy, _thickness};
 	unsigned dims[3] = {_width, _height, _nrslices};
-	auto slices = get_work();
+	auto slices = target_slices();
 
 	if (overwrite_working)
 	{
@@ -2345,7 +2343,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename,
 		SlicesHandler dummy_SlicesHandler;
 		dummy_SlicesHandler.LoadHeader(fpMerge, tissuesVersion, version);
 
-		unsigned short mergeNrslices = dummy_SlicesHandler.return_nrslices();
+		unsigned short mergeNrslices = dummy_SlicesHandler.num_slices();
 		float mergeThickness = dummy_SlicesHandler.get_slicethickness();
 
 		// Load input slices and save to merged project file
@@ -2965,9 +2963,9 @@ bool SlicesHandler::SwapXY()
 	auto lut = GetColorLookupTable();
 
 	unsigned short w, h, nrslices;
-	w = return_height();
-	h = return_width();
-	nrslices = return_nrslices();
+	w = height();
+	h = width();
+	nrslices = num_slices();
 	QString str1;
 	bool ok = true;
 	unsigned char mode1 = get_activebmphandler()->return_mode(true);
@@ -3031,9 +3029,9 @@ bool SlicesHandler::SwapYZ()
 	auto lut = GetColorLookupTable();
 
 	unsigned short w, h, nrslices;
-	w = return_width();
-	h = return_nrslices();
-	nrslices = return_height();
+	w = width();
+	h = num_slices();
+	nrslices = height();
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
@@ -3096,9 +3094,9 @@ bool SlicesHandler::SwapXZ()
 	auto lut = GetColorLookupTable();
 
 	unsigned short w, h, nrslices;
-	w = return_nrslices();
-	h = return_height();
-	nrslices = return_width();
+	w = num_slices();
+	h = height();
+	nrslices = width();
 	Pair p = get_pixelsize();
 	float thick = get_slicethickness();
 	QString str1;
@@ -3985,15 +3983,15 @@ unsigned int SlicesHandler::return_area()
 	return (_image_slices[0]).return_area();
 }
 
-unsigned short SlicesHandler::return_width() { return _width; }
+unsigned short SlicesHandler::width() { return _width; }
 
-unsigned short SlicesHandler::return_height() { return _height; }
+unsigned short SlicesHandler::height() { return _height; }
 
-unsigned short SlicesHandler::return_nrslices() { return _nrslices; }
+unsigned short SlicesHandler::num_slices() { return _nrslices; }
 
-unsigned short SlicesHandler::return_startslice() { return _startslice; }
+unsigned short SlicesHandler::start_slice() { return _startslice; }
 
-unsigned short SlicesHandler::return_endslice() { return _endslice; }
+unsigned short SlicesHandler::end_slice() { return _endslice; }
 
 void SlicesHandler::set_startslice(unsigned short startslice1)
 {
@@ -4690,8 +4688,8 @@ void SlicesHandler::extractinterpolatesave_contours2_xmirrored(
 		{
 			dummy3D.extract_contours2_xmirrored(minsize, tissuevec);
 		}
-		dummy3D.shift_contours(-(int)dummy3D.return_width(),
-				-(int)dummy3D.return_height());
+		dummy3D.shift_contours(-(int)dummy3D.width(),
+				-(int)dummy3D.height());
 		fp = dummy3D.save_contoursection(fp, 0, between, (between + 1) * j);
 	}
 
@@ -6945,7 +6943,7 @@ Pair SlicesHandler::get_pixelsize()
 	return p;
 }
 
-Transform SlicesHandler::get_transform() const { return _transform; }
+Transform SlicesHandler::transform() const { return _transform; }
 
 Transform SlicesHandler::get_transform_active_slices() const
 {
@@ -6959,11 +6957,9 @@ Transform SlicesHandler::get_transform_active_slices() const
 
 void SlicesHandler::set_transform(const Transform& tr) { _transform = tr; }
 
-void SlicesHandler::get_spacing(float spacing[3]) const
+Vec3 SlicesHandler::spacing() const
 {
-	spacing[0] = _dx;
-	spacing[1] = _dy;
-	spacing[2] = _thickness;
+	return Vec3(_dx, _dy, _thickness);
 }
 
 void SlicesHandler::get_displacement(float disp[3]) const
@@ -7190,8 +7186,8 @@ int SlicesHandler::extract_tissue_surfaces(
 
 	vtkSmartPointer<vtkImageData> labelField =
 			vtkSmartPointer<vtkImageData>::New();
-	labelField->SetExtent(0, (int)return_width() + 1, 0,
-			(int)return_height() + 1, 0,
+	labelField->SetExtent(0, (int)width() + 1, 0,
+			(int)height() + 1, 0,
 			(int)(_endslice - _startslice) + 1);
 	Pair ps = get_pixelsize();
 	labelField->SetSpacing(ps.high, ps.low, get_slicethickness());
@@ -7249,20 +7245,20 @@ int SlicesHandler::extract_tissue_surfaces(
 	{
 		copyfromtissuepadded(
 				i,
-				&(field[(nrSlice + 1) * (unsigned long long)(return_width() + 2) *
-								(return_height() + 2)]),
+				&(field[(nrSlice + 1) * (unsigned long long)(width() + 2) *
+								(height() + 2)]),
 				padding);
 	}
 	for (unsigned long long i = 0;
-			 i < (unsigned long long)(return_width() + 2) * (return_height() + 2);
+			 i < (unsigned long long)(width() + 2) * (height() + 2);
 			 i++)
 		field[i] = 0;
 	for (unsigned long long i = (_endslice - _startslice + 1) *
-															(unsigned long long)(return_width() + 2) *
-															(return_height() + 2);
+															(unsigned long long)(width() + 2) *
+															(height() + 2);
 			 i < (_endslice - _startslice + 2) *
-							 (unsigned long long)(return_width() + 2) *
-							 (return_height() + 2);
+							 (unsigned long long)(width() + 2) *
+							 (height() + 2);
 			 i++)
 		field[i] = 0;
 
@@ -7757,14 +7753,14 @@ unsigned short SlicesHandler::get_next_featuring_slice(tissues_size_t type,
 	return _activeslice;
 }
 
-unsigned short SlicesHandler::get_activeslice() { return _activeslice; }
+unsigned short SlicesHandler::active_slice() { return _activeslice; }
 
 bmphandler* SlicesHandler::get_activebmphandler()
 {
 	return &(_image_slices[_activeslice]);
 }
 
-tissuelayers_size_t SlicesHandler::get_active_tissuelayer()
+tissuelayers_size_t SlicesHandler::active_tissuelayer()
 {
 	return _active_tissuelayer;
 }
@@ -9255,8 +9251,8 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 
 	// copy label field
 	vtkImageData* labelField = vtkImageData::New();
-	labelField->SetExtent(0, (int)return_width() - 1, 0,
-			(int)return_height() - 1, 0,
+	labelField->SetExtent(0, (int)width() - 1, 0,
+			(int)height() - 1, 0,
 			(int)(_endslice - _startslice) - 1);
 	Pair ps = get_pixelsize();
 	float offset[3];
@@ -9327,7 +9323,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 bool SlicesHandler::export_tissue(const char* filename, bool binary) const
 {
 	// BL TODO startslice-endslice
-	auto slices = get_tissues(_active_tissuelayer);
+	auto slices = tissue_slices(_active_tissuelayer);
 	float spacing[3] = {_dx, _dy, _thickness};
 	return ImageWriter(binary).writeVolume(
 			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
@@ -9336,7 +9332,7 @@ bool SlicesHandler::export_tissue(const char* filename, bool binary) const
 bool SlicesHandler::export_bmp(const char* filename, bool binary) const
 {
 	// BL TODO startslice-endslice
-	auto slices = get_bmp();
+	auto slices = source_slices();
 	float spacing[3] = {_dx, _dy, _thickness};
 	return ImageWriter(binary).writeVolume(
 			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
@@ -9345,7 +9341,7 @@ bool SlicesHandler::export_bmp(const char* filename, bool binary) const
 bool SlicesHandler::export_work(const char* filename, bool binary) const
 {
 	// BL TODO startslice-endslice
-	auto slices = get_work();
+	auto slices = target_slices();
 	float spacing[3] = {_dx, _dy, _thickness};
 	return ImageWriter(binary).writeVolume(
 			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
@@ -12317,9 +12313,9 @@ std::vector<float> SlicesHandler::GetBoundingBox()
 {
 	std::vector<float> bbox;
 
-	unsigned int dimensionX = return_width();
-	unsigned int dimensionY = return_height();
-	unsigned int dimensionZ = return_nrslices();
+	unsigned int dimensionX = width();
+	unsigned int dimensionY = height();
+	unsigned int dimensionZ = num_slices();
 
 	if (dimensionX * dimensionY * dimensionZ == 0)
 		return bbox;
@@ -12380,7 +12376,7 @@ void SlicesHandler::GetITKImage(itk::Image<float, 3>* inputim, int begin,
 		int end)
 {
 	const SlicesHandler* self = this; // for const slices
-	auto slices = self->get_bmp();
+	auto slices = self->source_slices();
 	float spacing[3] = {_dx, _dy, _thickness};
 	ImageToITK::copy(slices.data(), _width, _height, (unsigned)begin,
 			(unsigned)(end - begin), spacing, _transform, inputim);
@@ -12517,16 +12513,16 @@ void SlicesHandler::GetSeed(itk::Image<float, 3>::IndexType* seed)
 	for (unsigned z = 0; z < (int)(_endslice - _startslice); z++)
 	{
 		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)return_width() * (int)return_height());
+		std::vector<float> fieldin((int)width() * (int)height());
 		float* field = &fieldin[0];
 		copyfromwork(z, field); //&([z*(unsigned long long)return_area()])
-		for (unsigned y = 0; y < return_height(); y++)
+		for (unsigned y = 0; y < height(); y++)
 		{
 			pi.SetElement(1, y);
-			for (unsigned x = 0; x < return_width(); x++)
+			for (unsigned x = 0; x < width(); x++)
 			{
 				pi.SetElement(0, x);
-				if (abs(field[x + y * return_width()]) > 4500)
+				if (abs(field[x + y * width()]) > 4500)
 				{
 					*seed = pi;
 				}
@@ -12573,7 +12569,7 @@ itk::SliceContiguousImage<float>::Pointer
 			static_cast<size_t>(active_slices ? _endslice - _startslice : _nrslices)};
 	double spacing[3] = {_dx, _dy, _thickness};
 
-	auto all_slices = (type == eImageType::kSource) ? get_bmp() : get_work();
+	auto all_slices = (type == eImageType::kSource) ? source_slices() : target_slices();
 	if (!active_slices)
 	{
 		return _GetITKView(all_slices, dims, spacing);
@@ -12595,7 +12591,7 @@ itk::SliceContiguousImage<tissues_size_t>::Pointer
 			static_cast<size_t>(active_slices ? _endslice - _startslice : _nrslices)};
 	double spacing[3] = {_dx, _dy, _thickness};
 
-	auto all_slices = get_tissues(_active_tissuelayer);
+	auto all_slices = tissue_slices(_active_tissuelayer);
 	if (!active_slices)
 	{
 		return _GetITKView(all_slices, dims, spacing);
@@ -12640,7 +12636,7 @@ itk::Image<float, 2>::Pointer
 	size_t dims[2] = {_width, _height};
 	double spacing[2] = {_dx, _dy};
 
-	auto all_slices = (type == eImageType::kSource) ? get_bmp() : get_work();
+	auto all_slices = (type == eImageType::kSource) ? source_slices() : target_slices();
 	return _GetITKView2D(all_slices[_activeslice], dims, spacing);
 }
 
@@ -12650,6 +12646,6 @@ itk::Image<tissues_size_t, 2>::Pointer
 	size_t dims[2] = {_width, _height};
 	double spacing[2] = {_dx, _dy};
 
-	auto all_slices = get_tissues(_active_tissuelayer);
+	auto all_slices = tissue_slices(_active_tissuelayer);
 	return _GetITKView2D(all_slices[_activeslice], dims, spacing);
 }

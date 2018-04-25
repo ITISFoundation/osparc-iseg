@@ -32,11 +32,11 @@ ActiveSlicesConfigWidget::ActiveSlicesConfigWidget(SlicesHandler* hand3D, QWidge
 	lb_start = new QLabel("Start Slice: ", vbox2);
 	lb_end = new QLabel("End Slice: ", vbox2);
 
-	sb_start = new QSpinBox(1, (int)handler3D->return_nrslices(), 1, vbox3);
-	sb_start->setValue((int)handler3D->return_startslice() + 1);
+	sb_start = new QSpinBox(1, (int)handler3D->num_slices(), 1, vbox3);
+	sb_start->setValue((int)handler3D->start_slice() + 1);
 
-	sb_end = new QSpinBox(1, (int)handler3D->return_nrslices(), 1, vbox3);
-	sb_end->setValue((int)handler3D->return_endslice());
+	sb_end = new QSpinBox(1, (int)handler3D->num_slices(), 1, vbox3);
+	sb_end->setValue((int)handler3D->end_slice());
 
 	pb_ok = new QPushButton("OK", hbox2);
 	pb_close = new QPushButton("Cancel", hbox2);

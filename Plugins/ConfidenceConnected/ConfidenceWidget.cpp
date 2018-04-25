@@ -27,7 +27,7 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 
 	usp = NULL;
 
@@ -113,7 +113,7 @@ ConfidenceWidget::~ConfidenceWidget()
 
 void ConfidenceWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }
 
 void ConfidenceWidget::init()
@@ -130,5 +130,5 @@ void ConfidenceWidget::newloaded()
 		usp = NULL;
 	}
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }

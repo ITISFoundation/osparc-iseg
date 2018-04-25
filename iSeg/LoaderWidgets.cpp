@@ -780,7 +780,7 @@ void SaverImg::save_pushed()
 						s.append(".bmp");
 
 					res = (handler3D->get_activebmphandler()->SaveTissueBitmap(
-							   handler3D->get_active_tissuelayer(),
+							   handler3D->active_tissuelayer(),
 							   s.ascii()) == 0);
 				}
 			}
@@ -872,7 +872,7 @@ void SaverImg::save_pushed()
 				else
 				{
 					res = (handler3D->get_activebmphandler()->SaveTissueRaw(
-							   handler3D->get_active_tissuelayer(),
+							   handler3D->active_tissuelayer(),
 							   nameEdit->text().ascii()) == 0);
 				}
 			}

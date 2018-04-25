@@ -85,7 +85,7 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 						 "Krcah et al., 'Fully automatic and fast segmentation of the "
 						 "femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
 
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 
 	m_VGrid = new Q3VBox(this);
 
@@ -130,10 +130,10 @@ void BoneSegmentationWidget::showsliders()
 {
 	if (m_UseSliceRange->isChecked() == true)
 	{
-		m_Start->setMaximum(m_Handler3D->return_endslice());
+		m_Start->setMaximum(m_Handler3D->end_slice());
 		m_Start->setEnabled(true);
-		m_End->setMaximum(m_Handler3D->return_endslice());
-		m_End->setValue(m_Handler3D->return_endslice());
+		m_End->setMaximum(m_Handler3D->end_slice());
+		m_End->setValue(m_Handler3D->end_slice());
 		m_End->setEnabled(true);
 	}
 	else
@@ -228,7 +228,7 @@ BoneSegmentationWidget::~BoneSegmentationWidget() { delete m_VGrid; }
 
 void BoneSegmentationWidget::on_slicenr_changed()
 {
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 }
 
 void BoneSegmentationWidget::init()
@@ -239,5 +239,5 @@ void BoneSegmentationWidget::init()
 
 void BoneSegmentationWidget::newloaded()
 {
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 }

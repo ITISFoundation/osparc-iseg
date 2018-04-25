@@ -29,7 +29,7 @@ SliceTransform::SliceTransform(SlicesHandler* hand3D)
 	: originalSource(NULL), originalTarget(NULL), originalTissues(NULL)
 {
 	handler3D = hand3D;
-	activeSlice = handler3D->get_activeslice();
+	activeSlice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	transformSource = transformTarget = transformTissues = true;
@@ -135,7 +135,7 @@ void SliceTransform::ActiveSliceChanged()
 	CopyToOriginalSlice(transformSource, transformTarget, transformTissues);
 
 	// Get new active slice
-	activeSlice = handler3D->get_activeslice();
+	activeSlice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	CopyFromOriginalSlice(transformSource, transformTarget, transformTissues);
 
@@ -146,7 +146,7 @@ void SliceTransform::ActiveSliceChanged()
 void SliceTransform::NewDataLoaded()
 {
 	// Get new active slice
-	activeSlice = handler3D->get_activeslice();
+	activeSlice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	// Reallocate slice data
@@ -160,8 +160,8 @@ void SliceTransform::Execute(bool allSlices)
 {
 	if (allSlices)
 	{
-		for (unsigned short slice = handler3D->return_startslice();
-			 slice < handler3D->return_endslice(); ++slice)
+		for (unsigned short slice = handler3D->start_slice();
+			 slice < handler3D->end_slice(); ++slice)
 		{
 			// Active slice has already been transformed
 			if (slice == activeSlice)
@@ -452,7 +452,7 @@ void SliceTransform::CopyFromOriginalSlice(bool source, bool target,
 	}
 	if (tissues)
 	{
-		bmphand->copy_tissue(handler3D->get_active_tissuelayer(),
+		bmphand->copy_tissue(handler3D->active_tissuelayer(),
 							 originalTissues);
 	}
 }
@@ -470,7 +470,7 @@ void SliceTransform::CopyToOriginalSlice(bool source, bool target, bool tissues)
 	}
 	if (tissues)
 	{
-		bmphand->copy2tissue(handler3D->get_active_tissuelayer(),
+		bmphand->copy2tissue(handler3D->active_tissuelayer(),
 							 originalTissues);
 	}
 }
@@ -488,7 +488,7 @@ void SliceTransform::SwapDataPointers()
 	if (transformTissues)
 	{
 		originalTissues = bmphand->swap_tissues_pointer(
-			handler3D->get_active_tissuelayer(), originalTissues);
+			handler3D->active_tissuelayer(), originalTissues);
 	}
 }
 
@@ -509,7 +509,7 @@ void SliceTransform::ApplyTransform(bool source, bool target, bool tissues)
 	float* sourcePtr = bmphand->return_bmp();
 	float* targetPtr = bmphand->return_work();
 	tissues_size_t* tissuesPtr =
-		bmphand->return_tissues(handler3D->get_active_tissuelayer());
+		bmphand->return_tissues(handler3D->active_tissuelayer());
 	for (unsigned int y = 0; y < height; ++y)
 	{
 		for (unsigned int x = 0; x < width; ++x)
@@ -571,7 +571,7 @@ void SliceTransform::ApplyTransformAll()
 	float* sourcePtr = bmphand->return_bmp();
 	float* targetPtr = bmphand->return_work();
 	tissues_size_t* tissuesPtr =
-		bmphand->return_tissues(handler3D->get_active_tissuelayer());
+		bmphand->return_tissues(handler3D->active_tissuelayer());
 	for (unsigned int y = 0; y < height; ++y)
 	{
 		for (unsigned int x = 0; x < width; ++x)

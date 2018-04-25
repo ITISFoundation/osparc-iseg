@@ -71,7 +71,7 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	float spacing[3];
+	Vec3 spacing;
 	Point last_pt;
 	Q3VBox* vbox1;
 	Q3HBox* hbox1;

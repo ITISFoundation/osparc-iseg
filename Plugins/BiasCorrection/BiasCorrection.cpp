@@ -122,7 +122,7 @@ BiasCorrectionWidget::BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D,
 			"Tustison et al., 'N4ITK: Improved N3 Bias Correction', IEEE "
 			"Transactions on Medical Imaging, 29(6) : 1310 - 1320, June 2010"));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 
 	vbox1 = new Q3VBox(this);
 	bias_header = new QLabel("N4 Bias Correction: ", vbox1);
@@ -205,7 +205,7 @@ BiasCorrectionWidget::~BiasCorrectionWidget() { delete vbox1; }
 
 void BiasCorrectionWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }
 
 void BiasCorrectionWidget::init()
@@ -216,7 +216,7 @@ void BiasCorrectionWidget::init()
 
 void BiasCorrectionWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }
 
 std::string BiasCorrectionWidget::GetName()

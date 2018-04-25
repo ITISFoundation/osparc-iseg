@@ -46,7 +46,7 @@ LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
 	setToolTip(Format("Use the Auto Trace to follow ideal contour path or draw "
 										"contours around a tissue to segment it."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	hboxoverall = new Q3HBox(this);
@@ -221,7 +221,7 @@ void LivewireWidget::pt_doubleclicked(Point p)
 		}
 
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -341,7 +341,7 @@ void LivewireWidget::on_mouse_released(Point p)
 		addLine(&dynamic, p2, p);
 
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -465,9 +465,9 @@ void LivewireWidget::on_mouse_moved(Point p)
 
 void LivewireWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand = handler3D->get_activebmphandler();
 
 		dynamic.clear();
@@ -504,7 +504,7 @@ void LivewireWidget::init()
 
 void LivewireWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	dynamic.clear();
@@ -574,7 +574,7 @@ void LivewireWidget::bmp_changed()
 
 void LivewireWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 

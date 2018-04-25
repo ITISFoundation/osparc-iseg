@@ -33,7 +33,7 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 	setToolTip(Format(
 			"Perform different types of distance, angle or volume measurements"));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	hboxoverall = new Q3HBox(this);
@@ -134,9 +134,9 @@ void MeasurementWidget::bmphand_changed(bmphandler* bmph)
 
 void MeasurementWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand_changed(handler3D->get_activebmphandler());
 	}
 	else
@@ -145,7 +145,7 @@ void MeasurementWidget::init()
 
 void MeasurementWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -223,7 +223,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				p1 = p;
 				drawing = true;
 				txt_displayer->setText("Mark end point.");
-				set_coord(0, p, handler3D->get_activeslice());
+				set_coord(0, p, handler3D->active_slice());
 				state = 1;
 				dynamic.clear();
 				established.clear();
@@ -232,7 +232,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 1)
 			{
 				drawing = false;
-				set_coord(1, p, handler3D->get_activeslice());
+				set_coord(1, p, handler3D->active_slice());
 				state = 0;
 				addLine(&established, p1, p);
 				dynamic.clear();
@@ -251,7 +251,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				p1 = p;
 				drawing = true;
 				txt_displayer->setText("Mark end point.");
-				set_coord(0, p, handler3D->get_activeslice());
+				set_coord(0, p, handler3D->active_slice());
 				state = 1;
 				dynamic.clear();
 				established.clear();
@@ -260,7 +260,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 1)
 			{
 				drawing = false;
-				set_coord(1, p, handler3D->get_activeslice());
+				set_coord(1, p, handler3D->active_slice());
 				state = 0;
 				addLine(&established, p1, p);
 				dynamic.clear();
@@ -276,7 +276,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 				p1 = p;
 				drawing = true;
 				txt_displayer->setText("Mark end point.");
-				set_coord(0, p, handler3D->get_activeslice());
+				set_coord(0, p, handler3D->active_slice());
 				state = 1;
 				dynamic.clear();
 				established.clear();
@@ -285,7 +285,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 1)
 			{
 				drawing = false;
-				set_coord(1, p, handler3D->get_activeslice());
+				set_coord(1, p, handler3D->active_slice());
 				state = 0;
 				addLine(&established, p1, p);
 				dynamic.clear();
@@ -299,7 +299,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			if (state == 0)
 			{
 				txt_displayer->setText("Mark second point.");
-				set_coord(0, p, handler3D->get_activeslice());
+				set_coord(0, p, handler3D->active_slice());
 				state = 1;
 				drawing = true;
 				p1 = p;
@@ -310,7 +310,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 1)
 			{
 				txt_displayer->setText("Mark third point.");
-				set_coord(1, p, handler3D->get_activeslice());
+				set_coord(1, p, handler3D->active_slice());
 				state = 2;
 				addLine(&established, p1, p);
 				p1 = p;
@@ -320,7 +320,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 2)
 			{
 				drawing = false;
-				set_coord(2, p, handler3D->get_activeslice());
+				set_coord(2, p, handler3D->active_slice());
 				state = 0;
 				addLine(&established, p1, p);
 				dynamic.clear();
@@ -334,7 +334,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			if (state == 0)
 			{
 				txt_displayer->setText("Mark second point.");
-				set_coord(0, p, handler3D->get_activeslice());
+				set_coord(0, p, handler3D->active_slice());
 				state = 1;
 				drawing = true;
 				p1 = p;
@@ -345,7 +345,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 1)
 			{
 				txt_displayer->setText("Mark third point.");
-				set_coord(1, p, handler3D->get_activeslice());
+				set_coord(1, p, handler3D->active_slice());
 				state = 2;
 				addLine(&established, p1, p);
 				drawing = true;
@@ -356,7 +356,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else if (state == 2)
 			{
 				txt_displayer->setText("Mark third point.");
-				set_coord(2, p, handler3D->get_activeslice());
+				set_coord(2, p, handler3D->active_slice());
 				state = 3;
 				addLine(&established, p1, p);
 				drawing = true;
@@ -366,7 +366,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			}
 			else if (state == 3)
 			{
-				set_coord(3, p, handler3D->get_activeslice());
+				set_coord(3, p, handler3D->active_slice());
 				state = 0;
 				drawing = false;
 				addLine(&established, p1, p);
@@ -384,25 +384,25 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			emit vp1dyn_changed(&established, &dynamic);
 			QString tissuename1;
 			tissues_size_t tnr =
-					handler3D->get_tissue_pt(p, handler3D->get_activeslice());
+					handler3D->get_tissue_pt(p, handler3D->active_slice());
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = TissueInfos::GetTissueName(tnr);
 			QString note = QString("");
-			if (!(handler3D->return_startslice() == 0 &&
-							handler3D->return_endslice() == handler3D->return_nrslices()))
+			if (!(handler3D->start_slice() == 0 &&
+							handler3D->end_slice() == handler3D->num_slices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
 			txt_displayer->setText(
 					QString("Tissue '") + tissuename1 + QString("': ") +
 					QString::number(handler3D->calculate_tissuevolume(
-															p, handler3D->get_activeslice()),
+															p, handler3D->active_slice()),
 							'g', 3) +
 					QString(" mm^3\n") + QString("'Target': ") +
 					QString::number(handler3D->calculate_volume(
-															p, handler3D->get_activeslice()),
+															p, handler3D->active_slice()),
 							'g', 3) +
 					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
@@ -417,25 +417,25 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			emit vp1dyn_changed(&established, &dynamic);
 			QString tissuename1;
 			tissues_size_t tnr =
-					handler3D->get_tissue_pt(p, handler3D->get_activeslice());
+					handler3D->get_tissue_pt(p, handler3D->active_slice());
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = TissueInfos::GetTissueName(tnr);
 			QString note = QString("");
-			if (!(handler3D->return_startslice() == 0 &&
-							handler3D->return_endslice() == handler3D->return_nrslices()))
+			if (!(handler3D->start_slice() == 0 &&
+							handler3D->end_slice() == handler3D->num_slices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
 			txt_displayer->setText(
 					QString("Tissue '") + tissuename1 + QString("': ") +
 					QString::number(handler3D->calculate_tissuevolume(
-															p, handler3D->get_activeslice()),
+															p, handler3D->active_slice()),
 							'g', 3) +
 					QString(" mm^3\n") + QString("'Target': ") +
 					QString::number(handler3D->calculate_volume(
-															p, handler3D->get_activeslice()),
+															p, handler3D->active_slice()),
 							'g', 3) +
 					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
@@ -471,8 +471,8 @@ void MeasurementWidget::cbb_changed(int)
 		if (rb_dist->isOn())
 		{
 			Point pc;
-			pc.px = (short)handler3D->return_width() / 2;
-			pc.py = (short)handler3D->return_height() / 2;
+			pc.px = (short)handler3D->width() / 2;
+			pc.py = (short)handler3D->height() / 2;
 			Point p1, p2;
 			if (cbb_lb1->currentItem() == 0)
 				p1 = pc;
@@ -489,8 +489,8 @@ void MeasurementWidget::cbb_changed(int)
 		else if (rb_thick->isOn())
 		{
 			Point pc;
-			pc.px = (short)handler3D->return_width() / 2;
-			pc.py = (short)handler3D->return_height() / 2;
+			pc.px = (short)handler3D->width() / 2;
+			pc.py = (short)handler3D->height() / 2;
 			Point p1, p2;
 			if (cbb_lb1->currentItem() == 0)
 				p1 = pc;
@@ -507,8 +507,8 @@ void MeasurementWidget::cbb_changed(int)
 		else if (rb_vector->isOn())
 		{
 			Point pc;
-			pc.px = (short)handler3D->return_width() / 2;
-			pc.py = (short)handler3D->return_height() / 2;
+			pc.px = (short)handler3D->width() / 2;
+			pc.py = (short)handler3D->height() / 2;
 			Point p1, p2;
 			if (cbb_lb1->currentItem() == 0)
 				p1 = pc;
@@ -528,8 +528,8 @@ void MeasurementWidget::cbb_changed(int)
 		else if (rb_angle->isOn())
 		{
 			Point pc;
-			pc.px = (short)handler3D->return_width() / 2;
-			pc.py = (short)handler3D->return_height() / 2;
+			pc.px = (short)handler3D->width() / 2;
+			pc.py = (short)handler3D->height() / 2;
 			Point p1, p2, p3;
 			if (cbb_lb1->currentItem() == 0)
 				p1 = pc;
@@ -551,8 +551,8 @@ void MeasurementWidget::cbb_changed(int)
 		else if (rb_4ptangle->isOn())
 		{
 			Point pc;
-			pc.px = (short)handler3D->return_width() / 2;
-			pc.py = (short)handler3D->return_height() / 2;
+			pc.px = (short)handler3D->width() / 2;
+			pc.py = (short)handler3D->height() / 2;
 			Point p1, p2, p3, p4;
 			if (cbb_lb1->currentItem() == 0)
 				p1 = pc;
@@ -722,9 +722,9 @@ float MeasurementWidget::calculate()
 		//Pair p1=handler3D->get_pixelsize();
 		if (cbb_lb1->currentItem() == 0)
 		{
-			pt[0][0] = (int)handler3D->return_width() / 2;
-			pt[0][1] = (int)handler3D->return_height() / 2;
-			pt[0][2] = (int)handler3D->return_nrslices() / 2;
+			pt[0][0] = (int)handler3D->width() / 2;
+			pt[0][1] = (int)handler3D->height() / 2;
+			pt[0][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{
@@ -734,9 +734,9 @@ float MeasurementWidget::calculate()
 		}
 		if (cbb_lb2->currentItem() == 0)
 		{
-			pt[1][0] = (int)handler3D->return_width() / 2;
-			pt[1][1] = (int)handler3D->return_height() / 2;
-			pt[1][2] = (int)handler3D->return_nrslices() / 2;
+			pt[1][0] = (int)handler3D->width() / 2;
+			pt[1][1] = (int)handler3D->height() / 2;
+			pt[1][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{
@@ -746,9 +746,9 @@ float MeasurementWidget::calculate()
 		}
 		if (cbb_lb3->currentItem() == 0)
 		{
-			pt[2][0] = (int)handler3D->return_width() / 2;
-			pt[2][1] = (int)handler3D->return_height() / 2;
-			pt[2][2] = (int)handler3D->return_nrslices() / 2;
+			pt[2][0] = (int)handler3D->width() / 2;
+			pt[2][1] = (int)handler3D->height() / 2;
+			pt[2][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{
@@ -758,9 +758,9 @@ float MeasurementWidget::calculate()
 		}
 		if (cbb_lb4->currentItem() == 0)
 		{
-			pt[3][0] = (int)handler3D->return_width() / 2;
-			pt[3][1] = (int)handler3D->return_height() / 2;
-			pt[3][2] = (int)handler3D->return_nrslices() / 2;
+			pt[3][0] = (int)handler3D->width() / 2;
+			pt[3][1] = (int)handler3D->height() / 2;
+			pt[3][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{
@@ -857,9 +857,9 @@ float MeasurementWidget::calculatevec(unsigned short orient)
 		//Pair p1=handler3D->get_pixelsize();
 		if (cbb_lb1->currentItem() == 0)
 		{
-			pt[0][0] = (int)handler3D->return_width() / 2;
-			pt[0][1] = (int)handler3D->return_height() / 2;
-			pt[0][2] = (int)handler3D->return_nrslices() / 2;
+			pt[0][0] = (int)handler3D->width() / 2;
+			pt[0][1] = (int)handler3D->height() / 2;
+			pt[0][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{
@@ -869,9 +869,9 @@ float MeasurementWidget::calculatevec(unsigned short orient)
 		}
 		if (cbb_lb2->currentItem() == 0)
 		{
-			pt[1][0] = (int)handler3D->return_width() / 2;
-			pt[1][1] = (int)handler3D->return_height() / 2;
-			pt[1][2] = (int)handler3D->return_nrslices() / 2;
+			pt[1][0] = (int)handler3D->width() / 2;
+			pt[1][1] = (int)handler3D->height() / 2;
+			pt[1][2] = (int)handler3D->num_slices() / 2;
 		}
 		else
 		{

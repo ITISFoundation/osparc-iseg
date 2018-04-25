@@ -9,6 +9,11 @@
  */
 #pragma once
 
+#include "Types.h"
+#include "Transform.h"
+
+#include <vector>
+
 #include <itkImage.h> // BL TODO get rid of this
 #include <itkSliceContiguousImage.h>
 
@@ -17,15 +22,29 @@ namespace iseg {
 class SliceHandlerInterface
 {
 public:
-	typedef unsigned short tissue_type;
+	typedef tissues_size_t tissue_type;
 	typedef float pixel_type;
 
-	virtual unsigned short return_width() = 0;
-	virtual unsigned short return_height() = 0;
-	virtual unsigned short return_nrslices() = 0;
-	virtual unsigned short return_startslice() = 0;
-	virtual unsigned short return_endslice() = 0;
-	virtual unsigned short get_activeslice() = 0;
+	virtual unsigned short width() = 0;
+	virtual unsigned short height() = 0;
+	virtual unsigned short num_slices() = 0;
+
+	virtual unsigned short start_slice() = 0;
+	virtual unsigned short end_slice() = 0;
+	virtual unsigned short active_slice() = 0;
+
+	virtual Transform transform() const = 0;
+	virtual Vec3 spacing() const = 0;
+
+	virtual tissuelayers_size_t active_tissuelayer() = 0;
+	virtual std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const = 0;
+	virtual std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) = 0;
+
+	virtual std::vector<const float*> source_slices() const = 0;
+	virtual std::vector<float*> source_slices() = 0;
+
+	virtual std::vector<const float*> target_slices() const = 0;
+	virtual std::vector<float*> target_slices() = 0;
 
 	virtual void GetITKImage(itk::Image<float, 3>*) = 0;
 	virtual void GetITKImageFB(itk::Image<float, 3>*) = 0;

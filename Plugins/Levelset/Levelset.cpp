@@ -22,7 +22,7 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 
 	usp = NULL;
 
@@ -130,7 +130,7 @@ LevelsetWidget::~LevelsetWidget()
 
 void LevelsetWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }
 
 void LevelsetWidget::init()
@@ -147,5 +147,5 @@ void LevelsetWidget::newloaded()
 		usp = NULL;
 	}
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 }

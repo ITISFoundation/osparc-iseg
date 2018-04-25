@@ -50,7 +50,7 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 			"A rectangular area is marked by pressing down the left mouse "
 			"button and moving the mouse."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	hbox1 = new Q3HBox(this);
 	vbox1 = new Q3VBox(hbox1);
@@ -125,16 +125,16 @@ void FeatureWidget::on_mouse_moved(Point p)
 
 	Pair psize = handler3D->get_pixelsize();
 
-	lb_pt_value->setText(QString::number(handler3D->return_width() - 1 - p.px) +
+	lb_pt_value->setText(QString::number(handler3D->width() - 1 - p.px) +
 											 QString(":") + QString::number(p.py));
 	lb_work_pt_value->setText(
 			QString("(") +
-			QString::number((handler3D->return_width() - 1 - p.px) * psize.high) +
+			QString::number((handler3D->width() - 1 - p.px) * psize.high) +
 			QString(":") + QString::number(p.py * psize.low) + QString(" mm)"));
 	lb_grey_value->setText(QString::number(bmphand->bmp_pt(p)));
 	lb_work_grey_value->setText(QString::number(bmphand->work_pt(p)));
 	tissues_size_t tnr =
-			bmphand->tissues_pt(handler3D->get_active_tissuelayer(), p);
+			bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
 	if (tnr == 0)
 		lb_tissuename->setText("- (0)");
 	else
@@ -171,7 +171,7 @@ void FeatureWidget::on_mouse_released(Point p)
 
 void FeatureWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
@@ -182,6 +182,6 @@ void FeatureWidget::init()
 
 void FeatureWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }

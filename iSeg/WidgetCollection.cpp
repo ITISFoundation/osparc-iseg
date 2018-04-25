@@ -94,7 +94,7 @@ ScaleWork::ScaleWork(SlicesHandler *hand3D, QDir picpath, QWidget *parent,
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	vbox1 = new Q3VBox(this);
@@ -170,7 +170,7 @@ ScaleWork::~ScaleWork() { delete vbox1; }
 
 void ScaleWork::getrange_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	Pair p;
 	if (allslices->isChecked())
@@ -225,7 +225,7 @@ void ScaleWork::getrange_pushed()
 
 void ScaleWork::scale_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	Pair p;
@@ -236,7 +236,7 @@ void ScaleWork::scale_pushed()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -255,12 +255,12 @@ void ScaleWork::scale_pushed()
 
 void ScaleWork::crop_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -279,7 +279,7 @@ void ScaleWork::crop_pushed()
 void ScaleWork::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 	//	}
 }
@@ -323,7 +323,7 @@ void ScaleWork::slider_pressed()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 }
@@ -413,7 +413,7 @@ ShowHisto::ShowHisto(SlicesHandler *hand3D, QWidget *parent, const char *name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	vbox1 = new Q3VBox(this);
@@ -567,7 +567,7 @@ void ShowHisto::draw_histo()
 void ShowHisto::slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 	//	}
 }
@@ -582,7 +582,7 @@ void ShowHisto::bmphand_changed(bmphandler *bmph)
 
 void ShowHisto::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -2699,8 +2699,8 @@ bits_stack::bits_stack(SlicesHandler *hand3D, QWidget *parent, const char *name,
 	QObject::connect(loaditem, SIGNAL(clicked()), this,
 			SLOT(loaditem_pressed()));
 
-	oldw = handler3D->return_width();
-	oldh = handler3D->return_height();
+	oldw = handler3D->width();
+	oldh = handler3D->height();
 
 	tissuenr = 0;
 }
@@ -2764,7 +2764,7 @@ void bits_stack::push_helper(bool source, bool target, bool tissue)
 				"Name", "Enter a name for the picture:", QLineEdit::Normal, "", &ok,
 				this);
 		newText = newText + QString(" (") +
-							QString::number(handler3D->get_activeslice() + 1) +
+							QString::number(handler3D->active_slice() + 1) +
 							QString(")");
 		while (ok &&
 					 bits_names->findItems(newText, Qt::MatchExactly).size() > 0)
@@ -2774,7 +2774,7 @@ void bits_stack::push_helper(bool source, bool target, bool tissue)
 					"Enter a !new! name for the picture:", QLineEdit::Normal, "",
 					&ok, this);
 			newText = newText + QString(" (") +
-								QString::number(handler3D->get_activeslice() + 1) +
+								QString::number(handler3D->active_slice() + 1) +
 								QString(")");
 		}
 		if (ok)
@@ -2804,7 +2804,7 @@ void bits_stack::push_helper(bool source, bool target, bool tissue)
 		unsigned int startslice = pushdialog.get_startslice(&startok);
 		unsigned int endslice = pushdialog.get_endslice(&endok);
 		while (!startok || !endok || startslice > endslice || startslice < 1 ||
-					 endslice > handler3D->return_nrslices())
+					 endslice > handler3D->num_slices())
 		{
 			QMessageBox::information(
 					this, QString("Copy ") + dataName + QString("..."),
@@ -2901,8 +2901,8 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 	{
 		return;
 	}
-	else if (handler3D->get_activeslice() + selectedItems.size() >
-					 handler3D->return_nrslices())
+	else if (handler3D->active_slice() + selectedItems.size() >
+					 handler3D->num_slices())
 	{
 		QMessageBox::information(
 				this, QString("Paste ") + dataName,
@@ -2912,14 +2912,14 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 	}
 
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = source;
 	dataSelection.work = target;
 	dataSelection.tissues = tissue;
 	dataSelection.allSlices = selectedItems.size() > 1;
 	emit begin_datachange(dataSelection, this);
 
-	unsigned int slice = handler3D->get_activeslice();
+	unsigned int slice = handler3D->active_slice();
 	if (source)
 	{
 		for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
@@ -3116,13 +3116,13 @@ QMap<QString, unsigned int> *bits_stack::return_bitsnr() { return &bits_nr; }
 
 void bits_stack::newloaded()
 {
-	if (oldw != handler3D->return_width() || oldh != handler3D->return_height())
+	if (oldw != handler3D->width() || oldh != handler3D->height())
 	{
 		bits_names->clear();
 		bits_nr.clear();
 	}
-	oldw = handler3D->return_width();
-	oldh = handler3D->return_height();
+	oldw = handler3D->width();
+	oldh = handler3D->height();
 	emit stack_changed();
 }
 
@@ -3154,8 +3154,8 @@ FILE *bits_stack::save_proj(FILE *fp)
 
 FILE *bits_stack::load_proj(FILE *fp)
 {
-	oldw = handler3D->return_width();
-	oldh = handler3D->return_height();
+	oldw = handler3D->width();
+	oldh = handler3D->height();
 
 	char name[100];
 	int size;
@@ -3186,7 +3186,7 @@ extoverlay_widget::extoverlay_widget(SlicesHandler *hand3D, QWidget *parent,
 		const char *name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	alpha = 0.0f;
@@ -3310,7 +3310,7 @@ void extoverlay_widget::reload_overlay()
 							 Qt::CaseInsensitive))
 	{
 		ok = handler3D->ReadRawOverlay(datasetFilepaths[selectedDataset], 8,
-				handler3D->get_activeslice());
+				handler3D->active_slice());
 	}
 	else if (datasetFilepaths[selectedDataset].endsWith(QString(".vtk"),
 							 Qt::CaseInsensitive) ||
@@ -3318,7 +3318,7 @@ void extoverlay_widget::reload_overlay()
 							 Qt::CaseInsensitive))
 	{
 		ok = handler3D->ReadOverlay(datasetFilepaths[selectedDataset],
-				handler3D->get_activeslice());
+				handler3D->active_slice());
 	}
 	else if (datasetFilepaths[selectedDataset].endsWith(QString(".nii"),
 							 Qt::CaseInsensitive) ||
@@ -3330,7 +3330,7 @@ void extoverlay_widget::reload_overlay()
 							 Qt::CaseInsensitive))
 	{
 		ok = handler3D->ReadOverlay(datasetFilepaths[selectedDataset],
-				handler3D->get_activeslice());
+				handler3D->active_slice());
 	}
 
 	if (!ok)
@@ -3530,9 +3530,9 @@ void MultiDataset_widget::NewLoaded()
 
 	Initialize();
 
-	const unsigned short w_loaded = m_Handler3D->return_width();
-	const unsigned short h_loaded = m_Handler3D->return_height();
-	const unsigned short nrofslices_loaded = m_Handler3D->return_nrslices();
+	const unsigned short w_loaded = m_Handler3D->width();
+	const unsigned short h_loaded = m_Handler3D->height();
+	const unsigned short nrofslices_loaded = m_Handler3D->num_slices();
 
 	const bool checkMatch = true;
 	if (checkMatch)
@@ -3602,9 +3602,9 @@ void MultiDataset_widget::AddDatasetPressed()
 				LB.move(QCursor::pos());
 				LB.exec();
 
-				width = handler3D->return_width();
-				height = handler3D->return_height();
-				nrofslices = handler3D->return_nrslices();
+				width = handler3D->width();
+				height = handler3D->height();
+				nrofslices = handler3D->num_slices();
 
 				success = CheckInfoAndAddToList(dataInfo, loadfilenames, width,
 						height, nrofslices);
@@ -3627,9 +3627,9 @@ void MultiDataset_widget::AddDatasetPressed()
 				LD.exec();
 			}
 
-			width = handler3D->return_width();
-			height = handler3D->return_height();
-			nrofslices = handler3D->return_nrslices();
+			width = handler3D->width();
+			height = handler3D->height();
+			nrofslices = handler3D->num_slices();
 
 			success = CheckInfoAndAddToList(dataInfo, loadfilenames, width,
 					height, nrofslices);
@@ -3644,9 +3644,9 @@ void MultiDataset_widget::AddDatasetPressed()
 
 			QString loadfilename = LR.GetFileName();
 			loadfilenames.append(loadfilename);
-			width = handler3D->return_width();
-			height = handler3D->return_height();
-			nrofslices = handler3D->return_nrslices();
+			width = handler3D->width();
+			height = handler3D->height();
+			nrofslices = handler3D->num_slices();
 
 			success = CheckInfoAndAddToList(dataInfo, loadfilenames, width,
 					height, nrofslices);
@@ -3668,9 +3668,9 @@ void MultiDataset_widget::AddDatasetPressed()
 				if (handler3D->ReadImage(loadfilename.ascii()))
 				{
 					loadfilenames.append(loadfilename);
-					width = handler3D->return_width();
-					height = handler3D->return_height();
-					nrofslices = handler3D->return_nrslices();
+					width = handler3D->width();
+					height = handler3D->height();
+					nrofslices = handler3D->num_slices();
 
 					success = CheckInfoAndAddToList(dataInfo, loadfilenames,
 							width, height, nrofslices);
@@ -3705,9 +3705,9 @@ bool MultiDataset_widget::CheckInfoAndAddToList(
 		unsigned short nrofslices)
 {
 	// check whether the new dataset matches the dataset loaded
-	const unsigned short w_loaded = m_Handler3D->return_width();
-	const unsigned short h_loaded = m_Handler3D->return_height();
-	const unsigned short nrofslices_loaded = m_Handler3D->return_nrslices();
+	const unsigned short w_loaded = m_Handler3D->width();
+	const unsigned short h_loaded = m_Handler3D->height();
+	const unsigned short nrofslices_loaded = m_Handler3D->num_slices();
 
 	if (w_loaded == 512 && h_loaded == 512 && nrofslices_loaded == 1)
 	{
@@ -3758,9 +3758,9 @@ void MultiDataset_widget::CopyImagesSlices(
 		SlicesHandler *handler3D, MultiDataset_widget::SDatasetInfo &newRadioButton,
 		const bool saveOnlyWorkingBits /*= false*/)
 {
-	const int nrslices = handler3D->return_nrslices();
-	const int width = handler3D->return_width();
-	const int height = handler3D->return_height();
+	const int nrslices = handler3D->num_slices();
+	const int width = handler3D->width();
+	const int height = handler3D->height();
 	const int size = width * height;
 
 	newRadioButton.m_Width = width;
@@ -3808,9 +3808,9 @@ void MultiDataset_widget::SwitchDataset()
 				float size = radioButton.m_Width * radioButton.m_Height;
 				const int nSlices = radioButton.m_BmpSlices.size();
 				assert(radioButton.m_BmpSlices.size() ==
-							 m_Handler3D->return_nrslices());
+							 m_Handler3D->num_slices());
 				assert(radioButton.m_WorkSlices.size() ==
-							 m_Handler3D->return_nrslices());
+							 m_Handler3D->num_slices());
 
 				for (int i = 0; i < nSlices; i++)
 				{
@@ -4203,7 +4203,7 @@ ImageMath::ImageMath(SlicesHandler *hand3D, QWidget *parent, const char *name,
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	vbox1 = new Q3VBox(this);
@@ -4277,12 +4277,12 @@ void ImageMath::imgorval_changed(int)
 
 void ImageMath::add_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -4314,12 +4314,12 @@ void ImageMath::add_pushed()
 
 void ImageMath::sub_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -4351,12 +4351,12 @@ void ImageMath::sub_pushed()
 
 void ImageMath::mult_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -4388,12 +4388,12 @@ void ImageMath::mult_pushed()
 
 void ImageMath::neg_pushed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -4411,7 +4411,7 @@ void ImageMath::neg_pushed()
 
 void ImageMath::slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -4445,7 +4445,7 @@ ImageOverlay::ImageOverlay(SlicesHandler *hand3D, QWidget *parent,
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	bkpWork = (float *)malloc(sizeof(float) * bmphand->return_area());
 	bmphand->copyfromwork(bkpWork);
@@ -4520,7 +4520,7 @@ void ImageOverlay::closeEvent(QCloseEvent *e)
 		// Undo overlay
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = false;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this, false);
 
@@ -4537,7 +4537,7 @@ void ImageOverlay::apply_pushed()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -4561,7 +4561,7 @@ void ImageOverlay::apply_pushed()
 
 void ImageOverlay::slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -4605,7 +4605,7 @@ void ImageOverlay::alpha_changed()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = false;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this, false);
 
@@ -4622,7 +4622,7 @@ void ImageOverlay::slider_changed(int newval)
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = false;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this, false);
 
@@ -4934,10 +4934,10 @@ void CheckBoneConnectivityDialog::LookForConnections()
 {
 	foundConnections.clear();
 
-	unsigned short width = handler3D->return_width();
-	unsigned short height = handler3D->return_height();
-	unsigned short startSl = handler3D->return_startslice();
-	unsigned short endSl = handler3D->return_endslice();
+	unsigned short width = handler3D->width();
+	unsigned short height = handler3D->height();
+	unsigned short startSl = handler3D->start_slice();
+	unsigned short endSl = handler3D->end_slice();
 
 	int numTasks = endSl - startSl;
 	QProgressDialog progress("Looking for connected bones...", "Cancel", 0,

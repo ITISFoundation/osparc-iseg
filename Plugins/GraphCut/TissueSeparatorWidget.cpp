@@ -32,7 +32,7 @@ TissueSeparatorWidget::TissueSeparatorWidget(
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), slice_handler(hand3D)
 {
-	current_slice = slice_handler->get_activeslice();
+	current_slice = slice_handler->active_slice();
 
 	// create options
 	all_slices = new QCheckBox;
@@ -66,7 +66,7 @@ void TissueSeparatorWidget::init()
 
 void TissueSeparatorWidget::newloaded()
 {
-	current_slice = slice_handler->get_activeslice();
+	current_slice = slice_handler->active_slice();
 }
 
 void TissueSeparatorWidget::cleanup()
@@ -96,7 +96,7 @@ void TissueSeparatorWidget::on_tissuenr_changed(int i)
 
 void TissueSeparatorWidget::on_slicenr_changed()
 {
-	current_slice = slice_handler->get_activeslice();
+	current_slice = slice_handler->active_slice();
 
 	auto& vm_slice = vm[current_slice];
 	emit vm_changed(&vm_slice);
@@ -138,7 +138,7 @@ void TissueSeparatorWidget::on_mouse_released(Point p)
 	bool const auto_update = (!all_slices->isChecked()) && labels.size() >= 2;
 
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = slice_handler->get_activeslice();
+	dataSelection.sliceNr = slice_handler->active_slice();
 	dataSelection.work = auto_update;
 	dataSelection.vvm = true;
 	emit begin_datachange(dataSelection, this);
@@ -185,10 +185,10 @@ void TissueSeparatorWidget::do_work_all_slices()
 	auto target = slice_handler->GetImage(SliceHandlerInterface::kTarget, false);
 
 	auto start = target->GetLargestPossibleRegion().GetIndex();
-	start[2] = slice_handler->return_startslice();
+	start[2] = slice_handler->start_slice();
 
 	auto size = target->GetLargestPossibleRegion().GetSize();
-	size[2] = slice_handler->return_endslice() - start[2];
+	size[2] = slice_handler->end_slice() - start[2];
 
 	auto output = do_work<3, source_type>(source, target, mask_type::RegionType(start, size));
 	if (output)
@@ -198,7 +198,7 @@ void TissueSeparatorWidget::do_work_all_slices()
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
-		iseg::Paste<unsigned char, float>(output, target, slice_handler->return_startslice(), slice_handler->return_endslice());
+		iseg::Paste<unsigned char, float>(output, target, slice_handler->start_slice(), slice_handler->end_slice());
 
 		emit end_datachange(this);
 	}
@@ -257,8 +257,8 @@ typename itk::Image<unsigned char, Dim>::Pointer
 
 	auto mask = threshold->GetOutput();
 	auto mask_buffer = mask->GetPixelContainer()->GetImportPointer();
-	size_t const width = slice_handler->return_width();
-	size_t const height = slice_handler->return_width();
+	size_t const width = slice_handler->width();
+	size_t const height = slice_handler->width();
 
 	unsigned first_mark = -1;
 	bool found_other_mark = false;

@@ -94,9 +94,9 @@ PixelResize::PixelResize(SlicesHandler* hand3D, QWidget* parent,
 	dy = p1.low;
 	le_dx = new QLineEdit(QString::number(p1.high), vbox3);
 	le_dy = new QLineEdit(QString::number(p1.low), vbox3);
-	le_lx = new QLineEdit(QString::number(p1.high * handler3D->return_width()),
+	le_lx = new QLineEdit(QString::number(p1.high * handler3D->width()),
 						  vbox3);
-	le_ly = new QLineEdit(QString::number(p1.low * handler3D->return_height()),
+	le_ly = new QLineEdit(QString::number(p1.low * handler3D->height()),
 						  vbox3);
 
 	pb_resize = new QPushButton("Resize", hbox2);
@@ -134,7 +134,7 @@ void PixelResize::dx_changed()
 	float dx1 = le_dx->text().toFloat(&b1);
 	if (b1)
 	{
-		unsigned w = handler3D->return_width();
+		unsigned w = handler3D->width();
 		le_lx->setText(QString::number(w * dx1));
 		dx = dx1;
 	}
@@ -151,7 +151,7 @@ void PixelResize::dy_changed()
 	float dy1 = le_dy->text().toFloat(&b1);
 	if (b1)
 	{
-		unsigned h = handler3D->return_height();
+		unsigned h = handler3D->height();
 		le_ly->setText(QString::number(h * dy1));
 		dy = dy1;
 	}
@@ -168,7 +168,7 @@ void PixelResize::lx_changed()
 	float lx1 = le_lx->text().toFloat(&b1);
 	if (b1)
 	{
-		unsigned w = handler3D->return_width();
+		unsigned w = handler3D->width();
 		le_dx->setText(QString::number(lx1 / w));
 		dx = lx1 / w;
 	}
@@ -185,7 +185,7 @@ void PixelResize::ly_changed()
 	float ly1 = le_ly->text().toFloat(&b1);
 	if (b1)
 	{
-		unsigned h = handler3D->return_height();
+		unsigned h = handler3D->height();
 		le_dy->setText(QString::number(ly1 / h));
 		dy = ly1 / h;
 	}
@@ -524,9 +524,9 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
 	m_ImageSourceLabel = new ImagePVLabel(vImagebox1);
 	m_ImageSourceLabel->setFixedSize(vImagebox1->size());
 
-	unsigned short activeSlice = hand3D->get_activeslice();
-	unsigned short sourceWidth = hand3D->return_width();
-	unsigned short sourceHeight = hand3D->return_height();
+	unsigned short activeSlice = hand3D->active_slice();
+	unsigned short sourceWidth = hand3D->width();
+	unsigned short sourceHeight = hand3D->height();
 	float* data = hand3D->return_bmp(activeSlice);
 
 	QImage smallImage(sourceWidth, sourceHeight, 32);
@@ -578,22 +578,22 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
 
 		if (resizetype == kOther) // BL TODO what is this for?
 		{
-			sb_dxm = new QSpinBox(-(int)hand3D->return_width(), 1000, 1, vbox3);
+			sb_dxm = new QSpinBox(-(int)hand3D->width(), 1000, 1, vbox3);
 			sb_dxm->setValue(0);
 			sb_dym =
-				new QSpinBox(-(int)hand3D->return_height(), 1000, 1, vbox3);
+				new QSpinBox(-(int)hand3D->height(), 1000, 1, vbox3);
 			sb_dym->setValue(0);
 			sb_dzm =
-				new QSpinBox(-(int)hand3D->return_nrslices(), 1000, 1, vbox3);
+				new QSpinBox(-(int)hand3D->num_slices(), 1000, 1, vbox3);
 			sb_dzm->setValue(0);
 
-			sb_dxp = new QSpinBox(-(int)hand3D->return_width(), 1000, 1, vbox5);
+			sb_dxp = new QSpinBox(-(int)hand3D->width(), 1000, 1, vbox5);
 			sb_dxp->setValue(0);
 			sb_dyp =
-				new QSpinBox(-(int)hand3D->return_height(), 1000, 1, vbox5);
+				new QSpinBox(-(int)hand3D->height(), 1000, 1, vbox5);
 			sb_dyp->setValue(0);
 			sb_dzp =
-				new QSpinBox(-(int)hand3D->return_nrslices(), 1000, 1, vbox5);
+				new QSpinBox(-(int)hand3D->num_slices(), 1000, 1, vbox5);
 			sb_dzp->setValue(0);
 		}
 		else
@@ -623,18 +623,18 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
 		lb_dyp = new QLabel(QString("crop y+ (pixels): "), vbox4);
 		lb_dzp = new QLabel(QString("crop z+ (pixels): "), vbox4);
 
-		sb_dxm = new QSpinBox(0, (int)hand3D->return_width(), 1, vbox3);
+		sb_dxm = new QSpinBox(0, (int)hand3D->width(), 1, vbox3);
 		sb_dxm->setValue(0);
-		sb_dym = new QSpinBox(0, (int)hand3D->return_height(), 1, vbox3);
+		sb_dym = new QSpinBox(0, (int)hand3D->height(), 1, vbox3);
 		sb_dym->setValue(0);
-		sb_dzm = new QSpinBox(0, (int)hand3D->return_nrslices(), 1, vbox3);
+		sb_dzm = new QSpinBox(0, (int)hand3D->num_slices(), 1, vbox3);
 		sb_dzm->setValue(0);
 
-		sb_dxp = new QSpinBox(0, (int)hand3D->return_width(), 1, vbox5);
+		sb_dxp = new QSpinBox(0, (int)hand3D->width(), 1, vbox5);
 		sb_dxp->setValue(0);
-		sb_dyp = new QSpinBox(0, (int)hand3D->return_height(), 1, vbox5);
+		sb_dyp = new QSpinBox(0, (int)hand3D->height(), 1, vbox5);
 		sb_dyp->setValue(0);
-		sb_dzp = new QSpinBox(0, (int)hand3D->return_nrslices(), 1, vbox5);
+		sb_dzp = new QSpinBox(0, (int)hand3D->num_slices(), 1, vbox5);
 		sb_dzp->setValue(0);
 	}
 
