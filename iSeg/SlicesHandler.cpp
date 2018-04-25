@@ -12,6 +12,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 #include "config.h"
+#include "StdStringToQString.h"
 
 #include "AvwReader.h"
 #include "ChannelExtractor.h"
@@ -5228,7 +5229,7 @@ FILE* SlicesHandler::save_tissuenamescolors(FILE* fp)
 			tissueInfo = TissueInfos::GetTissueInfo(*idxIt);
 			fprintf(fp, "T%i %f %f %f %s\n", (int)*idxIt, tissueInfo->color[0],
 					tissueInfo->color[1], tissueInfo->color[2],
-					tissueInfo->name.ascii());
+					tissueInfo->name.c_str());
 		}
 	}
 	else
@@ -5239,7 +5240,7 @@ FILE* SlicesHandler::save_tissuenamescolors(FILE* fp)
 			tissueInfo = TissueInfos::GetTissueInfo(i);
 			fprintf(fp, "T%i %f %f %f %s\n", (int)i, tissueInfo->color[0],
 					tissueInfo->color[1], tissueInfo->color[2],
-					tissueInfo->name.ascii());
+					tissueInfo->name.c_str());
 		}
 	}
 
@@ -7219,7 +7220,7 @@ int SlicesHandler::extract_tissue_surfaces(
 	{
 		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
 				i);
-		names_array->SetValue(i, TissueInfos::GetTissueName(i).ascii());
+		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		float* color = TissueInfos::GetTissueColor(i);
 		color_array->SetTuple(i, color);
 	}
@@ -7390,7 +7391,7 @@ int SlicesHandler::extract_tissue_surfaces(
 				if (i == tissuevec[0])
 				{
 					names_array_1->SetValue(
-							0, TissueInfos::GetTissueName(i).ascii());
+							0, TissueInfos::GetTissueName(i).c_str());
 					color_array_1->SetTuple(0, color);
 				}
 			}
@@ -7458,9 +7459,7 @@ void SlicesHandler::triangulate(const char* filename,
 			 it != tissuevec.end(); it++)
 	{
 		tissueInfo = TissueInfos::GetTissueInfo(*it);
-		QString a = tissueInfo->name;
-		std::string b = std::string(tissueInfo->name.ascii());
-		vstring.push_back((std::string)(tissueInfo->name.ascii()));
+		vstring.push_back(tissueInfo->name);
 		RGB dummy;
 		dummy.r = tissueInfo->color[0];
 		dummy.g = tissueInfo->color[1];
@@ -7522,9 +7521,7 @@ void SlicesHandler::triangulatesimpl(const char* filename,
 			 it != tissuevec.end(); it++)
 	{
 		tissueInfo = TissueInfos::GetTissueInfo(*it);
-		QString a = tissueInfo->name;
-		std::string b = std::string(tissueInfo->name.ascii());
-		vstring.push_back((std::string)(tissueInfo->name.ascii()));
+		vstring.push_back(tissueInfo->name);
 		RGB dummy;
 		dummy.r = tissueInfo->color[0];
 		dummy.g = tissueInfo->color[1];
@@ -7533,8 +7530,7 @@ void SlicesHandler::triangulatesimpl(const char* filename,
 	}
 
 	MarchingCubes mc;
-	mc.init(tissuebits, _width, _height, _endslice - _startslice, _thickness, _dx,
-			_dy);
+	mc.init(tissuebits, _width, _height, _endslice - _startslice, _thickness, _dx, _dy);
 	mc.marchingcubeprint(filename, tissuevec, colorvec, vstring);
 
 	free(tissuebits);
@@ -9145,8 +9141,7 @@ bool SlicesHandler::print_atlas(const char* filename)
 	for (tissues_size_t tissuenr = 1; tissuenr <= tissueCount; tissuenr++)
 	{
 		tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
-		out << tissueInfo->name << tissueInfo->color[0] << tissueInfo->color[1]
-				<< tissueInfo->color[2];
+		out << ToQ(tissueInfo->name) << tissueInfo->color[0] << tissueInfo->color[1] << tissueInfo->color[2];
 	}
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
@@ -9185,7 +9180,7 @@ bool SlicesHandler::print_amascii(const char* filename)
 		for (tissues_size_t tc = 0; tc < tissueCount; tc++)
 		{
 			tissueInfo = TissueInfos::GetTissueInfo(tc + 1);
-			QString nameCpy = tissueInfo->name;
+			QString nameCpy = ToQ(tissueInfo->name);
 			nameCpy = nameCpy.replace("�", "ae");
 			nameCpy = nameCpy.replace("�", "Ae");
 			nameCpy = nameCpy.replace("�", "oe");
@@ -9305,9 +9300,9 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 		int error_counter = 0;
 		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
 				i);
-		names_array->SetValue(i, TissueInfos::GetTissueName(i).ascii());
+		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		float* color = TissueInfos::GetTissueColor(i);
-		std::cerr << TissueInfos::GetTissueName(i).ascii() << " " << color[0]
+		std::cerr << TissueInfos::GetTissueName(i).c_str() << " " << color[0]
 							<< "," << color[1] << "," << color[2] << std::endl;
 		color_array->SetTuple(i, color);
 	}
@@ -9367,7 +9362,7 @@ bool SlicesHandler::print_xmlregionextent(const char* filename,
 			{
 				tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
 				streamname << "\t<label id=\"" << (int)tissuenr << "\" name=\""
-									 << tissueInfo->name.ascii() << "\" color=\""
+									 << tissueInfo->name.c_str() << "\" color=\""
 									 << tissueInfo->color[0] << " "
 									 << tissueInfo->color[1] << " "
 									 << tissueInfo->color[2] << "\">" << endl;
@@ -9414,7 +9409,7 @@ bool SlicesHandler::print_tissueindex(const char* filename,
 				 tissuenr <= TissueInfos::GetTissueCount(); tissuenr++)
 		{
 			streamname << (int)tissuenr << " \""
-								 << TissueInfos::GetTissueName(tissuenr).ascii()
+								 << TissueInfos::GetTissueName(tissuenr).c_str()
 								 << "\"\n";
 		}
 		streamname.close();

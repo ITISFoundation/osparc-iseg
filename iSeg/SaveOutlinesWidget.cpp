@@ -11,6 +11,7 @@
 
 #include "SaveOutlinesWidget.h"
 #include "SlicesHandler.h"
+#include "StdStringToQString.h"
 #include "TissueInfos.h"
 
 #include <q3filedialog.h>
@@ -39,7 +40,7 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	lbo_tissues = new Q3ListBox(vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)
 	{
-		lbo_tissues->insertItem(TissueInfos::GetTissueName(i));
+		lbo_tissues->insertItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
 	lbo_tissues->setMultiSelection(true);
 	hbox2 = new Q3HBox(vbox1);

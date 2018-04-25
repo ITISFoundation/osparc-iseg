@@ -14,6 +14,7 @@
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
+#include "StdStringToQString.h"
 
 #include "Data/addLine.h"
 
@@ -138,10 +139,7 @@ void FeatureWidget::on_mouse_moved(Point p)
 	if (tnr == 0)
 		lb_tissuename->setText("- (0)");
 	else
-		lb_tissuename->setText(TissueInfos::GetTissueName(tnr) + QString(" (") +
-													 QString::number((int)tnr) + QString(")"));
-
-	return;
+		lb_tissuename->setText(ToQ(TissueInfos::GetTissueName(tnr)) + QString(" (") + QString::number((int)tnr) + QString(")"));
 }
 
 void FeatureWidget::on_mouse_released(Point p)

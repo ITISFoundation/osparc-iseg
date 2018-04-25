@@ -9,6 +9,7 @@
  */
 #include "Precompiled.h"
 
+#include "StdStringToQString.h"
 #include "TissueHierarchy.h"
 #include "TissueInfos.h"
 
@@ -150,7 +151,7 @@ void TissueHierarchyItem::UpdateTissuesRecursively()
 			currChild->UpdateTissuesRecursively();
 			++iter;
 		}
-		else if (!TissueInfos::GetTissueType(currChild->GetName()))
+		else if (!TissueInfos::GetTissueType(ToStd(currChild->GetName())))
 		{
 			// Delete tissue
 			iter = children.erase(iter);
@@ -530,7 +531,7 @@ FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
 	}
 	else
 	{
-		tissues_size_t type = TissueInfos::GetTissueType(QString(name));
+		tissues_size_t type = TissueInfos::GetTissueType(ToStd(QString(name)));
 		if (type <= 0)
 		{
 			// The tissue does not exist

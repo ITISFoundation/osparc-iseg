@@ -16,6 +16,7 @@
 #include "WidgetCollection.h"
 #include "bmp_read_1.h"
 #include "config.h"
+#include "StdStringToQString.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
@@ -836,7 +837,7 @@ QTreeWidgetItem *TissueTreeWidget::create_hierarchy_item(bool isFolder,
 	}
 	else
 	{
-		tissues_size_t type = TissueInfos::GetTissueType(name);
+		tissues_size_t type = TissueInfos::GetTissueType(ToStd(name));
 		QTreeWidgetItem *newTissue = new QTreeWidgetItem();
 		newTissue->setIcon(TISSUETREEWIDGET_COLUMN_NAME, generatePixmap(type));
 		newTissue->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
@@ -947,10 +948,8 @@ void TissueTreeWidget::remove_tissue(const QString &name)
 		else
 		{
 			// Update tissue type
-			tissues_size_t newType = TissueInfos::GetTissueType(
-					currItem->text(TISSUETREEWIDGET_COLUMN_NAME));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,
-					QString::number(newType));
+			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
+			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,	QString::number(newType));
 		}
 	}
 	blockSignals(false);
@@ -982,10 +981,8 @@ void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem *parent,
 		else
 		{
 			// Update tissue type
-			tissues_size_t newType = TissueInfos::GetTissueType(
-					currItem->text(TISSUETREEWIDGET_COLUMN_NAME));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,
-					QString::number(newType));
+			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
+			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,	QString::number(newType));
 		}
 	}
 }
@@ -1387,8 +1384,7 @@ void TissueTreeWidget::update_tissue_indices()
 		}
 		else
 		{
-			tissues_size_t type = TissueInfos::GetTissueType(
-					item->text(TISSUETREEWIDGET_COLUMN_NAME));
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(item->text(TISSUETREEWIDGET_COLUMN_NAME)));
 			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
 		}
 	}
@@ -1406,8 +1402,7 @@ void TissueTreeWidget::update_tissue_indices_recursively(
 		}
 		else
 		{
-			tissues_size_t type = TissueInfos::GetTissueType(
-					item->text(TISSUETREEWIDGET_COLUMN_NAME));
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(item->text(TISSUETREEWIDGET_COLUMN_NAME)));
 			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
 		}
 	}
@@ -1674,8 +1669,7 @@ void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
 		}
 		else
 		{
-			tissues_size_t type =
-					TissueInfos::GetTissueType(currItem->GetName());
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
 			if (type > 0)
 			{
 				QTreeWidgetItem *newTissue =
@@ -1695,8 +1689,7 @@ void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
 	for (std::set<tissues_size_t>::iterator iter = tissueTypes.begin();
 			 iter != tissueTypes.end(); ++iter)
 	{
-		addTopLevelItem(
-				create_hierarchy_item(false, TissueInfos::GetTissueName(*iter)));
+		addTopLevelItem(create_hierarchy_item(false, ToQ(TissueInfos::GetTissueName(*iter))));
 	}
 
 	// Update folder icons
@@ -1724,15 +1717,12 @@ void TissueTreeWidget::build_tree_widget_recursively(
 		}
 		else
 		{
-			tissues_size_t type =
-					TissueInfos::GetTissueType(currItem->GetName());
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
 			if (type > 0)
 			{
-				QTreeWidgetItem *newTissue =
-						create_hierarchy_item(false, currItem->GetName());
+				QTreeWidgetItem *newTissue = create_hierarchy_item(false, currItem->GetName());
 				parentOut->addChild(newTissue);
-				std::set<tissues_size_t>::iterator iter =
-						tissueTypes->find(type);
+				std::set<tissues_size_t>::iterator iter = tissueTypes->find(type);
 				if (iter != tissueTypes->end())
 				{
 					tissueTypes->erase(iter);
@@ -2126,9 +2116,8 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget *tissueTree,
 	{
 		addTissue->setText("Modify Tissue");
 
-		TissueInfoStruct *tissueInfo =
-				TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
-		nameField->setText(tissueInfo->name);
+		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
+		nameField->setText(ToQ(tissueInfo->name));
 		r->setValue(int(tissueInfo->color[0] * 255));
 		g->setValue(int(tissueInfo->color[1] * 255));
 		b->setValue(int(tissueInfo->color[2] * 255));
@@ -2323,28 +2312,25 @@ void TissueAdder::add_pressed()
 		{
 			tissues_size_t type = tissueTreeWidget->get_current_type();
 			TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(type);
-			QString oldName = tissueInfo->name;
+			QString oldName = ToQ(tissueInfo->name);
 			if (oldName.compare(nameField->text(), Qt::CaseInsensitive) != 0 &&
-					TissueInfos::GetTissueType(nameField->text()) > 0)
+					TissueInfos::GetTissueType(ToStd(nameField->text())) > 0)
 			{
 				QMessageBox::information(
 						this, "iSeg",
 						"A tissue with the same name already exists.");
 				return;
 			}
-			TissueInfos::SetTissueName(type, nameField->text());
+			TissueInfos::SetTissueName(type, ToStd(nameField->text()));
 			tissueInfo->opac = 1.0f - transp1;
 			tissueInfo->color[0] = fr1;
 			tissueInfo->color[1] = fg1;
 			tissueInfo->color[2] = fb1;
 			// Update tissue name and icon in hierarchy
-			tissueTreeWidget->update_tissue_name(oldName, tissueInfo->name);
+			tissueTreeWidget->update_tissue_name(oldName, ToQ(tissueInfo->name));
 			tissueTreeWidget->update_tissue_icons();
 			close();
 		}
-
-		//	fprintf(fp,"%f %f %f",tissuecolor[1][0],tissuecolor[1][1],tissuecolor[1][2]);
-		//	fclose(fp);
 		return;
 	}
 	else
@@ -2355,7 +2341,7 @@ void TissueAdder::add_pressed()
 		}
 		else if (!nameField->text().isEmpty())
 		{
-			if (TissueInfos::GetTissueType(nameField->text()) > 0)
+			if (TissueInfos::GetTissueType(ToStd(nameField->text())) > 0)
 			{
 				QMessageBox::information(
 						this, "iSeg",
@@ -2371,7 +2357,7 @@ void TissueAdder::add_pressed()
 			tissueInfo.color[2] = fb1;
 			TissueInfos::AddTissue(tissueInfo);
 			// Insert new tissue in hierarchy
-			tissueTreeWidget->insert_item(false, tissueInfo.name);
+			tissueTreeWidget->insert_item(false, ToQ(tissueInfo.name));
 			close();
 		}
 	}
@@ -4903,7 +4889,7 @@ void CheckBoneConnectivityDialog::CheckBoneExist()
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
 		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(i);
-		if (IsBone(tissueInfo->name.toUtf8().constData()))
+		if (IsBone(tissueInfo->name))
 		{
 			bonesFound++;
 			if (bonesFound > 1)
@@ -4952,7 +4938,7 @@ void CheckBoneConnectivityDialog::LookForConnections()
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
 		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(i);
-		label_names.push_back(tissueInfo->name.toUtf8().constData());
+		label_names.push_back(tissueInfo->name);
 	}
 
 	std::vector<int> same_bone_map(label_names.size(), -1);
@@ -5143,9 +5129,9 @@ void CheckBoneConnectivityDialog::FillConnectionsTable()
 				TissueInfos::GetTissueInfo(newLineInfo.TissueID2);
 
 		foundConnectionsTable->setItem(row, BoneConnectionColumn::kTissue1,
-				new QTableWidgetItem(tissueInfo1->name));
+				new QTableWidgetItem(ToQ(tissueInfo1->name)));
 		foundConnectionsTable->setItem(row, BoneConnectionColumn::kTissue2,
-				new QTableWidgetItem(tissueInfo2->name));
+				new QTableWidgetItem(ToQ(tissueInfo2->name)));
 		foundConnectionsTable->setItem(
 				row, BoneConnectionColumn::kSliceNumber,
 				new QTableWidgetItem(QString::number(newLineInfo.SliceNumber + 1)));
@@ -5189,8 +5175,8 @@ void CheckBoneConnectivityDialog::export_pressed()
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID1);
 		TissueInfoStruct *tissueInfo2 =
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID2);
-		output_file << tissueInfo1->name.toStdString() << " "
-								<< tissueInfo2->name.toStdString() << " "
+		output_file << tissueInfo1->name << " "
+								<< tissueInfo2->name << " "
 								<< foundConnections[i].SliceNumber + 1 << endl;
 	}
 	output_file.close();

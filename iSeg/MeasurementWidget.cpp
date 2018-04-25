@@ -14,6 +14,7 @@
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
+#include "StdStringToQString.h"
 
 #include "Data/Point.h"
 #include "Data/addLine.h"
@@ -388,10 +389,9 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
-				tissuename1 = TissueInfos::GetTissueName(tnr);
+				tissuename1 = ToQ(TissueInfos::GetTissueName(tnr));
 			QString note = QString("");
-			if (!(handler3D->start_slice() == 0 &&
-							handler3D->end_slice() == handler3D->num_slices()))
+			if (!(handler3D->start_slice() == 0 && handler3D->end_slice() == handler3D->num_slices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
@@ -416,12 +416,11 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			dynamic.clear();
 			emit vp1dyn_changed(&established, &dynamic);
 			QString tissuename1;
-			tissues_size_t tnr =
-					handler3D->get_tissue_pt(p, handler3D->active_slice());
+			tissues_size_t tnr = handler3D->get_tissue_pt(p, handler3D->active_slice());
 			if (tnr == 0)
 				tissuename1 = QString("-");
 			else
-				tissuename1 = TissueInfos::GetTissueName(tnr);
+				tissuename1 = ToQ(TissueInfos::GetTissueName(tnr));
 			QString note = QString("");
 			if (!(handler3D->start_slice() == 0 &&
 							handler3D->end_slice() == handler3D->num_slices()))

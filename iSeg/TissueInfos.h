@@ -7,15 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef TISSUEINFOS
-#define TISSUEINFOS
+#pragma once
 
 #include "Data/Types.h"
 
-#include <qstring.h> // BL TODO get rid of this
-
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace iseg {
@@ -79,13 +77,13 @@ struct TissueInfoStruct
 
 	float color[3];
 	float opac;
-	QString name;
+	std::string name;
 	bool locked;
 };
 
 typedef std::vector<TissueInfoStruct> TissueInfosVecType;
-typedef std::map<QString, tissues_size_t> TissueTypeMapType;
-typedef std::pair<QString, tissues_size_t> TissueTypeMapEntryType;
+typedef std::map<std::string, tissues_size_t> TissueTypeMapType;
+typedef std::pair<std::string, tissues_size_t> TissueTypeMapEntryType;
 
 class TissueInfos
 {
@@ -101,14 +99,14 @@ public:
 			unsigned char& b,
 			unsigned char offset = 0);
 	static float GetTissueOpac(tissues_size_t tissuetype);
-	static QString GetTissueName(tissues_size_t tissuetype);
-	static tissues_size_t GetTissueType(QString tissuename);
+	static std::string GetTissueName(tissues_size_t tissuetype);
+	static tissues_size_t GetTissueType(std::string tissuename);
 	static bool GetTissueLocked(tissues_size_t tissuetype);
 
 	static void SetTissueColor(tissues_size_t tissuetype, float r, float g,
 			float b);
 	static void SetTissueOpac(tissues_size_t tissuetype, float val);
-	static void SetTissueName(tissues_size_t tissuetype, QString val);
+	static void SetTissueName(tissues_size_t tissuetype, std::string val);
 	static void SetTissueLocked(tissues_size_t tissuetype, bool val);
 	static void SetTissuesLocked(bool val);
 
@@ -150,5 +148,3 @@ protected:
 };
 
 } // namespace iseg
-
-#endif

@@ -34,6 +34,7 @@
 #include "SliceViewerWidget.h"
 #include "SmoothingWidget.h"
 #include "SurfaceViewerWidget.h"
+#include "StdStringToQString.h"
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
@@ -189,8 +190,8 @@ bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
 		char name2[1000];
 		while (fscanf(fp, "%s %s\n", name1, name2) == 2)
 		{
-			olds.push_back(TissueInfos::GetTissueType(QString(name1)));
-			news.push_back(TissueInfos::GetTissueType(QString(name2)));
+			olds.push_back(TissueInfos::GetTissueType(std::string(name1)));
+			news.push_back(TissueInfos::GetTissueType(std::string(name2)));
 		}
 		fclose(fp);
 		return true;
@@ -239,8 +240,7 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 			{
 				type1 = (tissues_size_t)tmp1;
 				type2 = (tissues_size_t)tmp2;
-				if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-						type2 <= tissueCount)
+				if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 				{
 					olds.push_back(type1);
 					news.push_back(type2);
@@ -252,10 +252,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 		else
 		{
 			// Read input as tissue names
-			type1 = TissueInfos::GetTissueType(QString(name1));
-			type2 = TissueInfos::GetTissueType(QString(name2));
-			if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-					type2 <= tissueCount)
+			type1 = TissueInfos::GetTissueType(std::string(name1));
+			type2 = TissueInfos::GetTissueType(std::string(name2));
+			if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 			{
 				olds.push_back(type1);
 				news.push_back(type2);
@@ -273,10 +272,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 
 			while (fscanf(fp, "%s %s\n", name1, name2) == 2)
 			{
-				type1 = TissueInfos::GetTissueType(QString(name1));
-				type2 = TissueInfos::GetTissueType(QString(name2));
-				if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-						type2 <= tissueCount)
+				type1 = TissueInfos::GetTissueType(std::string(name1));
+				type2 = TissueInfos::GetTissueType(std::string(name2));
+				if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 				{
 					olds.push_back(type1);
 					news.push_back(type2);
@@ -315,7 +313,7 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 
 	while (fscanf(fp, "%s\n", name) == 1)
 	{
-		tissues_size_t type = TissueInfos::GetTissueType(QString(name));
+		tissues_size_t type = TissueInfos::GetTissueType(std::string(name));
 		if (type > 0 && type <= tissueCount)
 		{
 			types.push_back(type);
@@ -6297,7 +6295,7 @@ void MainWindow::removeselected()
 			dataSelection.tissues = true;
 			emit begin_datachange(dataSelection, this, false);
 
-			QString tissueName = TissueInfos::GetTissueName(currTissueType);
+			QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
 			handler3D->remove_tissue(currTissueType, tissueCount);
 			tissueTreeWidget->remove_tissue(tissueName);
 
@@ -6328,7 +6326,7 @@ void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		QString tissueName = TissueInfos::GetTissueName(currTissueType);
+		QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
 		handler3D->remove_tissue(currTissueType, tissueCount);
 		tissueTreeWidget->remove_tissue(tissueName);
 
