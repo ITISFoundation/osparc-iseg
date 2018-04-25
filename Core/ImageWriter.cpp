@@ -9,11 +9,11 @@
  */
 #include "Precompiled.h"
 
-#include "ImageToITK.h"
 #include "ImageWriter.h"
 #include "InitializeITKFactory.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
 
+#include "Data/ImageToITK.h"
 #include "Data/Transform.h"
 
 #include <itkImage.h>
@@ -39,9 +39,7 @@ bool ImageWriter::writeVolume(const char* filename, const T** data,
 	typedef itk::Image<T, 3> image_type;
 	typedef itk::ImageFileWriter<image_type> writer_type;
 
-	typename image_type::Pointer image =
-			ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
-
+	auto image = ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
 	if (image)
 	{
 		boost::filesystem::path path(filename);

@@ -11,15 +11,16 @@ OPTION(PLUGIN_BIAS "Build MRI bias correction plugin" ON)
 IF(PLUGIN_BIAS)
 	QT4_WRAP_CPP(MOCSrcsbias BiasCorrection.h)
 
+	FILE(GLOB PLUGIN_HEADERS *.h)
 	ADD_LIBRARY(BiasCorrection.ext SHARED 
 		BiasCorrectionPlugin.cpp 
-		BiasCorrectionPlugin.h 
 		BiasCorrection.cpp 
-		BiasCorrection.h 
+		${PLUGIN_HEADERS}
 		${MOCSrcsbias}
 	)
 	
 	TARGET_LINK_LIBRARIES( BiasCorrection.ext 
+		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)

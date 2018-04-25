@@ -14,6 +14,7 @@ USE_ITK()
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	addLine.cpp
+	SliceHandlerItkWrapper.cpp
 	Transform.cpp
 )
 

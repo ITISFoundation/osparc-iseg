@@ -19,6 +19,10 @@
 #include <qpushbutton.h>
 #include <qspinbox.h>
 
+namespace itk {
+class ProcessObject;
+}
+
 class BoneSegmentationWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT

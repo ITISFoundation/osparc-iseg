@@ -71,6 +71,7 @@ void LevelsetWidget::do_work()
 	NodeContainer::Pointer seeds;
 	seeds = NodeContainer::New();
 
+#if 0 // TODO BL fixme
 	TInput::IndexType seedPosition;
 	handler3D->GetSeed(&seedPosition);
 
@@ -117,6 +118,7 @@ void LevelsetWidget::do_work()
 	output = thresholder->GetOutput();
 	output->Update();
 	handler3D->ModifyWorkFloat(output);
+#endif 
 }
 
 QSize LevelsetWidget::sizeHint() const { return vbox1->sizeHint(); }

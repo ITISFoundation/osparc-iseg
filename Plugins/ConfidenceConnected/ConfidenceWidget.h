@@ -35,7 +35,6 @@ protected:
 	void on_slicenr_changed() override;
 
 private:
-	unsigned int* usp;
 	iseg::SliceHandlerInterface* handler3D;
 	unsigned short activeslice;
 	Q3VBox* vbox1;

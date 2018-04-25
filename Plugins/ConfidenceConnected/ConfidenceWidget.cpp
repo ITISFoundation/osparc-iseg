@@ -29,8 +29,6 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 {
 	activeslice = handler3D->active_slice();
 
-	usp = NULL;
-
 	vbox1 = new Q3VBox(this);
 	bias_header = new QLabel("ConfidenceConnected Algorithm:(Pick with OLC "
 													 "Foreground 1 pixel to start) ",
@@ -60,8 +58,6 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 	vbox1->setFixedSize(vbox1->sizeHint());
 
 	QObject::connect(bias_exec, SIGNAL(clicked()), this, SLOT(do_work()));
-
-	return;
 }
 
 void ConfidenceWidget::do_work()
@@ -79,6 +75,7 @@ void ConfidenceWidget::do_work()
 	ConnectedFilterType::Pointer confidenceConnected;
 	confidenceConnected = ConnectedFilterType::New();
 
+#if 0 // TODO BL fixme	
 	TInput::Pointer input = TInput::New();
 	handler3D->GetITKImage(input);
 	input->Update();
@@ -100,6 +97,7 @@ void ConfidenceWidget::do_work()
 
 	output->Update();
 	handler3D->ModifyWorkFloat(output);
+#endif
 }
 
 QSize ConfidenceWidget::sizeHint() const { return vbox1->sizeHint(); }
@@ -107,8 +105,6 @@ QSize ConfidenceWidget::sizeHint() const { return vbox1->sizeHint(); }
 ConfidenceWidget::~ConfidenceWidget()
 {
 	delete vbox1;
-
-	free(usp);
 }
 
 void ConfidenceWidget::on_slicenr_changed()
@@ -124,11 +120,5 @@ void ConfidenceWidget::init()
 
 void ConfidenceWidget::newloaded()
 {
-	if (usp != NULL)
-	{
-		free(usp);
-		usp = NULL;
-	}
-
 	activeslice = handler3D->active_slice();
 }

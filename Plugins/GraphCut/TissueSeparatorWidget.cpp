@@ -14,6 +14,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/addLine.h"
+#include "Data/SliceHandlerItkWrapper.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 
@@ -181,8 +182,9 @@ void TissueSeparatorWidget::do_work_all_slices()
 	using source_type = itk::SliceContiguousImage<float>;
 	using mask_type = itk::Image<unsigned char, 3>;
 
-	auto source = slice_handler->GetImage(SliceHandlerInterface::kSource, false);
-	auto target = slice_handler->GetImage(SliceHandlerInterface::kTarget, false);
+	SliceHandlerItkWrapper wrapper(slice_handler);
+	auto source = wrapper.GetImage(SliceHandlerItkWrapper::kSource, false);
+	auto target = wrapper.GetImage(SliceHandlerItkWrapper::kTarget, false);
 
 	auto start = target->GetLargestPossibleRegion().GetIndex();
 	start[2] = slice_handler->start_slice();
@@ -215,8 +217,9 @@ void TissueSeparatorWidget::do_work_current_slice()
 {
 	using source_type = itk::Image<float, 2>;
 
-	auto source = slice_handler->GetImageSlice(SliceHandlerInterface::kSource);
-	auto target = slice_handler->GetImageSlice(SliceHandlerInterface::kTarget);
+	SliceHandlerItkWrapper wrapper(slice_handler);
+	auto source = wrapper.GetImageSlice(SliceHandlerItkWrapper::kSource);
+	auto target = wrapper.GetImageSlice(SliceHandlerItkWrapper::kTarget);
 
 	auto output = do_work<2, source_type>(source, target, target->GetLargestPossibleRegion());
 	if (output)

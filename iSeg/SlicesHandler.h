@@ -33,7 +33,7 @@ class TissueHiearchy;
 class ColorLookupTable;
 class bmphandler;
 
-class SlicesHandler : public iseg::SliceHandlerInterface
+class SlicesHandler : public SliceHandlerInterface
 {
 public:
 	SlicesHandler();
@@ -458,15 +458,14 @@ public:
 			float** centers, float* tol_f, float* tol_d);
 	void fill_unassigned();
 	void fill_unassignedtissue(tissues_size_t f);
-	void start_undo(iseg::DataSelection& dataSelection);
-	bool start_undoall(iseg::DataSelection& dataSelection);
-	bool start_undo(iseg::DataSelection& dataSelection,
-			std::vector<unsigned> vslicenr1);
+	void start_undo(DataSelection& dataSelection);
+	bool start_undoall(DataSelection& dataSelection);
+	bool start_undo(DataSelection& dataSelection, std::vector<unsigned> vslicenr1);
 	void abort_undo();
 	void end_undo();
 	void merge_undo();
-	iseg::DataSelection undo();
-	iseg::DataSelection redo();
+	DataSelection undo();
+	DataSelection redo();
 	void clear_undo();
 	void reverse_undosliceorder();
 	unsigned return_nrundo();
@@ -531,34 +530,14 @@ public:
 	void SetCompression(int c) { this->_hdf5_compression = c; };
 	bool GetContiguousMemory() const { return _contiguous_memory_io; }
 	void SetContiguousMemory(bool v) { _contiguous_memory_io = v; }
-	std::vector<float> GetBoundingBox();
 
 	int SaveRaw(const char* filename, bool work);
 	float DICOMsort(std::vector<const char*>* lfilename);
 
 	TissueHiearchy* get_tissue_hierachy() { return _tissue_hierachy; }
 
-	void GetITKImage(itk::Image<float, 3>*, int startslice, int endslice);
-	void GetITKImageFB(itk::Image<float, 3>*, int startslice, int endslice);
-	void GetITKImageGM(itk::Image<float, 3>*, int startslice, int endslice);
-	void ModifyWork(itk::Image<unsigned int, 3>* output, int startslice,
-			int endslice);
-	void ModifyWorkFloat(itk::Image<float, 3>* output, int startslice,
-			int endslice);
-
-	void GetITKImage(itk::Image<float, 3>*);
-	void GetITKImageFB(itk::Image<float, 3>*);
-	void GetITKImageGM(itk::Image<float, 3>*);
-	void ModifyWork(itk::Image<unsigned int, 3>* output);
-	void ModifyWorkFloat(itk::Image<float, 3>* output);
 	void mergetissues(tissues_size_t tissuetype);
-	void GetSeed(itk::Image<float, 3>::IndexType*);
 	void selectedtissue2mc(tissues_size_t tissuetype, unsigned char** voxels);
-
-	itk::SliceContiguousImage<float>::Pointer GetImage(eImageType type, bool active_slices) override;
-	itk::SliceContiguousImage<unsigned short>::Pointer GetTissues(bool active_slices) override;
-	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) override;
-	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() override;
 
 private:
 	unsigned short _activeslice;

@@ -11,6 +11,9 @@
 
 #include "ImageGraphCut3DFilter.h"
 
+#include "Data/ItkUtils.h"
+#include "Data/SliceHandlerItkWrapper.h"
+
 #include <itkConnectedComponentImageFilter.h>
 #include <itkFlatStructuringElement.h>
 #include <itkGrayscaleErodeImageFilter.h>
@@ -156,15 +159,11 @@ void BoneSegmentationWidget::do_work()
 	typedef itk::Image<float, 3> TInput;
 	typedef itk::Image<unsigned int, 3> TOutput;
 	typedef itk::Image<int, 3> TIntImage;
-	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput>
-			GraphCutFilterType;
+	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput> GraphCutFilterType;
 
 	// get input image
-	auto input = TInput::New();
-	if (m_UseSliceRange->isChecked() == true)
-		m_Handler3D->GetITKImage(input, m_Start->value() - 1, m_End->value());
-	else
-		m_Handler3D->GetITKImage(input);
+	iseg::SliceHandlerItkWrapper itk_wrapper(m_Handler3D);
+	auto input = itk_wrapper.GetImageDeprecated(iseg::SliceHandlerItkWrapper::kSource, m_UseSliceRange->isChecked());
 
 	assert(m_MaxFlowAlgorithm->currentItem() > 0);
 
@@ -188,8 +187,7 @@ void BoneSegmentationWidget::do_work()
 		m_CurrentFilter = graphCutFilter;
 
 		auto observer = CommandProgressUpdate<GraphCutFilterType>::New();
-		auto observer_id =
-				graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
+		auto observer_id = graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
 		observer->SetProgressObject(&progress);
 
 		try
@@ -197,10 +195,17 @@ void BoneSegmentationWidget::do_work()
 			graphCutFilter->Update();
 
 			auto output = graphCutFilter->GetOutput();
-			if (m_UseSliceRange->isChecked() == true)
-				m_Handler3D->ModifyWork(output, m_Start->value() - 1, m_End->value());
-			else
-				m_Handler3D->ModifyWork(output);
+
+			auto target = itk_wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, m_UseSliceRange->isChecked());
+
+			iseg::DataSelection dataSelection;
+			dataSelection.allSlices = true;
+			dataSelection.work = true;
+			emit begin_datachange(dataSelection, this);
+
+			iseg::Paste<TOutput, iseg::SliceHandlerItkWrapper::image_ref_type>(output, target);
+
+			emit end_datachange(this);
 		}
 		catch (itk::ExceptionObject&)
 		{

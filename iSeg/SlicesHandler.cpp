@@ -29,12 +29,12 @@
 #include "vtkImageExtractCompatibleMesher.h"
 
 #include "Data/Transform.h"
+#include "Data/SliceHandlerItkWrapper.h"
 
 #include "Core/ExpectationMaximization.h"
 #include "Core/HDF5Writer.h"
 #include "Core/ImageForestingTransform.h"
 #include "Core/ImageReader.h"
-#include "Core/ImageToITK.h"
 #include "Core/ImageWriter.h"
 #include "Core/KMeans.h"
 #include "Core/MarchingCubes.h"
@@ -3695,8 +3695,6 @@ void SlicesHandler::mergetissues(tissues_size_t tissuetype)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		(_image_slices[i]).mergetissue(tissuetype, _active_tissuelayer);
-
-	return;
 }
 
 void SlicesHandler::tissue2workall()
@@ -3708,16 +3706,12 @@ void SlicesHandler::tissue2workall3D()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		(_image_slices[i]).tissue2work(_active_tissuelayer);
-
-	return;
 }
 
 void SlicesHandler::swap_bmpworkall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		(_image_slices[i]).swap_bmpwork();
-
-	return;
 }
 
 void SlicesHandler::add_mark(Point p, unsigned label)
@@ -5791,7 +5785,8 @@ private:
 
 void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 {
-	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5803,7 +5798,8 @@ void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 
 void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 {
-	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5815,7 +5811,8 @@ void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 
 void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 {
-	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5827,7 +5824,8 @@ void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 
 void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 {
-	auto all_slices = GetImage(iseg::SliceHandlerInterface::kTarget, false);
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5837,8 +5835,7 @@ void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::interpolateworkgrey(unsigned short slice1,
-		unsigned short slice2)
+void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2)
 {
 	if (slice2 < slice1)
 	{
@@ -12307,345 +12304,4 @@ unsigned SlicesHandler::GetNumberOfUndoArrays()
 void SlicesHandler::SetNumberOfUndoArrays(unsigned n)
 {
 	this->_undoQueue.set_nrundoarraysmax(n);
-}
-
-std::vector<float> SlicesHandler::GetBoundingBox()
-{
-	std::vector<float> bbox;
-
-	unsigned int dimensionX = width();
-	unsigned int dimensionY = height();
-	unsigned int dimensionZ = num_slices();
-
-	if (dimensionX * dimensionY * dimensionZ == 0)
-		return bbox;
-
-	float offset[3], dc[6];
-	get_displacement(offset);
-	get_direction_cosines(dc);
-
-	Vec3 origin(offset[0], offset[1], offset[2]);
-
-	Vec3 d1(dc[0], dc[1], dc[2]);
-	Vec3 d2(dc[3], dc[4], dc[5]);
-	Vec3 d3(d1 ^ d2);
-
-	bbox.resize(6);
-	bbox[0] =
-			(float)std::min<double>(origin[0], origin[0] + d1[0] * dimensionX * _dx);
-	bbox[1] =
-			(float)std::max<double>(origin[0], origin[0] + d1[0] * dimensionX * _dx);
-	bbox[2] =
-			(float)std::min<double>(origin[1], origin[1] + d2[1] * dimensionY * _dy);
-	bbox[3] =
-			(float)std::max<double>(origin[1], origin[1] + d2[1] * dimensionY * _dy);
-	bbox[4] = (float)std::min<double>(
-			origin[2], origin[2] + d3[2] * dimensionZ * _thickness);
-	bbox[5] = (float)std::max<double>(
-			origin[2], origin[2] + d3[2] * dimensionZ * _thickness);
-
-	return bbox;
-}
-
-void SlicesHandler::GetITKImage(itk::Image<float, 3>* inputim)
-{
-	GetITKImage(inputim, _startslice, _endslice);
-}
-
-void SlicesHandler::GetITKImageGM(itk::Image<float, 3>* inputim)
-{
-	GetITKImageGM(inputim, _startslice, _endslice);
-}
-
-void SlicesHandler::GetITKImageFB(itk::Image<float, 3>* inputim)
-{
-	GetITKImageFB(inputim, _startslice, _endslice);
-}
-
-void SlicesHandler::ModifyWork(itk::Image<unsigned int, 3>* output)
-{
-	ModifyWork(output, _startslice, _endslice);
-}
-
-void SlicesHandler::ModifyWorkFloat(itk::Image<float, 3>* output)
-{
-	ModifyWorkFloat(output, _startslice, _endslice);
-}
-
-void SlicesHandler::GetITKImage(itk::Image<float, 3>* inputim, int begin,
-		int end)
-{
-	const SlicesHandler* self = this; // for const slices
-	auto slices = self->source_slices();
-	float spacing[3] = {_dx, _dy, _thickness};
-	ImageToITK::copy(slices.data(), _width, _height, (unsigned)begin,
-			(unsigned)(end - begin), spacing, _transform, inputim);
-}
-
-void SlicesHandler::GetITKImageGM(itk::Image<float, 3>* inputim, int begin,
-		int end)
-{
-	float spacing[3] = {_dx, _dy, _thickness};
-	ImageToITK::setup<float>(_width, _height, begin, end, spacing, _transform,
-			inputim);
-
-	itk::Image<float, 3>::IndexType pi;
-	auto size = inputim->GetLargestPossibleRegion().GetSize();
-
-	for (unsigned z = 0; z < size[2]; z++)
-	{
-		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)size[0] * (int)size[1]);
-		float* field = &fieldin[0];
-		std::vector<float> fieldwork((int)size[0] * (int)size[1]);
-		float* fieldw = &fieldwork[0];
-		copyfrombmp(begin + z, field);
-		copyfromwork(begin + z, fieldw);
-		for (unsigned y = begin; y < size[1]; y++)
-		{
-			pi.SetElement(1, y);
-			for (unsigned x = 0; x < size[0]; x++)
-			{
-				pi.SetElement(0, x);
-				if (fieldw[x + y * size[0]] == 0)
-					field[x + y * size[0]] = 0;
-				inputim->SetPixel(pi, field[x + y * size[0]]);
-			}
-		}
-	}
-	inputim->Update();
-}
-
-void SlicesHandler::GetITKImageFB(itk::Image<float, 3>* inputim, int begin,
-		int end)
-{
-	float spacing[3] = {_dx, _dy, _thickness};
-	ImageToITK::setup<float>(_width, _height, begin, end, spacing, _transform,
-			inputim);
-
-	itk::Image<float, 3>::IndexType pi;
-	auto size = inputim->GetLargestPossibleRegion().GetSize();
-
-	for (unsigned z = 0; z < size[2]; z++)
-	{
-		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)size[0] * (int)size[1]);
-		float* field = &fieldin[0];
-		copyfromwork(begin + z,
-				field); //&([z*(unsigned long long)return_area()])
-		for (unsigned y = begin; y < size[1]; y++)
-		{
-			pi.SetElement(1, y);
-			for (unsigned x = 0; x < size[0]; x++)
-			{
-				pi.SetElement(0, x);
-				inputim->SetPixel(pi, field[x + y * size[0]]);
-			}
-		}
-	}
-	inputim->Update();
-}
-
-void SlicesHandler::ModifyWork(itk::Image<unsigned int, 3>* output, int begin,
-		int end)
-{
-	typedef itk::Image<unsigned int, 3> TInput;
-	TInput::SizeType size;
-	size[0] = _width;			 // size along X
-	size[1] = _height;			 // size along Y
-	size[2] = end - begin; // size along Z
-
-	TInput::IndexType pi;
-
-	for (unsigned z = 0; z < size[2]; z++)
-	{
-		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)size[0] * (int)size[1]);
-		float* field = &fieldin[0];
-		for (unsigned y = begin; y < size[1]; y++)
-		{
-			pi.SetElement(1, y);
-			for (unsigned x = 0; x < size[0]; x++)
-			{
-				pi.SetElement(0, x);
-				field[x + y * size[0]] = output->GetPixel(pi);
-			}
-		}
-		copy2work(begin + z, field, 1);
-	}
-}
-
-void SlicesHandler::ModifyWorkFloat(itk::Image<float, 3>* output, int begin,
-		int end)
-{
-	typedef itk::Image<unsigned int, 3> TInput;
-	TInput::SizeType size;
-	size[0] = _width;			 // size along X
-	size[1] = _height;			 // size along Y
-	size[2] = end - begin; // size along Z
-	TInput::IndexType pi;
-
-	for (unsigned z = 0; z < output->GetLargestPossibleRegion().GetSize(2); z++)
-	{
-		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)size[0] * (int)size[1]);
-		float* field = &fieldin[0];
-		for (unsigned y = 0; y < output->GetLargestPossibleRegion().GetSize(1);
-				 y++)
-		{
-			pi.SetElement(1, y);
-			for (unsigned x = 0;
-					 x < output->GetLargestPossibleRegion().GetSize(0); x++)
-			{
-				pi.SetElement(0, x);
-				field[x + y * size[0]] = output->GetPixel(pi);
-			}
-		}
-		copy2work(begin + z, field, 1);
-	}
-}
-
-void SlicesHandler::GetSeed(itk::Image<float, 3>::IndexType* seed)
-{
-	typedef itk::Image<float, 3> TInput;
-	TInput::IndexType pi;
-
-	for (unsigned z = 0; z < (int)(_endslice - _startslice); z++)
-	{
-		pi.SetElement(2, z);
-		std::vector<float> fieldin((int)width() * (int)height());
-		float* field = &fieldin[0];
-		copyfromwork(z, field); //&([z*(unsigned long long)return_area()])
-		for (unsigned y = 0; y < height(); y++)
-		{
-			pi.SetElement(1, y);
-			for (unsigned x = 0; x < width(); x++)
-			{
-				pi.SetElement(0, x);
-				if (abs(field[x + y * width()]) > 4500)
-				{
-					*seed = pi;
-				}
-			}
-		}
-	}
-}
-
-template<typename T>
-typename itk::SliceContiguousImage<T>::Pointer
-		_GetITKView(std::vector<T*>& slices, size_t dims[3], double spacing[3])
-{
-	typedef itk::SliceContiguousImage<T> SliceContiguousImageType;
-
-	auto image = SliceContiguousImageType::New();
-	image->SetSpacing(spacing);
-	// \bug Transform (rotation/offset) not set
-
-	typename SliceContiguousImageType::IndexType start;
-	start.Fill(0);
-
-	typename SliceContiguousImageType::SizeType size;
-	size[0] = dims[0];
-	size[1] = dims[1];
-	size[2] = dims[2];
-
-	typename SliceContiguousImageType::RegionType region(start, size);
-	image->SetRegions(region);
-	image->Allocate();
-
-	// Set slice pointers
-	auto container = SliceContiguousImageType::PixelContainer::New();
-	container->SetImportPointersForSlices(slices, size[0] * size[1], false);
-	image->SetPixelContainer(container);
-
-	return image;
-}
-
-itk::SliceContiguousImage<float>::Pointer
-		SlicesHandler::GetImage(eImageType type, bool active_slices)
-{
-	size_t dims[3] = {
-			_width, _height,
-			static_cast<size_t>(active_slices ? _endslice - _startslice : _nrslices)};
-	double spacing[3] = {_dx, _dy, _thickness};
-
-	auto all_slices = (type == eImageType::kSource) ? source_slices() : target_slices();
-	if (!active_slices)
-	{
-		return _GetITKView(all_slices, dims, spacing);
-	}
-
-	std::vector<float*> slices;
-	for (unsigned i = _startslice; i < _endslice; ++i)
-	{
-		slices.push_back(all_slices[i]);
-	}
-	return _GetITKView(slices, dims, spacing);
-}
-
-itk::SliceContiguousImage<tissues_size_t>::Pointer
-		SlicesHandler::GetTissues(bool active_slices)
-{
-	size_t dims[3] = {
-			_width, _height,
-			static_cast<size_t>(active_slices ? _endslice - _startslice : _nrslices)};
-	double spacing[3] = {_dx, _dy, _thickness};
-
-	auto all_slices = tissue_slices(_active_tissuelayer);
-	if (!active_slices)
-	{
-		return _GetITKView(all_slices, dims, spacing);
-	}
-
-	std::vector<tissues_size_t*> slices;
-	for (unsigned i = _startslice; i < _endslice; ++i)
-	{
-		slices.push_back(all_slices[i]);
-	}
-	return _GetITKView(slices, dims, spacing);
-}
-
-template<typename T>
-typename itk::Image<T>::Pointer
-		_GetITKView2D(T* slice, size_t dims[2], double spacing[2])
-{
-	typedef itk::Image<T, 2> image_type;
-
-	typename image_type::IndexType start;
-	start[0] = 0; // first index on X
-	start[1] = 0; // first index on Y
-	typename image_type::SizeType size;
-	size[0] = dims[0]; // size along X
-	size[1] = dims[1]; // size along Y
-
-	auto image = itk::Image<T>::New();
-	image->SetRegions(typename image_type::RegionType(start, size));
-	image->SetSpacing(spacing);
-	// \warning transform is ignored
-	//image->SetOrigin(origin);
-	//image->SetDirection(direction);
-
-	bool const manage_memory = false;
-	image->GetPixelContainer()->SetImportPointer(slice, size[0] * size[1], manage_memory);
-	return image;
-}
-
-itk::Image<float, 2>::Pointer
-		SlicesHandler::GetImageSlice(eImageType type)
-{
-	size_t dims[2] = {_width, _height};
-	double spacing[2] = {_dx, _dy};
-
-	auto all_slices = (type == eImageType::kSource) ? source_slices() : target_slices();
-	return _GetITKView2D(all_slices[_activeslice], dims, spacing);
-}
-
-itk::Image<tissues_size_t, 2>::Pointer
-		SlicesHandler::GetTissuesSlice()
-{
-	size_t dims[2] = {_width, _height};
-	double spacing[2] = {_dx, _dy};
-
-	auto all_slices = tissue_slices(_active_tissuelayer);
-	return _GetITKView2D(all_slices[_activeslice], dims, spacing);
 }
