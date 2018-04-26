@@ -34,22 +34,28 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 {
 	activeslice = handler3D->active_slice();
 
-	header = new QLabel("Confidence Connected Algorithm: Pick at least one seed point");
+	setToolTip(Format(
+		"Segment pixels with similar statistics using region growing. At least one seed point is needed."));
+
+	all_slices = new QCheckBox;
 
 	iterations = new QSpinBox(0, 50, 1, nullptr);
 	iterations->setValue(1);
+	iterations->setToolTip(Format("Number of growing iterations (each time image statistics of current region are recomputed)."));
 
 	multiplier = new QLineEdit(QString::number(2.5));
 	multiplier->setValidator(new QDoubleValidator(1.0, 1e6, 2));
+	multiplier->setToolTip(Format("The confidence interval is the mean plus or minus the 'Multiplier' times the standard deviation."));
 
 	radius = new QSpinBox(1, 10, 1, nullptr);
 	radius->setValue(2);
+	radius->setToolTip(Format("The neighborhood side of the initial seed points used to compute the image statistics."));
 
 	clear_seeds = new QPushButton("Clear seeds");
 	execute_button = new QPushButton("Execute");
 
 	auto layout = new QFormLayout;
-	layout->addRow(header);
+	layout->addRow(QString("Apply to all slices"), all_slices);
 	layout->addRow(QString("Iterations"), iterations);
 	layout->addRow(QString("Multiplier"), multiplier);
 	layout->addRow(QString("Neighborhood radius"), radius);
@@ -64,6 +70,9 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 void ConfidenceWidget::on_slicenr_changed()
 {
 	activeslice = handler3D->active_slice();
+
+	std::vector<iseg::Point> vp = vpdyn[activeslice];
+	emit vpdyn_changed(&vp);
 }
 
 void ConfidenceWidget::init()
@@ -74,22 +83,37 @@ void ConfidenceWidget::init()
 
 void ConfidenceWidget::newloaded()
 {
-	activeslice = handler3D->active_slice();
+	clearmarks();
+	on_slicenr_changed();
+}
+
+void ConfidenceWidget::cleanup()
+{
+	clearmarks();
 }
 
 void ConfidenceWidget::clearmarks()
 {
 	vpdyn.clear();
+
+	std::vector<iseg::Point> empty;
+	emit vpdyn_changed(&empty);
 }
 
 void ConfidenceWidget::on_mouse_clicked(iseg::Point p)
 {
-	vpdyn.push_back(p);
+	vpdyn[activeslice].push_back(p);
+
+	if (!all_slices->isChecked())
+	{
+		do_work();
+	}
 }
 
 void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 {
-	for (auto p: vpdyn)
+	auto vp = vpdyn[activeslice];
+	for (auto p: vp)
 	{
 		itk::Index<2> idx;
 		idx[0] = p.px;
@@ -100,25 +124,46 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 
 void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 {
-	auto slice_idx = handler3D->active_slice();
-	for (auto p: vpdyn)
+	for (auto slice: vpdyn)
 	{
-		itk::Index<3> idx;
-		idx[0] = p.px;
-		idx[1] = p.py;
-		idx[2] = slice_idx;
-		seeds.push_back(idx);
+		for (auto p : slice.second)
+		{
+			itk::Index<3> idx;
+			idx[0] = p.px;
+			idx[1] = p.py;
+			idx[2] = slice.first;
+			seeds.push_back(idx);
+		}
 	}
 }
 
 void ConfidenceWidget::do_work()
 {
-	using input_type = itk::SliceContiguousImage<float>;
-	using real_type = itk::Image<float,3>;
-	using mask_type = itk::Image<unsigned char,3>;
-
 	iseg::SliceHandlerItkWrapper itk_handler(handler3D);
-	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+	if (all_slices->isChecked())
+	{
+		using input_type = itk::SliceContiguousImage<float>;
+		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+		auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+		do_work_nd<input_type>(source, target);
+	}
+	else
+	{
+		using input_type = itk::Image<float,2>;
+		auto source = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kSource);
+		auto target = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kTarget);
+		do_work_nd<input_type>(source, target);
+	}
+}
+
+template<typename TInput>
+void ConfidenceWidget::do_work_nd(TInput* source, TInput* target)
+{
+	itkStaticConstMacro(ImageDimension, unsigned int, TInput::ImageDimension);
+	using input_type = TInput;
+	using real_type = itk::Image<float, ImageDimension>;
+	using mask_type = itk::Image<unsigned char, ImageDimension>;
+
 	auto smoothing = itk::CurvatureFlowImageFilter<input_type, real_type>::New();
 	auto confidenceConnected = itk::ConfidenceConnectedImageFilter<real_type, mask_type>::New();
 
@@ -136,7 +181,7 @@ void ConfidenceWidget::do_work()
 
 	std::vector<typename input_type::IndexType> seeds;
 	get_seeds(seeds);
-	for (auto idx: seeds)
+	for (auto idx : seeds)
 	{
 		confidenceConnected->AddSeed(idx);
 	}
@@ -145,7 +190,7 @@ void ConfidenceWidget::do_work()
 	{
 		confidenceConnected->Update();
 	}
-	catch(itk::ExceptionObject)
+	catch (itk::ExceptionObject)
 	{
 		return;
 	}
@@ -155,7 +200,6 @@ void ConfidenceWidget::do_work()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
 	iseg::Paste<mask_type, input_type>(confidenceConnected->GetOutput(), target);
 
 	emit end_datachange(this);
