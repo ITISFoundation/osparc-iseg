@@ -196,7 +196,8 @@ void ConfidenceWidget::do_work_nd(TInput* source, TInput* target)
 	}
 
 	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
+	dataSelection.allSlices = all_slices->isChecked();
+	dataSelection.sliceNr = activeslice;
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
