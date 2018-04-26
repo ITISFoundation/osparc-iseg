@@ -36,10 +36,12 @@ namespace
 {
 	template<class T> void dump_image(T *img, const std::string& file_name)
 	{
+#if 0
 		auto writer = itk::ImageFileWriter<T>::New();
 		writer->SetInput(img);
 		writer->SetFileName(file_name);
 		writer->Update();
+#endif
 	}
 }
 
@@ -182,13 +184,13 @@ void LevelsetWidget::guess_thresholds_nd(TInput* source)
 	std::vector<typename input_type::IndexType> indices;
 	get_seeds(indices);
 
-	input_type::SizeType radius;
+	typename input_type::SizeType radius;
 	radius.Fill(2);
 
 	acc::accumulator_set<double, acc::features<
 		acc::tag::mean,
-		acc::tag::min,
-		acc::tag::max,
+		//acc::tag::min,
+		//acc::tag::max,
 		//acc::tag::percentile,
 		acc::tag::variance
 	> > stats;
@@ -210,8 +212,6 @@ void LevelsetWidget::guess_thresholds_nd(TInput* source)
 		}
 	}
 
-	auto min = acc::min(stats);
-	auto max = acc::max(stats);
 	auto mean = acc::mean(stats);
 	auto stddev = std::sqrt(acc::variance(stats));
 	auto s = multiplier->text().toDouble();
@@ -259,11 +259,6 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	auto threshold_levelset = itk::ThresholdSegmentationLevelSetImageFilter<real_type, input_type>::New();
 	auto threshold = itk::BinaryThresholdImageFilter<real_type, mask_type>::New();
 
-	// setup pipeline
-	threshold_levelset->SetInput(fast_marching->GetOutput());
-	threshold_levelset->SetFeatureImage(input);
-	threshold->SetInput(threshold_levelset->GetOutput());
-
 	// setup seeds
 	const double initialDistance = 2.0; // \todo BL
 	const double seedValue = -initialDistance; // \todo BL
@@ -285,14 +280,17 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	fast_marching->SetOutputOrigin(input->GetOrigin());
 	fast_marching->SetOutputDirection(input->GetDirection());
 
+	threshold_levelset->SetInput(fast_marching->GetOutput());
+	threshold_levelset->SetFeatureImage(input);
 	threshold_levelset->SetPropagationScaling(1.0); 
 	threshold_levelset->SetCurvatureScaling(1.0);
 	threshold_levelset->SetMaximumRMSError(0.02);
 	threshold_levelset->SetNumberOfIterations(iterations->value());
-	threshold_levelset->SetUpperThreshold(lower_threshold->text().toDouble());
-	threshold_levelset->SetLowerThreshold(upper_threshold->text().toDouble());
+	threshold_levelset->SetLowerThreshold(lower_threshold->text().toDouble());
+	threshold_levelset->SetUpperThreshold(upper_threshold->text().toDouble());
 	threshold_levelset->SetIsoSurfaceValue(0.0);
 
+	threshold->SetInput(threshold_levelset->GetOutput());
 	threshold->SetLowerThreshold(-5000.0); // \todo BL
 	threshold->SetUpperThreshold(0);
 	threshold->SetOutsideValue(0);
@@ -302,8 +300,12 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	{
 		threshold->Update();
 
-		dump_image(threshold_levelset->GetOutput(), "E:/temp/_ls_levelset.nii.gz");
-		dump_image(threshold->GetOutput(), "E:/temp/_ls_final.nii.gz");
+		std::cerr << "Finished levelset segmentation\n";
+
+		std::string dir = "/Users/lloyd/temp/"; //"E:/temp/";
+		dump_image(fast_marching->GetOutput(), dir + "_ls_fastmarching.nii.gz");
+		dump_image(threshold_levelset->GetOutput(), dir + "_ls_levelset.nii.gz");
+		dump_image(threshold->GetOutput(), dir + "_ls_final.nii.gz");
 	}
 	catch (itk::ExceptionObject e)
 	{

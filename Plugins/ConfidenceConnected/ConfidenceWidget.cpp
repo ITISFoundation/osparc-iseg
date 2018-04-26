@@ -124,6 +124,7 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 
 void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 {
+	auto start_slice = handler3D->start_slice();
 	for (auto slice: vpdyn)
 	{
 		for (auto p : slice.second)
@@ -131,7 +132,7 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 			itk::Index<3> idx;
 			idx[0] = p.px;
 			idx[1] = p.py;
-			idx[2] = slice.first;
+			idx[2] = slice.first - start_slice;
 			seeds.push_back(idx);
 		}
 	}
