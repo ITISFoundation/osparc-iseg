@@ -103,13 +103,6 @@ typename ImageType::Pointer AllocImage(
 	return rval;
 }
 
-inline QString Format(const char* tooltip)
-{
-	QString fmt = "<html>\n";
-	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
-	fmt += "</html>";
-	return fmt;
-}
 } // namespace
 
 BiasCorrectionWidget::BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D,

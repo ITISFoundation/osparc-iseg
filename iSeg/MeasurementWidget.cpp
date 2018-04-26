@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "MeasurementWidget.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"

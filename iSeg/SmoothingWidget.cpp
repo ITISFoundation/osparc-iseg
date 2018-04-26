@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "SmoothingWidget.h"
 #include "bmp_read_1.h"

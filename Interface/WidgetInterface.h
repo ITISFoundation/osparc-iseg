@@ -11,6 +11,8 @@
 
 #include "InterfaceApi.h"
 
+#include "FormatTooltip.h"
+
 #include "Data/DataSelection.h"
 #include "Data/Mark.h"
 

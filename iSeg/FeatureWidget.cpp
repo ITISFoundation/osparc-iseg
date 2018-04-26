@@ -10,7 +10,6 @@
 #include "Precompiled.h"
 
 #include "FeatureWidget.h"
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
 #include "bmp_read_1.h"

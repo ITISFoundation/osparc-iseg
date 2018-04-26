@@ -10,7 +10,6 @@
 #include "Precompiled.h"
 
 #include "FastmarchingFuzzyWidget.h"
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 

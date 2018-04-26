@@ -16,7 +16,6 @@
 #include "EdgeWidget.h"
 #include "FastmarchingFuzzyWidget.h"
 #include "FeatureWidget.h"
-#include "FormatTooltip.h"
 #include "HystereticGrowingWidget.h"
 #include "ImageForestingTransformRegionGrowingWidget.h"
 #include "ImageInformationDialogs.h"

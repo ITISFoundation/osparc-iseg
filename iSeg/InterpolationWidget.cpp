@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "InterpolationWidget.h"
 #include "SlicesHandler.h"
 

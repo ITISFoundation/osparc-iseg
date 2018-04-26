@@ -65,13 +65,6 @@ private:
 	QProgressDialog* m_Progress;
 };
 
-inline QString Format(const char* tooltip)
-{
-	QString fmt = "<html>\n";
-	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
-	fmt += "</html>";
-	return fmt;
-}
 } // namespace
 
 BoneSegmentationWidget::BoneSegmentationWidget(
@@ -80,13 +73,13 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
 			m_CurrentFilter(nullptr)
 {
-	setToolTip(
-			Format("A fully-automatic method for segmenting the femur from 3D CT "
-						 "scans, based on the graph-cut segmentation framework and bone "
-						 "enhancement filters "
-						 "<br>"
-						 "Krcah et al., 'Fully automatic and fast segmentation of the "
-						 "femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
+	setToolTip(Format(
+			"A fully-automatic method for segmenting the femur from 3D CT "
+			"scans, based on the graph-cut segmentation framework and bone "
+			"enhancement filters."
+			"<br>"
+			"Krcah et al., 'Fully automatic and fast segmentation of the "
+			"femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
 
 	m_CurrentSlice = m_Handler3D->active_slice();
 
