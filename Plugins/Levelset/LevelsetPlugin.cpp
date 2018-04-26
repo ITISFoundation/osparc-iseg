@@ -9,7 +9,7 @@
  */
 #include "LevelsetPlugin.h"
 
-#include "Levelset.h"
+#include "LevelsetWidget.h"
 
 namespace iseg { namespace plugin {
 
