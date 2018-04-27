@@ -17,7 +17,7 @@
 #include <itkFastMarchingImageFilter.h>
 #include <itkThresholdSegmentationLevelSetImageFilter.h>
 #include <itkConstNeighborhoodIterator.h>
-#include <itkImageFileWriter.h>
+#include <itkApproximateSignedDistanceMapImageFilter.h>
 
 #include <QFormLayout>
 
@@ -31,19 +31,6 @@
 
 #include <algorithm>
 #include <sstream>
-
-namespace
-{
-	template<class T> void dump_image(T *img, const std::string& file_name)
-	{
-#if 0
-		auto writer = itk::ImageFileWriter<T>::New();
-		writer->SetInput(img);
-		writer->SetFileName(file_name);
-		writer->Update();
-#endif
-	}
-}
 
 namespace acc = boost::accumulators;
 
@@ -59,15 +46,17 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 
 	init_from_target = new QCheckBox;
 
-	iterations = new QSpinBox(1, 50000, 1, nullptr);
-	iterations->setValue(1200);
-	iterations->setToolTip(Format(""));
+	curvature_scaling = new QLineEdit(QString::number(1.0));
+	curvature_scaling->setValidator(new QDoubleValidator);
 
 	lower_threshold = new QLineEdit(QString::number(0.0));
 	lower_threshold->setValidator(new QDoubleValidator);
 
 	upper_threshold = new QLineEdit(QString::number(1.0));
 	upper_threshold->setValidator(new QDoubleValidator);
+
+	edge_weight = new QLineEdit(QString::number(0.0));
+	edge_weight->setValidator(new QDoubleValidator);
 
 	multiplier = new QLineEdit(QString::number(2.5));
 	multiplier->setValidator(new QDoubleValidator);
@@ -85,9 +74,10 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 	layout->addRow(QString("Apply to all slices"), all_slices);
 	
 	layout->addRow(QString("Initialize from target"), init_from_target);
-	layout->addRow(QString("Iterations"), iterations);
+	layout->addRow(QString("Curvature scaling"), curvature_scaling);
 	layout->addRow(QString("Lower threshold"), lower_threshold);
 	layout->addRow(QString("Upper threshold"), upper_threshold);
+	layout->addRow(QString("Edge weight"), edge_weight);
 	layout->addRow(QString("Multiplier"), multiplier);
 	layout->addRow(guess_threshold, clear_seeds);
 	layout->addRow(execute_button);
@@ -248,7 +238,7 @@ void LevelsetWidget::do_work()
 template<typename TInput>
 void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 {
-	itkStaticConstMacro(ImageDimension, unsigned int, TInput::ImageDimension);
+	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using input_type = TInput;
 	using real_type = itk::Image<float, ImageDimension>;
 	using mask_type = itk::Image<unsigned char, ImageDimension>;
@@ -266,12 +256,14 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	typename real_type::Pointer initial_levelset;
 	if (init_from_target->isChecked())
 	{
-		// 1. threshold target -> mask
-		auto threshold_target = itk::BinaryThresholdImageFilter<input_type, mask_type>::New();
+		// threshold target -> mask
+		auto threshold_target = itk::BinaryThresholdImageFilter<input_type, real_type>::New();
 		threshold_target->SetInput(target);
 		threshold_target->SetLowerThreshold(0.001f);
-
-		// 2. compute sdf from that
+		threshold_target->SetInsideValue(-0.5f); // level set filter uses iso-value 0.0
+		threshold_target->SetOutsideValue(0.5f);
+		threshold_target->Update();
+		initial_levelset = threshold_target->GetOutput();
 	}
 	else
 	{
@@ -303,16 +295,17 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	// set parameters
 	threshold_levelset->SetInput(initial_levelset);
 	threshold_levelset->SetFeatureImage(input);
-	threshold_levelset->SetPropagationScaling(1.0); 
-	threshold_levelset->SetCurvatureScaling(1.0);
-	threshold_levelset->SetMaximumRMSError(0.02);
-	threshold_levelset->SetNumberOfIterations(iterations->value());
+	threshold_levelset->SetPropagationScaling(1.0);
+	threshold_levelset->SetCurvatureScaling(curvature_scaling->text().toDouble());
+	threshold_levelset->SetEdgeWeight(edge_weight->text().toDouble());
 	threshold_levelset->SetLowerThreshold(lower_threshold->text().toDouble());
 	threshold_levelset->SetUpperThreshold(upper_threshold->text().toDouble());
+	threshold_levelset->SetMaximumRMSError(0.02);
+	threshold_levelset->SetNumberOfIterations(1200);
 	threshold_levelset->SetIsoSurfaceValue(0.0);
 
 	threshold->SetInput(threshold_levelset->GetOutput());
-	threshold->SetLowerThreshold(std::numeric_limits<double>::lowest());
+	threshold->SetLowerThreshold(std::numeric_limits<float>::lowest());
 	threshold->SetUpperThreshold(0);
 	threshold->SetOutsideValue(0);
 	threshold->SetInsideValue(255);
@@ -320,13 +313,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	try
 	{
 		threshold->Update();
-
 		std::cerr << "Finished levelset segmentation\n";
-
-		std::string dir = "/Users/lloyd/temp/"; //"E:/temp/";
-		dump_image(fast_marching->GetOutput(), dir + "_ls_fastmarching.nii.gz");
-		dump_image(threshold_levelset->GetOutput(), dir + "_ls_levelset.nii.gz");
-		dump_image(threshold->GetOutput(), dir + "_ls_final.nii.gz");
 	}
 	catch (itk::ExceptionObject e)
 	{
