@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Core/Types.h"
+#include "Data/Types.h"
 
 #include <qstring.h>
 
@@ -66,21 +66,21 @@ class TissueLayerInfos
 public:
 	static tissuelayers_size_t GetTissueLayerCount();
 	static TissueLayerInfoStruct*
-		GetTissueLayerInfo(tissuelayers_size_t layerIdx);
+			GetTissueLayerInfo(tissuelayers_size_t layerIdx);
 
 	static tissuelayers_size_t GetTissueLayerIndex(QString layerName);
 	static QString GetTissueLayerName(tissuelayers_size_t layerIdx);
 	static bool GetTissueLayerVisible(tissuelayers_size_t layerIdx);
 	static float GetTissueLayerOpac(tissuelayers_size_t layerIdx);
 	static TissueLayerOverlayMode
-		GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx);
+			GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx);
 
 	static void SetTissueLayerName(tissuelayers_size_t layerIdx, QString val);
 	static void SetTissueLayerVisible(tissuelayers_size_t layerIdx, bool val);
 	static void SetTissueLayersVisible(bool val);
 	static void SetTissueLayerOpac(tissuelayers_size_t layerIdx, float val);
 	static void SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx,
-										  TissueLayerOverlayMode val);
+			TissueLayerOverlayMode val);
 
 	static void AddTissueLayer(TissueLayerInfoStruct& layer);
 	static void RemoveTissueLayer(tissuelayers_size_t layerIdx);

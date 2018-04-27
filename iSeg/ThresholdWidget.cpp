@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "ThresholdWidget.h"
 #include "bmp_read_1.h"
@@ -49,7 +48,7 @@ ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
 {
 	setToolTip(Format("Segment tissues based on thresholding techniques."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	lower = 0;
@@ -256,7 +255,7 @@ void ThresholdWidget::execute()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -317,14 +316,14 @@ void ThresholdWidget::execute()
 			for (int i = 0; i + 1 < sb_dim->value(); i++)
 				mhdfiles.push_back(std::string(filenames[i].ascii()));
 			if (allslices->isChecked())
-				handler3D->gamma_mhd(handler3D->get_activeslice(),
+				handler3D->gamma_mhd(handler3D->active_slice(),
 									 (short)sb_nrtissues->value(),
 									 (short)sb_dim->value(), mhdfiles, weights,
 									 centers, tol_f, tol_d);
 			else
 				bmphand->gamma_mhd(
 					(short)sb_nrtissues->value(), (short)sb_dim->value(),
-					mhdfiles, handler3D->get_activeslice(), weights, centers,
+					mhdfiles, handler3D->active_slice(), weights, centers,
 					tol_f, tol_d, handler3D->get_pixelsize());
 			delete[] tol_d;
 			delete[] tol_f;
@@ -355,7 +354,7 @@ void ThresholdWidget::execute()
 						return;
 					if (allslices->isChecked())
 						handler3D->kmeans_png(
-							handler3D->get_activeslice(),
+							handler3D->active_slice(),
 							(short)sb_nrtissues->value(),
 							(short)sb_dim->value(), kmeansfiles,
 							extractChannels, weights,
@@ -366,7 +365,7 @@ void ThresholdWidget::execute()
 						bmphand->kmeans_png(
 							(short)sb_nrtissues->value(),
 							(short)sb_dim->value(), kmeansfiles,
-							extractChannels, handler3D->get_activeslice(),
+							extractChannels, handler3D->active_slice(),
 							weights, (unsigned int)sb_iternr->value(),
 							(unsigned int)sb_converge->value(),
 							centerFilename.toStdString());
@@ -375,7 +374,7 @@ void ThresholdWidget::execute()
 				{
 					if (allslices->isChecked())
 						handler3D->kmeans_mhd(
-							handler3D->get_activeslice(),
+							handler3D->active_slice(),
 							(short)sb_nrtissues->value(),
 							(short)sb_dim->value(), kmeansfiles, weights,
 							(unsigned int)sb_iternr->value(),
@@ -383,7 +382,7 @@ void ThresholdWidget::execute()
 					else
 						bmphand->kmeans_mhd((short)sb_nrtissues->value(),
 											(short)sb_dim->value(), kmeansfiles,
-											handler3D->get_activeslice(),
+											handler3D->active_slice(),
 											weights,
 											(unsigned int)sb_iternr->value(),
 											(unsigned int)sb_converge->value());
@@ -393,14 +392,14 @@ void ThresholdWidget::execute()
 			{
 				if (allslices->isChecked())
 					handler3D->kmeans_mhd(
-						handler3D->get_activeslice(),
+						handler3D->active_slice(),
 						(short)sb_nrtissues->value(), (short)sb_dim->value(),
 						kmeansfiles, weights, (unsigned int)sb_iternr->value(),
 						(unsigned int)sb_converge->value());
 				else
 					bmphand->kmeans_mhd((short)sb_nrtissues->value(),
 										(short)sb_dim->value(), kmeansfiles,
-										handler3D->get_activeslice(), weights,
+										handler3D->active_slice(), weights,
 										(unsigned int)sb_iternr->value(),
 										(unsigned int)sb_converge->value());
 			}
@@ -445,7 +444,7 @@ void ThresholdWidget::execute()
 		//		em.make_iter(sb_iternr->value(),sb_converge->value());
 		//		em.classify(bmphand->return_work());
 		if (allslices->isChecked())
-			handler3D->em(handler3D->get_activeslice(),
+			handler3D->em(handler3D->active_slice(),
 						  (short)sb_nrtissues->value(),
 						  (unsigned int)sb_iternr->value(),
 						  (unsigned int)sb_converge->value());
@@ -739,7 +738,7 @@ void ThresholdWidget::slider_pressed()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 	}
@@ -766,7 +765,7 @@ QSize ThresholdWidget::sizeHint() const { return vbox1->sizeHint(); }
 void ThresholdWidget::on_slicenr_changed()
 {
 	//	if(activeslice!=handler3D->get_activeslice()){
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 	//	}
 }
@@ -782,9 +781,9 @@ void ThresholdWidget::bmphand_changed(bmphandler* bmph)
 
 void ThresholdWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand_changed(handler3D->get_activebmphandler());
 	}
 	else
@@ -794,7 +793,7 @@ void ThresholdWidget::init()
 
 void ThresholdWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -821,7 +820,7 @@ void ThresholdWidget::le_borderval_returnpressed()
 
 			iseg::DataSelection dataSelection;
 			dataSelection.allSlices = allslices->isChecked();
-			dataSelection.sliceNr = handler3D->get_activeslice();
+			dataSelection.sliceNr = handler3D->active_slice();
 			dataSelection.work = true;
 			emit begin_datachange(dataSelection, this);
 

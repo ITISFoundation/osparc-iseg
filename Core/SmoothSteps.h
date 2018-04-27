@@ -11,7 +11,7 @@
 
 #include "iSegCore.h"
 
-#include "Types.h"
+#include "Data/Types.h"
 
 namespace iseg {
 
@@ -22,9 +22,9 @@ public:
 	~SmoothSteps();
 	void dostepsmooth(tissues_size_t* line);
 	void init(float* mask1, unsigned short masklength1,
-			  unsigned short linelength1, tissues_size_t nrtissues1);
+			unsigned short linelength1, tissues_size_t nrtissues1);
 	void init(unsigned short masklength1, unsigned short linelength1,
-			  tissues_size_t nrtissues1);
+			tissues_size_t nrtissues1);
 
 private:
 	float* mask;

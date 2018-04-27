@@ -14,7 +14,7 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include "Core/ColorLookupTable.h"
 
@@ -216,7 +216,7 @@ void ImageViewerWidget::bmp_changed() { update(); }
 
 void ImageViewerWidget::slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -227,7 +227,7 @@ void ImageViewerWidget::bmphand_changed(bmphandler* bmph)
 		bmpbits = bmph->return_bmpfield();
 	else
 		bmpbits = bmph->return_workfield();
-	tissue = bmph->return_tissuefield(handler3D->get_active_tissuelayer());
+	tissue = bmph->return_tissuefield(handler3D->active_tissuelayer());
 	marks = bmph->return_marks();
 
 	mode_changed(bmph->return_mode(bmporwork), false);
@@ -279,7 +279,7 @@ void ImageViewerWidget::update(QRect rect)
 		bmpbits = bmphand->return_bmpfield();
 	else
 		bmpbits = bmphand->return_workfield();
-	tissue = bmphand->return_tissuefield(handler3D->get_active_tissuelayer());
+	tissue = bmphand->return_tissuefield(handler3D->active_tissuelayer());
 	marks = bmphand->return_marks();
 
 	if (bmphand->return_width() != width || bmphand->return_height() != height)
@@ -318,7 +318,7 @@ void ImageViewerWidget::update(QRect rect)
 void ImageViewerWidget::init(SlicesHandler* hand3D, bool bmporwork1)
 {
 	handler3D = hand3D;
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	overlaybits = handler3D->return_overlay();
 	bmporwork = bmporwork1;
@@ -326,7 +326,7 @@ void ImageViewerWidget::init(SlicesHandler* hand3D, bool bmporwork1)
 		bmpbits = bmphand->return_bmpfield();
 	else
 		bmpbits = bmphand->return_workfield();
-	tissue = bmphand->return_tissuefield(hand3D->get_active_tissuelayer());
+	tissue = bmphand->return_tissuefield(hand3D->active_tissuelayer());
 	width = bmphand->return_width();
 	height = bmphand->return_height();
 	marks = bmphand->return_marks();

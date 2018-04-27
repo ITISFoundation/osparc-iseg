@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Interface/ItkUtils.h"
+#include "Data/ItkUtils.h"
 
 #include <itkBinaryDilateImageFilter.h>
 #include <itkBinaryErodeImageFilter.h>
@@ -117,7 +117,7 @@ typename TOutputImage::Pointer
 
 	auto threshold = itk::BinaryThresholdImageFilter<input_image_type, image_type>::New();
 	threshold->SetInput(input);
-	threshold->SetLowerThreshold(0.5f); // background is '0'
+	threshold->SetLowerThreshold(0.001f); // background is '0'
 	threshold->SetInsideValue(foreground_value);
 
 	std::vector<typename itk::ImageSource<image_type>::Pointer> filters;

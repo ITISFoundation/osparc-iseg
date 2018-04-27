@@ -9,12 +9,11 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "MorphologyWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <QFormLayout>
 #include <QProgressDialog>
@@ -36,7 +35,7 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 			"The functions act on the Target image (to modify a tissue "
 			"use Get Tissue and Adder)."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	auto modegroup = new QButtonGroup(this);
@@ -135,7 +134,7 @@ void MorphologyWidget::execute()
 	{
 		auto radius = static_cast<int>(operation_radius->text().toFloat());
 
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		emit begin_datachange(dataSelection, this);
 
 		if (rb_open->isOn())
@@ -160,7 +159,7 @@ void MorphologyWidget::execute()
 
 void MorphologyWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -171,9 +170,9 @@ void MorphologyWidget::bmphand_changed(bmphandler* bmph)
 
 void MorphologyWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand_changed(handler3D->get_activebmphandler());
 	}
 	hideparams_changed();
@@ -181,7 +180,7 @@ void MorphologyWidget::init()
 
 void MorphologyWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 

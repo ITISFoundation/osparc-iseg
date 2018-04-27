@@ -9,9 +9,10 @@
  */
 #include "Precompiled.h"
 
+#include "Data/Transform.h"
+
 #include "ImageReader.h"
 #include "InitializeITKFactory.h"
-#include "Transform.h"
 #include "VTIreader.h"
 
 #include <itkImage.h>
@@ -26,13 +27,13 @@ typedef itk::Image<float, 3> image_type;
 typedef itk::ImageFileReader<image_type> reader_type;
 
 bool ImageReader::getSlice(const char* filename, float* slice, unsigned slicenr,
-						   unsigned width, unsigned height)
+		unsigned width, unsigned height)
 {
 	return getVolume(filename, &slice, slicenr, 1, width, height);
 }
 
 float* ImageReader::getSliceInfo(const char* filename, unsigned slicenr,
-								 unsigned& width, unsigned& height)
+		unsigned& width, unsigned& height)
 {
 	unsigned nrslices;
 	float spacing[3];
@@ -50,31 +51,31 @@ float* ImageReader::getSliceInfo(const char* filename, unsigned slicenr,
 }
 
 bool ImageReader::getVolume(const char* filename, float** slices,
-							unsigned nrslices, unsigned width, unsigned height)
+		unsigned nrslices, unsigned width, unsigned height)
 {
 	return getVolume(filename, slices, 0, nrslices, width, height);
 }
 
 bool ImageReader::getVolume(const char* filename, float** slices,
-							unsigned startslice, unsigned nrslices,
-							unsigned width, unsigned height)
+		unsigned startslice, unsigned nrslices,
+		unsigned width, unsigned height)
 {
 	initializeITKFactory();
 
 	// ITK does not know how to load VTI
 	boost::filesystem::path path(filename);
 	std::string extension = boost::algorithm::to_lower_copy(
-		path.has_extension() ? path.extension().string() : "");
+			path.has_extension() ? path.extension().string() : "");
 	if (extension == ".vti")
 	{
 		unsigned w, h, n;
 		float s[3], o[3];
 		std::vector<std::string> arrayNames;
 		if (VTIreader::getInfo(filename, w, h, n, s, o, arrayNames) &&
-			!arrayNames.empty())
+				!arrayNames.empty())
 		{
 			return VTIreader::getVolume(filename, slices, startslice, nrslices,
-										width, height, arrayNames[0]);
+					width, height, arrayNames[0]);
 		}
 	}
 
@@ -108,13 +109,13 @@ bool ImageReader::getVolume(const char* filename, float** slices,
 }
 
 bool ImageReader::getInfo(const char* filename, unsigned& width,
-						  unsigned& height, unsigned& nrslices,
-						  float spacing[3], Transform& transform)
+		unsigned& height, unsigned& nrslices,
+		float spacing[3], Transform& transform)
 {
 	initializeITKFactory();
 
 	auto imageIO = itk::ImageIOFactory::CreateImageIO(
-		filename, itk::ImageIOFactory::ReadMode);
+			filename, itk::ImageIOFactory::ReadMode);
 	if (imageIO)
 	{
 		imageIO->SetFileName(filename);
@@ -142,13 +143,13 @@ bool ImageReader::getInfo(const char* filename, unsigned& width,
 	{
 		boost::filesystem::path path(filename);
 		std::string extension = boost::algorithm::to_lower_copy(
-			path.has_extension() ? path.extension().string() : "");
+				path.has_extension() ? path.extension().string() : "");
 		if (extension == ".vti")
 		{
 			float offset[3];
 			std::vector<std::string> arrayNames;
 			VTIreader::getInfo(filename, width, height, nrslices, spacing,
-							   offset, arrayNames);
+					offset, arrayNames);
 
 			transform.setIdentity();
 			transform.setOffset(offset);

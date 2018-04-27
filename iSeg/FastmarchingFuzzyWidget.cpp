@@ -10,7 +10,6 @@
 #include "Precompiled.h"
 
 #include "FastmarchingFuzzyWidget.h"
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
@@ -45,7 +44,7 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 						 "implementation of a levelset technique. Both methods "
 						 "require a seed point to be specified."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	area = 0;
@@ -225,7 +224,7 @@ FastmarchingFuzzyWidget::~FastmarchingFuzzyWidget()
 
 void FastmarchingFuzzyWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -245,9 +244,9 @@ void FastmarchingFuzzyWidget::bmphand_changed(bmphandler* bmph)
 
 void FastmarchingFuzzyWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand = handler3D->get_activebmphandler();
 	}
 
@@ -267,7 +266,7 @@ void FastmarchingFuzzyWidget::init()
 
 void FastmarchingFuzzyWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
@@ -336,7 +335,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 		sl_extend->setEnabled(true);
 
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 		execute();
@@ -353,7 +352,7 @@ void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 		extend = map[unsigned(bmphand->return_width()) * p.py + p.px];
 
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 		execute();
@@ -630,7 +629,7 @@ void FastmarchingFuzzyWidget::slider_changed()
 void FastmarchingFuzzyWidget::slextend_pressed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 }

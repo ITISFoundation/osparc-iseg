@@ -9,12 +9,11 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "ImageForestingTransformRegionGrowingWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/addLine.h"
+#include "Data/addLine.h"
 
 #include "Core/ImageForestingTransform.h"
 
@@ -51,7 +50,7 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 			"The result is stored in the Target. To assign a segmented region to a "
 			"tissue the 'Adder' must be used."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	area = 0;
@@ -105,9 +104,9 @@ ImageForestingTransformRegionGrowingWidget::~ImageForestingTransformRegionGrowin
 
 void ImageForestingTransformRegionGrowingWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand = handler3D->get_activebmphandler();
 		init1();
 		if (sl_thresh->isEnabled())
@@ -125,7 +124,7 @@ void ImageForestingTransformRegionGrowingWidget::init()
 
 void ImageForestingTransformRegionGrowingWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
@@ -225,7 +224,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 		vm.insert(vm.end(), vmdummy.begin(), vmdummy.end());
 
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		dataSelection.vvm = true;
 		emit begin_datachange(dataSelection, this);
@@ -311,7 +310,7 @@ void ImageForestingTransformRegionGrowingWidget::bmp_changed()
 
 void ImageForestingTransformRegionGrowingWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -378,7 +377,7 @@ void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 	if (bmphand->del_vm(p, 3))
 	{
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		dataSelection.vvm = true;
 		emit begin_datachange(dataSelection, this);
@@ -410,7 +409,7 @@ void ImageForestingTransformRegionGrowingWidget::removemarks(Point p)
 void ImageForestingTransformRegionGrowingWidget::slider_pressed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 }

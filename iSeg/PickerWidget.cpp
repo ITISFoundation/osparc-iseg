@@ -9,12 +9,11 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "PickerWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/addLine.h"
+#include "Data/addLine.h"
 
 #include "Core/Pair.h"
 
@@ -206,7 +205,7 @@ void PickerWidget::on_mouse_clicked(Point p)
 		bmphand->change2mask_connectedwork(currentselection, p, addorsub);
 	else
 		bmphand->change2mask_connectedtissue(
-				handler3D->get_active_tissuelayer(), currentselection, p, addorsub);
+				handler3D->active_tissuelayer(), currentselection, p, addorsub);
 
 	showborder();
 }
@@ -318,7 +317,7 @@ void PickerWidget::copy_pressed()
 	else
 	{
 		tissues_size_t* tissues =
-				bmphand->return_tissues(handler3D->get_active_tissuelayer());
+				bmphand->return_tissues(handler3D->active_tissuelayer());
 		for (unsigned int i = 0; i < area; i++)
 		{
 			valuedistrib[i] = (float)tissues[i];
@@ -341,7 +340,7 @@ void PickerWidget::paste_pressed()
 	unsigned int area = bmphand->return_area();
 
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = clipboardworkortissue;
 	dataSelection.tissues = !clipboardworkortissue;
 	emit begin_datachange(dataSelection, this);
@@ -357,7 +356,7 @@ void PickerWidget::paste_pressed()
 		{
 			valuedistrib2[i] = (tissues_size_t)valuedistrib[i];
 		}
-		bmphand->copy2tissue(handler3D->get_active_tissuelayer(), valuedistrib2,
+		bmphand->copy2tissue(handler3D->active_tissuelayer(), valuedistrib2,
 				mask);
 		delete[] valuedistrib2;
 	}
@@ -368,7 +367,7 @@ void PickerWidget::paste_pressed()
 void PickerWidget::delete_pressed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = rb_work->isOn();
 	dataSelection.tissues = !rb_work->isOn();
 	emit begin_datachange(dataSelection, this);
@@ -383,10 +382,10 @@ void PickerWidget::delete_pressed()
 	else
 	{
 		if (rb_erase->isOn())
-			bmphand->erasetissue(handler3D->get_active_tissuelayer(),
+			bmphand->erasetissue(handler3D->active_tissuelayer(),
 					currentselection);
 		else
-			bmphand->floodtissue(handler3D->get_active_tissuelayer(),
+			bmphand->floodtissue(handler3D->active_tissuelayer(),
 					currentselection);
 	}
 

@@ -11,7 +11,7 @@
 
 #include <vector>
 
-#include "Interface/SlicesHandlerInterface.h"
+#include "Data/SlicesHandlerInterface.h"
 #include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>

@@ -7,14 +7,13 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef HANDLER3DSLICES
-#define HANDLER3DSLICES
+#pragma once
 
-#include "Interface/SlicesHandlerInterface.h"
+#include "Data/SlicesHandlerInterface.h"
+#include "Data/Transform.h"
 
 #include "Core/Outline.h" // BL TODO get rid of this
 #include "Core/RGB.h"
-#include "Core/Transform.h"
 #include "Core/UndoElem.h"
 #include "Core/UndoQueue.h"
 
@@ -34,7 +33,7 @@ class TissueHiearchy;
 class ColorLookupTable;
 class bmphandler;
 
-class SlicesHandler : public iseg::SliceHandlerInterface
+class SlicesHandler : public SliceHandlerInterface
 {
 public:
 	SlicesHandler();
@@ -97,7 +96,7 @@ public:
 	int LoadAllHDF(const char* filename);
 
 	void UpdateColorLookupTable(std::shared_ptr<ColorLookupTable> new_lut = nullptr);
-	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return color_lookup_table; }
+	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return _color_lookup_table; }
 
 	// Description: write project data into an Xdmf file
 	int SaveAllXdmf(const char* filename, int compression, bool naked = false);
@@ -166,15 +165,12 @@ public:
 	int ReloadImage(const char* filename, unsigned short slicenr);
 	int ReloadRTdose(const char* filename, unsigned short slicenr);
 	int ReloadAVW(const char* filename, unsigned short slicenr);
-	FILE* SaveHeader(FILE* fp, short unsigned nr_slices_to_write,
-			Transform transform_to_write);
+	FILE* SaveHeader(FILE* fp, short unsigned nr_slices_to_write, Transform transform_to_write);
 	FILE* SaveProject(const char* filename, const char* imageFileExtension);
 	bool SaveCommunicationFile(const char* filename);
-	FILE* SaveActiveSlices(const char* filename,
-			const char* imageFileExtension);
+	FILE* SaveActiveSlices(const char* filename, const char* imageFileExtension);
 	void LoadHeader(FILE* fp, int& tissuesVersion, int& version);
-	FILE* MergeProjects(const char* savefilename,
-			std::vector<QString>& mergeFilenames);
+	FILE* MergeProjects(const char* savefilename, std::vector<QString>& mergeFilenames);
 	FILE* LoadProject(const char* filename, int& tissuesVersion);
 	bool LoadS4Llink(const char* filename, int& tissuesVersion);
 	int SaveBmpRaw(const char* filename);
@@ -188,8 +184,7 @@ public:
 	void setextrusion_contours(int top, int bottom);
 	void resetextrusion_contours();
 	FILE* save_contourprologue(const char* filename, unsigned nr_slices);
-	FILE* save_contoursection(FILE* fp, unsigned startslice1,
-			unsigned endslice1, unsigned offset);
+	FILE* save_contoursection(FILE* fp, unsigned startslice1, unsigned endslice1, unsigned offset);
 	FILE* save_tissuenamescolors(FILE* fp);
 	void work2bmp();
 	void bmp2work();
@@ -198,19 +193,20 @@ public:
 	void bmp2workall();
 	void work2tissueall();
 	void swap_bmpworkall();
-	//		void swap_bmphelp();
-	//		void swap_workhelp();
-	std::vector<const float*> get_bmp() const;
-	std::vector<float*> get_bmp();
-	std::vector<const float*> get_work() const;
-	std::vector<float*> get_work();
-	std::vector<const tissues_size_t*>
-			get_tissues(tissuelayers_size_t layeridx) const;
-	std::vector<tissues_size_t*> get_tissues(tissuelayers_size_t layeridx);
+
+	std::vector<const float*> source_slices() const override;
+	std::vector<float*> source_slices() override;
+	std::vector<const float*> target_slices() const override;
+	std::vector<float*> target_slices() override;
+	std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const override;
+	std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) override;
+
+	std::vector<std::string> tissue_names() const override;
+	std::vector<bool> tissue_locks() const override;
+
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
-	tissues_size_t* return_tissues(tissuelayers_size_t layeridx,
-			unsigned short slicenr1);
+	tissues_size_t* return_tissues(tissuelayers_size_t layeridx, unsigned short slicenr1);
 	float* return_overlay();
 	float get_work_pt(Point p, unsigned short slicenr);
 	void set_work_pt(Point p, unsigned short slicenr, float f);
@@ -219,13 +215,12 @@ public:
 	tissues_size_t get_tissue_pt(Point p, unsigned short slicenr);
 	void set_tissue_pt(Point p, unsigned short slicenr, tissues_size_t f);
 	unsigned int make_histogram(bool includeoutofrange);
-	unsigned int* return_histogram();
 	unsigned int return_area();
-	unsigned short return_width() override;
-	unsigned short return_height() override;
-	unsigned short return_nrslices() override;
-	unsigned short return_startslice() override;
-	unsigned short return_endslice() override;
+	unsigned short width() const override;
+	unsigned short height() const override;
+	unsigned short num_slices() const override;
+	unsigned short start_slice() const override;
+	unsigned short end_slice() const override;
 	void set_startslice(unsigned short startslice1);
 	void set_endslice(unsigned short endslice1);
 	bool isloaded();
@@ -409,9 +404,9 @@ public:
 	void next_slice();
 	void prev_slice();
 	unsigned short get_next_featuring_slice(tissues_size_t type, bool& found);
-	unsigned short get_activeslice() override;
+	unsigned short active_slice() const override;
 	bmphandler* get_activebmphandler();
-	tissuelayers_size_t get_active_tissuelayer();
+	tissuelayers_size_t active_tissuelayer() const override;
 	void set_active_tissuelayer(tissuelayers_size_t idx);
 	unsigned pushstack_bmp();
 	unsigned pushstack_bmp(unsigned int slice);
@@ -466,15 +461,14 @@ public:
 			float** centers, float* tol_f, float* tol_d);
 	void fill_unassigned();
 	void fill_unassignedtissue(tissues_size_t f);
-	void start_undo(iseg::DataSelection& dataSelection);
-	bool start_undoall(iseg::DataSelection& dataSelection);
-	bool start_undo(iseg::DataSelection& dataSelection,
-			std::vector<unsigned> vslicenr1);
+	void start_undo(DataSelection& dataSelection);
+	bool start_undoall(DataSelection& dataSelection);
+	bool start_undo(DataSelection& dataSelection, std::vector<unsigned> vslicenr1);
 	void abort_undo();
 	void end_undo();
 	void merge_undo();
-	iseg::DataSelection undo();
-	iseg::DataSelection redo();
+	DataSelection undo();
+	DataSelection redo();
 	void clear_undo();
 	void reverse_undosliceorder();
 	unsigned return_nrundo();
@@ -517,8 +511,8 @@ public:
 	float calculate_tissuevolume(Point p, unsigned short slicenr);
 	void inversesliceorder();
 
-	void get_spacing(float spacing[3]) const;
-	Transform get_transform() const;
+	Vec3 spacing() const override;
+	Transform transform() const override;
 	Transform get_transform_active_slices() const;
 	void set_transform(const Transform& tr);
 	void get_displacement(float disp[3]) const;
@@ -535,72 +529,46 @@ public:
 	void SetNumberOfUndoSteps(unsigned);
 	unsigned GetNumberOfUndoArrays();
 	void SetNumberOfUndoArrays(unsigned);
-	int GetCompression() const { return this->Compression; };
-	void SetCompression(int c) { this->Compression = c; };
-	bool GetContiguousMemory() const { return ContiguousMemoryIO; }
-	void SetContiguousMemory(bool v) { ContiguousMemoryIO = v; }
-	std::vector<float> GetBoundingBox();
+	int GetCompression() const { return this->_hdf5_compression; };
+	void SetCompression(int c) { this->_hdf5_compression = c; };
+	bool GetContiguousMemory() const { return _contiguous_memory_io; }
+	void SetContiguousMemory(bool v) { _contiguous_memory_io = v; }
 
-	TissueHiearchy* get_tissue_hierachy() { return tissue_hierachy; }
+	int SaveRaw(const char* filename, bool work);
+	float DICOMsort(std::vector<const char*>* lfilename);
 
-	void GetITKImage(itk::Image<float, 3>*, int startslice, int endslice);
-	void GetITKImageFB(itk::Image<float, 3>*, int startslice, int endslice);
-	void GetITKImageGM(itk::Image<float, 3>*, int startslice, int endslice);
-	void ModifyWork(itk::Image<unsigned int, 3>* output, int startslice,
-			int endslice);
-	void ModifyWorkFloat(itk::Image<float, 3>* output, int startslice,
-			int endslice);
+	TissueHiearchy* get_tissue_hierachy() { return _tissue_hierachy; }
 
-	void GetITKImage(itk::Image<float, 3>*);
-	void GetITKImageFB(itk::Image<float, 3>*);
-	void GetITKImageGM(itk::Image<float, 3>*);
-	void ModifyWork(itk::Image<unsigned int, 3>* output);
-	void ModifyWorkFloat(itk::Image<float, 3>* output);
 	void mergetissues(tissues_size_t tissuetype);
-	void GetSeed(itk::Image<float, 3>::IndexType*);
 	void selectedtissue2mc(tissues_size_t tissuetype, unsigned char** voxels);
 
-	itk::SliceContiguousImage<float>::Pointer GetImage(eImageType type, bool active_slices) override;
-	itk::SliceContiguousImage<unsigned short>::Pointer GetTissues(bool active_slices) override;
-	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type) override;
-	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice() override;
-
 private:
-	unsigned short activeslice;
-	std::vector<bmphandler> image_slices;
-	std::shared_ptr<ColorLookupTable> color_lookup_table;
-	TissueHiearchy* tissue_hierachy;
-	float* overlay;
-	std::vector<Pair> slice_ranges;
-	std::vector<Pair> slice_bmpranges;
-	OutlineSlices os;
-	float thickness;
-	float dx;
-	float dy;
-	Transform transform;
-	short unsigned width;
-	short unsigned height;
-	short unsigned startslice;
-	short unsigned endslice;
-	short unsigned nrslices;
-	unsigned int area;
-	tissuelayers_size_t active_tissuelayer;
-	int SaveRaw(const char* filename, bool work);
-	unsigned int histogram[256];
-	bool loaded;
-	UndoElem* uelem;
-	UndoQueue undoQueue;
-	bool undo3D;
-	float DICOMsort(std::vector<const char*>* lfilename);
-	int Compression;
-	bool ContiguousMemoryIO;
+	unsigned short _activeslice;
+	std::vector<bmphandler> _image_slices;
+	short unsigned _width;
+	short unsigned _height;
+	short unsigned _startslice;
+	short unsigned _endslice;
+	short unsigned _nrslices;
+	unsigned int _area;
+	float _thickness;
+	float _dx;
+	float _dy;
+	Transform _transform;
+	tissuelayers_size_t _active_tissuelayer;
+	std::shared_ptr<ColorLookupTable> _color_lookup_table;
+	TissueHiearchy* _tissue_hierachy;
+	float* _overlay;
+	std::vector<Pair> _slice_ranges;
+	std::vector<Pair> _slice_bmpranges;
+	OutlineSlices _os;
 
-protected:
-	int redFactor;
-	int greenFactor;
-	int blueFactor;
+	bool _loaded;
+	UndoElem* _uelem;
+	UndoQueue _undoQueue;
+	bool _undo3D;
+	int _hdf5_compression;
+	bool _contiguous_memory_io;
 };
 
 } // namespace iseg
-
-#endif

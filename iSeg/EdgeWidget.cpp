@@ -10,11 +10,10 @@
 #include "Precompiled.h"
 
 #include "EdgeWidget.h"
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <q3vbox.h>
 #include <qbuttongroup.h>
@@ -38,7 +37,7 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 			Format("Various edge extraction routines. These are mostly useful "
 						 "as part of other segmentation techniques."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	hboxoverall = new Q3HBox(this);
@@ -120,7 +119,7 @@ EdgeWidget::~EdgeWidget()
 
 void EdgeWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -132,7 +131,7 @@ void EdgeWidget::bmphand_changed(bmphandler* bmph)
 void EdgeWidget::execute()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -287,7 +286,7 @@ QSize EdgeWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void EdgeWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 

@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "TransformWidget.h"
 
@@ -316,7 +315,7 @@ void TransformWidget::UpdatePreview()
 	}
 
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = transformSourceCheckBox->isChecked();
 	dataSelection.work = transformTargetCheckBox->isChecked();
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();
@@ -456,7 +455,7 @@ void TransformWidget::TransformChanged(int index)
 void TransformWidget::SelectSourceChanged(int state)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = true;
 	emit begin_datachange(dataSelection, this, false);
 
@@ -472,7 +471,7 @@ void TransformWidget::SelectSourceChanged(int state)
 void TransformWidget::SelectTargetChanged(int state)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this, false);
 
@@ -488,7 +487,7 @@ void TransformWidget::SelectTargetChanged(int state)
 void TransformWidget::SelectTissuesChanged(int state)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
@@ -506,7 +505,7 @@ QSize TransformWidget::sizeHint() const { return hBoxOverall->sizeHint(); }
 void TransformWidget::on_slicenr_changed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = transformSourceCheckBox->isChecked();
 	dataSelection.work = transformTargetCheckBox->isChecked();
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();
@@ -605,7 +604,7 @@ void TransformWidget::SetCenter(int x, int y)
 
 void TransformWidget::SetCenterDefault()
 {
-	SetCenter(handler3D->return_width() / 2, handler3D->return_height() / 2);
+	SetCenter(handler3D->width() / 2, handler3D->height() / 2);
 }
 
 void TransformWidget::ResetWidgets()
@@ -624,13 +623,13 @@ void TransformWidget::ResetWidgets()
 	if (translateRadioButton->isChecked())
 	{
 		// Translate: Range = [-width, width], value = 0
-		slider1->setRange(-(int)handler3D->return_width(),
-				handler3D->return_width());
+		slider1->setRange(-(int)handler3D->width(),
+				handler3D->width());
 		slider1->setSteps(1, 10);
 		slider1->setValue(0);
 		Slider1Changed(slider1->value());
-		slider2->setRange(-(int)handler3D->return_height(),
-				handler3D->return_height());
+		slider2->setRange(-(int)handler3D->height(),
+				handler3D->height());
 		slider2->setSteps(1, 10);
 		slider2->setValue(0);
 		Slider2Changed(slider2->value());
@@ -677,7 +676,7 @@ void TransformWidget::ExecutePushButtonClicked()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allSlicesCheckBox->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = transformSourceCheckBox->isChecked();
 	dataSelection.work = transformTargetCheckBox->isChecked();
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();
@@ -700,7 +699,7 @@ void TransformWidget::ExecutePushButtonClicked()
 void TransformWidget::CancelPushButtonClicked()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = transformSourceCheckBox->isChecked();
 	dataSelection.work = transformTargetCheckBox->isChecked();
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();

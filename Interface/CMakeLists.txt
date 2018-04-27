@@ -7,21 +7,15 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-ADD_SUBDIRECTORY(testsuite)
-
 USE_QT4()
 USE_ITK()
 
+FILE(GLOB HEADERS *.h)
 SET(SOURCES
-	addLine.cpp
 	Plugin.cpp
-	Plugin.h
-	InterfaceApi.h
-	SlicesHandlerInterface.h
-	WidgetInterface.h
 	WidgetInterface.cpp
 )
 
 QT4_WRAP_CPP(MOCSrcs WidgetInterface.h)
-ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${MOCSrcs})
+ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${HEADERS} ${MOCSrcs})
 TARGET_LINK_LIBRARIES(iSegInterface ${MY_EXTERNAL_LINK_LIBRARIES} )

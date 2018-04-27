@@ -20,9 +20,9 @@ class ImageToITK
 {
 public:
 	static void
-		copy(const Transform& transform,
-			 typename itk::Point<itk::SpacePrecisionType, 3>& origin,
-			 typename itk::Matrix<itk::SpacePrecisionType, 3, 3>& direction)
+			copy(const Transform& transform,
+					typename itk::Point<itk::SpacePrecisionType, 3>& origin,
+					typename itk::Matrix<itk::SpacePrecisionType, 3, 3>& direction)
 	{
 		transform.getRotation(direction);
 		transform.getOffset(origin);
@@ -30,18 +30,18 @@ public:
 
 	template<typename T>
 	static void setup(unsigned width, unsigned height, unsigned startslice,
-					  unsigned nrslices, const float spacing[3],
-					  const Transform& transform, itk::Image<T, 3>* image)
+			unsigned nrslices, const float spacing[3],
+			const Transform& transform, itk::Image<T, 3>* image)
 	{
 		typedef itk::Image<T, 3> ImageType;
 
 		typename ImageType::IndexType start;
-		start[0] = 0;		   // first index on X
-		start[1] = 0;		   // first index on Y
+		start[0] = 0;					 // first index on X
+		start[1] = 0;					 // first index on Y
 		start[2] = startslice; // first index on Z
 		typename ImageType::SizeType size;
-		size[0] = width;	// size along X
-		size[1] = height;   // size along Y
+		size[0] = width;		// size along X
+		size[1] = height;		// size along Y
 		size[2] = nrslices; // size along Z
 		typename ImageType::RegionType region;
 		region.SetSize(size);
@@ -60,9 +60,9 @@ public:
 
 	template<typename T>
 	static void copy(const T** data, unsigned width, unsigned height,
-					 unsigned startslice, unsigned nrslices,
-					 const float spacing[3], const Transform& transform,
-					 itk::Image<T, 3>* image)
+			unsigned startslice, unsigned nrslices,
+			const float spacing[3], const Transform& transform,
+			itk::Image<T, 3>* image)
 	{
 		setup(width, height, startslice, nrslices, spacing, transform, image);
 
@@ -88,13 +88,13 @@ public:
 
 	template<typename T>
 	static typename itk::Image<T, 3>::Pointer
-		copy(const T** data, unsigned width, unsigned height,
-			 unsigned startslice, unsigned nrslices, const float spacing[3],
-			 const Transform& transform)
+			copy(const T** data, unsigned width, unsigned height,
+					unsigned startslice, unsigned nrslices, const float spacing[3],
+					const Transform& transform)
 	{
 		auto image = itk::Image<T, 3>::New();
 		copy(data, width, height, startslice, nrslices, spacing, transform,
-			 image.GetPointer());
+				image.GetPointer());
 		return image;
 	}
 };

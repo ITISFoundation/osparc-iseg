@@ -10,6 +10,7 @@
 #include "Precompiled.h"
 
 #include "RadiotherapyStructureSetImporter.h"
+#include "StdStringToQString.h"
 #include "TissueInfos.h"
 
 #include "Core/fillcontour.h"
@@ -65,8 +66,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 
 		for (tissuenr = 0;
 			 tissuenr < TissueInfos::GetTissueCount() &&
-			 tissues[i]->name !=
-				 TissueInfos::GetTissueName(tissuenr + 1).toAscii().data();
+			 tissues[i]->name != TissueInfos::GetTissueName(tissuenr + 1);
 			 tissuenr++)
 		{}
 		if (tissuenr == (tissues_size_t)TissueInfos::GetTissueCount())
@@ -113,7 +113,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	cb_names = new QComboBox(hbox3);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
 	{
-		cb_names->insertItem(TissueInfos::GetTissueName(i));
+		cb_names->insertItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
 	cb_names->setCurrentItem(vectissuenrs[cb_solids->currentItem()]);
 
@@ -195,8 +195,8 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	handler3D->get_displacement(disp);
 	float dc[6];
 	handler3D->get_direction_cosines(dc);
-	unsigned short pixel_extents[2] = {handler3D->return_width(),
-									   handler3D->return_height()};
+	unsigned short pixel_extents[2] = {handler3D->width(),
+									   handler3D->height()};
 	float pixel_size[2] = {p.high, p.low};
 
 	if (abs(dc[0]) != 1.0f || abs(dc[4]) != 1.0f)
@@ -264,8 +264,8 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 				}
 				float swap_z = dc[0] * dc[4];
 				int slicenr = ceil(swap_z * (disp[2] - zcoord) / thick);
-				int startSL = handler3D->return_startslice();
-				int endSL = handler3D->return_endslice();
+				int startSL = handler3D->start_slice();
+				int endSL = handler3D->end_slice();
 				if (slicenr <= 0)
 					slicenr = endSL + slicenr;
 				if (slicenr >= startSL && slicenr < endSL)

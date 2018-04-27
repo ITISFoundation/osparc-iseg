@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "InterpolationWidget.h"
 #include "SlicesHandler.h"
 
@@ -35,7 +34,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
 
-	nrslices = handler3D->return_nrslices();
+	nrslices = handler3D->num_slices();
 
 	hboxoverall = new Q3HBox(this);
 	vboxmethods = new Q3VBox(hboxoverall);
@@ -168,9 +167,9 @@ QSize InterpolationWidget::sizeHint() const { return hboxoverall->sizeHint(); }
 
 void InterpolationWidget::init()
 {
-	if (handler3D->return_nrslices() != nrslices)
+	if (handler3D->num_slices() != nrslices)
 	{
-		nrslices = handler3D->return_nrslices();
+		nrslices = handler3D->num_slices();
 		sb_slicenr->setMaxValue((int)nrslices);
 		sb_batchstride->setMaxValue((int)nrslices - 1);
 		pushexec->setEnabled(false);
@@ -188,9 +187,9 @@ void InterpolationWidget::on_tissuenr_changed(int tissuetype)
 
 void InterpolationWidget::handler3D_changed()
 {
-	if (handler3D->return_nrslices() != nrslices)
+	if (handler3D->num_slices() != nrslices)
 	{
-		nrslices = handler3D->return_nrslices();
+		nrslices = handler3D->num_slices();
 		sb_slicenr->setMaxValue((int)nrslices);
 		sb_batchstride->setMaxValue((int)nrslices - 1);
 	}
@@ -199,7 +198,7 @@ void InterpolationWidget::handler3D_changed()
 
 void InterpolationWidget::startslice_pressed()
 {
-	startnr = handler3D->get_activeslice();
+	startnr = handler3D->active_slice();
 	pushexec->setEnabled(true);
 }
 
@@ -207,7 +206,7 @@ void InterpolationWidget::execute()
 {
 	unsigned short batchstride = (unsigned short)sb_batchstride->value();
 
-	unsigned short current = handler3D->get_activeslice();
+	unsigned short current = handler3D->active_slice();
 	if (current != startnr)
 	{
 		iseg::DataSelection dataSelection;

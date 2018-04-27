@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Core/Types.h"
+#include "Data/Types.h"
 
 namespace iseg {
 
@@ -36,9 +36,9 @@ public:
 	void Translate(int offsetX, int offsetY, bool apply = true);
 	void Rotate(double angle, int centerX, int centerY, bool apply = true);
 	void Scale(double factorX, double factorY, int centerX, int centerY,
-			   bool apply = true);
+			bool apply = true);
 	void Shear(double angle, bool shearXAxis, int axisPosition,
-			   bool apply = true);
+			bool apply = true);
 	void Flip(bool flipXAxis, int axisPosition, bool apply = true);
 	void Matrix(double* inverseMatrix, bool apply = true);
 

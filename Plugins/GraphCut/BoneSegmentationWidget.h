@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "Interface/SlicesHandlerInterface.h"
+#include "Data/SlicesHandlerInterface.h"
 #include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
@@ -18,6 +18,10 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
+
+namespace itk {
+class ProcessObject;
+}
 
 class BoneSegmentationWidget : public iseg::WidgetInterface
 {

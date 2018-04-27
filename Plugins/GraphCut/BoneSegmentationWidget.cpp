@@ -11,6 +11,9 @@
 
 #include "ImageGraphCut3DFilter.h"
 
+#include "Data/ItkUtils.h"
+#include "Data/SliceHandlerItkWrapper.h"
+
 #include <itkConnectedComponentImageFilter.h>
 #include <itkFlatStructuringElement.h>
 #include <itkGrayscaleErodeImageFilter.h>
@@ -62,13 +65,6 @@ private:
 	QProgressDialog* m_Progress;
 };
 
-inline QString Format(const char* tooltip)
-{
-	QString fmt = "<html>\n";
-	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
-	fmt += "</html>";
-	return fmt;
-}
 } // namespace
 
 BoneSegmentationWidget::BoneSegmentationWidget(
@@ -77,15 +73,15 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
 			m_CurrentFilter(nullptr)
 {
-	setToolTip(
-			Format("A fully-automatic method for segmenting the femur from 3D CT "
-						 "scans, based on the graph-cut segmentation framework and bone "
-						 "enhancement filters "
-						 "<br>"
-						 "Krcah et al., 'Fully automatic and fast segmentation of the "
-						 "femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
+	setToolTip(Format(
+			"A fully-automatic method for segmenting the femur from 3D CT "
+			"scans, based on the graph-cut segmentation framework and bone "
+			"enhancement filters."
+			"<br>"
+			"Krcah et al., 'Fully automatic and fast segmentation of the "
+			"femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
 
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 
 	m_VGrid = new Q3VBox(this);
 
@@ -130,10 +126,10 @@ void BoneSegmentationWidget::showsliders()
 {
 	if (m_UseSliceRange->isChecked() == true)
 	{
-		m_Start->setMaximum(m_Handler3D->return_endslice());
+		m_Start->setMaximum(m_Handler3D->end_slice());
 		m_Start->setEnabled(true);
-		m_End->setMaximum(m_Handler3D->return_endslice());
-		m_End->setValue(m_Handler3D->return_endslice());
+		m_End->setMaximum(m_Handler3D->end_slice());
+		m_End->setValue(m_Handler3D->end_slice());
 		m_End->setEnabled(true);
 	}
 	else
@@ -156,15 +152,11 @@ void BoneSegmentationWidget::do_work()
 	typedef itk::Image<float, 3> TInput;
 	typedef itk::Image<unsigned int, 3> TOutput;
 	typedef itk::Image<int, 3> TIntImage;
-	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput>
-			GraphCutFilterType;
+	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput> GraphCutFilterType;
 
 	// get input image
-	auto input = TInput::New();
-	if (m_UseSliceRange->isChecked() == true)
-		m_Handler3D->GetITKImage(input, m_Start->value() - 1, m_End->value());
-	else
-		m_Handler3D->GetITKImage(input);
+	iseg::SliceHandlerItkWrapper itk_wrapper(m_Handler3D);
+	auto input = itk_wrapper.GetImageDeprecated(iseg::SliceHandlerItkWrapper::kSource, m_UseSliceRange->isChecked());
 
 	assert(m_MaxFlowAlgorithm->currentItem() > 0);
 
@@ -188,8 +180,7 @@ void BoneSegmentationWidget::do_work()
 		m_CurrentFilter = graphCutFilter;
 
 		auto observer = CommandProgressUpdate<GraphCutFilterType>::New();
-		auto observer_id =
-				graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
+		auto observer_id = graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
 		observer->SetProgressObject(&progress);
 
 		try
@@ -197,10 +188,17 @@ void BoneSegmentationWidget::do_work()
 			graphCutFilter->Update();
 
 			auto output = graphCutFilter->GetOutput();
-			if (m_UseSliceRange->isChecked() == true)
-				m_Handler3D->ModifyWork(output, m_Start->value() - 1, m_End->value());
-			else
-				m_Handler3D->ModifyWork(output);
+
+			auto target = itk_wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, m_UseSliceRange->isChecked());
+
+			iseg::DataSelection dataSelection;
+			dataSelection.allSlices = true;
+			dataSelection.work = true;
+			emit begin_datachange(dataSelection, this);
+
+			iseg::Paste<TOutput, iseg::SliceHandlerItkWrapper::image_ref_type>(output, target);
+
+			emit end_datachange(this);
 		}
 		catch (itk::ExceptionObject&)
 		{
@@ -228,7 +226,7 @@ BoneSegmentationWidget::~BoneSegmentationWidget() { delete m_VGrid; }
 
 void BoneSegmentationWidget::on_slicenr_changed()
 {
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 }
 
 void BoneSegmentationWidget::init()
@@ -239,5 +237,5 @@ void BoneSegmentationWidget::init()
 
 void BoneSegmentationWidget::newloaded()
 {
-	m_CurrentSlice = m_Handler3D->get_activeslice();
+	m_CurrentSlice = m_Handler3D->active_slice();
 }

@@ -17,7 +17,6 @@ IF(ISEG_BUILD_TESTING)
 	
 		test_HDF5IO.cpp
 		test_ImageIO.cpp
-		test_Transform.cpp
 	)
 	
 	ADD_LIBRARY(TestSuite_iSegCore ${SOURCES} ${HEADERS})

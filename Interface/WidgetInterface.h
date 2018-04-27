@@ -11,8 +11,10 @@
 
 #include "InterfaceApi.h"
 
-#include "DataSelection.h"
-#include "Mark.h"
+#include "FormatTooltip.h"
+
+#include "Data/DataSelection.h"
+#include "Data/Mark.h"
 
 #include <qcursor.h>
 #include <qdir.h>
@@ -50,12 +52,10 @@ signals:
 	void vm_changed(std::vector<Mark>* vm1);
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
 
-	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
-			iseg::EndUndoAction undoAction = iseg::EndUndo);
+	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL, iseg::EndUndoAction undoAction = iseg::EndUndo);
 
-private slots:
+protected slots:
 	void tissuenr_changed(int i) { on_tissuenr_changed(i); }
 	void slicenr_changed() { on_slicenr_changed(); }
 

@@ -7,7 +7,7 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-OPTION(PLUGIN_CONFIDENCE "Build confidence connected segmentation plugin" OFF)
+OPTION(PLUGIN_CONFIDENCE "Build confidence connected segmentation plugin" ON)
 IF(PLUGIN_CONFIDENCE)
 	QT4_WRAP_CPP(MOCSrcscon ConfidenceWidget.h)
 
@@ -20,6 +20,7 @@ IF(PLUGIN_CONFIDENCE)
 	)
 
 	TARGET_LINK_LIBRARIES( Confidence.ext 
+		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)

@@ -16,7 +16,6 @@
 #include "EdgeWidget.h"
 #include "FastmarchingFuzzyWidget.h"
 #include "FeatureWidget.h"
-#include "FormatTooltip.h"
 #include "HystereticGrowingWidget.h"
 #include "ImageForestingTransformRegionGrowingWidget.h"
 #include "ImageInformationDialogs.h"
@@ -34,6 +33,7 @@
 #include "SliceViewerWidget.h"
 #include "SmoothingWidget.h"
 #include "SurfaceViewerWidget.h"
+#include "StdStringToQString.h"
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
@@ -49,9 +49,10 @@
 
 #include "Interface/Plugin.h"
 
+#include "Data/Transform.h"
+
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
-#include "Core/Transform.h"
 
 #include <boost/filesystem.hpp>
 
@@ -188,8 +189,8 @@ bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
 		char name2[1000];
 		while (fscanf(fp, "%s %s\n", name1, name2) == 2)
 		{
-			olds.push_back(TissueInfos::GetTissueType(QString(name1)));
-			news.push_back(TissueInfos::GetTissueType(QString(name2)));
+			olds.push_back(TissueInfos::GetTissueType(std::string(name1)));
+			news.push_back(TissueInfos::GetTissueType(std::string(name2)));
 		}
 		fclose(fp);
 		return true;
@@ -238,8 +239,7 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 			{
 				type1 = (tissues_size_t)tmp1;
 				type2 = (tissues_size_t)tmp2;
-				if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-						type2 <= tissueCount)
+				if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 				{
 					olds.push_back(type1);
 					news.push_back(type2);
@@ -251,10 +251,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 		else
 		{
 			// Read input as tissue names
-			type1 = TissueInfos::GetTissueType(QString(name1));
-			type2 = TissueInfos::GetTissueType(QString(name2));
-			if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-					type2 <= tissueCount)
+			type1 = TissueInfos::GetTissueType(std::string(name1));
+			type2 = TissueInfos::GetTissueType(std::string(name2));
+			if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 			{
 				olds.push_back(type1);
 				news.push_back(type2);
@@ -272,10 +271,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 
 			while (fscanf(fp, "%s %s\n", name1, name2) == 2)
 			{
-				type1 = TissueInfos::GetTissueType(QString(name1));
-				type2 = TissueInfos::GetTissueType(QString(name2));
-				if (type1 > 0 && type1 <= tissueCount && type2 > 0 &&
-						type2 <= tissueCount)
+				type1 = TissueInfos::GetTissueType(std::string(name1));
+				type2 = TissueInfos::GetTissueType(std::string(name2));
+				if (type1 > 0 && type1 <= tissueCount && type2 > 0 && type2 <= tissueCount)
 				{
 					olds.push_back(type1);
 					news.push_back(type2);
@@ -314,7 +312,7 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 
 	while (fscanf(fp, "%s\n", name) == 1)
 	{
-		tissues_size_t type = TissueInfos::GetTissueType(QString(name));
+		tissues_size_t type = TissueInfos::GetTissueType(std::string(name));
 		if (type > 0 && type <= tissueCount)
 		{
 			types.push_back(type);
@@ -592,17 +590,17 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	//	pb_work2tissue=new QPushButton("Target->Tissue",this);
 
-	unsigned short slicenr = handler3D->get_activeslice() + 1;
+	unsigned short slicenr = handler3D->active_slice() + 1;
 	pb_first = new QPushButton("|<<", this);
-	scb_slicenr = new QScrollBar(1, (int)handler3D->return_nrslices(), 1, 5, 1,
+	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1,
 			Qt::Horizontal, this);
 	scb_slicenr->setFixedWidth(500);
 	scb_slicenr->setValue(int(slicenr));
 	pb_last = new QPushButton(">>|", this);
-	sb_slicenr = new QSpinBox(1, (int)handler3D->return_nrslices(), 1, this);
+	sb_slicenr = new QSpinBox(1, (int)handler3D->num_slices(), 1, this);
 	sb_slicenr->setValue(slicenr);
 	lb_slicenr = new QLabel(
-			QString(" of ") + QString::number((int)handler3D->return_nrslices()),
+			QString(" of ") + QString::number((int)handler3D->num_slices()),
 			this);
 	//	lb_inactivewarning=new QLabel(QSimpleRichText(QString("  3D Inactive Slice!"),this->font()),this);
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
@@ -766,8 +764,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	VV3D = NULL;
 	VV3Dbmp = NULL;
 
-	if (handler3D->return_startslice() >= slicenr ||
-			handler3D->return_endslice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr ||
+			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -1940,7 +1938,7 @@ void MainWindow::provide_selected_tissue_TS()
 void MainWindow::execute_bmp2work()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -1952,7 +1950,7 @@ void MainWindow::execute_bmp2work()
 void MainWindow::execute_work2bmp()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -1964,7 +1962,7 @@ void MainWindow::execute_work2bmp()
 void MainWindow::execute_swap_bmpwork()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.bmp = true;
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
@@ -2036,9 +2034,9 @@ void MainWindow::execute_swapxy()
 	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
-		w = handler3D->return_height();
-		h = handler3D->return_width();
-		nrslices = handler3D->return_nrslices();
+		w = handler3D->height();
+		h = handler3D->width();
+		nrslices = handler3D->num_slices();
 		QString str1;
 		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
@@ -2067,8 +2065,8 @@ void MainWindow::execute_swapxy()
 					str1 = QDir::temp().absFilePath(QString("work_float.raw"));
 					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 
 				if (ok)
@@ -2078,8 +2076,8 @@ void MainWindow::execute_swapxy()
 					str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
 					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}
@@ -2113,9 +2111,9 @@ void MainWindow::execute_swapxz()
 	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
-		w = handler3D->return_nrslices();
-		h = handler3D->return_height();
-		nrslices = handler3D->return_width();
+		w = handler3D->num_slices();
+		h = handler3D->height();
+		nrslices = handler3D->width();
 		QString str1;
 		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
@@ -2142,8 +2140,8 @@ void MainWindow::execute_swapxz()
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 
 				if (ok)
@@ -2152,8 +2150,8 @@ void MainWindow::execute_swapxz()
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}
@@ -2191,9 +2189,9 @@ void MainWindow::execute_swapyz()
 	if (multidataset_widget->isVisible() && swapExtraDatasets)
 	{
 		unsigned short w, h, nrslices;
-		w = handler3D->return_width();
-		h = handler3D->return_nrslices();
-		nrslices = handler3D->return_height();
+		w = handler3D->width();
+		h = handler3D->num_slices();
+		nrslices = handler3D->height();
 		QString str1;
 		for (int i = 0; i < multidataset_widget->GetNumberOfDatasets(); i++)
 		{
@@ -2220,8 +2218,8 @@ void MainWindow::execute_swapyz()
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					multidataset_widget->SetWorkingData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 
 				if (ok)
@@ -2230,8 +2228,8 @@ void MainWindow::execute_swapyz()
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					multidataset_widget->SetBmpData(
 							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->return_startslice(),
-										 handler3D->return_endslice(), 0, w * h));
+										 str1.ascii(), handler3D->start_slice(),
+										 handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}
@@ -2274,9 +2272,9 @@ void MainWindow::execute_resize(int resizetype)
 	RD.return_padding(dxm, dxp, dym, dyp, dzm, dzp);
 
 	unsigned short w, h, nrslices;
-	w = handler3D->return_width();
-	h = handler3D->return_height();
-	nrslices = handler3D->return_nrslices();
+	w = handler3D->width();
+	h = handler3D->height();
+	nrslices = handler3D->num_slices();
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
@@ -2313,13 +2311,12 @@ void MainWindow::execute_resize(int resizetype)
 			ok = false;
 	}
 
-	float spacing[3];
-	Transform tr = handler3D->get_transform();
-	handler3D->get_spacing(spacing);
+	Transform tr = handler3D->transform();
+	Vec3 spacing = handler3D->spacing();
 
 	Transform transform_corrected(tr);
 	int plo[3] = {dxm, dym, dzm};
-	transform_corrected.paddingUpdateTransform(plo, spacing);
+	transform_corrected.paddingUpdateTransform(plo, spacing.v);
 	handler3D->set_transform(transform_corrected);
 
 	// add color lookup table again
@@ -2940,9 +2937,9 @@ void MainWindow::execute_reloadbmp()
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
-	if ((unsigned short)files.size() == handler3D->return_nrslices() ||
+	if ((unsigned short)files.size() == handler3D->num_slices() ||
 			(unsigned short)files.size() ==
-					(handler3D->return_endslice() - handler3D->return_startslice()))
+					(handler3D->end_slice() - handler3D->start_slice()))
 	{
 		sort(files.begin(), files.end());
 
@@ -3048,7 +3045,7 @@ void MainWindow::execute_reloadavw()
 			this);
 	if (!loadfilename.isEmpty())
 	{
-		handler3D->ReloadAVW(loadfilename.ascii(), handler3D->return_startslice());
+		handler3D->ReloadAVW(loadfilename.ascii(), handler3D->start_slice());
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -3073,7 +3070,7 @@ void MainWindow::execute_reloadmhd()
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
-				handler3D->return_startslice());
+				handler3D->start_slice());
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -3097,7 +3094,7 @@ void MainWindow::execute_reloadvtk()
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
-				handler3D->return_startslice());
+				handler3D->start_slice());
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -3123,7 +3120,7 @@ void MainWindow::execute_reloadnifti()
 	{
 		handler3D->ReloadImage(
 				loadfilename.ascii(),
-				handler3D->return_startslice()); // TODO: handle failure
+				handler3D->start_slice()); // TODO: handle failure
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -3266,7 +3263,7 @@ void MainWindow::execute_reloadrtdose()
 	{
 		handler3D->ReloadRTdose(
 				loadfilename.ascii(),
-				handler3D->return_startslice()); // TODO: handle failure
+				handler3D->start_slice()); // TODO: handle failure
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -5171,9 +5168,9 @@ void MainWindow::execute_activeslicesconf()
 	AC.move(QCursor::pos());
 	AC.exec();
 
-	unsigned short slicenr = handler3D->get_activeslice() + 1;
-	if (handler3D->return_startslice() >= slicenr ||
-			handler3D->return_endslice() + 1 <= slicenr)
+	unsigned short slicenr = handler3D->active_slice() + 1;
+	if (handler3D->start_slice() >= slicenr ||
+			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -5539,7 +5536,7 @@ void MainWindow::execute_about()
 void MainWindow::add_mark(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.marks = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5551,7 +5548,7 @@ void MainWindow::add_mark(Point p)
 void MainWindow::add_label(Point p, std::string str)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.marks = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5563,7 +5560,7 @@ void MainWindow::add_label(Point p, std::string str)
 void MainWindow::clear_marks()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.marks = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5575,7 +5572,7 @@ void MainWindow::clear_marks()
 void MainWindow::remove_mark(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.marks = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5597,7 +5594,7 @@ void MainWindow::select_tissue(Point p)
 		(*i)->setSelected(false);
 	}
 	tissueTreeWidget->set_current_tissue(
-			handler3D->get_tissue_pt(p, handler3D->get_activeslice()));
+			handler3D->get_tissue_pt(p, handler3D->active_slice()));
 }
 
 void MainWindow::next_featuring_slice()
@@ -5624,7 +5621,7 @@ void MainWindow::next_featuring_slice()
 void MainWindow::add_tissue(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5637,7 +5634,7 @@ void MainWindow::add_tissue(Point p)
 void MainWindow::add_tissue_connected(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5651,7 +5648,7 @@ void MainWindow::add_tissue_connected(Point p)
 void MainWindow::add_tissuelarger(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5677,7 +5674,7 @@ void MainWindow::add_tissue_3D(Point p)
 void MainWindow::subtract_tissue(Point p)
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5701,7 +5698,7 @@ void MainWindow::addhold_tissue_clicked(Point p)
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = cb_addsub3d->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -5751,7 +5748,7 @@ void MainWindow::subtracthold_tissue_clicked(Point p)
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = cb_addsub3d->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -6297,7 +6294,7 @@ void MainWindow::removeselected()
 			dataSelection.tissues = true;
 			emit begin_datachange(dataSelection, this, false);
 
-			QString tissueName = TissueInfos::GetTissueName(currTissueType);
+			QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
 			handler3D->remove_tissue(currTissueType, tissueCount);
 			tissueTreeWidget->remove_tissue(tissueName);
 
@@ -6328,7 +6325,7 @@ void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		QString tissueName = TissueInfos::GetTissueName(currTissueType);
+		QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
 		handler3D->remove_tissue(currTissueType, tissueCount);
 		tissueTreeWidget->remove_tissue(tissueName);
 
@@ -6453,7 +6450,7 @@ void MainWindow::tissue2work()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = tissue3Dopt->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -6475,7 +6472,7 @@ void MainWindow::selectedtissue2work()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = tissue3Dopt->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -6503,7 +6500,7 @@ void MainWindow::tissue2workall()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = tissue3Dopt->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -6542,7 +6539,7 @@ void MainWindow::cleartissues()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = tissue3Dopt->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -6579,7 +6576,7 @@ void MainWindow::cleartissue()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = tissue3Dopt->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -6620,7 +6617,7 @@ void MainWindow::clearselected()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = tissue3Dopt->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -6695,7 +6692,7 @@ void MainWindow::slice_changed()
 	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 	qw->on_slicenr_changed();
 
-	unsigned short slicenr = handler3D->get_activeslice() + 1;
+	unsigned short slicenr = handler3D->active_slice() + 1;
 	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this,
 			SLOT(scb_slicenr_changed()));
 	scb_slicenr->setValue(int(slicenr));
@@ -6712,8 +6709,8 @@ void MainWindow::slice_changed()
 	imagemath_dialog->slicenr_changed();
 	imageoverlay_dialog->slicenr_changed();
 	overlay_widget->slicenr_changed();
-	if (handler3D->return_startslice() >= slicenr ||
-			handler3D->return_endslice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr ||
+			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -6751,25 +6748,25 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 
 	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
 
-	if (handler3D->return_nrslices() != nrslices)
+	if (handler3D->num_slices() != nrslices)
 	{
 		QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this,
 				SLOT(scb_slicenr_changed()));
-		scb_slicenr->setMaxValue((int)handler3D->return_nrslices());
+		scb_slicenr->setMaxValue((int)handler3D->num_slices());
 		QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
 				SLOT(scb_slicenr_changed()));
 		QObject::disconnect(sb_slicenr, SIGNAL(valueChanged(int)), this,
 				SLOT(sb_slicenr_changed()));
-		sb_slicenr->setMaxValue((int)handler3D->return_nrslices());
+		sb_slicenr->setMaxValue((int)handler3D->num_slices());
 		QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
 				SLOT(sb_slicenr_changed()));
 		lb_slicenr->setText(QString(" of ") +
-												QString::number((int)handler3D->return_nrslices()));
+												QString::number((int)handler3D->num_slices()));
 		interpolation_widget->handler3D_changed();
-		nrslices = handler3D->return_nrslices();
+		nrslices = handler3D->num_slices();
 	}
 
-	unsigned short slicenr = handler3D->get_activeslice() + 1;
+	unsigned short slicenr = handler3D->active_slice() + 1;
 	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this,
 			SLOT(scb_slicenr_changed()));
 	scb_slicenr->setValue(int(slicenr));
@@ -6780,8 +6777,8 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 	sb_slicenr->setValue(int(slicenr));
 	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
 			SLOT(sb_slicenr_changed()));
-	if (handler3D->return_startslice() >= slicenr ||
-			handler3D->return_endslice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr ||
+			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -6815,7 +6812,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 
 void MainWindow::slicenr_up()
 {
-	handler3D->set_activeslice(handler3D->get_activeslice() + 1);
+	handler3D->set_activeslice(handler3D->active_slice() + 1);
 	slice_changed();
 }
 
@@ -6836,7 +6833,7 @@ void MainWindow::zoom_out()
 
 void MainWindow::slicenr_down()
 {
-	handler3D->set_activeslice(handler3D->get_activeslice() - 1);
+	handler3D->set_activeslice(handler3D->active_slice() - 1);
 	slice_changed();
 }
 
@@ -6860,7 +6857,7 @@ void MainWindow::pb_first_pressed()
 
 void MainWindow::pb_last_pressed()
 {
-	handler3D->set_activeslice(handler3D->return_nrslices() - 1);
+	handler3D->set_activeslice(handler3D->num_slices() - 1);
 	slice_changed();
 }
 
@@ -7824,17 +7821,17 @@ void MainWindow::execute_smoothtissues()
 
 void MainWindow::execute_cleanup()
 {
-	tissues_size_t** slices = new tissues_size_t*[handler3D->return_endslice() - handler3D->return_startslice()];
-	tissuelayers_size_t activelayer = handler3D->get_active_tissuelayer();
-	for (unsigned short i = handler3D->return_startslice();
-			 i < handler3D->return_endslice(); i++)
+	tissues_size_t** slices = new tissues_size_t*[handler3D->end_slice() - handler3D->start_slice()];
+	tissuelayers_size_t activelayer = handler3D->active_tissuelayer();
+	for (unsigned short i = handler3D->start_slice();
+			 i < handler3D->end_slice(); i++)
 	{
-		slices[i - handler3D->return_startslice()] =
+		slices[i - handler3D->start_slice()] =
 				handler3D->return_tissues(activelayer, i);
 	}
 	TissueCleaner TC(
-			slices, handler3D->return_endslice() - handler3D->return_startslice(),
-			handler3D->return_width(), handler3D->return_height());
+			slices, handler3D->end_slice() - handler3D->start_slice(),
+			handler3D->width(), handler3D->height());
 	if (!TC.Allocate())
 	{
 		QMessageBox::information(

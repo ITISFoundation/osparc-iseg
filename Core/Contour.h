@@ -11,7 +11,7 @@
 
 #include "iSegCore.h"
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include <iostream>
 #include <vector>

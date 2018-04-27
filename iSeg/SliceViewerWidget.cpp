@@ -52,8 +52,8 @@ bmptissuesliceshower::bmptissuesliceshower(
 		else
 			bmpbits = handler3D->slicework_x(slicenr);
 		tissue = handler3D->slicetissue_x(slicenr);
-		width = handler3D->return_height();
-		height = handler3D->return_nrslices();
+		width = handler3D->height();
+		height = handler3D->num_slices();
 		d = handler3D->get_pixelsize().low;
 	}
 	else
@@ -63,8 +63,8 @@ bmptissuesliceshower::bmptissuesliceshower(
 		else
 			bmpbits = handler3D->slicework_y(slicenr);
 		tissue = handler3D->slicetissue_y(slicenr);
-		width = handler3D->return_width();
-		height = handler3D->return_nrslices();
+		width = handler3D->width();
+		height = handler3D->num_slices();
 		d = handler3D->get_pixelsize().high;
 	}
 
@@ -144,13 +144,13 @@ void bmptissuesliceshower::update()
 
 	if (directionx)
 	{
-		w = handler3D->return_height();
-		h = handler3D->return_nrslices();
+		w = handler3D->height();
+		h = handler3D->num_slices();
 	}
 	else
 	{
-		w = handler3D->return_width();
-		h = handler3D->return_nrslices();
+		w = handler3D->width();
+		h = handler3D->num_slices();
 	}
 
 	if (w != width || h != height)
@@ -274,7 +274,7 @@ void bmptissuesliceshower::reload_bits()
 	{
 		for (int x = 0; x < width; x++)
 		{
-			image.setPixel(x, handler3D->get_activeslice(), qRgb(0, 255, 0));
+			image.setPixel(x, handler3D->active_slice(), qRgb(0, 255, 0));
 		}
 	}
 
@@ -474,9 +474,9 @@ SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
 {
 	//	setWindowIcon(QIcon("images/isegicon.png"));
 	if (directionx)
-		nrslices = handler3D->return_width();
+		nrslices = handler3D->width();
 	else
-		nrslices = handler3D->return_height();
+		nrslices = handler3D->height();
 
 	vbox = new Q3VBoxLayout(this);
 
@@ -578,9 +578,9 @@ void SliceViewerWidget::bmp_changed()
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
-			nrslicesnew = handler3D->return_width();
+			nrslicesnew = handler3D->width();
 		else
-			nrslicesnew = handler3D->return_height();
+			nrslicesnew = handler3D->height();
 
 		if (nrslicesnew != nrslices)
 		{
@@ -603,9 +603,9 @@ void SliceViewerWidget::work_changed()
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
-			nrslicesnew = handler3D->return_width();
+			nrslicesnew = handler3D->width();
 		else
-			nrslicesnew = handler3D->return_height();
+			nrslicesnew = handler3D->height();
 
 		if (nrslicesnew != nrslices)
 		{

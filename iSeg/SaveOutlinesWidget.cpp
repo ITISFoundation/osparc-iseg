@@ -11,6 +11,7 @@
 
 #include "SaveOutlinesWidget.h"
 #include "SlicesHandler.h"
+#include "StdStringToQString.h"
 #include "TissueInfos.h"
 
 #include <q3filedialog.h>
@@ -39,7 +40,7 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	lbo_tissues = new Q3ListBox(vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)
 	{
-		lbo_tissues->insertItem(TissueInfos::GetTissueName(i));
+		lbo_tissues->insertItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
 	lbo_tissues->setMultiSelection(true);
 	hbox2 = new Q3HBox(vbox1);
@@ -324,8 +325,8 @@ void SaveOutlinesWidget::save_pushed()
 					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
 														   vtissues);
 				}
-				handler3D->shift_contours(-(int)handler3D->return_width(),
-										  -(int)handler3D->return_height());
+				handler3D->shift_contours(-(int)handler3D->width(),
+										  -(int)handler3D->height());
 				if (cb_extrusion->isChecked())
 				{
 					handler3D->setextrusion_contours(
@@ -339,10 +340,10 @@ void SaveOutlinesWidget::save_pushed()
 				float disp[3];
 				handler3D->get_displacement(disp);
 				fprintf(fp, "V1\nX%i %i %i %i O%f %f %f\n",
-						-(int)handler3D->return_width(),
-						(int)handler3D->return_width(),
-						-(int)handler3D->return_height(),
-						(int)handler3D->return_height(), disp[0], disp[1],
+						-(int)handler3D->width(),
+						(int)handler3D->width(),
+						-(int)handler3D->height(),
+						(int)handler3D->height(), disp[0], disp[1],
 						disp[2]); // TODO: rotation
 				vector<augmentedmark> labels;
 				handler3D->get_labels(&labels);
@@ -351,10 +352,10 @@ void SaveOutlinesWidget::save_pushed()
 				for (size_t i = 0; i < labels.size(); i++)
 				{
 					fprintf(fp, "S%i 1\nL%i %i %s\n", (int)labels[i].slicenr,
-							(int)handler3D->return_width() - 1 -
+							(int)handler3D->width() - 1 -
 								(int)labels[i].p.px * 2,
 							(int)labels[i].p.py * 2 -
-								(int)handler3D->return_height() + 1,
+								(int)handler3D->height() + 1,
 							labels[i].name.c_str());
 				}
 				fclose(fp);

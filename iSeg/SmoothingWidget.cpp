@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "SmoothingWidget.h"
 #include "bmp_read_1.h"
@@ -39,7 +38,7 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 {
 	setToolTip(Format("Smoothing and noise removal filters."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	hboxoverall = new Q3HBox(this);
@@ -176,7 +175,7 @@ void SmoothingWidget::execute()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -314,7 +313,7 @@ void SmoothingWidget::continue_diff()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -374,7 +373,7 @@ void SmoothingWidget::n_changed(int newval)
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -413,7 +412,7 @@ void SmoothingWidget::kmax_changed(int newval)
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
@@ -439,7 +438,7 @@ QSize SmoothingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void SmoothingWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -456,7 +455,7 @@ void SmoothingWidget::init()
 
 void SmoothingWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
@@ -466,7 +465,7 @@ void SmoothingWidget::slider_pressed()
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 	}

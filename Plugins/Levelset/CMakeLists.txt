@@ -7,19 +7,23 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-OPTION(PLUGIN_LEVELSET "Build levelset segmentation plugin" OFF)
+OPTION(PLUGIN_LEVELSET "Build levelset segmentation plugin" ON)
 IF(PLUGIN_LEVELSET)
-	QT4_WRAP_CPP(MOCSrcslevel Levelset.h)
+	USE_BOOST()
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty)
 
+	QT4_WRAP_CPP(MOCSrcslevel LevelsetWidget.h)
+
+	FILE(GLOB PLUGIN_HEADERS *.h)
 	ADD_LIBRARY(Levelset.ext SHARED 
 		LevelsetPlugin.cpp 
-		LevelsetPlugin.h 
-		Levelset.cpp 
-		Levelset.h 
+		LevelsetWidget.cpp 
+		${PLUGIN_HEADERS}
 		${MOCSrcslevel}
 	)
 
 	TARGET_LINK_LIBRARIES( Levelset.ext 
+		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES} 
 	)

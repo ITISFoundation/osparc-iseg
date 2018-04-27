@@ -9,7 +9,6 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "SlicesHandler.h"
 #include "WatershedWidget.h"
 #include "bmp_read_1.h"
@@ -45,7 +44,7 @@ WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 						 "simulated resulting in thousands of basins. "
 						 "Higher water causes adjacent basins to merge. "));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	usp = NULL;
@@ -120,7 +119,7 @@ void WatershedWidget::recalc()
 	if (usp != NULL)
 	{
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -139,7 +138,7 @@ void WatershedWidget::marks_changed()
 	if (usp != NULL)
 	{
 		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		dataSelection.work = true;
 		emit begin_datachange(dataSelection, this);
 
@@ -173,7 +172,7 @@ WatershedWidget::~WatershedWidget()
 
 void WatershedWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -203,14 +202,14 @@ void WatershedWidget::newloaded()
 		usp = NULL;
 	}
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
 
 void WatershedWidget::slider_pressed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 }

@@ -10,7 +10,7 @@
 #ifndef dicomread_22Juli05
 #define dicomread_22Juli05
 
-#include "Interface/Point.h"
+#include "Data/Point.h"
 
 #include "Core/Pair.h"
 

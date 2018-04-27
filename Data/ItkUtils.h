@@ -13,6 +13,7 @@
 
 #include <itkImage.h>
 #include <itkImageRegionIterator.h>
+#include <itkImageFileWriter.h>
 
 namespace iseg {
 
@@ -64,6 +65,16 @@ bool Paste(TInputImage* source, TOutputImage* destination)
 		return true;
 	}
 	return false;
+}
+
+template<class T> void dump_image(T *img, const std::string& file_name)
+{
+#if 0
+	auto writer = itk::ImageFileWriter<T>::New();
+	writer->SetInput(img);
+	writer->SetFileName(file_name);
+	writer->Update();
+#endif
 }
 
 } // namespace iseg

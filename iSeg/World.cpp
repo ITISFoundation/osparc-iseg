@@ -1802,9 +1802,9 @@ void World::getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
 	}
 
 	// add margin
-	Vec3 imgExt((float)handler3D->return_width(),
-				(float)handler3D->return_height(),
-				(float)handler3D->return_nrslices());
+	Vec3 imgExt((float)handler3D->width(),
+				(float)handler3D->height(),
+				(float)handler3D->num_slices());
 	//	Vector imgExt = getInImg(0)->getImgExt();
 
 	for (int j = 0; j < 3; j++)

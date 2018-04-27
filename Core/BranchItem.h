@@ -11,9 +11,8 @@
 
 #include "iSegCore.h"
 
-#include "Vec3.h"
-
-#include "Interface/Point.h"
+#include "Data/Point.h"
+#include "Data/Vec3.h"
 
 #include <list>
 #include <sstream>
@@ -57,7 +56,7 @@ public:
 			_parent->removeChild(getLabel());
 		_centerList.clear();
 		for (std::list<BranchItem*>::iterator it = _children.begin();
-			 it != _children.end(); it++)
+				 it != _children.end(); it++)
 		{
 			(*it)->setParentDirty(NULL);
 			delete *it;
@@ -112,7 +111,7 @@ public:
 		{
 			*(_centerList.rbegin()) = (*_children.begin())->getCenterPointAt(0);
 			for (std::list<BranchItem*>::iterator it = _children.begin();
-				 it != _children.end(); it++)
+					 it != _children.end(); it++)
 			{
 				(*it)->correct_branchpoints();
 			}
@@ -152,14 +151,14 @@ public:
 	{
 		doug_peuck(epsilon, dx, dy, dz);
 		for (std::list<BranchItem*>::iterator it = _children.begin();
-			 it != _children.end(); it++)
+				 it != _children.end(); it++)
 		{
 			(*it)->doug_peuck_inclchildren(epsilon, dx, dy, dz);
 		}
 	}
 
 	void doug_peuck(float epsilon, float dx, float dy, float dz,
-					std::vector<Vec3>& vp)
+			std::vector<Vec3>& vp)
 	{
 		vp.clear();
 		unsigned int n = (unsigned int)_centerList.size();
@@ -189,13 +188,13 @@ public:
 		return;
 	}
 	void doug_peuck_inclchildren(float epsilon, float dx, float dy, float dz,
-								 std::vector<std::vector<Vec3>>& vp)
+			std::vector<std::vector<Vec3>>& vp)
 	{
 		std::vector<Vec3> vp2;
 		doug_peuck(epsilon, dx, dy, dz, vp2);
 		vp.push_back(vp2);
 		for (std::list<BranchItem*>::iterator it = _children.begin();
-			 it != _children.end(); it++)
+				 it != _children.end(); it++)
 		{
 			(*it)->doug_peuck_inclchildren(epsilon, dx, dy, dz, vp);
 		}
@@ -204,7 +203,7 @@ public:
 	{
 		Point p;
 		for (std::vector<Vec3>::iterator it = _centerList.begin();
-			 it != _centerList.end(); it++)
+				 it != _centerList.end(); it++)
 		{
 			if ((unsigned short)((*it)[2] + 0.0001f) == slicenr)
 			{
@@ -215,11 +214,11 @@ public:
 		}
 	}
 	void getCenterListSlice_inclchildren(unsigned short slicenr,
-										 std::vector<Point>& vp)
+			std::vector<Point>& vp)
 	{
 		getCenterListSlice(slicenr, vp);
 		for (std::list<BranchItem*>::iterator it = _children.begin();
-			 it != _children.end(); it++)
+				 it != _children.end(); it++)
 		{
 			(*it)->getCenterListSlice_inclchildren(slicenr, vp);
 		}
@@ -248,15 +247,15 @@ private:
 	// centerline list in world coordinates
 	std::vector<Vec3> _centerList;
 
-	Vec3 _startVox;		 // voxel (in voxel coord) where branch starts
+	Vec3 _startVox;			 // voxel (in voxel coord) where branch starts
 	Vec3 _startVoxWorld; // voxel (in world coord) where branch starts
 	Vec3
-		_endVox; // voxel (in voxel coord) where branch ends (end of vessel or begin of other branches)
+			_endVox; // voxel (in voxel coord) where branch ends (end of vessel or begin of other branches)
 	Vec3
-		_endVoxWorld; // voxel (in world coord) where branch ends (end of vessel or begin of other branches)
+			_endVoxWorld; // voxel (in world coord) where branch ends (end of vessel or begin of other branches)
 	void doug_peuck_sub(float epsilon, const unsigned int p1,
-						const unsigned int p2, std::vector<bool>* v1_p,
-						float dx, float dy, float dz)
+			const unsigned int p2, std::vector<bool>* v1_p,
+			float dx, float dy, float dz)
 	{
 		//	cout << p1<<" "<<p2<<endl;
 		if (p2 <= p1 + 1)

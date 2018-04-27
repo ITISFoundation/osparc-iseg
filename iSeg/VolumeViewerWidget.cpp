@@ -141,16 +141,16 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	//  input->Update();
 
 	input = vtkSmartPointer<vtkImageData>::New();
-	input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-			(int)hand3D->return_height() - 1, 0,
-			(int)hand3D->return_nrslices() - 1);
+	input->SetExtent(0, (int)hand3D->width() - 1, 0,
+			(int)hand3D->height() - 1, 0,
+			(int)hand3D->num_slices() - 1);
 	Pair ps = hand3D->get_pixelsize();
 	if (bmportissue)
 	{
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 		input->AllocateScalars(VTK_FLOAT, 1);
 		float* field = (float*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
+		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
 			hand3D->copyfrombmp(
 					i, &(field[i * (unsigned long long)hand3D->return_area()]));
@@ -170,7 +170,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
 		tissues_size_t* field =
 				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
+		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
 			hand3D->copyfromtissue(
 					i, &(field[i * (unsigned long long)hand3D->return_area()]));
@@ -715,14 +715,14 @@ void VolumeViewerWidget::reload()
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
 	int size1[3];
 	input->GetDimensions(size1);
-	int w = hand3D->return_width(); //xxxa
-	if ((hand3D->return_width() != size1[0]) ||
-			(hand3D->return_height() != size1[1]) ||
-			(hand3D->return_nrslices() != size1[2]))
+	int w = hand3D->width(); //xxxa
+	if ((hand3D->width() != size1[0]) ||
+			(hand3D->height() != size1[1]) ||
+			(hand3D->num_slices() != size1[2]))
 	{
-		input->SetExtent(0, (int)hand3D->return_width() - 1, 0,
-				(int)hand3D->return_height() - 1, 0,
-				(int)hand3D->return_nrslices() - 1);
+		input->SetExtent(0, (int)hand3D->width() - 1, 0,
+				(int)hand3D->height() - 1, 0,
+				(int)hand3D->num_slices() - 1);
 		input->AllocateScalars(input->GetScalarType(),
 				input->GetNumberOfScalarComponents());
 		outlineGrid->SetInputData(input);
@@ -756,7 +756,7 @@ void VolumeViewerWidget::reload()
 	if (bmportissue)
 	{
 		float* field = (float*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
+		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
 			hand3D->copyfrombmp(
 					i, &(field[i * (unsigned long long)hand3D->return_area()]));
@@ -766,7 +766,7 @@ void VolumeViewerWidget::reload()
 	{
 		tissues_size_t* field =
 				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->return_nrslices(); i++)
+		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
 			hand3D->copyfromtissue(
 					i, &(field[i * (unsigned long long)hand3D->return_area()]));

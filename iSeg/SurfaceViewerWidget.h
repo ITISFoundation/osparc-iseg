@@ -9,8 +9,9 @@
 */
 #pragma once
 
+#include "Data/Types.h"
+
 #include "Core/Pair.h"
-#include "Core/Types.h"
 
 #include <QWidget>
 

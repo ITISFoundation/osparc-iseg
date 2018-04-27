@@ -12,8 +12,9 @@
 #include "SlicesHandler.h"
 #include "VesselWidget.h"
 
+#include "Data/Vec3.h"
+
 #include "Core/Pair.h"
-#include "Core/Vec3.h"
 
 #include <q3filedialog.h>
 #include <qlabel.h>
@@ -90,7 +91,7 @@ void VesselWidget::init()
 	if (branchTree.getSize() > 0)
 	{
 		branchTree.getItem()->getCenterListSlice_inclchildren(
-				handler3D->get_activeslice(), vp);
+				handler3D->active_slice(), vp);
 	}
 	emit vp1_changed(&vp);
 }
@@ -222,8 +223,8 @@ void VesselWidget::execute()
 
 	allSeeds.push_back(end);
 
-	if (!seeds.empty() && (handler3D->return_nrslices() > 0) &&
-			(handler3D->return_width() > 0) && (handler3D->return_height() > 0))
+	if (!seeds.empty() && (handler3D->num_slices() > 0) &&
+			(handler3D->width() > 0) && (handler3D->height() > 0))
 	{
 		Vec3 tmpbbStart;
 		//tmpbbStart[0]=0;
@@ -324,7 +325,7 @@ void VesselWidget::on_slicenr_changed()
 	if (branchTree.getSize() > 0)
 	{
 		branchTree.getItem()->getCenterListSlice_inclchildren(
-				handler3D->get_activeslice(), vp);
+				handler3D->active_slice(), vp);
 	}
 	emit vp1_changed(&vp);
 }
@@ -347,10 +348,10 @@ void VesselWidget::savevessel()
 				pair1.low, thick, vp);
 		FILE* fp = fopen(savefilename.ascii(), "w");
 		int version = 2;
-		unsigned short w = handler3D->return_width();
-		unsigned short h = handler3D->return_height();
+		unsigned short w = handler3D->width();
+		unsigned short h = handler3D->height();
 		fprintf(fp, "V%i\n", version);
-		fprintf(fp, "NS%i\n", (int)handler3D->return_nrslices());
+		fprintf(fp, "NS%i\n", (int)handler3D->num_slices());
 		fprintf(fp, "VoxelSize: %f %f %f\n", pair1.high / 2, pair1.low / 2,
 				thick);
 		fprintf(fp, "N%i\n", (int)vp.size());

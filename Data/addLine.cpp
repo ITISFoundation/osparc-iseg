@@ -17,8 +17,7 @@ using namespace std;
 
 void addLine(vector<Point>* vP, Point p1, Point p2)
 {
-	short deltax, deltay, xinc1, xinc2, yinc1, yinc2, den, num, numadd,
-			numpixels;
+	short deltax, deltay, xinc1, xinc2, yinc1, yinc2, den, num, numadd, numpixels;
 	Point p;
 
 	deltax = abs(p2.px - p1.px); // The difference between the x's

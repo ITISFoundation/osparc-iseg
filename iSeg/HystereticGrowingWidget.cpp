@@ -9,12 +9,11 @@
  */
 #include "Precompiled.h"
 
-#include "FormatTooltip.h"
 #include "HystereticGrowingWidget.h"
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Interface/addLine.h"
+#include "Data/addLine.h"
 
 #include "Core/Pair.h"
 
@@ -47,7 +46,7 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget*
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
 										"neighboring pixels with similar intensities."));
 
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	Pair p;
@@ -167,7 +166,7 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget*
 
 void HystereticGrowingWidget::on_slicenr_changed()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
@@ -235,7 +234,7 @@ void HystereticGrowingWidget::execute()
 	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	emit begin_datachange(dataSelection, this);
 
 	execute1();
@@ -275,7 +274,7 @@ void HystereticGrowingWidget::execute1()
 		//		bmphand->thresholded_growing(p1,ll,uu,false,255.f);
 		if (allslices->isChecked())
 		{
-			handler3D->thresholded_growing(handler3D->get_activeslice(), p1, ll,
+			handler3D->thresholded_growing(handler3D->active_slice(), p1, ll,
 					uu, 255.f);
 		}
 		else
@@ -404,9 +403,9 @@ QSize HystereticGrowingWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void HystereticGrowingWidget::init()
 {
-	if (activeslice != handler3D->get_activeslice())
+	if (activeslice != handler3D->active_slice())
 	{
-		activeslice = handler3D->get_activeslice();
+		activeslice = handler3D->active_slice();
 		bmphand = handler3D->get_activebmphandler();
 		getrange();
 	}
@@ -416,7 +415,7 @@ void HystereticGrowingWidget::init()
 
 void HystereticGrowingWidget::newloaded()
 {
-	activeslice = handler3D->get_activeslice();
+	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	getrange();
 
@@ -476,7 +475,7 @@ void HystereticGrowingWidget::on_mouse_released(Point p)
 
 		iseg::DataSelection dataSelection;
 		dataSelection.limits = true;
-		dataSelection.sliceNr = handler3D->get_activeslice();
+		dataSelection.sliceNr = handler3D->active_slice();
 		emit begin_datachange(dataSelection, this);
 
 		bmphand->add_limit(&vpdyn);
@@ -504,7 +503,7 @@ void HystereticGrowingWidget::clearpressed()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.limits = true;
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	emit begin_datachange(dataSelection, this);
 
 	bmphand->clear_limits();
@@ -521,7 +520,7 @@ void HystereticGrowingWidget::slider_pressed()
 	iseg::DataSelection dataSelection;
 	dataSelection.work = dataSelection.limits = true;
 	dataSelection.allSlices = allslices->isChecked();
-	dataSelection.sliceNr = handler3D->get_activeslice();
+	dataSelection.sliceNr = handler3D->active_slice();
 	emit begin_datachange(dataSelection, this);
 }
 

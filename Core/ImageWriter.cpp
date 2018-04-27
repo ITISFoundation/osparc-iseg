@@ -9,11 +9,12 @@
  */
 #include "Precompiled.h"
 
-#include "ImageToITK.h"
 #include "ImageWriter.h"
 #include "InitializeITKFactory.h"
-#include "Transform.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
+
+#include "Data/ImageToITK.h"
+#include "Data/Transform.h"
 
 #include <itkImage.h>
 #include <itkImageFileWriter.h>
@@ -29,23 +30,21 @@ using namespace iseg;
 
 template<typename T>
 bool ImageWriter::writeVolume(const char* filename, const T** data,
-							  unsigned width, unsigned height,
-							  unsigned nrslices, const float spacing[3],
-							  const Transform& transform)
+		unsigned width, unsigned height,
+		unsigned nrslices, const float spacing[3],
+		const Transform& transform)
 {
 	initializeITKFactory();
 
 	typedef itk::Image<T, 3> image_type;
 	typedef itk::ImageFileWriter<image_type> writer_type;
 
-	typename image_type::Pointer image =
-		ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
-
+	auto image = ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
 	if (image)
 	{
 		boost::filesystem::path path(filename);
 		std::string extension = boost::algorithm::to_lower_copy(
-			path.has_extension() ? path.extension().string() : "");
+				path.has_extension() ? path.extension().string() : "");
 		if (extension == ".vti" || extension == ".vtk")
 		{
 			typedef itk::ImageToVTKImageFilter<image_type> connector_type;
