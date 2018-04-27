@@ -57,6 +57,8 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 
 	all_slices = new QCheckBox;
 
+	init_from_target = new QCheckBox;
+
 	iterations = new QSpinBox(1, 50000, 1, nullptr);
 	iterations->setValue(1200);
 	iterations->setToolTip(Format(""));
@@ -75,19 +77,24 @@ LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* par
 
 	guess_threshold = new QPushButton("Estimate thresholds");
 
+	clear_seeds = new QPushButton("Clear seeds");
+
 	execute_button = new QPushButton("Execute");
 
 	auto layout = new QFormLayout;
 	layout->addRow(QString("Apply to all slices"), all_slices);
+	
+	layout->addRow(QString("Initialize from target"), init_from_target);
 	layout->addRow(QString("Iterations"), iterations);
 	layout->addRow(QString("Lower threshold"), lower_threshold);
 	layout->addRow(QString("Upper threshold"), upper_threshold);
 	layout->addRow(QString("Multiplier"), multiplier);
-	layout->addRow(guess_threshold);
+	layout->addRow(guess_threshold, clear_seeds);
 	layout->addRow(execute_button);
 	setLayout(layout);
 
 	QObject::connect(guess_threshold, SIGNAL(clicked()), this, SLOT(guess_thresholds()));
+	QObject::connect(clear_seeds, SIGNAL(clicked()), this, SLOT(clearmarks()));
 	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
 }
 
@@ -225,7 +232,7 @@ void LevelsetWidget::do_work()
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
-		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true); // active_slices -> correct seed z-position
 		auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
 		do_work_nd<input_type>(source, target);
 	}
@@ -250,37 +257,51 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	using node_container_type = typename fast_marching_type::NodeContainer;
 	using node_type = typename fast_marching_type::NodeType;
 
-	// get seeds
-	std::vector<typename input_type::IndexType> indices;
-	get_seeds(indices);
-
 	// create filters
 	auto fast_marching = fast_marching_type::New();
 	auto threshold_levelset = itk::ThresholdSegmentationLevelSetImageFilter<real_type, input_type>::New();
 	auto threshold = itk::BinaryThresholdImageFilter<real_type, mask_type>::New();
 
-	// setup seeds
-	const double initialDistance = 2.0; // \todo BL
-	const double seedValue = -initialDistance; // \todo BL
-	auto seeds = node_container_type::New();
-	seeds->Initialize();
-	for (size_t i = 0; i<indices.size(); ++i)
+	// initialize levelset
+	typename real_type::Pointer initial_levelset;
+	if (init_from_target->isChecked())
 	{
-		node_type node;
-		node.SetValue(seedValue);
-		node.SetIndex(indices[i]);
-		seeds->InsertElement(i, node);
+		// 1. threshold target -> mask
+		auto threshold_target = itk::BinaryThresholdImageFilter<input_type, mask_type>::New();
+		threshold_target->SetInput(target);
+		threshold_target->SetLowerThreshold(0.001f);
+
+		// 2. compute sdf from that
+	}
+	else
+	{
+		// setup seeds
+		std::vector<typename input_type::IndexType> indices;
+		get_seeds(indices);
+
+		const double initialDistance = 2.0; // \todo BL
+		const double seedValue = -initialDistance; // \todo BL
+		auto seeds = node_container_type::New();
+		seeds->Initialize();
+		for (size_t i = 0; i<indices.size(); ++i)
+		{
+			node_type node;
+			node.SetValue(seedValue);
+			node.SetIndex(indices[i]);
+			seeds->InsertElement(i, node);
+		}
+
+		fast_marching->SetTrialPoints(seeds);
+		fast_marching->SetSpeedConstant(1.0);
+		fast_marching->SetOutputRegion(input->GetBufferedRegion());
+		fast_marching->SetOutputSpacing(input->GetSpacing());
+		fast_marching->SetOutputOrigin(input->GetOrigin());
+		fast_marching->SetOutputDirection(input->GetDirection());
+		initial_levelset = fast_marching->GetOutput();
 	}
 
 	// set parameters
-	fast_marching->SetTrialPoints(seeds);
-	fast_marching->SetSpeedConstant(1.0);
-	fast_marching->SetOutputRegion(input->GetBufferedRegion());
-	fast_marching->SetOutputSpacing(input->GetSpacing());
-	fast_marching->SetOutputOrigin(input->GetOrigin());
-	fast_marching->SetOutputDirection(input->GetDirection());
-
-	threshold_levelset->SetInput(fast_marching->GetOutput());
+	threshold_levelset->SetInput(initial_levelset);
 	threshold_levelset->SetFeatureImage(input);
 	threshold_levelset->SetPropagationScaling(1.0); 
 	threshold_levelset->SetCurvatureScaling(1.0);
@@ -291,7 +312,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	threshold_levelset->SetIsoSurfaceValue(0.0);
 
 	threshold->SetInput(threshold_levelset->GetOutput());
-	threshold->SetLowerThreshold(-5000.0); // \todo BL
+	threshold->SetLowerThreshold(std::numeric_limits<double>::lowest());
 	threshold->SetUpperThreshold(0);
 	threshold->SetOutsideValue(0);
 	threshold->SetInsideValue(255);

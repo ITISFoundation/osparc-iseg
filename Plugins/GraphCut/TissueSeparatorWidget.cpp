@@ -253,7 +253,7 @@ typename itk::Image<unsigned char, Dim>::Pointer
 	// create mask from selected tissue [use current selection, or initial selection?]
 	auto threshold = itk::BinaryThresholdImageFilter<source_type, mask_type>::New();
 	threshold->SetInput(target);
-	threshold->SetLowerThreshold(0.5f);
+	threshold->SetLowerThreshold(0.001f);
 	threshold->SetInsideValue(1);
 	threshold->SetOutsideValue(0);
 	threshold->Update();

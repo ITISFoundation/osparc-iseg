@@ -50,10 +50,12 @@ private:
 	unsigned short activeslice;
 
 	QCheckBox* all_slices;
+	QCheckBox* init_from_target;
 	QSpinBox* iterations;
 	QLineEdit* lower_threshold;
 	QLineEdit* upper_threshold;
 	QLineEdit* multiplier;
+	QPushButton* clear_seeds;
 	QPushButton* guess_threshold;
 	QPushButton* execute_button;
 
