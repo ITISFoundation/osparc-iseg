@@ -66,7 +66,7 @@ void brush(T* slice_data, unsigned slice_width, unsigned slice_height,
 	{
 		d = int(std::floor(std::sqrt(float(dist - (x - p.px) * (x - p.px)))));
 		ymin = std::max(0, int(p.py) - d);
-		ymax = std::min(int(height - 1), d + p.py);
+		ymax = std::min(int(slice_height - 1), d + p.py);
 
 		for (int y = ymin; y <= ymax; y++)
 		{
