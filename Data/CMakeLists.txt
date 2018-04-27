@@ -10,10 +10,12 @@
 ADD_SUBDIRECTORY(testsuite)
 
 USE_ITK()
+USE_BOOST()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	addLine.cpp
+	BrushInteraction.cpp
 	SliceHandlerItkWrapper.cpp
 	Transform.cpp
 )

@@ -14,7 +14,8 @@ IF(ISEG_BUILD_TESTING)
 	FILE(GLOB HEADERS *.h)
 	SET(SOURCES
 		test_DataMain.cpp
-	
+
+		test_Brush.cpp
 		test_iSegImageAdaptor.cpp
 		test_Transform.cpp
 	)
