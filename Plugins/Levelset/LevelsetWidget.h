@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Data/SlicesHandlerInterface.h"
+
 #include "Interface/WidgetInterface.h"
 
 #include <qcheckbox.h>

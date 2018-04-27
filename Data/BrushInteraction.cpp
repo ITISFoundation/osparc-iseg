@@ -25,8 +25,8 @@ void BrushInteraction::on_mouse_clicked(Point p)
 	begin_datachange(dataSelection);
 
 	_last_pt = p;
-	float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
-	brush(target, _width, _height, _dx, _dy, p, _radius, true, 255.0f, 0.0f, [](float v) { return false; });
+	float* target = slice();
+	brush(target, _width, _height, _dx, _dy, p, _radius, true, _new_value, _old_value, [](float v) { return false; });
 
 	end_datachange(iseg::NoUndo);
 }
@@ -37,10 +37,10 @@ void BrushInteraction::on_mouse_moved(Point p)
 	addLine(&vps, _last_pt, p);
 	_last_pt = p;
 
-	float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
+	float* target = slice();
 	for (auto pi : vps)
 	{
-		brush(target, _width, _height, _dx, _dy, pi, _radius, true, 255.0f, 0.0f, [](float v) { return false; });
+		brush(target, _width, _height, _dx, _dy, pi, _radius, true, _new_value, _old_value, [](float v) { return false; });
 	}
 
 	end_datachange(iseg::NoUndo);
@@ -51,10 +51,10 @@ void BrushInteraction::on_mouse_released(Point p)
 	std::vector<Point> vps;
 	addLine(&vps, _last_pt, p);
 
-	float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
+	float* target = slice();
 	for (auto pi : vps)
 	{
-		brush(target, _width, _height, _dx, _dy, pi, _radius, true, 255.0f, 0.0f, [](float v) { return false; });
+		brush(target, _width, _height, _dx, _dy, pi, _radius, true, _new_value, _old_value, [](float v) { return false; });
 	}
 
 	end_datachange(iseg::EndUndo);
