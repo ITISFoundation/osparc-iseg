@@ -15486,24 +15486,21 @@ template<typename T, typename F>
 void bmphandler::_brush(T* data, T f, Point p, float const radius, float dx,
 		float dy, bool draw, T f1, F is_locked)
 {
-	float const radius_corrected = dx > dy ? std::ceil(radius / dx + 0.5f) * dx
-																				 : std::ceil(radius / dy + 0.5f) * dy;
+	float const radius_corrected = dx > dy 
+		? std::floor(radius / dx + 0.5f) * dx
+		: std::floor(radius / dy + 0.5f) * dy;
 
 	int const xradius = std::ceil(radius_corrected / dx);
 	int const yradius = std::ceil(radius_corrected / dy);
-	for (int x = max(0, p.px - xradius);
-			 x <= min(static_cast<int>(width) - 1, p.px + xradius); x++)
+	for (int x = max(0, p.px - xradius); x <= min(static_cast<int>(width) - 1, p.px + xradius); x++)
 	{
-		for (int y = max(0, p.py - yradius);
-				 y <= min(static_cast<int>(height) - 1, p.py + yradius); y++)
+		for (int y = max(0, p.py - yradius); y <= min(static_cast<int>(height) - 1, p.py + yradius); y++)
 		{
 			// don't modify locked pixels
 			if (is_locked(data[y * unsigned(width) + x]))
 				continue;
 
-			if (std::pow(dx * (p.px - x), 2.f) +
-							std::pow(dy * (p.py - y), 2.f) <=
-					radius_corrected * radius_corrected)
+			if (std::pow(dx * (p.px - x), 2.f) + std::pow(dy * (p.py - y), 2.f) <= radius_corrected * radius_corrected)
 			{
 				if (draw)
 				{

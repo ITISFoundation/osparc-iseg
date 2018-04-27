@@ -327,8 +327,8 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 		float const radius = mm_radius->text().toFloat();
 		float const radius_corrected =
 				spacing[0] > spacing[1]
-						? std::ceil(radius / spacing[0] + 0.5f) * spacing[0]
-						: std::ceil(radius / spacing[1] + 0.5f) * spacing[1];
+						? std::floor(radius / spacing[0] + 0.5f) * spacing[0]
+						: std::floor(radius / spacing[1] + 0.5f) * spacing[1];
 
 		int const xradius = std::ceil(radius_corrected / spacing[0]);
 		int const yradius = std::ceil(radius_corrected / spacing[1]);
@@ -412,16 +412,14 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 			}
 			else
 			{
-				if (bmphand->tissues_pt(handler3D->active_tissuelayer(),
-								p) == tissuenr)
+				if (bmphand->tissues_pt(handler3D->active_tissuelayer(), p) == tissuenr)
 				{
 					draw = true;
 				}
 				else
 				{
 					draw = false;
-					tissuenrnew = bmphand->tissues_pt(
-							handler3D->active_tissuelayer(), p);
+					tissuenrnew = bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
 				}
 			}
 		}
@@ -432,12 +430,10 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		else
 		{
 			draw = false;
-			if (bmphand->tissues_pt(handler3D->active_tissuelayer(), p) ==
-					tissuenr)
+			if (bmphand->tissues_pt(handler3D->active_tissuelayer(), p) == tissuenr)
 				tissuenrnew = 0;
 			else
-				tissuenrnew =
-						bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
+				tissuenrnew = bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
 		}
 
 		emit begin_datachange(dataSelection, this);
@@ -449,8 +445,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 				f = -5000; // \hack by SK, remove
 
 			if (mm->isOn())
-				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0],
-						spacing[1], draw);
+				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw);
 			else
 				bmphand->brush(f, p, sb_radius->value(), draw);
 		}
@@ -458,12 +453,9 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		{
 			auto idx = handler3D->active_tissuelayer();
 			if (mm->isOn())
-				bmphand->brushtissue(idx, tissuenr, p,
-						mm_radius->text().toFloat(), spacing[0],
-						spacing[1], draw, tissuenrnew);
+				bmphand->brushtissue(idx, tissuenr, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw, tissuenrnew);
 			else
-				bmphand->brushtissue(idx, tissuenr, p, sb_radius->value(), draw,
-						tissuenrnew);
+				bmphand->brushtissue(idx, tissuenr, p, sb_radius->value(), draw, tissuenrnew);
 		}
 		emit end_datachange(this, iseg::NoUndo);
 
@@ -1143,9 +1135,7 @@ void OutlineCorrectionWidget::on_slicenr_changed()
 void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
-
 	spacing = handler3D->spacing();
-
 	workbits_changed();
 }
 
@@ -1234,6 +1224,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
 		sb_radius->setValue(dummy);
+		mm_radius->setText(QString(dummy));
 		fread(&dummy, sizeof(int), 1, fp);
 		sb_holesize->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
