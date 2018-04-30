@@ -5593,8 +5593,15 @@ void MainWindow::select_tissue(Point p)
 	{
 		(*i)->setSelected(false);
 	}
-	tissueTreeWidget->set_current_tissue(
-			handler3D->get_tissue_pt(p, handler3D->active_slice()));
+	
+	// remove filter if it is preventing tissue from being shown
+	auto type = handler3D->get_tissue_pt(p, handler3D->active_slice());
+	if (!tissueTreeWidget->is_visible(type))
+	{
+		tissueFilter->setText(QString(""));
+	}
+	// now select the tissue
+	tissueTreeWidget->set_current_tissue(type);
 }
 
 void MainWindow::next_featuring_slice()

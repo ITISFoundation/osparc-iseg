@@ -299,6 +299,7 @@ public:
 	void initialize();
 
 	void set_tissue_filter(const QString& filter);
+	bool is_visible(tissues_size_t type) const;
 	void update_visibility();
 	void update_visibility_recursive(QTreeWidgetItem* item);
 
@@ -319,30 +320,27 @@ public:
 	// Current item
 	void set_current_item(QTreeWidgetItem* item);
 	void set_current_tissue(tissues_size_t type);
-	bool get_current_is_folder();
-	tissues_size_t get_current_type();
-	QString get_current_name();
-	bool get_current_has_children();
-	void get_current_child_tissues(
-			std::map<tissues_size_t, unsigned short>& types);
+	bool get_current_is_folder() const;
+	tissues_size_t get_current_type() const;
+	QString get_current_name() const;
+	bool get_current_has_children() const;
+	void get_current_child_tissues(std::map<tissues_size_t, unsigned short>& types) const;
 
 	// Hierarchy
-	void
-			update_tree_widget(); // Updates QTreeWidget from internal representation
+	void update_tree_widget(); // Updates QTreeWidget from internal representation
 	void update_hierarchy();	// Updates internal representation from QTreeWidget
-	unsigned short get_selected_hierarchy();
-	unsigned short get_hierarchy_count();
-	std::vector<QString>* get_hierarchy_names_ptr();
-	QString get_current_hierarchy_name();
+	unsigned short get_selected_hierarchy() const;
+	unsigned short get_hierarchy_count() const;
+	std::vector<QString>* get_hierarchy_names_ptr() const;
+	QString get_current_hierarchy_name() const;
 	void reset_default_hierarchy();
 	void set_hierarchy(unsigned short index);
 	void add_new_hierarchy(const QString& name);
 	void remove_current_hierarchy();
-	bool get_hierarchy_modified();
+	bool get_hierarchy_modified() const;
 	void set_hierarchy_modified(bool val);
-	unsigned short get_tissue_instance_count(tissues_size_t type);
-	void get_sublevel_child_tissues(
-			std::map<tissues_size_t, unsigned short>& types);
+	unsigned short get_tissue_instance_count(tissues_size_t type) const;
+	void get_sublevel_child_tissues(std::map<tissues_size_t, unsigned short>& types) const;
 
 	// File IO
 	FILE* SaveParams(FILE* fp, int version);
@@ -351,16 +349,16 @@ public:
 	bool save_hierarchy_as(const QString& name, const QString& path);
 
 	// Display
-	bool get_tissue_indices_hidden();
+	bool get_tissue_indices_hidden() const;
 
-	QList<QTreeWidgetItem*> get_all_items();
+	QList<QTreeWidgetItem*> get_all_items() const;
 
 public slots:
 	void toggle_show_tissue_indices();
 	void sort_by_tissue_name();
 	void sort_by_tissue_index();
-	tissues_size_t get_type(QTreeWidgetItem* item);
-	QString get_name(QTreeWidgetItem* item);
+	tissues_size_t get_type(QTreeWidgetItem* item) const;
+	QString get_name(QTreeWidgetItem* item) const;
 
 protected:
 	// Drag & drop
@@ -368,45 +366,30 @@ protected:
 
 private:
 	void resize_columns_to_contents();
-	bool get_is_folder(QTreeWidgetItem* item);
+	bool get_is_folder(QTreeWidgetItem* item) const;
 
-	QTreeWidgetItem* find_tissue_item(tissues_size_t type,
-			QTreeWidgetItem* parent = 0);
-	void take_children_recursively(QTreeWidgetItem* parent,
-			QList<QTreeWidgetItem*>& appendTo);
-	void get_child_tissues_recursively(
-			QTreeWidgetItem* parent,
-			std::map<tissues_size_t, unsigned short>& types);
-	unsigned short
-			get_tissue_instance_count_recursively(QTreeWidgetItem* parent,
-					tissues_size_t type);
-	void insert_item(bool isFolder, const QString& name,
-			QTreeWidgetItem* insertAbove);
-	void insert_item(bool isFolder, const QString& name,
-			QTreeWidgetItem* parent, unsigned int index);
-	void remove_tissue_recursively(QTreeWidgetItem* parent,
-			const QString& name);
-	void update_tissue_name_widget(const QString& oldName,
-			const QString& newName,
-			QTreeWidgetItem* parent = 0);
+	QTreeWidgetItem* find_tissue_item(tissues_size_t type, QTreeWidgetItem* parent = 0) const;
+	void take_children_recursively(QTreeWidgetItem* parent, QList<QTreeWidgetItem*>& appendTo);
+	void get_child_tissues_recursively(QTreeWidgetItem* parent, std::map<tissues_size_t, unsigned short>& types) const;
+	unsigned short get_tissue_instance_count_recursively(QTreeWidgetItem* parent, tissues_size_t type) const;
+	void insert_item(bool isFolder, const QString& name, QTreeWidgetItem* insertAbove);
+	void insert_item(bool isFolder, const QString& name, QTreeWidgetItem* parent, unsigned int index);
+	void remove_tissue_recursively(QTreeWidgetItem* parent, const QString& name);
+	void update_tissue_name_widget(const QString& oldName, const QString& newName, QTreeWidgetItem* parent = 0);
 	short get_child_lockstates(QTreeWidgetItem* folder);
 	void pad_tissue_indices();
-	void pad_tissue_indices_recursively(QTreeWidgetItem* parent,
-			unsigned short digits);
+	void pad_tissue_indices_recursively(QTreeWidgetItem* parent, unsigned short digits);
 	void update_tissue_indices();
 	void update_tissue_indices_recursively(QTreeWidgetItem* parent);
 
 	// Convert QTreeWidget to internal representation
 	TissueHierarchyItem* create_current_hierarchy();
-	void create_hierarchy_recursively(QTreeWidgetItem* parentIn,
-			TissueHierarchyItem* parentOut);
+	void create_hierarchy_recursively(QTreeWidgetItem* parentIn, TissueHierarchyItem* parentOut);
 	TissueHierarchyItem* create_hierarchy_item(QTreeWidgetItem* item);
 
 	// Convert internal representation to QTreeWidget
 	void build_tree_widget(TissueHierarchyItem* root);
-	void build_tree_widget_recursively(TissueHierarchyItem* parentIn,
-			QTreeWidgetItem* parentOut,
-			std::set<tissues_size_t>* tissueTypes);
+	void build_tree_widget_recursively(TissueHierarchyItem* parentIn, QTreeWidgetItem* parentOut, std::set<tissues_size_t>* tissueTypes);
 	QTreeWidgetItem* create_hierarchy_item(bool isFolder, const QString& name);
 
 	// SaveParams

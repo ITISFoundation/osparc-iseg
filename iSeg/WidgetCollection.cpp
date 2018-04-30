@@ -678,6 +678,18 @@ void TissueTreeWidget::set_tissue_filter(const QString &filter)
 	}
 }
 
+bool TissueTreeWidget::is_visible(tissues_size_t type) const
+{
+	if (type > 0)
+	{
+		if (auto item = find_tissue_item(type))
+		{
+			return !item->isHidden();
+		}
+	}
+	return false;
+}
+
 void TissueTreeWidget::update_visibility()
 {
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
@@ -689,8 +701,7 @@ void TissueTreeWidget::update_visibility()
 void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem *current)
 {
 	// setHidden hides/shows recursively
-	bool const matches =
-			SearchFilter(get_name(current).toStdString(), tissue_filter);
+	bool const matches = SearchFilter(get_name(current).toStdString(), tissue_filter);
 	bool const is_folder = get_is_folder(current);
 	if (matches || !is_folder)
 	{
@@ -1449,16 +1460,14 @@ void TissueTreeWidget::set_current_tissue(tissues_size_t type)
 	}
 }
 
-QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type,
-		QTreeWidgetItem *parent)
+QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type, QTreeWidgetItem *parent) const
 {
 	if (parent == 0)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			QTreeWidgetItem *recursiveRes =
-					find_tissue_item(type, topLevelItem(i));
+			QTreeWidgetItem *recursiveRes = find_tissue_item(type, topLevelItem(i));
 			if (recursiveRes != 0)
 			{
 				return recursiveRes;
@@ -1475,8 +1484,7 @@ QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type,
 		// Recursion with children
 		for (int i = 0; i < parent->childCount(); ++i)
 		{
-			QTreeWidgetItem *recursiveRes =
-					find_tissue_item(type, parent->child(i));
+			QTreeWidgetItem *recursiveRes = find_tissue_item(type, parent->child(i));
 			if (recursiveRes != 0)
 			{
 				return recursiveRes;
@@ -1486,19 +1494,19 @@ QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type,
 	return (QTreeWidgetItem *)0;
 }
 
-tissues_size_t TissueTreeWidget::get_current_type()
+tissues_size_t TissueTreeWidget::get_current_type() const
 {
 	return get_type(currentItem());
 }
 
-QString TissueTreeWidget::get_current_name() { return get_name(currentItem()); }
+QString TissueTreeWidget::get_current_name() const { return get_name(currentItem()); }
 
-bool TissueTreeWidget::get_current_is_folder()
+bool TissueTreeWidget::get_current_is_folder() const
 {
 	return get_is_folder(currentItem());
 }
 
-bool TissueTreeWidget::get_is_folder(QTreeWidgetItem *item)
+bool TissueTreeWidget::get_is_folder(QTreeWidgetItem *item) const
 {
 	if (item)
 	{
@@ -1507,7 +1515,7 @@ bool TissueTreeWidget::get_is_folder(QTreeWidgetItem *item)
 	return true;
 }
 
-tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem *item)
+tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem *item) const
 {
 	if (item && !get_is_folder(item))
 	{
@@ -1517,7 +1525,7 @@ tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem *item)
 	return 0;
 }
 
-QString TissueTreeWidget::get_name(QTreeWidgetItem *item)
+QString TissueTreeWidget::get_name(QTreeWidgetItem *item) const
 {
 	if (item)
 	{
@@ -1526,7 +1534,7 @@ QString TissueTreeWidget::get_name(QTreeWidgetItem *item)
 	return "";
 }
 
-bool TissueTreeWidget::get_current_has_children()
+bool TissueTreeWidget::get_current_has_children() const
 {
 	if (currentItem() == 0)
 	{
@@ -1538,8 +1546,7 @@ bool TissueTreeWidget::get_current_has_children()
 	}
 }
 
-void TissueTreeWidget::get_current_child_tissues(
-		std::map<tissues_size_t, unsigned short> &types)
+void TissueTreeWidget::get_current_child_tissues(std::map<tissues_size_t, unsigned short> &types) const
 {
 	types.clear();
 	if (currentItem() != 0)
@@ -1548,8 +1555,7 @@ void TissueTreeWidget::get_current_child_tissues(
 	}
 }
 
-void TissueTreeWidget::get_sublevel_child_tissues(
-		std::map<tissues_size_t, unsigned short> &types)
+void TissueTreeWidget::get_sublevel_child_tissues(std::map<tissues_size_t, unsigned short> &types) const
 {
 	types.clear();
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
@@ -1562,8 +1568,7 @@ void TissueTreeWidget::get_sublevel_child_tissues(
 	}
 }
 
-void TissueTreeWidget::get_child_tissues_recursively(
-		QTreeWidgetItem *parent, std::map<tissues_size_t, unsigned short> &types)
+void TissueTreeWidget::get_child_tissues_recursively(QTreeWidgetItem *parent, std::map<tissues_size_t, unsigned short> &types) const
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
@@ -1590,22 +1595,22 @@ void TissueTreeWidget::get_child_tissues_recursively(
 	}
 }
 
-unsigned short TissueTreeWidget::get_selected_hierarchy()
+unsigned short TissueTreeWidget::get_selected_hierarchy() const
 {
 	return hierarchies->get_selected_hierarchy();
 }
 
-unsigned short TissueTreeWidget::get_hierarchy_count()
+unsigned short TissueTreeWidget::get_hierarchy_count() const
 {
 	return hierarchies->get_hierarchy_count();
 }
 
-std::vector<QString> *TissueTreeWidget::get_hierarchy_names_ptr()
+std::vector<QString> *TissueTreeWidget::get_hierarchy_names_ptr() const
 {
 	return hierarchies->get_hierarchy_names_ptr();
 }
 
-QString TissueTreeWidget::get_current_hierarchy_name()
+QString TissueTreeWidget::get_current_hierarchy_name() const
 {
 	return hierarchies->get_current_hierarchy_name();
 }
@@ -1853,7 +1858,7 @@ void TissueTreeWidget::sort_by_tissue_index()
 	update_hierarchy();
 }
 
-bool TissueTreeWidget::get_tissue_indices_hidden()
+bool TissueTreeWidget::get_tissue_indices_hidden() const
 {
 	return isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE);
 }
@@ -1877,7 +1882,7 @@ QList<QTreeWidgetItem *> get_my_children(QTreeWidgetItem *item)
 	return my_children;
 }
 
-QList<QTreeWidgetItem *> TissueTreeWidget::get_all_items()
+QList<QTreeWidgetItem *> TissueTreeWidget::get_all_items() const
 {
 	QList<QTreeWidgetItem *> all_items;
 	all_items.append(get_my_children(invisibleRootItem()));
@@ -1898,11 +1903,11 @@ void TissueTreeWidget::resize_columns_to_contents(QTreeWidgetItem *item)
 	resize_columns_to_contents();
 }
 
-bool TissueTreeWidget::get_hierarchy_modified() { return modified; }
+bool TissueTreeWidget::get_hierarchy_modified() const { return modified; }
 
 void TissueTreeWidget::set_hierarchy_modified(bool val) { modified = val; }
 
-unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type)
+unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type) const
 {
 	// Get number of items in tissue tree corresponding to the same tissue type
 	unsigned short res = 0;
@@ -1922,7 +1927,7 @@ unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type)
 }
 
 unsigned short TissueTreeWidget::get_tissue_instance_count_recursively(
-		QTreeWidgetItem *parent, tissues_size_t type)
+		QTreeWidgetItem *parent, tissues_size_t type) const
 {
 	unsigned short res = 0;
 	for (unsigned int i = 0; i < parent->childCount(); ++i)

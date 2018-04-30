@@ -77,15 +77,11 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	connect(clearmarks, SIGNAL(activated()), this, SLOT(clear_marks()));
 	connect(removemark, SIGNAL(activated()), this, SLOT(remove_mark()));
 	connect(addtissue, SIGNAL(activated()), this, SLOT(add_tissue()));
-	connect(addtissueconnected, SIGNAL(activated()), this,
-			SLOT(add_tissue_connected()));
+	connect(addtissueconnected, SIGNAL(activated()), this, SLOT(add_tissue_connected()));
 	connect(subtissue, SIGNAL(activated()), this, SLOT(sub_tissue()));
 	connect(addtissue3D, SIGNAL(activated()), this, SLOT(add_tissue_3D()));
-	connect(addtissuelarger, SIGNAL(activated()), this,
-			SLOT(add_tissuelarger()));
+	connect(addtissuelarger, SIGNAL(activated()), this, SLOT(add_tissuelarger()));
 	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
-
-	return;
 }
 
 ImageViewerWidget::~ImageViewerWidget()
