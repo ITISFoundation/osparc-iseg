@@ -13,4 +13,6 @@ IF(ISEG_BUILD_TESTING)
 	ADD_EXECUTABLE(TestRunner TestRunner.cpp)
 	TARGET_LINK_LIBRARIES(TestRunner ${MY_EXTERNAL_LINK_LIBRARIES})
 	VS_SET_PROPERTY(TestRunner "TestSuite")
+
+	ADD_TEST(NAME TestSuite COMMAND TestRunner --log_level=message)
 ENDIF()
