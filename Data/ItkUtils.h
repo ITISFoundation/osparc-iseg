@@ -69,7 +69,7 @@ bool Paste(TInputImage* source, TOutputImage* destination)
 }
 
 template<class TInputImage, class TOutputImage>
-bool Paste(TInputImage* source, TOutputImage* destination, typename const TInputImage::RegionType& region)
+bool Paste(TInputImage* source, TOutputImage* destination, const typename TInputImage::RegionType& region)
 {
 	using OutputPixel = typename TOutputImage::PixelType;
 

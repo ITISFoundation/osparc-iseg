@@ -33,7 +33,7 @@ public:
 	ValueType m_AngleWeight = 1;
 	ValueType m_LengthWeight = 1;
 
-	void Initialize(typename ImageType::ConstPointer image, typename ImageType::IndexType start, typename ImageType::IndexType end)
+	void Initialize(const ImageType* image, typename ImageType::IndexType start, typename ImageType::IndexType end)
 	{
 		m_Image = image;
 		m_Spacing = m_Image->GetSpacing();
@@ -41,7 +41,7 @@ public:
 		m_EndValue = m_Image->GetPixel(end);
 	}
 
-	ValueType GetEdgeWeight(typename const ImageType::IndexType& i, typename const ImageType::IndexType& j, typename const ImageType::IndexType& iprev) const
+	ValueType GetEdgeWeight(const typename ImageType::IndexType& i, const typename ImageType::IndexType& j, const typename ImageType::IndexType& iprev) const
 	{
 		auto value_i = this->m_Image->GetPixel(i);
 		auto value_j = this->m_Image->GetPixel(j);

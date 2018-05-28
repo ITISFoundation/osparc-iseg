@@ -43,10 +43,8 @@ BOOST_AUTO_TEST_CASE(DijkstraMetric_test)
 		img->SetRegions(region);
 		img->Allocate();
 
-		image_type::ConstPointer const_img = img;
-
 		metric_type m;
-		m.Initialize(const_img, iprev, j);
+		m.Initialize(img, iprev, j);
 
 		BOOST_CHECK_CLOSE(3 * 0 + 1.0 + 0.0, m.GetEdgeWeight(i, j, iprev), 1e-3);
 	}

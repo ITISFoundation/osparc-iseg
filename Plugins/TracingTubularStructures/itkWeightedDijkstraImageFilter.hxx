@@ -51,7 +51,7 @@ void WeightedDijkstraImageFilter<TInputImageType, TMetric>::
 
 	auto ijk2index = [&](const typename ImageType::IndexType& ijk) {
 		typename ImageType::OffsetValueType offset = 0;
-		ImageHelper<InputImageDimension, InputImageDimension>::ComputeOffset(m_Region.GetIndex(), ijk, offset_table, offset);
+		ImageHelper<3, 3>::ComputeOffset(m_Region.GetIndex(), ijk, offset_table, offset);
 		return offset;
 	};
 
@@ -63,7 +63,7 @@ void WeightedDijkstraImageFilter<TInputImageType, TMetric>::
 	dummy_img->SetLargestPossibleRegion(image->GetLargestPossibleRegion());
 	dummy_img->SetBufferedRegion(m_Region);
 
-	neighborhood_iterator_type::RadiusType radius;
+	typename neighborhood_iterator_type::RadiusType radius;
 	radius.Fill(1);
 	neighborhood_iterator_type nit(radius, dummy_img, m_Region);
 
