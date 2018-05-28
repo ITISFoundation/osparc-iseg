@@ -120,7 +120,8 @@ void ImageViewerWidget::set_zoom(double z)
 {
 	if (z != zoom)
 	{
-		QPoint oldCenter = visibleRegion().boundingRect().center();
+		//QPoint oldCenter = visibleRegion().boundingRect().center();
+		QPoint oldCenter = rect().center();
 		QPoint newCenter;
 		if (mousePosZoom.x() == 0 && mousePosZoom.y() == 0)
 		{
@@ -128,14 +129,12 @@ void ImageViewerWidget::set_zoom(double z)
 		}
 		else
 		{
-			QPoint oldDiff;
-			oldDiff = mousePosZoom - oldCenter;
-			newCenter = z * oldDiff / zoom + mousePosZoom;
+			newCenter = zoom * (oldCenter + z * mousePosZoom / zoom - mousePosZoom) / z;
 		}
 
 		zoom = z;
-		int w = static_cast<int>(width) * zoom * pixelsize.high;
-		int h = static_cast<int>(height) * zoom * pixelsize.low;
+		int const w = static_cast<int>(width) * zoom * pixelsize.high;
+		int const h = static_cast<int>(height) * zoom * pixelsize.low;
 		setFixedSize(w, h);
 		if (mousePosZoom.x() != 0 && mousePosZoom.y() != 0)
 		{
