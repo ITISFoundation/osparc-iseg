@@ -98,8 +98,7 @@ ImageViewerWidget::~ImageViewerWidget()
 	delete selecttissue;
 }
 
-void ImageViewerWidget::mode_changed(unsigned char newmode,
-		bool updatescale)
+void ImageViewerWidget::mode_changed(unsigned char newmode, bool updatescale)
 {
 	if (newmode != 0 && mode != newmode)
 	{
@@ -111,8 +110,7 @@ void ImageViewerWidget::mode_changed(unsigned char newmode,
 	}
 }
 
-void ImageViewerWidget::get_scaleoffsetfactor(float& offset1,
-		float& factor1)
+void ImageViewerWidget::get_scaleoffsetfactor(float& offset1, float& factor1)
 {
 	offset1 = scaleoffset;
 	factor1 = scalefactor;
@@ -123,25 +121,26 @@ void ImageViewerWidget::set_zoom(double z)
 	if (z != zoom)
 	{
 		QPoint oldCenter = visibleRegion().boundingRect().center();
-
 		QPoint newCenter;
 		if (mousePosZoom.x() == 0 && mousePosZoom.y() == 0)
-			newCenter =
-					QPoint(z * oldCenter.x() / zoom, z * oldCenter.y() / zoom);
+		{
+			newCenter = z * oldCenter / zoom;
+		}
 		else
 		{
 			QPoint oldDiff;
-			oldDiff = oldCenter - mousePosZoom;
-			newCenter = z * mousePosZoom / zoom + oldDiff;
+			oldDiff = mousePosZoom - oldCenter;
+			newCenter = z * oldDiff / zoom + mousePosZoom;
 		}
 
 		zoom = z;
-		int w = (int)width * (zoom * pixelsize.high);
-		int h = (int)height * (zoom * pixelsize.low);
+		int w = static_cast<int>(width) * zoom * pixelsize.high;
+		int h = static_cast<int>(height) * zoom * pixelsize.low;
 		setFixedSize(w, h);
 		if (mousePosZoom.x() != 0 && mousePosZoom.y() != 0)
-			//if( isBmp )
+		{
 			emit setcenter_sign(newCenter.x(), newCenter.y());
+		}
 	}
 }
 
