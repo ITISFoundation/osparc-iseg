@@ -130,7 +130,7 @@ protected:
   /** PrintSelf routine. Normally this is a protected internal method. It is
    * made public here so that Image can call this method.  Users should not
    * call this method but should call Print() instead. */
-  void PrintSelf(std::ostream& os, Indent indent) const;
+  void PrintSelf(std::ostream& os, Indent indent) const ITK_OVERRIDE;
 
   virtual SliceArrayType AllocateSlices(ElementIdentifier numberOfSlices,
                                         ElementIdentifier sizeOfSlice) const;

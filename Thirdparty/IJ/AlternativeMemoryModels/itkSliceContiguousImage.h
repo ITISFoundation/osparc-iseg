@@ -155,7 +155,7 @@ public:
 
   /** Restore the data object to its initial state. This means releasing
    * memory. */
-  virtual void Initialize();
+  virtual void Initialize() ITK_OVERRIDE;
 
   OffsetValueType ComputeOffset(const IndexType &ind) const
   {
@@ -269,7 +269,7 @@ public:
    * simply calls CopyInformation() and copies the region ivars.
    * The implementation here refers to the superclass' implementation
    * and then copies over the pixel container. */
-  virtual void Graft(const DataObject *data);
+  virtual void Graft(const DataObject *data) ITK_OVERRIDE;
   
   /** Return the Pixel Accessor object */
   AccessorType GetPixelAccessor( void ) 
@@ -310,7 +310,7 @@ public:
 
 protected:
   SliceContiguousImage();
-  void PrintSelf( std::ostream& os, Indent indent ) const;
+  void PrintSelf( std::ostream& os, Indent indent ) const ITK_OVERRIDE;
   virtual ~SliceContiguousImage() {};
   
 private:
