@@ -13,10 +13,13 @@
 
 #include "Interface/WidgetInterface.h"
 
+#include <itkImageBase.h>
+
 #include <vector>
 
 class QCheckBox;
 class QLineEdit;
+class QComboBox;
 class QPushButton;
 
 namespace itk {
@@ -61,10 +64,15 @@ private:
 
 	void update_points();
 
+	template<class TSpeedImage>
+	void do_work_template(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
+
 	iseg::SliceHandlerInterface* _handler;
 	unsigned short _active_slice;
 	std::vector<iseg::Point3D> _points;
 
+	QWidget* _main_options;
+	QComboBox* _metric;
 	QLineEdit* _intensity_weight;
 	QLineEdit* _angle_weight;
 	QLineEdit* _line_radius;
@@ -72,7 +80,12 @@ private:
 	QPushButton* _clear_points;
 	QPushButton* _execute_button;
 
+	QWidget* _vesselness_options;
+	QLineEdit* _sigma;
+	QCheckBox* _dark_objects;
+
 private slots:
 	void do_work();
 	void clear_points();
+	void on_metric_changed();
 };
