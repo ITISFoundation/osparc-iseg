@@ -13,7 +13,7 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <itkImageBase.h>
+#include <itkImage.h>
 
 #include <vector>
 
@@ -64,6 +64,8 @@ private:
 
 	void update_points();
 
+	itk::Image<float, 3>::Pointer compute_hessian(const itk::ImageBase<3>::RegionType& requested_region);
+
 	template<class TSpeedImage>
 	void do_work_template(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
 
@@ -73,11 +75,14 @@ private:
 
 	QWidget* _main_options;
 	QComboBox* _metric;
+	QLineEdit* _intensity_value;
 	QLineEdit* _intensity_weight;
 	QLineEdit* _angle_weight;
 	QLineEdit* _line_radius;
 	QLineEdit* _active_region_padding;
+	QCheckBox* _use_distance_for_radius;
 	QPushButton* _clear_points;
+	QPushButton* _estimate_intensity;
 	QPushButton* _execute_button;
 
 	QWidget* _vesselness_options;
@@ -87,5 +92,6 @@ private:
 private slots:
 	void do_work();
 	void clear_points();
+	void estimate_intensity();
 	void on_metric_changed();
 };

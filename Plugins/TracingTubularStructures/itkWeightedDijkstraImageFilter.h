@@ -39,6 +39,8 @@ public:
 		m_Spacing = m_Image->GetSpacing();
 		m_StartValue = m_Image->GetPixel(start);
 		m_EndValue = m_Image->GetPixel(end);
+
+		std::cerr << "Metric is using start/end intensities: " << m_StartValue << "/" << m_EndValue << "\n";
 	}
 
 	ValueType GetEdgeWeight(const typename ImageType::IndexType& i, const typename ImageType::IndexType& j, const typename ImageType::IndexType& iprev) const
