@@ -202,7 +202,15 @@ bool LoadPlugins(const std::string& directory_path)
 				if (algo::iends_with(module_file_s, ".ext.so"))
 #endif
 				{
-					ok = ok && LoadPlugin(module_file_s);
+					try
+					{
+						ok = LoadPlugin(module_file_s) && ok;
+					}
+					catch (std::exception& e)
+					{
+						std::cerr << "Unable to load plugin: " << e.what() << std::endl;
+						ok = false;
+					}
 				}
 			}
 		}
