@@ -90,7 +90,7 @@ bool Paste(TInputImage* source, TOutputImage* destination, const typename TInput
 template<class T>
 void dump_image(T* img, const std::string& file_name)
 {
-#if 0
+#ifdef ENABLE_DUMP_IMAGE
 	auto writer = itk::ImageFileWriter<T>::New();
 	writer->SetInput(img);
 	writer->SetFileName(file_name);

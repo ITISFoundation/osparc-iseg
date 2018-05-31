@@ -21,6 +21,7 @@ class QCheckBox;
 class QLineEdit;
 class QComboBox;
 class QPushButton;
+class QStackedWidget;
 
 namespace itk {
 class ProcessObject;
@@ -56,21 +57,26 @@ public:
 
 private:
 	void on_slicenr_changed() override;
-	void on_mouse_clicked(iseg::Point p) override;
 	void on_mouse_released(iseg::Point p) override;
-	void on_mouse_moved(iseg::Point p) override;
-
-	void keyReleaseEvent(QKeyEvent* key) override;
 
 	void update_points();
 
-	itk::Image<float, 3>::Pointer compute_hessian(const itk::ImageBase<3>::RegionType& requested_region);
+	enum eMetric {
+		kIntensity = 0,
+		kHessian2D,
+		kHessian3D,
+		kTarget
+	};
+	itk::Image<float, 3>::Pointer compute_vesselness(const itk::ImageBase<3>::RegionType& requested_region) const;
+
+	itk::Image<float, 3>::Pointer compute_blobiness(const itk::ImageBase<3>::RegionType& requested_region) const;
+
+	itk::Image<float, 3>::Pointer compute_object_sdf(const itk::ImageBase<3>::RegionType& requested_region) const;
 
 	template<class TSpeedImage>
 	void do_work_template(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
 
 	iseg::SliceHandlerInterface* _handler;
-	unsigned short _active_slice;
 	std::vector<iseg::Point3D> _points;
 
 	QWidget* _main_options;
@@ -80,14 +86,23 @@ private:
 	QLineEdit* _angle_weight;
 	QLineEdit* _line_radius;
 	QLineEdit* _active_region_padding;
-	QCheckBox* _use_distance_for_radius;
 	QPushButton* _clear_points;
 	QPushButton* _estimate_intensity;
 	QPushButton* _execute_button;
 
+	QWidget* _empty_options;
+
 	QWidget* _vesselness_options;
 	QLineEdit* _sigma;
 	QCheckBox* _dark_objects;
+	QLineEdit* _alpha;
+	QLineEdit* _beta;
+	QLineEdit* _gamma;
+
+	QWidget* _target_options;
+	QLineEdit* _path_file_name;
+
+	QStackedWidget* _options_stack;
 
 private slots:
 	void do_work();

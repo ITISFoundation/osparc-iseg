@@ -24,21 +24,26 @@ template<typename ImageType>
 class MyMetric
 {
 public:
-	typedef typename ImageType::PixelType ValueType;
-	typedef typename ImageType::SpacingValueType SpacingValueType;
-
-	MyMetric() : m_StartValue(0), m_EndValue(0) {}
+	using ValueType = typename ImageType::PixelType;
+	using SpacingValueType = typename ImageType::SpacingValueType;
 
 	ValueType m_IntensityWeight = 1;
 	ValueType m_AngleWeight = 1;
 	ValueType m_LengthWeight = 1;
 
+	bool m_InitIntensity = true;
+	ValueType m_StartValue = 0;
+	ValueType m_EndValue = 0;
+
 	void Initialize(const ImageType* image, typename ImageType::IndexType start, typename ImageType::IndexType end)
 	{
 		m_Image = image;
 		m_Spacing = m_Image->GetSpacing();
-		m_StartValue = m_Image->GetPixel(start);
-		m_EndValue = m_Image->GetPixel(end);
+		if (m_InitIntensity)
+		{
+			m_StartValue = m_Image->GetPixel(start);
+			m_EndValue = m_Image->GetPixel(end);
+		}
 
 		std::cerr << "Metric is using start/end intensities: " << m_StartValue << "/" << m_EndValue << "\n";
 	}
@@ -81,23 +86,22 @@ public:
 private:
 	typename ImageType::SpacingType m_Spacing;
 	typename ImageType::ConstPointer m_Image;
-	ValueType m_StartValue;
-	ValueType m_EndValue;
 };
 
 template<typename TInputImageType, typename TMetric = MyMetric<TInputImageType>>
 class WeightedDijkstraImageFilter : public ImageToPathFilter<TInputImageType, PolyLineParametricPath<3>>
 {
 public:
-	typedef TInputImageType ImageType;
-	typedef PolyLineParametricPath<3> PathType;
-	typedef typename TInputImageType::IndexType IndexType;
-	typedef typename TInputImageType::PixelType PixelType;
+	using ImageType = TInputImageType;
+	using PathType = PolyLineParametricPath<3>;
+	using IndexType = typename TInputImageType::IndexType;
+	using PixelType = typename TInputImageType::PixelType;
+	using RegionType = typename TInputImageType::RegionType;
 
-	typedef WeightedDijkstraImageFilter Self;
-	typedef ImageToPathFilter<ImageType, PathType> Superclass;
-	typedef SmartPointer<Self> Pointer;
-	typedef SmartPointer<const Self> ConstPointer;
+	using Self = WeightedDijkstraImageFilter;
+	using Superclass = ImageToPathFilter<ImageType, PathType>;
+	using Pointer = SmartPointer<Self>;
+	using ConstPointer = SmartPointer<const Self>;
 
 	itkNewMacro(Self);
 	itkTypeMacro(WeightedDijkstraImageFilter, ImageToPathFilter);
@@ -110,7 +114,7 @@ public:
 		m_Region = region;
 	}
 
-	TMetric& GetMetric()
+	TMetric& Metric()
 	{
 		return m_Metric;
 	}
@@ -119,15 +123,14 @@ protected:
 	WeightedDijkstraImageFilter();
 	virtual ~WeightedDijkstraImageFilter() {}
 	void PrintSelf(std::ostream& os, Indent indent) const override;
-
 	void GenerateData() override;
 
 private:
 	ITK_DISALLOW_COPY_AND_ASSIGN(WeightedDijkstraImageFilter);
 
 	TMetric m_Metric;
-	typename TInputImageType::IndexType m_StartIndex, m_EndIndex;
-	typename TInputImageType::RegionType m_Region;
+	IndexType m_StartIndex, m_EndIndex;
+	RegionType m_Region;
 };
 
 } // end of namespace itk

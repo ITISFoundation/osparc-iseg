@@ -12,27 +12,56 @@
 #include "itkWeightedDijkstraImageFilter.h"
 
 #include "Data/BrushInteraction.h"
+#define ENABLE_DUMP_IMAGE
 #include "Data/ItkUtils.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
-#include <itkBinaryDilateImageFilter.h>
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkDanielssonDistanceMapImageFilter.h>
-#include <itkFlatStructuringElement.h>
 #include <itkHessianRecursiveGaussianImageFilter.h>
 #include <itkHessianToObjectnessMeasureImageFilter.h>
-#include <itkRescaleIntensityImageFilter.h>
+#include <itkMinimumMaximumImageCalculator.h>
+#include <itkRegionOfInterestImageFilter.h>
+#include <itkSignedDanielssonDistanceMapImageFilter.h>
+#include <itkSignedMaurerDistanceMapImageFilter.h>
+#include <itkSliceBySliceImageFilter.h>
 
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCompleter>
 #include <QDoubleValidator>
+#include <QFileSystemModel>
 #include <QFormLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QStackedWidget>
+
+#include <boost/format.hpp>
 
 using iseg::Point;
+
+namespace {
+class FileSystemModel : public QFileSystemModel
+{
+public:
+	FileSystemModel(QObject* parent = 0) : QFileSystemModel(parent) {}
+
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+	{
+		if (role == Qt::DisplayRole && index.column() == 0)
+		{
+			QString path = QDir::toNativeSeparators(filePath(index));
+			if (path.endsWith(QDir::separator()))
+				path.chop(1);
+			return path;
+		}
+
+		return QFileSystemModel::data(index, role);
+	}
+};
+} // namespace
 
 TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 		QWidget* parent, const char* name,
@@ -41,75 +70,120 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 {
 	setToolTip(Format("Trace elongated structures"));
 
-	_active_slice = _handler->active_slice();
-
-	_metric = new QComboBox;
-	_metric->insertItem(QString("Intensity"));
-	_metric->insertItem(QString("Vesselness"));
-	_metric->setCurrentIndex(0);
-
-	_intensity_value = new QLineEdit(QString::number(0.0));
-	_intensity_value->setValidator(new QDoubleValidator);
-	_intensity_value->setToolTip(Format("Typical intensity value along path. Call estimate intensity to guess a meaningful value."));
-
-	_intensity_weight = new QLineEdit(QString::number(1.0 / 255.0));
-	_intensity_weight->setValidator(new QDoubleValidator(0, 1e6, 6));
-	_intensity_weight->setToolTip(Format("Weight assigned to intensity differences wrt start/end pixel value."));
-
-	_angle_weight = new QLineEdit(QString::number(1));
-	_angle_weight->setValidator(new QDoubleValidator(0, 1e6, 6));
-	_angle_weight->setToolTip(Format("Penalty weight for non-smooth paths. If values are too large, piece-wise straight paths will be created."));
-
-	_line_radius = new QLineEdit(QString::number(1));
-	_line_radius->setValidator(new QDoubleValidator(0, 100, 4));
-
-	_active_region_padding = new QLineEdit(QString::number(1));
-	_active_region_padding->setValidator(new QIntValidator(0, 1000, _active_region_padding));
-	_active_region_padding->setToolTip(Format("The region for computing the path is defined by the bounding box of the seed points, including a padding."));
-
-	_use_distance_for_radius = new QCheckBox;
-	_use_distance_for_radius->setChecked(true);
-	_use_distance_for_radius->setToolTip(Format("Use distance from path to create tubes with a specific radius."));
-
-	_clear_points = new QPushButton("Clear points");
-
-	_estimate_intensity = new QPushButton("Estimate intensity");
-
-	_execute_button = new QPushButton("Execute");
-
-	auto layout = new QFormLayout();
-	layout->addRow(QString("Metric"), _metric);
-	layout->addRow(QString("Intensity"), _intensity_value);
-	layout->addRow(QString("Intensity weight"), _intensity_weight);
-	layout->addRow(QString("Angle weight"), _angle_weight);
-	layout->addRow(QString("Line radius"), _line_radius);
-	layout->addRow(QString("Use distance"), _use_distance_for_radius);
-	layout->addRow(QString("Region padding"), _active_region_padding);
-	layout->addRow(_clear_points);
-	layout->addRow(_estimate_intensity);
-	layout->addRow(_execute_button);
-
 	_main_options = new QWidget;
-	_main_options->setLayout(layout);
+	{
+		_metric = new QComboBox;
+		_metric->insertItem(kIntensity, QString("Intensity"));
+		_metric->insertItem(kHessian2D, QString("Vesselness 2D"));
+		_metric->insertItem(kHessian3D, QString("Vesselness 3D"));
+		_metric->insertItem(kTarget, QString("Target"));
+		_metric->setCurrentIndex(kHessian2D);
 
-	_sigma = new QLineEdit(QString::number(1.0));
+		_intensity_value = new QLineEdit(QString(""));
+		_intensity_value->setValidator(new QDoubleValidator);
+		_intensity_value->setToolTip(Format("Typical intensity value along path. Call estimate intensity to guess a meaningful value."));
 
-	_dark_objects = new QCheckBox;
-	_dark_objects->setChecked(true);
+		_intensity_weight = new QLineEdit(QString::number(1.0 / 255.0));
+		_intensity_weight->setValidator(new QDoubleValidator(0, 1e6, 6));
+		_intensity_weight->setToolTip(Format("Weight assigned to intensity differences wrt start/end pixel value."));
 
-	auto alayout = new QFormLayout();
-	alayout->addRow(QString("Sigma"), _sigma);
-	alayout->addRow(QString("Dark objects"), _dark_objects);
+		_angle_weight = new QLineEdit(QString::number(1));
+		_angle_weight->setValidator(new QDoubleValidator(0, 1e6, 6));
+		_angle_weight->setToolTip(Format("Penalty weight for non-smooth paths. If values are too large, piece-wise straight paths will be created."));
+
+		_line_radius = new QLineEdit(QString::number(0));
+		_line_radius->setValidator(new QDoubleValidator(0, 100, 4));
+
+		_active_region_padding = new QLineEdit(QString::number(2));
+		_active_region_padding->setValidator(new QIntValidator(0, 1000, _active_region_padding));
+		_active_region_padding->setToolTip(Format("The region for computing the path is defined by the bounding box of the seed points, including a padding."));
+
+		_clear_points = new QPushButton("Clear points");
+
+		_estimate_intensity = new QPushButton("Estimate intensity");
+
+		_execute_button = new QPushButton("Execute");
+
+		auto layout = new QFormLayout();
+		layout->addRow(QString("Metric"), _metric);
+		layout->addRow(QString("Intensity"), _intensity_value);
+		layout->addRow(QString("Intensity weight"), _intensity_weight);
+		layout->addRow(QString("Angle weight"), _angle_weight);
+		layout->addRow(QString("Line radius"), _line_radius);
+		layout->addRow(QString("Region padding"), _active_region_padding);
+		layout->addRow(_clear_points);
+		layout->addRow(_estimate_intensity);
+		layout->addRow(_execute_button);
+
+		_main_options->setLayout(layout);
+	}
 
 	_vesselness_options = new QWidget;
-	_vesselness_options->setLayout(alayout);
+	{
+		_sigma = new QLineEdit(QString::number(1.0));
 
-	auto hlayout = new QHBoxLayout;
-	hlayout->addWidget(_main_options);
-	hlayout->addWidget(_vesselness_options);
+		_dark_objects = new QCheckBox;
+		_dark_objects->setChecked(true);
+		_dark_objects->setToolTip(Format("Enhance dark structures on a bright background if true."));
 
-	setLayout(hlayout);
-	setMinimumWidth(std::max(300, hlayout->sizeHint().width()));
+		_alpha = new QLineEdit(QString::number(0.5));
+		_alpha->setValidator(new QDoubleValidator);
+		_alpha->setToolTip(Format(
+				"Ratio of the smallest eigenvalue that has to be large to the larger ones. "
+				"Smaller values lead to increased sensitivity to the object dimensionality."));
+
+		_beta = new QLineEdit(QString::number(0.5));
+		_beta->setValidator(new QDoubleValidator);
+		_beta->setToolTip(Format(
+				"Ratio of the largest eigenvalue that has to be small to the larger ones. "
+				"Smaller values lead to increased sensitivity to the object dimensionality."));
+
+		_gamma = new QLineEdit(QString::number(5.0));
+		_gamma->setValidator(new QDoubleValidator);
+
+		auto layout = new QFormLayout();
+		layout->addRow(QString("Sigma"), _sigma);
+		layout->addRow(QString("Dark objects"), _dark_objects);
+		layout->addRow(QString("Alpha"), _alpha);
+		layout->addRow(QString("Beta"), _beta);
+		layout->addRow(QString("Gamma"), _gamma);
+
+		_vesselness_options->setLayout(layout);
+	}
+
+	_target_options = new QWidget;
+	{
+		auto completer = new QCompleter(this);
+		completer->setMaxVisibleItems(10);
+
+		FileSystemModel* fsModel = new FileSystemModel(completer);
+		completer->setModel(fsModel);
+		fsModel->setRootPath("");
+
+		_path_file_name = new QLineEdit;
+		_path_file_name->setCompleter(completer);
+		_path_file_name->setToolTip(Format("Points along traced 1D path are saved to this file."));
+
+		auto layout = new QFormLayout();
+		layout->addRow(QString("Path file name"), _path_file_name);
+
+		_target_options->setLayout(layout);
+	}
+
+	_options_stack = new QStackedWidget;
+	_options_stack->addWidget(_empty_options = new QWidget);
+	_options_stack->addWidget(_vesselness_options);
+	_options_stack->addWidget(_target_options);
+
+	auto top_level_layout = new QHBoxLayout;
+	top_level_layout->addWidget(_main_options);
+	top_level_layout->addWidget(_options_stack);
+
+	setLayout(top_level_layout);
+	setMinimumWidth(std::max(300, top_level_layout->sizeHint().width()));
+
+	// update advanced options
+	on_metric_changed();
 
 	QObject::connect(_metric, SIGNAL(currentIndexChanged(int)), this, SLOT(on_metric_changed()));
 	QObject::connect(_clear_points, SIGNAL(clicked()), this, SLOT(clear_points()));
@@ -119,15 +193,24 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 
 void TraceTubesWidget::on_metric_changed()
 {
-	_vesselness_options->setVisible(_metric->currentIndex() != 0);
+	if (_metric->currentIndex() == kIntensity)
+	{
+		_options_stack->setCurrentWidget(_empty_options);
+	}
+	else if (_metric->currentIndex() == kTarget)
+	{
+		_options_stack->setCurrentWidget(_target_options);
+	}
+	else // kHessian2D/kHessian3D
+	{
+		_options_stack->setCurrentWidget(_vesselness_options);
+	}
 
-	//_estimate_intensity->setEnabled(_metric->currentIndex() == 0);
+	_estimate_intensity->setEnabled(_metric->currentIndex() != kTarget);
 }
 
 void TraceTubesWidget::on_slicenr_changed()
 {
-	_active_slice = _handler->active_slice();
-
 	update_points();
 }
 
@@ -136,17 +219,6 @@ void TraceTubesWidget::init()
 	on_slicenr_changed();
 	hideparams_changed();
 	on_metric_changed();
-
-	//if (!_brush)
-	//{
-	//	_brush = new iseg::BrushInteraction(_handler,
-	//			[this](iseg::DataSelection sel) { begin_datachange(sel, this); },
-	//			[this](iseg::EndUndoAction a) { end_datachange(this, a); });
-	//}
-	//else
-	//{
-	//	_brush->init(_handler);
-	//}
 }
 
 void TraceTubesWidget::newloaded()
@@ -169,34 +241,22 @@ QIcon TraceTubesWidget::GetIcon(QDir picdir)
 	return QIcon(picdir.absFilePath(QString("Bias.png")).ascii());
 }
 
-void TraceTubesWidget::on_mouse_clicked(Point p)
-{
-	//_brush->on_mouse_clicked(p);
-}
-
 void TraceTubesWidget::on_mouse_released(Point x)
 {
-	//_brush->on_mouse_released(p);
+	auto active_slice = _handler->active_slice();
+	if (active_slice >= _handler->start_slice() && active_slice < _handler->end_slice())
+	{
+		iseg::Point3D p;
+		p.p = x;
+		p.pz = _handler->active_slice();
+		_points.push_back(p);
 
-	iseg::Point3D p;
-	p.p = x;
-	p.pz = _active_slice;
-	_points.push_back(p);
-
-	update_points();
-}
-
-void TraceTubesWidget::on_mouse_moved(Point p)
-{
-	//_brush->on_mouse_moved(p);
-}
-
-void TraceTubesWidget::keyReleaseEvent(QKeyEvent* key)
-{
-	//if (key->key() == Qt::Key_Enter || key->key() == Qt::Key_Return)
-	//{
-	//	key->accept();
-	//}
+		update_points();
+	}
+	else
+	{
+		std::cerr << "WARNING: no points selected, because slice is not in active slices\n";
+	}
 }
 
 void TraceTubesWidget::update_points()
@@ -204,13 +264,13 @@ void TraceTubesWidget::update_points()
 	std::vector<iseg::Point> vp;
 	for (auto v : _points)
 	{
-		if (v.pz == _active_slice)
+		if (v.pz == _handler->active_slice())
 			vp.push_back(v.p);
 	}
 	emit vpdyn_changed(&vp);
 }
 
-itk::Image<float, 3>::Pointer TraceTubesWidget::compute_hessian(const itk::ImageBase<3>::RegionType& requested_region)
+itk::Image<float, 3>::Pointer TraceTubesWidget::compute_vesselness(const itk::ImageBase<3>::RegionType& requested_region) const
 {
 	using input_type = itk::SliceContiguousImage<float>;
 	using hessian_filter_type = itk::HessianRecursiveGaussianImageFilter<input_type>;
@@ -220,26 +280,107 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_hessian(const itk::Image
 	using objectness_filter_type = itk::HessianToObjectnessMeasureImageFilter<hessian_image_type, image_type>;
 
 	double sigma = _sigma->text().toDouble();
+	double alpha = _alpha->text().toDouble();
+	double beta = _beta->text().toDouble();
+	double gamma = _gamma->text().toDouble();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
 	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
 
-	auto hessianFilter = hessian_filter_type::New();
-	hessianFilter->SetInput(source);
-	hessianFilter->SetSigma(sigma);
+	auto hessian_filter = hessian_filter_type::New();
+	hessian_filter->SetInput(source);
+	hessian_filter->SetSigma(sigma);
 
-	auto objectnessFilter = objectness_filter_type::New();
-	objectnessFilter->SetInput(hessianFilter->GetOutput());
-	objectnessFilter->SetBrightObject(!_dark_objects->isChecked());
-	objectnessFilter->SetObjectDimension(1);
-	objectnessFilter->SetScaleObjectnessMeasure(true);
-	objectnessFilter->SetAlpha(0.5); // default 0.5
-	objectnessFilter->SetBeta(0.5);	// default 0.5
-	objectnessFilter->SetGamma(5.0); // default 5
-	objectnessFilter->GetOutput()->SetRequestedRegion(requested_region);
-	objectnessFilter->Update();
+	auto objectness_filter = objectness_filter_type::New();
+	objectness_filter->SetInput(hessian_filter->GetOutput());
+	objectness_filter->SetBrightObject(!_dark_objects->isChecked());
+	objectness_filter->SetObjectDimension(1);
+	objectness_filter->SetScaleObjectnessMeasure(true);
+	objectness_filter->SetAlpha(alpha);
+	objectness_filter->SetBeta(beta);
+	objectness_filter->SetGamma(gamma);
+	objectness_filter->GetOutput()->SetRequestedRegion(requested_region);
+	objectness_filter->Update();
 
-	return objectnessFilter->GetOutput();
+	return objectness_filter->GetOutput();
+}
+
+itk::Image<float, 3>::Pointer TraceTubesWidget::compute_blobiness(const itk::ImageBase<3>::RegionType& requested_region) const
+{
+	using input_type = itk::SliceContiguousImage<float>;
+	using output_type = itk::Image<float, 3>;
+	using image_type = itk::Image<float, 2>;
+
+	using hessian_filter_type = itk::HessianRecursiveGaussianImageFilter<image_type>;
+	using hessian_pixel_type = itk::SymmetricSecondRankTensor<double, 2>;
+	using hessian_image_type = itk::Image<hessian_pixel_type, 2>;
+
+	using objectness_filter_type = itk::HessianToObjectnessMeasureImageFilter<hessian_image_type, image_type>;
+	using slice_by_slice_filter_type = itk::SliceBySliceImageFilter<input_type, output_type, hessian_filter_type, objectness_filter_type>;
+
+	double sigma = _sigma->text().toDouble();
+	double alpha = _alpha->text().toDouble();
+	double beta = _beta->text().toDouble();
+	double gamma = _gamma->text().toDouble();
+
+	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+
+	auto hessian_filter = hessian_filter_type::New();
+	hessian_filter->SetSigma(sigma);
+
+	auto objectness_filter = objectness_filter_type::New();
+	objectness_filter->SetInput(hessian_filter->GetOutput());
+	objectness_filter->SetBrightObject(!_dark_objects->isChecked());
+	objectness_filter->SetObjectDimension(0);
+	objectness_filter->SetScaleObjectnessMeasure(true);
+	objectness_filter->SetAlpha(alpha);
+	objectness_filter->SetBeta(beta);
+	objectness_filter->SetGamma(gamma);
+
+	auto slice_filter = slice_by_slice_filter_type::New();
+	slice_filter->SetInput(source);
+	slice_filter->SetInputFilter(hessian_filter);
+	slice_filter->SetOutputFilter(objectness_filter);
+	slice_filter->GetOutput()->SetRequestedRegion(requested_region);
+	slice_filter->Update();
+
+	return slice_filter->GetOutput();
+}
+
+itk::Image<float, 3>::Pointer TraceTubesWidget::compute_object_sdf(const itk::ImageBase<3>::RegionType& requested_region) const
+{
+	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+
+	using input_type = itk::SliceContiguousImage<float>;
+	using mask_type = itk::Image<unsigned char, 3>;
+	using real_type = itk::Image<float, 3>;
+	using roi_filter_type = itk::RegionOfInterestImageFilter<input_type, mask_type>;
+	using threshold_filter_type = itk::BinaryThresholdImageFilter<mask_type, mask_type>;
+	using distance_filter_type = itk::SignedDanielssonDistanceMapImageFilter<mask_type, real_type>;
+
+	auto roi_filter = roi_filter_type::New();
+	roi_filter->SetInput(target);
+	roi_filter->SetRegionOfInterest(requested_region);
+
+	auto threshold = threshold_filter_type::New();
+	threshold->SetInput(roi_filter->GetOutput());
+	threshold->SetLowerThreshold(1);
+	threshold->SetInsideValue(255);
+	threshold->SetOutsideValue(0);
+
+	auto distance = distance_filter_type::New();
+	distance->SetInput(threshold->GetOutput());
+	distance->SetUseImageSpacing(true);
+	distance->SetSquaredDistance(false);
+	distance->Update();
+
+	auto output = real_type::New();
+	output->Graft(distance->GetOutput());
+	output->SetLargestPossibleRegion(target->GetLargestPossibleRegion());
+	output->SetBufferedRegion(requested_region);
+	return output;
 }
 
 void TraceTubesWidget::clear_points()
@@ -264,7 +405,7 @@ void TraceTubesWidget::estimate_intensity()
 		{
 			image_type::IndexType idx = {p.px, p.py, p.pz};
 
-			if (_metric->currentIndex() == 0)
+			if (_metric->currentIndex() == kIntensity)
 			{
 				intensity += source->GetPixel(idx);
 			}
@@ -275,9 +416,20 @@ void TraceTubesWidget::estimate_intensity()
 				region.PadByRadius(1);
 				region.Crop(source->GetLargestPossibleRegion());
 
-				auto speed_image = compute_hessian(region);
-				std::cerr << "Value: " << speed_image->GetPixel(idx) << "\n";
-				intensity += speed_image->GetPixel(idx);
+				if (_metric->currentIndex() == kHessian2D)
+				{
+					auto speed_image = compute_blobiness(region);
+					std::cerr << "Value: " << speed_image->GetPixel(idx) << "\n";
+					std::cerr << "Region: " << speed_image->GetBufferedRegion() << "\n";
+					intensity += speed_image->GetPixel(idx);
+				}
+				else if (_metric->currentIndex() == kHessian3D)
+				{
+					auto speed_image = compute_vesselness(region);
+					std::cerr << "Value: " << speed_image->GetPixel(idx) << "\n";
+					std::cerr << "Region: " << speed_image->GetBufferedRegion() << "\n";
+					intensity += speed_image->GetPixel(idx);
+				}
 			}
 		}
 
@@ -318,14 +470,38 @@ void TraceTubesWidget::do_work()
 	requested_region.PadByRadius(pad);
 	requested_region.Crop(source->GetLargestPossibleRegion());
 
-	if (_metric->currentIndex() == 0)
+	if (_metric->currentIndex() == kIntensity)
 	{
 		auto speed_image = source;
 		do_work_template<input_type>(speed_image, requested_region);
 	}
-	else
+	else if (_metric->currentIndex() == kHessian2D)
 	{
-		auto speed_image = compute_hessian(requested_region);
+		auto speed_image = compute_blobiness(requested_region);
+
+		static int count = 0;
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_blobiness-%02d.nii.gz") % count++).str());
+
+		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
+	}
+	else if (_metric->currentIndex() == kHessian3D)
+	{
+		auto speed_image = compute_vesselness(requested_region);
+
+		static int count = 0;
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_vesselness-%02d.nii.gz") % count++).str());
+
+		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
+	}
+	else if (_metric->currentIndex() == kTarget)
+	{
+		auto speed_image = compute_object_sdf(requested_region);
+
+		std::cerr << "SDF region: " << speed_image->GetBufferedRegion() << "\n";
+
+		static int count = 0;
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_object_sdf-%02d.nii.gz") % count++).str());
+
 		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
 	}
 }
@@ -350,7 +526,18 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 	double bone_length_penalty = 2;		// TODO
 	double artery_length_penalty = 2; // TODO
 	double line_radius = _line_radius->text().toDouble();
-	bool use_distance = _use_distance_for_radius->isChecked();
+
+	bool has_intensity = false;
+	double intensity_value = _intensity_value->text().toDouble(&has_intensity);
+	if (_metric->currentIndex() == kTarget)
+	{
+		auto calculator = itk::MinimumMaximumImageCalculator<TSpeedImage>::New();
+		calculator->SetImage(speed_image);
+		calculator->SetRegion(requested_region);
+		calculator->ComputeMinimum();
+		intensity_value = calculator->GetMinimum();
+		has_intensity = true;
+	}
 
 	std::vector<typename path_filter_type::PathType::VertexListPointer> paths;
 
@@ -375,9 +562,15 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 		dijkstra->SetStartIndex(aidx);
 		dijkstra->SetEndIndex(bidx);
 		dijkstra->SetRegion(region);
-		dijkstra->GetMetric().m_IntensityWeight = intensity_weight;
-		dijkstra->GetMetric().m_AngleWeight = angle_weight;
-		dijkstra->GetMetric().m_LengthWeight = length_weight;
+		dijkstra->Metric().m_IntensityWeight = intensity_weight;
+		dijkstra->Metric().m_AngleWeight = angle_weight;
+		dijkstra->Metric().m_LengthWeight = length_weight;
+		if (has_intensity)
+		{
+			dijkstra->Metric().m_InitIntensity = false;
+			dijkstra->Metric().m_StartValue = intensity_value;
+			dijkstra->Metric().m_EndValue = intensity_value;
+		}
 		dijkstra->Update();
 
 		auto path = dijkstra->GetOutput(0);
@@ -406,41 +599,43 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 
 	if (line_radius > 0)
 	{
-		if (use_distance)
+		using real_type = itk::Image<float, 3>;
+		using distance_type = itk::DanielssonDistanceMapImageFilter<output_type, real_type>;
+		using threshold_type = itk::BinaryThresholdImageFilter<real_type, output_type>;
+
+		auto distance = distance_type::New();
+		distance->SetInput(image_with_path);
+		distance->SetInputIsBinary(true);
+		distance->SetUseImageSpacing(true);
+		distance->SetSquaredDistance(true);
+
+		auto threshold = threshold_type::New();
+		threshold->SetInput(distance->GetOutput());
+		threshold->SetUpperThreshold(line_radius * line_radius);
+		threshold->SetInsideValue(255);
+		threshold->SetOutsideValue(0);
+		threshold->GetOutput()->SetRequestedRegion(requested_region);
+		threshold->Update();
+
+		image_with_path = threshold->GetOutput();
+	}
+
+	if (!_path_file_name->text().isEmpty() && _metric->currentIndex() == kTarget)
+	{
+		auto fname = _path_file_name->text().toStdString();
+		std::ofstream ofile(fname, std::ofstream::out);
+		if (ofile.is_open())
 		{
-			using real_type = itk::Image<float, 3>;
-			using distance_type = itk::DanielssonDistanceMapImageFilter<output_type, real_type>;
-			using threshold_type = itk::BinaryThresholdImageFilter<real_type, output_type>;
-
-			auto distance = distance_type::New();
-			distance->SetInput(image_with_path);
-			distance->SetInputIsBinary(true);
-			distance->SetUseImageSpacing(true);
-			distance->SetSquaredDistance(true);
-
-			auto threshold = threshold_type::New();
-			threshold->SetInput(distance->GetOutput());
-			threshold->SetUpperThreshold(line_radius * line_radius);
-			threshold->SetInsideValue(255);
-			threshold->SetOutsideValue(0);
-			threshold->GetOutput()->SetRequestedRegion(requested_region);
-			threshold->Update();
-
-			image_with_path = threshold->GetOutput();
-		}
-		else
-		{
-			auto ball = iseg::MakeBall<bool, 3>(speed_image->GetSpacing(), line_radius);
-			auto se = itk::FlatStructuringElement<3>::FromImage(ball);
-
-			auto dilate = itk::BinaryDilateImageFilter<output_type, output_type, itk::FlatStructuringElement<3>>::New();
-			dilate->SetInput(image_with_path);
-			dilate->SetKernel(se);
-			dilate->SetDilateValue(255);
-			dilate->GetOutput()->SetRequestedRegion(requested_region);
-			dilate->Update();
-
-			image_with_path = dilate->GetOutput();
+			for (auto verts : paths)
+			{
+				for (auto v : *verts)
+				{
+					itk::Point<double> p;
+					target->TransformContinuousIndexToPhysicalPoint(v, p);
+					ofile << p[0] << ", " << p[1] << ", " << p[2] << "\n";
+				}
+			}
+			ofile.close();
 		}
 	}
 

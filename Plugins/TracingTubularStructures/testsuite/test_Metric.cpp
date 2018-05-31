@@ -15,8 +15,39 @@ namespace iseg {
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
 BOOST_AUTO_TEST_SUITE(TraceTubesWidget_suite);
-// TestRunner.exe --run_test=iSeg_suite/TraceTubesWidget_suite --log_level=message
 
+// TestRunner.exe --run_test=iSeg_suite/TraceTubesWidget_suite/ROI_test --log_level=message
+BOOST_AUTO_TEST_CASE(ROI_test)
+{
+	using image_type = itk::Image<float, 3>;
+	auto img = image_type::New();
+	{
+		itk::Index<3> idx = {0, 0, 0};
+		itk::Size<3> size = {10, 20, 30};
+		itk::ImageRegion<3> region(idx, size);
+		img->SetRegions(region);
+	}
+	img->Allocate(true);
+
+	{
+		itk::Index<3> idx = {0, 5, 7};
+		itk::Size<3> size = {3, 10, 10};
+		itk::ImageRegion<3> region(idx, size);
+
+		auto output = image_type::New();
+		output->Graft(img);
+		output->SetLargestPossibleRegion(img->GetLargestPossibleRegion());
+		output->SetBufferedRegion(region);
+
+		BOOST_CHECK_EQUAL(output->GetBufferedRegion().GetIndex()[0], 0);
+		BOOST_CHECK_EQUAL(output->GetBufferedRegion().GetIndex()[1], 5);
+		BOOST_CHECK_EQUAL(output->GetBufferedRegion().GetIndex()[2], 7);
+
+		BOOST_CHECK_EQUAL(output->GetBufferedRegion().GetNumberOfPixels(), size[0] * size[1] * size[2]);
+	}
+}
+
+// TestRunner.exe --run_test=iSeg_suite/TraceTubesWidget_suite --log_level=message
 BOOST_AUTO_TEST_CASE(DijkstraMetric_test)
 {
 	using image_type = itk::Image<float, 3>;
