@@ -13,15 +13,8 @@
 #include "Data/SliceHandlerItkWrapper.h"
 
 #include <itkConfidenceConnectedImageFilter.h>
-#include <itkConnectedComponentImageFilter.h>
 #include <itkCurvatureFlowImageFilter.h>
-#include <itkFlatStructuringElement.h>
-#include <itkGrayscaleErodeImageFilter.h>
 #include <itkImage.h>
-#include <itkLabelShapeKeepNObjectsImageFilter.h>
-#include <itkStatisticsImageFilter.h>
-#include <itkSubtractImageFilter.h>
-#include <itksys/SystemTools.hxx>
 
 #include <QFormLayout>
 
@@ -35,7 +28,7 @@ ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget*
 	activeslice = handler3D->active_slice();
 
 	setToolTip(Format(
-		"Segment pixels with similar statistics using region growing. At least one seed point is needed."));
+			"Segment pixels with similar statistics using region growing. At least one seed point is needed."));
 
 	all_slices = new QCheckBox;
 
@@ -113,7 +106,7 @@ void ConfidenceWidget::on_mouse_clicked(iseg::Point p)
 void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 {
 	auto vp = vpdyn[activeslice];
-	for (auto p: vp)
+	for (auto p : vp)
 	{
 		itk::Index<2> idx;
 		idx[0] = p.px;
@@ -125,7 +118,7 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 {
 	auto start_slice = handler3D->start_slice();
-	for (auto slice: vpdyn)
+	for (auto slice : vpdyn)
 	{
 		for (auto p : slice.second)
 		{
@@ -150,7 +143,7 @@ void ConfidenceWidget::do_work()
 	}
 	else
 	{
-		using input_type = itk::Image<float,2>;
+		using input_type = itk::Image<float, 2>;
 		auto source = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kSource);
 		auto target = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kTarget);
 		do_work_nd<input_type>(source, target);
