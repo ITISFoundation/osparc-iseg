@@ -360,6 +360,9 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_object_sdf(const itk::Im
 	using threshold_filter_type = itk::BinaryThresholdImageFilter<mask_type, mask_type>;
 	using distance_filter_type = itk::SignedDanielssonDistanceMapImageFilter<mask_type, real_type>;
 
+	// it seems the distance transform always runs on whole image, which is slow
+	// therefore, I extract ROI and afterwards graft the output to fake a bufferedregion 
+	// with correct start index.
 	auto roi_filter = roi_filter_type::New();
 	roi_filter->SetInput(target);
 	roi_filter->SetRegionOfInterest(requested_region);
