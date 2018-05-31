@@ -12,8 +12,6 @@ IF(PLUGIN_BIAS)
 	ADD_SUBDIRECTORY(testsuite)
 
 	USE_BOOST()
-	
-	# INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty/Eigen)
 
 	QT4_WRAP_CPP(MOCSrcsbias TraceTubesWidget.h)
 	
