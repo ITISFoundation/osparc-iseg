@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_CASE(ROI_test)
 		itk::ImageRegion<3> region(idx, size);
 		img->SetRegions(region);
 	}
-	img->Allocate(true);
+	img->Allocate();
+	img->FillBuffer(0.f);
 
 	{
 		itk::Index<3> idx = {0, 5, 7};
