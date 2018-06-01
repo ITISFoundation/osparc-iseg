@@ -592,7 +592,8 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 	image_with_path->SetBufferedRegion(requested_region);
 	image_with_path->SetLargestPossibleRegion(speed_image->GetLargestPossibleRegion());
 	image_with_path->SetSpacing(speed_image->GetSpacing());
-	image_with_path->Allocate(true);
+	image_with_path->Allocate();
+	image_with_path->FillBuffer(0);
 
 	for (auto verts : paths)
 	{
