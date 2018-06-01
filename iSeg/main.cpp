@@ -28,6 +28,9 @@
 #include <qlabel.h>
 #include <qmessagebox.h>
 
+#include <boost/date_time.hpp>
+#include <boost/format.hpp>
+
 #include <cerrno>
 #include <cmath>
 #include <cstdio>
@@ -50,6 +53,14 @@ using namespace std;
 using namespace iseg;
 
 namespace {
+
+std::string timestamped(const std::string prefix, const std::string& suffix)
+{
+	auto timeLocal = boost::posix_time::second_clock::local_time();
+	auto tod = boost::posix_time::to_iso_string(timeLocal);
+	return prefix + "-" + tod + suffix;
+}
+
 // \brief Redirect VTK errors/warnings to file
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
@@ -113,7 +124,8 @@ int main(int argc, char **argv)
 	}
 
 	cerr << "intercepting application's output to a log file..." << endl;
-	if (!interceptOutput(tmpdir.absFilePath(QString("iSeg.log")).toStdString()))
+	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
+	if (!interceptOutput(log_file_name))
 	{
 		error("intercepting output failed");
 	}
