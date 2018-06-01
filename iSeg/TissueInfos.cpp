@@ -1155,5 +1155,29 @@ bool TissueInfos::ExportSurfaceGenerationToolXML(const char* filename)
 	}
 }
 
+namespace
+{
+	bool is_valid(tissues_size_t i)
+	{
+		return (i <= TissueInfos::GetTissueCount());
+	}
+	std::set<tissues_size_t> _selection;
+}
+
+std::set<iseg::tissues_size_t> iseg::TissueInfos::GetSelectedTissues()
+{
+	std::set<tissues_size_t> r;
+	std::copy_if(_selection.begin(), _selection.end(), std::inserter(r, r.end()), is_valid);
+	return r;
+}
+
+void iseg::TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
+{
+	if (std::all_of(sel.begin(), sel.end(), is_valid))
+	{
+		_selection = sel;
+	}
+}
+
 TissueInfosVecType TissueInfos::tissueInfosVector;
 TissueTypeMapType TissueInfos::tissueTypeMap;

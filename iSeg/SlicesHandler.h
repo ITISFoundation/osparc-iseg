@@ -203,6 +203,7 @@ public:
 
 	std::vector<std::string> tissue_names() const override;
 	std::vector<bool> tissue_locks() const override;
+	std::vector<tissues_size_t> tissue_selection() const override;
 
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
