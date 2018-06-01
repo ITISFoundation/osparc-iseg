@@ -6954,6 +6954,13 @@ void MainWindow::tissue_selection_changed()
 	{
 		tissuenr_changed((int)tissueTreeWidget->get_current_type() - 1);
 	}
+
+	std::set<tissues_size_t> sel;
+	for (auto a: list)
+	{
+		sel.insert(tissueTreeWidget->get_type(a));
+	}
+	TissueInfos::SetSelectedTissues(sel);
 }
 
 void MainWindow::unselectall()

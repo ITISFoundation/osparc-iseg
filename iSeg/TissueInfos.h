@@ -117,6 +117,10 @@ public:
 	static void RemoveTissues(const std::set<tissues_size_t>& tissuetypes);
 	static void RemoveAllTissues();
 
+	static std::set<tissues_size_t> GetSelectedTissues();
+	// \warning The GUI does not observe changes to this selection, they are set from the GUI
+	static void SetSelectedTissues(const std::set<tissues_size_t>& sel);
+
 	static FILE* SaveTissues(FILE* fp, unsigned short version);
 	static FILE* LoadTissues(FILE* fp, int tissuesVersion);
 	static bool LoadTissuesHDF(const char* filename, int tissuesVersion);

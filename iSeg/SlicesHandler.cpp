@@ -12323,3 +12323,9 @@ void SlicesHandler::SetNumberOfUndoArrays(unsigned n)
 {
 	this->_undoQueue.set_nrundoarraysmax(n);
 }
+
+std::vector<iseg::tissues_size_t> iseg::SlicesHandler::tissue_selection() const
+{
+	auto sel_set = TissueInfos::GetSelectedTissues();
+	return std::vector<iseg::tissues_size_t>(sel_set.begin(), sel_set.end());
+}

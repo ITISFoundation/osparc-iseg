@@ -46,6 +46,7 @@ public:
 
 	virtual std::vector<std::string> tissue_names() const = 0;
 	virtual std::vector<bool> tissue_locks() const = 0;
+	virtual std::vector<tissues_size_t> tissue_selection() const = 0;
 };
 
 } // namespace iseg
