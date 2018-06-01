@@ -329,6 +329,7 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 				spacing[0] > spacing[1]
 						? std::floor(radius / spacing[0] + 0.5f) * spacing[0]
 						: std::floor(radius / spacing[1] + 0.5f) * spacing[1];
+		float const radius_corrected2 = radius_corrected * radius_corrected;
 
 		int const xradius = std::ceil(radius_corrected / spacing[0]);
 		int const yradius = std::ceil(radius_corrected / spacing[1]);
@@ -337,13 +338,10 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 				 p1.px++)
 		{
 			for (p1.py = max(0, p.py - yradius);
-					 p1.py <=
-					 min((int)bmphand->return_height() - 1, p.py + yradius);
+					 p1.py <= min((int)bmphand->return_height() - 1, p.py + yradius);
 					 p1.py++)
 			{
-				if (std::pow(spacing[0] * (p.px - p1.px), 2.f) +
-								std::pow(spacing[1] * (p.py - p1.py), 2.f) <=
-						radius_corrected * radius_corrected)
+				if (std::pow(spacing[0] * (p.px - p1.px), 2.f) + std::pow(spacing[1] * (p.py - p1.py), 2.f) <= radius_corrected2)
 				{
 					vpdyn.push_back(p1);
 				}
@@ -354,17 +352,16 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 	{
 		int const xradius = sb_radius->value();
 		int const yradius = sb_radius->value();
-		for (p1.px = max(0, p.px - xradius);
-				 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
+		int const radius2 = sb_radius->value() * sb_radius->value();
+		for (p1.px = std::max(0, p.px - xradius);
+				 p1.px <= std::min((int)bmphand->return_width() - 1, p.px + xradius);
 				 p1.px++)
 		{
-			for (p1.py = max(0, p.py - yradius);
-					 p1.py <= min((int)bmphand->return_width() - 1, p.py + yradius);
+			for (p1.py = std::max(0, p.py - yradius);
+					 p1.py <= std::min((int)bmphand->return_height() - 1, p.py + yradius);
 					 p1.py++)
 			{
-				if ((p.px - p1.px) * (p.px - p1.px) +
-								(p.py - p1.py) * (p.py - p1.py) <=
-						sb_radius->value() * sb_radius->value())
+				if ((p.px - p1.px) * (p.px - p1.px) + (p.py - p1.py) * (p.py - p1.py) <= radius2)
 				{
 					vpdyn.push_back(p1);
 				}
