@@ -44,80 +44,78 @@ class vtkTriangulatorImpl;
 class vtkImageExtractCompatibleMesher : public vtkPolyDataAlgorithm
 {
 public:
-	static vtkImageExtractCompatibleMesher *New();
-	vtkTypeMacro(vtkImageExtractCompatibleMesher,
-							 vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
-																										vtkIndent indent);
+	static vtkImageExtractCompatibleMesher* New();
+	vtkTypeMacro(vtkImageExtractCompatibleMesher, vtkPolyDataAlgorithm);
+	void PrintSelf(ostream& os, vtkIndent indent) override;
 
 	// If you don't set the name, by default the input name "Material" will be used.
-	vtkSetStringMacro(OutputScalarName) vtkGetStringMacro(OutputScalarName)
+	vtkSetStringMacro(OutputScalarName) vtkGetStringMacro(OutputScalarName);
 
-			// The background value will be ignored, i.e. it will be the outside domain
-			vtkSetMacro(BackgroundLabel, int) vtkGetMacro(BackgroundLabel, int)
+	// The background value will be ignored, i.e. it will be the outside domain
+	vtkSetMacro(BackgroundLabel, int) vtkGetMacro(BackgroundLabel, int);
 
-			// Set the ordering for odd/even voxels, such that each voxel
-			// is triangulated using 5 tetrahedra: Default On
-			// Honestly, I am not sure if there is any reason to switch this off
-			vtkSetMacro(FiveTetrahedraPerVoxel, bool)
-					vtkGetMacro(FiveTetrahedraPerVoxel, bool)
-							vtkBooleanMacro(FiveTetrahedraPerVoxel, bool)
+	// Set the ordering for odd/even voxels, such that each voxel
+	// is triangulated using 5 tetrahedra: Default On
+	// Honestly, I am not sure if there is any reason to switch this off
+	vtkSetMacro(FiveTetrahedraPerVoxel, bool);
+	vtkGetMacro(FiveTetrahedraPerVoxel, bool);
+	vtkBooleanMacro(FiveTetrahedraPerVoxel, bool);
 
-			// Create voxel center point if there are more than N=2 labels per
-			// voxel: Default Off
-			//vtkSetMacro(CreateVoxelCenterPoint,bool)
-			//vtkGetMacro(CreateVoxelCenterPoint,bool)
-			//vtkBooleanMacro(CreateVoxelCenterPoint,bool)
+	// Create voxel center point if there are more than N=2 labels per
+	// voxel: Default Off
+	//vtkSetMacro(CreateVoxelCenterPoint,bool)
+	//vtkGetMacro(CreateVoxelCenterPoint,bool)
+	//vtkBooleanMacro(CreateVoxelCenterPoint,bool)
 
-			// Use templates for triangulation: Default On
-			vtkSetMacro(UseTemplates, bool) vtkGetMacro(UseTemplates, bool)
-					vtkBooleanMacro(UseTemplates, bool)
+	// Use templates for triangulation: Default On
+	vtkSetMacro(UseTemplates, bool) vtkGetMacro(UseTemplates, bool);
+	vtkBooleanMacro(UseTemplates, bool);
 
-			// Use octree point locator: Default On
-			vtkSetMacro(UseOctreeLocator, bool) vtkGetMacro(UseOctreeLocator, bool)
-					vtkBooleanMacro(UseOctreeLocator, bool)
+	// Use octree point locator: Default On
+	vtkSetMacro(UseOctreeLocator, bool) vtkGetMacro(UseOctreeLocator, bool);
+	vtkBooleanMacro(UseOctreeLocator, bool);
 
-			// Generate tetrahedral in second output: Default Off
-			// Attention: this will consume lots of memory
-			vtkSetMacro(GenerateTetMeshOutput, bool)
-					vtkGetMacro(GenerateTetMeshOutput, bool)
-							vtkBooleanMacro(GenerateTetMeshOutput, bool)
+	// Generate tetrahedral in second output: Default Off
+	// Attention: this will consume lots of memory
+	vtkSetMacro(GenerateTetMeshOutput, bool);
+	vtkGetMacro(GenerateTetMeshOutput, bool);
+	vtkBooleanMacro(GenerateTetMeshOutput, bool);
 
-			// Number of iterations used to label tetrahedra
-			//vtkSetMacro(MaxNumberOfIterations,int)
-			//vtkGetMacro(MaxNumberOfIterations,int)
+	// Number of iterations used to label tetrahedra
+	//vtkSetMacro(MaxNumberOfIterations,int)
+	//vtkGetMacro(MaxNumberOfIterations,int)
 
-			// Test if there are any unassigned labels after running the filter
-			// vtkGetMacro(NumberOfUnassignedLabels,int);
+	// Test if there are any unassigned labels after running the filter
+	// vtkGetMacro(NumberOfUnassignedLabels,int);
 
-			protected :
-
-			vtkImageExtractCompatibleMesher();
+protected:
+	vtkImageExtractCompatibleMesher();
 	~vtkImageExtractCompatibleMesher();
 
-	virtual int RequestData(vtkInformation *, vtkInformationVector **,
-													vtkInformationVector *);
-	virtual int FillInputPortInformation(int port, vtkInformation *info);
-	virtual int FillOutputPortInformation(int port, vtkInformation *info);
+	virtual int RequestData(vtkInformation*, vtkInformationVector**,
+			vtkInformationVector*) override;
+	virtual int FillInputPortInformation(int port, vtkInformation* info) override;
+	virtual int FillOutputPortInformation(int port, vtkInformation* info) override;
 
 	// Use a contouring method (similar to discrete marching cubes)
 	// to extract the surfaces between different material regions
-	int ContourSurface(vtkInformationVector **, vtkInformationVector *);
+	int ContourSurface(vtkInformationVector**, vtkInformationVector*);
 
-	void ClipVoxel(vtkShortArray *cellScalars, int flip, double spacing[3],
-								 vtkIdList *cellIds, vtkPoints *cellPts);
+	void ClipVoxel(vtkShortArray* cellScalars, int flip, double spacing[3],
+			vtkIdList* cellIds, vtkPoints* cellPts);
 
 	// Helper function for ContourSurface
 	void TriangulateVoxel(int cellScalar, int flip, double spacing[3],
-												vtkIdList *cellIds, vtkPoints *cellPts);
+			vtkIdList* cellIds, vtkPoints* cellPts);
 
 	// Helper function for ContourSurface
 	int EvaluateLabel(double x[3]);
 
 	// Helper function for ContourSurface:
 	// Extract domain interfaces/surfaces from tetrahedral mesh
-	void ExtractMeshDomainInterfaces(vtkInformationVector *);
+	void ExtractMeshDomainInterfaces(vtkInformationVector*);
 
-	void GenerateTetMesh(vtkUnstructuredGrid *grid);
+	void GenerateTetMesh(vtkUnstructuredGrid* grid);
 
 	//BTX
 	enum {
@@ -132,22 +130,22 @@ public:
 	int BackgroundLabel;
 	bool UseTemplates;
 	bool UseOctreeLocator;
-	char *OutputScalarName;
+	char* OutputScalarName;
 	bool GenerateTetMeshOutput;
 	int MaxNumberOfIterations;
 
 	// Data
-	vtkImageData *Input;
-	vtkDataArray *ClipScalars;
-	vtkPoints *Points;
-	vtkOrderedTriangulator *Triangulator;
-	vtkIncrementalPointLocator *Locator;
-	vtkCellArray *Connectivity;
-	vtkShortArray *PointDomainArray;
-	vtkShortArray *CellDomainArray;
+	vtkImageData* Input;
+	vtkDataArray* ClipScalars;
+	vtkPoints* Points;
+	vtkOrderedTriangulator* Triangulator;
+	vtkIncrementalPointLocator* Locator;
+	vtkCellArray* Connectivity;
+	vtkShortArray* PointDomainArray;
+	vtkShortArray* CellDomainArray;
 	//BTX
-	TetContainer *Tetrahedra;
-	vtkTriangulatorImpl *MyTriangulator;
+	TetContainer* Tetrahedra;
+	vtkTriangulatorImpl* MyTriangulator;
 	//ETX
 
 	int NumberOfUnassignedLabels;
@@ -159,12 +157,12 @@ public:
 
 private:
 	vtkImageExtractCompatibleMesher(
-			const vtkImageExtractCompatibleMesher &);						 // Not implemented
-	void operator=(const vtkImageExtractCompatibleMesher &); // Not implemented
+			const vtkImageExtractCompatibleMesher&);						// Not implemented
+	void operator=(const vtkImageExtractCompatibleMesher&); // Not implemented
 
-	void ClipVoxel_not_used(vtkShortArray *cellScalars, int flip,
-													double spacing[3], vtkIdList *cellIds,
-													vtkPoints *cellPts);
+	void ClipVoxel_not_used(vtkShortArray* cellScalars, int flip,
+			double spacing[3], vtkIdList* cellIds,
+			vtkPoints* cellPts);
 	int LabelTetra_not_used();
 };
 

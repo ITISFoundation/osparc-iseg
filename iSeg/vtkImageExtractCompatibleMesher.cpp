@@ -45,7 +45,6 @@
 #include <vtkPriorityQueue.h>
 
 #include <vtkUnstructuredGrid.h>
-#include <vtkXMLUnstructuredGridWriter.h>
 
 #include <vtkTimerLog.h>
 
@@ -395,13 +394,13 @@ class vtkTriangulatorImpl : public vtkTemplateTriangulator
 public:
 	static vtkTriangulatorImpl* New();
 	vtkTypeMacro(vtkTriangulatorImpl, vtkTemplateTriangulator);
-	void PrintSelf(ostream& os, vtkIndent indent)
+	void PrintSelf(ostream& os, vtkIndent indent) override
 	{
 		Superclass::PrintSelf(os, indent);
 	}
 
 	/// Override
-	void GetPoint(vtkIdType v, double p[3])
+	void GetPoint(vtkIdType v, double p[3]) override
 	{
 		assert(Points != NULL);
 		assert(v >= 0 && v < Points->GetNumberOfPoints());
@@ -409,7 +408,7 @@ public:
 	}
 
 	/// Override
-	virtual vtkIdType AddPoint(double x, double y, double z)
+	virtual vtkIdType AddPoint(double x, double y, double z) override
 	{
 		assert(Locator != NULL);
 		double p[3] = {x, y, z};
@@ -420,7 +419,7 @@ public:
 
 	/// Override
 	virtual void AddTetrahedron(vtkIdType v1, vtkIdType v2, vtkIdType v3,
-								vtkIdType v4, int domain)
+								vtkIdType v4, int domain) override
 	{
 		assert(Tetrahedra);
 		assert(CellDomainArray);
