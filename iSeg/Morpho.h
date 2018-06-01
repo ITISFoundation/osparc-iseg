@@ -20,72 +20,11 @@
 #include <itkPasteImageFilter.h>
 
 namespace morpho {
-namespace detail {
-unsigned NextOddInteger(double v)
-{
-	int vint = static_cast<int>(v);
-	// make odd
-	if (vint % 2 == 0)
-	{
-		vint++;
-	}
-	// increase by 2 to next odd
-	if (v > vint)
-	{
-		vint += 2;
-	}
-	return vint;
-}
-
-template<typename T, unsigned int Dimension>
-typename itk::Image<T, Dimension>::Pointer MakeBall(const typename itk::ImageBase<Dimension>::SpacingType& spacing, double radius)
-{
-	using image_type = typename itk::Image<T, Dimension>;
-	using iterator_type = itk::ImageRegionIteratorWithIndex<image_type>;
-
-	typename image_type::SizeType size;
-	int center[Dimension];
-	for (unsigned int d = 0; d < Dimension; ++d)
-	{
-		size[d] = NextOddInteger(radius / spacing[d]);
-		center[d] = static_cast<int>(size[d] / 2);
-	}
-
-	typename image_type::RegionType region;
-	region.SetSize(size);
-
-	auto img = image_type::New();
-	img->SetRegions(region);
-	img->Allocate();
-	img->FillBuffer(0);
-	img->SetSpacing(spacing);
-
-	double radius2 = radius * radius;
-
-	iterator_type it(img, img->GetLargestPossibleRegion());
-	for (it.GoToBegin(); !it.IsAtEnd(); ++it)
-	{
-		auto idx = it.GetIndex();
-		double distance = 0;
-		for (unsigned int d = 0; d < Dimension; ++d)
-		{
-			double dx = spacing[d] * (static_cast<int>(idx[d]) - center[d]);
-			distance += dx * dx;
-		}
-
-		if (distance < radius2)
-		{
-			it.Set(1);
-		}
-	}
-	return img;
-}
-} // namespace detail
 
 template<unsigned int Dimension>
 itk::FlatStructuringElement<Dimension> MakeBall(const typename itk::ImageBase<Dimension>::SpacingType& spacing, double radius)
 {
-	auto ball = detail::MakeBall<bool, Dimension>(spacing, radius);
+	auto ball = iseg::MakeBall<bool, Dimension>(spacing, radius);
 	return itk::FlatStructuringElement<Dimension>::FromImage(ball);
 }
 

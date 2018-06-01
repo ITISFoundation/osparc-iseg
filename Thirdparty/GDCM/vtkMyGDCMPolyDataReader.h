@@ -40,7 +40,7 @@ class vtkGDCM_API vtkMyGDCMPolyDataReader : public vtkPolyDataAlgorithm
 public:
   static vtkMyGDCMPolyDataReader *New();
   vtkTypeMacro(vtkMyGDCMPolyDataReader,vtkPolyDataAlgorithm);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+  virtual void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Set/Get the filename of the file to be read
@@ -61,11 +61,11 @@ protected:
   void FillMedicalImageInformation(const gdcm::Reader &reader);
 //ETX
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
   int RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
-    vtkInformationVector *outputVector);
+    vtkInformationVector *outputVector) override;
 //BTX
   int RequestInformation_RTStructureSetStorage(gdcm::Reader const & reader);
   int RequestData_RTStructureSetStorage(gdcm::Reader const &reader, vtkInformationVector *outputVector);

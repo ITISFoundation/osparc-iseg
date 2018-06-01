@@ -35,7 +35,7 @@ class vtkTemplateTriangulator : public vtkObject
 {
 public:
 	vtkTypeMacro(vtkTemplateTriangulator, vtkObject);
-	void PrintSelf(ostream &os, vtkIndent indent);
+	void PrintSelf(ostream &os, vtkIndent indent) override;
 
 	/// Divide tetrahedron given domain labels at corners
 	/// \note does not support nodes on interface (with more than one label)
