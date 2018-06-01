@@ -61,6 +61,18 @@ public:
 		return QFileSystemModel::data(index, role);
 	}
 };
+
+void add_completer(QLineEdit* file_path, QWidget* parent)
+{
+	auto completer = new QCompleter(parent);
+	completer->setMaxVisibleItems(10);
+
+	FileSystemModel* fsModel = new FileSystemModel(completer);
+	completer->setModel(fsModel);
+	fsModel->setRootPath("");
+
+	file_path->setCompleter(completer);
+}
 } // namespace
 
 TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
@@ -78,10 +90,11 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 		_metric->insertItem(kHessian3D, QString("Vesselness 3D"));
 		_metric->insertItem(kTarget, QString("Target"));
 		_metric->setCurrentIndex(kHessian2D);
+		_metric->setToolTip(Format("Intensity sticks to pixels with similar intensity as the start/end points. Vesselness computes a tubular structure measure and sticks to vesselness values similar to start/end."));
 
-		_intensity_value = new QLineEdit(QString(""));
+		_intensity_value = new QLineEdit;
 		_intensity_value->setValidator(new QDoubleValidator);
-		_intensity_value->setToolTip(Format("Typical intensity value along path. Call estimate intensity to guess a meaningful value."));
+		_intensity_value->setToolTip(Format("Typical intensity value along path. Call estimate intensity to guess a meaningful value. If empty, the value will be guessed from the selected points."));
 
 		_intensity_weight = new QLineEdit(QString::number(1.0 / 255.0));
 		_intensity_weight->setValidator(new QDoubleValidator(0, 1e6, 6));
@@ -98,6 +111,10 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 		_active_region_padding->setValidator(new QIntValidator(0, 1000, _active_region_padding));
 		_active_region_padding->setToolTip(Format("The region for computing the path is defined by the bounding box of the seed points, including a padding."));
 
+		_debug_metric_file_path = new QLineEdit;
+		add_completer(_debug_metric_file_path, this);
+		_debug_metric_file_path->setToolTip(Format("In order to debug the metric parameters, you can set a file path to export the metric to."));
+
 		_clear_points = new QPushButton("Clear points");
 
 		_estimate_intensity = new QPushButton("Estimate intensity");
@@ -111,6 +128,7 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 		layout->addRow(QString("Angle weight"), _angle_weight);
 		layout->addRow(QString("Line radius"), _line_radius);
 		layout->addRow(QString("Region padding"), _active_region_padding);
+		layout->addRow(QString("Metric debug file"), _debug_metric_file_path);
 		layout->addRow(_clear_points);
 		layout->addRow(_estimate_intensity);
 		layout->addRow(_execute_button);
@@ -153,16 +171,8 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 
 	_target_options = new QWidget;
 	{
-		auto completer = new QCompleter(this);
-		completer->setMaxVisibleItems(10);
-
-		FileSystemModel* fsModel = new FileSystemModel(completer);
-		completer->setModel(fsModel);
-		fsModel->setRootPath("");
-
 		_path_file_name = new QLineEdit;
-		_path_file_name->setCompleter(completer);
-		_path_file_name->setToolTip(Format("Points along traced 1D path are saved to this file."));
+		add_completer(_path_file_name, this);
 
 		auto layout = new QFormLayout();
 		layout->addRow(QString("Path file name"), _path_file_name);
@@ -361,7 +371,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_object_sdf(const itk::Im
 	using distance_filter_type = itk::SignedDanielssonDistanceMapImageFilter<mask_type, real_type>;
 
 	// it seems the distance transform always runs on whole image, which is slow
-	// therefore, I extract ROI and afterwards graft the output to fake a bufferedregion 
+	// therefore, I extract ROI and afterwards graft the output to fake a bufferedregion
 	// with correct start index.
 	auto roi_filter = roi_filter_type::New();
 	roi_filter->SetInput(target);
@@ -451,6 +461,7 @@ void TraceTubesWidget::do_work()
 	using input_type = itk::SliceContiguousImage<float>;
 
 	int pad = _active_region_padding->text().toInt();
+	auto export_file_path = _debug_metric_file_path->text().toStdString();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
 	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
@@ -482,8 +493,7 @@ void TraceTubesWidget::do_work()
 	{
 		auto speed_image = compute_blobiness(requested_region);
 
-		static int count = 0;
-		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_blobiness-%02d.nii.gz") % count++).str());
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, export_file_path);
 
 		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
 	}
@@ -491,8 +501,7 @@ void TraceTubesWidget::do_work()
 	{
 		auto speed_image = compute_vesselness(requested_region);
 
-		static int count = 0;
-		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_vesselness-%02d.nii.gz") % count++).str());
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, export_file_path);
 
 		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
 	}
@@ -500,10 +509,7 @@ void TraceTubesWidget::do_work()
 	{
 		auto speed_image = compute_object_sdf(requested_region);
 
-		std::cerr << "SDF region: " << speed_image->GetBufferedRegion() << "\n";
-
-		static int count = 0;
-		iseg::dump_image<itk::Image<float, 3>>(speed_image, (boost::format("F:/temp/iseg/_object_sdf-%02d.nii.gz") % count++).str());
+		iseg::dump_image<itk::Image<float, 3>>(speed_image, export_file_path);
 
 		do_work_template<itk::Image<float, 3>>(speed_image, requested_region);
 	}

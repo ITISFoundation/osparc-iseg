@@ -86,6 +86,7 @@ private:
 	QLineEdit* _angle_weight;
 	QLineEdit* _line_radius;
 	QLineEdit* _active_region_padding;
+	QLineEdit* _debug_metric_file_path;
 	QPushButton* _clear_points;
 	QPushButton* _estimate_intensity;
 	QPushButton* _execute_button;
