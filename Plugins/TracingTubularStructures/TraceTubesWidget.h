@@ -61,6 +61,8 @@ private:
 
 	void update_points();
 
+	int get_padding() const;
+
 	enum eMetric {
 		kIntensity = 0,
 		kHessian2D,

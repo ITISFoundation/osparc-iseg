@@ -108,7 +108,7 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 		_line_radius->setValidator(new QDoubleValidator(0, 100, 4));
 
 		_active_region_padding = new QLineEdit(QString::number(2));
-		_active_region_padding->setValidator(new QIntValidator(0, 1000, _active_region_padding));
+		_active_region_padding->setValidator(new QIntValidator(1, 1000, _active_region_padding));
 		_active_region_padding->setToolTip(Format("The region for computing the path is defined by the bounding box of the seed points, including a padding."));
 
 		_debug_metric_file_path = new QLineEdit;
@@ -138,7 +138,8 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 
 	_vesselness_options = new QWidget;
 	{
-		_sigma = new QLineEdit(QString::number(1.0));
+		_sigma = new QLineEdit(QString::number(0.5));
+		_sigma->setToolTip(Format("Sigma is the width of a Gaussian smoothing operator used to remove noise. Large values might remove important features."));
 
 		_dark_objects = new QCheckBox;
 		_dark_objects->setChecked(true);
@@ -278,6 +279,20 @@ void TraceTubesWidget::update_points()
 			vp.push_back(v.p);
 	}
 	emit vpdyn_changed(&vp);
+}
+
+int TraceTubesWidget::get_padding() const
+{
+	int pad = _active_region_padding->text().toInt();
+	auto const line_radius = _line_radius->text().toDouble();
+	if (line_radius > 0.0)
+	{
+		auto const spacing = _handler->spacing();
+		pad = std::max(pad, static_cast<int>(std::ceil(line_radius / spacing[0])));
+		pad = std::max(pad, static_cast<int>(std::ceil(line_radius / spacing[1])));
+		pad = std::max(pad, static_cast<int>(std::ceil(line_radius / spacing[2])));
+	}
+	return pad;
 }
 
 itk::Image<float, 3>::Pointer TraceTubesWidget::compute_vesselness(const itk::ImageBase<3>::RegionType& requested_region) const
@@ -460,7 +475,7 @@ void TraceTubesWidget::do_work()
 
 	using input_type = itk::SliceContiguousImage<float>;
 
-	int pad = _active_region_padding->text().toInt();
+	int pad = get_padding();
 	auto export_file_path = _debug_metric_file_path->text().toStdString();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
@@ -528,7 +543,7 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
 	auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
 
-	int pad = _active_region_padding->text().toInt();
+	int pad = get_padding();
 	double intensity_weight = _intensity_weight->text().toDouble();
 	double angle_weight = _angle_weight->text().toDouble();
 	double length_weight = 1;
