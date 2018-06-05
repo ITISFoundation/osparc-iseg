@@ -205,6 +205,10 @@ public:
 	std::vector<bool> tissue_locks() const override;
 	std::vector<tissues_size_t> tissue_selection() const override;
 
+	bool has_colors() const override { return _color_lookup_table != 0; }
+	size_t number_of_colors() const;
+	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const;
+
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
 	tissues_size_t* return_tissues(tissuelayers_size_t layeridx, unsigned short slicenr1);

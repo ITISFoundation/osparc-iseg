@@ -32,6 +32,7 @@
 #include "Data/Transform.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
+#include "Core/ColorLookupTable.h"
 #include "Core/ExpectationMaximization.h"
 #include "Core/HDF5Writer.h"
 #include "Core/ImageForestingTransform.h"
@@ -12328,4 +12329,17 @@ std::vector<iseg::tissues_size_t> iseg::SlicesHandler::tissue_selection() const
 {
 	auto sel_set = TissueInfos::GetSelectedTissues();
 	return std::vector<iseg::tissues_size_t>(sel_set.begin(), sel_set.end());
+}
+
+size_t iseg::SlicesHandler::number_of_colors() const
+{
+	return (_color_lookup_table!=0) ? _color_lookup_table->NumberOfColors() : 0;
+}
+
+void iseg::SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, unsigned char& b) const
+{
+	if (_color_lookup_table != 0)
+	{
+		_color_lookup_table->GetColor(idx, r, g, b);
+	}
 }

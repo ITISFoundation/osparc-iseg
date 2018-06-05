@@ -47,6 +47,10 @@ public:
 	virtual std::vector<std::string> tissue_names() const = 0;
 	virtual std::vector<bool> tissue_locks() const = 0;
 	virtual std::vector<tissues_size_t> tissue_selection() const = 0;
+
+	virtual bool has_colors() const = 0;
+	virtual size_t number_of_colors() const = 0;
+	virtual void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const = 0;
 };
 
 } // namespace iseg
