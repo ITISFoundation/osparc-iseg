@@ -8,7 +8,7 @@
 ##  https://opensource.org/licenses/MIT
 ##
 OPTION(PLUGIN_TRACE_TUBES "Build tubular structures tracing plugin" ON)
-IF(PLUGIN_BIAS)
+IF(PLUGIN_TRACE_TUBES)
 	ADD_SUBDIRECTORY(testsuite)
 
 	USE_BOOST()
