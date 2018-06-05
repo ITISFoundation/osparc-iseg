@@ -12331,7 +12331,7 @@ std::vector<iseg::tissues_size_t> iseg::SlicesHandler::tissue_selection() const
 	return std::vector<iseg::tissues_size_t>(sel_set.begin(), sel_set.end());
 }
 
-size_t iseg::SlicesHandler::number_of_color() const
+size_t iseg::SlicesHandler::number_of_colors() const
 {
 	return (_color_lookup_table!=0) ? _color_lookup_table->NumberOfColors() : 0;
 }

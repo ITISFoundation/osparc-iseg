@@ -49,7 +49,7 @@ public:
 	virtual std::vector<tissues_size_t> tissue_selection() const = 0;
 
 	virtual bool has_colors() const = 0;
-	virtual size_t number_of_color() const = 0;
+	virtual size_t number_of_colors() const = 0;
 	virtual void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const = 0;
 };
 
