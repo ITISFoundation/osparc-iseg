@@ -38,6 +38,9 @@ public:
 	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type);
 	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice();
 
+	/// Get region defined by active slices
+	itk::ImageRegion<3> GetActiveRegion() const;
+
 	itk::Image<pixel_type, 3>::Pointer GetImageDeprecated(eImageType type, bool active_slices);
 	itk::Image<tissue_type, 3>::Pointer GetTissuesDeprecated(bool active_slices);
 

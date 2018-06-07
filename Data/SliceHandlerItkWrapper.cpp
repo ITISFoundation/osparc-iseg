@@ -133,6 +133,13 @@ itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice()
 	return _GetITKView2D(all_slices.at(_handler->active_slice()), dims, spacing);
 }
 
+itk::ImageRegion<3> SliceHandlerItkWrapper::GetActiveRegion() const
+{
+	itk::Index<3> start = { 0, 0, _handler->start_slice() };
+	itk::Size<3> size = { _handler->width(), _handler->height(), static_cast<size_t>(_handler->end_slice() - _handler->start_slice()) };
+	return itk::ImageRegion<3>(start, size);
+}
+
 itk::Image<float, 3>::Pointer SliceHandlerItkWrapper::GetImageDeprecated(eImageType type, bool active_slices)
 {
 	using input_image = itk::SliceContiguousImage<float>;
