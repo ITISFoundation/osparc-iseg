@@ -340,7 +340,7 @@ RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent,
 							   const char* name, Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	handler3D->get_direction_cosines(directionCosines);
+	handler3D->transform().getRotation(rotation);
 
 	vbox1 = new Q3VBox(this);
 	vbox1->setMargin(5);
@@ -348,33 +348,36 @@ RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent,
 	// Description
 	hbox1 = new Q3HBox(vbox1);
 	hbox1->setMargin(5);
-	lb_descr = new QLabel(
-		QString("Direction cosines of the first row and first column\nof the "
-				"data set w.r.t. the world coordinate system."),
-		hbox1);
+	lb_descr = new QLabel(QString("The rotation matrix of the image data."), hbox1);
 
 	// Values
 	hbox2 = new Q3HBox(vbox1);
 	hbox2->setMargin(5);
 
 	vbox2 = new Q3VBox(hbox2);
-	lb_row = new QLabel(QString("Row"), vbox2);
-	le_dca = new QLineEdit(QString::number(directionCosines[0]), vbox2);
-	le_dcb = new QLineEdit(QString::number(directionCosines[1]), vbox2);
-	le_dcc = new QLineEdit(QString::number(directionCosines[2]), vbox2);
+	lb_c1 = new QLabel(QString("Column 1"), vbox2);
+	le_r11 = new QLineEdit(QString::number(rotation[0][0]), vbox2);
+	le_r21 = new QLineEdit(QString::number(rotation[1][0]), vbox2);
+	le_r31 = new QLineEdit(QString::number(rotation[2][0]), vbox2);
 
 	vbox3 = new Q3VBox(hbox2);
-	lb_col = new QLabel(QString("Column"), vbox3);
-	le_dcx = new QLineEdit(QString::number(directionCosines[3]), vbox3);
-	le_dcy = new QLineEdit(QString::number(directionCosines[4]), vbox3);
-	le_dcz = new QLineEdit(QString::number(directionCosines[5]), vbox3);
+	lb_c2 = new QLabel(QString("Column 2"), vbox3);
+	le_r12 = new QLineEdit(QString::number(rotation[0][1]), vbox3);
+	le_r22 = new QLineEdit(QString::number(rotation[1][1]), vbox3);
+	le_r32 = new QLineEdit(QString::number(rotation[2][1]), vbox3);
+
+	vbox4 = new Q3VBox(hbox2);
+	lb_c3 = new QLabel(QString("Column 3"), vbox4);
+	le_r13 = new QLineEdit(QString::number(rotation[0][2]), vbox4);
+	le_r23 = new QLineEdit(QString::number(rotation[1][2]), vbox4);
+	le_r33 = new QLineEdit(QString::number(rotation[2][2]), vbox4);
 
 	// Buttons
 	hbox3 = new Q3HBox(vbox1);
 	hbox3->setMargin(5);
 	pb_orthonorm = new QPushButton("Orthonormalize", hbox3);
 	pb_set = new QPushButton("Set", hbox3);
-	pb_close = new QPushButton("Close", hbox3);
+	pb_close = new QPushButton("Cancel", hbox3);
 
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
@@ -384,91 +387,61 @@ RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(orthonorm_pressed()));
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dca, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dca_changed()));
-	QObject::connect(le_dcb, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dcb_changed()));
-	QObject::connect(le_dcc, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dcc_changed()));
-	QObject::connect(le_dcx, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dcx_changed()));
-	QObject::connect(le_dcy, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dcy_changed()));
-	QObject::connect(le_dcz, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dcz_changed()));
 
-	return;
+	QObject::connect(le_r11, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r12, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r13, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r21, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r22, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r23, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r31, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r32, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
+	QObject::connect(le_r33, SIGNAL(textChanged(const QString&)), this,
+					 SLOT(rotation_changed()));
 }
 
-RotationDialog::~RotationDialog() { delete vbox1; }
+RotationDialog::~RotationDialog() {}
 
-void RotationDialog::ParseValue(QLineEdit* le, unsigned short dcIndex)
+void RotationDialog::rotation_changed()
 {
-	bool b1;
-	float val = le->text().toFloat(&b1);
-	if (b1)
-	{
-		directionCosines[dcIndex] = val;
-	}
-	else
-	{
-		if (le->text() != QString(".") && le->text() != QString("-"))
-			QApplication::beep();
-	}
-}
-
-void RotationDialog::dca_changed()
-{
-	ParseValue(le_dca, 0);
-	pb_set->setEnabled(false);
-}
-
-void RotationDialog::dcb_changed()
-{
-	ParseValue(le_dcb, 1);
-	pb_set->setEnabled(false);
-}
-
-void RotationDialog::dcc_changed()
-{
-	ParseValue(le_dcc, 2);
-	pb_set->setEnabled(false);
-}
-
-void RotationDialog::dcx_changed()
-{
-	ParseValue(le_dcx, 3);
-	pb_set->setEnabled(false);
-}
-
-void RotationDialog::dcy_changed()
-{
-	ParseValue(le_dcy, 4);
-	pb_set->setEnabled(false);
-}
-
-void RotationDialog::dcz_changed()
-{
-	ParseValue(le_dcz, 5);
-	pb_set->setEnabled(false);
+	pb_set->setEnabled(true);
 }
 
 void RotationDialog::set_pressed()
 {
-	bool ok[6];
-	le_dca->text().toFloat(&ok[0]);
-	le_dcb->text().toFloat(&ok[1]);
-	le_dcc->text().toFloat(&ok[2]);
-	le_dcx->text().toFloat(&ok[3]);
-	le_dcy->text().toFloat(&ok[4]);
-	le_dcz->text().toFloat(&ok[5]);
-	bool tmp = true;
-	for (unsigned short i = 0; i < 6; ++i)
+	QLineEdit* les[] = {
+		le_r11, le_r12, le_r13,
+		le_r21, le_r22, le_r23,
+		le_r31, le_r32, le_r33
+	};
+
+	bool ok = true;
+	for (int i=0; i<9; i++)
 	{
-		tmp &= ok[i];
+		if (ok) les[i]->text().toFloat(&ok);
 	}
-	if (tmp)
+	if (ok)
 	{
+		rotation[0][0] = le_r11->text().toFloat();
+		rotation[0][1] = le_r12->text().toFloat();
+		rotation[0][2] = le_r13->text().toFloat();
+
+		rotation[1][0] = le_r21->text().toFloat();
+		rotation[1][1] = le_r22->text().toFloat();
+		rotation[1][2] = le_r23->text().toFloat();
+
+		rotation[2][0] = le_r31->text().toFloat();
+		rotation[2][1] = le_r32->text().toFloat();
+		rotation[2][2] = le_r33->text().toFloat();
+
 		accept();
 	}
 	else
@@ -479,14 +452,35 @@ void RotationDialog::set_pressed()
 
 void RotationDialog::orthonorm_pressed()
 {
+	float directionCosines[6];
+	directionCosines[0] = le_r11->text().toFloat();
+	directionCosines[1] = le_r21->text().toFloat();
+	directionCosines[2] = le_r31->text().toFloat();
+
+	directionCosines[3] = le_r12->text().toFloat();
+	directionCosines[4] = le_r22->text().toFloat();
+	directionCosines[5] = le_r32->text().toFloat();
+
 	if (orthonormalize(&directionCosines[0], &directionCosines[3]))
 	{
-		le_dca->setText(QString::number(directionCosines[0]));
-		le_dcb->setText(QString::number(directionCosines[1]));
-		le_dcc->setText(QString::number(directionCosines[2]));
-		le_dcx->setText(QString::number(directionCosines[3]));
-		le_dcy->setText(QString::number(directionCosines[4]));
-		le_dcz->setText(QString::number(directionCosines[5]));
+		float offset[3] = {0,0,0};
+		Transform tr(offset, directionCosines);
+
+		float rot[3][3];
+		tr.getRotation(rot);
+
+		le_r11->setText(QString::number(rot[0][0]));
+		le_r12->setText(QString::number(rot[0][1]));
+		le_r13->setText(QString::number(rot[0][2]));
+
+		le_r21->setText(QString::number(rot[1][0]));
+		le_r22->setText(QString::number(rot[1][1]));
+		le_r23->setText(QString::number(rot[1][2]));
+
+		le_r31->setText(QString::number(rot[2][0]));
+		le_r32->setText(QString::number(rot[2][1]));
+		le_r33->setText(QString::number(rot[2][2]));
+
 		pb_set->setEnabled(true);
 	}
 	else
@@ -495,13 +489,15 @@ void RotationDialog::orthonorm_pressed()
 	}
 }
 
-void RotationDialog::return_direction_cosines(float dc[6])
+void RotationDialog::get_rotation(float r[3][3])
 {
-	for (unsigned short i = 0; i < 6; ++i)
+	for (unsigned i = 0; i < 3; ++i)
 	{
-		dc[i] = directionCosines[i];
+		for (unsigned j = 0; j < 3; ++j)
+		{
+			r[i][j] = rotation[i][j];
+		}
 	}
-	return;
 }
 
 ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
@@ -666,8 +662,6 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
 
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-
-	return;
 }
 
 ResizeDialog::~ResizeDialog() { delete vbox1; }

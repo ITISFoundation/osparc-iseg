@@ -107,13 +107,10 @@ public:
 	RotationDialog(SlicesHandler* hand3D, QWidget* parent = 0,
 				   const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~RotationDialog();
-	void return_direction_cosines(float dc[6]);
+	void get_rotation(float r[3][3]);
 
 private:
-	void ParseValue(QLineEdit* le, unsigned short dcIndex);
-
-private:
-	float directionCosines[6];
+	float rotation[3][3];
 	SlicesHandler* handler3D;
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
@@ -121,26 +118,26 @@ private:
 	Q3VBox* vbox1;
 	Q3VBox* vbox2;
 	Q3VBox* vbox3;
+	Q3VBox* vbox4;
 	QLabel* lb_descr;
-	QLabel* lb_row;
-	QLabel* lb_col;
-	QLineEdit* le_dca;
-	QLineEdit* le_dcb;
-	QLineEdit* le_dcc;
-	QLineEdit* le_dcx;
-	QLineEdit* le_dcy;
-	QLineEdit* le_dcz;
+	QLabel* lb_c1;
+	QLabel* lb_c2;
+	QLabel* lb_c3;
+	QLineEdit* le_r11;
+	QLineEdit* le_r12;
+	QLineEdit* le_r13;
+	QLineEdit* le_r21;
+	QLineEdit* le_r22;
+	QLineEdit* le_r23;
+	QLineEdit* le_r31;
+	QLineEdit* le_r32;
+	QLineEdit* le_r33;
 	QPushButton* pb_orthonorm;
 	QPushButton* pb_set;
 	QPushButton* pb_close;
 
 private slots:
-	void dca_changed();
-	void dcb_changed();
-	void dcc_changed();
-	void dcx_changed();
-	void dcy_changed();
-	void dcz_changed();
+	void rotation_changed();
 	void set_pressed();
 	void orthonorm_pressed();
 };

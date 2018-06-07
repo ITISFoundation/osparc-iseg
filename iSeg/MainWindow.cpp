@@ -5123,8 +5123,6 @@ void MainWindow::execute_displacement()
 		DD.return_displacement(disp);
 		handler3D->set_displacement(disp);
 	}
-
-	return;
 }
 
 void MainWindow::execute_rotation()
@@ -5133,12 +5131,13 @@ void MainWindow::execute_rotation()
 	RD.move(QCursor::pos());
 	if (RD.exec())
 	{
-		float dc[6];
-		RD.return_direction_cosines(dc);
-		handler3D->set_direction_cosines(dc);
-	}
+		float rot[3][3];
+		RD.get_rotation(rot);
 
-	return;
+		auto tr = handler3D->transform();
+		tr.setRotation(rot);
+		handler3D->set_transform(tr);
+	}
 }
 
 void MainWindow::execute_undoconf()
