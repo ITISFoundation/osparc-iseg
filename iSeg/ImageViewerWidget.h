@@ -76,7 +76,7 @@ signals:
 	void addtissuelarger_sign(Point p);
 	void subtissue_sign(Point p);
 	void addtissue3D_sign(Point p);
-	void selecttissue_sign(Point p);
+	void selecttissue_sign(Point p, bool clear_selection);
 	void mousepressed_sign(Point p);
 	void mousereleased_sign(Point p);
 	void mousepressedmid_sign(Point p);
@@ -146,6 +146,7 @@ private:
 	Q3Action* addtissue3D;
 	Q3Action* addtissuelarger;
 	Q3Action* selecttissue;
+	Q3Action* addtoselection;
 	std::vector<Point> vp;
 	std::vector<Point> vp_old;
 	std::vector<Point> vp1;
@@ -186,6 +187,7 @@ private slots:
 	void add_tissue_3D();
 	void add_tissuelarger();
 	void select_tissue();
+	void add_to_selected_tissues();
 	void mark_changed();
 	void bmp_changed();
 	void overlay_changed();

@@ -63,6 +63,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	//	vp=new vector<Point>;
 	//	vp_old=new vector<Point>;
 	selecttissue = new Q3Action("Select Tissue", 0, this);
+	addtoselection = new Q3Action("Select Tissue", 0, this);
 	addmark = new Q3Action("&Add Mark", 0, this);
 	addlabel = new Q3Action("Add &Label", 0, this);
 	removemark = new Q3Action("&Remove Mark", 0, this);
@@ -82,6 +83,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	connect(addtissue3D, SIGNAL(activated()), this, SLOT(add_tissue_3D()));
 	connect(addtissuelarger, SIGNAL(activated()), this, SLOT(add_tissuelarger()));
 	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
+	connect(addtoselection, SIGNAL(activated()), this, SLOT(add_to_selected_tissues()));
 }
 
 ImageViewerWidget::~ImageViewerWidget()
@@ -96,6 +98,7 @@ ImageViewerWidget::~ImageViewerWidget()
 	delete subtissue;
 	delete addtissuelarger;
 	delete selecttissue;
+	delete addtoselection;
 }
 
 void ImageViewerWidget::mode_changed(unsigned char newmode, bool updatescale)
@@ -650,7 +653,15 @@ void ImageViewerWidget::select_tissue()
 	Point p;
 	p.px = (unsigned short)eventx;
 	p.py = (unsigned short)eventy;
-	emit selecttissue_sign(p);
+	emit selecttissue_sign(p, true);
+}
+
+void ImageViewerWidget::add_to_selected_tissues()
+{
+	Point p;
+	p.px = (unsigned short)eventx;
+	p.py = (unsigned short)eventy;
+	emit selecttissue_sign(p, false);
 }
 
 void ImageViewerWidget::zoom_in() { set_zoom(2 * zoom); }
@@ -671,7 +682,14 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	addlabel->addTo(&contextMenu);
 	removemark->addTo(&contextMenu);
 	clearmarks->addTo(&contextMenu);
-	selecttissue->addTo(&contextMenu);
+	if (event->modifiers() == Qt::ControlModifier)
+	{
+		addtoselection->addTo(&contextMenu);
+	}
+	else
+	{
+		selecttissue->addTo(&contextMenu);
+	}
 	if (!bmporwork)
 	{
 		contextMenu.insertSeparator();

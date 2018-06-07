@@ -1454,7 +1454,7 @@ void TissueTreeWidget::set_current_tissue(tissues_size_t type)
 			parent->setExpanded(true);
 		}
 	}
-	else if (topLevelItemCount() > 0)
+	else if (topLevelItemCount() > 0 && type > 0)
 	{
 		setCurrentItem(topLevelItem(0));
 	}
