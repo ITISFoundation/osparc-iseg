@@ -372,6 +372,16 @@ RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent,
 	le_r23 = new QLineEdit(QString::number(rotation[1][2]), vbox4);
 	le_r33 = new QLineEdit(QString::number(rotation[2][2]), vbox4);
 
+	QLineEdit* rot[] = {
+		le_r11, le_r12, le_r13,
+		le_r21, le_r22, le_r23,
+		le_r31, le_r32, le_r33
+	};
+	for (auto le: rot)
+	{
+		le->setValidator(new QDoubleValidator);
+	}
+
 	// Buttons
 	hbox3 = new Q3HBox(vbox1);
 	hbox3->setMargin(5);
@@ -417,37 +427,19 @@ void RotationDialog::rotation_changed()
 
 void RotationDialog::set_pressed()
 {
-	QLineEdit* les[] = {
-		le_r11, le_r12, le_r13,
-		le_r21, le_r22, le_r23,
-		le_r31, le_r32, le_r33
-	};
+	rotation[0][0] = le_r11->text().toFloat();
+	rotation[0][1] = le_r12->text().toFloat();
+	rotation[0][2] = le_r13->text().toFloat();
 
-	bool ok = true;
-	for (int i=0; i<9; i++)
-	{
-		if (ok) les[i]->text().toFloat(&ok);
-	}
-	if (ok)
-	{
-		rotation[0][0] = le_r11->text().toFloat();
-		rotation[0][1] = le_r12->text().toFloat();
-		rotation[0][2] = le_r13->text().toFloat();
+	rotation[1][0] = le_r21->text().toFloat();
+	rotation[1][1] = le_r22->text().toFloat();
+	rotation[1][2] = le_r23->text().toFloat();
 
-		rotation[1][0] = le_r21->text().toFloat();
-		rotation[1][1] = le_r22->text().toFloat();
-		rotation[1][2] = le_r23->text().toFloat();
+	rotation[2][0] = le_r31->text().toFloat();
+	rotation[2][1] = le_r32->text().toFloat();
+	rotation[2][2] = le_r33->text().toFloat();
 
-		rotation[2][0] = le_r31->text().toFloat();
-		rotation[2][1] = le_r32->text().toFloat();
-		rotation[2][2] = le_r33->text().toFloat();
-
-		accept();
-	}
-	else
-	{
-		QApplication::beep();
-	}
+	accept();
 }
 
 void RotationDialog::orthonorm_pressed()

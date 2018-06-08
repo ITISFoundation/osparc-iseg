@@ -12,7 +12,6 @@
 #include "Data/Transform.h"
 
 #include "ImageReader.h"
-#include "InitializeITKFactory.h"
 #include "VTIreader.h"
 
 #include <itkImage.h>
@@ -60,8 +59,6 @@ bool ImageReader::getVolume(const char* filename, float** slices,
 		unsigned startslice, unsigned nrslices,
 		unsigned width, unsigned height)
 {
-	initializeITKFactory();
-
 	// ITK does not know how to load VTI
 	boost::filesystem::path path(filename);
 	std::string extension = boost::algorithm::to_lower_copy(
@@ -112,10 +109,7 @@ bool ImageReader::getInfo(const char* filename, unsigned& width,
 		unsigned& height, unsigned& nrslices,
 		float spacing[3], Transform& transform)
 {
-	initializeITKFactory();
-
-	auto imageIO = itk::ImageIOFactory::CreateImageIO(
-			filename, itk::ImageIOFactory::ReadMode);
+	auto imageIO = itk::ImageIOFactory::CreateImageIO(filename, itk::ImageIOFactory::ReadMode);
 	if (imageIO)
 	{
 		imageIO->SetFileName(filename);

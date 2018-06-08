@@ -47,4 +47,13 @@ void initializeITKFactory()
 	});
 }
 
+class AutoInit
+{
+public:
+	AutoInit()
+	{
+		initializeITKFactory();
+	}
+} _instance;
+
 } // namespace iseg
