@@ -1503,8 +1503,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SLOT(add_tissue_3D(Point)));
 	QObject::connect(bmp_show, SIGNAL(addtissuelarger_sign(Point)), this,
 			SLOT(add_tissuelarger(Point)));
-	QObject::connect(bmp_show, SIGNAL(selecttissue_sign(Point)), this,
-			SLOT(select_tissue(Point)));
+	QObject::connect(bmp_show, SIGNAL(selecttissue_sign(Point, bool)), this,
+			SLOT(select_tissue(Point, bool)));
 	QObject::connect(work_show, SIGNAL(addmark_sign(Point)), this,
 			SLOT(add_mark(Point)));
 	QObject::connect(work_show, SIGNAL(addlabel_sign(Point, std::string)), this,
@@ -1523,8 +1523,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SLOT(add_tissue_3D(Point)));
 	QObject::connect(work_show, SIGNAL(addtissuelarger_sign(Point)), this,
 			SLOT(add_tissuelarger(Point)));
-	QObject::connect(work_show, SIGNAL(selecttissue_sign(Point)), this,
-			SLOT(select_tissue(Point)));
+	QObject::connect(work_show, SIGNAL(selecttissue_sign(Point, bool)), this,
+			SLOT(select_tissue(Point, bool)));
 	QObject::connect(tissueFilter, SIGNAL(textChanged(const QString&)), this,
 			SLOT(tissueFilterChanged(const QString&)));
 	QObject::connect(lockTissues, SIGNAL(clicked()), this,
@@ -5123,8 +5123,6 @@ void MainWindow::execute_displacement()
 		DD.return_displacement(disp);
 		handler3D->set_displacement(disp);
 	}
-
-	return;
 }
 
 void MainWindow::execute_rotation()
@@ -5133,12 +5131,13 @@ void MainWindow::execute_rotation()
 	RD.move(QCursor::pos());
 	if (RD.exec())
 	{
-		float dc[6];
-		RD.return_direction_cosines(dc);
-		handler3D->set_direction_cosines(dc);
-	}
+		float rot[3][3];
+		RD.get_rotation(rot);
 
-	return;
+		auto tr = handler3D->transform();
+		tr.setRotation(rot);
+		handler3D->set_transform(tr);
+	}
 }
 
 void MainWindow::execute_undoconf()
@@ -5586,22 +5585,44 @@ void MainWindow::remove_mark(Point p)
 	}
 }
 
-void MainWindow::select_tissue(Point p)
+void MainWindow::select_tissue(Point p, bool clear_selection)
 {
-	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
-	for (auto i = list.begin(); i != list.end(); ++i)
+	auto const type = handler3D->get_tissue_pt(p, handler3D->active_slice());
+
+	if (clear_selection)
 	{
-		(*i)->setSelected(false);
+		QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
+		for (auto item : list)
+		{
+			// avoid unselecting if should be selected
+			item->setSelected(tissueTreeWidget->get_type(item) == type);
+		}
 	}
 	
 	// remove filter if it is preventing tissue from being shown
-	auto type = handler3D->get_tissue_pt(p, handler3D->active_slice());
 	if (!tissueTreeWidget->is_visible(type))
 	{
 		tissueFilter->setText(QString(""));
 	}
 	// now select the tissue
-	tissueTreeWidget->set_current_tissue(type);
+	if (clear_selection && type > 0)
+	{
+		tissueTreeWidget->set_current_tissue(type);
+	}
+	else
+	{
+		for (auto item : tissueTreeWidget->get_all_items())
+		{
+			if (tissueTreeWidget->get_type(item) == type)
+			{
+				item->setSelected(true);
+				if (auto p = item->parent())
+				{
+					p->setExpanded(true);
+				}
+			}
+		}
+	}
 }
 
 void MainWindow::next_featuring_slice()

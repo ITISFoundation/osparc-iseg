@@ -49,6 +49,9 @@ public:
 	template<typename TRotation3x3>
 	void getRotation(TRotation3x3& rot) const;
 
+	template<typename TRotation3x3>
+	void setRotation(const TRotation3x3& rot);
+
 	template<typename TVec3>
 	void setRotation(const TVec3& c0, const TVec3& c1, const TVec3& c2);
 
@@ -66,7 +69,7 @@ public:
 };
 
 template<typename TVec3>
-void iseg::Transform::setRotation(const TVec3& c0, const TVec3& c1, const TVec3& c2)
+void Transform::setRotation(const TVec3& c0, const TVec3& c1, const TVec3& c2)
 {
 	for (unsigned int r = 0; r < 3; r++)
 	{
@@ -77,7 +80,19 @@ void iseg::Transform::setRotation(const TVec3& c0, const TVec3& c1, const TVec3&
 }
 
 template<typename TRotation3x3>
-void iseg::Transform::getRotation(TRotation3x3& rot) const
+void Transform::setRotation(const TRotation3x3& rot)
+{
+	for (unsigned int r = 0; r < 3; r++)
+	{
+		for (unsigned int c = 0; c < 3; c++)
+		{
+			_m[r][c] = rot[r][c];
+		}
+	}
+}
+
+template<typename TRotation3x3>
+void Transform::getRotation(TRotation3x3& rot) const
 {
 	for (unsigned int r = 0; r < 3; r++)
 	{
@@ -89,7 +104,7 @@ void iseg::Transform::getRotation(TRotation3x3& rot) const
 }
 
 template<typename TVec3>
-void iseg::Transform::setOffset(const TVec3& offset)
+void Transform::setOffset(const TVec3& offset)
 {
 	for (unsigned int r = 0; r < 3; r++)
 	{
@@ -98,7 +113,7 @@ void iseg::Transform::setOffset(const TVec3& offset)
 }
 
 template<typename TVec3>
-void iseg::Transform::getOffset(TVec3& offset) const
+void Transform::getOffset(TVec3& offset) const
 {
 	for (unsigned int r = 0; r < 3; r++)
 	{
@@ -107,7 +122,7 @@ void iseg::Transform::getOffset(TVec3& offset) const
 }
 
 template<typename TVec3>
-TVec3 iseg::Transform::rigidTransformPoint(const TVec3& in) const
+TVec3 Transform::rigidTransformPoint(const TVec3& in) const
 {
 	typedef typename TVec3::value_type T2;
 
@@ -119,7 +134,7 @@ TVec3 iseg::Transform::rigidTransformPoint(const TVec3& in) const
 }
 
 template<typename T>
-void iseg::Transform::setTransform(const T offset[3], const T dc[6])
+void Transform::setTransform(const T offset[3], const T dc[6])
 {
 	setIdentity();
 

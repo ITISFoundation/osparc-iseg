@@ -89,7 +89,7 @@ typename TOutputImage::Pointer
 		if (operation == kClose)
 		{
 			auto erode = itk::BinaryErodeImageFilter<image_type, image_type, kernel_type>::New();
-			erode->SetInput(erode->GetOutput());
+			erode->SetInput(dilate->GetOutput());
 			erode->SetKernel(structuringElement);
 			erode->SetErodeValue(foreground_value);
 			erode->SetBackgroundValue(0);
