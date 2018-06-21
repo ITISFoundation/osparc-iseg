@@ -439,7 +439,7 @@ void TraceTubesWidget::estimate_intensity()
 			}
 			else
 			{
-				image_type::SizeType size = {0, 0, 0};
+				image_type::SizeType size = {1, 1, 1};
 				image_type::RegionType region(idx, size);
 				region.PadByRadius(1);
 				region.Crop(source->GetLargestPossibleRegion());

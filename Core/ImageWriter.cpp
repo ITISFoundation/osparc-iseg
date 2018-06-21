@@ -10,7 +10,6 @@
 #include "Precompiled.h"
 
 #include "ImageWriter.h"
-#include "InitializeITKFactory.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
 
 #include "Data/ImageToITK.h"
@@ -34,8 +33,6 @@ bool ImageWriter::writeVolume(const char* filename, const T** data,
 		unsigned nrslices, const float spacing[3],
 		const Transform& transform)
 {
-	initializeITKFactory();
-
 	typedef itk::Image<T, 3> image_type;
 	typedef itk::ImageFileWriter<image_type> writer_type;
 
