@@ -51,6 +51,7 @@
 #include "Core/SmoothSteps.h"
 #include "Core/Treaps.h"
 #include "Core/VoxelSurface.h"
+#include "Core/ConnectedShapeBasedInterpolation.h"
 
 #include "vtkMyGDCMPolyDataReader.h"
 
@@ -5811,7 +5812,7 @@ private:
 void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5824,7 +5825,7 @@ void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5837,7 +5838,7 @@ void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5850,7 +5851,7 @@ void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5860,18 +5861,19 @@ void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2)
+void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2, bool connected)
 {
 	if (slice2 < slice1)
 	{
-		unsigned short dummy = slice1;
-		slice1 = slice2;
-		slice2 = dummy;
+		std::swap(slice1, slice2);
+	}
+	if (slice1 + 1 >= slice2) // no slices inbetween
+	{
+		return;
 	}
 
 	const short n = slice2 - slice1;
-
-	if (n > 0)
+	if (!connected)
 	{
 		_image_slices[slice1].pushstack_bmp();
 		_image_slices[slice2].pushstack_bmp();
@@ -5923,6 +5925,25 @@ void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short sl
 
 		_image_slices[slice2].popstack_bmp();
 		_image_slices[slice1].popstack_bmp();
+	}
+	else
+	{
+		SliceHandlerItkWrapper itk_handler(this);
+		auto img1 = itk_handler.GetTargetSlice(slice1);
+		auto img2 = itk_handler.GetTargetSlice(slice2);
+
+		ConnectedShapeBasedInterpolation interpolator;
+		auto interpolated_slices = interpolator.interpolate(img1, img2, n-1);
+
+		for(short i = 0; i < n-1; i++)
+		{
+			auto slice = interpolated_slices[i];
+			const float* source = slice->GetPixelContainer()->GetImportPointer();
+			size_t source_len = slice->GetPixelContainer()->Size();
+			// copy to target (idx = slice1 + i + 1)
+			float* target = _image_slices[slice1 + i + 1].return_work();
+			std::copy(source, source + source_len, target);
+		}
 	}
 }
 

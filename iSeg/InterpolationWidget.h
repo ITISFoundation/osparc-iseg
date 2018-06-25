@@ -47,7 +47,7 @@ public:
 	void newloaded() override;
 	FILE *SaveParams(FILE *fp, int version) override;
 	FILE *LoadParams(FILE *fp, int version) override;
-	std::string GetName() override { return std::string("Interpol"); }
+	std::string GetName() override { return std::string("Interpolate"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("interpolate.png"))); }
 
 private:
@@ -81,6 +81,7 @@ private:
 	QRadioButton *rb_8connectivity;
 	QButtonGroup *connectivitygroup;
 	QCheckBox *cb_medianset;
+	QCheckBox *cb_connectedshapebased; 
 	unsigned short startnr;
 	unsigned short nrslices;
 	unsigned short tissuenr;

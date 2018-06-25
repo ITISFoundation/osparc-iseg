@@ -95,8 +95,8 @@ private slots:
 	void bmphand_changed(bmphandler* bmph);
 
 protected:
-	void keyPressEvent(QKeyEvent* event);
-	void keyReleaseEvent(QKeyEvent* event);
+	void keyPressEvent(QKeyEvent* event) override;
+	void keyReleaseEvent(QKeyEvent* event) override;
 };
 
 } // namespace iseg

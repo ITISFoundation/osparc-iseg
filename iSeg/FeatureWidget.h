@@ -44,11 +44,11 @@ class FeatureWidget : public WidgetInterface
 public:
 	FeatureWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	void init();
-	void newloaded();
+	void init() override;
+	void newloaded() override;
 	QSize sizeHint() const override;
-	std::string GetName() { return std::string("Feature"); }
-	QIcon GetIcon(QDir picdir) { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
+	std::string GetName() override { return std::string("Feature"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
 
 private:
 	void on_slicenr_changed() override;

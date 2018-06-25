@@ -106,6 +106,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 		"1998.<br>"
 		"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of "
 		"multidimensional objects. 1990."));
+	cb_connectedshapebased = new QCheckBox(QString("Connected Shape-Based"), vboxparams);
 	rb_4connectivity = new QRadioButton(QString("4-connectivity"), vboxparams);
 	rb_8connectivity = new QRadioButton(QString("8-connectivity"), vboxparams);
 	connectivitygroup = new QButtonGroup(this);
@@ -146,6 +147,8 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 					 SLOT(startslice_pressed()));
 	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(cb_medianset, SIGNAL(stateChanged(int)), this,
+					 SLOT(method_changed()));
+	QObject::connect(cb_connectedshapebased, SIGNAL(stateChanged(int)), this,
 					 SLOT(method_changed()));
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
 					 SLOT(method_changed()));
@@ -205,6 +208,7 @@ void InterpolationWidget::startslice_pressed()
 void InterpolationWidget::execute()
 {
 	unsigned short batchstride = (unsigned short)sb_batchstride->value();
+	bool const connected = cb_connectedshapebased->isVisible() && cb_connectedshapebased->isChecked();
 
 	unsigned short current = handler3D->active_slice();
 	if (current != startnr)
@@ -243,25 +247,8 @@ void InterpolationWidget::execute()
 				}
 				else
 				{
-					handler3D->interpolateworkgrey(startnr, current);
+					handler3D->interpolateworkgrey(startnr, current, connected);
 				}
-				/*				if(startnr==current+2||current==startnr+2){
-					handler3D->start_undo(2,(current+startnr)/2);
-
-					handler3D->interpolatework(startnr, current);
-
-					handler3D->end_undo();
-					emit undostepdone();
-				} else {
-					if(handler3D->return_undo3D()&&handler3D->start_undoall(2)){
-						handler3D->interpolatework(startnr, current);
-						handler3D->end_undo();
-						emit undostepdone();
-					} else {
-						handler3D->interpolatework(startnr, current);
-						emit undoclear();
-					}
-				}*/
 			}
 			else if (rb_tissue->isOn())
 			{
@@ -330,14 +317,14 @@ void InterpolationWidget::execute()
 						 batchstart += batchstride)
 					{
 						handler3D->interpolateworkgrey(
-							batchstart, batchstart + batchstride);
+							batchstart, batchstart + batchstride, connected);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current &&
 						current - (batchstart - batchstride) >= 2)
 					{
 						handler3D->interpolateworkgrey(batchstart - batchstride,
-													   current);
+													   current, connected);
 					}
 				}
 			}
@@ -430,25 +417,7 @@ void InterpolationWidget::execute()
 				}
 			}
 			emit end_datachange(this);
-		} /* else {
-			if(startnr==current+2||current==startnr+2){
-				handler3D->start_undo(2,(current+startnr)/2);
-
-				handler3D->interpolateworkgrey(startnr, current);
-
-				handler3D->end_undo();
-				emit undostepdone();
-			} else {
-				if(handler3D->return_undo3D()&&handler3D->start_undoall(2)){
-					handler3D->interpolateworkgrey(startnr, current);
-					handler3D->end_undo();
-					emit undostepdone();
-				} else {
-					handler3D->interpolateworkgrey(startnr, current);
-					emit undoclear();
-				}
-			}
-		}*/
+		}
 		pushexec->setEnabled(false);
 	}
 }
@@ -460,6 +429,7 @@ void InterpolationWidget::method_changed()
 		hboxextra->show();
 		hboxbatch->hide();
 		cb_medianset->hide();
+		cb_connectedshapebased->hide();
 		rb_4connectivity->hide();
 		rb_8connectivity->hide();
 		if (rb_tissueall->isChecked())
@@ -476,11 +446,13 @@ void InterpolationWidget::method_changed()
 		cb_medianset->show();
 		if (cb_medianset->isChecked())
 		{
+			cb_connectedshapebased->hide();
 			rb_4connectivity->show();
 			rb_8connectivity->show();
 		}
 		else
 		{
+			cb_connectedshapebased->setVisible(!rb_tissueall->isOn());
 			rb_4connectivity->hide();
 			rb_8connectivity->hide();
 		}
@@ -506,6 +478,7 @@ void InterpolationWidget::method_changed()
 
 void InterpolationWidget::source_changed()
 {
+	method_changed();
 	/*	if(rb_work->isOn()){
 		rb_intergrey->show();
 	} else {
