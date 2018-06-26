@@ -74,6 +74,7 @@ BOOST_AUTO_TEST_CASE(DijkstraMetric_test)
 		auto img = image_type::New();
 		img->SetRegions(region);
 		img->Allocate();
+		img->FillBuffer(0.f);
 
 		metric_type m;
 		m.Initialize(img, iprev, j);
