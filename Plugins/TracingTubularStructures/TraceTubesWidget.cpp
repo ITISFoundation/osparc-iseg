@@ -310,7 +310,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_vesselness(const itk::Im
 	double gamma = _gamma->text().toDouble();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
-	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+	auto source = itk_handler.GetSource(true);
 
 	auto hessian_filter = hessian_filter_type::New();
 	hessian_filter->SetInput(source);
@@ -349,7 +349,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_blobiness(const itk::Ima
 	double gamma = _gamma->text().toDouble();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
-	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+	auto source = itk_handler.GetSource(true);
 
 	auto hessian_filter = hessian_filter_type::New();
 	hessian_filter->SetSigma(sigma);
@@ -376,7 +376,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_blobiness(const itk::Ima
 itk::Image<float, 3>::Pointer TraceTubesWidget::compute_object_sdf(const itk::ImageBase<3>::RegionType& requested_region) const
 {
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
-	auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+	auto target = itk_handler.GetTarget(true);
 
 	using input_type = itk::SliceContiguousImage<float>;
 	using mask_type = itk::Image<unsigned char, 3>;
@@ -425,7 +425,7 @@ void TraceTubesWidget::estimate_intensity()
 		using image_type = itk::Image<float, 3>;
 
 		iseg::SliceHandlerItkWrapper itk_handler(_handler);
-		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+		auto source = itk_handler.GetSource(true);
 
 		double intensity = 0.0;
 
@@ -479,7 +479,7 @@ void TraceTubesWidget::do_work()
 	auto export_file_path = _debug_metric_file_path->text().toStdString();
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
-	auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+	auto source = itk_handler.GetSource(true);
 
 	input_type::IndexType idx_lo = {_points.front().px, _points.front().py, _points.front().pz};
 	input_type::IndexType idx_hi = idx_lo;
@@ -541,7 +541,7 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 	using metric_type = itk::MyMetric<speed_image_type>;
 
 	iseg::SliceHandlerItkWrapper itk_handler(_handler);
-	auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+	auto target = itk_handler.GetTarget(true);
 
 	int pad = get_padding();
 	double intensity_weight = _intensity_weight->text().toDouble();

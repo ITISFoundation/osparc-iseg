@@ -189,7 +189,7 @@ void BoneSegmentationWidget::do_work()
 
 			auto output = graphCutFilter->GetOutput();
 
-			auto target = itk_wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, m_UseSliceRange->isChecked());
+			auto target = itk_wrapper.GetTarget(m_UseSliceRange->isChecked());
 
 			iseg::DataSelection dataSelection;
 			dataSelection.allSlices = true;

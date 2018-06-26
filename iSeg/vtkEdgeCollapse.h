@@ -48,7 +48,7 @@ class vtkEdgeCollapse : public vtkPolyDataAlgorithm
 {
 public:
 	vtkTypeMacro(vtkEdgeCollapse, vtkPolyDataAlgorithm);
-	void PrintSelf(ostream &os, vtkIndent indent);
+	void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 	static vtkEdgeCollapse *New();
 
 	// Edges with edge length shorter than MinimumEdgeLength are collapsed
@@ -112,7 +112,7 @@ protected:
 
 	// Implementation of algorithm
 	int RequestData(vtkInformation *, vtkInformationVector **,
-									vtkInformationVector *);
+									vtkInformationVector *) VTK_OVERRIDE;
 
 	// Find all edges that will have an endpoint change ids because of an edge
 	// collapse.  p1Id and p2Id are the endpoints of the edge.  p2Id is the

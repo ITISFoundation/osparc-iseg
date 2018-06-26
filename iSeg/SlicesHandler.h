@@ -206,8 +206,8 @@ public:
 	std::vector<tissues_size_t> tissue_selection() const override;
 
 	bool has_colors() const override { return _color_lookup_table != 0; }
-	size_t number_of_colors() const;
-	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const;
+	size_t number_of_colors() const override;
+	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const override;
 
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
@@ -349,8 +349,7 @@ public:
 	void cleartissue3D(tissues_size_t tissuetype);
 	void cleartissues();
 	void cleartissues3D();
-	void interpolatetissue(unsigned short slice1, unsigned short slice2,
-			tissues_size_t tissuetype);
+	void interpolatetissue(unsigned short slice1, unsigned short slice2, tissues_size_t tissuetype, bool connected);
 	void interpolatetissue_medianset(unsigned short slice1,
 			unsigned short slice2,
 			tissues_size_t tissuetype,
@@ -366,7 +365,7 @@ public:
 			unsigned short slice2,
 			bool connectivity,
 			bool handleVanishingComp = true);
-	void interpolateworkgrey(unsigned short slice1, unsigned short slice2);
+	void interpolateworkgrey(unsigned short slice1, unsigned short slice2, bool connected);
 	void interpolateworkgrey_medianset(unsigned short slice1,
 			unsigned short slice2, bool connectivity,
 			bool handleVanishingComp = true);

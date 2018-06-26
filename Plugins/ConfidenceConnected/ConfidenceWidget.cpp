@@ -137,15 +137,15 @@ void ConfidenceWidget::do_work()
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
-		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
-		auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+		auto source = itk_handler.GetSource(true);
+		auto target = itk_handler.GetTarget(true);
 		do_work_nd<input_type>(source, target);
 	}
 	else
 	{
 		using input_type = itk::Image<float, 2>;
-		auto source = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kSource);
-		auto target = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kTarget);
+		auto source = itk_handler.GetSourceSlice();
+		auto target = itk_handler.GetTargetSlice();
 		do_work_nd<input_type>(source, target);
 	}
 }

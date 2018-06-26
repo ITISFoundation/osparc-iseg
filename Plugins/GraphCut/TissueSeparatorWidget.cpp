@@ -183,8 +183,8 @@ void TissueSeparatorWidget::do_work_all_slices()
 	using mask_type = itk::Image<unsigned char, 3>;
 
 	SliceHandlerItkWrapper wrapper(slice_handler);
-	auto source = wrapper.GetImage(SliceHandlerItkWrapper::kSource, false);
-	auto target = wrapper.GetImage(SliceHandlerItkWrapper::kTarget, false);
+	auto source = wrapper.GetSource(false);
+	auto target = wrapper.GetTarget(false);
 
 	auto start = target->GetLargestPossibleRegion().GetIndex();
 	start[2] = slice_handler->start_slice();
@@ -218,8 +218,8 @@ void TissueSeparatorWidget::do_work_current_slice()
 	using source_type = itk::Image<float, 2>;
 
 	SliceHandlerItkWrapper wrapper(slice_handler);
-	auto source = wrapper.GetImageSlice(SliceHandlerItkWrapper::kSource);
-	auto target = wrapper.GetImageSlice(SliceHandlerItkWrapper::kTarget);
+	auto source = wrapper.GetSourceSlice();
+	auto target = wrapper.GetTargetSlice();
 
 	auto output = do_work<2, source_type>(source, target, target->GetLargestPossibleRegion());
 	if (output)

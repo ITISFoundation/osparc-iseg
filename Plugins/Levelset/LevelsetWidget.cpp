@@ -162,13 +162,13 @@ void LevelsetWidget::guess_thresholds()
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
-		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+		auto source = itk_handler.GetSource(true);
 		guess_thresholds_nd<input_type>(source);
 	}
 	else
 	{
 		using input_type = itk::Image<float, 2>;
-		auto source = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kSource);
+		auto source = itk_handler.GetSourceSlice();
 		guess_thresholds_nd<input_type>(source);
 	}
 }
@@ -222,15 +222,15 @@ void LevelsetWidget::do_work()
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
-		auto source = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kSource, true); // active_slices -> correct seed z-position
-		auto target = itk_handler.GetImage(iseg::SliceHandlerItkWrapper::kTarget, true);
+		auto source = itk_handler.GetSource(true); // active_slices -> correct seed z-position
+		auto target = itk_handler.GetTarget(true);
 		do_work_nd<input_type>(source, target);
 	}
 	else
 	{
 		using input_type = itk::Image<float, 2>;
-		auto source = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kSource);
-		auto target = itk_handler.GetImageSlice(iseg::SliceHandlerItkWrapper::kTarget);
+		auto source = itk_handler.GetSourceSlice();
+		auto target = itk_handler.GetTargetSlice();
 		do_work_nd<input_type>(source, target);
 	}
 }

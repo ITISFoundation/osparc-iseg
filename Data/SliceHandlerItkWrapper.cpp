@@ -33,10 +33,36 @@ typename itk::SliceContiguousImage<T>::Pointer _GetITKView(std::vector<T*>& slic
 	return image;
 }
 
-itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetImage(eImageType type, bool active_slices)
+itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(bool active_slices)
 {
 	auto spacing = _handler->spacing();
-	auto all_slices = (type == eImageType::kSource) ? _handler->source_slices() : _handler->target_slices();
+	auto all_slices = _handler->source_slices();
+	if (!active_slices)
+	{
+		size_t dims[3] = {
+			_handler->width(),
+			_handler->height(),
+			_handler->num_slices()};
+
+		return _GetITKView(all_slices, dims, spacing);
+	}
+
+	std::vector<float*> slices;
+	for (unsigned i = _handler->start_slice(); i < _handler->end_slice(); ++i)
+	{
+		slices.push_back(all_slices[i]);
+	}
+	size_t dims[3] = {
+		_handler->width(),
+		_handler->height(),
+		static_cast<size_t>(_handler->end_slice() - _handler->start_slice()) };
+	return _GetITKView(slices, dims, spacing);
+}
+
+itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool active_slices)
+{
+	auto spacing = _handler->spacing();
+	auto all_slices = _handler->target_slices();
 	if (!active_slices)
 	{
 		size_t dims[3] = {
@@ -109,7 +135,7 @@ typename itk::Image<T>::Pointer _GetITKView2D(T* slice, size_t dims[2], double s
 	return image;
 }
 
-itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetImageSlice(eImageType type)
+itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetSourceSlice(int slice)
 {
 	size_t dims[2] = {
 		_handler->width(),
@@ -117,11 +143,25 @@ itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetImageSlice(eImageType t
 	auto spacing3d = _handler->spacing();
 	double spacing[2] = { spacing3d[0], spacing3d[1] };
 
-	auto all_slices = (type == eImageType::kSource) ? _handler->source_slices() : _handler->target_slices();
-	return _GetITKView2D(all_slices.at(_handler->active_slice()), dims, spacing);
+	auto all_slices = _handler->source_slices();
+	slice = (slice == kActiveSlice) ? _handler->active_slice() : slice;
+	return _GetITKView2D(all_slices.at(slice), dims, spacing);
 }
 
-itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice()
+itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetTargetSlice(int slice)
+{
+	size_t dims[2] = {
+		_handler->width(),
+		_handler->height() };
+	auto spacing3d = _handler->spacing();
+	double spacing[2] = { spacing3d[0], spacing3d[1] };
+
+	auto all_slices = _handler->target_slices();
+	slice = (slice == kActiveSlice) ? _handler->active_slice() : slice;
+	return _GetITKView2D(all_slices.at(slice), dims, spacing);
+}
+
+itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice(int slice)
 {
 	size_t dims[2] = {
 		_handler->width(),
@@ -130,7 +170,8 @@ itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice()
 	double spacing[2] = { spacing3d[0], spacing3d[1] };
 
 	auto all_slices = _handler->tissue_slices(_handler->active_tissuelayer());
-	return _GetITKView2D(all_slices.at(_handler->active_slice()), dims, spacing);
+	slice = (slice == kActiveSlice) ? _handler->active_slice() : slice;
+	return _GetITKView2D(all_slices.at(slice), dims, spacing);
 }
 
 itk::ImageRegion<3> SliceHandlerItkWrapper::GetActiveRegion() const
@@ -146,7 +187,7 @@ itk::Image<float, 3>::Pointer SliceHandlerItkWrapper::GetImageDeprecated(eImageT
 	using output_image = itk::Image<float, 3>;
 
 	auto cast = itk::CastImageFilter<input_image, output_image>::New();
-	cast->SetInput(GetImage(type, active_slices));
+	cast->SetInput(type==eImageType::kSource ? GetSource(active_slices) : GetTarget(active_slices));
 	cast->Update();
 	return cast->GetOutput();
 }

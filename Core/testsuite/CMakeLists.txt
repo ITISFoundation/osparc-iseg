@@ -10,11 +10,13 @@
 IF(ISEG_BUILD_TESTING)
 	USE_BOOST()
 	USE_HDF5()
+	USE_ITK()
 	
 	FILE(GLOB HEADERS *.h)
 	SET(SOURCES
 		test_iSegCoreMain.cpp
 	
+		test_ConnectedInterpolation.cpp
 		test_HDF5IO.cpp
 		test_ImageIO.cpp
 	)

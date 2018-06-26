@@ -10,9 +10,9 @@
 #include "Precompiled.h"
 
 #include "SlicesHandler.h"
+#include "StdStringToQString.h"
 #include "bmp_read_1.h"
 #include "config.h"
-#include "StdStringToQString.h"
 
 #include "AvwReader.h"
 #include "ChannelExtractor.h"
@@ -29,10 +29,11 @@
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
-#include "Data/Transform.h"
 #include "Data/SliceHandlerItkWrapper.h"
+#include "Data/Transform.h"
 
 #include "Core/ColorLookupTable.h"
+#include "Core/ConnectedShapeBasedInterpolation.h"
 #include "Core/ExpectationMaximization.h"
 #include "Core/HDF5Writer.h"
 #include "Core/ImageForestingTransform.h"
@@ -230,7 +231,7 @@ std::vector<tissues_size_t*> SlicesHandler::tissue_slices(tissuelayers_size_t la
 
 std::vector<std::string> SlicesHandler::tissue_names() const
 {
-	std::vector<std::string> names(TissueInfos::GetTissueCount()+1);
+	std::vector<std::string> names(TissueInfos::GetTissueCount() + 1);
 	names[0] = "Background";
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
 	{
@@ -241,7 +242,7 @@ std::vector<std::string> SlicesHandler::tissue_names() const
 
 std::vector<bool> SlicesHandler::tissue_locks() const
 {
-	std::vector<bool> locks(TissueInfos::GetTissueCount()+1, false);
+	std::vector<bool> locks(TissueInfos::GetTissueCount() + 1, false);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
 	{
 		locks.at(i) = TissueInfos::GetTissueLocked(i);
@@ -907,7 +908,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 		unsigned short slicenr)
 {
-	FILE* fp;						/* Open file pointer */
+	FILE* fp;						 /* Open file pointer */
 	int bitsize = _area; /* Size of bitmap */
 
 	if ((fp = fopen(filename, "rb")) == nullptr)
@@ -5811,7 +5812,7 @@ private:
 void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5824,7 +5825,7 @@ void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5837,7 +5838,7 @@ void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5850,7 +5851,7 @@ void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
-	auto all_slices = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kTarget, false);
+	auto all_slices = wrapper.GetTarget(false);
 
 	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
 
@@ -5860,18 +5861,19 @@ void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2)
+void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2, bool connected)
 {
 	if (slice2 < slice1)
 	{
-		unsigned short dummy = slice1;
-		slice1 = slice2;
-		slice2 = dummy;
+		std::swap(slice1, slice2);
+	}
+	if (slice1 + 1 >= slice2) // no slices inbetween
+	{
+		return;
 	}
 
 	const short n = slice2 - slice1;
-
-	if (n > 0)
+	if (!connected)
 	{
 		_image_slices[slice1].pushstack_bmp();
 		_image_slices[slice2].pushstack_bmp();
@@ -5923,6 +5925,32 @@ void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short sl
 
 		_image_slices[slice2].popstack_bmp();
 		_image_slices[slice1].popstack_bmp();
+	}
+	else
+	{
+		SliceHandlerItkWrapper itk_handler(this);
+		auto img1 = itk_handler.GetTargetSlice(slice1);
+		auto img2 = itk_handler.GetTargetSlice(slice2);
+
+		ConnectedShapeBasedInterpolation interpolator;
+		try
+		{
+			auto interpolated_slices = interpolator.interpolate(img1, img2, n - 1);
+
+			for (short i = 0; i < n - 1; i++)
+			{
+				auto slice = interpolated_slices[i];
+				const float* source = slice->GetPixelContainer()->GetImportPointer();
+				size_t source_len = slice->GetPixelContainer()->Size();
+				// copy to target (idx = slice1 + i + 1)
+				float* target = _image_slices[slice1 + i + 1].return_work();
+				std::copy(source, source + source_len, target);
+			}
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << "ERROR: failed to interpolate slices " << e.what() << "\n";
+		}
 	}
 }
 
@@ -6540,43 +6568,43 @@ void SlicesHandler::interpolatetissuegrey_medianset(unsigned short slice1,
 	}
 }
 
-void SlicesHandler::interpolatetissue(unsigned short slice1,
-		unsigned short slice2,
-		tissues_size_t tissuetype)
+void SlicesHandler::interpolatetissue(unsigned short slice1, unsigned short slice2,
+		tissues_size_t tissuetype, bool connected)
 {
 	if (slice2 < slice1)
 	{
-		unsigned short dummy = slice1;
-		slice1 = slice2;
-		slice2 = dummy;
+		std::swap(slice1, slice2);
 	}
-
-	tissues_size_t* tissue1 =
-			_image_slices[slice1].return_tissues(_active_tissuelayer);
-	tissues_size_t* tissue2 =
-			_image_slices[slice2].return_tissues(_active_tissuelayer);
-	_image_slices[slice1].pushstack_bmp();
-	_image_slices[slice2].pushstack_bmp();
-	float* bmp1 = _image_slices[slice1].return_bmp();
-	float* bmp2 = _image_slices[slice2].return_bmp();
-	for (unsigned int i = 0; i < _area; i++)
+	if (slice1 + 1 >= slice2) // no slices in between
 	{
-		bmp1[i] = (float)tissue1[i];
-		bmp2[i] = (float)tissue2[i];
+		return;
 	}
 
-	_image_slices[slice2].dead_reckoning((float)tissuetype);
-	_image_slices[slice1].dead_reckoning((float)tissuetype);
-
-	bmp1 = _image_slices[slice1].return_work();
-	bmp2 = _image_slices[slice2].return_work();
 	const short n = slice2 - slice1;
-	Point p;
-	float delta;
-	unsigned i1 = 0;
-
-	if (n != 0)
+	if (!connected)
 	{
+		tissues_size_t* tissue1 = _image_slices[slice1].return_tissues(_active_tissuelayer);
+		tissues_size_t* tissue2 = _image_slices[slice2].return_tissues(_active_tissuelayer);
+		_image_slices[slice1].pushstack_bmp();
+		_image_slices[slice2].pushstack_bmp();
+		float* bmp1 = _image_slices[slice1].return_bmp();
+		float* bmp2 = _image_slices[slice2].return_bmp();
+		for (unsigned int i = 0; i < _area; i++)
+		{
+			bmp1[i] = (float)tissue1[i];
+			bmp2[i] = (float)tissue2[i];
+		}
+
+		_image_slices[slice2].dead_reckoning((float)tissuetype);
+		_image_slices[slice1].dead_reckoning((float)tissuetype);
+
+		bmp1 = _image_slices[slice1].return_work();
+		bmp2 = _image_slices[slice2].return_work();
+		const short n = slice2 - slice1;
+		Point p;
+		float delta;
+		unsigned i1 = 0;
+
 		for (p.py = 0; p.py < _height; p.py++)
 		{
 			for (p.px = 0; p.px < _width; p.px++)
@@ -6592,27 +6620,53 @@ void SlicesHandler::interpolatetissue(unsigned short slice1,
 				i1++;
 			}
 		}
-	}
 
-	for (unsigned i = 0; i < _area; i++)
+		for (unsigned i = 0; i < _area; i++)
+		{
+			if (bmp1[i] < 0)
+				bmp1[i] = 0;
+			else
+				bmp1[i] = 255.0f;
+			if (bmp2[i] < 0)
+				bmp2[i] = 0;
+			else
+				bmp2[i] = 255.0f;
+		}
+
+		for (unsigned short j = 1; j < n; j++)
+		{
+			_image_slices[slice1 + j].set_mode(2, false);
+		}
+
+		_image_slices[slice2].popstack_bmp();
+		_image_slices[slice1].popstack_bmp();
+	}
+	else
 	{
-		if (bmp1[i] < 0)
-			bmp1[i] = 0;
-		else
-			bmp1[i] = 255.0f;
-		if (bmp2[i] < 0)
-			bmp2[i] = 0;
-		else
-			bmp2[i] = 255.0f;
-	}
+		SliceHandlerItkWrapper itk_handler(this);
+		auto tissues1 = itk_handler.GetTissuesSlice(slice1);
+		auto tissues2 = itk_handler.GetTissuesSlice(slice2);
 
-	for (unsigned short j = 1; j < n; j++)
-	{
-		_image_slices[slice1 + j].set_mode(2, false);
-	}
+		ConnectedShapeBasedInterpolation interpolator;
+		try
+		{
+			auto interpolated_slices = interpolator.interpolate(tissues1, tissues2, tissuetype, n - 1, true);
 
-	_image_slices[slice2].popstack_bmp();
-	_image_slices[slice1].popstack_bmp();
+			for (short i = 0; i < interpolated_slices.size(); ++i)
+			{
+				auto slice = interpolated_slices[i];
+				const float* source = slice->GetPixelContainer()->GetImportPointer();
+				size_t source_len = slice->GetPixelContainer()->Size();
+				// copy to target (idx = slice1 + i), slice1 is included
+				float* target = _image_slices[slice1 + i].return_work();
+				std::copy(source, source + source_len, target);
+			}
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << "ERROR: failed to interpolate slices " << e.what() << "\n";
+		}
+	}
 }
 
 void SlicesHandler::interpolatetissue_medianset(unsigned short slice1,
@@ -6899,7 +6953,7 @@ void SlicesHandler::extrapolate(unsigned short origin1, unsigned short origin2,
 		{
 			delta = (bmp2[i] - bmp1[i]) / n;
 			_image_slices[target].set_work_pt(p, bmp1[i] +
-																							delta * (target - origin1));
+																							 delta * (target - origin1));
 			i++;
 		}
 	}
@@ -9069,7 +9123,7 @@ void SlicesHandler::build255tissues()
 		tissue.color[0] = (i % 7) * 0.166666666f;
 		tissue.color[1] = ((i / 7) % 7) * 0.166666666f;
 		tissue.color[2] = (i / 49) * 0.19f;
-		tissue.name = (boost::format("Tissue%d") % static_cast<int>(i+1)).str();
+		tissue.name = (boost::format("Tissue%d") % static_cast<int>(i + 1)).str();
 		TissueInfos::AddTissue(tissue);
 	}
 }
@@ -12333,7 +12387,7 @@ std::vector<iseg::tissues_size_t> iseg::SlicesHandler::tissue_selection() const
 
 size_t iseg::SlicesHandler::number_of_colors() const
 {
-	return (_color_lookup_table!=0) ? _color_lookup_table->NumberOfColors() : 0;
+	return (_color_lookup_table != 0) ? _color_lookup_table->NumberOfColors() : 0;
 }
 
 void iseg::SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, unsigned char& b) const

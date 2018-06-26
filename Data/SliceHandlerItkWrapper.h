@@ -28,18 +28,22 @@ public:
 
 	SliceHandlerItkWrapper(SliceHandlerInterface* sh) : _handler(sh) {}
 
+	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(bool active_slices);
+	itk::SliceContiguousImage<pixel_type>::Pointer GetTarget(bool active_slices);
+	itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices);
+
+	enum { kActiveSlice = -1 };
+	itk::Image<pixel_type, 2>::Pointer GetSourceSlice(int slice = kActiveSlice);
+	itk::Image<pixel_type, 2>::Pointer GetTargetSlice(int slice = kActiveSlice);
+	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice(int slice = kActiveSlice);
+
+	/// Get region defined by active slices
+	itk::ImageRegion<3> GetActiveRegion() const;
+
 	enum eImageType {
 		kSource,
 		kTarget
 	};
-	itk::SliceContiguousImage<pixel_type>::Pointer GetImage(eImageType type, bool active_slices);
-	itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices);
-
-	itk::Image<pixel_type, 2>::Pointer GetImageSlice(eImageType type);
-	itk::Image<tissue_type, 2>::Pointer GetTissuesSlice();
-
-	/// Get region defined by active slices
-	itk::ImageRegion<3> GetActiveRegion() const;
 
 	itk::Image<pixel_type, 3>::Pointer GetImageDeprecated(eImageType type, bool active_slices);
 	itk::Image<tissue_type, 3>::Pointer GetTissuesDeprecated(bool active_slices);

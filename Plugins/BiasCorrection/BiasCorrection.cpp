@@ -169,7 +169,7 @@ void BiasCorrectionWidget::do_work()
 
 			if (output)
 			{
-				auto source = wrapper.GetImage(iseg::SliceHandlerItkWrapper::kSource, true);
+				auto source = wrapper.GetSource(true);
 
 				iseg::DataSelection dataSelection;
 				dataSelection.allSlices = true;
