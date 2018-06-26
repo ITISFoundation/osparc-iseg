@@ -65,58 +65,110 @@ public:
 		int num_objects2 = 0;
 		const auto objects1 = get_components(slice1, num_objects1);
 		const auto objects2 = get_components(slice2, num_objects2);
-		if (num_objects1 != 1 || num_objects2 != 1)
+		if (num_objects1 != num_objects2 || num_objects2 == 0)
 		{
-			throw std::runtime_error("Detected multiple foreground objects");
+			throw std::runtime_error("Slices don't have same number of foreground objects.");
 		}
 
-		const auto x1 = get_center_of_mass(objects1, num_objects1)[0];
-		const auto x2 = get_center_of_mass(objects2, num_objects2)[0];
+		const auto center_of_mass1 = get_center_of_mass(objects1, num_objects1);
+		const auto center_of_mass2 = get_center_of_mass(objects2, num_objects2);
 
-		itk::Vector<double, 2> translation;
-		translation[0] = x1[0] - x2[0];
-		translation[1] = x1[1] - x2[1];
-		auto slice2_moved = move_image(slice2, -translation);
+		auto get_closest = [](const std::vector<itk::Point<double, 2>>& pts1, const std::vector<itk::Point<double, 2>>& pts2) {
+			std::map<size_t, size_t> corresponding_objects;
+			for (size_t i = 0; i < pts1.size(); ++i)
+			{
+				double closest_dist = std::numeric_limits<double>::max();
+				size_t closest_id = 0;
+				for (size_t j = 0; j < pts2.size(); ++j)
+				{
+					double dist = pts1[i].SquaredEuclideanDistanceTo(pts2[j]);
+					if (dist < closest_dist)
+					{
+						closest_dist = dist;
+						closest_id = j;
+					}
+				}
+				corresponding_objects[i] = closest_id;
+			}
+			return corresponding_objects;
+		};
 
-		auto sdf1 = compute_sdf<image_type>(slice1);
-		auto sdf2 = compute_sdf<image_type>(slice2_moved);
-
-		// slack to 3d image
-		using image_stack_type = itk::SliceContiguousImage<float>;
-		image_stack_type::IndexType start;
-		image_stack_type::SizeType size;
-		image_stack_type::SpacingType spacing;
-		image_stack_type::PointType origin;
-		for (int i = 0; i < 2; i++)
+		auto map12 = get_closest(center_of_mass1, center_of_mass2);
+		auto map21 = get_closest(center_of_mass2, center_of_mass1);
+		for (auto p : map12)
 		{
-			start[i] = slice1->GetBufferedRegion().GetIndex()[i];
-			size[i] = slice1->GetBufferedRegion().GetSize()[i];
-			spacing[i] = slice1->GetSpacing()[i];
-			origin[i] = slice1->GetOrigin()[i];
+			if (map21.find(p.second) == map21.end() || map21.at(p.second) != p.first)
+			{
+				throw std::runtime_error("Foreground objects cannot be unambiguously assigned.");
+			}
 		}
-		start[2] = 0;
-		size[2] = 2;
-		spacing[2] = 1.0; // TODO
-		origin[2] = 0.0;
 
-		auto image3d = image_stack_type::New();
-		image3d->SetRegions(image_stack_type::RegionType(start, size));
-		image3d->SetSpacing(spacing);
-		image3d->SetOrigin(origin);
-
-		std::vector<float*> slices;
-		slices.push_back(sdf1->GetPixelContainer()->GetImportPointer());
-		slices.push_back(sdf2->GetPixelContainer()->GetImportPointer());
-
-		auto container = image_stack_type::PixelContainer::New();
-		container->SetImportPointersForSlices(slices, size[0] * size[1], false);
-		image3d->SetPixelContainer(container);
-
-		std::vector<image_type::Pointer> interpolated_slices;
-		for (int i = 1; i <= number_of_slices; i++)
+		std::vector<image_type::Pointer> interpolated_slices(number_of_slices);
+		for (auto p : map12)
 		{
-			auto slice = interpolate(image3d, i / (number_of_slices + 1.0), translation);
-			interpolated_slices.push_back(slice);
+			auto object1 = p.first;
+			auto object2 = p.second;
+
+			auto x1 = center_of_mass1.at(object1);
+			auto x2 = center_of_mass2.at(object2);
+
+			itk::Vector<double, 2> translation;
+			translation[0] = x1[0] - x2[0];
+			translation[1] = x1[1] - x2[1];
+			auto slice2_moved = move_image(slice2, -translation);
+
+			auto sdf1 = compute_sdf<image_type>(slice1);
+			auto sdf2 = compute_sdf<image_type>(slice2_moved);
+
+			// slack to 3d image
+			using image_stack_type = itk::SliceContiguousImage<float>;
+			image_stack_type::IndexType start;
+			image_stack_type::SizeType size;
+			image_stack_type::SpacingType spacing;
+			image_stack_type::PointType origin;
+			for (int i = 0; i < 2; i++)
+			{
+				start[i] = slice1->GetBufferedRegion().GetIndex()[i];
+				size[i] = slice1->GetBufferedRegion().GetSize()[i];
+				spacing[i] = slice1->GetSpacing()[i];
+				origin[i] = slice1->GetOrigin()[i];
+			}
+			start[2] = 0;
+			size[2] = 2;
+			spacing[2] = 1.0; // TODO
+			origin[2] = 0.0;
+
+			auto image3d = image_stack_type::New();
+			image3d->SetRegions(image_stack_type::RegionType(start, size));
+			image3d->SetSpacing(spacing);
+			image3d->SetOrigin(origin);
+
+			std::vector<float*> slices;
+			slices.push_back(sdf1->GetPixelContainer()->GetImportPointer());
+			slices.push_back(sdf2->GetPixelContainer()->GetImportPointer());
+
+			auto container = image_stack_type::PixelContainer::New();
+			container->SetImportPointersForSlices(slices, size[0] * size[1], false);
+			image3d->SetPixelContainer(container);
+
+			for (int i = 1; i <= number_of_slices; i++)
+			{
+				auto slice = interpolate(image3d, i / (number_of_slices + 1.0), translation);
+				if (interpolated_slices[i - 1])
+				{
+					itk::ImageRegionIterator<image_type> sit(slice, slice->GetBufferedRegion());
+					itk::ImageRegionIterator<image_type> dit(interpolated_slices[i - 1], slice->GetBufferedRegion());
+
+					for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
+					{
+						dit.Set(sit.Get() != 0 ? sit.Get() : dit.Get());
+					}
+				}
+				else
+				{
+					interpolated_slices[i - 1] = slice;
+				}
+			}
 		}
 		return interpolated_slices;
 	}
