@@ -30,16 +30,22 @@ class ConnectedShapeBasedInterpolation
 {
 public:
 	using image_type = itk::Image<float, 2>;
+	using mask_type = itk::Image<unsigned char, 2>;
 	using image_stack_type = itk::SliceContiguousImage<float>;
 
 	std::vector<image_type::Pointer> interpolate(const image_type* slice1, const image_type* slice2, int number_of_slices)
 	{
-		if (!check_exactly_one_object(slice1) || !check_exactly_one_object(slice2))
+		int num_objects1 = 0;
+		int num_objects2 = 0;
+		auto objects1 = get_components(slice1, num_objects1);
+		auto objects2 = get_components(slice2, num_objects2);
+		if (num_objects1 != 1 || num_objects2 != 1)
 		{
 			throw std::runtime_error("Detected multiple foreground objects");
 		}
-		auto x1 = get_center_of_mass(slice1);
-		auto x2 = get_center_of_mass(slice2);
+
+		auto x1 = get_center_of_mass(objects1, num_objects1)[0];
+		auto x2 = get_center_of_mass(objects2, num_objects2)[0];
 
 		itk::Vector<double, 2> translation;
 		translation[0] = x1[0] - x2[0];
@@ -90,9 +96,9 @@ public:
 	}
 
 private:
-	bool check_exactly_one_object(const image_type* img) const
+	/// find connected foreground regions (called "objects")
+	mask_type::Pointer get_components(const image_type* img, int& num_objects) const
 	{
-		using mask_type = itk::Image<unsigned char, 2>;
 		auto caster = itk::CastImageFilter<image_type, mask_type>::New();
 		caster->SetInput(img);
 		auto connectivity = itk::ConnectedComponentImageFilter<mask_type, mask_type>::New();
@@ -100,32 +106,40 @@ private:
 		connectivity->SetFullyConnected(true);
 		connectivity->SetBackgroundValue(0.f);
 		connectivity->Update();
-		return connectivity->GetObjectCount() == 1;
+		num_objects = connectivity->GetObjectCount();
+		return connectivity->GetOutput();
 	}
 
 	/// compute center of mass of foreground object, assumes BG=0
-	itk::Point<double, 2> get_center_of_mass(const image_type* img) const
+	std::vector<itk::Point<double, 2>> get_center_of_mass(const mask_type* img, int num_objects) const
 	{
-		double n = 0;
-		itk::ContinuousIndex<double, 2> idx({ 0,0 });
-		itk::ImageRegionConstIteratorWithIndex<image_type> it(img, img->GetBufferedRegion());
+		using idx_type = itk::ContinuousIndex<double, 2>;
+		std::vector<double> n(num_objects, 0.0);
+		std::vector<idx_type> idx(num_objects, idx_type({0,0}));
+
+		itk::ImageRegionConstIteratorWithIndex<mask_type> it(img, img->GetBufferedRegion());
 		for (it.GoToBegin(); !it.IsAtEnd(); ++it)
 		{
-			if (it.Get() > 0.f)
+			int const id = static_cast<int>(it.Get()) - 1;
+			if (id >= 0)
 			{
-				n++;
-				idx[0] += it.GetIndex()[0];
-				idx[1] += it.GetIndex()[1];
+				n[id]++;
+				idx[id][0] += it.GetIndex()[0];
+				idx[id][1] += it.GetIndex()[1];
 			}
 		}
-		if (n > 0)
+
+		std::vector<itk::Point<double, 2>> pts(num_objects);
+		for (int id=0; id<num_objects; ++id)
 		{
-			idx[0] /= n;
-			idx[1] /= n;
+			if (n[id] > 0)
+			{
+				idx[id][0] /= n[id];
+				idx[id][1] /= n[id];
+			}
+			img->TransformContinuousIndexToPhysicalPoint(idx[id], pts[id]);
 		}
-		itk::Point<double, 2> pt;
-		img->TransformContinuousIndexToPhysicalPoint(idx, pt);
-		return pt;
+		return pts;
 	}
 
 	/// shift image by a specified amount
