@@ -30,7 +30,6 @@
 #include <vtkTriangle.h>
 
 #include <vtkCellLocator.h>
-#include <vtkDataSetWriter.h>
 #include <vtkFloatArray.h>
 #include <vtkIntArray.h>
 #include <vtkPlane.h>
