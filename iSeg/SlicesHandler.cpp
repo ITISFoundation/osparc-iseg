@@ -6652,7 +6652,7 @@ void SlicesHandler::interpolatetissue(unsigned short slice1, unsigned short slic
 		{
 			auto interpolated_slices = interpolator.interpolate(tissues1, tissues2, tissuetype, n - 1, true);
 
-			for (short i = 0; i < interpolated_slices.size(); i++)
+			for (short i = 0; i < interpolated_slices.size(); ++i)
 			{
 				auto slice = interpolated_slices[i];
 				const float* source = slice->GetPixelContainer()->GetImportPointer();

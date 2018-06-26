@@ -63,23 +63,23 @@ public:
 	{
 		int num_objects1 = 0;
 		int num_objects2 = 0;
-		auto objects1 = get_components(slice1, num_objects1);
-		auto objects2 = get_components(slice2, num_objects2);
+		const auto objects1 = get_components(slice1, num_objects1);
+		const auto objects2 = get_components(slice2, num_objects2);
 		if (num_objects1 != 1 || num_objects2 != 1)
 		{
 			throw std::runtime_error("Detected multiple foreground objects");
 		}
 
-		auto x1 = get_center_of_mass(objects1, num_objects1)[0];
-		auto x2 = get_center_of_mass(objects2, num_objects2)[0];
+		const auto x1 = get_center_of_mass(objects1, num_objects1)[0];
+		const auto x2 = get_center_of_mass(objects2, num_objects2)[0];
 
 		itk::Vector<double, 2> translation;
 		translation[0] = x1[0] - x2[0];
 		translation[1] = x1[1] - x2[1];
 		auto slice2_moved = move_image(slice2, -translation);
 
-		auto sdf1 = compute_sdf(slice1);
-		auto sdf2 = compute_sdf(slice2_moved);
+		auto sdf1 = compute_sdf<image_type>(slice1);
+		auto sdf2 = compute_sdf<image_type>(slice2_moved);
 
 		// slack to 3d image
 		using image_stack_type = itk::SliceContiguousImage<float>;
@@ -169,15 +169,16 @@ private:
 	}
 
 	/// shift image by a specified amount
-	image_type::Pointer move_image(const image_type* img, const itk::Vector<double, 2>& translation) const
+	template<class TImage>
+	typename TImage::Pointer move_image(const TImage* img, const itk::Vector<double, 2>& translation) const
 	{
-		using resample_filter_type = itk::ResampleImageFilter<image_type, image_type>;
+		using resample_filter_type = itk::ResampleImageFilter<TImage, TImage>;
 		using translation_type = itk::TranslationTransform<double, 2>;
 
 		auto resample_filter = resample_filter_type::New();
 		resample_filter->SetInput(img);
 
-		auto nn_interpolator = itk::NearestNeighborInterpolateImageFunction<image_type>::New();
+		auto nn_interpolator = itk::NearestNeighborInterpolateImageFunction<TImage>::New();
 		resample_filter->SetInterpolator(nn_interpolator);
 
 		auto transform = translation_type::New();
@@ -190,9 +191,10 @@ private:
 	}
 
 	/// compute signed distance function, assumes BG=0
-	image_type::Pointer compute_sdf(const image_type* img) const
+	template<class TImage>
+	image_type::Pointer compute_sdf(const TImage* img) const
 	{
-		using distance_filter_type = itk::SignedMaurerDistanceMapImageFilter<image_type, image_type>;
+		using distance_filter_type = itk::SignedMaurerDistanceMapImageFilter<TImage, image_type>;
 		auto dt_filter1 = distance_filter_type::New();
 		dt_filter1->SetInput(img);
 		dt_filter1->SetBackgroundValue(0); // ?
