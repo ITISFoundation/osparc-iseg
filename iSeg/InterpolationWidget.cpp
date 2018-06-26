@@ -29,8 +29,8 @@
 using namespace iseg;
 
 InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
-										 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
 
@@ -48,8 +48,8 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	rb_extra = new QRadioButton(QString("Extrapolation"), vboxmethods);
 	rb_batchinter = new QRadioButton(QString("Batch Interpol."), vboxmethods);
 	rb_batchinter->setToolTip(Format(
-		"Select the stride of (distance between) segmented slices and the "
-		"start slice to batch segment multiple slices."));
+			"Select the stride of (distance between) segmented slices and the "
+			"start slice to batch segment multiple slices."));
 	modegroup = new QButtonGroup(this);
 	modegroup->insert(rb_inter);
 	modegroup->insert(rb_extra);
@@ -60,10 +60,10 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	vboxdataselect->layout()->setAlignment(Qt::AlignTop);
 	rb_tissue = new QRadioButton(QString("Selected Tissue"), vboxdataselect);
 	rb_tissue->setToolTip(Format(
-		"Works on the tissue distribution of the currently selected tissue."));
+			"Works on the tissue distribution of the currently selected tissue."));
 	rb_tissueall = new QRadioButton(QString("All Tissues"), vboxdataselect);
 	rb_tissueall->setToolTip(Format(
-		"Works on all tissue at once (not available for extrapolation)."));
+			"Works on all tissue at once (not available for extrapolation)."));
 	rb_work = new QRadioButton(QString("TargetPict"), vboxdataselect);
 	rb_work->setToolTip(Format("Works on the Target image."));
 
@@ -81,31 +81,31 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	sb_slicenr = new QSpinBox(1, nrslices, 1, hboxextra);
 	sb_slicenr->setValue(1);
 	sb_slicenr->setToolTip(Format("Set the slice index where the Tissue/Target "
-								  "distribution will be extrapolated."));
+																"distribution will be extrapolated."));
 
 	hboxbatch = new Q3HBox(vboxparams);
 	txt_batchstride = new QLabel("Stride: ", hboxbatch);
 	sb_batchstride = new QSpinBox(2, nrslices - 1, 1, hboxbatch);
 	sb_batchstride->setValue(2);
 	sb_batchstride->setToolTip(Format(
-		"The stride is the distance between segmented slices. For example, "
-		"you may segment every fifth slice (stride=5), then interpolate in "
-		"between."));
+			"The stride is the distance between segmented slices. For example, "
+			"you may segment every fifth slice (stride=5), then interpolate in "
+			"between."));
 
 	cb_medianset = new QCheckBox(QString("Median Set"), vboxparams);
 	cb_medianset->setChecked(true);
 	cb_medianset->setToolTip(Format(
-		"If Median Set is ON, the algorithm described in [1] "
-		"is employed. Otherwise shape-based interpolation [2] is used. "
-		"Multiple "
-		"objects (with "
-		"different gray values or tissue assignments, respectively) can be "
-		"interpolated jointly "
-		"without introducing gaps or overlap.<br>"
-		"[1] S. Beucher. Sets, partitions and functions interpolations. "
-		"1998.<br>"
-		"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of "
-		"multidimensional objects. 1990."));
+			"If Median Set is ON, the algorithm described in [1] "
+			"is employed. Otherwise shape-based interpolation [2] is used. "
+			"Multiple "
+			"objects (with "
+			"different gray values or tissue assignments, respectively) can be "
+			"interpolated jointly "
+			"without introducing gaps or overlap.<br>"
+			"[1] S. Beucher. Sets, partitions and functions interpolations. "
+			"1998.<br>"
+			"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of "
+			"multidimensional objects. 1990."));
 	cb_connectedshapebased = new QCheckBox(QString("Connected Shape-Based"), vboxparams);
 	rb_4connectivity = new QRadioButton(QString("4-connectivity"), vboxparams);
 	rb_8connectivity = new QRadioButton(QString("8-connectivity"), vboxparams);
@@ -118,16 +118,16 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	vboxexecute->layout()->setAlignment(Qt::AlignTop);
 	pushstart = new QPushButton("Start Slice", vboxexecute);
 	pushstart->setToolTip(Format(
-		"Interpolation/extrapolation is based on 2 slices. Click start to "
-		"select "
-		"the first slice and Execute to select the second slice. Interpolation "
-		"automatically interpolates the intermediate slices."
-		"<br>"
-		"Note:<br>The result is displayed in the Target but is not directly "
-		"added to the tissue distribution. "
-		"The user can add it with Adder function. The 'All Tissues' option "
-		"adds "
-		"the result directly to the tissue."));
+			"Interpolation/extrapolation is based on 2 slices. Click start to "
+			"select "
+			"the first slice and Execute to select the second slice. Interpolation "
+			"automatically interpolates the intermediate slices."
+			"<br>"
+			"Note:<br>The result is displayed in the Target but is not directly "
+			"added to the tissue distribution. "
+			"The user can add it with Adder function. The 'All Tissues' option "
+			"adds "
+			"the result directly to the tissue."));
 	pushexec = new QPushButton("Execute", vboxexecute);
 	pushexec->setEnabled(false);
 
@@ -144,16 +144,16 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	vboxexecute->setFixedSize(vboxparams->sizeHint());
 
 	QObject::connect(pushstart, SIGNAL(clicked()), this,
-					 SLOT(startslice_pressed()));
+			SLOT(startslice_pressed()));
 	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(cb_medianset, SIGNAL(stateChanged(int)), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(cb_connectedshapebased, SIGNAL(stateChanged(int)), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-					 SLOT(method_changed()));
+			SLOT(method_changed()));
 	QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-					 SLOT(source_changed()));
+			SLOT(source_changed()));
 
 	method_changed();
 	source_changed();
@@ -221,14 +221,11 @@ void InterpolationWidget::execute()
 			emit begin_datachange(dataSelection, this);
 			if (rb_work->isOn())
 			{
-				handler3D->extrapolatework(
-					startnr, current, (unsigned short)sb_slicenr->value() - 1);
+				handler3D->extrapolatework(startnr, current, (unsigned short)sb_slicenr->value() - 1);
 			}
 			else
 			{
-				handler3D->extrapolatetissue(
-					startnr, current, (unsigned short)sb_slicenr->value() - 1,
-					tissuenr);
+				handler3D->extrapolatetissue(startnr, current, (unsigned short)sb_slicenr->value() - 1, tissuenr);
 			}
 			emit end_datachange(this);
 		}
@@ -242,8 +239,7 @@ void InterpolationWidget::execute()
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolateworkgrey_medianset(
-						startnr, current, rb_8connectivity->isOn());
+					handler3D->interpolateworkgrey_medianset(startnr, current, rb_8connectivity->isOn());
 				}
 				else
 				{
@@ -256,12 +252,11 @@ void InterpolationWidget::execute()
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolatetissue_medianset(
-						startnr, current, tissuenr, rb_8connectivity->isOn());
+					handler3D->interpolatetissue_medianset(startnr, current, tissuenr, rb_8connectivity->isOn());
 				}
 				else
 				{
-					handler3D->interpolatetissue(startnr, current, tissuenr);
+					handler3D->interpolatetissue(startnr, current, tissuenr, connected);
 				}
 			}
 			else if (rb_tissueall->isOn())
@@ -270,8 +265,7 @@ void InterpolationWidget::execute()
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolatetissuegrey_medianset(
-						startnr, current, rb_8connectivity->isOn());
+					handler3D->interpolatetissuegrey_medianset(startnr, current, rb_8connectivity->isOn());
 				}
 				else
 				{
@@ -293,38 +287,30 @@ void InterpolationWidget::execute()
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolateworkgrey_medianset(
-							batchstart, batchstart + batchstride,
-							rb_8connectivity->isOn());
+						handler3D->interpolateworkgrey_medianset(batchstart, batchstart + batchstride, rb_8connectivity->isOn());
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolateworkgrey_medianset(
-							batchstart - batchstride, current,
-							rb_8connectivity->isOn());
+						handler3D->interpolateworkgrey_medianset(batchstart - batchstride, current, rb_8connectivity->isOn());
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolateworkgrey(
-							batchstart, batchstart + batchstride, connected);
+						handler3D->interpolateworkgrey(batchstart, batchstart + batchstride, connected);
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolateworkgrey(batchstart - batchstride,
-													   current, connected);
+						handler3D->interpolateworkgrey(batchstart - batchstride, current, connected);
 					}
 				}
 			}
@@ -337,38 +323,30 @@ void InterpolationWidget::execute()
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolatetissue_medianset(
-							batchstart, batchstart + batchstride, tissuenr,
-							rb_8connectivity->isOn());
+						handler3D->interpolatetissue_medianset(batchstart, batchstart + batchstride, tissuenr, rb_8connectivity->isOn());
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissue_medianset(
-							batchstart - batchstride, current, tissuenr,
-							rb_8connectivity->isOn());
+						handler3D->interpolatetissue_medianset(batchstart - batchstride, current, tissuenr, rb_8connectivity->isOn());
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolatetissue(
-							batchstart, batchstart + batchstride, tissuenr);
+						handler3D->interpolatetissue(batchstart, batchstart + batchstride, tissuenr, connected);
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissue(batchstart - batchstride,
-													 current, tissuenr);
+						handler3D->interpolatetissue(batchstart - batchstride, current, tissuenr, connected);
 					}
 				}
 			}
@@ -381,38 +359,33 @@ void InterpolationWidget::execute()
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolatetissuegrey_medianset(
-							batchstart, batchstart + batchstride,
-							rb_8connectivity->isOn());
+						handler3D->interpolatetissuegrey_medianset(batchstart, batchstart + batchstride,
+								rb_8connectivity->isOn());
 					}
 					// Last batch with smaller stride
 					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+							current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissuegrey_medianset(
-							batchstart - batchstride, current,
-							rb_8connectivity->isOn());
+						handler3D->interpolatetissuegrey_medianset(batchstart - batchstride, current, rb_8connectivity->isOn());
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
 					for (batchstart = startnr;
-						 batchstart <= current - batchstride;
-						 batchstart += batchstride)
+							 batchstart <= current - batchstride;
+							 batchstart += batchstride)
 					{
-						handler3D->interpolatetissuegrey(
-							batchstart, batchstart + batchstride);
+						handler3D->interpolatetissuegrey(batchstart, batchstart + batchstride);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current &&
-						current - (batchstart - batchstride) >= 2)
+							current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissuegrey(
-							batchstart - batchstride, current);
+						handler3D->interpolatetissuegrey(batchstart - batchstride, current);
 					}
 				}
 			}
@@ -527,9 +500,9 @@ FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(method_changed()));
+				SLOT(method_changed()));
 		QObject::disconnect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(source_changed()));
+				SLOT(source_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -563,9 +536,9 @@ FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 		source_changed();
 
 		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(method_changed()));
+				SLOT(method_changed()));
 		QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(source_changed()));
+				SLOT(source_changed()));
 	}
 	return fp;
 }

@@ -10,15 +10,17 @@
 
 #pragma once
 
+#include "Data/Types.h"
+
+#include <itkBinaryThresholdImageFilter.h>
 #include <itkCastImageFilter.h>
-#include <itkTranslationTransform.h>
-#include <itkNearestNeighborInterpolateImageFunction.h>
+#include <itkConnectedComponentImageFilter.h>
+#include <itkExtractImageFilter.h>
 #include <itkImageRegionConstIteratorWithIndex.h>
+#include <itkNearestNeighborInterpolateImageFunction.h>
 #include <itkResampleImageFilter.h>
 #include <itkSignedMaurerDistanceMapImageFilter.h>
-#include <itkExtractImageFilter.h>
-#include <itkBinaryThresholdImageFilter.h>
-#include <itkConnectedComponentImageFilter.h>
+#include <itkTranslationTransform.h>
 
 #include "itkSliceContiguousImage.h"
 
@@ -31,7 +33,31 @@ class ConnectedShapeBasedInterpolation
 public:
 	using image_type = itk::Image<float, 2>;
 	using mask_type = itk::Image<unsigned char, 2>;
+	using labefield_type = itk::Image<unsigned short, 2>;
 	using image_stack_type = itk::SliceContiguousImage<float>;
+
+	std::vector<image_type::Pointer> interpolate(const labefield_type* tissues1, const labefield_type* tissues2, tissues_size_t tissue_label, int number_of_slices, bool include_input_slices)
+	{
+		auto mask_tissues = [](const labefield_type* tissues, tissues_size_t tissuetype) {
+			auto masker = itk::BinaryThresholdImageFilter<labefield_type, image_type>::New();
+			masker->SetInput(tissues);
+			masker->SetLowerThreshold(tissuetype);
+			masker->SetUpperThreshold(tissuetype);
+			masker->SetInsideValue(255.0);
+			masker->SetOutsideValue(0.0);
+			masker->Update();
+			return image_type::Pointer(masker->GetOutput());
+		};
+		auto img1 = mask_tissues(tissues1, tissue_label);
+		auto img2 = mask_tissues(tissues2, tissue_label);
+		auto slices = interpolate(img1, img2, number_of_slices);
+		if (include_input_slices)
+		{
+			slices.insert(slices.begin(), img1);
+			slices.push_back(img2);
+		}
+		return slices;
+	}
 
 	std::vector<image_type::Pointer> interpolate(const image_type* slice1, const image_type* slice2, int number_of_slices)
 	{
@@ -115,7 +141,7 @@ private:
 	{
 		using idx_type = itk::ContinuousIndex<double, 2>;
 		std::vector<double> n(num_objects, 0.0);
-		std::vector<idx_type> idx(num_objects, idx_type({0,0}));
+		std::vector<idx_type> idx(num_objects, idx_type({0, 0}));
 
 		itk::ImageRegionConstIteratorWithIndex<mask_type> it(img, img->GetBufferedRegion());
 		for (it.GoToBegin(); !it.IsAtEnd(); ++it)
@@ -130,7 +156,7 @@ private:
 		}
 
 		std::vector<itk::Point<double, 2>> pts(num_objects);
-		for (int id=0; id<num_objects; ++id)
+		for (int id = 0; id < num_objects; ++id)
 		{
 			if (n[id] > 0)
 			{
@@ -143,14 +169,14 @@ private:
 	}
 
 	/// shift image by a specified amount
-	image_type::Pointer move_image(const image_type* img, const itk::Vector<double,2>& translation) const
+	image_type::Pointer move_image(const image_type* img, const itk::Vector<double, 2>& translation) const
 	{
 		using resample_filter_type = itk::ResampleImageFilter<image_type, image_type>;
 		using translation_type = itk::TranslationTransform<double, 2>;
-		
+
 		auto resample_filter = resample_filter_type::New();
 		resample_filter->SetInput(img);
-		
+
 		auto nn_interpolator = itk::NearestNeighborInterpolateImageFunction<image_type>::New();
 		resample_filter->SetInterpolator(nn_interpolator);
 
@@ -214,7 +240,6 @@ private:
 
 		return move_image(mask, ratio_12 * translation_12);
 	};
-
 };
 
 } // namespace iseg

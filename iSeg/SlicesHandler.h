@@ -349,8 +349,7 @@ public:
 	void cleartissue3D(tissues_size_t tissuetype);
 	void cleartissues();
 	void cleartissues3D();
-	void interpolatetissue(unsigned short slice1, unsigned short slice2,
-			tissues_size_t tissuetype);
+	void interpolatetissue(unsigned short slice1, unsigned short slice2, tissues_size_t tissuetype, bool connected);
 	void interpolatetissue_medianset(unsigned short slice1,
 			unsigned short slice2,
 			tissues_size_t tissuetype,
