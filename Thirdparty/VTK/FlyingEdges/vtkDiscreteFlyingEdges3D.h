@@ -56,7 +56,7 @@
 
 class vtkImageData;
 
-class VTKFILTERSGENERAL_EXPORT vtkDiscreteFlyingEdges3D : public vtkPolyDataAlgorithm
+class /* VTKFILTERSGENERAL_EXPORT */ vtkDiscreteFlyingEdges3D : public vtkPolyDataAlgorithm
 {
 public:
   static vtkDiscreteFlyingEdges3D *New();

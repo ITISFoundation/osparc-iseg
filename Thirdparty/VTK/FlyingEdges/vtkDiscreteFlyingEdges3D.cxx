@@ -12,6 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include "Precompiled.h"
+
 #include "vtkDiscreteFlyingEdges3D.h"
 
 #include "vtkArrayListTemplate.h" // For processing attribute data
