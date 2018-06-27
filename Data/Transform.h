@@ -46,6 +46,9 @@ public:
 	template<typename TVec3>
 	void setOffset(const TVec3& offset);
 
+	template<typename T>
+	void getDirectionCosines(T dc[6]) const;
+
 	template<typename TRotation3x3>
 	void getRotation(TRotation3x3& rot) const;
 
@@ -131,6 +134,17 @@ TVec3 Transform::rigidTransformPoint(const TVec3& in) const
 	out[1] = static_cast<T2>(_m[1][0] * in[0] + _m[1][1] * in[1] + _m[1][2] * in[2] + _m[1][3]);
 	out[2] = static_cast<T2>(_m[2][0] * in[0] + _m[2][1] * in[1] + _m[2][2] * in[2] + _m[2][3]);
 	return out;
+}
+
+template<typename T>
+void Transform::getDirectionCosines(T dc[6]) const
+{
+	dc[0] = _m[0][0];
+	dc[1] = _m[1][0];
+	dc[2] = _m[2][0];
+	dc[3] = _m[0][1];
+	dc[4] = _m[1][1];
+	dc[5] = _m[2][1];
 }
 
 template<typename T>
