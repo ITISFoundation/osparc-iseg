@@ -15,12 +15,14 @@
 
 #include "QVTKWidget.h"
 
+#include <QAction>
+#include <QMenu>
 #include <QResizeEvent>
 
-#include <vtkDiscreteMarchingCubes.h>
+#include <vtkFlyingEdges3D.h>
+#include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkGeometryFilter.h>
 #include <vtkImageAccumulate.h>
-#include <vtkMarchingCubes.h>
 #include <vtkMaskFields.h>
 #include <vtkPointData.h>
 #include <vtkThreshold.h>
@@ -53,7 +55,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 	vbox1 = new Q3VBox(this);
 	vtkWidget = new QVTKWidget(vbox1);
 	vtkWidget->setFixedSize(600, 600);
-	//	resize( QSize(600, 600).expandedTo(minimumSizeHint()) );
 
 	hbox1 = new Q3HBox(vbox1);
 	lb_trans = new QLabel("Transp.:", hbox1);
@@ -83,8 +84,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 	vbox1->show();
 
-	//	setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	//	vbox1->setFixedSize(vbox1->sizeHint());
 	resize(vbox1->sizeHint().expandedTo(minimumSizeHint()));
 
 	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
@@ -101,8 +100,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		float* field = (float*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
-			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			hand3D->copyfrombmp(i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 	else
@@ -112,22 +110,17 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		case 1: input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
 		case 2: input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
 		default:
-			cerr << "surfaceviewer3D::surfaceviewer3D: tissues_size_t not "
-							"implemented."
-					 << endl;
+			cerr << "surfaceviewer3D::surfaceviewer3D: tissues_size_t not implemented.\n";
 		}
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-		tissues_size_t* field =
-				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field =(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
-			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			hand3D->copyfromtissue(i, &(field[i * (unsigned long long)hand3D->return_area()]));
 		}
 	}
 
 	double bounds[6], center[3];
-
 	input->GetBounds(bounds);
 	input->GetCenter(center);
 	input->GetScalarRange(range);
@@ -157,9 +150,8 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 	if (bmportissue)
 	{
-		cubes = vtkSmartPointer<vtkMarchingCubes>::New();
-		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) *
-																			sl_thresh->value());
+		cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
+		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) * sl_thresh->value());
 		cubes->SetInputData(input);
 
 		PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
@@ -168,15 +160,13 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 		Actor.push_back(vtkSmartPointer<vtkActor>::New());
 		(*Actor.rbegin())->SetMapper((*PolyDataMapper.rbegin()));
-		(*Actor.rbegin())
-				->GetProperty()
-				->SetOpacity(1.0 - 0.01 * sl_trans->value());
-		//		(*Actor.rbegin())->GetProperty()->SetColor(1.0,1.0,1.0);
+		(*Actor.rbegin())->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
+
 		ren3D->AddActor((*Actor.rbegin()));
 	}
 	else
 	{
-		discreteCubes = vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
+		discreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 		discreteCubes->SetInputData(input);
 
 		histogram = vtkSmartPointer<vtkImageAccumulate>::New();
@@ -203,28 +193,12 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 			selector.push_back(vtkSmartPointer<vtkThreshold>::New());
 
-			//selector->SetInput(smoother->GetOutput());
-			(*selector.rbegin())
-					->SetInputConnection(discreteCubes->GetOutputPort());
-			//selector->SetInputArrayToProcess(0, 0, 0,
-			//	vtkDataObject::FIELD_ASSOCIATION_CELLS,
-			//	vtkDataSetAttributes::SCALARS);
+			(*selector.rbegin())->SetInputConnection(discreteCubes->GetOutputPort());
 
-			//// Strip the scalars from the output
-			//scalarsOff->SetInput(selector->GetOutput());
-			//scalarsOff->CopyAttributeOff(vtkMaskFields::POINT_DATA,
-			//	vtkDataSetAttributes::SCALARS);
-			//scalarsOff->CopyAttributeOff(vtkMaskFields::CELL_DATA,
-			//	vtkDataSetAttributes::SCALARS);
-
-			//geometry->SetInput(scalarsOff->GetOutput());
-			(*geometry.rbegin())
-					->SetInputConnection((*selector.rbegin())->GetOutputPort());
+			(*geometry.rbegin())->SetInputConnection((*selector.rbegin())->GetOutputPort());
 
 			// see if the label exists, if not skip it
-			double frequency =
-					histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(
-							i);
+			double frequency = histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(i);
 			if (frequency == 0.0)
 			{
 				continue;
@@ -236,8 +210,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 			(*selector.rbegin())->ThresholdBetween(i, i);
 
 			PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
-			(*PolyDataMapper.rbegin())
-					->SetInputConnection((*geometry.rbegin())->GetOutputPort());
+			(*PolyDataMapper.rbegin())->SetInputConnection((*geometry.rbegin())->GetOutputPort());
 			(*PolyDataMapper.rbegin())->ScalarVisibilityOff();
 
 			Actor.push_back(vtkSmartPointer<vtkActor>::New());
@@ -249,9 +222,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
 			(*Actor.rbegin())->GetProperty()->SetOpacity(opac1);
 			tissuecolor = TissueInfos::GetTissueColor(i);
-			(*Actor.rbegin())
-					->GetProperty()
-					->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+			(*Actor.rbegin())->GetProperty()->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 			ren3D->AddActor((*Actor.rbegin()));
 		}
 	}
@@ -286,9 +257,42 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 	//
 	//iren->Start();
 	vtkWidget->GetRenderWindow()->Render();
+
+	vtkWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(vtkWidget, SIGNAL(customContextMenuRequested(const QPoint &)), 
+        this, SLOT(show_context_menu(const QPoint &)));
 }
 
 SurfaceViewerWidget::~SurfaceViewerWidget() { delete vbox1; }
+
+void SurfaceViewerWidget::show_context_menu(const QPoint &pos)
+{
+	// maybe override vtk interactor to get signal (and picked object/coordinates?)
+
+	QMenu contextMenu(tr("Context menu"), this);
+	contextMenu.setStyleSheet("QWidget { color: white; }");
+
+	QAction select("Select Tissue", this);
+	connect(&select, SIGNAL(triggered()), this, SLOT(select_tissue()));
+	contextMenu.addAction(&select);
+
+	QAction get_slice("Go to Slice", this);
+	connect(&get_slice, SIGNAL(triggered()), this, SLOT(select_slice()));
+	contextMenu.addAction(&get_slice);
+	
+	contextMenu.exec(mapToGlobal(pos));
+}
+
+void SurfaceViewerWidget::select_tissue()
+{
+	;
+}
+
+void SurfaceViewerWidget::select_slice()
+{
+	;
+}
 
 void SurfaceViewerWidget::tissue_changed()
 {

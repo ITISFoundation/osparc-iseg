@@ -29,8 +29,8 @@ class vtkActor;
 class vtkInteractorStyleTrackballCamera;
 class vtkImageData;
 class vtkImageAccumulate;
-class vtkMarchingCubes;
-class vtkDiscreteMarchingCubes;
+class vtkFlyingEdges3D;
+class vtkDiscreteFlyingEdges3D;
 class vtkWindowedSincPolyDataFilter;
 class vtkThreshold;
 class vtkMaskFields;
@@ -77,6 +77,9 @@ protected:
 protected slots:
 	void transp_changed();
 	void thresh_changed();
+	void show_context_menu(const QPoint &pos);
+	void select_tissue();
+	void select_slice();
 
 signals:
 	void hasbeenclosed();
@@ -94,8 +97,8 @@ private:
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
 	vtkSmartPointer<vtkRenderWindow> renWin;
 	vtkSmartPointer<vtkImageAccumulate> histogram;
-	vtkSmartPointer<vtkDiscreteMarchingCubes> discreteCubes;
-	vtkSmartPointer<vtkMarchingCubes> cubes;
+	vtkSmartPointer<vtkDiscreteFlyingEdges3D> discreteCubes;
+	vtkSmartPointer<vtkFlyingEdges3D> cubes;
 	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother;
 	std::vector<vtkSmartPointer<vtkThreshold>> selector;
 	vtkSmartPointer<vtkMaskFields> scalarsOff;
