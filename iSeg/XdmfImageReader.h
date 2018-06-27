@@ -49,7 +49,7 @@ public:
 	QMap<QString, QString> GetMapArrayNames() const
 	{
 		return this->mapArrayNames;
-	};
+	}
 	int ParseXML();
 	int Read();
 
