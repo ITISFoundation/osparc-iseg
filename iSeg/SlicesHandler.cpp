@@ -1363,8 +1363,7 @@ int SlicesHandler::SaveAllXdmf(const char* filename, int compression,
 	writer.SetCompression(compression);
 	bool ok = writer.Write(naked);
 	ok &= writer.WriteColorLookup(_color_lookup_table.get(), naked);
-	ok &= TissueInfos::SaveTissuesHDF(
-			filename, _tissue_hierachy->selected_hierarchy(), naked, 0);
+	ok &= TissueInfos::SaveTissuesHDF(filename, _tissue_hierachy->selected_hierarchy(), naked, 0);
 	ok &= SaveMarkersHDF(filename, naked, 0);
 	return ok;
 }
@@ -1473,8 +1472,7 @@ int SlicesHandler::SaveMergeAllXdmf(const char* filename,
 	float pixsize[3];
 	float offset[3];
 
-	get_displacement(offset);
-	offset[2] += _thickness * _startslice;
+	auto active_slices_transform = get_transform_active_slices();
 
 	pixsize[0] = _dx;
 	pixsize[1] = _dy;
@@ -1487,8 +1485,7 @@ int SlicesHandler::SaveMergeAllXdmf(const char* filename,
 	{
 		bmpslices[i - _startslice] = _image_slices[i].return_bmp();
 		workslices[i - _startslice] = _image_slices[i].return_work();
-		tissueslices[i - _startslice] =
-				_image_slices[i].return_tissues(0); // TODO
+		tissueslices[i - _startslice] = _image_slices[i].return_tissues(0);
 	}
 
 	XdmfImageMerger merger;
@@ -1501,14 +1498,16 @@ int SlicesHandler::SaveMergeAllXdmf(const char* filename,
 	merger.SetWidth(_width);
 	merger.SetHeight(_height);
 	merger.SetPixelSize(pixsize);
-	merger.SetOffset(offset);
+	merger.SetImageTransform(active_slices_transform);
 	merger.SetCompression(compression);
 	merger.SetMergeFileNames(mergeImagefilenames);
 	if (merger.Write())
 	{
+		bool naked = false;
+		TissueInfos::SaveTissuesHDF(filename, _tissue_hierachy->selected_hierarchy(), naked, 0);
+		// \todo save markers also ?
 		if (auto lut = GetColorLookupTable())
 		{
-			bool naked = false;
 			XdmfImageWriter(filename).WriteColorLookup(lut.get(), naked);
 		}
 		return 1;

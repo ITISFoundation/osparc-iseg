@@ -37,7 +37,6 @@ XdmfImageMerger::XdmfImageMerger()
 	this->Height = 0;
 	this->Compression = 1;
 	this->PixelSize = 0;
-	this->Offset = 0;
 	this->ImageSlices = 0;
 	this->WorkSlices = 0;
 	this->TissueSlices = 0;
@@ -49,36 +48,28 @@ XdmfImageMerger::~XdmfImageMerger() { delete[] this->FileName; }
 int XdmfImageMerger::Write()
 {
 	return this->InternalWrite(FileName, MergeFileNames, ImageSlices,
-							   WorkSlices, TissueSlices, NumberOfSlices,
-							   TotalNumberOfSlices, Width, Height, PixelSize,
-							   Offset, Compression);
+			WorkSlices, TissueSlices, NumberOfSlices,
+			TotalNumberOfSlices, Width, Height, PixelSize,
+			ImageTransform, Compression);
 }
 
 int XdmfImageMerger::InternalWrite(
-	const char* filename, std::vector<QString>& mergefilenames,
-	float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue,
-	unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height,
-	float* pixelsize, float* offset, int compression)
+		const char* filename, std::vector<QString>& mergefilenames,
+		float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue,
+		unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height,
+		float* pixelsize, const Transform& transform, int compression)
 {
 	// Parse xml files of merged projects
 	std::vector<XdmfImageReader*> imageReaders;
 	std::vector<QString>::iterator iterFilename;
-	for (iterFilename = mergefilenames.begin();
-		 iterFilename != mergefilenames.end(); ++iterFilename)
+	for (iterFilename = mergefilenames.begin(); iterFilename != mergefilenames.end(); ++iterFilename)
 	{
 		XdmfImageReader* reader = new XdmfImageReader();
-		QString imageFilename =
-			QFileInfo(*iterFilename).completeBaseName() + ".xmf";
-		reader->SetFileName(QFileInfo(*iterFilename)
-								.dir()
-								.absFilePath(imageFilename)
-								.toAscii()
-								.data());
+		QString imageFilename = QFileInfo(*iterFilename).completeBaseName() + ".xmf";
+		reader->SetFileName(QFileInfo(*iterFilename).dir().absFilePath(imageFilename).toAscii().data());
 		if (reader->ParseXML() == 0)
 		{
-			std::cerr
-				<< "error in XdmfImageMerger::InternalWrite while parsing xmls"
-				<< std::endl;
+			std::cerr << "ERROR: XdmfImageMerger::InternalWrite while parsing xmls\n";
 			return 0;
 		}
 		imageReaders.push_back(reader);
@@ -92,15 +83,17 @@ int XdmfImageMerger::InternalWrite(
 	// save working directory
 	QDir oldcwd = QDir::current();
 	std::cerr << "storing current folder "
-			  << oldcwd.absolutePath().toAscii().data() << std::endl;
+						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	std::cerr << "changing current folder to "
-			  << fileInfo.absolutePath().toAscii().data() << std::endl;
+	std::cerr << "changing current folder to " << fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	const size_t N = (size_t)width * (size_t)height * (size_t)nrslicesTotal;
 	const size_t slice_size = static_cast<size_t>(width) * height;
+
+	float offset[3];
+	transform.getOffset(offset);
 
 	std::cerr << "XdmfImageReader::InternalWrite()" << std::endl;
 	std::cerr << "Width = " << width << std::endl;
@@ -115,6 +108,53 @@ int XdmfImageMerger::InternalWrite(
 		std::cerr << "error opening " << fname.toAscii().data() << std::endl;
 	}
 	writer.compression = compression;
+
+	{
+		//write dimensions, pixelsize, offset, dc,
+		std::vector<HDF5Writer::size_type> shape;
+		shape.resize(1);
+		int dimension[3];
+		dimension[0] = width;
+		dimension[1] = height;
+		dimension[2] = nrslicesTotal;
+
+		float dc[6];
+		transform.getDirectionCosines(dc);
+
+		float rotation[9];
+		for (int k = 0; k < 3; ++k)
+		{
+			rotation[k * 3 + 0] = transform[k][0];
+			rotation[k * 3 + 1] = transform[k][1];
+			rotation[k * 3 + 2] = transform[k][2];
+		}
+
+		shape[0] = 3;
+		if (!writer.write(dimension, shape, std::string("dimensions")))
+		{
+			cerr << "error writing dimensions" << endl;
+		}
+		if (!writer.write(offset, shape, std::string("offset")))
+		{
+			cerr << "error writing offset" << endl;
+		}
+		if (!writer.write(pixelsize, shape, std::string("pixelsize")))
+		{
+			cerr << "error writing pixelsize" << endl;
+		}
+
+		shape[0] = 6;
+		if (!writer.write(dc, shape, std::string("dc")))
+		{
+			cerr << "error writing dc" << endl;
+		}
+
+		shape[0] = 9;
+		if (!writer.write(rotation, shape, std::string("rotation")))
+		{
+			cerr << "error writing rotation" << endl;
+		}
+	}
 
 	// The slices are not contiguous in memory so we need to copy.
 
@@ -135,16 +175,16 @@ int XdmfImageMerger::InternalWrite(
 			std::vector<float> project_buffer;
 			std::vector<XdmfImageReader*>::iterator iterReader;
 			for (iterFilename = mergefilenames.begin(),
-				iterReader = imageReaders.begin();
-				 iterFilename != mergefilenames.end();
-				 ++iterFilename, ++iterReader)
+					iterReader = imageReaders.begin();
+					 iterFilename != mergefilenames.end();
+					 ++iterFilename, ++iterReader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-					(*iterReader)->GetNumberOfSlices();
+						(*iterReader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
 				ReadSource(*iterReader, (*iterFilename).toAscii().data(),
-						   project_buffer, junk);
+						project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -152,7 +192,7 @@ int XdmfImageMerger::InternalWrite(
 					slices[i] = &project_buffer[i * slice_size];
 				}
 				writer.write(slices.data(), project_slices, slice_size,
-							 "Source", offset);
+						"Source", offset);
 				offset += project_slices * slice_size;
 			}
 		}
@@ -175,16 +215,16 @@ int XdmfImageMerger::InternalWrite(
 			std::vector<float> project_buffer;
 			std::vector<XdmfImageReader*>::iterator iterReader;
 			for (iterFilename = mergefilenames.begin(),
-				iterReader = imageReaders.begin();
-				 iterFilename != mergefilenames.end();
-				 ++iterFilename, ++iterReader)
+					iterReader = imageReaders.begin();
+					 iterFilename != mergefilenames.end();
+					 ++iterFilename, ++iterReader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-					(*iterReader)->GetNumberOfSlices();
+						(*iterReader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
 				ReadTarget(*iterReader, (*iterFilename).toAscii().data(),
-						   project_buffer, junk);
+						project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -192,7 +232,7 @@ int XdmfImageMerger::InternalWrite(
 					slices[i] = &project_buffer[i * slice_size];
 				}
 				writer.write(slices.data(), project_slices, slice_size,
-							 "Target", offset);
+						"Target", offset);
 				offset += project_slices * slice_size;
 			}
 		}
@@ -215,16 +255,16 @@ int XdmfImageMerger::InternalWrite(
 			std::vector<tissues_size_t> project_buffer;
 			std::vector<XdmfImageReader*>::iterator iterReader;
 			for (iterFilename = mergefilenames.begin(),
-				iterReader = imageReaders.begin();
-				 iterFilename != mergefilenames.end();
-				 ++iterFilename, ++iterReader)
+					iterReader = imageReaders.begin();
+					 iterFilename != mergefilenames.end();
+					 ++iterFilename, ++iterReader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-					(*iterReader)->GetNumberOfSlices();
+						(*iterReader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
 				ReadTissues(*iterReader, (*iterFilename).toAscii().data(),
-							project_buffer, junk);
+						project_buffer, junk);
 
 				std::vector<tissues_size_t*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -232,7 +272,7 @@ int XdmfImageMerger::InternalWrite(
 					slices[i] = &project_buffer[i * slice_size];
 				}
 				writer.write(slices.data(), project_slices, slice_size,
-							 "Tissue", offset);
+						"Tissue", offset);
 				offset += project_slices * slice_size;
 			}
 		}
@@ -265,11 +305,11 @@ int XdmfImageMerger::InternalWrite(
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Dimensions", 3);
 	text = doc.createTextNode(QString("%1 %2 %3")
-								  .arg(offset[2])
-								  .arg(offset[1])
-								  .arg(offset[0])
-								  .toAscii()
-								  .data());
+																.arg(offset[2])
+																.arg(offset[1])
+																.arg(offset[0])
+																.toAscii()
+																.data());
 	dataitem.appendChild(text);
 	geometry.appendChild(dataitem);
 
@@ -280,22 +320,22 @@ int XdmfImageMerger::InternalWrite(
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Dimensions", 3);
 	text = doc.createTextNode(QString("%1 %2 %3")
-								  .arg(pixelsize[2])
-								  .arg(pixelsize[1])
-								  .arg(pixelsize[0])
-								  .toAscii()
-								  .data());
+																.arg(pixelsize[2])
+																.arg(pixelsize[1])
+																.arg(pixelsize[0])
+																.toAscii()
+																.data());
 	dataitem.appendChild(text);
 	geometry.appendChild(dataitem);
 
 	grid.appendChild(geometry);
 
 	QString qdims = QString("%1 %2 %3")
-						.arg(nrslicesTotal)
-						.arg(height)
-						.arg(width)
-						.toAscii()
-						.data();
+											.arg(nrslicesTotal)
+											.arg(height)
+											.arg(width)
+											.toAscii()
+											.data();
 
 	QDomElement topology = doc.createElement("Topology");
 	topology.setAttribute("Type", "3DCORECTMesh");
@@ -367,7 +407,7 @@ int XdmfImageMerger::InternalWrite(
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	std::cerr << "restored current folder "
-			  << QDir::current().absolutePath().toAscii().data() << std::endl;
+						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	for (XdmfImageReader* r : imageReaders)
 	{
@@ -378,9 +418,9 @@ int XdmfImageMerger::InternalWrite(
 }
 
 int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
-								const char* filename,
-								std::vector<float>& bufferFloat,
-								size_t& sliceoffset)
+		const char* filename,
+		std::vector<float>& bufferFloat,
+		size_t& sliceoffset)
 {
 	QFileInfo fileInfo(filename);
 	QString basename = fileInfo.completeBaseName();
@@ -389,12 +429,12 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 	// save working directory
 	QDir oldcwd = QDir::current();
 	std::cerr << "storing current folder "
-			  << oldcwd.absolutePath().toAscii().data() << std::endl;
+						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	std::cerr << "changing current folder to "
-			  << fileInfo.absolutePath().toAscii().data() << std::endl;
+						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	reader.loud = 1;
@@ -413,7 +453,7 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 		return 0;
 	}
 	if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
-					 mapSourceName.toAscii().data()))
+					mapSourceName.toAscii().data()))
 	{
 		std::cerr << "Error reading Source dataset..." << std::endl;
 		return 0;
@@ -423,15 +463,15 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	std::cerr << "restored current folder "
-			  << QDir::current().absolutePath().toAscii().data() << std::endl;
+						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }
 
 int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
-								const char* filename,
-								std::vector<float>& bufferFloat,
-								size_t& sliceoffset)
+		const char* filename,
+		std::vector<float>& bufferFloat,
+		size_t& sliceoffset)
 {
 	QFileInfo fileInfo(filename);
 	QString basename = fileInfo.completeBaseName();
@@ -440,12 +480,12 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	// save working directory
 	QDir oldcwd = QDir::current();
 	std::cerr << "storing current folder "
-			  << oldcwd.absolutePath().toAscii().data() << std::endl;
+						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	std::cerr << "changing current folder to "
-			  << fileInfo.absolutePath().toAscii().data() << std::endl;
+						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	reader.loud = 1;
@@ -461,13 +501,13 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	if (mapTargetName.isEmpty())
 	{
 		std::cerr << "Warning, no Target array, will initialize to 0..."
-				  << std::endl;
+							<< std::endl;
 		bufferFloat.assign(bufferFloat.size(), 0.0f);
 	}
 	else
 	{
 		if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
-						 mapTargetName.toAscii().data()))
+						mapTargetName.toAscii().data()))
 		{
 			std::cerr << "Error reading Target dataset..." << std::endl;
 			return 0;
@@ -478,14 +518,14 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	std::cerr << "restored current folder "
-			  << QDir::current().absolutePath().toAscii().data() << std::endl;
+						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }
 
 int XdmfImageMerger::ReadTissues(
-	XdmfImageReader* imageReader, const char* filename,
-	std::vector<tissues_size_t>& bufferTissuesSizeT, size_t& sliceoffset)
+		XdmfImageReader* imageReader, const char* filename,
+		std::vector<tissues_size_t>& bufferTissuesSizeT, size_t& sliceoffset)
 {
 	QFileInfo fileInfo(filename);
 	QString basename = fileInfo.completeBaseName();
@@ -494,12 +534,12 @@ int XdmfImageMerger::ReadTissues(
 	// save working directory
 	QDir oldcwd = QDir::current();
 	std::cerr << "storing current folder "
-			  << oldcwd.absolutePath().toAscii().data() << std::endl;
+						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 	std::cerr << "changing current folder to "
-			  << fileInfo.absolutePath().toAscii().data() << std::endl;
+						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
@@ -546,8 +586,8 @@ int XdmfImageMerger::ReadTissues(
 		}
 		std::vector<unsigned char>::iterator iterFrom = bufferUChar.begin();
 		std::vector<tissues_size_t>::iterator iterTo =
-			bufferTissuesSizeT.begin() +
-			(sliceoffset * this->Width) * this->Height;
+				bufferTissuesSizeT.begin() +
+				(sliceoffset * this->Width) * this->Height;
 		for (unsigned int k = 0; k < currNrslices; k++)
 		{
 			for (unsigned int j = 0; j < this->Height; j++)
@@ -563,15 +603,15 @@ int XdmfImageMerger::ReadTissues(
 	else if (type.compare("unsigned short") == 0)
 	{
 		static_assert(std::is_same<unsigned short, tissues_size_t>::value,
-					  "Special case we read directly into the buffer.");
+				"Special case we read directly into the buffer.");
 		if (mapTissueName.isEmpty())
 		{
 			std::cerr << "Error, no Tissue array..." << std::endl;
 			return 0;
 		}
 		if (!reader.read(
-				&bufferTissuesSizeT[(sliceoffset * this->Width) * this->Height],
-				mapTissueName.toAscii().data()))
+						&bufferTissuesSizeT[(sliceoffset * this->Width) * this->Height],
+						mapTissueName.toAscii().data()))
 		{
 			std::cerr << "Error reading Tissue dataset..." << std::endl;
 			return 0;
@@ -601,8 +641,8 @@ int XdmfImageMerger::ReadTissues(
 		}
 		std::vector<unsigned int>::iterator iterFrom = bufferUInt.begin();
 		std::vector<tissues_size_t>::iterator iterTo =
-			bufferTissuesSizeT.begin() +
-			sliceoffset * this->Width * this->Height;
+				bufferTissuesSizeT.begin() +
+				sliceoffset * this->Width * this->Height;
 		for (unsigned int k = 0; k < currNrslices; k++)
 		{
 			for (unsigned int j = 0; j < this->Height; j++)
@@ -625,7 +665,7 @@ int XdmfImageMerger::ReadTissues(
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 	std::cerr << "restored current folder "
-			  << QDir::current().absolutePath().toAscii().data() << std::endl;
+						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }

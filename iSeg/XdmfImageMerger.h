@@ -12,6 +12,7 @@
 
 #include "XdmfImageReader.h"
 
+#include "Data/Transform.h"
 #include "Data/Types.h"
 
 #include "Core/SetGetMacros.h"
@@ -37,8 +38,8 @@ public:
 	GetMacro(Compression, int);
 	SetMacro(PixelSize, float*);
 	GetMacro(PixelSize, float*);
-	SetMacro(Offset, float*);
-	GetMacro(Offset, float*);
+	SetMacro(ImageTransform, Transform);
+	GetMacro(ImageTransform, Transform);
 	SetMacro(ImageSlices, float**);
 	GetMacro(ImageSlices, float**);
 	SetMacro(WorkSlices, float**);
@@ -57,7 +58,7 @@ protected:
 	unsigned Height;
 	int Compression;
 	float* PixelSize;
-	float* Offset;
+	Transform ImageTransform;
 	float** ImageSlices;
 	float** WorkSlices;
 	tissues_size_t** TissueSlices;
@@ -68,7 +69,7 @@ private:
 			std::vector<QString>& mergefilenames, float** slicesbmp,
 			float** sliceswork, tissues_size_t** slicestissue,
 			unsigned nrslices, unsigned nrslicesTotal, unsigned width,
-			unsigned height, float* pixelsize, float* offset,
+			unsigned height, float* pixelsize, const Transform& transform,
 			int compression);
 	int ReadSource(XdmfImageReader* imageReader, const char* filename,
 			std::vector<float>& bufferFloat, size_t& sliceoffset);
