@@ -47,6 +47,35 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 
 using namespace iseg;
 
+class MyInteractor : public vtkInteractorStyleTrackballCamera
+{
+public:
+	static MyInteractor *New();
+	vtkTypeMacro(MyInteractor, vtkInteractorStyleTrackballCamera);
+	void PrintSelf(ostream& os, vtkIndent indent) override 
+	{
+		vtkInteractorStyleTrackballCamera::PrintSelf(os, indent);
+	}
+	
+	void OnRightButtonDown() override
+	{
+		this->FindPokedRenderer(this->Interactor->GetEventPosition()[0],
+							this->Interactor->GetEventPosition()[1]);
+		if (this->CurrentRenderer == nullptr)
+		{
+			return;
+		}
+		// pick prop
+
+		// if no prop
+		this->GrabFocus(this->EventCallbackCommand);
+		this->StartDolly();
+	}
+};
+
+vtkStandardNewMacro(MyInteractor);
+
+
 SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissue1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
