@@ -39,6 +39,10 @@ class vtkDataSetMapper;
 class vtkPolyDataMapper;
 class vtkRenderer;
 class vtkRenderWindow;
+class vtkEventQtSlotConnect;
+class vtkObject;
+class vtkCommand;
+class vtkCellPicker;
 
 namespace iseg {
 
@@ -77,9 +81,10 @@ protected:
 protected slots:
 	void transp_changed();
 	void thresh_changed();
-	void show_context_menu(const QPoint &pos);
-	void select_tissue();
-	void select_slice();
+	void popup(vtkObject* obj, unsigned long,
+			void* client_data, void*,
+			vtkCommand* command);
+	void select_action(QAction*);
 
 signals:
 	void hasbeenclosed();
@@ -91,6 +96,9 @@ private:
 	vtkSmartPointer<vtkDataSetMapper> gridMapper;
 
 	vtkSmartPointer<QVTKInteractor> iren;
+
+	vtkSmartPointer<vtkEventQtSlotConnect> connections;
+	vtkSmartPointer<vtkCellPicker> cellpicker;
 
 	vtkSmartPointer<vtkImageData> input;
 	vtkSmartPointer<vtkRenderer> ren3D;

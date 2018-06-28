@@ -19,8 +19,8 @@
 #include <QMenu>
 #include <QResizeEvent>
 
-#include <vtkFlyingEdges3D.h>
 #include <vtkDiscreteFlyingEdges3D.h>
+#include <vtkFlyingEdges3D.h>
 #include <vtkGeometryFilter.h>
 #include <vtkImageAccumulate.h>
 #include <vtkMaskFields.h>
@@ -29,6 +29,8 @@
 #include <vtkWindowedSincPolyDataFilter.h>
 
 #include <vtkActor.h>
+#include <vtkCellPicker.h>
+#include <vtkEventQtSlotConnect.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
@@ -46,35 +48,6 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL);
 VTK_MODULE_INIT(vtkInteractionStyle);
 
 using namespace iseg;
-
-class MyInteractor : public vtkInteractorStyleTrackballCamera
-{
-public:
-	static MyInteractor *New();
-	vtkTypeMacro(MyInteractor, vtkInteractorStyleTrackballCamera);
-	void PrintSelf(ostream& os, vtkIndent indent) override 
-	{
-		vtkInteractorStyleTrackballCamera::PrintSelf(os, indent);
-	}
-	
-	void OnRightButtonDown() override
-	{
-		this->FindPokedRenderer(this->Interactor->GetEventPosition()[0],
-							this->Interactor->GetEventPosition()[1]);
-		if (this->CurrentRenderer == nullptr)
-		{
-			return;
-		}
-		// pick prop
-
-		// if no prop
-		this->GrabFocus(this->EventCallbackCommand);
-		this->StartDolly();
-	}
-};
-
-vtkStandardNewMacro(MyInteractor);
-
 
 SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissue1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
@@ -142,7 +115,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 			cerr << "surfaceviewer3D::surfaceviewer3D: tissues_size_t not implemented.\n";
 		}
 		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-		tissues_size_t* field =(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field = (tissues_size_t*)input->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
 		{
 			hand3D->copyfromtissue(i, &(field[i * (unsigned long long)hand3D->return_area()]));
@@ -210,9 +183,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
-			cerr << "surfaceviewer3D::surfaceviewer3D: Out of range "
-							"tissues_size_t."
-					 << endl;
+			cerr << "surfaceviewer3D::surfaceviewer3D: Out of range tissues_size_t.\n";
 		}
 #endif // TISSUES_SIZE_TYPEDEF
 		float* tissuecolor;
@@ -256,16 +227,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		}
 	}
 
-	//smoother->SetInput(discreteCubes->GetOutput());
-	//smoother->SetNumberOfIterations(smoothingIterations);
-	//smoother->BoundarySmoothingOff();
-	//smoother->FeatureEdgeSmoothingOff();
-	//smoother->SetFeatureAngle(featureAngle);
-	//smoother->SetPassBand(passBand);
-	//smoother->NonManifoldSmoothingOn();
-	//smoother->NormalizeCoordinatesOn();
-	//smoother->Update();
-
 	ren3D->SetBackground(0, 0, 0);
 	ren3D->SetViewport(0.0, 0.0, 1.0, 1.0);
 
@@ -281,46 +242,85 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 	iren->SetRenderWindow(vtkWidget->GetRenderWindow());
 
-	//
-	// Jump into the event loop and capture mouse and keyboard events.
-	//
-	//iren->Start();
+	QMenu* popup_actions = new QMenu(vtkWidget);
+	popup_actions->addAction("Select Tissue");
+	popup_actions->addAction("Select Slice");
+	connect(popup_actions, SIGNAL(triggered(QAction*)), this, SLOT(select_action(QAction*)));
+
+	connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+
+	connections->Connect(vtkWidget->GetRenderWindow()->GetInteractor(), vtkCommand::RightButtonPressEvent,
+			this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)),
+			popup_actions, 1.0);
+
 	vtkWidget->GetRenderWindow()->Render();
-
-	vtkWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-
-	connect(vtkWidget, SIGNAL(customContextMenuRequested(const QPoint &)), 
-        this, SLOT(show_context_menu(const QPoint &)));
 }
 
 SurfaceViewerWidget::~SurfaceViewerWidget() { delete vbox1; }
 
-void SurfaceViewerWidget::show_context_menu(const QPoint &pos)
+void iseg::SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)
 {
-	// maybe override vtk interactor to get signal (and picked object/coordinates?)
+	// A note about context menus in Qt and the QVTKWidget
+	// You may find it easy to just do context menus on right button up,
+	// due to the event proxy mechanism in place.
 
-	QMenu contextMenu(tr("Context menu"), this);
-	contextMenu.setStyleSheet("QWidget { color: white; }");
+	// That usually works, except in some cases.
+	// One case is where you capture context menu events that
+	// child windows don't process.  You could end up with a second
+	// context menu after the first one.
 
-	QAction select("Select Tissue", this);
-	connect(&select, SIGNAL(triggered()), this, SLOT(select_tissue()));
-	contextMenu.addAction(&select);
+	// See QVTKWidget::ContextMenuEvent enum which was added after the
+	// writing of this example.
 
-	QAction get_slice("Go to Slice", this);
-	connect(&get_slice, SIGNAL(triggered()), this, SLOT(select_slice()));
-	contextMenu.addAction(&get_slice);
-	
-	contextMenu.exec(mapToGlobal(pos));
+	if (!cellpicker)
+	{
+		cellpicker = vtkSmartPointer<vtkCellPicker>::New();
+		cellpicker->SetTolerance(0.0005);
+	}
+
+	// get interactor
+	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+
+	// get event location
+	int* position = iren->GetEventPosition();
+
+	// pick from this location.
+	cellpicker->Pick(position[0], position[1], 0, ren3D);
+
+	if (cellpicker->GetCellId() != -1)
+	{
+		// consume event so the interactor style doesn't get it
+		command->AbortFlagOn();
+		// get popup menu
+		QMenu* popupMenu = static_cast<QMenu*>(client_data);
+		// remember to flip y
+		int* sz = iren->GetSize();
+		QPoint pt = QPoint(position[0], sz[1] - position[1]);
+		// map to global
+		QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
+		// show popup menu at global point
+		popupMenu->popup(global_pt);
+	}
 }
 
-void SurfaceViewerWidget::select_tissue()
+void iseg::SurfaceViewerWidget::select_action(QAction* action)
 {
-	;
-}
-
-void SurfaceViewerWidget::select_slice()
-{
-	;
+	if (cellpicker)
+	{
+		if (action->text() == "Select Tissue")
+		{
+			if (cellpicker->GetCellId() != -1)
+			{
+				// get tissue type, then select tissue
+			}
+		}
+		else if (action->text() == "Select Slice")
+		{
+			double* worldPosition = cellpicker->GetPickPosition();
+			// snap to closest slice
+			// jump to slice
+		}
+	}
 }
 
 void SurfaceViewerWidget::tissue_changed()
@@ -570,9 +570,7 @@ void SurfaceViewerWidget::transp_changed()
 {
 	if (bmportissue)
 	{
-		(*Actor.rbegin())
-				->GetProperty()
-				->SetOpacity(1.0 - 0.01 * sl_trans->value());
+		(*Actor.rbegin())->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
 	}
 	else
 	{
@@ -606,8 +604,7 @@ void SurfaceViewerWidget::thresh_changed()
 {
 	if (bmportissue)
 	{
-		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) *
-																			sl_thresh->value());
+		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) * sl_thresh->value());
 
 		vtkWidget->GetRenderWindow()->Render();
 	}
