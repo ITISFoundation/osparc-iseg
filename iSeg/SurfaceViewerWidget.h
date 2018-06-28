@@ -42,7 +42,7 @@ class vtkRenderWindow;
 class vtkEventQtSlotConnect;
 class vtkObject;
 class vtkCommand;
-class vtkCellPicker;
+class vtkPropPicker;
 
 namespace iseg {
 
@@ -98,7 +98,7 @@ private:
 	vtkSmartPointer<QVTKInteractor> iren;
 
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;
-	vtkSmartPointer<vtkCellPicker> cellpicker;
+	vtkSmartPointer<vtkPropPicker> picker;
 
 	vtkSmartPointer<vtkImageData> input;
 	vtkSmartPointer<vtkRenderer> ren3D;

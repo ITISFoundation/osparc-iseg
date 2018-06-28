@@ -9,11 +9,11 @@
  */
 #pragma once
 
-#include "Types.h"
 #include "Transform.h"
+#include "Types.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace iseg {
 
@@ -29,7 +29,9 @@ public:
 
 	virtual unsigned short start_slice() const = 0;
 	virtual unsigned short end_slice() const = 0;
+
 	virtual unsigned short active_slice() const = 0;
+	virtual void set_active_slice(unsigned short slice, bool signal_change) = 0;
 
 	virtual Transform transform() const = 0;
 	virtual Vec3 spacing() const = 0;
@@ -47,6 +49,7 @@ public:
 	virtual std::vector<std::string> tissue_names() const = 0;
 	virtual std::vector<bool> tissue_locks() const = 0;
 	virtual std::vector<tissues_size_t> tissue_selection() const = 0;
+	virtual void set_tissue_selection(const std::vector<tissues_size_t>& sel) = 0;
 
 	virtual bool has_colors() const = 0;
 	virtual size_t number_of_colors() const = 0;

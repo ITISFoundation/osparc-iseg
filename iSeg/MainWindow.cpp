@@ -32,8 +32,8 @@
 #include "Settings.h"
 #include "SliceViewerWidget.h"
 #include "SmoothingWidget.h"
-#include "SurfaceViewerWidget.h"
 #include "StdStringToQString.h"
+#include "SurfaceViewerWidget.h"
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
@@ -382,6 +382,19 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	m_S4Lcommunicationfilename = QString("");
 
 	handler3D = hand3D;
+
+	handler3D->on_tissue_selection_changed.connect([this](const std::vector<tissues_size_t>& sel) {
+		std::set<tissues_size_t> selection(sel.begin(), sel.end());
+		for (auto item : tissueTreeWidget->get_all_items())
+		{
+			bool select = selection.count(tissueTreeWidget->get_type(item)) != 0;
+			item->setSelected(select);
+		}
+	});
+
+	handler3D->on_active_slice_changed.connect([this](unsigned short slice) {
+		slice_changed();
+	});
 
 	if (!(handler3D->isloaded()))
 	{
@@ -4731,8 +4744,7 @@ void MainWindow::execute_3Dsurfaceviewerbmp()
 	if (SV3Dbmp == NULL)
 	{
 		SV3Dbmp = new SurfaceViewerWidget(handler3D, true, 0);
-		QObject::connect(SV3Dbmp, SIGNAL(hasbeenclosed()), this,
-				SLOT(SV3Dbmp_closed()));
+		QObject::connect(SV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(SV3Dbmp_closed()));
 	}
 
 	SV3Dbmp->show();
@@ -5598,7 +5610,7 @@ void MainWindow::select_tissue(Point p, bool clear_selection)
 			item->setSelected(tissueTreeWidget->get_type(item) == type);
 		}
 	}
-	
+
 	// remove filter if it is preventing tissue from being shown
 	if (!tissueTreeWidget->is_visible(type))
 	{
@@ -5637,7 +5649,7 @@ void MainWindow::next_featuring_slice()
 	unsigned short nextslice = handler3D->get_next_featuring_slice(type, found);
 	if (found)
 	{
-		handler3D->set_activeslice(nextslice);
+		handler3D->set_active_slice(nextslice);
 		slice_changed();
 	}
 	else
@@ -6840,7 +6852,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 
 void MainWindow::slicenr_up()
 {
-	handler3D->set_activeslice(handler3D->active_slice() + 1);
+	handler3D->set_active_slice(handler3D->active_slice() + 1);
 	slice_changed();
 }
 
@@ -6861,31 +6873,31 @@ void MainWindow::zoom_out()
 
 void MainWindow::slicenr_down()
 {
-	handler3D->set_activeslice(handler3D->active_slice() - 1);
+	handler3D->set_active_slice(handler3D->active_slice() - 1);
 	slice_changed();
 }
 
 void MainWindow::sb_slicenr_changed()
 {
-	handler3D->set_activeslice(sb_slicenr->value() - 1);
+	handler3D->set_active_slice(sb_slicenr->value() - 1);
 	slice_changed();
 }
 
 void MainWindow::scb_slicenr_changed()
 {
-	handler3D->set_activeslice(scb_slicenr->value() - 1);
+	handler3D->set_active_slice(scb_slicenr->value() - 1);
 	slice_changed();
 }
 
 void MainWindow::pb_first_pressed()
 {
-	handler3D->set_activeslice(0);
+	handler3D->set_active_slice(0);
 	slice_changed();
 }
 
 void MainWindow::pb_last_pressed()
 {
-	handler3D->set_activeslice(handler3D->num_slices() - 1);
+	handler3D->set_active_slice(handler3D->num_slices() - 1);
 	slice_changed();
 }
 
@@ -6977,7 +6989,7 @@ void MainWindow::tissue_selection_changed()
 	}
 
 	std::set<tissues_size_t> sel;
-	for (auto a: list)
+	for (auto a : list)
 	{
 		sel.insert(tissueTreeWidget->get_type(a));
 	}

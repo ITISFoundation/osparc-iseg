@@ -7786,18 +7786,12 @@ void SlicesHandler::add2tissueall(tissues_size_t tissuetype, float f,
 	}
 }
 
-void SlicesHandler::set_activeslice(unsigned int actslice)
-{
-	if (actslice < _nrslices)
-		_activeslice = actslice;
-}
-
-void SlicesHandler::next_slice() { set_activeslice(_activeslice + 1); }
+void SlicesHandler::next_slice() { set_active_slice(_activeslice + 1); }
 
 void SlicesHandler::prev_slice()
 {
 	if (_activeslice > 0)
-		set_activeslice(_activeslice - 1);
+		set_active_slice(_activeslice - 1);
 }
 
 unsigned short SlicesHandler::get_next_featuring_slice(tissues_size_t type,
@@ -7824,6 +7818,20 @@ unsigned short SlicesHandler::get_next_featuring_slice(tissues_size_t type,
 }
 
 unsigned short SlicesHandler::active_slice() const { return _activeslice; }
+
+void SlicesHandler::set_active_slice(unsigned short slice, bool signal_change)
+{
+	if (slice < _nrslices && slice != _activeslice)
+	{
+		_activeslice = slice;
+
+		// notify observers that slice changed
+		if (signal_change)
+		{
+			on_active_slice_changed(slice);
+		}
+	}
+}
 
 bmphandler* SlicesHandler::get_activebmphandler()
 {
@@ -8368,7 +8376,7 @@ iseg::DataSelection SlicesHandler::undo()
 					_uelem->marks_old.clear();
 				}
 
-				set_activeslice(dataSelection.sliceNr);
+				set_active_slice(dataSelection.sliceNr);
 
 				_uelem = nullptr;
 
@@ -8536,7 +8544,7 @@ iseg::DataSelection SlicesHandler::redo()
 					_uelem->marks_new.clear();
 				}
 
-				set_activeslice(dataSelection.sliceNr);
+				set_active_slice(dataSelection.sliceNr);
 
 				_uelem = nullptr;
 
@@ -12378,18 +12386,24 @@ void SlicesHandler::SetNumberOfUndoArrays(unsigned n)
 	this->_undoQueue.set_nrundoarraysmax(n);
 }
 
-std::vector<iseg::tissues_size_t> iseg::SlicesHandler::tissue_selection() const
+std::vector<iseg::tissues_size_t> SlicesHandler::tissue_selection() const
 {
 	auto sel_set = TissueInfos::GetSelectedTissues();
 	return std::vector<iseg::tissues_size_t>(sel_set.begin(), sel_set.end());
 }
 
-size_t iseg::SlicesHandler::number_of_colors() const
+void SlicesHandler::set_tissue_selection(const std::vector<tissues_size_t>& sel)
+{
+	TissueInfos::SetSelectedTissues(std::set<tissues_size_t>(sel.begin(), sel.end()));
+	on_tissue_selection_changed(sel);
+}
+
+size_t SlicesHandler::number_of_colors() const
 {
 	return (_color_lookup_table != 0) ? _color_lookup_table->NumberOfColors() : 0;
 }
 
-void iseg::SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, unsigned char& b) const
+void SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, unsigned char& b) const
 {
 	if (_color_lookup_table != 0)
 	{

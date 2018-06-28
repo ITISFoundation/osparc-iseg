@@ -19,6 +19,7 @@
 #include <QMenu>
 #include <QResizeEvent>
 
+#include <vtkCellData.h>
 #include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkFlyingEdges3D.h>
 #include <vtkGeometryFilter.h>
@@ -26,13 +27,14 @@
 #include <vtkMaskFields.h>
 #include <vtkPointData.h>
 #include <vtkThreshold.h>
+#include <vtkUnsignedShortArray.h>
 #include <vtkWindowedSincPolyDataFilter.h>
 
 #include <vtkActor.h>
-#include <vtkCellPicker.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkPropPicker.h>
 #include <vtkProperty.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
@@ -56,7 +58,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 	hand3D = hand3D1;
 	vbox1 = new Q3VBox(this);
 	vtkWidget = new QVTKWidget(vbox1);
-	vtkWidget->setFixedSize(600, 600);
+	vtkWidget->setFixedSize(1000, 1000);
 
 	hbox1 = new Q3HBox(vbox1);
 	lb_trans = new QLabel("Transp.:", hbox1);
@@ -77,8 +79,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		sl_thresh->setValue(50);
 		hbox2->setFixedHeight(hbox2->sizeHint().height());
 
-		QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this,
-				SLOT(thresh_changed()));
+		QObject::connect(sl_thresh, SIGNAL(sliderReleased()), this, SLOT(thresh_changed()));
 	}
 
 	bt_update = new QPushButton("Update", vbox1);
@@ -122,11 +123,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		}
 	}
 
-	double bounds[6], center[3];
-	input->GetBounds(bounds);
-	input->GetCenter(center);
 	input->GetScalarRange(range);
-
 	double level = 0.5 * (range[1] + range[0]);
 	double window = range[1] - range[0];
 
@@ -178,8 +175,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 		histogram->SetComponentSpacing(1, 1, 1);
 		histogram->Update();
 
-		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel,
-				endLabel);
+		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel, endLabel);
 #ifdef TISSUES_SIZE_TYPEDEF
 		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
 		{
@@ -258,7 +254,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissu
 
 SurfaceViewerWidget::~SurfaceViewerWidget() { delete vbox1; }
 
-void iseg::SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)
+void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)
 {
 	// A note about context menus in Qt and the QVTKWidget
 	// You may find it easy to just do context menus on right button up,
@@ -272,10 +268,9 @@ void iseg::SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* clien
 	// See QVTKWidget::ContextMenuEvent enum which was added after the
 	// writing of this example.
 
-	if (!cellpicker)
+	if (!picker)
 	{
-		cellpicker = vtkSmartPointer<vtkCellPicker>::New();
-		cellpicker->SetTolerance(0.0005);
+		picker = vtkSmartPointer<vtkPropPicker>::New();
 	}
 
 	// get interactor
@@ -285,9 +280,7 @@ void iseg::SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* clien
 	int* position = iren->GetEventPosition();
 
 	// pick from this location.
-	cellpicker->Pick(position[0], position[1], 0, ren3D);
-
-	if (cellpicker->GetCellId() != -1)
+	if (picker->Pick(position[0], position[1], 0, ren3D) != 0)
 	{
 		// consume event so the interactor style doesn't get it
 		command->AbortFlagOn();
@@ -298,27 +291,56 @@ void iseg::SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* clien
 		QPoint pt = QPoint(position[0], sz[1] - position[1]);
 		// map to global
 		QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
+
+		for (auto action : popupMenu->actions())
+		{
+			if (action->text() == "Select Tissue")
+			{
+				action->setVisible(!bmportissue);
+			}
+		}
+
 		// show popup menu at global point
 		popupMenu->popup(global_pt);
 	}
 }
 
-void iseg::SurfaceViewerWidget::select_action(QAction* action)
+void SurfaceViewerWidget::select_action(QAction* action)
 {
-	if (cellpicker)
+	if (picker)
 	{
+		double* worldPosition = picker->GetPickPosition();
+
 		if (action->text() == "Select Tissue")
 		{
-			if (cellpicker->GetCellId() != -1)
+			auto surface = discreteCubes->GetOutput();
+			vtkIdType pointId = surface->FindPoint(worldPosition);
+
+			if (pointId != -1 && discreteCubes)
 			{
 				// get tissue type, then select tissue
+				if (auto labels = surface->GetPointData()->GetScalars())
+				{
+					auto tissue_type = static_cast<int>(labels->GetTuple1(pointId));
+					hand3D->set_tissue_selection(std::vector<tissues_size_t>(1, tissue_type));
+				}
 			}
 		}
 		else if (action->text() == "Select Slice")
 		{
-			double* worldPosition = cellpicker->GetPickPosition();
-			// snap to closest slice
-			// jump to slice
+			if (input)
+			{
+				// compute closest slice
+				int dims[3];
+				double spacing[3], origin[3];
+				input->GetDimensions(dims);
+				input->GetSpacing(spacing);
+				input->GetSpacing(origin);
+				int slice = (spacing[2] > 0) ? static_cast<int>(std::round((worldPosition[2] - origin[2] + spacing[2]) / spacing[2])) : 0;
+
+				// jump to slice
+				hand3D->set_active_slice(std::min(slice, dims[2] - 1), true);
+			}
 		}
 	}
 }
