@@ -12,7 +12,9 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#ifdef WIN32
 #include "Precompiled.h"
+#endif
 
 #include "vtkDiscreteFlyingEdges3D.h"
 
