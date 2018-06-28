@@ -335,8 +335,8 @@ void SurfaceViewerWidget::select_action(QAction* action)
 				double spacing[3], origin[3];
 				input->GetDimensions(dims);
 				input->GetSpacing(spacing);
-				input->GetSpacing(origin);
-				int slice = (spacing[2] > 0) ? static_cast<int>(std::round((worldPosition[2] - origin[2] + spacing[2]) / spacing[2])) : 0;
+				input->GetOrigin(origin);
+				int slice = (spacing[2] > 0) ? static_cast<int>(std::round((worldPosition[2] - origin[2]) / spacing[2])) : 0;
 
 				// jump to slice
 				hand3D->set_active_slice(std::min(slice, dims[2] - 1), true);
