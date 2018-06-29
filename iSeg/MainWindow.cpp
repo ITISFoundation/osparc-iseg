@@ -4714,6 +4714,11 @@ void MainWindow::execute_tissue_surfaceviewer()
 	start_surfaceviewer(SurfaceViewerWidget::kTissues);
 }
 
+void MainWindow::execute_selectedtissue_surfaceviewer()
+{
+	start_surfaceviewer(SurfaceViewerWidget::kSelectedTissues);
+}
+
 void MainWindow::execute_source_surfaceviewer()
 {
 	start_surfaceviewer(SurfaceViewerWidget::kSource);
@@ -6995,6 +7000,7 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 			contextMenu.insertItem("Next Feat. Slice", this,
 					SLOT(next_featuring_slice()));
 		}
+		contextMenu.insertItem("Show Tissue Surface", this, SLOT(execute_selectedtissue_surfaceviewer()));
 		contextMenu.insertSeparator();
 		int itemId = contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget,
 				SLOT(toggle_show_tissue_indices()));
@@ -7015,7 +7021,8 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		contextMenu.insertItem("Clear Selected", this, SLOT(clearselected()));
 		contextMenu.insertItem("Get Selected", this, SLOT(selectedtissue2work()));
 		contextMenu.insertItem("Merge", this, SLOT(merge()));
-		contextMenu.insertItem("Unselect all", this, SLOT(unselectall()));
+		contextMenu.insertItem("Unselect All", this, SLOT(unselectall()));
+		contextMenu.insertItem("Show Tissue Surfaces", this, SLOT(execute_selectedtissue_surfaceviewer()));
 		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 }

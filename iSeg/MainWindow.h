@@ -428,6 +428,7 @@ private slots:
 	void execute_tissue_surfaceviewer();
 	void execute_source_surfaceviewer();
 	void execute_target_surfaceviewer();
+	void execute_selectedtissue_surfaceviewer();
 	void execute_3Dvolumeviewerbmp();
 	void execute_3Dvolumeviewertissue();
 	void execute_displacement();
