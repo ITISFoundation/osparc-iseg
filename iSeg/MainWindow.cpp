@@ -1518,7 +1518,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(bmp_show, SIGNAL(selecttissue_sign(Point, bool)), this,
 			SLOT(select_tissue(Point, bool)));
 	QObject::connect(bmp_show, SIGNAL(viewtissue_sign(Point)), this,
-			SLOT(select_tissue(Point, bool)));
+			SLOT(view_tissue(Point)));
 	QObject::connect(work_show, SIGNAL(addmark_sign(Point)), this,
 			SLOT(add_mark(Point)));
 	QObject::connect(work_show, SIGNAL(addlabel_sign(Point, std::string)), this,
@@ -1540,7 +1540,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(work_show, SIGNAL(selecttissue_sign(Point, bool)), this,
 			SLOT(select_tissue(Point, bool)));
 	QObject::connect(work_show, SIGNAL(viewtissue_sign(Point)), this,
-			SLOT(select_tissue(Point, bool)));
+			SLOT(view_tissue(Point)));
 	QObject::connect(tissueFilter, SIGNAL(textChanged(const QString&)), this,
 			SLOT(tissueFilterChanged(const QString&)));
 	QObject::connect(lockTissues, SIGNAL(clicked()), this,
@@ -4688,7 +4688,7 @@ void MainWindow::execute_new()
 	reset_brightnesscontrast();
 }
 
-void iseg::MainWindow::start_surfaceviewer(int mode)
+void MainWindow::start_surfaceviewer(int mode)
 {
 	// ensure we don't have a viewer running
 	if (surface_viewer != NULL)

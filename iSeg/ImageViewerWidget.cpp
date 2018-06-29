@@ -663,6 +663,7 @@ void ImageViewerWidget::view_tissue_surface()
 	Point p;
 	p.px = (unsigned short)eventx;
 	p.py = (unsigned short)eventy;
+	//emit selecttissue_sign(p, true);
 	emit viewtissue_sign(p);
 }
 
