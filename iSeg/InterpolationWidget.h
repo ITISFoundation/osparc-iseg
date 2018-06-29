@@ -89,7 +89,9 @@ private:
 	QRadioButton *rb_8connectivity;
 	QButtonGroup *connectivitygroup;
 	QCheckBox *cb_medianset;
-	QCheckBox *cb_connectedshapebased; 
+	QCheckBox *cb_connectedshapebased;
+	//QComboBox *brush_method;
+	QLineEdit *brush_radius;
 	unsigned short startnr;
 	unsigned short nrslices;
 	unsigned short tissuenr;
@@ -102,6 +104,7 @@ private slots:
 	void execute();
 	void method_changed();
 	void source_changed();
+	void brush_changed();
 };
 
 } // namespace iseg
