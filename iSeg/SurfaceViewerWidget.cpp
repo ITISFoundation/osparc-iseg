@@ -83,7 +83,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	hand3D = hand3D1;
 	vbox1 = new Q3VBox(this);
 	vtkWidget = new QVTKWidget(vbox1);
-	vtkWidget->setFixedSize(1000, 1000);
+	vtkWidget->setFixedSize(800, 800);
 
 	hbox1 = new Q3HBox(vbox1);
 	lb_trans = new QLabel("Transparency", hbox1);
@@ -92,8 +92,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	sl_trans->setValue(00);
 	hbox1->setFixedHeight(hbox1->sizeHint().height());
 
-	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this,
-			SLOT(transp_changed()));
+	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this, SLOT(transp_changed()));
 
 	if (input_type == kSource)
 	{
@@ -127,7 +126,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	iren = vtkSmartPointer<QVTKInteractor>::New();
 	iren->SetInteractorStyle(style);
-
 	iren->SetRenderWindow(vtkWidget->GetRenderWindow());
 
 	QMenu* popup_actions = new QMenu(vtkWidget);
@@ -136,10 +134,8 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	connect(popup_actions, SIGNAL(triggered(QAction*)), this, SLOT(select_action(QAction*)));
 
 	connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-
 	connections->Connect(vtkWidget->GetRenderWindow()->GetInteractor(), vtkCommand::RightButtonPressEvent,
-			this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)),
-			popup_actions, 1.0);
+			this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)), popup_actions, 1.0);
 
 	// copy input data and setup VTK pipeline
 	input = vtkSmartPointer<vtkImageData>::New();
@@ -180,9 +176,7 @@ void SurfaceViewerWidget::load()
 		auto slices = hand3D->target_slices();
 		input->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
 		auto field = vtkUnsignedCharArray::SafeDownCast(input->GetPointData()->GetScalars());
-		transform_slices_vtk(slices, slice_size, field, [](float v) {
-			return v > 0.f ? 1 : 0;
-		});
+		transform_slices_vtk(slices, slice_size, field, [](float v) { return v > 0.f ? 1 : 0; });
 	}
 	else if (input_type == kTissues || tissue_selection.size() > 254) // all tissues
 	{
@@ -191,7 +185,7 @@ void SurfaceViewerWidget::load()
 		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
 		transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
 	}
-	else if (tissue_selection.size() > 1) // [2, 254]
+	else if (tissue_selection.size() >= 1) // [1, 254]
 	{
 		auto slices = hand3D->tissue_slices(0);
 
@@ -214,17 +208,6 @@ void SurfaceViewerWidget::load()
 			std::cerr << "ERROR: bad tissue index map " << e.what() << "\n";
 			std::fill_n(field, slices.size() * slice_size, 0);
 		}
-	}
-	else if (tissue_selection.size() == 1)
-	{
-		auto tissue_type = tissue_selection[0];
-		index_tissue_map[0] = tissue_type;
-
-		auto slices = hand3D->tissue_slices(0);
-		input->AllocateScalars(VTK_BIT, 1);
-		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
-
-		transform_slices_vtk(slices, slice_size, field, [tissue_type](tissues_size_t v) { return v == tissue_type; });
 	}
 	else
 	{
@@ -256,11 +239,17 @@ void SurfaceViewerWidget::load()
 	else
 	{
 		discreteCubes->SetInputData(input);
-		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel, endLabel + 1);
-		discreteCubes->Print(std::cerr);
+		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel, endLabel);
 
 		mapper->SetInputConnection(discreteCubes->GetOutputPort());
-		mapper->ScalarVisibilityOn();
+		if (input_type == kTarget)
+		{
+			mapper->ScalarVisibilityOff();
+		}
+		else
+		{
+			mapper->ScalarVisibilityOn();
+		}
 
 		build_lookuptable();
 	}
@@ -291,10 +280,10 @@ void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data
 	}
 
 	// get interactor
-	vtkRenderWindowInteractor* iren = vtkRenderWindowInteractor::SafeDownCast(obj);
+	auto interactor = vtkRenderWindowInteractor::SafeDownCast(obj);
 
 	// get event location
-	int* position = iren->GetEventPosition();
+	int* position = interactor->GetEventPosition();
 
 	// pick from this location.
 	if (picker->Pick(position[0], position[1], 0, ren3D) != 0)
@@ -304,7 +293,7 @@ void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data
 		// get popup menu
 		QMenu* popupMenu = static_cast<QMenu*>(client_data);
 		// remember to flip y
-		int* sz = iren->GetSize();
+		int* sz = interactor->GetSize();
 		QPoint pt = QPoint(position[0], sz[1] - position[1]);
 		// map to global
 		QPoint global_pt = popupMenu->parentWidget()->mapToGlobal(pt);
@@ -390,7 +379,7 @@ void SurfaceViewerWidget::build_lookuptable()
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
 			float* tissuecolor = nullptr;
-			if (index_tissue_map.count(i))
+			if (index_tissue_map.count(i) != 0)
 			{
 				tissuecolor = TissueInfos::GetTissueColor(index_tissue_map.at(i));
 			}
