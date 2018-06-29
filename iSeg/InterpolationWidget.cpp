@@ -12,6 +12,8 @@
 #include "InterpolationWidget.h"
 #include "SlicesHandler.h"
 
+#include "Data/BrushInteraction.h"
+
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -33,6 +35,8 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
+
+	brush = nullptr;
 
 	nrslices = handler3D->num_slices();
 
@@ -93,7 +97,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 			"between."));
 
 	cb_medianset = new QCheckBox(QString("Median Set"), vboxparams);
-	cb_medianset->setChecked(true);
+	cb_medianset->setChecked(false);
 	cb_medianset->setToolTip(Format(
 			"If Median Set is ON, the algorithm described in [1] "
 			"is employed. Otherwise shape-based interpolation [2] is used. "
@@ -177,6 +181,19 @@ void InterpolationWidget::init()
 		sb_batchstride->setMaxValue((int)nrslices - 1);
 		pushexec->setEnabled(false);
 	}
+
+	if (!brush)
+	{
+		brush = new iseg::BrushInteraction(handler3D,
+				[this](iseg::DataSelection sel) { begin_datachange(sel, this); },
+				[this](iseg::EndUndoAction a) { end_datachange(this, a); });
+		brush->set_brush_target(true);
+	}
+	else
+	{
+		brush->init(handler3D);
+	}
+
 }
 
 void InterpolationWidget::newloaded() {}
@@ -203,6 +220,42 @@ void InterpolationWidget::startslice_pressed()
 {
 	startnr = handler3D->active_slice();
 	pushexec->setEnabled(true);
+}
+
+void InterpolationWidget::on_mouse_clicked(Point p)
+{
+	if (rb_work->isOn())
+	{
+		brush->on_mouse_clicked(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_clicked(p);
+	}
+}
+
+void InterpolationWidget::on_mouse_released(Point p)
+{
+	if (rb_work->isOn())
+	{
+		brush->on_mouse_released(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_released(p);
+	}
+}
+
+void InterpolationWidget::on_mouse_moved(Point p)
+{
+	if (rb_work->isOn())
+	{
+		brush->on_mouse_moved(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_moved(p);
+	}
 }
 
 void InterpolationWidget::execute()

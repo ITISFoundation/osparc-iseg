@@ -35,6 +35,8 @@
 
 namespace iseg {
 
+class BrushInteraction;
+
 class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
@@ -53,8 +55,14 @@ public:
 private:
 	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
+	
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_released(Point p) override;
+	void on_mouse_moved(Point p) override;
 
 	SlicesHandler *handler3D;
+	BrushInteraction *brush;
+
 	Q3HBox *hboxoverall;
 	Q3VBox *vboxmethods;
 	Q3VBox *vboxdataselect;
