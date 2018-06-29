@@ -772,13 +772,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	m_notes->clear();
 
 	xsliceshower = ysliceshower = NULL;
-	SV3D = NULL;
-	SV3Dbmp = NULL;
+	surface_viewer = NULL;
 	VV3D = NULL;
 	VV3Dbmp = NULL;
 
-	if (handler3D->start_slice() >= slicenr ||
-			handler3D->end_slice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -786,8 +784,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(
-				this->paletteBackgroundColor());
+		lb_inactivewarning->setPaletteBackgroundColor(this->paletteBackgroundColor());
 	}
 
 	QWidget* hbox2w = new QWidget;
@@ -1300,14 +1297,16 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	imagemenu->insertSeparator();
 	imagemenu->insertItem("&x Sliced", this, SLOT(execute_xslice()));
 	imagemenu->insertItem("&y Sliced", this, SLOT(execute_yslice()));
-	imagemenu->insertItem("3D surface view", this,
-			SLOT(execute_3Dsurfaceviewer()));
-	imagemenu->insertItem("3D isosurface view", this,
-			SLOT(execute_3Dsurfaceviewerbmp()));
-	imagemenu->insertItem("3D volume view source", this,
-			SLOT(execute_3Dvolumeviewerbmp()));
-	imagemenu->insertItem("3D volume view tissue", this,
+	imagemenu->insertItem("Tissue surface view", this,
+			SLOT(execute_tissue_surfaceviewer()));
+	imagemenu->insertItem("Target surface view", this,
+			SLOT(execute_target_surfaceviewer()));
+	imagemenu->insertItem("Source iso-surface view", this,
+			SLOT(execute_source_surfaceviewer()));
+	imagemenu->insertItem("Tissue volume view", this,
 			SLOT(execute_3Dvolumeviewertissue()));
+	imagemenu->insertItem("Source volume view", this,
+			SLOT(execute_3Dvolumeviewerbmp()));
 	if (!m_editingmode)
 	{
 		//xxxa;
@@ -1840,19 +1839,12 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 					SLOT(yslice_closed()));
 			delete ysliceshower;
 		}
-		if (SV3D != NULL)
+		if (surface_viewer != NULL)
 		{
-			SV3D->close();
-			QObject::disconnect(SV3D, SIGNAL(hasbeenclosed()), this,
-					SLOT(SV3D_closed()));
-			delete SV3D;
-		}
-		if (SV3Dbmp != NULL)
-		{
-			SV3Dbmp->close();
-			QObject::disconnect(SV3Dbmp, SIGNAL(hasbeenclosed()), this,
-					SLOT(SV3Dbmp_closed()));
-			delete SV3Dbmp;
+			surface_viewer->close();
+			QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this,
+					SLOT(surface_viewer_closed()));
+			delete surface_viewer;
 		}
 		if (VV3D != NULL)
 		{
@@ -2522,17 +2514,14 @@ void MainWindow::execute_loadbmp()
 {
 	maybeSafe();
 
-	QStringList files =
-			Q3FileDialog::getOpenFileNames("Images (*.bmp)\n"
-																		 "All(*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
+	QStringList files = Q3FileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+			QString::null, this, "open files dialog", "Select one or more files to open");
 
 	if (!files.empty())
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
+		std::vector<int> vi;
 		vi.clear();
 
 		short nrelem = files.size();
@@ -2541,24 +2530,6 @@ void MainWindow::execute_loadbmp()
 		{
 			vi.push_back(bmpimgnr(&files[i]));
 		}
-		/*
-		int dummy;
-		QString dummys;
-		for(short k=0;k<nrelem-1;k++)
-		{
-			for(short j=nrelem-1;j>k;j--)
-			{
-				if(vi[j]>vi[j-1])
-				{
-					dummy=vi[j];
-					vi[j]=vi[j-1];
-					vi[j-1]=dummy;
-					dummys=files[j];
-					files[j]=files[j-1];
-					files[j-1]=dummys;
-				}
-			}
-		}*/
 
 		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
@@ -2578,8 +2549,6 @@ void MainWindow::execute_loadbmp()
 		LB.exec();
 
 		emit end_datachange(this, iseg::ClearUndo);
-
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 		reset_brightnesscontrast();
 
@@ -4715,42 +4684,44 @@ void MainWindow::execute_new()
 	reset_brightnesscontrast();
 }
 
-void MainWindow::execute_3Dsurfaceviewer()
+void iseg::MainWindow::start_surfaceviewer(int mode)
 {
+	// ensure we don't have a viewer running
+	if (surface_viewer != NULL)
+	{
+		surface_viewer->close();
+		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
+		delete surface_viewer;
+	}
+
 	iseg::DataSelection dataSelection;
 	dataSelection.bmp = true;
 	dataSelection.work = true;
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	if (SV3D == NULL)
-	{
-		SV3D = new SurfaceViewerWidget(handler3D, SurfaceViewerWidget::kTissues, 0);
-		QObject::connect(SV3D, SIGNAL(hasbeenclosed()), this, SLOT(SV3D_closed()));
-	}
+	surface_viewer = new SurfaceViewerWidget(handler3D, static_cast<SurfaceViewerWidget::eInputType>(mode), 0);
+	QObject::connect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 
-	SV3D->show();
-	SV3D->raise();
+	surface_viewer->show();
+	surface_viewer->raise();
 
 	emit end_dataexport(this);
 }
 
-void MainWindow::execute_3Dsurfaceviewerbmp()
+void MainWindow::execute_tissue_surfaceviewer()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.bmp = true;
-	emit begin_dataexport(dataSelection, this);
+	start_surfaceviewer(SurfaceViewerWidget::kTissues);
+}
 
-	if (SV3Dbmp == NULL)
-	{
-		SV3Dbmp = new SurfaceViewerWidget(handler3D, SurfaceViewerWidget::kSource, 0);
-		QObject::connect(SV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(SV3Dbmp_closed()));
-	}
+void MainWindow::execute_source_surfaceviewer()
+{
+	start_surfaceviewer(SurfaceViewerWidget::kSource);
+}
 
-	SV3Dbmp->show();
-	SV3Dbmp->raise();
-
-	emit end_dataexport(this);
+void MainWindow::execute_target_surfaceviewer()
+{
+	start_surfaceviewer(SurfaceViewerWidget::kTarget);
 }
 
 void MainWindow::execute_3Dvolumeviewertissue()
@@ -4833,8 +4804,8 @@ void MainWindow::update_tissue()
 		ysliceshower->tissue_changed();
 	if (VV3D != NULL)
 		VV3D->tissue_changed();
-	if (SV3D != NULL)
-		SV3D->tissue_changed();
+	if (surface_viewer != NULL)
+		surface_viewer->tissue_changed();
 }
 
 void MainWindow::xslice_closed()
@@ -4895,25 +4866,13 @@ void MainWindow::yslice_closed()
 	}
 }
 
-void MainWindow::SV3D_closed()
+void MainWindow::surface_viewer_closed()
 {
-	if (SV3D != NULL)
+	if (surface_viewer != NULL)
 	{
-		QObject::disconnect(SV3D, SIGNAL(hasbeenclosed()), this,
-				SLOT(SV3D_closed()));
-		delete SV3D;
-		SV3D = NULL;
-	}
-}
-
-void MainWindow::SV3Dbmp_closed()
-{
-	if (SV3Dbmp != NULL)
-	{
-		QObject::disconnect(SV3D, SIGNAL(hasbeenclosed()), this,
-				SLOT(SV3Dbmp_closed()));
-		delete SV3Dbmp;
-		SV3Dbmp = NULL;
+		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
+		delete surface_viewer;
+		surface_viewer = NULL;
 	}
 }
 
@@ -5115,13 +5074,9 @@ void MainWindow::pixelsize_changed()
 	{
 		VV3Dbmp->pixelsize_changed(p);
 	}
-	if (SV3D != NULL)
+	if (surface_viewer != NULL)
 	{
-		SV3D->pixelsize_changed(p);
-	}
-	if (SV3Dbmp != NULL)
-	{
-		SV3Dbmp->pixelsize_changed(p);
+		surface_viewer->pixelsize_changed(p);
 	}
 }
 
@@ -6841,11 +6796,8 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 	if (VV3Dbmp != NULL)
 		VV3Dbmp->reload();
 
-	if (SV3D != NULL)
-		SV3D->reload();
-
-	if (SV3Dbmp != NULL)
-		SV3Dbmp->reload();
+	if (surface_viewer != NULL)
+		surface_viewer->reload();
 
 	qw->init();
 }
@@ -6916,10 +6868,8 @@ void MainWindow::slicethickness_changed()
 			VV3D->thickness_changed(thickness);
 		if (VV3Dbmp != NULL)
 			VV3Dbmp->thickness_changed(thickness);
-		if (SV3D != NULL)
-			SV3D->thickness_changed(thickness);
-		if (SV3Dbmp != NULL)
-			SV3Dbmp->thickness_changed(thickness);
+		if (surface_viewer != NULL)
+			surface_viewer->thickness_changed(thickness);
 	}
 	else
 	{
@@ -6940,10 +6890,8 @@ void MainWindow::slicethickness_changed1()
 		VV3D->thickness_changed(handler3D->get_slicethickness());
 	if (VV3Dbmp != NULL)
 		VV3Dbmp->thickness_changed(handler3D->get_slicethickness());
-	if (SV3D != NULL)
-		SV3D->thickness_changed(handler3D->get_slicethickness());
-	if (SV3Dbmp != NULL)
-		SV3Dbmp->thickness_changed(handler3D->get_slicethickness());
+	if (surface_viewer != NULL)
+		surface_viewer->thickness_changed(handler3D->get_slicethickness());
 }
 
 void MainWindow::tissuenr_changed(int i)

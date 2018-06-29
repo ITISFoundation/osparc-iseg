@@ -108,6 +108,7 @@ public:
 	void loadS4Llink(const QString& loadfilename);
 
 protected:
+	void start_surfaceviewer(int mode);
 	void closeEvent(QCloseEvent*);
 	bool maybeSafe();
 	bool modified();
@@ -276,8 +277,7 @@ private:
 	//	float thickness;
 	SliceViewerWidget* xsliceshower;
 	SliceViewerWidget* ysliceshower;
-	SurfaceViewerWidget* SV3D;
-	SurfaceViewerWidget* SV3Dbmp;
+	SurfaceViewerWidget* surface_viewer;
 	VolumeViewerWidget* VV3D;
 	VolumeViewerWidget* VV3Dbmp;
 	int undonr;
@@ -425,8 +425,9 @@ private slots:
 	void execute_overlay();
 	void execute_histo();
 	void execute_pixelsize();
-	void execute_3Dsurfaceviewer();
-	void execute_3Dsurfaceviewerbmp();
+	void execute_tissue_surfaceviewer();
+	void execute_source_surfaceviewer();
+	void execute_target_surfaceviewer();
 	void execute_3Dvolumeviewerbmp();
 	void execute_3Dvolumeviewertissue();
 	void execute_displacement();
@@ -507,8 +508,7 @@ private slots:
 	void slicethickness_changed();
 	void xslice_closed();
 	void yslice_closed();
-	void SV3D_closed();
-	void SV3Dbmp_closed();
+	void surface_viewer_closed();
 	void VV3D_closed();
 	void VV3Dbmp_closed();
 	void xshower_slicechanged();

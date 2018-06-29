@@ -19,21 +19,21 @@
 #include <QMenu>
 #include <QResizeEvent>
 
+#include <vtkBitArray.h>
 #include <vtkCellData.h>
 #include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkFlyingEdges3D.h>
 #include <vtkGeometryFilter.h>
 #include <vtkImageAccumulate.h>
-#include <vtkMaskFields.h>
 #include <vtkPointData.h>
+#include <vtkQuadricDecimation.h>
 #include <vtkThreshold.h>
 #include <vtkUnsignedShortArray.h>
-#include <vtkBitArray.h>
-#include <vtkWindowedSincPolyDataFilter.h>
 
 #include <vtkActor.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkInteractorStyleTrackballCamera.h>
+#include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPropPicker.h>
 #include <vtkProperty.h>
@@ -52,30 +52,29 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 
 using namespace iseg;
 
-namespace
+namespace {
+template<typename TIn, typename TOut, typename TMap>
+void transform_slices(const std::vector<TIn*>& slices, size_t slice_size, TOut* out, const TMap& map)
 {
-	template<typename TIn, typename TOut, typename TMap>
-	void transform_slices(const std::vector<TIn*>& slices, size_t slice_size, TOut* out, const TMap& map)
+	for (auto slice : slices)
 	{
-		for (auto slice: slices)
-		{
-			std::transform(slice, slice + slice_size, out, map);
-			std::advance(out, slice_size);
-		}
+		std::transform(slice, slice + slice_size, out, map);
+		std::advance(out, slice_size);
 	}
-	template<typename TIn, typename TMap>
-	void transform_slices(const std::vector<TIn*>& slices, size_t slice_size, vtkBitArray* out, const TMap& map)
+}
+template<typename TIn, typename TArray, typename TMap>
+void transform_slices_vtk(const std::vector<TIn*>& slices, size_t slice_size, TArray* out, const TMap& map)
+{
+	size_t idx = 0, i;
+	for (auto& slice : slices)
 	{
-		size_t idx = 0, i;
-		for (auto& slice: slices)
+		for (i = 0; i < slice_size; ++i)
 		{
-			for (i = 0; i < slice_size; ++i)
-			{
-				out->SetValue(idx++, map(slice[i]));
-			}
+			out->SetValue(idx++, map(slice[i]));
 		}
 	}
 }
+} // namespace
 
 SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inputtype, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
@@ -117,181 +116,9 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 
 	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
 
-	auto tissue_selection = hand3D->tissue_selection();
-	auto spacing = hand3D->spacing();
-	size_t slice_size = static_cast<size_t>(hand3D->width()) * hand3D->height();
-	
-	input = vtkSmartPointer<vtkImageData>::New();
-	input->SetExtent(0, (int)hand3D->width() - 1, 0,
-			(int)hand3D->height() - 1, 0,
-			(int)hand3D->num_slices() - 1);
-	input->SetSpacing(spacing[0], spacing[1], spacing[2]);
-
-	if (input_type == kSource) // iso-surface
-	{
-		auto slices = hand3D->source_slices();
-		input->AllocateScalars(VTK_FLOAT, 1);
-		auto field = (float*)input->GetScalarPointer();
-		transform_slices(slices, slice_size, field, [](float v){ return v; });
-	}
-	else if (input_type == kTarget) // foreground
-	{
-		auto slices = hand3D->target_slices();
-		input->AllocateScalars(VTK_BIT, 1);
-		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
-		transform_slices(slices, slice_size, field, [](float v){ return v>0.f?1:0; });
-	}
-	else if (input_type == kTissues || tissue_selection.size() > 254) // all tissues
-	{
-		auto slices = hand3D->tissue_slices(0);
-		input->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
-		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
-		transform_slices(slices, slice_size, field, [](tissues_size_t v){ return v; });
-	}
-	else if (tissue_selection.size() > 1) // [2, 254]
-	{
-		auto slices = hand3D->tissue_slices(0);
-
-		unsigned char count = 1;
-		std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
-		for (auto tissue_type: tissue_selection)
-		{
-			index_tissue_map[count] = tissue_type;
-			tissue_index_map[tissue_type] = count++;
-		}
-
-		input->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
-		auto field = static_cast<unsigned char*>(input->GetScalarPointer());
-		try
-		{
-			transform_slices(slices, slice_size, field, [tissue_index_map](tissues_size_t v){ return tissue_index_map.at(v); });
-		}
-		catch(std::exception& e)
-		{
-			std::cerr << "ERROR: bad tissue index map " << e.what() << "\n";
-			std::fill_n(field, slices.size() * slice_size, 0);
-		}
-	}
-	else if (tissue_selection.size() == 1)
-	{
-		auto tissue_type = tissue_selection[0];
-		index_tissue_map[0] = tissue_type;
-
-		auto slices = hand3D->tissue_slices(0);
-		input->AllocateScalars(VTK_BIT, 1);
-		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
-
-		transform_slices(slices, slice_size, field, [tissue_type](tissues_size_t v){ return v==tissue_type; });
-	}
-	else
-	{
-		input->AllocateScalars(VTK_BIT, 1);
-		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
-		field->FillComponent(0, 0);
-	}
-
-	input->GetScalarRange(range);
-	double level = 0.5 * (range[1] + range[0]);
-	double window = range[1] - range[0];
-
-	smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
-	scalarsOff = vtkSmartPointer<vtkMaskFields>::New();
-
-	// Define all of the variables
-	startLabel = range[0];
-	endLabel = range[1];
-	startLabel = 1;
-	unsigned int smoothingIterations = 15;
-	double passBand = 0.001;
-	double featureAngle = 120.0;
-
-	// Generate models from labels
-	// 1) Read the meta file
-	// 2) Generate a histogram of the labels
-	// 3) Generate models from the labeled volume
-	// 4) Smooth the models
-	// 5) Output each model into a separate file
-
 	ren3D = vtkSmartPointer<vtkRenderer>::New();
-
-	if (input_type == kSource)
-	{
-		cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
-		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
-		cubes->SetInputData(input);
-
-		PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
-		PolyDataMapper.back()->SetInputData(cubes->GetOutput());
-		PolyDataMapper.back()->ScalarVisibilityOff();
-
-		Actor.push_back(vtkSmartPointer<vtkActor>::New());
-		Actor.back()->SetMapper(PolyDataMapper.back());
-		Actor.back()->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
-
-		ren3D->AddActor(Actor.back());
-	}
-	else
-	{
-		discreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
-		discreteCubes->SetInputData(input);
-
-		histogram = vtkSmartPointer<vtkImageAccumulate>::New();
-		histogram->SetInputData(input);
-		histogram->SetComponentExtent(0, endLabel, 0, 0, 0, 0);
-		histogram->SetComponentOrigin(0, 0, 0);
-		histogram->SetComponentSpacing(1, 1, 1);
-		histogram->Update();
-
-		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel, endLabel);
-#ifdef TISSUES_SIZE_TYPEDEF
-		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
-		{
-			cerr << "surfaceviewer3D::surfaceviewer3D: Out of range tissues_size_t.\n";
-		}
-#endif // TISSUES_SIZE_TYPEDEF
-		float* tissuecolor;
-		for (unsigned int i = startLabel; i <= endLabel; i++)
-		{
-			selector.push_back(vtkSmartPointer<vtkThreshold>::New());
-			selector.back()->SetInputConnection(discreteCubes->GetOutputPort());
-
-			geometry.push_back(vtkSmartPointer<vtkGeometryFilter>::New());
-			geometry.back()->SetInputConnection(selector.back()->GetOutputPort());
-
-			// see if the label exists, if not skip it
-			double frequency = histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(i);
-			if (frequency == 0.0)
-			{
-				continue;
-			}
-
-			indices.push_back(i);
-
-			// select the cells for a given label
-			selector.back()->ThresholdBetween(i, i);
-
-			PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
-			PolyDataMapper.back()->SetInputConnection(geometry.back()->GetOutputPort());
-			PolyDataMapper.back()->ScalarVisibilityOff();
-
-			Actor.push_back(vtkSmartPointer<vtkActor>::New());
-			Actor.back()->SetMapper(PolyDataMapper.back());
-			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
-			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			Actor.back()->GetProperty()->SetOpacity(opac1);
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			Actor.back()->GetProperty()->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
-			ren3D->AddActor(Actor.back());
-		}
-	}
-
 	ren3D->SetBackground(0, 0, 0);
 	ren3D->SetViewport(0.0, 0.0, 1.0, 1.0);
-
-	renWin = vtkSmartPointer<vtkRenderWindow>::New();
 
 	vtkWidget->GetRenderWindow()->AddRenderer(ren3D);
 	vtkWidget->GetRenderWindow()->LineSmoothingOn();
@@ -314,10 +141,135 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 			this, SLOT(popup(vtkObject*, unsigned long, void*, void*, vtkCommand*)),
 			popup_actions, 1.0);
 
+	// copy input data and setup VTK pipeline
+	input = vtkSmartPointer<vtkImageData>::New();
+	discreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+	cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
+
+	decimate = vtkSmartPointer<vtkQuadricDecimation>::New();
+	decimate->SetInputConnection(input_type == kSource ? cubes->GetOutputPort() : discreteCubes->GetOutputPort());
+	decimate->SetTargetReduction(0.9);
+
+	load();
+
 	vtkWidget->GetRenderWindow()->Render();
 }
 
 SurfaceViewerWidget::~SurfaceViewerWidget() { delete vbox1; }
+
+void SurfaceViewerWidget::load()
+{
+	auto tissue_selection = hand3D->tissue_selection();
+	auto spacing = hand3D->spacing();
+	size_t slice_size = static_cast<size_t>(hand3D->width()) * hand3D->height();
+
+	input->SetExtent(0, (int)hand3D->width() - 1, 0,
+			(int)hand3D->height() - 1, 0,
+			(int)hand3D->num_slices() - 1);
+	input->SetSpacing(spacing[0], spacing[1], spacing[2]);
+
+	if (input_type == kSource) // iso-surface
+	{
+		auto slices = hand3D->source_slices();
+		input->AllocateScalars(VTK_FLOAT, 1);
+		auto field = (float*)input->GetScalarPointer();
+		transform_slices(slices, slice_size, field, [](float v) { return v; });
+	}
+	else if (input_type == kTarget) // foreground
+	{
+		auto slices = hand3D->target_slices();
+		input->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+		auto field = vtkUnsignedCharArray::SafeDownCast(input->GetPointData()->GetScalars());
+		transform_slices_vtk(slices, slice_size, field, [](float v) {
+			return v > 0.f ? 1 : 0;
+		});
+	}
+	else if (input_type == kTissues || tissue_selection.size() > 254) // all tissues
+	{
+		auto slices = hand3D->tissue_slices(0);
+		input->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
+		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
+		transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
+	}
+	else if (tissue_selection.size() > 1) // [2, 254]
+	{
+		auto slices = hand3D->tissue_slices(0);
+
+		unsigned char count = 1;
+		std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
+		for (auto tissue_type : tissue_selection)
+		{
+			index_tissue_map[count] = tissue_type;
+			tissue_index_map[tissue_type] = count++;
+		}
+
+		input->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+		auto field = static_cast<unsigned char*>(input->GetScalarPointer());
+		try
+		{
+			transform_slices(slices, slice_size, field, [tissue_index_map](tissues_size_t v) { return tissue_index_map.at(v); });
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << "ERROR: bad tissue index map " << e.what() << "\n";
+			std::fill_n(field, slices.size() * slice_size, 0);
+		}
+	}
+	else if (tissue_selection.size() == 1)
+	{
+		auto tissue_type = tissue_selection[0];
+		index_tissue_map[0] = tissue_type;
+
+		auto slices = hand3D->tissue_slices(0);
+		input->AllocateScalars(VTK_BIT, 1);
+		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
+
+		transform_slices_vtk(slices, slice_size, field, [tissue_type](tissues_size_t v) { return v == tissue_type; });
+	}
+	else
+	{
+		input->AllocateScalars(VTK_BIT, 1);
+		auto field = vtkBitArray::SafeDownCast(input->GetPointData()->GetScalars());
+		field->FillComponent(0, 0);
+	}
+
+	// Define all of the variables
+	input->GetScalarRange(range);
+	startLabel = range[0];
+	endLabel = range[1];
+	startLabel = 1;
+
+	std::cerr << "value range: [" << range[0] << ", " << range[1] << "]\n";
+
+	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	actor = vtkSmartPointer<vtkActor>::New();
+
+	if (input_type == kSource)
+	{
+		cubes->SetInputData(input);
+		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
+		std::cerr << "iso-surface value: " << cubes->GetValue(0) << "\n";
+
+		mapper->SetInputConnection(cubes->GetOutputPort());
+		mapper->ScalarVisibilityOff();
+	}
+	else
+	{
+		discreteCubes->SetInputData(input);
+		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel, endLabel + 1);
+		discreteCubes->Print(std::cerr);
+
+		mapper->SetInputConnection(discreteCubes->GetOutputPort());
+		mapper->ScalarVisibilityOn();
+
+		build_lookuptable();
+	}
+
+	actor->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
+
+	actor->SetMapper(mapper);
+	ren3D->AddActor(actor);
+}
 
 void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)
 {
@@ -414,35 +366,48 @@ void SurfaceViewerWidget::tissue_changed()
 {
 	if (input_type == kTissues || input_type == kSelectedTissues)
 	{
-#ifdef TISSUES_SIZE_TYPEDEF
-		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
-		{
-			cerr << "surfaceviewer3D::tissue_changed: Out of range "
-							"tissues_size_t."
-					 << endl;
-		}
-#endif // TISSUES_SIZE_TYPEDEF
-		float* tissuecolor;
-		for (unsigned int i = startLabel; i <= endLabel; i++)
-		{
-			size_t j = 0;
-			while (j < indices.size() && indices[j] != i)
-				j++;
-			if (j == indices.size())
-				continue;
-			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
-			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			Actor[j]->GetProperty()->SetOpacity(opac1);
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			Actor[j]->GetProperty()->SetColor(tissuecolor[0], tissuecolor[1],
-					tissuecolor[2]);
-		}
+		build_lookuptable();
 
 		vtkWidget->GetRenderWindow()->Render();
 	}
+}
+
+void SurfaceViewerWidget::build_lookuptable()
+{
+	int const tableSize = endLabel + 1;
+
+	lut = vtkSmartPointer<vtkLookupTable>::New();
+	lut->SetNumberOfTableValues(tableSize);
+	lut->Build();
+
+	lut->SetTableValue(0, 0.1, 0.1, 0.1, 1); // background
+	if (input_type == kTarget)
+	{
+		lut->SetTableValue(1, 1, 1, 1, 1); // foreground
+	}
+	else
+	{
+		for (unsigned int i = startLabel; i <= endLabel; i++)
+		{
+			float* tissuecolor = nullptr;
+			if (index_tissue_map.count(i))
+			{
+				tissuecolor = TissueInfos::GetTissueColor(index_tissue_map.at(i));
+			}
+			else
+			{
+				tissuecolor = TissueInfos::GetTissueColor(i);
+			}
+
+			if (tissuecolor)
+			{
+				lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1);
+			}
+		}
+	}
+
+	mapper->SetScalarRange(0, tableSize - 1);
+	mapper->SetLookupTable(lut);
 }
 
 void SurfaceViewerWidget::pixelsize_changed(Pair p)
@@ -464,159 +429,9 @@ void SurfaceViewerWidget::thickness_changed(float thick)
 
 void SurfaceViewerWidget::reload()
 {
-	// \todo redo this function
-	{
-		for (size_t i = 0; i < Actor.size(); i++)
-			ren3D->RemoveActor(Actor[i]);
-		geometry.clear();
-		selector.clear();
-		indices.clear();
-		PolyDataMapper.clear();
-		Actor.clear();
-	}
+	ren3D->RemoveActor(actor);
 
-	int xm, xp, ym, yp, zm, zp;								//xxxa
-	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
-	int size1[3];
-	input->GetDimensions(size1);
-	int w = hand3D->width(); //xxxa
-	if ((hand3D->width() != size1[0]) ||
-			(hand3D->height() != size1[1]) ||
-			(hand3D->num_slices() != size1[2]))
-	{
-		input->SetExtent(0, (int)hand3D->width() - 1, 0,
-				(int)hand3D->height() - 1, 0,
-				(int)hand3D->num_slices() - 1);
-		input->AllocateScalars(input->GetScalarType(), 1);
-		if (input_type == kSource)
-		{
-			cubes->SetInputData(input);
-		}
-		else
-		{
-			discreteCubes->SetInputData(input);
-		}
-	}
-	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
-	input->GetDimensions(size1);							//xxxa
-	Pair ps = hand3D->get_pixelsize();
-	input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-
-	if (input_type == kSource)
-	{
-		float* field = (float*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
-		{
-			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
-		}
-	}
-	else
-	{
-		tissues_size_t* field =
-				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
-		{
-			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
-		}
-	}
-
-	if (input_type == kSource)
-	{
-		Pair p;
-		hand3D->get_bmprange(&p);
-		range[0] = p.low;
-		range[1] = p.high;
-	}
-	else
-	{
-		range[0] = 0;
-		range[1] = TissueInfos::GetTissueCount();
-	}
-
-	startLabel = range[0];
-	endLabel = range[1];
-	startLabel = 1;
-
-	if (input_type == kSource)
-	{
-		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) * sl_thresh->value());
-	}
-	else
-	{
-		histogram->SetInputData(input);
-		histogram->SetComponentExtent(0, endLabel, 0, 0, 0, 0);
-		histogram->Update();
-
-		discreteCubes->GenerateValues(endLabel - startLabel + 1, startLabel,
-				endLabel);
-
-#ifdef TISSUES_SIZE_TYPEDEF
-		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
-		{
-			cerr << "surfaceviewer3D::reload: Out of range tissues_size_t."
-					 << endl;
-		}
-#endif // TISSUES_SIZE_TYPEDEF
-		float* tissuecolor;
-		for (unsigned int i = startLabel; i <= endLabel; i++)
-		{
-			geometry.push_back(vtkSmartPointer<vtkGeometryFilter>::New());
-			selector.push_back(vtkSmartPointer<vtkThreshold>::New());
-
-			//selector->SetInput(smoother->GetOutput());
-			(*selector.rbegin())
-					->SetInputConnection(discreteCubes->GetOutputPort());
-			//selector->SetInputArrayToProcess(0, 0, 0,
-			//	vtkDataObject::FIELD_ASSOCIATION_CELLS,
-			//	vtkDataSetAttributes::SCALARS);
-
-			//// Strip the scalars from the output
-			//scalarsOff->SetInput(selector->GetOutput());
-			//scalarsOff->CopyAttributeOff(vtkMaskFields::POINT_DATA,
-			//	vtkDataSetAttributes::SCALARS);
-			//scalarsOff->CopyAttributeOff(vtkMaskFields::CELL_DATA,
-			//	vtkDataSetAttributes::SCALARS);
-
-			//geometry->SetInput(scalarsOff->GetOutput());
-			(*geometry.rbegin())
-					->SetInputConnection((*selector.rbegin())->GetOutputPort());
-
-			// see if the label exists, if not skip it
-			double frequency =
-					histogram->GetOutput()->GetPointData()->GetScalars()->GetTuple1(
-							i);
-			if (frequency == 0.0)
-			{
-				continue;
-			}
-
-			indices.push_back(i);
-
-			// select the cells for a given label
-			(*selector.rbegin())->ThresholdBetween(i, i);
-
-			PolyDataMapper.push_back(vtkSmartPointer<vtkPolyDataMapper>::New());
-			(*PolyDataMapper.rbegin())
-					->SetInputConnection((*geometry.rbegin())->GetOutputPort());
-			(*PolyDataMapper.rbegin())->ScalarVisibilityOff();
-
-			Actor.push_back(vtkSmartPointer<vtkActor>::New());
-			(*Actor.rbegin())->SetMapper((*PolyDataMapper.rbegin()));
-			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
-			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			(*Actor.rbegin())->GetProperty()->SetOpacity(opac1);
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			(*Actor.rbegin())
-					->GetProperty()
-					->SetColor(tissuecolor[0], tissuecolor[1], tissuecolor[2]);
-			ren3D->AddActor((*Actor.rbegin()));
-		}
-	}
+	load();
 
 	input->Modified();
 
@@ -643,35 +458,8 @@ void SurfaceViewerWidget::resizeEvent(QResizeEvent* RE)
 
 void SurfaceViewerWidget::transp_changed()
 {
-	if (input_type == kSource)
-	{
-		(*Actor.rbegin())->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
-	}
-	else
-	{
-#ifdef TISSUES_SIZE_TYPEDEF
-		if (startLabel > TISSUES_SIZE_MAX || endLabel > TISSUES_SIZE_MAX)
-		{
-			cerr << "surfaceviewer3D::transp_changed: Out of range "
-							"tissues_size_t."
-					 << endl;
-		}
-#endif // TISSUES_SIZE_TYPEDEF
-		for (unsigned int i = startLabel; i <= endLabel; i++)
-		{
-			size_t j = 0;
-			while (j < indices.size() && indices[j] != i)
-				j++;
-			if (j == indices.size())
-				continue;
-			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
-			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			Actor[j]->GetProperty()->SetOpacity(opac1);
-		}
-	}
+	actor->GetProperty()->SetOpacity(1.0 - 0.01 * sl_trans->value());
+
 	vtkWidget->GetRenderWindow()->Render();
 }
 
@@ -679,7 +467,9 @@ void SurfaceViewerWidget::thresh_changed()
 {
 	if (input_type == kSource)
 	{
-		cubes->SetValue(0, range[0] + 0.01 * (range[01] - range[0]) * sl_thresh->value());
+		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
+
+		std::cerr << "iso-surface value: " << cubes->GetValue(0) << "\n";
 
 		vtkWidget->GetRenderWindow()->Render();
 	}
