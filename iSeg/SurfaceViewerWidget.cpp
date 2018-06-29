@@ -30,13 +30,13 @@
 #include <vtkThreshold.h>
 #include <vtkUnsignedShortArray.h>
 
-#include <vtkActor.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkLookupTable.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPropPicker.h>
 #include <vtkProperty.h>
+#include <vtkQuadricLODActor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 
@@ -225,7 +225,7 @@ void SurfaceViewerWidget::load()
 	std::cerr << "value range: [" << range[0] << ", " << range[1] << "]\n";
 
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	actor = vtkSmartPointer<vtkActor>::New();
+	actor = vtkSmartPointer<vtkQuadricLODActor>::New();
 
 	if (input_type == kSource)
 	{
@@ -249,6 +249,7 @@ void SurfaceViewerWidget::load()
 		else
 		{
 			mapper->ScalarVisibilityOn();
+			mapper->SetColorModeToMapScalars();
 		}
 
 		build_lookuptable();

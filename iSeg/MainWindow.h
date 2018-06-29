@@ -458,6 +458,7 @@ private slots:
 	void clear_marks();
 	void remove_mark(Point p);
 	void select_tissue(Point p, bool clear_selection);
+	void view_tissue(Point p);
 	void next_featuring_slice();
 	void add_tissue(Point p);
 	void add_tissue_connected(Point p);

@@ -1517,6 +1517,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SLOT(add_tissuelarger(Point)));
 	QObject::connect(bmp_show, SIGNAL(selecttissue_sign(Point, bool)), this,
 			SLOT(select_tissue(Point, bool)));
+	QObject::connect(bmp_show, SIGNAL(viewtissue_sign(Point)), this,
+			SLOT(select_tissue(Point, bool)));
 	QObject::connect(work_show, SIGNAL(addmark_sign(Point)), this,
 			SLOT(add_mark(Point)));
 	QObject::connect(work_show, SIGNAL(addlabel_sign(Point, std::string)), this,
@@ -1536,6 +1538,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(work_show, SIGNAL(addtissuelarger_sign(Point)), this,
 			SLOT(add_tissuelarger(Point)));
 	QObject::connect(work_show, SIGNAL(selecttissue_sign(Point, bool)), this,
+			SLOT(select_tissue(Point, bool)));
+	QObject::connect(work_show, SIGNAL(viewtissue_sign(Point)), this,
 			SLOT(select_tissue(Point, bool)));
 	QObject::connect(tissueFilter, SIGNAL(textChanged(const QString&)), this,
 			SLOT(tissueFilterChanged(const QString&)));
@@ -4709,6 +4713,12 @@ void iseg::MainWindow::start_surfaceviewer(int mode)
 	emit end_dataexport(this);
 }
 
+void MainWindow::view_tissue(Point p)
+{
+	select_tissue(p, true);
+	start_surfaceviewer(SurfaceViewerWidget::kSelectedTissues);
+}
+
 void MainWindow::execute_tissue_surfaceviewer()
 {
 	start_surfaceviewer(SurfaceViewerWidget::kTissues);
@@ -6969,9 +6979,9 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 {
 	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
 
+	Q3PopupMenu contextMenu(tissueTreeWidget, "tissuetreemenu");
 	if (list.size() <= 1) // single selection
 	{
-		Q3PopupMenu contextMenu(tissueTreeWidget, "tissuetreemenu");
 		if (tissueTreeWidget->get_current_is_folder())
 		{
 			contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
@@ -7000,21 +7010,9 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 			contextMenu.insertItem("Next Feat. Slice", this,
 					SLOT(next_featuring_slice()));
 		}
-		contextMenu.insertItem("Show Tissue Surface", this, SLOT(execute_selectedtissue_surfaceviewer()));
-		contextMenu.insertSeparator();
-		int itemId = contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget,
-				SLOT(toggle_show_tissue_indices()));
-		contextMenu.setItemChecked(itemId,
-				!tissueTreeWidget->get_tissue_indices_hidden());
-		contextMenu.insertItem("Sort By Name", tissueTreeWidget,
-				SLOT(sort_by_tissue_name()));
-		contextMenu.insertItem("Sort By Index", tissueTreeWidget,
-				SLOT(sort_by_tissue_index()));
-		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
 	else // multi-selection
 	{
-		Q3PopupMenu contextMenu(tissueTreeWidget, "tissuetreemenu");
 		contextMenu.insertItem("Toggle Lock", cb_tissuelock, SLOT(click()));
 		contextMenu.insertSeparator();
 		contextMenu.insertItem("Delete Selected", this, SLOT(removeselected()));
@@ -7022,9 +7020,15 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		contextMenu.insertItem("Get Selected", this, SLOT(selectedtissue2work()));
 		contextMenu.insertItem("Merge", this, SLOT(merge()));
 		contextMenu.insertItem("Unselect All", this, SLOT(unselectall()));
-		contextMenu.insertItem("Show Tissue Surfaces", this, SLOT(execute_selectedtissue_surfaceviewer()));
-		contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 	}
+
+	contextMenu.insertItem("View Tissue Surface", this, SLOT(execute_selectedtissue_surfaceviewer()));
+	contextMenu.insertSeparator();
+	int itemId = contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget, SLOT(toggle_show_tissue_indices()));
+	contextMenu.setItemChecked(itemId, !tissueTreeWidget->get_tissue_indices_hidden());
+	contextMenu.insertItem("Sort By Name", tissueTreeWidget, SLOT(sort_by_tissue_name()));
+	contextMenu.insertItem("Sort By Index", tissueTreeWidget, SLOT(sort_by_tissue_index()));
+	contextMenu.exec(tissueTreeWidget->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::tissuelock_toggled()
