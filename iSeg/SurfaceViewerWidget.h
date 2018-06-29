@@ -17,6 +17,8 @@
 
 #include <vtkSmartPointer.h>
 
+#include <map>
+
 class QVTKWidget;
 class QVTKInteractor;
 class Q3VBox;
@@ -52,13 +54,18 @@ class SurfaceViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	SurfaceViewerWidget(SlicesHandler* hand3D1, bool bmportissue1 = true,
+	enum eInputType { kSource, kTarget, kTissues, kSelectedTissues };
+	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
 	~SurfaceViewerWidget();
+
+protected:
+	eInputType input_type;
+	std::map<int, tissues_size_t> index_tissue_map;
+
 	std::string fnamei;
 	QVTKWidget* vtkWidget;
-	bool bmportissue;
 	Q3VBox* vbox1;
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;

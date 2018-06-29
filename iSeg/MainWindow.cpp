@@ -4725,7 +4725,7 @@ void MainWindow::execute_3Dsurfaceviewer()
 
 	if (SV3D == NULL)
 	{
-		SV3D = new SurfaceViewerWidget(handler3D, false, 0);
+		SV3D = new SurfaceViewerWidget(handler3D, SurfaceViewerWidget::kTissues, 0);
 		QObject::connect(SV3D, SIGNAL(hasbeenclosed()), this, SLOT(SV3D_closed()));
 	}
 
@@ -4743,7 +4743,7 @@ void MainWindow::execute_3Dsurfaceviewerbmp()
 
 	if (SV3Dbmp == NULL)
 	{
-		SV3Dbmp = new SurfaceViewerWidget(handler3D, true, 0);
+		SV3Dbmp = new SurfaceViewerWidget(handler3D, SurfaceViewerWidget::kSource, 0);
 		QObject::connect(SV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(SV3Dbmp_closed()));
 	}
 
