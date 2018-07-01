@@ -90,7 +90,6 @@ private:
 	QButtonGroup *connectivitygroup;
 	QCheckBox *cb_medianset;
 	QCheckBox *cb_connectedshapebased;
-	//QComboBox *brush_method;
 	QLineEdit *brush_radius;
 	unsigned short startnr;
 	unsigned short nrslices;

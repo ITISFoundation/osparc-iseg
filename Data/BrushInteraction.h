@@ -24,8 +24,11 @@ namespace iseg {
 	public:
 		BrushInteraction(SliceHandlerInterface* handler,
 			const boost::function<void(DataSelection)>& begin,
-			const boost::function<void(EndUndoAction)>& end) 
-			: begin_datachange(begin), end_datachange(end)
+			const boost::function<void(EndUndoAction)>& end,
+			const boost::function<void(std::vector<Point>*)>& vpdynchanged) 
+			: begin_datachange(begin)
+			, end_datachange(end)
+			, vpdyn_changed(vpdynchanged)
 		{
 			init(handler);
 		}
@@ -34,8 +37,8 @@ namespace iseg {
 
 		void set_radius(float radius) { _radius = radius; }
 		void set_brush_target(bool on) { _brush_target = on; }
-		void set_old_value(float v) { _old_value = v; }
-		void set_new_value(float v) { _new_value = v; }
+		void set_tissue_value(tissues_size_t v) { _tissue_value = v; }
+		void set_target_value(float v) { _target_value = v; }
 
 		void on_mouse_clicked(Point p);
 
@@ -43,26 +46,23 @@ namespace iseg {
 
 		void on_mouse_released(Point p);
 
-	private:
-		float* slice()
-		{
-			return _brush_target
-				? _slice_handler->target_slices().at(_slice_handler->active_slice())
-				: _slice_handler->target_slices().at(_slice_handler->active_slice());
-		}
+		void draw_circle(Point p);
 
+	private:
 		boost::function<void(DataSelection)> begin_datachange;
 		boost::function<void(EndUndoAction)> end_datachange;
+		boost::function<void(std::vector<Point>*)> vpdyn_changed;
 
 		SliceHandlerInterface* _slice_handler;
+		std::vector<bool> _cached_tissue_locks;
 		unsigned _width;
 		unsigned _height;
 		float _dx;
 		float _dy;
 		float _radius = 1.0f;
 		bool _brush_target = true;
-		float _old_value = 0.f;
-		float _new_value = 255.f;
+		float _target_value = 255.f;
+		tissues_size_t _tissue_value = 1;
 		Point _last_pt;
 	};
 
