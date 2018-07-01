@@ -11,12 +11,12 @@
 
 #include "LoaderWidgets.h"
 #include "SlicesHandler.h"
+#include "StdStringToQString.h"
 #include "TissueHierarchy.h"
 #include "TissueInfos.h"
 #include "WidgetCollection.h"
 #include "bmp_read_1.h"
 #include "config.h"
-#include "StdStringToQString.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
@@ -65,7 +65,7 @@ using namespace std;
 using namespace iseg;
 
 namespace {
-inline bool SearchFilter(const std::string &text, const std::string &filter)
+inline bool SearchFilter(const std::string& text, const std::string& filter)
 {
 	namespace algo = boost::algorithm;
 
@@ -90,8 +90,8 @@ inline bool SearchFilter(const std::string &text, const std::string &filter)
 }
 } // namespace
 
-ScaleWork::ScaleWork(SlicesHandler *hand3D, QDir picpath, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
@@ -285,7 +285,7 @@ void ScaleWork::slicenr_changed()
 	//	}
 }
 
-void ScaleWork::bmphand_changed(bmphandler *bmph)
+void ScaleWork::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
@@ -352,7 +352,7 @@ void ScaleWork::slider_released()
 	emit end_datachange(this);
 }
 
-HistoWin::HistoWin(unsigned int *histo1, QWidget *parent, const char *name,
+HistoWin::HistoWin(unsigned int* histo1, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
@@ -393,14 +393,14 @@ void HistoWin::update()
 	return;
 }
 
-void HistoWin::histo_changed(unsigned int *histo1)
+void HistoWin::histo_changed(unsigned int* histo1)
 {
 	histo = histo1;
 
 	return;
 }
 
-void HistoWin::paintEvent(QPaintEvent *e)
+void HistoWin::paintEvent(QPaintEvent* e)
 {
 	if (image.size() != QSize(0, 0)) // is an image loaded?
 	{
@@ -410,7 +410,7 @@ void HistoWin::paintEvent(QPaintEvent *e)
 	}
 }
 
-ShowHisto::ShowHisto(SlicesHandler *hand3D, QWidget *parent, const char *name,
+ShowHisto::ShowHisto(SlicesHandler* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
@@ -573,7 +573,7 @@ void ShowHisto::slicenr_changed()
 	//	}
 }
 
-void ShowHisto::bmphand_changed(bmphandler *bmph)
+void ShowHisto::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	histwindow->histo_changed(bmphand->return_histogram());
@@ -587,7 +587,7 @@ void ShowHisto::newloaded()
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
-colorshower::colorshower(int lx1, int ly1, QWidget *parent, const char *name,
+colorshower::colorshower(int lx1, int ly1, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
@@ -613,7 +613,7 @@ void colorshower::color_changed(float fr1, float fg1, float fb1, float opac1)
 	repaint();
 }
 
-void colorshower::paintEvent(QPaintEvent *e)
+void colorshower::paintEvent(QPaintEvent* e)
 {
 	QColor color;
 	color.setRgb((int)(opac * fr * 255), (int)(opac * fg * 255),
@@ -630,8 +630,8 @@ void colorshower::paintEvent(QPaintEvent *e)
 	return;
 }
 
-TissueTreeWidget::TissueTreeWidget(TissueHiearchy *hierarchy, QDir picpath,
-		QWidget *parent)
+TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath,
+		QWidget* parent)
 		: QTreeWidget(parent), hierarchies(hierarchy)
 {
 	picturePath = picpath;
@@ -650,10 +650,10 @@ TissueTreeWidget::TissueTreeWidget(TissueHiearchy *hierarchy, QDir picpath,
 	setRootIsDecorated(true);
 	//xxxb	setFixedHeight(250);
 	//xxxb	setFixedWidth(110);
-	QObject::connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), this,
-			SLOT(resize_columns_to_contents(QTreeWidgetItem *)));
-	QObject::connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), this,
-			SLOT(resize_columns_to_contents(QTreeWidgetItem *)));
+	QObject::connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this,
+			SLOT(resize_columns_to_contents(QTreeWidgetItem*)));
+	QObject::connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this,
+			SLOT(resize_columns_to_contents(QTreeWidgetItem*)));
 	initialize();
 }
 
@@ -667,7 +667,7 @@ void TissueTreeWidget::initialize()
 	emit hierarchy_list_changed();
 }
 
-void TissueTreeWidget::set_tissue_filter(const QString &filter)
+void TissueTreeWidget::set_tissue_filter(const QString& filter)
 {
 	if (filter.toStdString() != tissue_filter)
 	{
@@ -698,7 +698,7 @@ void TissueTreeWidget::update_visibility()
 	}
 }
 
-void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem *current)
+void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem* current)
 {
 	// setHidden hides/shows recursively
 	bool const matches = SearchFilter(get_name(current).toStdString(), tissue_filter);
@@ -719,7 +719,7 @@ void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem *current)
 	bool any_child_visible = false;
 	for (unsigned int i = 0; i < current->childCount(); ++i)
 	{
-		QTreeWidgetItem *child = current->child(i);
+		QTreeWidgetItem* child = current->child(i);
 		update_visibility_recursive(child);
 
 		if (!child->isHidden())
@@ -741,16 +741,16 @@ void TissueTreeWidget::update_hierarchy()
 	hierarchies->set_selected_hierarchy(create_current_hierarchy());
 }
 
-TissueHierarchyItem *TissueTreeWidget::create_current_hierarchy()
+TissueHierarchyItem* TissueTreeWidget::create_current_hierarchy()
 {
 	// Create internal representation from current QTreeWidget
-	TissueHierarchyItem *root = new TissueHierarchyItem(true, QString("root"));
+	TissueHierarchyItem* root = new TissueHierarchyItem(true, QString("root"));
 
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
 	{
 		// Add top-level child
-		QTreeWidgetItem *currWidgetItem = topLevelItem(i);
-		TissueHierarchyItem *newTreeItem =
+		QTreeWidgetItem* currWidgetItem = topLevelItem(i);
+		TissueHierarchyItem* newTreeItem =
 				create_hierarchy_item(currWidgetItem);
 		root->AddChild(newTreeItem);
 
@@ -765,13 +765,13 @@ TissueHierarchyItem *TissueTreeWidget::create_current_hierarchy()
 }
 
 void TissueTreeWidget::create_hierarchy_recursively(
-		QTreeWidgetItem *parentIn, TissueHierarchyItem *parentOut)
+		QTreeWidgetItem* parentIn, TissueHierarchyItem* parentOut)
 {
 	for (unsigned int i = 0; i < parentIn->childCount(); ++i)
 	{
 		// Add child
-		QTreeWidgetItem *currWidgetItem = parentIn->child(i);
-		TissueHierarchyItem *newTreeItem =
+		QTreeWidgetItem* currWidgetItem = parentIn->child(i);
+		TissueHierarchyItem* newTreeItem =
 				create_hierarchy_item(currWidgetItem);
 		parentOut->AddChild(newTreeItem);
 
@@ -783,8 +783,8 @@ void TissueTreeWidget::create_hierarchy_recursively(
 	}
 }
 
-TissueHierarchyItem *
-		TissueTreeWidget::create_hierarchy_item(QTreeWidgetItem *item)
+TissueHierarchyItem*
+		TissueTreeWidget::create_hierarchy_item(QTreeWidgetItem* item)
 {
 	return new TissueHierarchyItem(get_is_folder(item),
 			item->text(TISSUETREEWIDGET_COLUMN_NAME));
@@ -801,7 +801,7 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 		return abc;
 	}
 	unsigned char r, g, b;
-	TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
+	TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
 	tissueInfo->GetColorRGB(r, g, b);
 	abc.fill(QColor(r, g, b));
 	if (tissueInfo->locked)
@@ -829,12 +829,12 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 
 } // namespace
 
-QTreeWidgetItem *TissueTreeWidget::create_hierarchy_item(bool isFolder,
-		const QString &name)
+QTreeWidgetItem* TissueTreeWidget::create_hierarchy_item(bool isFolder,
+		const QString& name)
 {
 	if (isFolder)
 	{
-		QTreeWidgetItem *newFolder = new QTreeWidgetItem();
+		QTreeWidgetItem* newFolder = new QTreeWidgetItem();
 		newFolder->setIcon(
 				TISSUETREEWIDGET_COLUMN_NAME,
 				QIcon(picturePath.absFilePath(QString("fileopen.png")).ascii()));
@@ -849,7 +849,7 @@ QTreeWidgetItem *TissueTreeWidget::create_hierarchy_item(bool isFolder,
 	else
 	{
 		tissues_size_t type = TissueInfos::GetTissueType(ToStd(name));
-		QTreeWidgetItem *newTissue = new QTreeWidgetItem();
+		QTreeWidgetItem* newTissue = new QTreeWidgetItem();
 		newTissue->setIcon(TISSUETREEWIDGET_COLUMN_NAME, generatePixmap(type));
 		newTissue->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
 		newTissue->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
@@ -862,10 +862,10 @@ QTreeWidgetItem *TissueTreeWidget::create_hierarchy_item(bool isFolder,
 	}
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString &name)
+void TissueTreeWidget::insert_item(bool isFolder, const QString& name)
 {
-	QTreeWidgetItem *currItem = currentItem();
-	QTreeWidgetItem *newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* currItem = currentItem();
+	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
 
 	if (get_is_folder(currItem) && currItem->isExpanded())
 	{
@@ -875,7 +875,7 @@ void TissueTreeWidget::insert_item(bool isFolder, const QString &name)
 	else
 	{
 		// Insert at current position
-		QTreeWidgetItem *currParent = currItem->parent();
+		QTreeWidgetItem* currParent = currItem->parent();
 		if (currParent == 0)
 		{
 			insertTopLevelItem(indexOfTopLevelItem(currItem), newItem);
@@ -892,17 +892,17 @@ void TissueTreeWidget::insert_item(bool isFolder, const QString &name)
 	update_hierarchy();
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString &name,
-		QTreeWidgetItem *insertAbove)
+void TissueTreeWidget::insert_item(bool isFolder, const QString& name,
+		QTreeWidgetItem* insertAbove)
 {
 	if (insertAbove == 0)
 	{
 		return;
 	}
 
-	QTreeWidgetItem *newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
 
-	QTreeWidgetItem *parent = insertAbove->parent();
+	QTreeWidgetItem* parent = insertAbove->parent();
 	if (parent == 0)
 	{
 		insertTopLevelItem(indexOfTopLevelItem(insertAbove), newItem);
@@ -918,10 +918,10 @@ void TissueTreeWidget::insert_item(bool isFolder, const QString &name,
 	update_hierarchy();
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString &name,
-		QTreeWidgetItem *parent, unsigned int index)
+void TissueTreeWidget::insert_item(bool isFolder, const QString& name,
+		QTreeWidgetItem* parent, unsigned int index)
 {
-	QTreeWidgetItem *newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
 
 	if (parent == 0)
 	{
@@ -938,13 +938,13 @@ void TissueTreeWidget::insert_item(bool isFolder, const QString &name,
 	update_hierarchy();
 }
 
-void TissueTreeWidget::remove_tissue(const QString &name)
+void TissueTreeWidget::remove_tissue(const QString& name)
 {
 	// Removes a tissue completely from all hierarchies
 	blockSignals(true);
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem *currItem = topLevelItem(i);
+		QTreeWidgetItem* currItem = topLevelItem(i);
 		if (get_is_folder(currItem))
 		{
 			remove_tissue_recursively(currItem, name);
@@ -960,7 +960,7 @@ void TissueTreeWidget::remove_tissue(const QString &name)
 		{
 			// Update tissue type
 			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,	QString::number(newType));
+			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(newType));
 		}
 	}
 	blockSignals(false);
@@ -972,12 +972,12 @@ void TissueTreeWidget::remove_tissue(const QString &name)
 	hierarchies->update_hierarchies();
 }
 
-void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem *parent,
-		const QString &name)
+void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent,
+		const QString& name)
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
-		QTreeWidgetItem *currItem = parent->child(i);
+		QTreeWidgetItem* currItem = parent->child(i);
 		if (get_is_folder(currItem))
 		{
 			remove_tissue_recursively(currItem, name);
@@ -993,7 +993,7 @@ void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem *parent,
 		{
 			// Update tissue type
 			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE,	QString::number(newType));
+			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(newType));
 		}
 	}
 }
@@ -1002,8 +1002,8 @@ void TissueTreeWidget::remove_current_item(bool removeChildren)
 {
 	// Removes current item in QTreeWidget and internal representations
 
-	QTreeWidgetItem *currItem = currentItem();
-	QTreeWidgetItem *currParent = currItem->parent();
+	QTreeWidgetItem* currItem = currentItem();
+	QTreeWidgetItem* currParent = currItem->parent();
 	bool updateTissues = false;
 
 	if (get_is_folder(currItem))
@@ -1012,7 +1012,7 @@ void TissueTreeWidget::remove_current_item(bool removeChildren)
 		if (removeChildren)
 		{
 			// Delete all children of current item
-			QList<QTreeWidgetItem *> children;
+			QList<QTreeWidgetItem*> children;
 			take_children_recursively(currItem, children);
 			qDeleteAll(children);
 
@@ -1089,11 +1089,11 @@ void TissueTreeWidget::remove_all_folders(bool removeChildren)
 	{
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			QTreeWidgetItem *item = topLevelItem(i);
+			QTreeWidgetItem* item = topLevelItem(i);
 			if (get_is_folder(item))
 			{
 				// Delete all children of item
-				QList<QTreeWidgetItem *> children;
+				QList<QTreeWidgetItem*> children;
 				take_children_recursively(item, children);
 				qDeleteAll(children);
 
@@ -1109,7 +1109,7 @@ void TissueTreeWidget::remove_all_folders(bool removeChildren)
 	{
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			QTreeWidgetItem *item = topLevelItem(i);
+			QTreeWidgetItem* item = topLevelItem(i);
 			if (get_is_folder(item))
 			{
 				// Insert children into parent and delete item
@@ -1132,8 +1132,8 @@ void TissueTreeWidget::remove_all_folders(bool removeChildren)
 	}
 }
 
-void TissueTreeWidget::update_tissue_name(const QString &oldName,
-		const QString &newName)
+void TissueTreeWidget::update_tissue_name(const QString& oldName,
+		const QString& newName)
 {
 	if (oldName.compare(newName) == 0)
 	{
@@ -1141,7 +1141,7 @@ void TissueTreeWidget::update_tissue_name(const QString &oldName,
 	}
 
 	// Update tissue name in internal representations
-	auto &hierarchyTrees = hierarchies->hierarchies();
+	auto& hierarchyTrees = hierarchies->hierarchies();
 	for (unsigned int i = 0; i < hierarchyTrees.size(); ++i)
 	{
 		hierarchyTrees[i]->UpdateTissueNameRecursively(oldName, newName);
@@ -1151,9 +1151,9 @@ void TissueTreeWidget::update_tissue_name(const QString &oldName,
 	update_tissue_name_widget(oldName, newName);
 }
 
-void TissueTreeWidget::update_tissue_name_widget(const QString &oldName,
-		const QString &newName,
-		QTreeWidgetItem *parent)
+void TissueTreeWidget::update_tissue_name_widget(const QString& oldName,
+		const QString& newName,
+		QTreeWidgetItem* parent)
 {
 	if (parent == 0)
 	{
@@ -1185,7 +1185,7 @@ void TissueTreeWidget::update_tissue_name_widget(const QString &oldName,
 	}
 }
 
-void TissueTreeWidget::update_tissue_icons(QTreeWidgetItem *parent)
+void TissueTreeWidget::update_tissue_icons(QTreeWidgetItem* parent)
 {
 	if (parent == 0)
 	{
@@ -1214,7 +1214,7 @@ void TissueTreeWidget::update_tissue_icons(QTreeWidgetItem *parent)
 	}
 }
 
-void TissueTreeWidget::update_folder_icons(QTreeWidgetItem *parent)
+void TissueTreeWidget::update_folder_icons(QTreeWidgetItem* parent)
 {
 	// Updates the folder icons based on the lock state of the child tissues
 	// This only works if the tree widget is completely built
@@ -1268,7 +1268,7 @@ void TissueTreeWidget::update_folder_icons(QTreeWidgetItem *parent)
 }
 
 // TODO: Optimize by introducing folder map / hidden flag
-short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem *folder)
+short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem* folder)
 {
 	// Returns whether all child tissues (including subfolders) are
 	// unlocked (return value 0),
@@ -1280,7 +1280,7 @@ short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem *folder)
 	short lockStates = 0; // Empty folders are considered to be unlocked
 	for (i = 0; i < folder->childCount(); ++i)
 	{
-		QTreeWidgetItem *currChild = folder->child(i);
+		QTreeWidgetItem* currChild = folder->child(i);
 		if (get_is_folder(currChild))
 		{
 			if (currChild->childCount() > 0)
@@ -1311,7 +1311,7 @@ short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem *folder)
 	// Test against lock states of other children
 	for (int i = 1; i < folder->childCount(); ++i)
 	{
-		QTreeWidgetItem *currChild = folder->child(i);
+		QTreeWidgetItem* currChild = folder->child(i);
 		if (get_is_folder(currChild))
 		{
 			// Skip empty folders
@@ -1343,7 +1343,7 @@ void TissueTreeWidget::pad_tissue_indices()
 
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem *item = topLevelItem(i);
+		QTreeWidgetItem* item = topLevelItem(i);
 		if (get_is_folder(item))
 		{
 			pad_tissue_indices_recursively(item, digits);
@@ -1361,12 +1361,12 @@ void TissueTreeWidget::pad_tissue_indices()
 	}
 }
 
-void TissueTreeWidget::pad_tissue_indices_recursively(QTreeWidgetItem *parent,
+void TissueTreeWidget::pad_tissue_indices_recursively(QTreeWidgetItem* parent,
 		unsigned short digits)
 {
 	for (unsigned int i = 0; i < parent->childCount(); ++i)
 	{
-		QTreeWidgetItem *item = parent->child(i);
+		QTreeWidgetItem* item = parent->child(i);
 		if (get_is_folder(item))
 		{
 			pad_tissue_indices_recursively(item, digits);
@@ -1388,7 +1388,7 @@ void TissueTreeWidget::update_tissue_indices()
 {
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem *item = topLevelItem(i);
+		QTreeWidgetItem* item = topLevelItem(i);
 		if (get_is_folder(item))
 		{
 			update_tissue_indices_recursively(item);
@@ -1402,11 +1402,11 @@ void TissueTreeWidget::update_tissue_indices()
 }
 
 void TissueTreeWidget::update_tissue_indices_recursively(
-		QTreeWidgetItem *parent)
+		QTreeWidgetItem* parent)
 {
 	for (unsigned int i = 0; i < parent->childCount(); ++i)
 	{
-		QTreeWidgetItem *item = parent->child(i);
+		QTreeWidgetItem* item = parent->child(i);
 		if (get_is_folder(item))
 		{
 			update_tissue_indices_recursively(item);
@@ -1419,7 +1419,7 @@ void TissueTreeWidget::update_tissue_indices_recursively(
 	}
 }
 
-void TissueTreeWidget::set_current_folder_name(const QString &name)
+void TissueTreeWidget::set_current_folder_name(const QString& name)
 {
 	if (get_current_is_folder())
 	{
@@ -1430,7 +1430,7 @@ void TissueTreeWidget::set_current_folder_name(const QString &name)
 	}
 }
 
-void TissueTreeWidget::set_current_item(QTreeWidgetItem *item)
+void TissueTreeWidget::set_current_item(QTreeWidgetItem* item)
 {
 	if (item)
 	{
@@ -1446,9 +1446,9 @@ void TissueTreeWidget::set_current_tissue(tissues_size_t type)
 {
 	if (type > 0 && type <= TissueInfos::GetTissueCount())
 	{
-		QTreeWidgetItem *item = find_tissue_item(type);
+		QTreeWidgetItem* item = find_tissue_item(type);
 		setCurrentItem(item);
-		QTreeWidgetItem *parent = item->parent();
+		QTreeWidgetItem* parent = item->parent();
 		if (parent != 0)
 		{
 			parent->setExpanded(true);
@@ -1460,14 +1460,14 @@ void TissueTreeWidget::set_current_tissue(tissues_size_t type)
 	}
 }
 
-QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type, QTreeWidgetItem *parent) const
+QTreeWidgetItem* TissueTreeWidget::find_tissue_item(tissues_size_t type, QTreeWidgetItem* parent) const
 {
 	if (parent == 0)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			QTreeWidgetItem *recursiveRes = find_tissue_item(type, topLevelItem(i));
+			QTreeWidgetItem* recursiveRes = find_tissue_item(type, topLevelItem(i));
 			if (recursiveRes != 0)
 			{
 				return recursiveRes;
@@ -1484,14 +1484,14 @@ QTreeWidgetItem *TissueTreeWidget::find_tissue_item(tissues_size_t type, QTreeWi
 		// Recursion with children
 		for (int i = 0; i < parent->childCount(); ++i)
 		{
-			QTreeWidgetItem *recursiveRes = find_tissue_item(type, parent->child(i));
+			QTreeWidgetItem* recursiveRes = find_tissue_item(type, parent->child(i));
 			if (recursiveRes != 0)
 			{
 				return recursiveRes;
 			}
 		}
 	}
-	return (QTreeWidgetItem *)0;
+	return (QTreeWidgetItem*)0;
 }
 
 tissues_size_t TissueTreeWidget::get_current_type() const
@@ -1506,7 +1506,7 @@ bool TissueTreeWidget::get_current_is_folder() const
 	return get_is_folder(currentItem());
 }
 
-bool TissueTreeWidget::get_is_folder(QTreeWidgetItem *item) const
+bool TissueTreeWidget::get_is_folder(QTreeWidgetItem* item) const
 {
 	if (item)
 	{
@@ -1515,7 +1515,7 @@ bool TissueTreeWidget::get_is_folder(QTreeWidgetItem *item) const
 	return true;
 }
 
-tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem *item) const
+tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem* item) const
 {
 	if (item && !get_is_folder(item))
 	{
@@ -1525,7 +1525,7 @@ tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem *item) const
 	return 0;
 }
 
-QString TissueTreeWidget::get_name(QTreeWidgetItem *item) const
+QString TissueTreeWidget::get_name(QTreeWidgetItem* item) const
 {
 	if (item)
 	{
@@ -1546,7 +1546,7 @@ bool TissueTreeWidget::get_current_has_children() const
 	}
 }
 
-void TissueTreeWidget::get_current_child_tissues(std::map<tissues_size_t, unsigned short> &types) const
+void TissueTreeWidget::get_current_child_tissues(std::map<tissues_size_t, unsigned short>& types) const
 {
 	types.clear();
 	if (currentItem() != 0)
@@ -1555,12 +1555,12 @@ void TissueTreeWidget::get_current_child_tissues(std::map<tissues_size_t, unsign
 	}
 }
 
-void TissueTreeWidget::get_sublevel_child_tissues(std::map<tissues_size_t, unsigned short> &types) const
+void TissueTreeWidget::get_sublevel_child_tissues(std::map<tissues_size_t, unsigned short>& types) const
 {
 	types.clear();
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem *item = topLevelItem(i);
+		QTreeWidgetItem* item = topLevelItem(i);
 		if (get_is_folder(item))
 		{
 			get_child_tissues_recursively(item, types);
@@ -1568,7 +1568,7 @@ void TissueTreeWidget::get_sublevel_child_tissues(std::map<tissues_size_t, unsig
 	}
 }
 
-void TissueTreeWidget::get_child_tissues_recursively(QTreeWidgetItem *parent, std::map<tissues_size_t, unsigned short> &types) const
+void TissueTreeWidget::get_child_tissues_recursively(QTreeWidgetItem* parent, std::map<tissues_size_t, unsigned short>& types) const
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
@@ -1605,7 +1605,7 @@ unsigned short TissueTreeWidget::get_hierarchy_count() const
 	return hierarchies->get_hierarchy_count();
 }
 
-std::vector<QString> *TissueTreeWidget::get_hierarchy_names_ptr() const
+std::vector<QString>* TissueTreeWidget::get_hierarchy_names_ptr() const
 {
 	return hierarchies->get_hierarchy_names_ptr();
 }
@@ -1648,7 +1648,7 @@ void TissueTreeWidget::set_hierarchy(unsigned short index)
 	resize_columns_to_contents();
 }
 
-void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
+void TissueTreeWidget::build_tree_widget(TissueHierarchyItem* root)
 {
 	clear();
 
@@ -1659,15 +1659,15 @@ void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
 		tissueTypes.insert(type);
 	}
 
-	vector<TissueHierarchyItem *> *children = root->GetChildren();
-	for (vector<TissueHierarchyItem *>::iterator iter = children->begin();
+	vector<TissueHierarchyItem*>* children = root->GetChildren();
+	for (vector<TissueHierarchyItem*>::iterator iter = children->begin();
 			 iter != children->end(); ++iter)
 	{
 		// Add top-level item
-		TissueHierarchyItem *currItem = *iter;
+		TissueHierarchyItem* currItem = *iter;
 		if (currItem->GetIsFolder())
 		{
-			QTreeWidgetItem *newFolder =
+			QTreeWidgetItem* newFolder =
 					create_hierarchy_item(true, currItem->GetName());
 			addTopLevelItem(newFolder);
 			build_tree_widget_recursively(currItem, newFolder, &tissueTypes);
@@ -1677,7 +1677,7 @@ void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
 			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
 			if (type > 0)
 			{
-				QTreeWidgetItem *newTissue =
+				QTreeWidgetItem* newTissue =
 						create_hierarchy_item(false, currItem->GetName());
 				addTopLevelItem(newTissue);
 				std::set<tissues_size_t>::iterator iter =
@@ -1704,18 +1704,18 @@ void TissueTreeWidget::build_tree_widget(TissueHierarchyItem *root)
 }
 
 void TissueTreeWidget::build_tree_widget_recursively(
-		TissueHierarchyItem *parentIn, QTreeWidgetItem *parentOut,
-		std::set<tissues_size_t> *tissueTypes)
+		TissueHierarchyItem* parentIn, QTreeWidgetItem* parentOut,
+		std::set<tissues_size_t>* tissueTypes)
 {
-	vector<TissueHierarchyItem *> *children = parentIn->GetChildren();
-	for (vector<TissueHierarchyItem *>::iterator iter = children->begin();
+	vector<TissueHierarchyItem*>* children = parentIn->GetChildren();
+	for (vector<TissueHierarchyItem*>::iterator iter = children->begin();
 			 iter != children->end(); ++iter)
 	{
 		// Add item to parentOut
-		TissueHierarchyItem *currItem = *iter;
+		TissueHierarchyItem* currItem = *iter;
 		if (currItem->GetIsFolder())
 		{
-			QTreeWidgetItem *newFolder =
+			QTreeWidgetItem* newFolder =
 					create_hierarchy_item(true, currItem->GetName());
 			parentOut->addChild(newFolder);
 			build_tree_widget_recursively(currItem, newFolder, tissueTypes);
@@ -1725,7 +1725,7 @@ void TissueTreeWidget::build_tree_widget_recursively(
 			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
 			if (type > 0)
 			{
-				QTreeWidgetItem *newTissue = create_hierarchy_item(false, currItem->GetName());
+				QTreeWidgetItem* newTissue = create_hierarchy_item(false, currItem->GetName());
 				parentOut->addChild(newTissue);
 				std::set<tissues_size_t>::iterator iter = tissueTypes->find(type);
 				if (iter != tissueTypes->end())
@@ -1737,7 +1737,7 @@ void TissueTreeWidget::build_tree_widget_recursively(
 	}
 }
 
-void TissueTreeWidget::add_new_hierarchy(const QString &name)
+void TissueTreeWidget::add_new_hierarchy(const QString& name)
 {
 	// Create and select default hierarchy
 	hierarchies->add_new_hierarchy(name);
@@ -1745,7 +1745,7 @@ void TissueTreeWidget::add_new_hierarchy(const QString &name)
 	emit hierarchy_list_changed();
 }
 
-bool TissueTreeWidget::load_hierarchy(const QString &path)
+bool TissueTreeWidget::load_hierarchy(const QString& path)
 {
 	if (!hierarchies->load_hierarchy(path))
 	{
@@ -1758,7 +1758,7 @@ bool TissueTreeWidget::load_hierarchy(const QString &path)
 }
 
 void TissueTreeWidget::take_children_recursively(
-		QTreeWidgetItem *parent, QList<QTreeWidgetItem *> &appendTo)
+		QTreeWidgetItem* parent, QList<QTreeWidgetItem*>& appendTo)
 {
 	// Recursion with children
 	for (int i = 0; i < parent->childCount(); ++i)
@@ -1775,8 +1775,8 @@ void TissueTreeWidget::update_tree_widget()
 	set_hierarchy(hierarchies->get_selected_hierarchy());
 }
 
-bool TissueTreeWidget::save_hierarchy_as(const QString &name,
-		const QString &path)
+bool TissueTreeWidget::save_hierarchy_as(const QString& name,
+		const QString& path)
 {
 	if (hierarchies->get_selected_hierarchy() == 0)
 	{
@@ -1863,9 +1863,9 @@ bool TissueTreeWidget::get_tissue_indices_hidden() const
 	return isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE);
 }
 
-QList<QTreeWidgetItem *> get_my_children(QTreeWidgetItem *item)
+QList<QTreeWidgetItem*> get_my_children(QTreeWidgetItem* item)
 {
-	QList<QTreeWidgetItem *> my_children;
+	QList<QTreeWidgetItem*> my_children;
 
 	if (item->childCount() == 0)
 	{
@@ -1882,9 +1882,9 @@ QList<QTreeWidgetItem *> get_my_children(QTreeWidgetItem *item)
 	return my_children;
 }
 
-QList<QTreeWidgetItem *> TissueTreeWidget::get_all_items() const
+QList<QTreeWidgetItem*> TissueTreeWidget::get_all_items() const
 {
-	QList<QTreeWidgetItem *> all_items;
+	QList<QTreeWidgetItem*> all_items;
 	all_items.append(get_my_children(invisibleRootItem()));
 	auto nItems = all_items.size();
 	return all_items;
@@ -1898,7 +1898,7 @@ void TissueTreeWidget::resize_columns_to_contents()
 	}
 }
 
-void TissueTreeWidget::resize_columns_to_contents(QTreeWidgetItem *item)
+void TissueTreeWidget::resize_columns_to_contents(QTreeWidgetItem* item)
 {
 	resize_columns_to_contents();
 }
@@ -1913,7 +1913,7 @@ unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type) 
 	unsigned short res = 0;
 	for (unsigned int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem *item = topLevelItem(i);
+		QTreeWidgetItem* item = topLevelItem(i);
 		if (get_is_folder(item))
 		{
 			res += get_tissue_instance_count_recursively(item, type);
@@ -1927,12 +1927,12 @@ unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type) 
 }
 
 unsigned short TissueTreeWidget::get_tissue_instance_count_recursively(
-		QTreeWidgetItem *parent, tissues_size_t type) const
+		QTreeWidgetItem* parent, tissues_size_t type) const
 {
 	unsigned short res = 0;
 	for (unsigned int i = 0; i < parent->childCount(); ++i)
 	{
-		QTreeWidgetItem *item = parent->child(i);
+		QTreeWidgetItem* item = parent->child(i);
 		if (get_is_folder(item))
 		{
 			res += get_tissue_instance_count_recursively(item, type);
@@ -1945,12 +1945,12 @@ unsigned short TissueTreeWidget::get_tissue_instance_count_recursively(
 	return res;
 }
 
-FILE *TissueTreeWidget::SaveParams(FILE *fp, int version)
+FILE* TissueTreeWidget::SaveParams(FILE* fp, int version)
 {
 	return hierarchies->SaveParams(fp, version);
 }
 
-FILE *TissueTreeWidget::LoadParams(FILE *fp, int version)
+FILE* TissueTreeWidget::LoadParams(FILE* fp, int version)
 {
 	fp = hierarchies->LoadParams(fp, version);
 
@@ -1962,12 +1962,12 @@ FILE *TissueTreeWidget::LoadParams(FILE *fp, int version)
 	return fp;
 }
 
-FILE *TissueTreeWidget::save_hierarchy(FILE *fp, unsigned short idx)
+FILE* TissueTreeWidget::save_hierarchy(FILE* fp, unsigned short idx)
 {
 	return hierarchies->save_hierarchy(fp, idx);
 }
 
-FILE *TissueTreeWidget::load_hierarchy(FILE *fp)
+FILE* TissueTreeWidget::load_hierarchy(FILE* fp)
 {
 	fp = hierarchies->load_hierarchy(fp);
 
@@ -1982,7 +1982,7 @@ FILE *TissueTreeWidget::load_hierarchy(FILE *fp)
 	return fp;
 }
 
-void TissueTreeWidget::dropEvent(QDropEvent *de)
+void TissueTreeWidget::dropEvent(QDropEvent* de)
 {
 	// Only accept internal move actions
 	if (!(de->source() == this && (de->possibleActions() & Qt::MoveAction)))
@@ -1994,8 +1994,8 @@ void TissueTreeWidget::dropEvent(QDropEvent *de)
 			(de->keyboardModifiers() & Qt::ShiftModifier))
 	{
 		// Move the item and insert a duplicate at the original position
-		QTreeWidgetItem *currItem = currentItem();
-		QTreeWidgetItem *currParent = currItem->parent();
+		QTreeWidgetItem* currItem = currentItem();
+		QTreeWidgetItem* currParent = currItem->parent();
 
 		// Get original index
 		unsigned int oldIdx = 0;
@@ -2043,8 +2043,8 @@ void TissueTreeWidget::dropEvent(QDropEvent *de)
 	update_folder_icons();
 }
 
-TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget *tissueTree,
-		QWidget *parent, const char *name,
+TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree,
+		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags), tissueTreeWidget(tissueTree)
 {
@@ -2121,7 +2121,7 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget *tissueTree,
 	{
 		addTissue->setText("Modify Tissue");
 
-		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
+		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
 		nameField->setText(ToQ(tissueInfo->name));
 		r->setValue(int(tissueInfo->color[0] * 255));
 		g->setValue(int(tissueInfo->color[1] * 255));
@@ -2316,7 +2316,7 @@ void TissueAdder::add_pressed()
 		if (!nameField->text().isEmpty())
 		{
 			tissues_size_t type = tissueTreeWidget->get_current_type();
-			TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(type);
+			TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(type);
 			QString oldName = ToQ(tissueInfo->name);
 			if (oldName.compare(nameField->text(), Qt::CaseInsensitive) != 0 &&
 					TissueInfos::GetTissueType(ToStd(nameField->text())) > 0)
@@ -2373,8 +2373,8 @@ void TissueAdder::add_pressed()
 	return;
 }
 
-TissueFolderAdder::TissueFolderAdder(TissueTreeWidget *tissueTree,
-		QWidget *parent, const char *name,
+TissueFolderAdder::TissueFolderAdder(TissueTreeWidget* tissueTree,
+		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags), tissueTreeWidget(tissueTree)
 {
@@ -2414,8 +2414,8 @@ void TissueFolderAdder::add_pressed()
 	close();
 }
 
-TissueHierarchyWidget::TissueHierarchyWidget(TissueTreeWidget *tissueTree,
-		QWidget *parent,
+TissueHierarchyWidget::TissueHierarchyWidget(TissueTreeWidget* tissueTree,
+		QWidget* parent,
 		Qt::WindowFlags wFlags)
 		: QWidget(parent, wFlags), tissueTreeWidget(tissueTree)
 {
@@ -2641,7 +2641,7 @@ void TissueHierarchyWidget::remove_hierarchy_pressed()
 	tissueTreeWidget->remove_current_hierarchy();
 }
 
-bits_stack::bits_stack(SlicesHandler *hand3D, QWidget *parent, const char *name,
+bits_stack::bits_stack(SlicesHandler* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), handler3D(hand3D)
 {
@@ -2887,7 +2887,7 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 		dataName = QString("Tissue");
 	}
 
-	QList<QListWidgetItem *> selectedItems = bits_names->selectedItems();
+	QList<QListWidgetItem*> selectedItems = bits_names->selectedItems();
 	if (selectedItems.size() <= 0)
 	{
 		return;
@@ -2913,7 +2913,7 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 	unsigned int slice = handler3D->active_slice();
 	if (source)
 	{
-		for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
+		for (QList<QListWidgetItem*>::iterator iter = selectedItems.begin();
 				 iter != selectedItems.end(); ++iter)
 		{
 			handler3D->getstack_bmp(slice++, bits_nr[(*iter)->text()]);
@@ -2921,7 +2921,7 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 	}
 	else if (target)
 	{
-		for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
+		for (QList<QListWidgetItem*>::iterator iter = selectedItems.begin();
 				 iter != selectedItems.end(); ++iter)
 		{
 			handler3D->getstack_work(slice++, bits_nr[(*iter)->text()]);
@@ -2929,7 +2929,7 @@ void bits_stack::pop_helper(bool source, bool target, bool tissue)
 	}
 	else if (tissue)
 	{
-		for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
+		for (QList<QListWidgetItem*>::iterator iter = selectedItems.begin();
 				 iter != selectedItems.end(); ++iter)
 		{
 			handler3D->getstack_tissue(slice++, bits_nr[(*iter)->text()],
@@ -2948,7 +2948,7 @@ void bits_stack::poptissue_pressed() { pop_helper(false, false, true); }
 
 void bits_stack::loaditem_pressed()
 {
-	Q3FileDialog *dialog = new Q3FileDialog(QString::null,
+	Q3FileDialog* dialog = new Q3FileDialog(QString::null,
 			"Stackitems (*.stk)\n"
 			"All(*.*)",
 			this);
@@ -3039,7 +3039,7 @@ void bits_stack::loaditem_pressed()
 
 void bits_stack::saveitem_pressed()
 {
-	QList<QListWidgetItem *> selectedItems = bits_names->selectedItems();
+	QList<QListWidgetItem*> selectedItems = bits_names->selectedItems();
 	if (selectedItems.size() <= 0)
 	{
 		return;
@@ -3066,7 +3066,7 @@ void bits_stack::saveitem_pressed()
 			fieldWidth++;
 		}
 		unsigned int suffix = 1;
-		for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
+		for (QList<QListWidgetItem*>::iterator iter = selectedItems.begin();
 				 iter != selectedItems.end(); ++iter)
 		{
 			QString savefilenameExt =
@@ -3087,13 +3087,13 @@ void bits_stack::saveitem_pressed()
 
 void bits_stack::delete_pressed()
 {
-	QList<QListWidgetItem *> selectedItems = bits_names->selectedItems();
+	QList<QListWidgetItem*> selectedItems = bits_names->selectedItems();
 	if (selectedItems.size() <= 0)
 	{
 		return;
 	}
 
-	for (QList<QListWidgetItem *>::iterator iter = selectedItems.begin();
+	for (QList<QListWidgetItem*>::iterator iter = selectedItems.begin();
 			 iter != selectedItems.end(); ++iter)
 	{
 		handler3D->removestack(bits_nr[(*iter)->text()]);
@@ -3103,7 +3103,7 @@ void bits_stack::delete_pressed()
 	}
 }
 
-QMap<QString, unsigned int> *bits_stack::return_bitsnr() { return &bits_nr; }
+QMap<QString, unsigned int>* bits_stack::return_bitsnr() { return &bits_nr; }
 
 void bits_stack::newloaded()
 {
@@ -3125,7 +3125,7 @@ void bits_stack::clear_stack()
 	emit stack_changed();
 }
 
-FILE *bits_stack::save_proj(FILE *fp)
+FILE* bits_stack::save_proj(FILE* fp)
 {
 	int size = int(bits_nr.size());
 	fwrite(&size, 1, sizeof(int), fp);
@@ -3143,7 +3143,7 @@ FILE *bits_stack::save_proj(FILE *fp)
 	return fp;
 }
 
-FILE *bits_stack::load_proj(FILE *fp)
+FILE* bits_stack::load_proj(FILE* fp)
 {
 	oldw = handler3D->width();
 	oldh = handler3D->height();
@@ -3173,8 +3173,8 @@ FILE *bits_stack::load_proj(FILE *fp)
 	return fp;
 }
 
-extoverlay_widget::extoverlay_widget(SlicesHandler *hand3D, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+extoverlay_widget::extoverlay_widget(SlicesHandler* hand3D, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->active_slice();
@@ -3266,7 +3266,7 @@ void extoverlay_widget::initialize()
 
 void extoverlay_widget::newloaded() { handler3D->clear_overlay(); }
 
-void extoverlay_widget::add_dataset(const QString &path)
+void extoverlay_widget::add_dataset(const QString& path)
 {
 	datasetNames.push_back(QFileInfo(path).fileName());
 	datasetFilepaths.push_back(path);
@@ -3411,8 +3411,8 @@ void extoverlay_widget::target_toggled()
 	emit workoverlayvisible_changed(isset);
 }
 
-MultiDataset_widget::MultiDataset_widget(SlicesHandler *hand3D, QWidget *parent,
-		const char *name,
+MultiDataset_widget::MultiDataset_widget(SlicesHandler* hand3D, QWidget* parent,
+		const char* name,
 		Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
 {
@@ -3432,7 +3432,7 @@ MultiDataset_widget::MultiDataset_widget(SlicesHandler *hand3D, QWidget *parent,
 	vboxOverall->addWidget(m_DatasetsGroupBox);
 
 	//Buttons
-	QHBoxLayout *buttonsGrid = new QHBoxLayout();
+	QHBoxLayout* buttonsGrid = new QHBoxLayout();
 	vboxOverall->addLayout(buttonsGrid);
 
 	// Add dataset button
@@ -3495,7 +3495,7 @@ void MultiDataset_widget::ClearRadioButtons()
 {
 	if (m_VboxDatasets->layout() != NULL)
 	{
-		QLayoutItem *item;
+		QLayoutItem* item;
 		while ((item = m_VboxDatasets->layout()->takeAt(0)) != NULL)
 		{
 			delete item->widget();
@@ -3561,7 +3561,7 @@ void MultiDataset_widget::AddDatasetPressed()
 
 	if (selectedType != -1)
 	{
-		SlicesHandler *handler3D = new SlicesHandler();
+		SlicesHandler* handler3D = new SlicesHandler();
 		QStringList loadfilenames;
 		unsigned short width, height, nrofslices;
 		MultiDataset_widget::SDatasetInfo dataInfo;
@@ -3583,7 +3583,7 @@ void MultiDataset_widget::AddDatasetPressed()
 				sort(loadfilenames.begin(), loadfilenames.end());
 				short nrelem = loadfilenames.size();
 
-				vector<const char *> vfilenames;
+				vector<const char*> vfilenames;
 				for (short i = 0; i < nrelem; i++)
 				{
 					vfilenames.push_back(loadfilenames[i].ascii());
@@ -3691,7 +3691,7 @@ void MultiDataset_widget::AddDatasetPressed()
 }
 
 bool MultiDataset_widget::CheckInfoAndAddToList(
-		MultiDataset_widget::SDatasetInfo &newRadioButton,
+		MultiDataset_widget::SDatasetInfo& newRadioButton,
 		QStringList loadfilenames, unsigned short width, unsigned short height,
 		unsigned short nrofslices)
 {
@@ -3728,7 +3728,7 @@ bool MultiDataset_widget::CheckInfoAndAddToList(
 }
 
 bool MultiDataset_widget::AddDatasetToList(
-		MultiDataset_widget::SDatasetInfo &newRadioButton,
+		MultiDataset_widget::SDatasetInfo& newRadioButton,
 		QStringList loadfilenames)
 {
 	QString butText = loadfilenames[0];
@@ -3746,7 +3746,7 @@ bool MultiDataset_widget::AddDatasetToList(
 }
 
 void MultiDataset_widget::CopyImagesSlices(
-		SlicesHandler *handler3D, MultiDataset_widget::SDatasetInfo &newRadioButton,
+		SlicesHandler* handler3D, MultiDataset_widget::SDatasetInfo& newRadioButton,
 		const bool saveOnlyWorkingBits /*= false*/)
 {
 	const int nrslices = handler3D->num_slices();
@@ -3762,7 +3762,7 @@ void MultiDataset_widget::CopyImagesSlices(
 		newRadioButton.m_BmpSlices.clear();
 		for (int i = 0; i < nrslices; i++)
 		{
-			float *bmp_data = (float *)malloc(sizeof(float) * size);
+			float* bmp_data = (float*)malloc(sizeof(float) * size);
 			memcpy(bmp_data, handler3D->return_bmp(i), sizeof(float) * size);
 			newRadioButton.m_BmpSlices.push_back(bmp_data);
 		}
@@ -3771,7 +3771,7 @@ void MultiDataset_widget::CopyImagesSlices(
 	newRadioButton.m_WorkSlices.clear();
 	for (int i = 0; i < nrslices; i++)
 	{
-		float *work_data = (float *)malloc(sizeof(float) * size);
+		float* work_data = (float*)malloc(sizeof(float) * size);
 		memcpy(work_data, handler3D->return_work(i), sizeof(float) * size);
 		newRadioButton.m_WorkSlices.push_back(work_data);
 	}
@@ -3779,7 +3779,7 @@ void MultiDataset_widget::CopyImagesSlices(
 
 void MultiDataset_widget::SwitchDataset()
 {
-	for (auto &radioButton : m_RadioButtons)
+	for (auto& radioButton : m_RadioButtons)
 	{
 		if (radioButton.m_RadioButton->isChecked())
 		{
@@ -3847,7 +3847,7 @@ void MultiDataset_widget::SwitchDataset()
 
 void MultiDataset_widget::ChangeDatasetName()
 {
-	for (auto &radioButton : m_RadioButtons)
+	for (auto& radioButton : m_RadioButtons)
 	{
 		if (radioButton.m_RadioButton->isChecked())
 		{
@@ -3868,7 +3868,7 @@ void MultiDataset_widget::ChangeDatasetName()
 void MultiDataset_widget::RemoveDataset()
 {
 	int index = 0;
-	for (auto &radioButton : m_RadioButtons)
+	for (auto& radioButton : m_RadioButtons)
 	{
 		if (radioButton.m_RadioButton->isChecked())
 		{
@@ -3876,12 +3876,12 @@ void MultiDataset_widget::RemoveDataset()
 
 			std::for_each(radioButton.m_BmpSlices.begin(),
 					radioButton.m_BmpSlices.end(),
-					[](float *element) { delete element; });
+					[](float* element) { delete element; });
 			radioButton.m_BmpSlices.clear();
 
 			std::for_each(radioButton.m_WorkSlices.begin(),
 					radioButton.m_WorkSlices.end(),
-					[](float *element) { delete element; });
+					[](float* element) { delete element; });
 			radioButton.m_WorkSlices.clear();
 
 			delete radioButton.m_RadioButton;
@@ -3947,17 +3947,17 @@ bool MultiDataset_widget::IsActive(const int multiDS_index)
 	return false;
 }
 
-std::vector<float *> MultiDataset_widget::GetBmpData(const int multiDS_index)
+std::vector<float*> MultiDataset_widget::GetBmpData(const int multiDS_index)
 {
 	if (multiDS_index < m_RadioButtons.size())
 	{
 		return m_RadioButtons.at(multiDS_index).m_BmpSlices;
 	}
-	return std::vector<float *>();
+	return std::vector<float*>();
 }
 
 void MultiDataset_widget::SetBmpData(const int multiDS_index,
-		std::vector<float *> bmp_bits_vc)
+		std::vector<float*> bmp_bits_vc)
 {
 	if (multiDS_index < m_RadioButtons.size())
 	{
@@ -3965,17 +3965,17 @@ void MultiDataset_widget::SetBmpData(const int multiDS_index,
 	}
 }
 
-std::vector<float *> MultiDataset_widget::GetWorkingData(const int multiDS_index)
+std::vector<float*> MultiDataset_widget::GetWorkingData(const int multiDS_index)
 {
 	if (multiDS_index < m_RadioButtons.size())
 	{
 		return m_RadioButtons.at(multiDS_index).m_WorkSlices;
 	}
-	return std::vector<float *>();
+	return std::vector<float*>();
 }
 
 void MultiDataset_widget::SetWorkingData(const int multiDS_index,
-		std::vector<float *> work_bits_vc)
+		std::vector<float*> work_bits_vc)
 {
 	if (multiDS_index < m_RadioButtons.size())
 	{
@@ -3983,7 +3983,7 @@ void MultiDataset_widget::SetWorkingData(const int multiDS_index,
 	}
 }
 
-bits_stack_pushdialog::bits_stack_pushdialog(QWidget *parent, const char *name,
+bits_stack_pushdialog::bits_stack_pushdialog(QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, false, wFlags)
 {
@@ -4041,12 +4041,12 @@ bool bits_stack_pushdialog::get_pushcurrentslice()
 	return rb_currentslice->isChecked();
 }
 
-unsigned int bits_stack_pushdialog::get_startslice(bool *ok)
+unsigned int bits_stack_pushdialog::get_startslice(bool* ok)
 {
 	return le_startslice->text().toUInt(ok);
 }
 
-unsigned int bits_stack_pushdialog::get_endslice(bool *ok)
+unsigned int bits_stack_pushdialog::get_endslice(bool* ok)
 {
 	return le_endslice->text().toUInt(ok);
 }
@@ -4065,8 +4065,8 @@ void bits_stack_pushdialog::sliceselection_changed()
 
 //xxxxxxxxxxxxxxxxxxxxxx histo xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
 	zoom = zoom1;
@@ -4189,7 +4189,7 @@ QSize QHBoxLayout_fixedheight::maximumSize() const
 
 //--------------------------------------------------
 
-ImageMath::ImageMath(SlicesHandler *hand3D, QWidget *parent, const char *name,
+ImageMath::ImageMath(SlicesHandler* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
@@ -4406,7 +4406,7 @@ void ImageMath::slicenr_changed()
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
-void ImageMath::bmphand_changed(bmphandler *bmph)
+void ImageMath::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	return;
@@ -4431,14 +4431,14 @@ void ImageMath::value_changed()
 
 //--------------------------------------------------
 
-ImageOverlay::ImageOverlay(SlicesHandler *hand3D, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+ImageOverlay::ImageOverlay(SlicesHandler* hand3D, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
-	bkpWork = (float *)malloc(sizeof(float) * bmphand->return_area());
+	bkpWork = (float*)malloc(sizeof(float) * bmphand->return_area());
 	bmphand->copyfromwork(bkpWork);
 
 	alpha = 0.0f;
@@ -4502,7 +4502,7 @@ ImageOverlay::~ImageOverlay()
 	free(bkpWork);
 }
 
-void ImageOverlay::closeEvent(QCloseEvent *e)
+void ImageOverlay::closeEvent(QCloseEvent* e)
 {
 	QDialog::closeEvent(e);
 
@@ -4556,7 +4556,7 @@ void ImageOverlay::slicenr_changed()
 	bmphand_changed(handler3D->get_activebmphandler());
 }
 
-void ImageOverlay::bmphand_changed(bmphandler *bmph)
+void ImageOverlay::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 	bmphand->copyfromwork(bkpWork);
@@ -4566,8 +4566,8 @@ void ImageOverlay::bmphand_changed(bmphandler *bmph)
 void ImageOverlay::newloaded()
 {
 	free(bkpWork);
-	bkpWork = (float *)malloc(sizeof(float) *
-														handler3D->get_activebmphandler()->return_area());
+	bkpWork = (float*)malloc(sizeof(float) *
+													 handler3D->get_activebmphandler()->return_area());
 }
 
 void ImageOverlay::alpha_changed()
@@ -4623,8 +4623,8 @@ void ImageOverlay::slider_changed(int newval)
 	emit end_datachange(this, iseg::NoUndo);
 }
 
-CleanerParams::CleanerParams(int *rate1, int *minsize1, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
+CleanerParams::CleanerParams(int* rate1, int* minsize1, QWidget* parent,
+		const char* name, Qt::WindowFlags wFlags)
 {
 	rate = rate1;
 	minsize = minsize1;
@@ -4663,7 +4663,7 @@ void CleanerParams::dontdoit_pressed()
 	close();
 }
 
-MergeProjectsDialog::MergeProjectsDialog(QWidget *parent, const char *name,
+MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags)
 {
@@ -4727,8 +4727,8 @@ void MergeProjectsDialog::add_pressed()
 
 void MergeProjectsDialog::remove_pressed()
 {
-	QList<QListWidgetItem *> removeItems = fileListWidget->selectedItems();
-	for (QList<QListWidgetItem *>::const_iterator iter = removeItems.begin();
+	QList<QListWidgetItem*> removeItems = fileListWidget->selectedItems();
+	for (QList<QListWidgetItem*>::const_iterator iter = removeItems.begin();
 			 iter != removeItems.end(); ++iter)
 	{
 		delete fileListWidget->takeItem(fileListWidget->row(*iter));
@@ -4737,7 +4737,7 @@ void MergeProjectsDialog::remove_pressed()
 
 void MergeProjectsDialog::move_up_pressed()
 {
-	QList<QListWidgetItem *> moveItems = fileListWidget->selectedItems();
+	QList<QListWidgetItem*> moveItems = fileListWidget->selectedItems();
 	if (moveItems.size() <= 0)
 	{
 		return;
@@ -4755,7 +4755,7 @@ void MergeProjectsDialog::move_up_pressed()
 
 void MergeProjectsDialog::move_down_pressed()
 {
-	QList<QListWidgetItem *> moveItems = fileListWidget->selectedItems();
+	QList<QListWidgetItem*> moveItems = fileListWidget->selectedItems();
 	if (moveItems.size() <= 0)
 	{
 		return;
@@ -4771,7 +4771,7 @@ void MergeProjectsDialog::move_down_pressed()
 	fileListWidget->insertItem(rowFirst, fileListWidget->takeItem(rowLast + 1));
 }
 
-void MergeProjectsDialog::get_filenames(std::vector<QString> &filenames)
+void MergeProjectsDialog::get_filenames(std::vector<QString>& filenames)
 {
 	filenames.clear();
 	for (int row = 0; row < fileListWidget->count(); ++row)
@@ -4781,7 +4781,7 @@ void MergeProjectsDialog::get_filenames(std::vector<QString> &filenames)
 }
 
 CheckBoneConnectivityDialog::CheckBoneConnectivityDialog(
-		SlicesHandler *hand3D, const char *name, QWidget *parent /*=0*/,
+		SlicesHandler* hand3D, const char* name, QWidget* parent /*=0*/,
 		Qt::WindowFlags wFlags /*=0*/)
 		: QWidget(parent, name, wFlags), handler3D(hand3D)
 {
@@ -4853,12 +4853,12 @@ CheckBoneConnectivityDialog::CheckBoneConnectivityDialog(
 
 CheckBoneConnectivityDialog::~CheckBoneConnectivityDialog() {}
 
-void CheckBoneConnectivityDialog::ShowText(const std::string &text)
+void CheckBoneConnectivityDialog::ShowText(const std::string& text)
 {
 	progressText->setText(QString::fromStdString(text));
 }
 
-bool CheckBoneConnectivityDialog::IsBone(const std::string &label_name) const
+bool CheckBoneConnectivityDialog::IsBone(const std::string& label_name) const
 {
 	std::string name = label_name;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
@@ -4893,7 +4893,7 @@ void CheckBoneConnectivityDialog::CheckBoneExist()
 	tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
-		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(i);
+		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(i);
 		if (IsBone(tissueInfo->name))
 		{
 			bonesFound++;
@@ -4942,13 +4942,13 @@ void CheckBoneConnectivityDialog::LookForConnections()
 	tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
-		TissueInfoStruct *tissueInfo = TissueInfos::GetTissueInfo(i);
+		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(i);
 		label_names.push_back(tissueInfo->name);
 	}
 
 	std::vector<int> same_bone_map(label_names.size(), -1);
-	auto replace = [](std::string &str, const std::string &from,
-										 const std::string &to) {
+	auto replace = [](std::string& str, const std::string& from,
+										 const std::string& to) {
 		size_t start_pos = str.find(from);
 		if (start_pos == std::string::npos)
 		{
@@ -4991,7 +4991,7 @@ void CheckBoneConnectivityDialog::LookForConnections()
 
 	for (int sliceN = startSl; sliceN < endSl - 1; sliceN++)
 	{
-		tissues_size_t *tissuesMain = handler3D->return_tissues(0, sliceN);
+		tissues_size_t* tissuesMain = handler3D->return_tissues(0, sliceN);
 		unsigned pos = 0;
 		//for( int y=height-1; y>=0; y-- )
 		for (int y = height - 2; y >= 1; y--)
@@ -5041,7 +5041,7 @@ void CheckBoneConnectivityDialog::LookForConnections()
 					//+1 slice:
 					if (sliceN + 1 < endSl)
 					{
-						tissues_size_t *tissues_plus1 =
+						tissues_size_t* tissues_plus1 =
 								handler3D->return_tissues(0, sliceN + 1);
 
 						neighbour_tissues.push_back(
@@ -5128,9 +5128,9 @@ void CheckBoneConnectivityDialog::FillConnectionsTable()
 
 		BoneConnectionInfo newLineInfo = foundConnections.at(i);
 
-		TissueInfoStruct *tissueInfo1 =
+		TissueInfoStruct* tissueInfo1 =
 				TissueInfos::GetTissueInfo(newLineInfo.TissueID1);
-		TissueInfoStruct *tissueInfo2 =
+		TissueInfoStruct* tissueInfo2 =
 				TissueInfos::GetTissueInfo(newLineInfo.TissueID2);
 
 		foundConnectionsTable->setItem(row, BoneConnectionColumn::kTissue1,
@@ -5151,7 +5151,7 @@ void CheckBoneConnectivityDialog::cellClicked(int row, int col)
 	{
 		int sliceNumber =
 				foundConnectionsTable->item(row, kSliceNumber)->text().toInt() - 1;
-		handler3D->set_activeslice(sliceNumber);
+		handler3D->set_active_slice(sliceNumber);
 		emit slice_changed();
 	}
 }
@@ -5176,9 +5176,9 @@ void CheckBoneConnectivityDialog::export_pressed()
 
 	for (unsigned int i = 0; i < foundConnections.size(); i++)
 	{
-		TissueInfoStruct *tissueInfo1 =
+		TissueInfoStruct* tissueInfo1 =
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID1);
-		TissueInfoStruct *tissueInfo2 =
+		TissueInfoStruct* tissueInfo2 =
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID2);
 		output_file << tissueInfo1->name << " "
 								<< tissueInfo2->name << " "
