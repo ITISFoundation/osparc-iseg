@@ -17,6 +17,7 @@
 #include "Core/UndoElem.h"
 #include "Core/UndoQueue.h"
 
+#include <boost/signals2.hpp>
 #include <boost/variant.hpp>
 
 #include <memory>
@@ -204,6 +205,9 @@ public:
 	std::vector<std::string> tissue_names() const override;
 	std::vector<bool> tissue_locks() const override;
 	std::vector<tissues_size_t> tissue_selection() const override;
+
+	boost::signals2::signal<void(const std::vector<tissues_size_t>& sel)> on_tissue_selection_changed;
+	void set_tissue_selection(const std::vector<tissues_size_t>& sel) override;
 
 	bool has_colors() const override { return _color_lookup_table != 0; }
 	size_t number_of_colors() const override;
@@ -404,11 +408,14 @@ public:
 			std::vector<RGB>& colorvec);
 	void triangulatesimpl(const char* filename,
 			std::vector<tissues_size_t>& tissuevec, float ratio);
-	void set_activeslice(unsigned int actslice);
 	void next_slice();
 	void prev_slice();
 	unsigned short get_next_featuring_slice(tissues_size_t type, bool& found);
+
 	unsigned short active_slice() const override;
+	boost::signals2::signal<void(unsigned short)> on_active_slice_changed;
+	void set_active_slice(unsigned short slice, bool signal_change = false);
+
 	bmphandler* get_activebmphandler();
 	tissuelayers_size_t active_tissuelayer() const override;
 	void set_active_tissuelayer(tissuelayers_size_t idx);
