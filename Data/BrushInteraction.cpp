@@ -54,10 +54,11 @@ void BrushInteraction::on_mouse_moved(Point p)
 
 	if (_brush_target)
 	{
+		draw_circle(p);
+
 		float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
 		for (auto pi : vps)
 		{
-			draw_circle(pi);
 			brush(target, _width, _height, _dx, _dy, pi, _radius, true, _target_value, 0.f, [](float v) { return false; });
 		}
 	}
