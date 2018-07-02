@@ -17,7 +17,11 @@
 #include "Core/UndoElem.h"
 #include "Core/UndoQueue.h"
 
-#include <boost/signals2.hpp>
+// boost 1.48, Qt and [Parse error at "BOOST_JOIN"] error
+// https://bugreports.qt.io/browse/QTBUG-22829
+#ifndef Q_MOC_RUN
+#	include <boost/signals2.hpp>
+#endif
 #include <boost/variant.hpp>
 
 #include <memory>
