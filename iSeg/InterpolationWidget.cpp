@@ -12,6 +12,8 @@
 #include "InterpolationWidget.h"
 #include "SlicesHandler.h"
 
+#include "Data/BrushInteraction.h"
+
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -33,6 +35,8 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
+
+	brush = nullptr;
 
 	nrslices = handler3D->num_slices();
 
@@ -92,8 +96,13 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 			"you may segment every fifth slice (stride=5), then interpolate in "
 			"between."));
 
+	cb_connectedshapebased = new QCheckBox(QString("Connected Shape-Based"), vboxparams);
+	cb_connectedshapebased->setToolTip(Format(
+			"Align corresponding foreground objects by their center of mass, "
+			"to ensure shape-based interpolation connects these objects"));
+
 	cb_medianset = new QCheckBox(QString("Median Set"), vboxparams);
-	cb_medianset->setChecked(true);
+	cb_medianset->setChecked(false);
 	cb_medianset->setToolTip(Format(
 			"If Median Set is ON, the algorithm described in [1] "
 			"is employed. Otherwise shape-based interpolation [2] is used. "
@@ -106,7 +115,6 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 			"1998.<br>"
 			"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of "
 			"multidimensional objects. 1990."));
-	cb_connectedshapebased = new QCheckBox(QString("Connected Shape-Based"), vboxparams);
 	rb_4connectivity = new QRadioButton(QString("4-connectivity"), vboxparams);
 	rb_8connectivity = new QRadioButton(QString("8-connectivity"), vboxparams);
 	connectivitygroup = new QButtonGroup(this);
@@ -114,20 +122,28 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	connectivitygroup->insert(rb_8connectivity);
 	rb_8connectivity->setChecked(TRUE);
 
+	brush_radius = new QLineEdit(QString::number(1));
+	brush_radius->setValidator(new QDoubleValidator);
+	brush_radius->setToolTip(Format("Set the radius of the brush in physical units, i.e. typically mm."));
+	
+	auto brush_param = new QWidget(vboxparams);
+	auto brush_layout = new QHBoxLayout;
+	brush_layout->addWidget(new QLabel("Brush radius"));
+	brush_layout->addWidget(brush_radius);
+	brush_param->setLayout(brush_layout);
+
 	// Execute
 	vboxexecute->layout()->setAlignment(Qt::AlignTop);
 	pushstart = new QPushButton("Start Slice", vboxexecute);
 	pushstart->setToolTip(Format(
 			"Interpolation/extrapolation is based on 2 slices. Click start to "
-			"select "
-			"the first slice and Execute to select the second slice. Interpolation "
+			"select the first slice and Execute to select the second slice. Interpolation "
 			"automatically interpolates the intermediate slices."
 			"<br>"
 			"Note:<br>The result is displayed in the Target but is not directly "
 			"added to the tissue distribution. "
 			"The user can add it with Adder function. The 'All Tissues' option "
-			"adds "
-			"the result directly to the tissue."));
+			"adds the result directly to the tissue."));
 	pushexec = new QPushButton("Execute", vboxexecute);
 	pushexec->setEnabled(false);
 
@@ -143,17 +159,16 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	vboxparams->setFixedSize(vboxparams->sizeHint());
 	vboxexecute->setFixedSize(vboxparams->sizeHint());
 
-	QObject::connect(pushstart, SIGNAL(clicked()), this,
-			SLOT(startslice_pressed()));
+	QObject::connect(brush_radius, SIGNAL(textEdited(const QString &)), this, SLOT(brush_changed()));
+	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(brush_changed()));
+
+	QObject::connect(pushstart, SIGNAL(clicked()), this, SLOT(startslice_pressed()));
+	QObject::connect(cb_medianset, SIGNAL(stateChanged(int)), this, SLOT(method_changed()));
+	QObject::connect(cb_connectedshapebased, SIGNAL(stateChanged(int)), this, SLOT(method_changed()));
+	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+	QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this, SLOT(source_changed()));
+
 	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
-	QObject::connect(cb_medianset, SIGNAL(stateChanged(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(cb_connectedshapebased, SIGNAL(stateChanged(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(source_changed()));
 
 	method_changed();
 	source_changed();
@@ -176,6 +191,19 @@ void InterpolationWidget::init()
 		sb_slicenr->setMaxValue((int)nrslices);
 		sb_batchstride->setMaxValue((int)nrslices - 1);
 		pushexec->setEnabled(false);
+	}
+
+	if (!brush)
+	{
+		brush = new BrushInteraction(handler3D,
+				[this](iseg::DataSelection sel) { begin_datachange(sel, this); },
+				[this](iseg::EndUndoAction a) { end_datachange(this, a); },
+				[this](std::vector<Point>* vp) { vpdyn_changed(vp);} );
+		brush_changed();
+	}
+	else
+	{
+		brush->init(handler3D);
 	}
 }
 
@@ -203,6 +231,43 @@ void InterpolationWidget::startslice_pressed()
 {
 	startnr = handler3D->active_slice();
 	pushexec->setEnabled(true);
+}
+
+void InterpolationWidget::on_mouse_clicked(Point p)
+{
+	if (rb_work->isOn() || rb_tissue->isOn())
+	{
+		brush->set_tissue_value(tissuenr);
+		brush->on_mouse_clicked(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_clicked(p);
+	}
+}
+
+void InterpolationWidget::on_mouse_released(Point p)
+{
+	if (rb_work->isOn() || rb_tissue->isOn())
+	{
+		brush->on_mouse_released(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_released(p);
+	}
+}
+
+void InterpolationWidget::on_mouse_moved(Point p)
+{
+	if (rb_work->isOn() || rb_tissue->isOn())
+	{
+		brush->on_mouse_moved(p);
+	}
+	else
+	{
+		WidgetInterface::on_mouse_moved(p);
+	}
 }
 
 void InterpolationWidget::execute()
@@ -395,6 +460,15 @@ void InterpolationWidget::execute()
 	}
 }
 
+void InterpolationWidget::brush_changed()
+{
+	if (brush)
+	{
+		brush->set_brush_target(rb_work->isOn());
+		brush->set_radius(brush_radius->text().toDouble());
+	}
+}
+
 void InterpolationWidget::method_changed()
 {
 	if (rb_extra->isOn())
@@ -452,11 +526,11 @@ void InterpolationWidget::method_changed()
 void InterpolationWidget::source_changed()
 {
 	method_changed();
-	/*	if(rb_work->isOn()){
-		rb_intergrey->show();
-	} else {
-		rb_intergrey->hide();
-	}*/
+
+	if (brush)
+	{
+		brush->set_brush_target(rb_work->isOn());
+	}
 }
 
 FILE* InterpolationWidget::SaveParams(FILE* fp, int version)

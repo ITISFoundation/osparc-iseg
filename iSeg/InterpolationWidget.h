@@ -35,6 +35,8 @@
 
 namespace iseg {
 
+class BrushInteraction;
+
 class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
@@ -53,8 +55,14 @@ public:
 private:
 	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
+	
+	void on_mouse_clicked(Point p) override;
+	void on_mouse_released(Point p) override;
+	void on_mouse_moved(Point p) override;
 
 	SlicesHandler *handler3D;
+	BrushInteraction *brush;
+
 	Q3HBox *hboxoverall;
 	Q3VBox *vboxmethods;
 	Q3VBox *vboxdataselect;
@@ -81,7 +89,8 @@ private:
 	QRadioButton *rb_8connectivity;
 	QButtonGroup *connectivitygroup;
 	QCheckBox *cb_medianset;
-	QCheckBox *cb_connectedshapebased; 
+	QCheckBox *cb_connectedshapebased;
+	QLineEdit *brush_radius;
 	unsigned short startnr;
 	unsigned short nrslices;
 	unsigned short tissuenr;
@@ -94,6 +103,7 @@ private slots:
 	void execute();
 	void method_changed();
 	void source_changed();
+	void brush_changed();
 };
 
 } // namespace iseg
