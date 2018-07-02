@@ -164,6 +164,8 @@ void SurfaceViewerWidget::load()
 			(int)hand3D->num_slices() - 1);
 	input->SetSpacing(spacing[0], spacing[1], spacing[2]);
 
+	index_tissue_map.clear();
+
 	if (input_type == kSource) // iso-surface
 	{
 		auto slices = hand3D->source_slices();
@@ -342,6 +344,10 @@ void SurfaceViewerWidget::select_action(QAction* action)
 				if (auto labels = surface->GetPointData()->GetScalars())
 				{
 					auto tissue_type = static_cast<int>(labels->GetTuple1(pointId));
+					if (index_tissue_map.count(tissue_type) != 0)
+					{
+						tissue_type = index_tissue_map[tissue_type];
+					}
 					hand3D->set_tissue_selection(std::vector<tissues_size_t>(1, tissue_type));
 				}
 			}
