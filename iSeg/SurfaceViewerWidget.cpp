@@ -183,7 +183,20 @@ void SurfaceViewerWidget::load()
 		auto slices = hand3D->tissue_slices(0);
 		input->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
 		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
-		transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
+
+		if (input_type == kTissues)
+		{
+			transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
+		}
+		else // selection only
+		{
+			std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
+			for (auto tissue_type : tissue_selection)
+			{
+				tissue_index_map[tissue_type] = tissue_type;
+			}
+			transform_slices(slices, slice_size, field, [tissue_index_map](tissues_size_t v) { return tissue_index_map.at(v); });
+		}
 	}
 	else if (tissue_selection.size() >= 1) // [1, 254]
 	{
