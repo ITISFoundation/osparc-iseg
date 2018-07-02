@@ -33,6 +33,7 @@ namespace iseg {
 			init(handler);
 		}
 
+		/// throws std::runtime_error if handler is invalid
 		void init(SliceHandlerInterface* handler);
 
 		void set_radius(float radius) { _radius = radius; }

@@ -7,6 +7,9 @@ namespace iseg {
 
 void BrushInteraction::init(iseg::SliceHandlerInterface* handler)
 {
+	if (handler == nullptr)
+		throw std::runtime_error("null slice handler");
+
 	_slice_handler = handler;
 	_width = _slice_handler->width();
 	_height = _slice_handler->height();
