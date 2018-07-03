@@ -2043,6 +2043,25 @@ void TissueTreeWidget::dropEvent(QDropEvent* de)
 	update_folder_icons();
 }
 
+void TissueTreeWidget::selectAll()
+{
+	for (auto item : get_all_items())
+	{
+		if (!get_is_folder(item))
+		{
+			item->setSelected(!item->isHidden());
+		}
+	}
+}
+
+void TissueTreeWidget::scrollToItem(QTreeWidgetItem* item)
+{
+	if (item)
+	{
+		scrollTo(indexFromItem(item));
+	}
+}
+
 TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)

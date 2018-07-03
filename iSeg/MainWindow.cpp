@@ -385,11 +385,28 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	handler3D->on_tissue_selection_changed.connect([this](const std::vector<tissues_size_t>& sel) {
 		std::set<tissues_size_t> selection(sel.begin(), sel.end());
+		QTreeWidgetItem* first = nullptr;
+		bool clear_filter = false;
 		for (auto item : tissueTreeWidget->get_all_items())
 		{
 			bool select = selection.count(tissueTreeWidget->get_type(item)) != 0;
 			item->setSelected(select);
+			if (select && !first)
+			{
+				first = item;
+			}
+
+			if (select && item->isHidden())
+			{
+				clear_filter = true;
+			}
 		}
+
+		if (clear_filter)
+		{
+			tissueFilter->setText(QString(""));
+		}
+		tissueTreeWidget->scrollToItem(first);
 	});
 
 	handler3D->on_active_slice_changed.connect([this](unsigned short slice) {

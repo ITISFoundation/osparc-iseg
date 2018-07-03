@@ -192,7 +192,7 @@ void SurfaceViewerWidget::load()
 		}
 		else // selection only
 		{
-			std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
+			std::vector<tissues_size_t> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
 			for (auto tissue_type : tissue_selection)
 			{
 				tissue_index_map[tissue_type] = tissue_type;
@@ -202,7 +202,6 @@ void SurfaceViewerWidget::load()
 	}
 	else if (tissue_selection.size() >= 1) // [1, 254]
 	{
-		auto slices = hand3D->tissue_slices(0);
 
 		unsigned char count = 1;
 		std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
@@ -212,6 +211,7 @@ void SurfaceViewerWidget::load()
 			tissue_index_map[tissue_type] = count++;
 		}
 
+		auto slices = hand3D->tissue_slices(0);
 		input->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
 		auto field = static_cast<unsigned char*>(input->GetScalarPointer());
 		try
