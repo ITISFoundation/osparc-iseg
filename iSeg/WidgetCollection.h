@@ -326,9 +326,11 @@ public:
 	bool get_current_has_children() const;
 	void get_current_child_tissues(std::map<tissues_size_t, unsigned short>& types) const;
 
+	void scrollToItem(QTreeWidgetItem* item);
+
 	// Hierarchy
 	void update_tree_widget(); // Updates QTreeWidget from internal representation
-	void update_hierarchy();	// Updates internal representation from QTreeWidget
+	void update_hierarchy();	 // Updates internal representation from QTreeWidget
 	unsigned short get_selected_hierarchy() const;
 	unsigned short get_hierarchy_count() const;
 	std::vector<QString>* get_hierarchy_names_ptr() const;
@@ -363,6 +365,7 @@ public slots:
 protected:
 	// Drag & drop
 	void dropEvent(QDropEvent* de);
+	void selectAll() override;
 
 private:
 	void resize_columns_to_contents();
