@@ -259,8 +259,6 @@ void bmphandler::set_bmp(float* bits, unsigned char mode)
 			mode1 = mode;
 		}
 	}
-	//	bmp_bits=bits;
-	return;
 }
 void bmphandler::set_work(float* bits, unsigned char mode)
 {
@@ -273,10 +271,6 @@ void bmphandler::set_work(float* bits, unsigned char mode)
 			mode2 = mode;
 		}
 	}
-	/*	if(loaded)
-		free(work_bits);
-	work_bits=bits;*/
-	return;
 }
 
 void bmphandler::set_tissue(tissuelayers_size_t idx, tissues_size_t* bits)
@@ -289,10 +283,6 @@ void bmphandler::set_tissue(tissuelayers_size_t idx, tissues_size_t* bits)
 			tissuelayers[idx] = bits;
 		}
 	}
-	/*	if(loaded)
-		free(work_bits);
-	work_bits=bits;*/
-	return;
 }
 
 float* bmphandler::swap_bmp_pointer(float* bits)

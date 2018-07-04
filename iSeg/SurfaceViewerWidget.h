@@ -9,6 +9,7 @@
 */
 #pragma once
 
+#include "Data/DataSelection.h"
 #include "Data/Types.h"
 
 #include "Core/Pair.h"
@@ -32,12 +33,6 @@ class vtkInteractorStyleTrackballCamera;
 class vtkImageData;
 class vtkFlyingEdges3D;
 class vtkDiscreteFlyingEdges3D;
-class vtkQuadricDecimation;
-class vtkWindowedSincPolyDataFilter;
-class vtkThreshold;
-class vtkMaskFields;
-class vtkGeometryFilter;
-class vtkDataSetMapper;
 class vtkPolyDataMapper;
 class vtkRenderer;
 class vtkEventQtSlotConnect;
@@ -66,6 +61,7 @@ public:
 protected:
 	void load();
 	void build_lookuptable();
+	int get_picked_tissue() const;
 	void closeEvent(QCloseEvent*) override;
 	void resizeEvent(QResizeEvent*) override;
 
@@ -83,6 +79,8 @@ protected slots:
 
 signals:
 	void hasbeenclosed();
+	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = NULL, bool beginUndo = true);
+	void end_datachange(QWidget* sender = NULL, iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 private:
 	eInputType input_type;
@@ -106,7 +104,6 @@ private:
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
 	vtkSmartPointer<vtkDiscreteFlyingEdges3D> discreteCubes;
 	vtkSmartPointer<vtkFlyingEdges3D> cubes;
-	vtkSmartPointer<vtkQuadricDecimation> decimate;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkLookupTable> lut;

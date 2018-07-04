@@ -1740,6 +1740,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(le_brightnesswork_val, SIGNAL(editingFinished()), this,
 			SLOT(le_brightnesswork_val_edited()));
 
+	QObject::connect(surface_viewer,
+			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
+			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	QObject::connect(surface_viewer,
+			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+
 	// \todo BL add generic connections here, e.g. begin/end_datachange
 
 	m_widget_signal_mapper = new QSignalMapper(this);

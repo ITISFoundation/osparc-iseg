@@ -23,11 +23,7 @@
 #include <vtkCellData.h>
 #include <vtkDiscreteFlyingEdges3D.h>
 #include <vtkFlyingEdges3D.h>
-#include <vtkGeometryFilter.h>
-#include <vtkImageAccumulate.h>
 #include <vtkPointData.h>
-#include <vtkQuadricDecimation.h>
-#include <vtkThreshold.h>
 #include <vtkUnsignedShortArray.h>
 
 #include <vtkEventQtSlotConnect.h>
@@ -129,8 +125,9 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	iren->SetRenderWindow(vtkWidget->GetRenderWindow());
 
 	QMenu* popup_actions = new QMenu(vtkWidget);
-	popup_actions->addAction("Select Tissue");
-	popup_actions->addAction("Select Slice");
+	popup_actions->addAction("Select tissue");
+	popup_actions->addAction("Go to slice");
+	popup_actions->addAction("Mark Point in target");
 	connect(popup_actions, SIGNAL(triggered(QAction*)), this, SLOT(select_action(QAction*)));
 
 	connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
@@ -141,10 +138,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	input = vtkSmartPointer<vtkImageData>::New();
 	discreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 	cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
-
-	decimate = vtkSmartPointer<vtkQuadricDecimation>::New();
-	decimate->SetInputConnection(input_type == kSource ? cubes->GetOutputPort() : discreteCubes->GetOutputPort());
-	decimate->SetTargetReduction(0.9);
 
 	load();
 
@@ -237,8 +230,6 @@ void SurfaceViewerWidget::load()
 	endLabel = range[1];
 	startLabel = 1;
 
-	std::cerr << "value range: [" << range[0] << ", " << range[1] << "]\n";
-
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	actor = vtkSmartPointer<vtkQuadricLODActor>::New();
 
@@ -246,7 +237,6 @@ void SurfaceViewerWidget::load()
 	{
 		cubes->SetInputData(input);
 		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
-		std::cerr << "iso-surface value: " << cubes->GetValue(0) << "\n";
 
 		mapper->SetInputConnection(cubes->GetOutputPort());
 		mapper->ScalarVisibilityOff();
@@ -316,9 +306,19 @@ void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data
 
 		for (auto action : popupMenu->actions())
 		{
-			if (action->text() == "Select Tissue")
+			if (action->text().startsWith(QString("Select tissue")))
 			{
 				action->setVisible(input_type == kTissues || input_type == kSelectedTissues);
+				if (action->isVisible())
+				{
+					int tissue_type = get_picked_tissue();
+					if (tissue_type != -1)
+					{
+						QString dummy;
+						auto name = TissueInfos::GetTissueName(tissue_type);
+						action->setText(dummy.sprintf("Select tissue (%s)", name.c_str()));
+					}
+				}
 			}
 		}
 
@@ -331,41 +331,51 @@ void SurfaceViewerWidget::select_action(QAction* action)
 {
 	if (picker)
 	{
-		double* worldPosition = picker->GetPickPosition();
-
-		if (action->text() == "Select Tissue")
+		if (action->text().startsWith(QString("Select tissue")))
 		{
-			auto surface = discreteCubes->GetOutput();
-			vtkIdType pointId = surface->FindPoint(worldPosition);
-
-			if (pointId != -1 && discreteCubes)
+			int tissue_type = get_picked_tissue();
+			if (tissue_type != -1)
 			{
-				// get tissue type, then select tissue
-				if (auto labels = surface->GetPointData()->GetScalars())
-				{
-					auto tissue_type = static_cast<int>(labels->GetTuple1(pointId));
-					if (index_tissue_map.count(tissue_type) != 0)
-					{
-						tissue_type = index_tissue_map[tissue_type];
-					}
-					hand3D->set_tissue_selection(std::vector<tissues_size_t>(1, tissue_type));
-				}
+				hand3D->set_tissue_selection(std::vector<tissues_size_t>(1, tissue_type));
 			}
 		}
-		else if (action->text() == "Select Slice")
+		else
 		{
 			if (input)
 			{
-				// compute closest slice
+				double* worldPosition = picker->GetPickPosition();
 				int dims[3];
 				double spacing[3], origin[3];
 				input->GetDimensions(dims);
 				input->GetSpacing(spacing);
 				input->GetOrigin(origin);
-				int slice = (spacing[2] > 0) ? static_cast<int>(std::round((worldPosition[2] - origin[2]) / spacing[2])) : 0;
+				// compute closest slice
+				int slice = static_cast<int>(std::round((worldPosition[2] - origin[2]) / spacing[2]));
+				slice = std::max(0, std::min(slice, dims[2] - 1));
+
+				if (action->text() == "Mark Point in target")
+				{
+					std::vector<float> work(hand3D->return_area(), 0);
+
+					int i = static_cast<int>(std::round((worldPosition[0] - origin[0]) / spacing[0]));
+					int j = static_cast<int>(std::round((worldPosition[1] - origin[1]) / spacing[1]));
+					int idx = i + j * hand3D->width();
+					if (idx < hand3D->return_area())
+					{
+						work[idx] = 255.f;
+					}
+					iseg::DataSelection dataSelection;
+					dataSelection.sliceNr = slice;
+					dataSelection.work = true;
+					emit begin_datachange(dataSelection, this, false);
+
+					hand3D->copy2work(slice, work.data(), 2);
+
+					emit end_datachange(this, iseg::ClearUndo);
+				}
 
 				// jump to slice
-				hand3D->set_active_slice(std::min(slice, dims[2] - 1), true);
+				hand3D->set_active_slice(slice, true);
 			}
 		}
 	}
@@ -478,8 +488,31 @@ void SurfaceViewerWidget::thresh_changed()
 	{
 		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
 
-		std::cerr << "iso-surface value: " << cubes->GetValue(0) << "\n";
-
 		vtkWidget->GetRenderWindow()->Render();
 	}
+}
+
+int SurfaceViewerWidget::get_picked_tissue() const
+{
+	double* worldPosition = picker->GetPickPosition();
+	if (discreteCubes)
+	{
+		auto surface = discreteCubes->GetOutput();
+		vtkIdType pointId = surface->FindPoint(worldPosition);
+
+		if (pointId != -1)
+		{
+			// get tissue type, then select tissue
+			if (auto labels = surface->GetPointData()->GetScalars())
+			{
+				auto tissue_type = static_cast<int>(labels->GetTuple1(pointId));
+				if (index_tissue_map.count(tissue_type) != 0)
+				{
+					tissue_type = index_tissue_map.at(tissue_type);
+				}
+				return tissue_type;
+			}
+		}
+	}
+	return -1;
 }
