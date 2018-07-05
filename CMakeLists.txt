@@ -68,6 +68,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_SOURCE_DIR}/Thirdparty/IJ/AlternativeMemoryModels
+	${CMAKE_SOURCE_DIR}/Thirdparty/IJ/BinaryThinningImageFilter3D
 )
 
 ADD_SUBDIRECTORY(Data)

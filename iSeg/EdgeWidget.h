@@ -15,7 +15,6 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qlabel.h>
@@ -26,6 +25,7 @@
 #include <qsize.h>
 #include <qslider.h>
 #include <qspinbox.h>
+#include <qcheckbox.h>
 #include <qwidget.h>
 
 #include <algorithm>
@@ -59,6 +59,7 @@ private:
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
 	Q3HBox* hbox3;
+	Q3HBox* hbox4;
 	Q3VBox* vbox1;
 	QLabel* txt_sigmal;
 	QLabel* txt_sigma2;
@@ -69,7 +70,9 @@ private:
 	QSlider* sl_sigma;
 	QSlider* sl_thresh1;
 	QSlider* sl_thresh2;
+	QCheckBox* cb_3d;
 	QPushButton* btn_exec;
+
 	QRadioButton* rb_sobel;
 	QRadioButton* rb_laplacian;
 	QRadioButton* rb_interquartile;
@@ -77,6 +80,7 @@ private:
 	QRadioButton* rb_gaussline;
 	QRadioButton* rb_canny;
 	QRadioButton* rb_laplacianzero;
+	QRadioButton* rb_centerlines;
 	QButtonGroup* modegroup;
 
 private slots:

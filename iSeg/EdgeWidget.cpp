@@ -13,7 +13,11 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Data/ItkUtils.h"
+#include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Point.h"
+
+#include "Core/BinaryThinningImageFilter.h"
 
 #include <q3vbox.h>
 #include <qbuttongroup.h>
@@ -46,6 +50,7 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 	hbox1 = new Q3HBox(vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
+	hbox4 = new Q3HBox(vbox1);
 	btn_exec = new QPushButton("Execute", vbox1);
 
 	txt_sigmal = new QLabel("Sigma: 0 ", hbox1);
@@ -61,11 +66,12 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 	txt_thresh12 = new QLabel(" 150", hbox2);
 
 	txt_thresh21 = new QLabel("Thresh high: 0 ", hbox3);
-	;
 	sl_thresh2 = new QSlider(Qt::Horizontal, hbox3);
 	sl_thresh2->setRange(1, 100);
 	sl_thresh2->setValue(80);
 	txt_thresh22 = new QLabel(" 150", hbox3);
+
+	cb_3d = new QCheckBox(QString("3D thinning"), hbox4);
 
 	rb_sobel = new QRadioButton(QString("Sobel"), vboxmethods);
 	rb_laplacian = new QRadioButton(QString("Laplacian"), vboxmethods);
@@ -74,6 +80,7 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 	rb_gaussline = new QRadioButton(QString("Gauss"), vboxmethods);
 	rb_canny = new QRadioButton(QString("Canny"), vboxmethods);
 	rb_laplacianzero = new QRadioButton(QString("Lapl. Zero"), vboxmethods);
+	rb_centerlines = new QRadioButton(QString("Centerlines"), vboxmethods);
 
 	modegroup = new QButtonGroup(this);
 	//	modegroup->hide();
@@ -84,6 +91,7 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 	modegroup->insert(rb_gaussline);
 	modegroup->insert(rb_canny);
 	modegroup->insert(rb_laplacianzero);
+	modegroup->insert(rb_centerlines);
 	rb_sobel->setChecked(TRUE);
 
 	// 2018.02.14: fix options view is too narrow
@@ -161,6 +169,45 @@ void EdgeWidget::execute()
 				sl_thresh1->value() * 1.5f,
 				sl_thresh2->value() * 1.5f);
 	}
+	else if (rb_centerlines->isOn())
+	{
+		if (cb_3d->isChecked())
+		{
+			using input_type = itk::SliceContiguousImage<float>;
+			using output_type = itk::Image<unsigned char, 3>;
+
+			SliceHandlerItkWrapper wrapper(handler3D);
+			auto target = wrapper.GetTarget(true);
+			auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
+
+			iseg::DataSelection dataSelection;
+			dataSelection.allSlices = true;
+			dataSelection.work = true;
+			emit begin_datachange(dataSelection, this);
+
+			iseg::Paste<output_type, input_type>(skeleton, target);
+
+			emit end_datachange(this);
+		}
+		else
+		{
+			using input_type = itk::Image<float, 2>;
+			using output_type = itk::Image<unsigned char, 2>;
+
+			SliceHandlerItkWrapper wrapper(handler3D);
+			auto target = wrapper.GetTargetSlice();
+			auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
+
+			iseg::DataSelection dataSelection;
+			dataSelection.sliceNr = handler3D->active_slice();
+			dataSelection.work = true;
+			emit begin_datachange(dataSelection, this);
+
+			iseg::Paste<output_type, input_type>(skeleton, target);
+
+			emit end_datachange(this);
+		}
+	}
 	else
 	{
 		bmphand->laplacian_zero(sl_sigma->value() * 0.05f,
@@ -209,6 +256,7 @@ void EdgeWidget::method_changed(int)
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 	else if (rb_laplacian->isOn())
@@ -216,6 +264,7 @@ void EdgeWidget::method_changed(int)
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 	else if (rb_interquartile->isOn())
@@ -223,6 +272,7 @@ void EdgeWidget::method_changed(int)
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 	else if (rb_momentline->isOn())
@@ -230,6 +280,7 @@ void EdgeWidget::method_changed(int)
 		hbox1->hide();
 		hbox2->hide();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 	else if (rb_gaussline->isOn())
@@ -240,6 +291,7 @@ void EdgeWidget::method_changed(int)
 			hbox1->show();
 		hbox2->hide();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 	else if (rb_canny->isOn())
@@ -258,6 +310,15 @@ void EdgeWidget::method_changed(int)
 			hbox3->hide();
 		else
 			hbox3->show();
+		hbox4->hide();
+		btn_exec->show();
+	}
+	else if (rb_centerlines->isOn())
+	{
+		hbox1->hide();
+		hbox2->hide();
+		hbox3->hide();
+		hbox4->show();
 		btn_exec->show();
 	}
 	else
@@ -273,6 +334,7 @@ void EdgeWidget::method_changed(int)
 		else
 			hbox2->show();
 		hbox3->hide();
+		hbox4->hide();
 		btn_exec->show();
 	}
 }
