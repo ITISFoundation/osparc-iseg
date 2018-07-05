@@ -25,7 +25,7 @@
 #include <QPaintEvent>
 #include <QWheelEvent>
 #include <algorithm>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>

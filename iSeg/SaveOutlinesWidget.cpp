@@ -14,7 +14,7 @@
 #include "StdStringToQString.h"
 #include "TissueInfos.h"
 
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3hbox.h>
 #include <q3listbox.h>
 #include <q3vbox.h>
@@ -223,11 +223,11 @@ void SaveOutlinesWidget::file_pushed()
 {
 	QString loadfilename;
 	if (rb_triang->isOn())
-		loadfilename = Q3FileDialog::getSaveFileName(
+		loadfilename = QFileDialog::getSaveFileName(
 			QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
 	else
 		loadfilename =
-			Q3FileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
+			QFileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
 
 	le_file->setText(loadfilename);
 	return;

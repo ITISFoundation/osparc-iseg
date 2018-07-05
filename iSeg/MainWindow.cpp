@@ -59,7 +59,7 @@
 #include <QDesktopWidget>
 #include <QSignalMapper.h>
 #include <q3accel.h>
-#include <q3filedialog.h>
+#include <QFileDialog>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qdockwidget.h>
@@ -2542,7 +2542,7 @@ void MainWindow::execute_loadbmp()
 {
 	maybeSafe();
 
-	QStringList files = Q3FileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
 			QString::null, this, "open files dialog", "Select one or more files to open");
 
 	if (!files.empty())
@@ -2590,11 +2590,9 @@ void MainWindow::execute_loadpng()
 {
 	maybeSafe();
 
-	QStringList files =
-			Q3FileDialog::getOpenFileNames("Images (*.png)\n"
-																		 "All(*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
+	QStringList files =		QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
+		QString::null, this, "open files dialog",
+		"Select one or more files to open");
 
 	if (!files.empty())
 	{
@@ -2642,7 +2640,7 @@ void MainWindow::execute_loadjpg()
 	maybeSafe();
 
 	QStringList files =
-			Q3FileDialog::getOpenFileNames("Images (*.jpg)\n"
+		QFileDialog::getOpenFileNames("Images (*.jpg)\n"
 																		 "All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
@@ -2710,7 +2708,7 @@ void MainWindow::execute_loaddicom()
 	maybeSafe();
 
 	QStringList files =
-			Q3FileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
+		QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
 																		 "All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
@@ -2750,7 +2748,7 @@ void MainWindow::execute_loaddicom()
 
 void MainWindow::execute_reloaddicom()
 {
-	QStringList files = Q3FileDialog::getOpenFileNames(
+	QStringList files = QFileDialog::getOpenFileNames(
 			"Images (*.dcm *.dicom)", QString::null, this, "open files dialog",
 			"Select one or more files to open");
 
@@ -2825,7 +2823,7 @@ void MainWindow::execute_loadmhd()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 					"Metaheader (*.mhd *.mha)\n"
 					"All(*.*)",
 					this);
@@ -2855,7 +2853,7 @@ void MainWindow::execute_loadvtk()
 	emit begin_datachange(dataSelection, this, false);
 
 	bool res = true;
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"VTK (*.vti *.vtk)\n"
 			"All(*.*)",
 			this);
@@ -2892,7 +2890,7 @@ void MainWindow::execute_loadnifti()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
 					"All(*.*)",
 					this);
@@ -2921,7 +2919,7 @@ void MainWindow::execute_loadavw()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"AnalzyeAVW (*.avw)\n"
 			"All(*.*)",
 			this);
@@ -2941,11 +2939,9 @@ void MainWindow::execute_loadavw()
 
 void MainWindow::execute_reloadbmp()
 {
-	QStringList files =
-			Q3FileDialog::getOpenFileNames("Images (*.bmp)\n"
-																		 "All(*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+		QString::null, this, "open files dialog",
+		"Select one or more files to open");
 
 	if ((unsigned short)files.size() == handler3D->num_slices() ||
 			(unsigned short)files.size() ==
@@ -3049,7 +3045,7 @@ void MainWindow::execute_reloadavw()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"AnalzyeAVW (*.avw)\n"
 			"All(*.*)",
 			this);
@@ -3073,7 +3069,7 @@ void MainWindow::execute_reloadmhd()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 					"Metaheader (*.mhd *.mha)\n"
 					"All(*.*)",
 					this);
@@ -3097,7 +3093,7 @@ void MainWindow::execute_reloadvtk()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"VTK (*.vti *.vtk)\n"
 			"All(*.*)",
 			this);
@@ -3122,7 +3118,7 @@ void MainWindow::execute_reloadnifti()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
 					"All(*.*)",
 					this);
@@ -3143,7 +3139,7 @@ void MainWindow::execute_loadsurface()
 	maybeSafe();
 
 	bool ok = true;
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"STL (*.stl)\n"
 			"All(*.*)",
 			this);
@@ -3185,7 +3181,7 @@ void MainWindow::execute_loadsurface()
 void MainWindow::execute_loadrtstruct()
 {
 #ifndef NORTSTRUCTSUPPORT
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTstruct (*.dcm)\n"
 			"All(*.*)",
 			this); //, filename);
@@ -3236,7 +3232,7 @@ void MainWindow::execute_loadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTdose (*.dcm)\n"
 			"All(*.*)",
 			this);
@@ -3265,7 +3261,7 @@ void MainWindow::execute_reloadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTdose (*.dcm)\n"
 			"All(*.*)",
 			this);
@@ -3284,7 +3280,7 @@ void MainWindow::execute_reloadrtdose()
 
 void MainWindow::execute_loads4llivelink()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"S4L Link (*.h5)\n"
 			"All(*.*)",
 			this);
@@ -3304,7 +3300,7 @@ void MainWindow::execute_loadrtss()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null, "RTSS (*.dcm)\n" "All(*.*)", this);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTSS (*.dcm)\n" "All(*.*)", this);
 	if(!loadfilename.isEmpty()){
 		//handler3D->ReloadRTdose(loadfilename.ascii(),handler3D->return_startslice()); // TODO: handle failure
 		handler3D->ReadRTSS(loadfilename.ascii());
@@ -3344,7 +3340,7 @@ void MainWindow::execute_saveprojas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Projects (*.prj)\n", this); //, filename);
 
 	if (!savefilename.isEmpty())
@@ -3451,7 +3447,7 @@ void MainWindow::execute_savecopyas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Projects (*.prj)\n", this); //, filename);
 
 	if (!savefilename.isEmpty())
@@ -3711,7 +3707,7 @@ void MainWindow::execute_saveactiveslicesas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Projects (*.prj)\n", this); //, filename);
 
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
@@ -4072,7 +4068,7 @@ void MainWindow::execute_mergeprojects()
 
 	// Get save file name
 	QString savefilename =
-			Q3FileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
+			QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
 					"iSeg", "Save merged project as");
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
@@ -4150,7 +4146,7 @@ void MainWindow::execute_loadproj()
 {
 	maybeSafe();
 
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"Projects (*.prj)\n"
 			"All(*.*)",
 			this); //, filename);
@@ -4340,7 +4336,7 @@ void MainWindow::execute_createatlas()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Atlas file (*.atl)", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".atl")))
@@ -4362,7 +4358,7 @@ void MainWindow::execute_reloadatlases()
 
 void MainWindow::execute_savetissues()
 {
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, QString::null, this); //, filename);
 
 	if (!savefilename.isEmpty())
@@ -4374,7 +4370,7 @@ void MainWindow::execute_savetissues()
 
 void MainWindow::execute_exportsurfacegenerationtoolxml()
 {
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, QString::null, this); //, filename);
 
 	if (!savefilename.isEmpty())
@@ -4389,7 +4385,7 @@ void MainWindow::execute_exportlabelfield()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "AmiraMesh Ascii (*.am)", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".am")))
@@ -4411,7 +4407,7 @@ void MainWindow::execute_exportmat()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Matlab (*.mat)", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".mat")))
@@ -4433,7 +4429,7 @@ void MainWindow::execute_exporthdf()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "HDF (*.h5)", this); //, filename);
 
 	if (savefilename.length() > 3 && !savefilename.endsWith(QString(".h5")))
@@ -4453,7 +4449,7 @@ void MainWindow::execute_exportvtkascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "VTK Ascii (*.vti *.vtk)", this); //, filename);
 
 	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) ||
@@ -4474,7 +4470,7 @@ void MainWindow::execute_exportvtkbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "VTK bin (*.vti *.vtk)", this); //, filename);
 
 	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) ||
@@ -4495,7 +4491,7 @@ void MainWindow::execute_exportvtkcompressedascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "VTK comp (*.vti)", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
@@ -4515,7 +4511,7 @@ void MainWindow::execute_exportvtkcompressedbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "VTK comp (*.vti)", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
@@ -4536,7 +4532,7 @@ void MainWindow::execute_exportxmlregionextent()
 	emit begin_dataexport(dataSelection, this);
 
 	QString savefilename =
-			Q3FileDialog::getSaveFileName(QString::null, "XML extent (*.xml)", this);
+			QFileDialog::getSaveFileName(QString::null, "XML extent (*.xml)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".xml")))
 		savefilename.append(".xml");
@@ -4563,7 +4559,7 @@ void MainWindow::execute_exporttissueindex()
 	iseg::DataSelection dataSelection;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "tissue index (*.txt)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
@@ -4588,7 +4584,7 @@ void MainWindow::execute_exporttissueindex()
 
 void MainWindow::execute_loadtissues()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(
+	QString loadfilename = QFileDialog::getOpenFileName(
 			QString::null, QString::null, this); //, filename);
 
 	if (!loadfilename.isEmpty())
@@ -5473,7 +5469,7 @@ void MainWindow::execute_yslice()
 
 void MainWindow::execute_removetissues()
 {
-	QString filename = Q3FileDialog::getOpenFileName(QString::null,
+	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
 			"All(*.*)",
 			this);
@@ -5502,7 +5498,7 @@ void MainWindow::execute_grouptissues()
 {
 	vector<tissues_size_t> olds, news;
 
-	QString filename = Q3FileDialog::getOpenFileName(QString::null,
+	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
 			"All(*.*)",
 			this);
@@ -6099,7 +6095,7 @@ void MainWindow::do_work2tissue_grouped()
 {
 	vector<tissues_size_t> olds, news;
 
-	QString filename = Q3FileDialog::getOpenFileName(QString::null,
+	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
 			"All(*.*)",
 			this);

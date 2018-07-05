@@ -17,7 +17,7 @@
 
 #include "Core/Pair.h"
 
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
@@ -528,7 +528,7 @@ void HystereticGrowingWidget::slider_released() { emit end_datachange(this); }
 
 void HystereticGrowingWidget::saveborders_execute()
 {
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Thresholds (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
@@ -550,7 +550,7 @@ void HystereticGrowingWidget::saveborders_execute()
 
 void HystereticGrowingWidget::loadborders_execute()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"Borders (*.txt)\n"
 			"All(*.*)",
 			this);

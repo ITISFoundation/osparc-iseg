@@ -18,7 +18,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QtGui>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
@@ -842,7 +842,7 @@ void ThresholdWidget::le_borderval_returnpressed()
 
 void ThresholdWidget::saveborders_execute()
 {
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 		QString::null, "Boarders (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
@@ -862,7 +862,7 @@ void ThresholdWidget::loadborders_execute()
 	if (rb_manual->isOn())
 	{
 		QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 										  "Boarders (*.txt)\n"
 										  "All(*.*)",
 										  this);
@@ -1049,7 +1049,7 @@ void ThresholdWidget::hideparams_changed() { method_changed(0); }
 
 void ThresholdWidget::select_pushed()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(
+	QString loadfilename = QFileDialog::getOpenFileName(
 		QString::null,
 		"Images (*.png)\n"
 		"Images (*.mhd)\n"
@@ -1084,7 +1084,7 @@ void ThresholdWidget::select_pushed()
 
 void ThresholdWidget::selectCenterFile_pushed()
 {
-	centerFilename = Q3FileDialog::getOpenFileName(QString::null,
+	centerFilename = QFileDialog::getOpenFileName(QString::null,
 												   "Text File (*.txt*)", this);
 	le_centerFilename->setText(centerFilename);
 }

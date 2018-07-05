@@ -24,7 +24,7 @@
 #include <QPaintEvent>
 #include <QProgressDialog>
 #include <QXmlInputSource>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3hbox.h>
 #include <q3listbox.h>
 #include <q3mimefactory.h>
@@ -2967,18 +2967,13 @@ void bits_stack::poptissue_pressed() { pop_helper(false, false, true); }
 
 void bits_stack::loaditem_pressed()
 {
-	Q3FileDialog* dialog = new Q3FileDialog(QString::null,
-			"Stackitems (*.stk)\n"
-			"All(*.*)",
-			this);
-	dialog->setMode(Q3FileDialog::ExistingFiles);
-	if (dialog->exec() == QDialog::Rejected)
+	QStringList selectedFiles = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll(*.*)", 
+		QString::null, this, "open file dialog", "Select on or more files to open");
+	if (selectedFiles.isEmpty())
 	{
-		delete dialog;
 		return;
 	}
 
-	QStringList selectedFiles = dialog->selectedFiles();
 	if (selectedFiles.size() > 1)
 	{
 		// Load multiple items
@@ -3052,8 +3047,6 @@ void bits_stack::loaditem_pressed()
 			}
 		}
 	}
-
-	delete dialog;
 }
 
 void bits_stack::saveitem_pressed()
@@ -3064,7 +3057,7 @@ void bits_stack::saveitem_pressed()
 		return;
 	}
 
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Stackitems (*.stk)\n", this); //, filename);
 	if (savefilename.endsWith(QString(".stk")))
 	{
@@ -3373,7 +3366,7 @@ extoverlay_widget::~extoverlay_widget()
 void extoverlay_widget::load_dataset_pressed()
 {
 	QString loadfilename =
-			Q3FileDialog::getOpenFileName(QString::null,
+			QFileDialog::getOpenFileName(QString::null,
 					"VTK (*.vti *.vtk)\n"
 					"Raw files (*.raw)\n"
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
@@ -3591,7 +3584,7 @@ void MultiDataset_widget::AddDatasetPressed()
 		{
 		case SupportedMultiDatasetTypes::supportedTypes::bmp:
 		{
-			loadfilenames = Q3FileDialog::getOpenFileNames(
+			loadfilenames = QFileDialog::getOpenFileNames(
 					"Images (*.bmp)\n"
 					"All(*.*)",
 					QString::null, this, "open files dialog",
@@ -3624,7 +3617,7 @@ void MultiDataset_widget::AddDatasetPressed()
 
 		case SupportedMultiDatasetTypes::supportedTypes::dcm:
 		{
-			loadfilenames = Q3FileDialog::getOpenFileNames(
+			loadfilenames = QFileDialog::getOpenFileNames(
 					"Images (*.dcm *.dicom)\n"
 					"All(*.*)",
 					QString::null, this, "open files dialog",
@@ -3667,7 +3660,7 @@ void MultiDataset_widget::AddDatasetPressed()
 		case SupportedMultiDatasetTypes::supportedTypes::vtk:
 		{
 			bool res = true;
-			QString loadfilename = Q3FileDialog::getOpenFileName(
+			QString loadfilename = QFileDialog::getOpenFileName(
 					QString::null,
 					"VTK (*.vti *.vtk)\n"
 					"NIFTI (*.nii *.hdr *.img *.nia)\n"
@@ -4738,7 +4731,7 @@ MergeProjectsDialog::~MergeProjectsDialog() { delete hboxOverall; }
 
 void MergeProjectsDialog::add_pressed()
 {
-	QStringList openfilenames = Q3FileDialog::getOpenFileNames(
+	QStringList openfilenames = QFileDialog::getOpenFileNames(
 			"Projects (*.prj)", QString::null, this, "iSeg",
 			"Select one or more files to add");
 	fileListWidget->addItems(openfilenames);

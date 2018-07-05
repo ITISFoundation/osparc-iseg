@@ -16,7 +16,7 @@
 
 #include "Core/Pair.h"
 
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <qlabel.h>
 
 #include <vector>
@@ -332,7 +332,7 @@ void VesselWidget::on_slicenr_changed()
 
 void VesselWidget::savevessel()
 {
-	QString savefilename = Q3FileDialog::getSaveFileName(
+	QString savefilename = QFileDialog::getSaveFileName(
 			QString::null, "Vessel-Tracks (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))

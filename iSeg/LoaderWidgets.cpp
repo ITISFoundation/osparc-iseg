@@ -15,7 +15,7 @@
 
 #include "Data/Point.h"
 
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
@@ -421,7 +421,7 @@ void LoaderBmp::load_pushed()
 
 void LoaderBmp::select_pushed()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(
+	QString loadfilename = QFileDialog::getOpenFileName(
 		QString::null,
 		"Images (*.bmp)\n"
 		"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
@@ -610,7 +610,7 @@ void LoaderRaw::load_pushed()
 void LoaderRaw::select_pushed()
 {
 	QString loadfilename =
-		Q3FileDialog::getOpenFileName(QString::null, QString::null,
+		QFileDialog::getOpenFileName(QString::null, QString::null,
 									  this); //, filename);
 	nameEdit->setText(loadfilename);
 	return;
@@ -897,7 +897,7 @@ void SaverImg::save_pushed()
 void SaverImg::select_pushed()
 {
 	QString savefilename =
-		Q3FileDialog::getSaveFileName(QString::null, QString::null,
+		QFileDialog::getSaveFileName(QString::null, QString::null,
 									  this); //, filename);
 	nameEdit->setText(savefilename);
 	return;
@@ -1016,7 +1016,7 @@ void ReloaderBmp::load_pushed()
 
 void ReloaderBmp::select_pushed()
 {
-	QString loadfilename = Q3FileDialog::getOpenFileName(QString::null,
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 														 "Images (*.bmp)\n"
 														 "All(*.*)",
 														 this); //, filename);
@@ -1181,7 +1181,7 @@ void ReloaderRaw::load_pushed()
 void ReloaderRaw::select_pushed()
 {
 	QString loadfilename =
-		Q3FileDialog::getOpenFileName(QString::null, QString::null,
+		QFileDialog::getOpenFileName(QString::null, QString::null,
 									  this); //, filename);
 	nameEdit->setText(loadfilename);
 	return;
