@@ -2572,7 +2572,7 @@ void MainWindow::execute_loadbmp()
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		LoaderBmp2 LB(handler3D, vfilenames, this);
+		LoaderColorImages LB(handler3D, LoaderColorImages::kBMP, vfilenames, this);
 		LB.move(QCursor::pos());
 		LB.exec();
 
@@ -2590,26 +2590,17 @@ void MainWindow::execute_loadpng()
 {
 	maybeSafe();
 
-	QStringList files =		QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
+	QStringList files =	QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
 		QString::null, this, "open files dialog",
 		"Select one or more files to open");
 
 	if (!files.empty())
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
-		vi.clear();
-
-		short nrelem = files.size();
-
-		for (short i = 0; i < nrelem; i++)
-		{
-			vi.push_back(pngimgnr(&files[i]));
-		}
-
+		size_t nrelem = files.size();
 		std::vector<const char*> vfilenames;
-		for (short i = 0; i < nrelem; i++)
+		for (size_t i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
 		}
@@ -2621,7 +2612,7 @@ void MainWindow::execute_loadpng()
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		LoaderPng LB(handler3D, vfilenames, this);
+		LoaderColorImages LB(handler3D, LoaderColorImages::kPNG, vfilenames, this);
 		LB.move(QCursor::pos());
 		LB.exec();
 
@@ -2631,8 +2622,6 @@ void MainWindow::execute_loadpng()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-
-	return;
 }
 
 void MainWindow::execute_loadjpg()
@@ -2687,7 +2676,7 @@ void MainWindow::execute_loadjpg()
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		LoaderJpg LB(handler3D, vfilenames, this);
+		LoaderColorImages LB(handler3D, LoaderColorImages::kJPG, vfilenames, this);
 		LB.move(QCursor::pos());
 		LB.exec();
 

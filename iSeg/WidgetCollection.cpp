@@ -3584,9 +3584,7 @@ void MultiDataset_widget::AddDatasetPressed()
 		{
 		case SupportedMultiDatasetTypes::supportedTypes::bmp:
 		{
-			loadfilenames = QFileDialog::getOpenFileNames(
-					"Images (*.bmp)\n"
-					"All(*.*)",
+			loadfilenames = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -3601,7 +3599,7 @@ void MultiDataset_widget::AddDatasetPressed()
 					vfilenames.push_back(loadfilenames[i].ascii());
 				}
 
-				LoaderBmp2 LB(handler3D, vfilenames, this);
+				LoaderColorImages LB(handler3D, LoaderColorImages::kBMP, vfilenames, this);
 				LB.move(QCursor::pos());
 				LB.exec();
 
