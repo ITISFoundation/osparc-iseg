@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Data/ItkUtils.h"
 #include "Data/Types.h"
 
 #include <itkBinaryThresholdImageFilter.h>
@@ -32,7 +33,9 @@ class ConnectedShapeBasedInterpolation
 {
 public:
 	using image_type = itk::Image<float, 2>;
+	using image3_type = itk::Image<float, 3>;
 	using mask_type = itk::Image<unsigned char, 2>;
+	using mask3_type = itk::Image<unsigned char, 3>;
 	using labefield_type = itk::Image<unsigned short, 2>;
 	using image_stack_type = itk::SliceContiguousImage<float>;
 
@@ -135,8 +138,8 @@ public:
 			}
 			start[2] = 0;
 			size[2] = 2;
-			spacing[2] = 1.0; // TODO
-			origin[2] = 0.0;
+			spacing[2] = 1.0; // unit spacing
+			origin[2] = 0.0; // zero
 
 			auto image3d = image_stack_type::New();
 			image3d->SetRegions(image_stack_type::RegionType(start, size));
@@ -151,13 +154,29 @@ public:
 			container->SetImportPointersForSlices(slices, size[0] * size[1], false);
 			image3d->SetPixelContainer(container);
 
-			for (int i = 1; i <= number_of_slices; i++)
+			auto mask = resample(image3d, number_of_slices);
+
+			for (int i = 0; i < number_of_slices; i++)
 			{
-				auto slice = interpolate(image3d, i / (number_of_slices + 1.0), translation);
-				if (interpolated_slices[i - 1])
+				auto size = mask->GetBufferedRegion().GetSize();
+				size[2] = 0;
+				auto start = mask->GetBufferedRegion().GetIndex();
+				start[2] = i;
+				itk::ImageRegion<3> region(start, size);
+
+				auto threed2twod = itk::ExtractImageFilter<mask3_type, image_type>::New();
+				threed2twod->SetInput(mask);
+				threed2twod->SetDirectionCollapseToIdentity();
+				threed2twod->SetExtractionRegion(region);
+				threed2twod->Update();
+
+				double ratio = (i + 1) / (number_of_slices + 1.0);
+				auto slice = move_image(threed2twod->GetOutput(), ratio * translation);
+
+				if (interpolated_slices[i])
 				{
 					itk::ImageRegionIterator<image_type> sit(slice, slice->GetBufferedRegion());
-					itk::ImageRegionIterator<image_type> dit(interpolated_slices[i - 1], slice->GetBufferedRegion());
+					itk::ImageRegionIterator<image_type> dit(interpolated_slices[i], slice->GetBufferedRegion());
 
 					for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
 					{
@@ -166,7 +185,7 @@ public:
 				}
 				else
 				{
-					interpolated_slices[i - 1] = slice;
+					interpolated_slices[i] = slice;
 				}
 			}
 		}
@@ -177,6 +196,8 @@ private:
 	/// find connected foreground regions (called "objects")
 	mask_type::Pointer get_components(const image_type* img, int& num_objects) const
 	{
+		ScopedTimer timer("ConnectedComponents");
+
 		auto caster = itk::CastImageFilter<image_type, mask_type>::New();
 		caster->SetInput(img);
 		auto connectivity = itk::ConnectedComponentImageFilter<mask_type, mask_type>::New();
@@ -191,6 +212,8 @@ private:
 	/// compute center of mass of foreground object, assumes BG=0
 	std::vector<itk::Point<double, 2>> get_center_of_mass(const mask_type* img, int num_objects) const
 	{
+		ScopedTimer timer("CenterOfMass");
+
 		using idx_type = itk::ContinuousIndex<double, 2>;
 		std::vector<double> n(num_objects, 0.0);
 		std::vector<idx_type> idx(num_objects, idx_type({0, 0}));
@@ -224,6 +247,8 @@ private:
 	template<class TImage>
 	typename TImage::Pointer move_image(const TImage* img, const itk::Vector<double, 2>& translation) const
 	{
+		ScopedTimer timer("MoveImage");
+
 		using resample_filter_type = itk::ResampleImageFilter<TImage, TImage>;
 		using translation_type = itk::TranslationTransform<double, 2>;
 
@@ -246,6 +271,8 @@ private:
 	template<class TImage>
 	image_type::Pointer compute_sdf(const TImage* img) const
 	{
+		ScopedTimer timer("SignedDistance");
+
 		using distance_filter_type = itk::SignedMaurerDistanceMapImageFilter<TImage, image_type>;
 		auto dt_filter1 = distance_filter_type::New();
 		dt_filter1->SetInput(img);
@@ -258,42 +285,35 @@ private:
 	}
 
 	/// interpolate between known slices
-	image_type::Pointer interpolate(image_stack_type* image3d, double ratio_12, const itk::Vector<double, 2>& translation_12) const
+	mask3_type::Pointer resample(image_stack_type* image3d, size_t num_slices) const
 	{
+		ScopedTimer timer("Resample");
+
 		auto id = itk::IdentityTransform<double, 3>::New();
 		auto origin = image3d->GetOrigin();
-		origin[2] = ratio_12;
+		origin[2] = 1.0 / (num_slices + 1);
 		auto size = image3d->GetBufferedRegion().GetSize();
-		size[2] = 1;
+		size[2] = num_slices;
+		auto spacing = image3d->GetSpacing();
+		spacing[2] = origin[2];
 
-		using image_3d_type = itk::Image<float, 3>;
-		auto resample_filter = itk::ResampleImageFilter<image_stack_type, image_3d_type>::New();
+		auto resample_filter = itk::ResampleImageFilter<image_stack_type, image3_type>::New();
 		resample_filter->SetTransform(id.GetPointer());
 		resample_filter->SetInput(image3d);
 		resample_filter->SetOutputParametersFromImage(image3d);
 		resample_filter->SetOutputOrigin(origin);
+		resample_filter->SetOutputSpacing(spacing);
 		resample_filter->SetSize(size);
-		itk::ImageRegion<3> region;
-		region.SetSize(0, size[0]);
-		region.SetSize(1, size[1]);
 
-		auto threed2twod = itk::ExtractImageFilter<image_3d_type, image_type>::New();
-		threed2twod->SetInput(resample_filter->GetOutput());
-		threed2twod->SetDirectionCollapseToIdentity();
-		threed2twod->SetExtractionRegion(region);
-		threed2twod->Update();
-
-		auto threshold_filter = itk::BinaryThresholdImageFilter<image_type, image_type>::New();
-		threshold_filter->SetInput(threed2twod->GetOutput());
+		auto threshold_filter = itk::BinaryThresholdImageFilter<image3_type, mask3_type>::New();
+		threshold_filter->SetInput(resample_filter->GetOutput());
 		threshold_filter->SetLowerThreshold(-std::numeric_limits<float>::max());
 		threshold_filter->SetUpperThreshold(0.f);
 		threshold_filter->SetOutsideValue(0);
 		threshold_filter->SetInsideValue(255);
 		threshold_filter->Update();
-		auto mask = threshold_filter->GetOutput();
-
-		return move_image(mask, ratio_12 * translation_12);
-	};
+		return threshold_filter->GetOutput();
+	}
 };
 
 } // namespace iseg
