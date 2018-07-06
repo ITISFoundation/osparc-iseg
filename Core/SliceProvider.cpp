@@ -43,7 +43,7 @@ float* SliceProvider::give_me()
 
 void SliceProvider::take_back(float* slice)
 {
-	if (slice != NULL)
+	if (slice != nullptr)
 		slicestack.push(slice);
 }
 
@@ -63,14 +63,14 @@ unsigned short SliceProvider::return_nrslices()
 	return (unsigned short)slicestack.size();
 }
 
-SliceProviderInstaller* SliceProviderInstaller::inst = NULL;
+SliceProviderInstaller* SliceProviderInstaller::inst = nullptr;
 
 unsigned short SliceProviderInstaller::counter = 0;
 
 SliceProviderInstaller* SliceProviderInstaller::getinst()
 {
 	static Waechter w;
-	if (inst == NULL)
+	if (inst == nullptr)
 		inst = new SliceProviderInstaller;
 
 	counter++;
@@ -141,7 +141,7 @@ SliceProviderInstaller::~SliceProviderInstaller()
 		free(it->spp);
 	}
 
-	inst = NULL;
+	inst = nullptr;
 }
 
 void SliceProviderInstaller::report() const

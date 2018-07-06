@@ -19,25 +19,25 @@ using namespace iseg;
 
 UndoElem::UndoElem()
 {
-	bmp_old = work_old = bmp_new = work_new = NULL;
-	tissue_old = tissue_new = NULL;
+	bmp_old = work_old = bmp_new = work_new = nullptr;
+	tissue_old = tissue_new = nullptr;
 	mode1_old = mode1_new = mode2_old = mode2_new = 0;
 	multi = false;
 }
 
 UndoElem::~UndoElem()
 {
-	if (bmp_old != NULL)
+	if (bmp_old != nullptr)
 		free(bmp_old);
-	if (work_old != NULL)
+	if (work_old != nullptr)
 		free(work_old);
-	if (tissue_old != NULL)
+	if (tissue_old != nullptr)
 		free(tissue_old);
-	if (bmp_new != NULL)
+	if (bmp_new != nullptr)
 		free(bmp_new);
-	if (work_new != NULL)
+	if (work_new != nullptr)
 		free(work_new);
-	if (tissue_new != NULL)
+	if (tissue_new != nullptr)
 		free(tissue_new);
 }
 
@@ -109,9 +109,9 @@ void UndoElem::merge(UndoElem* ue)
 		}
 		dataSelection.CombineSelection(ue->dataSelection);
 	}
-	/*	if(bmp_new!=NULL) free(bmp_new);
-	if(work_new!=NULL) free(work_new);
-	if(tissue_new!=NULL) free(tissue_new);
+	/*	if(bmp_new!=nullptr) free(bmp_new);
+	if(work_new!=nullptr) free(work_new);
+	if(tissue_new!=nullptr) free(tissue_new);
 	bmp_new=ue->bmp_new;
 	work_new=ue->work_new;
 	tissue_new=ue->tissue_new;

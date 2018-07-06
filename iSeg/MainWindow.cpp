@@ -180,7 +180,7 @@ bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
 		vector<tissues_size_t>& news)
 {
 	FILE* fp;
-	if ((fp = fopen(filename, "r")) == NULL)
+	if ((fp = fopen(filename, "r")) == nullptr)
 	{
 		return false;
 	}
@@ -203,7 +203,7 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 		bool fail_on_unknown_tissue)
 {
 	FILE* fp;
-	if ((fp = fopen(filename, "r")) == NULL)
+	if ((fp = fopen(filename, "r")) == nullptr)
 	{
 		return false;
 	}
@@ -302,7 +302,7 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 {
 	FILE* fp;
-	if ((fp = fopen(filename, "r")) == NULL)
+	if ((fp = fopen(filename, "r")) == nullptr)
 	{
 		return false;
 	}
@@ -442,9 +442,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	sl_brightnessbmp = new QSlider(Qt::Horizontal, this);
 	sl_brightnessbmp->setRange(0, 100);
 	lb_contrastbmp = new QLabel("C:", this);
-	lb_contrastbmp->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii())
-					.pixmap());
+	lb_contrastbmp->setPixmap(QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii()).pixmap());
 	le_contrastbmp_val = new QLineEdit(this);
 	le_contrastbmp_val->setAlignment(Qt::AlignRight);
 	le_contrastbmp_val->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -454,9 +452,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	le_contrastbmp_val->setFixedSize(rect.width() + 4, rect.height() + 4);
 	lb_contrastbmp_val = new QLabel("x", this);
 	lb_brightnessbmp = new QLabel("B:", this);
-	lb_brightnessbmp->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii())
-					.pixmap());
+	lb_brightnessbmp->setPixmap(QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii()).pixmap());
 	le_brightnessbmp_val = new QLineEdit(this);
 	le_brightnessbmp_val->setAlignment(Qt::AlignRight);
 	le_brightnessbmp_val->setText(QString("%1").arg(9999, 3));
@@ -469,32 +465,24 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	bmp_show->init(handler3D, TRUE);
 	bmp_show->set_workbordervisible(TRUE);
 	bmp_show->setIsBmp(true);
-	//	work_show->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	bmp_show->update();
 
-	toworkBtn = new QPushButton(
-			QIcon(m_picpath.absFilePath(QString("next.png")).ascii()), "", this);
+	toworkBtn = new QPushButton(QIcon(m_picpath.absFilePath(QString("next.png")).ascii()), "", this);
 	toworkBtn->setFixedWidth(50);
-	tobmpBtn = new QPushButton(
-			QIcon(m_picpath.absFilePath(QString("previous.png")).ascii()), "", this);
+	tobmpBtn = new QPushButton(QIcon(m_picpath.absFilePath(QString("previous.png")).ascii()), "", this);
 	tobmpBtn->setFixedWidth(50);
-	swapBtn = new QPushButton(
-			QIcon(m_picpath.absFilePath(QString("swap.png")).ascii()), "", this);
+	swapBtn = new QPushButton(QIcon(m_picpath.absFilePath(QString("swap.png")).ascii()), "", this);
 	swapBtn->setFixedWidth(50);
-	swapAllBtn = new QPushButton(
-			QIcon(m_picpath.absFilePath(QString("swap.png")).ascii()), "3D", this);
+	swapAllBtn = new QPushButton(QIcon(m_picpath.absFilePath(QString("swap.png")).ascii()), "3D", this);
 	swapAllBtn->setFixedWidth(50);
 
-	work_show = new ImageViewerWidget(
-			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	work_show = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	sl_contrastwork = new QSlider(Qt::Horizontal, this);
 	sl_contrastwork->setRange(0, 100);
 	sl_brightnesswork = new QSlider(Qt::Horizontal, this);
 	sl_brightnesswork->setRange(0, 100);
 	lb_contrastwork = new QLabel(this);
-	lb_contrastwork->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii())
-					.pixmap());
+	lb_contrastwork->setPixmap(QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii()).pixmap());
 	le_contrastwork_val = new QLineEdit(this);
 	le_contrastwork_val->setAlignment(Qt::AlignRight);
 	le_contrastwork_val->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -504,9 +492,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	le_contrastwork_val->setFixedSize(rect.width() + 4, rect.height() + 4);
 	lb_contrastwork_val = new QLabel("x", this);
 	lb_brightnesswork = new QLabel(this);
-	lb_brightnesswork->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii())
-					.pixmap());
+	lb_brightnesswork->setPixmap(QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii()).pixmap());
 	le_brightnesswork_val = new QLineEdit(this);
 	le_brightnesswork_val->setAlignment(Qt::AlignRight);
 	le_brightnesswork_val->setText(QString("%1").arg(9999, 3));
@@ -517,7 +503,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	lb_brightnesswork_val = new QLabel("%", this);
 	work_scroller = new Q3ScrollView(this);
 	work_scroller->addChild(work_show);
-	//	work_scroller->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+
 	work_show->init(handler3D, FALSE);
 	work_show->set_tissuevisible(false); //toggle_tissuevisible();
 	work_show->setIsBmp(false);
@@ -526,33 +512,31 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	zoom_widget = new ZoomWidget(1.0, m_picpath, this);
 
-	tissueTreeWidget =
-			new TissueTreeWidget(handler3D->get_tissue_hierachy(), m_picpath, this);
+	tissueTreeWidget = new TissueTreeWidget(handler3D->get_tissue_hierachy(), m_picpath, this);
 	tissueTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	tissueFilter = new QLineEdit(this);
 	tissueFilter->setMargin(1);
 	tissueHierarchyWidget = new TissueHierarchyWidget(tissueTreeWidget, this);
 	tissueTreeWidget->update_tree_widget(); // Reload hierarchy
 	cb_tissuelock = new QCheckBox(this);
-	cb_tissuelock->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("lock.png")).ascii()).pixmap());
+	cb_tissuelock->setPixmap(QIcon(m_picpath.absFilePath(QString("lock.png")).ascii()).pixmap());
 	cb_tissuelock->setChecked(false);
 	lockTissues = new QPushButton("All", this);
 	lockTissues->setToggleButton(true);
 	lockTissues->setFixedWidth(50);
 	addTissue = new QPushButton("New Tissue...", this);
 	addFolder = new QPushButton("New Folder...", this);
-	//xxxb	addTissue->setFixedWidth(110);
+
 	modifyTissueFolder = new QPushButton("Mod. Tissue/Folder", this);
 	modifyTissueFolder->setToolTip(
 			Format("Edit the selected tissue or folder properties."));
-	//xxxb	modifyTissue->setFixedWidth(110);
+
 	removeTissueFolder = new QPushButton("Del. Tissue/Folder", this);
 	removeTissueFolder->setToolTip(
 			Format("Remove the selected tissues or folders."));
 	removeTissueFolderAll = new QPushButton("All", this);
 	removeTissueFolderAll->setFixedWidth(30);
-	//xxxb	removeTissue->setFixedWidth(110);
+
 	tissue3Dopt = new QCheckBox("3D", this);
 	tissue3Dopt->setChecked(false);
 	tissue3Dopt->setToolTip(
@@ -564,18 +548,16 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	getTissueAll->setFixedWidth(30);
 	getTissueAll->setToolTip(Format("Get all tissue creates a mask in the Target "
 																	"from all Tissue excluding the background."));
-	//xxxb	getTissue->setFixedWidth(110);
 	clearTissue = new QPushButton("Clear Tissue", this);
 	clearTissue->setToolTip(
 			Format("Clears the currently selected tissue (use '3D' option to clear "
 						 "whole tissue or just the current slice)."));
-	//xxxb	clearTissue->setFixedWidth(110);
+
 	clearTissues = new QPushButton("All", this);
 	clearTissues->setFixedWidth(30);
 	clearTissues->setToolTip(
 			Format("Clears all tissues (use '3D' option to clear the entire "
 						 "segmentation or just the current slice)."));
-	//xxxb	clearTissues->setFixedWidth(110);
 
 	cb_addsub3d = new QCheckBox("3D", this);
 	cb_addsub3d->setToolTip(
@@ -588,7 +570,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_addsubconn = new QCheckBox("Connected", this);
 	cb_addsubconn->setToolTip(
 			Format("Only the connected image region is added/removed."));
-	//	vboxtissueadder2->addStretch();
+
 	pb_add = new QPushButton("+", this);
 	pb_add->setToggleButton(true);
 	pb_add->setToolTip(Format(
@@ -601,39 +583,27 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	pb_addhold->setToggleButton(true);
 	pb_addhold->setToolTip(
 			Format("Adds selected/picked Target image regions to current tissue."));
-	//	pb_stophold=new QPushButton(".",this);
-	//	vboxtissueadder2->addWidget(pb_stophold);
+
 	pb_subhold = new QPushButton("--", this);
 	pb_subhold->setToggleButton(true);
 	pb_subhold->setToolTip(Format(
 			"Removes selected/picked Target image regions from current tissue."));
-	/*	pb_add3D=new QPushButton("+3D",this);
-		vboxtissueadder1->addWidget(pb_add3D);
-		pb_addconn=new QPushButton("+Conn",this);
-		vboxtissueadder2->addWidget(pb_addconn);*/
+
 	pb_add->setFixedWidth(50);
 	pb_sub->setFixedWidth(50);
 	pb_addhold->setFixedWidth(50);
 	pb_subhold->setFixedWidth(50);
-	//	pb_stophold->setFixedWidth(50);
-	/*	pb_add3D->setFixedWidth(50);
-		pb_addconn->setFixedWidth(50);*/
-
-	//	pb_work2tissue=new QPushButton("Target->Tissue",this);
 
 	unsigned short slicenr = handler3D->active_slice() + 1;
 	pb_first = new QPushButton("|<<", this);
-	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1,
-			Qt::Horizontal, this);
+	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1, Qt::Horizontal, this);
 	scb_slicenr->setFixedWidth(500);
 	scb_slicenr->setValue(int(slicenr));
 	pb_last = new QPushButton(">>|", this);
 	sb_slicenr = new QSpinBox(1, (int)handler3D->num_slices(), 1, this);
 	sb_slicenr->setValue(slicenr);
-	lb_slicenr = new QLabel(
-			QString(" of ") + QString::number((int)handler3D->num_slices()),
-			this);
-	//	lb_inactivewarning=new QLabel(QSimpleRichText(QString("  3D Inactive Slice!"),this->font()),this);
+	lb_slicenr = new QLabel(QString(" of ") + QString::number((int)handler3D->num_slices()), this);
+
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
 	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -710,7 +680,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	showpb_tab.resize(nrtabbuttons);
 	showtab_action.resize(nrtabbuttons);
 
-	//pb_tab1=new QPushButton(QIconSet(qPixmapFromMimeSource("G:\\docs&settings\\Documents and Settings\\neufeld\\My Documents\\My Pictures\\iSeg icons\\thresholding.png")),"Thresh",this);
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
 		showpb_tab[i] = true;
@@ -727,7 +696,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		methodTab->addWidget(tabwidgets[i]);
-		//		methodTab->addTab(tabwidgets[i],tabwidgets[i]->GetName().c_str());
 	}
 
 	methodTab->setMargin(10);
@@ -742,32 +710,16 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	tab_changed((WidgetInterface*)methodTab->visibleWidget());
 
-	//	tab_old=(QWidget1 *)methodTab->visibleWidget();
 	updateTabvisibility();
 
 	int height_max = 0;
-	QSize qs; //,qsmax;
-						//	qsmax.setHeight(0);
-						//	qsmax.setWidth(0);
+	QSize qs;
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
-		//		qsmax.setWidth(max(qs.width(),qsmax.width()));
-		//		qsmax.setHeight(max(qs.height(),qsmax.height()));F
 		height_max = max(height_max, qs.height());
 	}
 	height_max += 65;
-	for (size_t i = 0; i < tabwidgets.size(); i++)
-	{
-		//		methodTab->page(i)->setFixedSize(qsmax);
-		//		tabwidgets[i]->setFixedHeight(height_max);
-		//		tabwidgets[i]->setFixedWidth(500);
-	}
-	//	methodTab->setFixedSize(qsmax);
-	for (unsigned short i = 0; i < nrtabbuttons; i++)
-	{
-		//		pb_tab[i]->setFixedHeight(height_max*2/nrtabbuttons);
-	}
 
 	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -789,10 +741,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	m_notes = new QTextEdit(this);
 	m_notes->clear();
 
-	xsliceshower = ysliceshower = NULL;
-	surface_viewer = NULL;
-	VV3D = NULL;
-	VV3Dbmp = NULL;
+	xsliceshower = ysliceshower = nullptr;
+	surface_viewer = nullptr;
+	VV3D = nullptr;
+	VV3Dbmp = nullptr;
 
 	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
@@ -890,7 +842,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hboxwork->addWidget(cb_workpicturevisible);
 	hboxworkw->setLayout(hboxwork);
 
-	//	vboxworkw->setSizePolicy(QSizePolicy::Ignored);
 	QVBoxLayout* vboxwork = new QVBoxLayout;
 	vboxwork->setSpacing(0);
 	vboxwork->setMargin(0);
@@ -899,9 +850,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	vboxwork->addWidget(work_scroller);
 	vboxwork->addWidget(hboxworkw);
 	vboxworkw->setLayout(vboxwork);
-
-	//	vboxbmpw->setSizePolicy(QSizePolicy::Ignore,QSizePolicy::Ignore);
-	//	vboxworkw->setSizePolicy(QSizePolicy::Ignore,QSizePolicy::Ignore);
 
 	QHBoxLayout* hbox1 = new QHBoxLayout;
 	hbox1->setSpacing(0);
@@ -1835,7 +1783,7 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 {
 	if (maybeSafe())
 	{
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 		{
 			xsliceshower->close();
 			QObject::disconnect(bmp_show,
@@ -1852,7 +1800,7 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 					SLOT(xslice_closed()));
 			delete xsliceshower;
 		}
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 		{
 			ysliceshower->close();
 			QObject::disconnect(bmp_show,
@@ -1869,21 +1817,21 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 					SLOT(yslice_closed()));
 			delete ysliceshower;
 		}
-		if (surface_viewer != NULL)
+		if (surface_viewer != nullptr)
 		{
 			surface_viewer->close();
 			QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this,
 					SLOT(surface_viewer_closed()));
 			delete surface_viewer;
 		}
-		if (VV3D != NULL)
+		if (VV3D != nullptr)
 		{
 			VV3D->close();
 			QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
 					SLOT(VV3D_closed()));
 			delete VV3D;
 		}
-		if (VV3Dbmp != NULL)
+		if (VV3Dbmp != nullptr)
 		{
 			VV3Dbmp->close();
 			QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
@@ -3483,7 +3431,7 @@ void MainWindow::execute_savecopyas()
 void MainWindow::SaveSettings()
 {
 	FILE* fp = fopen(settingsfile.c_str(), "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return;
 	unsigned short saveProjVersion = 12;
 	unsigned short combinedVersion =
@@ -3551,7 +3499,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 {
 	settingsfile = loadfilename;
 	FILE* fp;
-	if ((fp = fopen(loadfilename, "rb")) == NULL)
+	if ((fp = fopen(loadfilename, "rb")) == nullptr)
 	{
 		return;
 	}
@@ -3563,8 +3511,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		return;
 	}
 	int loadProjVersion, tissuesVersion;
-	iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion,
-			tissuesVersion);
+	iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion, tissuesVersion);
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
@@ -3578,8 +3525,6 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	execute_hideparameters(flag);
 	hideparameters->setOn(flag);
 	fread(&flag, sizeof(bool), 1, fp);
-	//	hidestack->setOn(!flag);
-	//	execute_hidestack(!flag);
 
 	if (loadProjVersion >= 7)
 	{
@@ -3589,11 +3534,8 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	{
 		flag = false;
 	}
-	//	hidenotes->setOn(!flag);
-	//	execute_hidenotes(!flag);
+
 	fread(&flag, sizeof(bool), 1, fp);
-	//	hidezoom->setOn(!flag);
-	//	execute_hidezoom(!flag);
 	fread(&flag, sizeof(bool), 1, fp);
 	hidecontrastbright->setOn(!flag);
 	execute_hidecontrastbright(!flag);
@@ -3615,6 +3557,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		fread(&flag, sizeof(bool), 1, fp);
 		showtab_action[15]->setOn(flag);
 	}
+
 	//New added. Show all loaded widgets
 	for (int i = 16; i < nrtabbuttons; i++)
 	{
@@ -3627,9 +3570,9 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	const char* defaultTissuesFilename =
 			m_tmppath.absFilePath(QString("def_tissues.txt"));
 	FILE* fpTmp = fopen(defaultTissuesFilename, "r");
-	if (fpTmp != NULL || TissueInfos::GetTissueCount() <= 0)
+	if (fpTmp != nullptr || TissueInfos::GetTissueCount() <= 0)
 	{
-		if (fpTmp != NULL)
+		if (fpTmp != nullptr)
 			fclose(fpTmp);
 		TissueInfos::LoadDefaultTissueList(defaultTissuesFilename);
 	}
@@ -3906,7 +3849,7 @@ void MainWindow::execute_saveproj()
 void MainWindow::loadproj(const QString& loadfilename)
 {
 	FILE* fp;
-	if ((fp = fopen(loadfilename.ascii(), "r")) == NULL)
+	if ((fp = fopen(loadfilename.ascii(), "r")) == nullptr)
 	{
 		return;
 	}
@@ -3939,11 +3882,11 @@ void MainWindow::loadproj(const QString& loadfilename)
 	emit end_datachange(this, iseg::ClearUndo);
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
-	//if(xsliceshower!=NULL) xsliceshower->thickness_changed(handler3D->get_slicethickness());
-	//if(ysliceshower!=NULL) ysliceshower->thickness_changed(handler3D->get_slicethickness());
+	//if(xsliceshower!=nullptr) xsliceshower->thickness_changed(handler3D->get_slicethickness());
+	//if(ysliceshower!=nullptr) ysliceshower->thickness_changed(handler3D->get_slicethickness());
 	pixelsize_changed();
-	/*if(xsliceshower!=NULL) xsliceshower->pixelsize_changed(handler3D->get_pixelsize());
-	if(ysliceshower!=NULL) ysliceshower->pixelsize_changed(handler3D->get_pixelsize());
+	/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(handler3D->get_pixelsize());
+	if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(handler3D->get_pixelsize());
 	bmp_show->pixelsize_changed(handler3D->get_pixelsize());
 	work_show->pixelsize_changed(handler3D->get_pixelsize());*/
 	slicethickness_changed1();
@@ -4702,7 +4645,7 @@ void MainWindow::execute_new()
 void MainWindow::start_surfaceviewer(int mode)
 {
 	// ensure we don't have a viewer running
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 	{
 		surface_viewer->close();
 		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
@@ -4756,7 +4699,7 @@ void MainWindow::execute_3Dvolumeviewertissue()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	if (VV3D == NULL)
+	if (VV3D == nullptr)
 	{
 		VV3D = new VolumeViewerWidget(handler3D, false, true, true, 0);
 		QObject::connect(VV3D, SIGNAL(hasbeenclosed()), this, SLOT(VV3D_closed()));
@@ -4774,7 +4717,7 @@ void MainWindow::execute_3Dvolumeviewerbmp()
 	dataSelection.bmp = true;
 	emit begin_dataexport(dataSelection, this);
 
-	if (VV3Dbmp == NULL)
+	if (VV3Dbmp == nullptr)
 	{
 		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, 0);
 		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
@@ -4796,11 +4739,11 @@ void MainWindow::execute_settings()
 void MainWindow::update_bmp()
 {
 	bmp_show->update();
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 	{
 		xsliceshower->bmp_changed();
 	}
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 	{
 		ysliceshower->bmp_changed();
 	}
@@ -4810,11 +4753,11 @@ void MainWindow::update_work()
 {
 	work_show->update();
 
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 	{
 		xsliceshower->work_changed();
 	}
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 	{
 		ysliceshower->work_changed();
 	}
@@ -4824,19 +4767,19 @@ void MainWindow::update_tissue()
 {
 	bmp_show->tissue_changed();
 	work_show->tissue_changed();
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 		xsliceshower->tissue_changed();
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 		ysliceshower->tissue_changed();
-	if (VV3D != NULL)
+	if (VV3D != nullptr)
 		VV3D->tissue_changed();
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 		surface_viewer->tissue_changed();
 }
 
 void MainWindow::xslice_closed()
 {
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 	{
 		QObject::disconnect(bmp_show,
 				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
@@ -4851,7 +4794,7 @@ void MainWindow::xslice_closed()
 		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), xsliceshower,
 				SLOT(set_zoom(double)));
 
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 		{
 			ysliceshower->xyexists_changed(false);
 		}
@@ -4859,13 +4802,13 @@ void MainWindow::xslice_closed()
 		work_show->set_crosshairyvisible(false);
 
 		delete xsliceshower;
-		xsliceshower = NULL;
+		xsliceshower = nullptr;
 	}
 }
 
 void MainWindow::yslice_closed()
 {
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 	{
 		QObject::disconnect(bmp_show,
 				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
@@ -4880,7 +4823,7 @@ void MainWindow::yslice_closed()
 		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), ysliceshower,
 				SLOT(set_zoom(double)));
 
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 		{
 			xsliceshower->xyexists_changed(false);
 		}
@@ -4888,45 +4831,45 @@ void MainWindow::yslice_closed()
 		work_show->set_crosshairxvisible(false);
 
 		delete ysliceshower;
-		ysliceshower = NULL;
+		ysliceshower = nullptr;
 	}
 }
 
 void MainWindow::surface_viewer_closed()
 {
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 	{
 		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 		delete surface_viewer;
-		surface_viewer = NULL;
+		surface_viewer = nullptr;
 	}
 }
 
 void MainWindow::VV3D_closed()
 {
-	if (VV3D != NULL)
+	if (VV3D != nullptr)
 	{
 		QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
 				SLOT(VV3D_closed()));
 		delete VV3D;
-		VV3D = NULL;
+		VV3D = nullptr;
 	}
 }
 
 void MainWindow::VV3Dbmp_closed()
 {
-	if (VV3Dbmp != NULL)
+	if (VV3Dbmp != nullptr)
 	{
 		QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
 				SLOT(VV3Dbmp_closed()));
 		delete VV3Dbmp;
-		VV3Dbmp = NULL;
+		VV3Dbmp = nullptr;
 	}
 }
 
 void MainWindow::xshower_slicechanged()
 {
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 	{
 		ysliceshower->xypos_changed(xsliceshower->get_slicenr());
 	}
@@ -4936,7 +4879,7 @@ void MainWindow::xshower_slicechanged()
 
 void MainWindow::yshower_slicechanged()
 {
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 	{
 		xsliceshower->xypos_changed(ysliceshower->get_slicenr());
 	}
@@ -5074,8 +5017,8 @@ void MainWindow::execute_pixelsize()
 		Pair p = PR.return_pixelsize();
 		handler3D->set_pixelsize(p.high, p.low);
 		pixelsize_changed();
-		/*if(xsliceshower!=NULL) xsliceshower->pixelsize_changed(p);
-		if(ysliceshower!=NULL) ysliceshower->pixelsize_changed(p);
+		/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(p);
+		if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(p);
 		bmp_show->pixelsize_changed(p);
 		work_show->pixelsize_changed(p);*/
 	}
@@ -5086,21 +5029,21 @@ void MainWindow::execute_pixelsize()
 void MainWindow::pixelsize_changed()
 {
 	Pair p = handler3D->get_pixelsize();
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 		xsliceshower->pixelsize_changed(p);
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 		ysliceshower->pixelsize_changed(p);
 	bmp_show->pixelsize_changed(p);
 	work_show->pixelsize_changed(p);
-	if (VV3D != NULL)
+	if (VV3D != nullptr)
 	{
 		VV3D->pixelsize_changed(p);
 	}
-	if (VV3Dbmp != NULL)
+	if (VV3Dbmp != nullptr)
 	{
 		VV3Dbmp->pixelsize_changed(p);
 	}
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 	{
 		surface_viewer->pixelsize_changed(p);
 	}
@@ -5180,7 +5123,7 @@ void MainWindow::execute_activeslicesconf()
 void MainWindow::execute_hideparameters(bool checked)
 {
 	WidgetInterface::set_hideparams(checked);
-	if (tab_old != NULL)
+	if (tab_old != nullptr)
 		tab_old->hideparams_changed();
 }
 
@@ -5337,8 +5280,7 @@ void MainWindow::execute_showtabtoggled(bool)
 		showpb_tab[i] = showtab_action[i]->isOn();
 	}
 
-	WidgetInterface* currentwidget =
-			(WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->visibleWidget());
 	unsigned short i = 0;
 	while ((i < nrtabbuttons) && (currentwidget != tabwidgets[i]))
 		i++;
@@ -5370,13 +5312,13 @@ void MainWindow::execute_xslice()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	if (xsliceshower == NULL)
+	if (xsliceshower == nullptr)
 	{
 		xsliceshower = new SliceViewerWidget(
 				handler3D, true, handler3D->get_slicethickness(),
 				zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		xsliceshower->zpos_changed();
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 		{
 			xsliceshower->xypos_changed(ysliceshower->get_slicenr());
 			xsliceshower->xyexists_changed(true);
@@ -5418,13 +5360,13 @@ void MainWindow::execute_yslice()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	if (ysliceshower == NULL)
+	if (ysliceshower == nullptr)
 	{
 		ysliceshower = new SliceViewerWidget(
 				handler3D, false, handler3D->get_slicethickness(),
 				zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
 		ysliceshower->zpos_changed();
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 		{
 			ysliceshower->xypos_changed(xsliceshower->get_slicenr());
 			ysliceshower->xyexists_changed(true);
@@ -6743,11 +6685,11 @@ void MainWindow::slice_changed()
 				this->paletteBackgroundColor());
 	}
 
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 	{
 		xsliceshower->zpos_changed();
 	}
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 	{
 		ysliceshower->zpos_changed();
 	}
@@ -6811,18 +6753,18 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 				this->paletteBackgroundColor());
 	}
 
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 		xsliceshower->zpos_changed();
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 		ysliceshower->zpos_changed();
 
-	if (VV3D != NULL)
+	if (VV3D != nullptr)
 		VV3D->reload();
 
-	if (VV3Dbmp != NULL)
+	if (VV3Dbmp != nullptr)
 		VV3Dbmp->reload();
 
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 		surface_viewer->reload();
 
 	qw->init();
@@ -6886,15 +6828,15 @@ void MainWindow::slicethickness_changed()
 	if (b1)
 	{
 		handler3D->set_slicethickness(thickness);
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 			xsliceshower->thickness_changed(thickness);
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 			ysliceshower->thickness_changed(thickness);
-		if (VV3D != NULL)
+		if (VV3D != nullptr)
 			VV3D->thickness_changed(thickness);
-		if (VV3Dbmp != NULL)
+		if (VV3Dbmp != nullptr)
 			VV3Dbmp->thickness_changed(thickness);
-		if (surface_viewer != NULL)
+		if (surface_viewer != nullptr)
 			surface_viewer->thickness_changed(thickness);
 	}
 	else
@@ -6908,15 +6850,15 @@ void MainWindow::slicethickness_changed1()
 {
 	le_slicethick->setText(QString::number(handler3D->get_slicethickness()));
 
-	if (xsliceshower != NULL)
+	if (xsliceshower != nullptr)
 		xsliceshower->thickness_changed(handler3D->get_slicethickness());
-	if (ysliceshower != NULL)
+	if (ysliceshower != nullptr)
 		ysliceshower->thickness_changed(handler3D->get_slicethickness());
-	if (VV3D != NULL)
+	if (VV3D != nullptr)
 		VV3D->thickness_changed(handler3D->get_slicethickness());
-	if (VV3Dbmp != NULL)
+	if (VV3Dbmp != nullptr)
 		VV3Dbmp->thickness_changed(handler3D->get_slicethickness());
-	if (surface_viewer != NULL)
+	if (surface_viewer != nullptr)
 		surface_viewer->thickness_changed(handler3D->get_slicethickness());
 }
 
@@ -6940,20 +6882,15 @@ void MainWindow::tissue_selection_changed()
 	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
 	if (list.size() > 1)
 	{
-		showpb_tab[6] = false;
-		showpb_tab[14] = false;
-		olc_widget->setDisabled(true);
-		picker_widget->setDisabled(true);
+		//showpb_tab[6] = false;
 		cb_bmpoutlinevisible->setChecked(false);
 		bmpoutlinevisible_changed();
 		updateTabvisibility();
 	}
 	else
 	{
-		showpb_tab[6] = true;
-		showpb_tab[14] = true;
-		olc_widget->setDisabled(false);
-		picker_widget->setDisabled(false);
+		//showpb_tab[6] = true;
+		//showpb_tab[14] = true;
 		updateTabvisibility();
 	}
 
@@ -7512,7 +7449,7 @@ void MainWindow::updateTabvisibility()
 		counter1++;
 	}
 
-	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* qw = static_cast<WidgetInterface*>(methodTab->visibleWidget());
 	updateMethodButtonsPressed(qw);
 }
 
@@ -7582,7 +7519,7 @@ void MainWindow::LoadLoadProj(const QString& path1)
 	FILE* fplatestproj = fopen(path1.ascii(), "r");
 	char c;
 	m_loadprojfilename.m_filename = path1;
-	while (fplatestproj != NULL && projcounter < 4)
+	while (fplatestproj != nullptr && projcounter < 4)
 	{
 		projcounter++;
 		QString qs_filename1 = "";
@@ -7693,7 +7630,7 @@ void MainWindow::SaveLoadProj(const QString& latestprojpath)
 	if (latestprojpath == QString(""))
 		return;
 	FILE* fplatestproj = fopen(latestprojpath.ascii(), "w");
-	if (fplatestproj != NULL)
+	if (fplatestproj != nullptr)
 	{
 		if (m_loadprojfilename.m_loadprojfilename4 != QString(""))
 		{
@@ -7751,12 +7688,12 @@ void MainWindow::bmpcrosshairvisible_changed()
 {
 	if (cb_bmpcrosshairvisible->isChecked())
 	{
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 		{
 			bmp_show->crosshairy_changed(xsliceshower->get_slicenr());
 			bmp_show->set_crosshairyvisible(true);
 		}
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 		{
 			bmp_show->crosshairx_changed(ysliceshower->get_slicenr());
 			bmp_show->set_crosshairxvisible(true);
@@ -7775,12 +7712,12 @@ void MainWindow::workcrosshairvisible_changed()
 {
 	if (cb_workcrosshairvisible->isChecked())
 	{
-		if (xsliceshower != NULL)
+		if (xsliceshower != nullptr)
 		{
 			work_show->crosshairy_changed(xsliceshower->get_slicenr());
 			work_show->set_crosshairyvisible(true);
 		}
-		if (ysliceshower != NULL)
+		if (ysliceshower != nullptr)
 		{
 			work_show->crosshairx_changed(ysliceshower->get_slicenr());
 			work_show->set_crosshairxvisible(true);

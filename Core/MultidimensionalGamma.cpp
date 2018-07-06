@@ -18,7 +18,7 @@
 using namespace std;
 using namespace iseg;
 
-MultidimensionalGamma::MultidimensionalGamma() { m = NULL; }
+MultidimensionalGamma::MultidimensionalGamma() { m = nullptr; }
 
 void MultidimensionalGamma::init(short unsigned w, short unsigned h,
 								 short nrclass, short dimension, float** bit,

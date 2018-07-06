@@ -3505,10 +3505,10 @@ void MultiDataset_widget::Initialize()
 
 void MultiDataset_widget::ClearRadioButtons()
 {
-	if (m_VboxDatasets->layout() != NULL)
+	if (m_VboxDatasets->layout() != nullptr)
 	{
 		QLayoutItem* item;
-		while ((item = m_VboxDatasets->layout()->takeAt(0)) != NULL)
+		while ((item = m_VboxDatasets->layout()->takeAt(0)) != nullptr)
 		{
 			delete item->widget();
 			delete item;
@@ -3695,7 +3695,7 @@ void MultiDataset_widget::AddDatasetPressed()
 			m_RadioButtons.push_back(dataInfo);
 
 			delete handler3D; //freed memory
-			handler3D = NULL; //pointed dangling ptr to NULL
+			handler3D = nullptr; //pointed dangling ptr to nullptr
 		}
 	}
 }
@@ -3831,7 +3831,7 @@ void MultiDataset_widget::SwitchDataset()
 					//float* work_data = (float*) malloc(sizeof(float)*size);
 					//memcpy(work_data, radioButton.m_WorkSlices.at(i), sizeof(float)*size);
 					//m_Handler3D->set_work( i, work_data, 1 );
-					//work_data = NULL;
+					//work_data = nullptr;
 					//delete work_data;
 				}
 				m_ItIsBeingLoaded = true;

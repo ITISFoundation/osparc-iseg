@@ -90,8 +90,8 @@ private:
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
@@ -138,8 +138,8 @@ private:
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
@@ -187,8 +187,8 @@ private:
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 public slots:
@@ -571,12 +571,12 @@ private:
 signals:
 	void stack_changed();
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 	void begin_dataexport(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL);
-	void end_dataexport(QWidget* sender = NULL);
+			QWidget* sender = nullptr);
+	void end_dataexport(QWidget* sender = nullptr);
 
 public slots:
 	void tissuenr_changed(unsigned short i);
@@ -747,8 +747,8 @@ protected:
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 	void dataset_changed();
 

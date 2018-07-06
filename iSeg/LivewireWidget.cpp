@@ -53,7 +53,7 @@ LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
 	vbox1 = new Q3VBox(hboxoverall);
 
 	drawing = false;
-	lw = lwfirst = NULL;
+	lw = lwfirst = nullptr;
 
 	drawmode = new QButtonGroup(this);
 
@@ -127,9 +127,9 @@ LivewireWidget::~LivewireWidget()
 {
 	delete vbox1;
 	delete drawmode;
-	if (lw != NULL)
+	if (lw != nullptr)
 		delete lw;
-	if (lwfirst != NULL)
+	if (lwfirst != nullptr)
 		delete lwfirst;
 }
 
@@ -141,7 +141,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 	{
 		if (autotrace->isOn())
 		{
-			if (lw == NULL)
+			if (lw == nullptr)
 			{
 				lw = bmphand->livewireinit(p);
 				lwfirst = bmphand->livewireinit(p);
@@ -239,7 +239,7 @@ void LivewireWidget::pt_doubleclicked(Point p)
 		drawing = false;
 		//		delete lw;
 		//		delete lwfirst;
-		//		lw=lwfirst=NULL;
+		//		lw=lwfirst=nullptr;
 		emit vp1dyn_changed(&established, &dynamic);
 	}
 }
@@ -321,7 +321,7 @@ void LivewireWidget::pt_doubleclickedmid(Point p)
 		drawing = false;
 		//		delete lw;
 		//		delete lwfirst;
-		//		lw=lwfirst=NULL;
+		//		lw=lwfirst=nullptr;
 		if (cooling)
 		{
 			dynamicold.clear();
@@ -355,7 +355,7 @@ void LivewireWidget::on_mouse_released(Point p)
 		drawing = false;
 		//		delete lw;
 		//		delete lwfirst;
-		//		lw=lwfirst=NULL;
+		//		lw=lwfirst=nullptr;
 		emit vp1dyn_changed(&established, &dynamic);
 	}
 }
@@ -480,15 +480,15 @@ void LivewireWidget::init()
 			times.clear();
 		}
 
-		if (lw != NULL)
+		if (lw != nullptr)
 		{
 			delete lw;
-			lw = NULL;
+			lw = nullptr;
 		}
-		if (lwfirst != NULL)
+		if (lwfirst != nullptr)
 		{
 			delete lwfirst;
-			lwfirst = NULL;
+			lwfirst = nullptr;
 		}
 
 		emit vp1dyn_changed(&established, &dynamic);
@@ -517,15 +517,15 @@ void LivewireWidget::newloaded()
 		times.clear();
 	}
 
-	if (lw != NULL)
+	if (lw != nullptr)
 	{
 		delete lw;
-		lw = NULL;
+		lw = nullptr;
 	}
-	if (lwfirst != NULL)
+	if (lwfirst != nullptr)
 	{
 		delete lwfirst;
-		lwfirst = NULL;
+		lwfirst = nullptr;
 	}
 }
 
@@ -555,11 +555,11 @@ void LivewireWidget::cleanup()
 	}
 
 	drawing = false;
-	if (lw != NULL)
+	if (lw != nullptr)
 		delete lw;
-	if (lw != NULL)
+	if (lw != nullptr)
 		delete lwfirst;
-	lw = lwfirst = NULL;
+	lw = lwfirst = nullptr;
 	emit vp1dyn_changed(&established, &dynamic);
 	//	isactive=false;
 }
@@ -592,15 +592,15 @@ void LivewireWidget::bmphand_changed(bmphandler* bmph)
 		times.clear();
 	}
 
-	if (lw != NULL)
+	if (lw != nullptr)
 	{
 		delete lw;
-		lw = NULL;
+		lw = nullptr;
 	}
-	if (lwfirst != NULL)
+	if (lwfirst != nullptr)
 	{
 		delete lwfirst;
-		lwfirst = NULL;
+		lwfirst = nullptr;
 	}
 
 	init1();

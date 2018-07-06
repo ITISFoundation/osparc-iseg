@@ -534,7 +534,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		H5Pset_chunk(plist, rank, cdims.data());
 		H5Pset_deflate(plist, compression);
 	}
-	hid_t dataspace = H5Screate_simple(rank, dimsf.data(), NULL);
+	hid_t dataspace = H5Screate_simple(rank, dimsf.data(), nullptr);
 	if (dataspace >= 0)
 	{
 		hid_t dataset;

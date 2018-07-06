@@ -55,8 +55,8 @@ std::vector<std::string> HDF5Reader::getGroupInfo(const std::string& name)
 		return names;
 	}
 
-	//int idx_f = H5Giterate(file, name.c_str(), NULL, my_info, NULL);
-	int idx_f = H5Giterate(file, name.c_str(), NULL, my_info, &names);
+	//int idx_f = H5Giterate(file, name.c_str(), nullptr, my_info, nullptr);
+	int idx_f = H5Giterate(file, name.c_str(), nullptr, my_info, &names);
 	if (loud)
 		std::cerr << "HDF5Reader::groupInfo : idx_f = " << idx_f << std::endl;
 	return names;
@@ -93,7 +93,7 @@ bool HDF5Reader::existsValidHdf5(const std::string& fname)
 	}
 #else
 	FILE* pFile = fopen(fname.c_str(), "r");
-	if (pFile == NULL)
+	if (pFile == nullptr)
 	{
 		std::cerr << "HDF5Reader::existsValidHdf5() : error, '" << fname
 				  << "' does not exist" << std::endl;
@@ -245,7 +245,7 @@ int HDF5Reader::getDatasetInfo(std::string& type, std::vector<size_type>& extent
 
 	//	hsize_t dims[rank];
 	std::vector<hsize_t> dims(rank);
-	status = H5Sget_simple_extent_dims(dataspace, dims.data(), NULL);
+	status = H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
 	extents.resize(rank);
 	for (int i = 0; i < rank; i++)
 	{
@@ -516,7 +516,7 @@ int HDF5Reader::readData(const std::string& name)
 		std::cerr << "HDF5Reader::readData() : rank = " << rank << std::endl;
 	if (rank <= 0)
 		error("invalid rank");
-	status = H5Sget_simple_extent_dims(dataspace, dims.data(), NULL);
+	status = H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
 	//if(loud) std::cerr << "HDF5Reader::read() : reading " << names[i] << " of type " << types[i] << " and total size " << totsize << std::endl;
 
 	// 	if(elclass == H5T_FLOAT && elsize==8)

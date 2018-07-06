@@ -65,7 +65,7 @@ private:
 	public:
 		~Waechter()
 		{
-			if (SliceProviderInstaller::inst != NULL)
+			if (SliceProviderInstaller::inst != nullptr)
 				delete SliceProviderInstaller::inst;
 		}
 	};

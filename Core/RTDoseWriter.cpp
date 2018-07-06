@@ -925,7 +925,7 @@ void RTDoseWriter::AdjustVRTypeString(gdcm::VR::VRType& vr, unsigned int vm,
 		break;
 	case gdcm::VR::OB:
 		//case gdcm::VR::UI:
-		// Padding with trailing NULL byte
+		// Padding with trailing nullptr byte
 		if (value.length() % 2 != 0)
 		{
 			value.append("0");

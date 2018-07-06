@@ -35,7 +35,7 @@
 #define SetStringMacro(name)                                                   \
 	virtual void Set##name(const char* _arg)                                   \
 	{                                                                          \
-		if (this->name == NULL && _arg == NULL)                                \
+		if (this->name == nullptr && _arg == nullptr)                                \
 		{                                                                      \
 			return;                                                            \
 		}                                                                      \
@@ -60,7 +60,7 @@
 		}                                                                      \
 		else                                                                   \
 		{                                                                      \
-			this->name = NULL;                                                 \
+			this->name = nullptr;                                                 \
 		}                                                                      \
 	}
 

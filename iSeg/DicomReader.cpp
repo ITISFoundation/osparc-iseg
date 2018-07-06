@@ -25,7 +25,7 @@ using namespace iseg;
 bool DicomReader::opendicom(const char* filename)
 {
 	depth = 0;
-	if ((fp = fopen(filename, "rb")) == NULL)
+	if ((fp = fopen(filename, "rb")) == nullptr)
 		return false;
 	else
 		return true;

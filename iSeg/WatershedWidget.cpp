@@ -47,7 +47,7 @@ WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
-	usp = NULL;
+	usp = nullptr;
 
 	vbox1 = new Q3VBox(this);
 	hbox1 = new Q3HBox(vbox1);
@@ -103,10 +103,10 @@ void WatershedWidget::hsb_changed(int value)
 
 void WatershedWidget::execute()
 {
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		free(usp);
-		usp = NULL;
+		usp = nullptr;
 	}
 
 	usp = bmphand->watershed_sobel(false);
@@ -116,7 +116,7 @@ void WatershedWidget::execute()
 
 void WatershedWidget::recalc()
 {
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
@@ -135,7 +135,7 @@ void WatershedWidget::marks_changed()
 {
 	//	recalc();
 
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
@@ -152,7 +152,7 @@ void WatershedWidget::marks_changed()
 
 void WatershedWidget::recalc1()
 {
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		bmphand->construct_regions(
 				(unsigned int)(sb_h->value() * sl_h->value() * 0.005f), usp);
@@ -178,10 +178,10 @@ void WatershedWidget::on_slicenr_changed()
 
 void WatershedWidget::bmphand_changed(bmphandler* bmph)
 {
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		free(usp);
-		usp = NULL;
+		usp = nullptr;
 	}
 
 	bmphand = bmph;
@@ -196,10 +196,10 @@ void WatershedWidget::init()
 
 void WatershedWidget::newloaded()
 {
-	if (usp != NULL)
+	if (usp != nullptr)
 	{
 		free(usp);
-		usp = NULL;
+		usp = nullptr;
 	}
 
 	activeslice = handler3D->active_slice();

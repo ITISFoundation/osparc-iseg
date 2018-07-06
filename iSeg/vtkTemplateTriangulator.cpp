@@ -1135,8 +1135,8 @@ int vtkTemplateTriangulator::AddHexahedron(vtkIdType v0, vtkIdType v1,
 }
 
 short vtkTemplateTriangulator::DetermineTetraSubdivisionCase(
-	short code[6], short edgeMap[6] /*= NULL*/, short vertexMap[4] /*= NULL*/,
-	short triangleMap[4] /*= NULL*/)
+	short code[6], short edgeMap[6] /*= nullptr*/, short vertexMap[4] /*= nullptr*/,
+	short triangleMap[4] /*= nullptr*/)
 {
 	int bitvalue = 0;
 	int factor = 1;

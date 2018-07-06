@@ -26,7 +26,7 @@
 using namespace iseg;
 
 SliceTransform::SliceTransform(SlicesHandler* hand3D)
-		: originalSource(NULL), originalTarget(NULL), originalTissues(NULL)
+		: originalSource(nullptr), originalTarget(nullptr), originalTissues(nullptr)
 {
 	handler3D = hand3D;
 	activeSlice = handler3D->active_slice();
@@ -43,15 +43,15 @@ SliceTransform::SliceTransform(SlicesHandler* hand3D)
 
 SliceTransform::~SliceTransform()
 {
-	if (originalSource != NULL)
+	if (originalSource != nullptr)
 	{
 		free(originalSource);
 	}
-	if (originalTarget != NULL)
+	if (originalTarget != nullptr)
 	{
 		free(originalTarget);
 	}
-	if (originalTissues != NULL)
+	if (originalTissues != nullptr)
 	{
 		free(originalTissues);
 	}
@@ -59,15 +59,15 @@ SliceTransform::~SliceTransform()
 
 void SliceTransform::ReallocateSliceData()
 {
-	if (originalSource != NULL)
+	if (originalSource != nullptr)
 	{
 		free(originalSource);
 	}
-	if (originalTarget != NULL)
+	if (originalTarget != nullptr)
 	{
 		free(originalTarget);
 	}
-	if (originalTissues != NULL)
+	if (originalTissues != nullptr)
 	{
 		free(originalTissues);
 	}

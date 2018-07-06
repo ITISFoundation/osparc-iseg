@@ -146,7 +146,7 @@ bool iseg::avw::ReadHeader(const char* filename, unsigned short& w,
 void* iseg::avw::ReadData(const char* filename, unsigned short slicenr,
 						  unsigned short& w, unsigned short& h, datatype& type)
 {
-	void* returnval = NULL;
+	void* returnval = nullptr;
 
 	w = h = 0;
 	type = uchar;
@@ -207,14 +207,14 @@ void* iseg::avw::ReadData(const char* filename, unsigned short slicenr,
 
 			file.seekg(data_section_start);
 
-			if (returnval != NULL)
+			if (returnval != nullptr)
 			{
 				char* data = (char*)returnval;
 				file.read(data, slicedim);
 				if (file.fail())
 				{
 					free(returnval);
-					returnval = NULL;
+					returnval = nullptr;
 				}
 			}
 		}

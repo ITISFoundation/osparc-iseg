@@ -22,7 +22,7 @@ bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	unsigned char header[128];
@@ -123,7 +123,7 @@ bool matexport::print_matslices(const char* filename, float** matrix, int nx,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	unsigned char header[128];
@@ -226,7 +226,7 @@ bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	unsigned char header[128];
@@ -317,7 +317,7 @@ bool matexport::print_matslices(const char* filename, unsigned char** matrix,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	unsigned char header[128];
@@ -408,7 +408,7 @@ bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	// Header
@@ -526,7 +526,7 @@ bool matexport::print_matslices(const char* filename, tissues_size_t** matrix,
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 		return false;
 
 	// Header

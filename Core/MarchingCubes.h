@@ -408,7 +408,7 @@ public:
 			float colordummy[3];
 			tissues_size_t tissue;
 			FILE* fp;
-			if ((fp = fopen(filename, "wb")) == NULL)
+			if ((fp = fopen(filename, "wb")) == nullptr)
 				return;
 
 			tissues_size_t* tissuearray1;
@@ -1411,8 +1411,8 @@ public:
 		vectissuedescr* tissdescvec =
 				new vectissuedescr; //(std::vector<tissuedescript> *)
 		FILE* fp;
-		if ((fp = fopen(filename, "rb")) == NULL)
-			return NULL;
+		if ((fp = fopen(filename, "rb")) == nullptr)
+			return nullptr;
 
 		unsigned nr;
 		fread(&nr, sizeof(unsigned), 1, fp);
@@ -1450,7 +1450,7 @@ public:
 	void vectissuedescr2bin(const char* filename, vectissuedescr* vtd)
 	{
 		FILE* fp;
-		if ((fp = fopen(filename, "wb")) == NULL)
+		if ((fp = fopen(filename, "wb")) == nullptr)
 			return;
 		unsigned dummy1 = (unsigned)vtd->vtd.size();
 		fwrite(&dummy1, sizeof(unsigned), 1, fp);

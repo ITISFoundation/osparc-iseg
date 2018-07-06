@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 #endif
 	app.processEvents();
 
-	MainWindow *mainWindow = NULL;
+	MainWindow *mainWindow = nullptr;
 	if (argc > 1)
 	{
 		QString qstr(argv[1]);

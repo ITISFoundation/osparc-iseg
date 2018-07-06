@@ -27,7 +27,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 																   Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	vbox1 = NULL;
+	vbox1 = nullptr;
 
 	if (loadfilename.isEmpty())
 	{

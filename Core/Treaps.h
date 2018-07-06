@@ -36,11 +36,11 @@ public:
 
 	public:
 		// Construct node.
-		Node(void) : left(NULL), right(NULL) {}
+		Node(void) : left(nullptr), right(nullptr) {}
 
 		Node(unsigned int priority_, KEY key_, VALUE value_, Node* parent_)
 			: priority(priority_), key(key_), value(value_), parent(parent_),
-			  left(NULL), right(NULL)
+			  left(nullptr), right(nullptr)
 		{
 		}
 		KEY getKey(void) const { return key; }
@@ -56,10 +56,10 @@ public:
 	~Treap(void);
 
 	// Return value of key or 0 if not found.
-	// Return a matching node (or NULL if not found).
+	// Return a matching node (or nullptr if not found).
 	Node* lookup(KEY key) const { return lookup_(key); }
 
-	// Return a matching node (or NULL if not found).
+	// Return a matching node (or nullptr if not found).
 	Node* lookupGreater(KEY key) const { return lookupGreater_(key); }
 
 	// Set the given key to have the given value.
@@ -80,7 +80,7 @@ public:
 
 		// If not found, then do nothing.
 		if (!node)
-			return NULL;
+			return nullptr;
 
 		// While node is not a leaf...
 		while (node->left || node->right)
@@ -124,7 +124,7 @@ public:
 
 #if 0
 			delete node;
-			return NULL;
+			return nullptr;
 #else
 		// Return the removed node.
 
@@ -140,7 +140,7 @@ public:
 
 	void reallyPrint(Node* node) const
 	{
-		if (node == NULL)
+		if (node == nullptr)
 			return;
 		reallyPrint(node->left);
 		cout << "[" << node->key << "] ";
@@ -161,7 +161,7 @@ private:
 	// Delete treap rooted at given node.
 	void deleteTreap(Node* node);
 
-	// Return node with given key or NULL if not found.
+	// Return node with given key or nullptr if not found.
 	Node* lookup_(KEY key) const;
 	Node* lookupGreater_(KEY key) const;
 	Node* lookupGeq(KEY key, Node* root) const;
@@ -352,7 +352,7 @@ template<class KEY, class VALUE>
 typename Treap<KEY, VALUE>::Node* Treap<KEY, VALUE>::lookupGeq(KEY key,
 															   Node* rt) const
 {
-	Node* bestSoFar = NULL;
+	Node* bestSoFar = nullptr;
 
 	// Start at the root.
 	Node* node = rt;
@@ -372,7 +372,7 @@ typename Treap<KEY, VALUE>::Node* Treap<KEY, VALUE>::lookupGeq(KEY key,
 		// look for a better match.
 		else
 		{
-			if ((bestSoFar == NULL) || (bestSoFar->key > node->key))
+			if ((bestSoFar == nullptr) || (bestSoFar->key > node->key))
 				bestSoFar = node;
 			node = node->left;
 		}
@@ -427,7 +427,7 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node* n, KEY key,
 	//n->key=key;
 	//n->value=value;
 	//n->parent=parent;
-	//n->left=n->right=NULL;
+	//n->left=n->right=nullptr;
 	// node = new Node (priority, key, value, parent);
 
 	// If the treap was empty, then new node is root.
@@ -490,7 +490,7 @@ void Treap<KEY, VALUE>::insert(typename Treap<KEY, VALUE>::Node* n)
 	//node=new Node (n->priority, n->key, n->value, parent);//xxxa node = new (n) Node (n->priority, n->key, n->value, parent);
 	//n=node;
 	n->parent = parent;
-	n->left = n->right = NULL;
+	n->left = n->right = nullptr;
 	// node = new Node (priority, key, value, parent);
 
 	// If the treap was empty, then new node is root.

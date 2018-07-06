@@ -63,7 +63,7 @@ public:
 	BranchItem* getItem()
 	{
 		if (_branchTreeIter == _branchTree.end())
-			return NULL;
+			return nullptr;
 		else
 			return *_branchTreeIter;
 	}
@@ -72,7 +72,7 @@ public:
 		if (_branchTreeIter != _branchTree.end())
 			_branchTreeIter++;
 		if (_branchTreeIter == _branchTree.end())
-			return NULL;
+			return nullptr;
 		else
 			return *_branchTreeIter;
 	};

@@ -517,9 +517,9 @@ public:
 	bool export_work(const char* filename, bool binary) const;
 
 	bool print_xmlregionextent(const char* filename, bool onlyactiveslices,
-			const char* projname = NULL);
+			const char* projname = nullptr);
 	bool print_tissueindex(const char* filename, bool onlyactiveslices,
-			const char* projname = NULL);
+			const char* projname = nullptr);
 	bool print_atlas(const char* filename);
 	vtkImageData* make_vtktissueimage();
 	float calculate_volume(Point p, unsigned short slicenr);

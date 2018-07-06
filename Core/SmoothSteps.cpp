@@ -18,10 +18,10 @@ using namespace iseg;
 
 SmoothSteps::SmoothSteps()
 {
-	mask = NULL;
+	mask = nullptr;
 	ownmask = false;
 	masklength = 0;
-	weights = NULL;
+	weights = nullptr;
 	return;
 }
 
@@ -39,7 +39,7 @@ SmoothSteps::~SmoothSteps()
 
 void SmoothSteps::dostepsmooth(tissues_size_t* line)
 {
-	if (mask == NULL || weights == NULL)
+	if (mask == nullptr || weights == nullptr)
 		return;
 	if (linelength < masklength || linelength < 2)
 		return;
@@ -134,7 +134,7 @@ void SmoothSteps::init(float* mask1, unsigned short masklength1,
 	mask = mask1;
 	masklength = masklength1;
 	linelength = linelength1;
-	if (weights != NULL)
+	if (weights != nullptr)
 	{
 		for (tissues_size_t i = 0; i < nrtissues; i++)
 		{
@@ -160,7 +160,7 @@ void SmoothSteps::init(unsigned short masklength1, unsigned short linelength1,
 	generate_binommask();
 	ownmask = true;
 	linelength = linelength1;
-	if (weights != NULL)
+	if (weights != nullptr)
 	{
 		for (tissues_size_t i = 0; i < nrtissues; i++)
 		{
