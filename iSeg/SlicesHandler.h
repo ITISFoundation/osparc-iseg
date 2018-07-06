@@ -418,7 +418,7 @@ public:
 
 	unsigned short active_slice() const override;
 	boost::signals2::signal<void(unsigned short)> on_active_slice_changed;
-	void set_active_slice(unsigned short slice, bool signal_change = false);
+	void set_active_slice(unsigned short slice, bool signal_change = false) override;
 
 	bmphandler* get_activebmphandler();
 	tissuelayers_size_t active_tissuelayer() const override;

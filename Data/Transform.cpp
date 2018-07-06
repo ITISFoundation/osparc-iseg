@@ -8,8 +8,6 @@
  *  https://opensource.org/licenses/MIT
  */
 
-#pragma once
-
 #include "Transform.h"
 
 namespace iseg {

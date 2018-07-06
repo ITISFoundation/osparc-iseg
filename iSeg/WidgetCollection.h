@@ -364,7 +364,7 @@ public slots:
 
 protected:
 	// Drag & drop
-	void dropEvent(QDropEvent* de);
+	void dropEvent(QDropEvent* de) override;
 	void selectAll() override;
 
 private:
