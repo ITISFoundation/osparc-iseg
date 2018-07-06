@@ -647,8 +647,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, double refFactor,
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		(_image_slices[i])
-				.SetRGBtoGrayScaleFactors(refFactor, blueFactor, greenFactor);
+		(_image_slices[i]).SetRGBtoGrayScaleFactors(refFactor, blueFactor, greenFactor);
 	}
 	return LoadPng(filenames);
 }

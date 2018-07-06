@@ -15,7 +15,7 @@
 
 #include "Core/fillcontour.h"
 
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 #include <qmessagebox.h>
 #include <qstring.h>
 #include <qstringlist.h>

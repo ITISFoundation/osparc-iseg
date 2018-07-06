@@ -143,60 +143,22 @@ private slots:
 	void select_pushed();
 };
 
-class LoaderBmp2 : public QDialog
+class LoaderColorImages : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames,
-			   QWidget* parent = 0, const char* name = 0,
-			   Qt::WindowFlags wFlags = 0);
-	~LoaderBmp2();
-	//	void update();
-	//protected:
+	enum eImageType {
+		kPNG,
+		kBMP,
+		kJPG
+	};
 
-private:
-	std::vector<const char*> m_filenames;
-	SlicesHandler* handler3D;
-	short unsigned w;
-	short unsigned h;
-	Point p;
-	unsigned short dx;
-	unsigned short dy;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
-	QSpinBox* xoffset;
-	QSpinBox* yoffset;
-	QSpinBox* xlength;
-	QSpinBox* ylength;
-	QCheckBox* subsect;
-	QLabel* xoffs;
-	QLabel* yoffs;
-	QLabel* xl;
-	QLabel* yl;
+	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames,
+		QWidget* parent = 0, const char* name = 0,
+		Qt::WindowFlags wFlags = 0);
+	~LoaderColorImages();
 
-private slots:
-	void subsect_toggled(bool isset);
-	void subsect_toggled();
-	void load_pushed();
-};
-
-class LoaderPng : public QDialog
-{
-	Q_OBJECT
-public:
-	LoaderPng(SlicesHandler* hand3D, std::vector<const char*> filenames,
-			  QWidget* parent = 0, const char* name = 0,
-			  Qt::WindowFlags wFlags = 0);
-	~LoaderPng();
-	//	void update();
-	//protected:
+	eImageType type = kPNG;
 
 private:
 	std::vector<const char*> m_filenames;
@@ -271,9 +233,14 @@ public:
 	int GetGreenFactor();
 	int GetBlueFactor();
 
+	bool QuantizeColor() const;
+
 private:
 	std::vector<const char*> m_filenames;
 	SlicesHandler* handler3D;
+
+	QCheckBox* cbQuantizeToLookuptable;
+	Q3VBox* hboxChannelOptions;
 
 	Q3VBox* vboxMain;
 
@@ -348,7 +315,7 @@ protected slots:
 	void NewCenterPreview(QPoint newCenter);
 
 private slots:
-
+	void mapToColorChanged();
 	void sliderRedValueChanged(int value);
 	void sliderGreenValueChanged(int value);
 	void sliderBlueValueChanged(int value);
@@ -364,50 +331,6 @@ private slots:
 	void sliceValueChanged(int value);
 
 	void cancel_toggled();
-	void load_pushed();
-};
-
-class LoaderJpg : public QDialog
-{
-	Q_OBJECT
-public:
-	LoaderJpg(SlicesHandler* hand3D, std::vector<const char*> filenames,
-			  QWidget* parent = 0, const char* name = 0,
-			  Qt::WindowFlags wFlags = 0);
-	~LoaderJpg();
-	//	void update();
-	//protected:
-
-private:
-	std::vector<const char*> m_filenames;
-	SlicesHandler* handler3D;
-	short unsigned w;
-	short unsigned h;
-	Point p;
-	unsigned short dx;
-	unsigned short dy;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
-	QSpinBox* xoffset;
-	QSpinBox* yoffset;
-	QSpinBox* xlength;
-	QSpinBox* ylength;
-	QCheckBox* subsect;
-	QLabel* xoffs;
-	QLabel* yoffs;
-	QLabel* xl;
-	QLabel* yl;
-
-private slots:
-	void subsect_toggled(bool isset);
-	void subsect_toggled();
 	void load_pushed();
 };
 

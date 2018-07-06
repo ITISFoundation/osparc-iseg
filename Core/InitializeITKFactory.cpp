@@ -21,6 +21,7 @@
 
 #include <itkGDCMImageIOFactory.h>
 
+#include <itkBMPImageIOFactory.h>
 #include <itkJPEGImageIOFactory.h>
 #include <itkPNGImageIOFactory.h>
 #include <itkTIFFImageIOFactory.h>
@@ -41,8 +42,9 @@ void initializeITKFactory()
 
 		itk::ObjectFactoryBase::RegisterFactory(itk::GDCMImageIOFactory::New());
 
-		itk::ObjectFactoryBase::RegisterFactory(itk::PNGImageIOFactory::New());
+		itk::ObjectFactoryBase::RegisterFactory(itk::BMPImageIOFactory::New());
 		itk::ObjectFactoryBase::RegisterFactory(itk::JPEGImageIOFactory::New());
+		itk::ObjectFactoryBase::RegisterFactory(itk::PNGImageIOFactory::New());
 		itk::ObjectFactoryBase::RegisterFactory(itk::TIFFImageIOFactory::New());
 	});
 }

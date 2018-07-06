@@ -15,6 +15,10 @@
 #include "Data/Transform.h"
 #include "Data/Vec3.h"
 
+#include <itkImage.h>
+#include <itkRGBPixel.h>
+#include <itkImageFileWriter.h>
+
 #include <boost/filesystem.hpp>
 
 #include <string>
@@ -160,6 +164,66 @@ private:
 	Transform _transform;
 	float _tolerance;
 };
+
+class TestColorImageIO
+{
+public:
+	void Test(const std::string& file_path)
+	{
+		auto img = WriteRGBImage(file_path);
+
+		unsigned w, h;
+		ImageReader::getInfo2D(file_path.c_str(), w, h);
+
+		BOOST_REQUIRE_EQUAL(w, img->GetBufferedRegion().GetSize()[0]);
+		BOOST_REQUIRE_EQUAL(h, img->GetBufferedRegion().GetSize()[1]);
+
+		std::vector<float> data(w*h, 0);
+		BOOST_REQUIRE(ImageReader::getImage2D(file_path.c_str(), data.data(), w, h,
+			[](unsigned char, unsigned char g, unsigned char) { return static_cast<float>(g); }));
+
+		itk::Index<2> idx = { 0,0 };
+		BOOST_CHECK_EQUAL(data[0], img->GetPixel(idx)[1]);
+
+		boost::system::error_code ec;
+		if (boost::filesystem::exists(file_path, ec))
+		{
+			boost::filesystem::remove(file_path, ec);
+		}
+	}
+
+private:
+	itk::Image<itk::RGBPixel<unsigned char>, 2>::Pointer WriteRGBImage(const std::string& file_path)
+	{
+		using rgb_type = itk::RGBPixel<unsigned char>;
+		using rgb_image_type = itk::Image<rgb_type, 2>;
+
+		rgb_type val;
+		val[0] = 1;
+		val[1] = 234;
+		val[2] = 171;
+
+		rgb_image_type::SizeType size;
+		size[0] = 32;
+		size[1] = 16;
+
+		rgb_image_type::IndexType start;
+		start.Fill(0);
+
+		auto image = rgb_image_type::New();
+		image->SetRegions(rgb_image_type::RegionType(start, size));
+		image->Allocate();
+		image->FillBuffer(val);
+
+		auto writer = itk::ImageFileWriter<rgb_image_type>::New();
+		writer->SetInput(image);
+		writer->SetFileName(file_path);
+		BOOST_CHECK_NO_THROW(writer->Update());
+
+		return image;
+	}
+};
+
 } // namespace
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
@@ -201,7 +265,16 @@ BOOST_AUTO_TEST_CASE(VTI)
 	test.Read();
 }
 
-BOOST_AUTO_TEST_CASE(Dicom) {}
+// TestRunner.exe --run_test=iSeg_suite/ImageIO_suite/ColorImages --log_level=message
+BOOST_AUTO_TEST_CASE(ColorImages)
+{
+	TestColorImageIO test;
+	test.Test("temp.bmp");
+
+	test.Test("temp.png");
+
+	test.Test("temp.jpg");
+}
 
 BOOST_AUTO_TEST_SUITE_END();
 BOOST_AUTO_TEST_SUITE_END();

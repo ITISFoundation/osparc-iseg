@@ -5,16 +5,20 @@
 # - preprocessor definitions needed by package
 #
 
-FIND_PACKAGE(ITK 4.12 COMPONENTS 
+FIND_PACKAGE(ITK COMPONENTS 
 		ITKCommon ITKOptimizers ITKOptimizersv4 ITKTransform ITKTransformFactory
 		ITKVNLInstantiation ITKVTK ITKBiasCorrection ITKLabelMap
 		ITKWatersheds ITKStatistics ITKMetaIO ITKIOImageBase ITKIOGDCM ITKIOMesh 
 		ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOTransformBase ITKIOTransformMatlab  
-		ITKIOPNG ITKIOTIFF ITKIOJPEG ITKIOVTK ITKBinaryMathematicalMorphology
+		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKBinaryMathematicalMorphology
 		ITKGDCM 
 		ITKFastMarching ITKLevelSets ITKRegionGrowing
 			REQUIRED)
- 
+SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
+IF(${_itk_version} VERSION_LESS "4.12.0")
+	MESSAGE(WARNING "ITK version (${_itk_version}) is lower than 4.12. Some parts of iSEG may depend on newer features")
+ENDIF()
+
 MACRO(USE_ITK)
 	INCLUDE( ${ITK_USE_FILE} )
 	LIST( APPEND MY_EXTERNAL_LINK_LIBRARIES ${ITK_LIBRARIES} )

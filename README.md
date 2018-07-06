@@ -34,18 +34,18 @@ The libraries below are required to be compiled and installed on the system in o
 
 ### 3rd Party Libraries compilation instructions
 
-- [Boost installer](https://dl.bintray.com/boostorg/release/1.64.0/binaries): boost_1_64_0-msvc-14.0
+- [Boost installer](https://dl.bintray.com/boostorg/release/1.64.0/binaries): boost_1_64_0-msvc-14.0, or newer
 
   1. Download the installer _boost_1_64_0_msvc-14.0-64.exe_
   2. Run the installer and follow the default instructions
 
-- [HDF5 installer](https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.18/bin/windows): v1.8.18
+- [HDF5 installer](https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.18/bin/windows): v1.8.18, or newer
 
   1. Download the installer _hdf5-1.8.18-win64-vs2013-shared.zip_
   2. Unzip the installer
   3. Run the installer and follow the default instructions
 
-- [ITK source code](https://sourceforge.net/projects/itk/files/itk/4.12/InsightToolkit-4.12.2.tar.gz/download): v4.12.2
+- [ITK source code](https://sourceforge.net/projects/itk/files/itk/4.12/InsightToolkit-4.12.2.tar.gz/download): v4.12.2, or newer
 
   1. Download and unzip the ITK folder
   2. CMake (source ITK folder, build in separate folder), press _Configure_
@@ -54,11 +54,11 @@ The libraries below are required to be compiled and installed on the system in o
   5. Press _Generate_
   6. Press _Open Project_ and build the solution in Debug and Release
 
-- [VTK source code](https://www.vtk.org/files/release/7.1/VTK-7.1.0.tar.gz): v7.1.0
+- [VTK source code](https://www.vtk.org/files/release/7.1/VTK-7.1.0.tar.gz): v7.1.0, or newer
 
   1. Download and unzip the VTK folder
   2. CMake (source VTK folder, build in separate folder), press _Configure_
-  3. Select _CMAKE_CXX_MP_FLAG_, check that _VTK_RENDERING_BACKEND_ to _OpenGL2_ and press _Configure_ again
+  3. Set _ISEG_VTK_OPENGL2_ depending on the value of _VTK_RENDERING_BACKEND_ (_OpenGL_ or _OpenGL2_)
   4. Press _Generate_
   5. Press _Open Project_ and build the solution in Debug and Release
 
