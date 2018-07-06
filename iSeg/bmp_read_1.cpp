@@ -136,16 +136,15 @@ bmphandler::bmphandler()
 	sliceprovide_installer = SliceProviderInstaller::getinst();
 	stackcounter = 1;
 	mode1 = mode2 = 1;
-	return;
+	return; // ?
 
 	redFactor = 0.299;
 	greenFactor = 0.587;
 	blueFactor = 0.114;
 }
 
-bmphandler::bmphandler(const bmphandler& object)
+bmphandler::bmphandler(const bmphandler&)
 {
-	UNREFERENCED_PARAMETER(object);
 	area = 0;
 	loaded = false;
 	ownsliceprovider = false;
@@ -1285,42 +1284,25 @@ void bmphandler::SetRGBtoGrayScaleFactors(double newRedFactor,
 int bmphandler::ConvertImageTo8BitBMP(const char* filename,
 		unsigned char*& bits_tmp)
 {
-	//Construct image from reading an image file.
-	//cimg_library::CImg<unsigned char> src(filename);
+	// construct image from reading an image file.
 	cimg_library::CImg<float> srcNoNorm(filename);
-
-	//float minF=0, maxF=0;
-	//srcNoNorm.get_min(minF);
-	//srcNoNorm.get_max(maxF);
 	cimg_library::CImg<unsigned char> src = srcNoNorm.get_normalize(0, 255);
-	//unsigned char minUC=0, maxUC=0;
-	//src.get_min(minUC);
-	//src.get_max(maxUC);
 
 	int width = src.width();
 	int height = src.height();
-	int depth = src.depth();
 
-	//New grayscale images.
-	cimg_library::CImg<unsigned char> gray1(width, height, depth, 1);
-
-	unsigned char r, g, b;
-
-	/* Convert RGB image to grayscale image */
+	// convert RGB image to gray scale image
+	double r, g, b;
 	int counter = 0;
-	for (int j = height - 1; j > 0; j--)
+	for (int j = height - 1; j > 0; j--) // flipped ?
 	{
-		for (int i = 0; i < width; i++)
+		for (int i = 0; i < width; i++, counter++)
 		{
-			//Return a pointer to a located pixel value.
 			r = src(i, j, 0, 0); // First channel RED
 			g = src(i, j, 0, 1); // Second channel GREEN
 			b = src(i, j, 0, 2); // Third channel BLUE
 
-			bits_tmp[counter] = (unsigned char)(redFactor * ((double)r) +
-																					greenFactor * ((double)g) +
-																					blueFactor * ((double)b));
-			counter++;
+			bits_tmp[counter] = (unsigned char)(redFactor * r +	greenFactor * g + blueFactor * b);
 		}
 	}
 
