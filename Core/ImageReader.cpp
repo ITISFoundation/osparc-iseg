@@ -16,12 +16,40 @@
 
 #include <itkImage.h>
 #include <itkRGBPixel.h>
+#include <itkUnaryFunctorImageFilter.h>
 #include <itkImageFileReader.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
 namespace iseg {
+
+namespace
+{
+	template<typename TComponent, typename TOutput>
+	class RGBToValue
+	{
+	public:
+		RGBToValue() {}
+		~RGBToValue() {}
+
+		std::function<float(unsigned char, unsigned char, unsigned char)> m_Functor;
+		
+		bool operator==(const RGBToValue & other) const
+		{
+			return (&m_Functor == &other.m_Functor);
+		}
+		bool operator!=(const RGBToValue & other) const
+		{
+			return !(*this == other);
+		}
+
+		inline TOutput operator()(const itk::RGBPixel<TComponent> & A) const
+		{
+			return static_cast<TOutput>(m_Functor(A[0], A[1], A[2]));
+		}
+	};
+}
 
 bool ImageReader::getInfo2D(const char* filename, unsigned& width, unsigned& height)
 {
@@ -36,19 +64,39 @@ bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, u
 	using rgbpixel = itk::RGBPixel<unsigned char>;
 	using input_image_type = itk::Image<rgbpixel, 3>;
 	using output_image_type = itk::Image<float, 3>;
+
 	using reader_type = itk::ImageFileReader<input_image_type>;
+	using functor_type = RGBToValue<unsigned char, float>;
+	using rgbmapper_type = itk::UnaryFunctorImageFilter<input_image_type, output_image_type, functor_type>;
 
 	auto reader = reader_type::New();
 	reader->SetFileName(filename);
+
+	functor_type functor;
+	functor.m_Functor = color2grey;
+
+	auto mapper = rgbmapper_type::New();
+	mapper->SetFunctor(functor);
+
 	try
 	{
-		reader->UpdateLargestPossibleRegion();
+		mapper->Update();
 	}
 	catch (itk::ExceptionObject&)
 	{
 		return false;
 	}
-	return true;
+
+	auto container = mapper->GetOutput()->GetPixelContainer();
+	size_t size = static_cast<size_t>(width) * height;
+
+	if (size == container->Size())
+	{
+		auto buffer = container->GetImportPointer();
+		std::copy(buffer, buffer + size, img);
+		return true;
+	}
+	return false;
 }
 
 bool ImageReader::getSlice(const char* filename, float* slice, unsigned slicenr,

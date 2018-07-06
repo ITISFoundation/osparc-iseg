@@ -42,6 +42,7 @@
 #include "VesselWidget.h"
 #include "VolumeViewerWidget.h"
 #include "WatershedWidget.h"
+#include "XdmfImageWriter.h"
 
 #ifndef NORTSTRUCTSUPPORT
 #	include "RadiotherapyStructureSetImporter.h"
@@ -8196,11 +8197,21 @@ void MainWindow::handle_end_dataexport(QWidget* sender) {}
 
 void MainWindow::execute_savecolorlookup()
 {
-	QString savefilename = QFileDialog::getSaveFileName(
-		QString::null, "HDF (*.lut)", this); //, filename);
+	if (!handler3D->GetColorLookupTable())
+	{
+		QMessageBox::warning(this, "iSeg", "No color lookup table to export\n", QMessageBox::Ok | QMessageBox::Default);
+		return;
+	}
+
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "iSEG Color Lookup Table (*.lut)", this);
 
 	if (!savefilename.endsWith(QString(".lut")))
 		savefilename.append(".lut");
 	
-	;
+	XdmfImageWriter writer(savefilename.toStdString().c_str());
+	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
+	{
+		QMessageBox::warning(this, "iSeg", 
+			"Error occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+	}
 }

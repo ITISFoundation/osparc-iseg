@@ -29,7 +29,7 @@ ELSE()
 		vtkInteractionStyle)
 ENDIF()
 
-IF(${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION} VERSION_LESS "7.1.0")
+IF(${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_BUILD} VERSION_LESS "7.1.0")
 	MESSAGE(WARNING "VTK version is lower than 7.1. Some parts of iSEG may depend on newer features")
 ENDIF()
 
