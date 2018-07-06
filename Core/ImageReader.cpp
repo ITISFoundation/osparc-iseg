@@ -76,14 +76,16 @@ bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, u
 	functor.m_Functor = color2grey;
 
 	auto mapper = rgbmapper_type::New();
+	mapper->SetInput(reader->GetOutput());
 	mapper->SetFunctor(functor);
 
 	try
 	{
 		mapper->Update();
 	}
-	catch (itk::ExceptionObject&)
+	catch (itk::ExceptionObject& e)
 	{
+		std::cerr << "ERROR: an exception occurred " << e.what() << "\n";
 		return false;
 	}
 
