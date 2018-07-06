@@ -417,6 +417,7 @@ private slots:
 	void execute_exportxmlregionextent();
 	void execute_exporttissueindex();
 	void execute_loadtissues();
+	void execute_savecolorlookup();
 	void execute_settissuesasdef();
 	void execute_removedeftissues();
 	void execute_scale();

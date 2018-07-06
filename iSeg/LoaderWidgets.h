@@ -233,6 +233,8 @@ public:
 	int GetGreenFactor();
 	int GetBlueFactor();
 
+	bool QuantizeColor() const;
+
 private:
 	std::vector<const char*> m_filenames;
 	SlicesHandler* handler3D;
