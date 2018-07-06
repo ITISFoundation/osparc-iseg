@@ -1701,8 +1701,7 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 			return 0;
 		}
 
-		tissuelayers.push_back(
-				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+		tissuelayers.push_back((tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 	else if (!loaded)
 	{
@@ -1726,8 +1725,7 @@ int bmphandler::LoadPNGBitmap(const char* filename)
 			return 0;
 		}
 
-		tissuelayers.push_back(
-				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+		tissuelayers.push_back((tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 	}
 
 	clear_tissue(0);
