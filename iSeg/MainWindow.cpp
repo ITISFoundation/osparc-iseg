@@ -1247,6 +1247,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	exportmenu->insertItem("Export tissue index...(txt)", this,
 			SLOT(execute_exporttissueindex()));
 	file->insertItem("Export Tissue Distr.", exportmenu);
+	file->insertItem("Export Color Lookup...", this, SLOT(execute_savecolorlookup()));
 	file->insertSeparator();
 
 	if (!m_editingmode)
@@ -4412,24 +4413,24 @@ void MainWindow::execute_exportmat()
 
 void MainWindow::execute_exporthdf()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.bmp = true;
-	dataSelection.work = true;
-	dataSelection.tissues = true;
-	emit begin_dataexport(dataSelection, this);
-
 	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "HDF (*.h5)", this); //, filename);
+		QString::null, "HDF (*.h5)", this); //, filename);
 
 	if (savefilename.length() > 3 && !savefilename.endsWith(QString(".h5")))
 		savefilename.append(".h5");
 
 	if (!savefilename.isEmpty())
 	{
-		handler3D->SaveCommunicationFile(savefilename.ascii());
-	}
+		iseg::DataSelection dataSelection;
+		dataSelection.bmp = true;
+		dataSelection.work = true;
+		dataSelection.tissues = true;
+		emit begin_dataexport(dataSelection, this);
 
-	emit end_dataexport(this);
+		handler3D->SaveCommunicationFile(savefilename.ascii());
+
+		emit end_dataexport(this);
+	}
 }
 
 void MainWindow::execute_exportvtkascii()
@@ -8192,3 +8193,14 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 }
 
 void MainWindow::handle_end_dataexport(QWidget* sender) {}
+
+void MainWindow::execute_savecolorlookup()
+{
+	QString savefilename = QFileDialog::getSaveFileName(
+		QString::null, "HDF (*.lut)", this); //, filename);
+
+	if (!savefilename.endsWith(QString(".lut")))
+		savefilename.append(".lut");
+	
+	;
+}

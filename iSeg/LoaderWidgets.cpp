@@ -1918,6 +1918,11 @@ void ChannelMixer::mapToColorChanged()
 	vboxGreen->setVisible(show_mixer);
 }
 
+bool ChannelMixer::QuantizeColor() const
+{
+	return cbQuantizeToLookuptable->isChecked();
+}
+
 ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,
 						   QWidget* parent, const char* name,
 						   Qt::WindowFlags wFlags)
