@@ -15,15 +15,41 @@
 #include "VTIreader.h"
 
 #include <itkImage.h>
+#include <itkRGBPixel.h>
 #include <itkImageFileReader.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-using namespace iseg;
+namespace iseg {
 
-typedef itk::Image<float, 3> image_type;
-typedef itk::ImageFileReader<image_type> reader_type;
+bool ImageReader::getInfo2D(const char* filename, unsigned& width, unsigned& height)
+{
+	unsigned nrslices;
+	float spacing[3];
+	Transform tr;
+	return ImageReader::getInfo(filename, width, height, nrslices, spacing, tr);
+}
+
+bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey)
+{
+	using rgbpixel = itk::RGBPixel<unsigned char>;
+	using input_image_type = itk::Image<rgbpixel, 3>;
+	using output_image_type = itk::Image<float, 3>;
+	using reader_type = itk::ImageFileReader<input_image_type>;
+
+	auto reader = reader_type::New();
+	reader->SetFileName(filename);
+	try
+	{
+		reader->UpdateLargestPossibleRegion();
+	}
+	catch (itk::ExceptionObject&)
+	{
+		return false;
+	}
+	return true;
+}
 
 bool ImageReader::getSlice(const char* filename, float* slice, unsigned slicenr,
 		unsigned width, unsigned height)
@@ -75,6 +101,9 @@ bool ImageReader::getVolume(const char* filename, float** slices,
 					width, height, arrayNames[0]);
 		}
 	}
+
+	using image_type = itk::Image<float, 3>;
+	using reader_type = itk::ImageFileReader<image_type>;
 
 	auto reader = reader_type::New();
 	reader->SetFileName(filename);
@@ -152,3 +181,5 @@ bool ImageReader::getInfo(const char* filename, unsigned& width,
 	}
 	return false;
 }
+
+} // namespace iseg

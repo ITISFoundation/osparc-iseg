@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace iseg {
 
@@ -23,6 +24,11 @@ class Transform;
 class ISEG_CORE_API ImageReader
 {
 public:
+	static bool getInfo2D(const char* filename, unsigned& width, unsigned& height);
+
+	/// loads 2D image into pre-allocated memory
+	static bool getImage2D(const char* filename, float* img, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
+
 	/// get image size, spacing and transform
 	static bool getInfo(const char* filename, unsigned& width, unsigned& height,
 						unsigned& nrslices, float spacing[3],
