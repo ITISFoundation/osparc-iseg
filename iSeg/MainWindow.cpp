@@ -1981,26 +1981,6 @@ void MainWindow::execute_saveContours()
 	emit end_dataexport(this);
 }
 
-void MainWindow::execute_loadbmp1()
-{
-	maybeSafe();
-
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.bmp = true;
-	dataSelection.work = true;
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this, false);
-
-	LoaderBmp LB(handler3D, this);
-	LB.move(QCursor::pos());
-	LB.exec();
-
-	emit end_datachange(this, iseg::ClearUndo);
-
-	reset_brightnesscontrast();
-}
-
 void MainWindow::execute_swapxy()
 {
 	iseg::DataSelection dataSelection;

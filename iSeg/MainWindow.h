@@ -349,7 +349,6 @@ private slots:
 	void execute_saveContours();
 	void execute_loaddicom();
 	void execute_loadbmp();
-	void execute_loadbmp1();
 	void execute_loadpng();
 	void execute_loadjpg();
 	void execute_loadraw();

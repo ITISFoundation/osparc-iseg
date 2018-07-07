@@ -58,7 +58,7 @@ class QVTK_EXPORT vtkEventQtSlotConnect : public vtkObject
     
     // Description:
     // Print the current connections between VTK and Qt
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) override;
     
     // Description:
     // Connect a vtk object's event with a Qt object's slot.  Multiple

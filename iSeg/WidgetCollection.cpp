@@ -3276,7 +3276,7 @@ void extoverlay_widget::initialize()
 	emit overlayalpha_changed(alpha);
 }
 
-void extoverlay_widget::newloaded() { handler3D->clear_overlay(); }
+void extoverlay_widget::newloaded() { handler3D->new_overlay(); }
 
 void extoverlay_widget::add_dataset(const QString& path)
 {

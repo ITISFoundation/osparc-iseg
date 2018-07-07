@@ -36,11 +36,11 @@ class vtkGDCM_API vtkGDCMMedicalImageProperties : public vtkMedicalImageProperti
 public:
   static vtkGDCMMedicalImageProperties *New();
   vtkTypeMacro(vtkGDCMMedicalImageProperties,vtkMedicalImageProperties);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Convenience method to reset all fields to an emptry string/value
-  virtual void Clear();
+  virtual void Clear() override;
 
 /*
   // Description:

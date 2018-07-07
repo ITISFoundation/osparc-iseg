@@ -90,59 +90,6 @@ private slots:
 	void load_pushed();
 };
 
-class LoaderBmp : public QDialog
-{
-	Q_OBJECT
-public:
-	LoaderBmp(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
-			  Qt::WindowFlags wFlags = 0);
-	~LoaderBmp();
-	//	void update();
-	//protected:
-
-private:
-	SlicesHandler* handler3D;
-	char* filename;
-	short unsigned w;
-	short unsigned h;
-	Point p;
-	unsigned short dx;
-	unsigned short dy;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	QPushButton* selectFile;
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
-	QSpinBox* xoffset;
-	QSpinBox* yoffset;
-	QSpinBox* xlength;
-	QSpinBox* ylength;
-	QSpinBox* sb_slicenr;
-	QSpinBox* sb_nrslices;
-	QCheckBox* subsect;
-	QLineEdit* nameEdit;
-	QLabel* fileName;
-	QLabel* xoffs;
-	QLabel* yoffs;
-	QLabel* xl;
-	QLabel* yl;
-	QLabel* lb_format;
-	QLabel* lb_slicenr;
-	QLabel* lb_nrslices;
-
-private slots:
-	void subsect_toggled(bool isset);
-	void subsect_toggled();
-	void load_pushed();
-	void select_pushed();
-};
-
 class LoaderColorImages : public QDialog
 {
 	Q_OBJECT
@@ -444,43 +391,6 @@ private slots:
 	void save_pushed();
 	void select_pushed();
 	void type_changed(int);
-};
-
-class ReloaderBmp : public QDialog
-{
-	Q_OBJECT
-public:
-	ReloaderBmp(SlicesHandler* hand3D, QWidget* parent = 0,
-				const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~ReloaderBmp();
-	//	void update();
-	//protected:
-
-private:
-	SlicesHandler* handler3D;
-	char* filename;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3VBox* vbox1;
-	QPushButton* selectFile;
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
-	QSpinBox* xoffset;
-	QSpinBox* yoffset;
-	QSpinBox* sb_startnr;
-	QCheckBox* subsect;
-	QLineEdit* nameEdit;
-	QLabel* fileName;
-	QLabel* xoffs;
-	QLabel* yoffs;
-	QLabel* lb_startnr;
-
-private slots:
-	void subsect_toggled();
-	void load_pushed();
-	void select_pushed();
 };
 
 class ReloaderBmp2 : public QDialog

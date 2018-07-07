@@ -49,6 +49,7 @@ public:
 	void clear_bmp();
 	void clear_work();
 	void clear_overlay();
+	void new_overlay();
 	void set_bmp(unsigned short slicenr, float* bits, unsigned char mode);
 	void set_work(unsigned short slicenr, float* bits, unsigned char mode);
 	void set_tissue(unsigned short slicenr, tissues_size_t* bits);
@@ -62,27 +63,11 @@ public:
 	void copyfromtissue(unsigned short slicenr, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
 	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits, unsigned short padding);
-	int LoadDIBitmap(
-			const char* filename, unsigned short slicenr,
-			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
-	int LoadDIBitmap(const char* filename, unsigned short slicenr,
-			unsigned short nrofslices, Point p, unsigned short dx,
-			unsigned short dy);
 	int LoadDIBitmap(std::vector<const char*> filenames);
-	int LoadDIBitmap(std::vector<const char*> filenames, double refFactor,
-			double blueFactor, double greenFactor);
 	int LoadDIBitmap(std::vector<const char*> filenames, Point p,
 			unsigned short dx, unsigned short dy);
 	int LoadPng(std::vector<const char*> filenames);
-	int LoadPng(std::vector<const char*> filenames, double refFactor,
-			double blueFactor, double greenFactor);
 	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx,
-			unsigned short dy);
-	int LoadDIJpg(
-			const char* filename, unsigned short slicenr,
-			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
-	int LoadDIJpg(const char* filename, unsigned short slicenr,
-			unsigned short nrofslices, Point p, unsigned short dx,
 			unsigned short dy);
 	int LoadDIJpg(std::vector<const char*> filenames);
 	int LoadDIJpg(std::vector<const char*> filenames, Point p,
@@ -144,8 +129,6 @@ public:
 	int SaveTissuesRaw_xy_swapped(const char* filename);
 	int SaveTissuesRaw_xz_swapped(const char* filename);
 	int SaveTissuesRaw_yz_swapped(const char* filename);
-	int ReloadDIBitmap(const char* filename, unsigned short slicenr);
-	int ReloadDIBitmap(const char* filename, Point p, unsigned short slicenr);
 	int ReloadDIBitmap(std::vector<const char*> filenames);
 	int ReloadDIBitmap(std::vector<const char*> filenames, Point p);
 	int ReloadDICOM(std::vector<const char*> lfilename);

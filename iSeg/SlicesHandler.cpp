@@ -268,64 +268,6 @@ tissues_size_t* SlicesHandler::return_tissues(tissuelayers_size_t layeridx,
 
 float* SlicesHandler::return_overlay() { return _overlay; }
 
-int SlicesHandler::LoadDIBitmap(const char* filename, unsigned short slicenr,
-		unsigned short nrofslices)
-{
-	UpdateColorLookupTable(nullptr);
-	_activeslice = 0;
-	_active_tissuelayer = 0;
-	char name[100];
-	_startslice = 0;
-	_endslice = _nrslices = nrofslices;
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(nrofslices);
-	int j = 0;
-
-	for (unsigned short i = 0; i < nrofslices; i++)
-	{
-		//		sprintf(name,"%s%0 3u.bmp",filename,i+slicenr);
-		//		fprintf(fp,"%s %u.bmp",filename,i+slicenr);
-		sprintf(name, "%s%u.bmp", filename, i + slicenr);
-
-		j += (_image_slices[i]).LoadDIBitmap(name);
-	}
-
-	_width = _image_slices[0].return_width();
-	_height = _image_slices[0].return_height();
-	_area = _height * (unsigned int)_width;
-
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
-
-	for (unsigned short i = 1; i < nrofslices; i++)
-	{
-		if (_width != _image_slices[i].return_width() ||
-				_height != _image_slices[i].return_height())
-			j = nrofslices + 1;
-	}
-
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(nrofslices);
-	_slice_bmpranges.resize(nrofslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
-	if (j == nrofslices)
-	{
-		_loaded = true;
-		return 1;
-	}
-	else
-	{
-		newbmp(_width, _height, nrofslices);
-		return 0;
-	}
-}
-
 int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 {
 	UpdateColorLookupTable(nullptr);
@@ -364,10 +306,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	_height = _image_slices[0].return_height();
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
@@ -395,72 +334,6 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	}
 }
 
-int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames,
-		double refFactor, double blueFactor,
-		double greenFactor)
-{
-	_endslice = _nrslices = (unsigned short)filenames.size();
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(_nrslices);
-
-	for (unsigned short i = 0; i < _nrslices; i++)
-	{
-		(_image_slices[i])
-				.SetRGBtoGrayScaleFactors(refFactor, blueFactor, greenFactor);
-	}
-	return LoadDIBitmap(filenames);
-}
-
-int SlicesHandler::LoadDIBitmap(const char* filename, unsigned short slicenr,
-		unsigned short nrofslices, Point p,
-		unsigned short dx, unsigned short dy)
-{
-	UpdateColorLookupTable(nullptr);
-
-	_activeslice = 0;
-	_active_tissuelayer = 0;
-	char name[100];
-	_startslice = 0;
-	_endslice = _nrslices = nrofslices;
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(nrofslices);
-	int j = 0;
-	for (unsigned short i = 0; i < nrofslices; i++)
-	{
-		sprintf(name, "%s%u.bmp", filename, i + slicenr);
-		j += (_image_slices[i]).LoadDIBitmap(name, p, dx, dy);
-	}
-
-	_width = dx;
-	_height = dy;
-	_area = _height * (unsigned int)_width;
-
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
-
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(nrofslices);
-	_slice_bmpranges.resize(nrofslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
-	if (j == nrofslices)
-	{
-		_loaded = true;
-		return 1;
-	}
-	else
-	{
-		newbmp(_width, _height, nrofslices);
-		return 0;
-	}
-}
-
 int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 		unsigned short dx, unsigned short dy)
 {
@@ -483,10 +356,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 	_height = dy;
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -558,10 +428,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	_height = _image_slices[0].return_height();
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
@@ -611,10 +478,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p,
 	_height = dy;
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -631,82 +495,6 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p,
 	else
 	{
 		newbmp(_width, _height, _nrslices);
-		return 0;
-	}
-}
-
-int SlicesHandler::LoadPng(std::vector<const char*> filenames, double refFactor,
-		double blueFactor, double greenFactor)
-{
-	UpdateColorLookupTable(nullptr);
-
-	_endslice = _nrslices = (unsigned short)filenames.size();
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(_nrslices);
-
-	for (unsigned short i = 0; i < _nrslices; i++)
-	{
-		(_image_slices[i]).SetRGBtoGrayScaleFactors(refFactor, blueFactor, greenFactor);
-	}
-	return LoadPng(filenames);
-}
-
-int SlicesHandler::LoadDIJpg(const char* filename, unsigned short slicenr,
-		unsigned short nrofslices)
-{
-	UpdateColorLookupTable(nullptr);
-
-	_activeslice = 0;
-	_active_tissuelayer = 0;
-	char name[100];
-	_startslice = 0;
-	_endslice = _nrslices = nrofslices;
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(nrofslices);
-	int j = 0;
-
-	for (unsigned short i = 0; i < nrofslices; i++)
-	{
-		//		sprintf(name,"%s%0 3u.bmp",filename,i+slicenr);
-		//		fprintf(fp,"%s %u.bmp",filename,i+slicenr);
-		sprintf(name, "%s%u.bmp", filename, i + slicenr);
-
-		j += (_image_slices[i]).LoadDIBitmap(name);
-	}
-
-	_width = _image_slices[0].return_width();
-	_height = _image_slices[0].return_height();
-	_area = _height * (unsigned int)_width;
-
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
-
-	for (unsigned short i = 1; i < nrofslices; i++)
-	{
-		if (_width != _image_slices[i].return_width() ||
-				_height != _image_slices[i].return_height())
-			j = nrofslices + 1;
-	}
-
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(nrofslices);
-	_slice_bmpranges.resize(nrofslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
-	if (j == nrofslices)
-	{
-		_loaded = true;
-		return 1;
-	}
-	else
-	{
-		newbmp(_width, _height, nrofslices);
 		return 0;
 	}
 }
@@ -733,10 +521,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
 	_height = _image_slices[0].return_height();
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
@@ -764,55 +549,6 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
 	}
 }
 
-int SlicesHandler::LoadDIJpg(const char* filename, unsigned short slicenr,
-		unsigned short nrofslices, Point p,
-		unsigned short dx, unsigned short dy)
-{
-	UpdateColorLookupTable(nullptr);
-
-	_activeslice = 0;
-	_active_tissuelayer = 0;
-	char name[100];
-	_startslice = 0;
-	_endslice = _nrslices = nrofslices;
-	_os.set_sizenr(_nrslices);
-
-	_image_slices.resize(nrofslices);
-	int j = 0;
-	for (unsigned short i = 0; i < nrofslices; i++)
-	{
-		sprintf(name, "%s%u.bmp", filename, i + slicenr);
-		j += (_image_slices[i]).LoadDIBitmap(name, p, dx, dy);
-	}
-
-	_width = dx;
-	_height = dy;
-	_area = _height * (unsigned int)_width;
-
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
-
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(nrofslices);
-	_slice_bmpranges.resize(nrofslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
-	if (j == nrofslices)
-	{
-		_loaded = true;
-		return 1;
-	}
-	else
-	{
-		newbmp(_width, _height, nrofslices);
-		return 0;
-	}
-}
-
 int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames, Point p,
 		unsigned short dx, unsigned short dy)
 {
@@ -835,10 +571,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames, Point p,
 	_height = dy;
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -879,10 +612,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 	for (unsigned short i = 0; i < nrofslices; i++)
 		j += (_image_slices[i]).ReadRaw(filename, w, h, bitdepth, slicenr + i);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -1121,10 +851,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 		this->_image_slices[j].newbmp(_width, _height);
 	}
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Pass slice pointers to reader
 	std::vector<float*> bmpslices(_nrslices);
@@ -1540,10 +1267,7 @@ int SlicesHandler::ReadAvw(const char* filename)
 	for (unsigned short i = 0; i < nrofslices; i++)
 		j += (_image_slices[i]).ReadAvw(filename, i);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -1586,10 +1310,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 		j += (_image_slices[i])
 						 .ReadRaw(filename, w, h, bitdepth, slicenr + i, p, dx, dy);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -1630,10 +1351,7 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w,
 	for (unsigned short i = 0; i < nrofslices; i++)
 		j += (_image_slices[i]).ReadRawFloat(filename, w, h, slicenr + i);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -1676,10 +1394,7 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w,
 		j += (_image_slices[i])
 						 .ReadRawFloat(filename, w, h, slicenr + i, p, dx, dy);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	// Ranges
 	Pair dummy;
@@ -1696,58 +1411,6 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w,
 	else
 	{
 		newbmp(_width, _height, nrofslices);
-		return 0;
-	}
-}
-
-int SlicesHandler::ReloadDIBitmap(const char* filename, unsigned short slicenr)
-{
-	UpdateColorLookupTable(nullptr);
-
-	char name[100];
-	int j = 0;
-
-	for (unsigned short i = _startslice; i < _endslice; i++)
-	{
-		sprintf(name, "%s%u.bmp", filename, i - _startslice + slicenr);
-		j += (_image_slices[i]).ReloadDIBitmap(name);
-	}
-
-	for (unsigned short i = _startslice; i < _endslice; i++)
-	{
-		if (_width != _image_slices[i].return_width() ||
-				_height != _image_slices[i].return_height())
-			j = _nrslices + 1;
-	}
-
-	if (j == (_endslice - _startslice))
-		return 1;
-	else
-	{
-		newbmp(_width, _height, _nrslices);
-		return 0;
-	}
-}
-
-int SlicesHandler::ReloadDIBitmap(const char* filename, Point p,
-		unsigned short slicenr)
-{
-	UpdateColorLookupTable(nullptr);
-
-	char name[100];
-	int j = 0;
-
-	for (unsigned short i = _startslice; i < _endslice; i++)
-	{
-		sprintf(name, "%s%u.bmp", filename, i - _startslice + slicenr);
-		j += (_image_slices[i]).ReloadDIBitmap(name, p);
-	}
-
-	if (j == (_endslice - _startslice))
-		return 1;
-	else
-	{
-		newbmp(_width, _height, _nrslices);
 		return 0;
 	}
 }
@@ -1846,8 +1509,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
 		return 0;
 }
 
-int SlicesHandler::ReloadRaw(const char* filename, unsigned bitdepth,
-		unsigned short slicenr)
+int SlicesHandler::ReloadRaw(const char* filename, unsigned bitdepth, unsigned short slicenr)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -2508,10 +2170,7 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 	_height = (_image_slices[0]).return_height();
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	if (version > 1)
 	{
@@ -2617,10 +2276,8 @@ bool SlicesHandler::LoadS4Llink(const char* filename, int& tissuesVersion)
 	{
 		this->_image_slices[j].newbmp(w, h);
 	}
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+
+	new_overlay();
 
 	bool res = LoadAllHDF(filename);
 
@@ -3874,12 +3531,7 @@ void SlicesHandler::newbmp(unsigned short width1, unsigned short height1,
 	_area = _height * (unsigned int)_width;
 	set_active_tissuelayer(0);
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
-
-	return;
+	new_overlay();
 }
 
 void SlicesHandler::freebmp()
@@ -3906,6 +3558,14 @@ void SlicesHandler::clear_overlay()
 {
 	for (unsigned int i = 0; i < _area; i++)
 		_overlay[i] = 0.0f;
+}
+
+void SlicesHandler::new_overlay()
+{
+	if (_overlay != nullptr)
+		free(_overlay);
+	_overlay = (float*)malloc(sizeof(float) * _area);
+	clear_overlay();
 }
 
 void SlicesHandler::set_bmp(unsigned short slicenr, float* bits,
@@ -8691,11 +8351,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		_height = _image_slices[0].return_height();
 		_area = _height * (unsigned int)_width;
 
-		if (_overlay != nullptr)
-			free(_overlay);
-
-		_overlay = (float*)malloc(sizeof(float) * _area);
-		clear_overlay();
+		new_overlay();
 
 		_loaded = true;
 
@@ -8740,9 +8396,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 			int j = 0;
 			for (unsigned short i = 0; i < _nrslices; i++)
 			{
-				if ((_image_slices[i])
-								.LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p,
-										dx, dy))
+				if ((_image_slices[i]).LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p, dx, dy))
 					j++;
 			}
 
@@ -8762,10 +8416,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 			_height = _image_slices[0].return_height();
 			_area = _height * (unsigned int)_width;
 
-			if (_overlay != nullptr)
-				free(_overlay);
-			_overlay = (float*)malloc(sizeof(float) * _area);
-			clear_overlay();
+			new_overlay();
 
 			_loaded = true;
 
@@ -8796,10 +8447,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 	_height = _image_slices[0].return_height();
 	_area = _height * (unsigned int)_width;
 
-	if (_overlay != nullptr)
-		free(_overlay);
-	_overlay = (float*)malloc(sizeof(float) * _area);
-	clear_overlay();
+	new_overlay();
 
 	if (j == _nrslices)
 	{
