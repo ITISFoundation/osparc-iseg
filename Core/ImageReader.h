@@ -27,7 +27,7 @@ public:
 	static bool getInfo2D(const char* filename, unsigned& width, unsigned& height);
 
 	/// loads 2D image into pre-allocated memory
-	static bool getImage2D(const char* filename, float* img, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
+	static bool getImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
 
 	/// get image size, spacing and transform
 	static bool getInfo(const char* filename, unsigned& width, unsigned& height,

@@ -179,7 +179,9 @@ public:
 		BOOST_REQUIRE_EQUAL(h, img->GetBufferedRegion().GetSize()[1]);
 
 		std::vector<float> data(w*h, 0);
-		BOOST_REQUIRE(ImageReader::getImage2D(file_path.c_str(), data.data(), w, h,
+		std::vector<float*> stack(1, data.data());
+		std::vector<const char*> files(1, file_path.c_str());
+		BOOST_REQUIRE(ImageReader::getImageStack(files, stack.data(), w, h,
 			[](unsigned char, unsigned char g, unsigned char) { return static_cast<float>(g); }));
 
 		itk::Index<2> idx = { 0,0 };

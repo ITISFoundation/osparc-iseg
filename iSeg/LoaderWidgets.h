@@ -171,7 +171,6 @@ class ChannelMixer : public QDialog
 {
 	Q_OBJECT
 public:
-	//ChannelMixer(SlicesHandler *hand3D, vector<const char *> filenames, QWidget *parent=0, const char *name=0, Qt::WindowFlags wFlags=0);
 	ChannelMixer(std::vector<const char*> filenames, QWidget* parent = 0,
 				 const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ChannelMixer();
