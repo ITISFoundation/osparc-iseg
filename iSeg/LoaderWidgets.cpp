@@ -959,6 +959,8 @@ bool NewImg::new_pressed() const { return newPressed; }
 
 void NewImg::new_pushed()
 {
+	handler3D->UpdateColorLookupTable(nullptr);
+
 	handler3D->newbmp((unsigned short)xlength->value(),
 					  (unsigned short)ylength->value(),
 					  (unsigned short)sb_nrslices->value());
