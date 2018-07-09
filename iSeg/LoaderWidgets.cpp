@@ -15,6 +15,7 @@
 #include "XdmfImageReader.h"
 
 #include "Data/Point.h"
+#include "Data/ItkUtils.h" // for ScopedTimer
 
 #include "Core/ColorLookupTable.h"
 #include "Core/ImageReader.h"
@@ -1063,7 +1064,12 @@ void LoaderColorImages::load_quantize()
 	{
 		XdmfImageReader reader;
 		reader.SetFileName(filename.toStdString().c_str());
-		if (auto lut = reader.ReadColorLookup())
+		std::shared_ptr<ColorLookupTable> lut;
+		{
+			ScopedTimer t("Load LUT");
+			lut = reader.ReadColorLookup();
+		}
+		if (lut)
 		{
 			auto N = lut->NumberOfColors();
 
@@ -1079,7 +1085,10 @@ void LoaderColorImages::load_quantize()
 			}
 
 			auto kdtree = vtkSmartPointer<vtkKdTree>::New();
-			kdtree->BuildLocatorFromPoints(points);
+			{
+				ScopedTimer t("Build KdTree");
+				kdtree->BuildLocatorFromPoints(points);
+			}
 
 			unsigned w, h;
 			if (ImageReader::getInfo2D(m_filenames[0], w, h))
@@ -1092,6 +1101,7 @@ void LoaderColorImages::load_quantize()
 
 				auto load = [&, this](float** slices)
 				{
+					ScopedTimer t("Load and map image stack");
 					ImageReader::getImageStack(m_filenames, slices, w, h, map_colors);
 				};
 

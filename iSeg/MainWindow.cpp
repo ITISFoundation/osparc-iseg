@@ -8123,6 +8123,7 @@ void MainWindow::execute_savecolorlookup()
 		savefilename.append(".lut");
 	
 	XdmfImageWriter writer(savefilename.toStdString().c_str());
+	writer.SetCompression(handler3D->GetCompression());
 	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
 	{
 		QMessageBox::warning(this, "iSeg", 

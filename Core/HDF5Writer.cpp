@@ -14,8 +14,11 @@
 #include "Log.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 #include <hdf5.h>
+
+namespace fs = boost::filesystem;
 
 namespace iseg {
 
@@ -43,14 +46,16 @@ int HDF5Writer::open(const std::string& fname, const std::string& fileMode)
 				  << " is already open, close first" << std::endl;
 		return 0;
 	}
-	if (fileMode == "overwrite")
+
+	boost::system::error_code ec;
+	// always create file if it does not exist
+	if (fileMode == "overwrite" || !fs::exists(fname, ec))
 	{
 		if (loud)
 		{
 			std::cerr << "HDF5Writer::write() : creating " << fname << std::endl;
 		}
 		file = H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-		// 		std::cerr << "file = " << file << std::endl;
 	}
 	else if (fileMode == "append")
 	{

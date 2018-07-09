@@ -79,6 +79,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	QDir::setCurrent(fileInfo.absolutePath());
 
 	HDF5Writer writer;
+	writer.compression = Compression;
 	QString fname;
 	if (naked)
 		fname = basename + "." + suffix;
@@ -96,7 +97,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 
 	// write size and version
 	std::vector<HDF5Writer::size_type> dim_scalar(1, 1);
-	int version = 1;
+	int version = 2;
 	if (!writer.write(&version, dim_scalar, "/Lut/version"))
 	{
 		cerr << "error writing LUT version" << endl;
@@ -110,32 +111,22 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	}
 
 	// write colors
-	std::vector<HDF5Writer::size_type> dim_rgb(1, 3);
+	std::vector<HDF5Writer::size_type> dim_rgb(1, 3* num_colors);
+	std::vector<float> colors(3 * num_colors);
+	unsigned char rgb[3];
 	for (int i = 0; i < num_colors; ++i)
 	{
-		// group name
-		std::string const folder_name = "/Lut/" + (boost::format("color%05d") % i).str();
-		writer.createGroup(folder_name);
-
-		// write color index
-		if (!writer.write(&i, dim_scalar, folder_name + "/index"))
-		{
-			std::cerr << "error writing index\n";
-			return false;
-		}
-
-		// write rgb
-		unsigned char rgb[3];
 		lut->GetColor(static_cast<size_t>(i), rgb);
-		float float_rgb[3] = {rgb[0] / 255.0f, rgb[1] / 255.0f, rgb[2] / 255.0f};
-		if (!writer.write(float_rgb, dim_rgb, folder_name + "/rgb"))
-		{
-			std::cerr << "error writing color\n";
-			return false;
-		}
+		colors[i * 3 + 0] = rgb[0] / 255.0f;
+		colors[i * 3 + 1] = rgb[1] / 255.0f;
+		colors[i * 3 + 2] = rgb[2] / 255.0f;
 	}
 
-	writer.close();
+	if (!writer.write(colors.data(), dim_rgb, "/Lut/colors"))
+	{
+		cerr << "error writing LUT size" << endl;
+		return false;
+	}
 
 	QDir::setCurrent(oldcwd.absolutePath());
 
