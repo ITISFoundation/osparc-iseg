@@ -52,11 +52,11 @@ bool interceptOutput(const std::string& logname)
 		std::cerr << "Error while opening log file\n";
 
 	FILE *outfile, *errfile;
-	if ((outfile = freopen(logname.c_str(), "a", stdout)) == NULL)
+	if ((outfile = freopen(logname.c_str(), "a", stdout)) == nullptr)
 		return false;
 	else
 		fprintf(stdout, "stdout redirected to %s\n", logname.c_str());
-	if ((errfile = freopen(logname.c_str(), "a", stderr)) == NULL)
+	if ((errfile = freopen(logname.c_str(), "a", stderr)) == nullptr)
 		return false;
 	else
 		fprintf(stderr, "stderr redirected to %s\n", logname.c_str());

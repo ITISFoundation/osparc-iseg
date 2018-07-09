@@ -27,7 +27,7 @@ public:
 	static bool getInfo2D(const char* filename, unsigned& width, unsigned& height);
 
 	/// loads 2D image into pre-allocated memory
-	static bool getImage2D(const char* filename, float* img, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
+	static bool getImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
 
 	/// get image size, spacing and transform
 	static bool getInfo(const char* filename, unsigned& width, unsigned& height,
@@ -50,27 +50,4 @@ public:
 						  unsigned width, unsigned height);
 };
 
-class ImageSeriesReader
-{
-public:
-	/// get image size, spacing and transform
-	static bool getInfo(const char* filename, unsigned& width, unsigned& height,
-						unsigned& nrslices, float spacing[3],
-						Transform& transform);
-
-	/// loads image into pre-allocated memory
-	static bool getSlice(const char* filename, float* slice, unsigned slicenr,
-						 unsigned width, unsigned height);
-
-	/// \note allocates memory for slice using new
-	static float* getSliceInfo(const char* filename, unsigned slicenr,
-							   unsigned& width, unsigned& height);
-
-	/// loads image into pre-allocated memory
-	static bool getVolume(const char* filename, float** slices,
-						  unsigned nrslices, unsigned width, unsigned height);
-	static bool getVolume(const char* filename, float** slices,
-						  unsigned startslice, unsigned nrslices,
-						  unsigned width, unsigned height);
-};
 } // namespace iseg

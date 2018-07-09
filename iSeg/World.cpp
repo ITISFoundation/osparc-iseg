@@ -21,7 +21,7 @@ using namespace iseg;
 World::World()
 {
 	_isValid = false;
-	nodes = NULL;
+	nodes = nullptr;
 }
 World::~World() { clear(); }
 
@@ -33,7 +33,7 @@ void World::clear()
 	if (nodes)
 	{
 		delete[] nodes;
-		nodes = NULL;
+		nodes = nullptr;
 	}
 	_isValid = false;
 }
@@ -77,17 +77,17 @@ bool World::init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D)
 
 	unsigned total = width * height * length;
 
-	Node* nodes2 = NULL;
+	Node* nodes2 = nullptr;
 	try
 	{
 		nodes2 = new Node[total];
 	}
 	catch (std::bad_alloc error)
 	{
-		nodes2 = NULL;
+		nodes2 = nullptr;
 	}
 
-	if (nodes2 == NULL)
+	if (nodes2 == nullptr)
 	{
 		std::cerr << "Memory allocation error!" << std::endl;
 		//		exit(1); // terminate the program
@@ -198,7 +198,7 @@ void World::dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree)
 
 	// ESRA
 	BranchItem* rootOne = _branchTree->addNewBranch();
-	rootOne->setParent(NULL);
+	rootOne->setParent(nullptr);
 	std::vector<BranchItem*> children;
 
 	//Declaring variables
@@ -1720,10 +1720,10 @@ void World::outputBranchTree(BranchItem* branchItem, std::string prefix,
 
 	prefix.append("----");
 
-	if (branchItem->getParent() == NULL)
+	if (branchItem->getParent() == nullptr)
 	{
-		fprintf(fp, "NULL )\n");
-		//std::cout << "NULL )" << std::endl;
+		fprintf(fp, "nullptr )\n");
+		//std::cout << "nullptr )" << std::endl;
 	}
 	else
 	{

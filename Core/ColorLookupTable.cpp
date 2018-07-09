@@ -41,6 +41,16 @@ void ColorLookupTable::SetColor(size_t idx, unsigned char rgb[3])
 						 1.0);
 }
 
+void ColorLookupTable::GetColor(size_t idx, unsigned char uchar_rgb[3]) const
+{
+	double rgb[4];
+	m_Lut->GetTableValue(idx, rgb);
+
+	uchar_rgb[0] = static_cast<unsigned char>(clamp(rgb[0] * 255.0));
+	uchar_rgb[1] = static_cast<unsigned char>(clamp(rgb[1] * 255.0));
+	uchar_rgb[2] = static_cast<unsigned char>(clamp(rgb[2] * 255.0));
+}
+
 void ColorLookupTable::GetColor(double v, unsigned char uchar_rgb[3]) const
 {
 	double rgb[3];

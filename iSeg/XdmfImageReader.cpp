@@ -710,54 +710,76 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 	bool ok = true;
 	if (reader.exists("/Lut"))
 	{
-		std::vector<std::string> colors = reader.getGroupInfo("/Lut");
-		if (!colors.empty())
+		int version = -1, num_colors = 0;
+		ok = ok && (reader.read(&version, "/Lut/version") != 0);
+		ok = ok && (reader.read(&num_colors, "/Lut/size") != 0);
+
+		if (version == 1)
 		{
-			int version = -1, num_colors = 0;
-			int index;
-			float float_rgb[3];
-			unsigned char rgb[3];
-
-			ok = ok && (reader.read(&version, "/Lut/version") != 0);
-			ok = ok && (reader.read(&num_colors, "/Lut/size") != 0);
-			ok = ok && (colors.size() == num_colors + 2);
-			if (!ok)
+			std::vector<std::string> colors = reader.getGroupInfo("/Lut");
+			if (!colors.empty())
 			{
-				std::cerr << "Error: could not load color lookup table\n";
-				return nullptr;
-			}
-			if (version > 1)
-			{
-				std::cerr
-						<< "Error: could not load color lookup table. The file "
-							 "format is newer than this iSEG.\n";
-				return nullptr;
-			}
+				int index;
+				float float_rgb[3];
+				unsigned char rgb[3];
 
-			color_lookup_table = std::make_shared<ColorLookupTable>();
-			color_lookup_table->SetNumberOfColors(num_colors);
-
-			for (auto name : colors)
-			{
-				if (ok && name.find("color") != std::string::npos)
+				ok = ok && (colors.size() == num_colors + 2);
+				if (!ok)
 				{
-					std::string const folder_name = "/Lut/" + name;
+					std::cerr << "Error: could not load color lookup table\n";
+					return nullptr;
+				}
+				if (version > 1)
+				{
+					std::cerr
+						<< "Error: could not load color lookup table. The file "
+						"format is newer than this iSEG.\n";
+					return nullptr;
+				}
 
-					ok = ok &&
-							 (reader.read(&index, folder_name + "/index") != 0);
-					ok = ok &&
-							 (reader.read(float_rgb, folder_name + "/rgb") != 0);
+				color_lookup_table = std::make_shared<ColorLookupTable>();
+				color_lookup_table->SetNumberOfColors(num_colors);
 
-					rgb[0] = static_cast<unsigned char>(float_rgb[0] * 255.0);
-					rgb[1] = static_cast<unsigned char>(float_rgb[1] * 255.0);
-					rgb[2] = static_cast<unsigned char>(float_rgb[2] * 255.0);
-					color_lookup_table->SetColor(index, rgb);
+				for (auto name : colors)
+				{
+					if (ok && name.find("color") != std::string::npos)
+					{
+						std::string const folder_name = "/Lut/" + name;
+
+						ok = ok &&
+							(reader.read(&index, folder_name + "/index") != 0);
+						ok = ok &&
+							(reader.read(float_rgb, folder_name + "/rgb") != 0);
+
+						rgb[0] = static_cast<unsigned char>(float_rgb[0] * 255.0);
+						rgb[1] = static_cast<unsigned char>(float_rgb[1] * 255.0);
+						rgb[2] = static_cast<unsigned char>(float_rgb[2] * 255.0);
+						color_lookup_table->SetColor(index, rgb);
+					}
+				}
+			}
+		}
+		else if (version >= 2)
+		{
+			std::vector<float> colors(3 * num_colors);
+			ok = ok && (reader.read(colors.data(), "/Lut/colors") != 0);
+			if (ok)
+			{
+				color_lookup_table = std::make_shared<ColorLookupTable>();
+				color_lookup_table->SetNumberOfColors(num_colors);
+
+				unsigned char rgb[3];
+				for (int i = 0; i < num_colors; ++i)
+				{
+					rgb[0] = static_cast<unsigned char>(colors[i * 3 + 0] * 255.0);
+					rgb[1] = static_cast<unsigned char>(colors[i * 3 + 1] * 255.0);
+					rgb[2] = static_cast<unsigned char>(colors[i * 3 + 2] * 255.0);
+					color_lookup_table->SetColor(static_cast<size_t>(i), rgb);
 				}
 			}
 		}
 	}
 
-	reader.close();
 	QDir::setCurrent(oldcwd.absolutePath());
 
 	return color_lookup_table;

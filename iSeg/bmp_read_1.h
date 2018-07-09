@@ -147,14 +147,14 @@ public:
 	void newbmp(unsigned short width1, unsigned short height1);
 	void newbmp(unsigned short width1, unsigned short height1, float* bits);
 	void freebmp();
-	int CheckBMPDepth(const char* filename);
+	static int CheckBMPDepth(const char* filename);
 	void SetConverterFactors(int redFactor, int greenFactor, int blueFactor);
 	int LoadDIBitmap(const char* filename);
 	int LoadDIBitmap(const char* filename, Point p, unsigned short dx,
 			unsigned short dy);
 	int ReloadDIBitmap(const char* filename);
 	int ReloadDIBitmap(const char* filename, Point p);
-	int CheckPNGDepth(const char* filename);
+	static int CheckPNGDepth(const char* filename);
 	int LoadPNGBitmap(const char* filename);
 	bool LoadArray(float* bits, unsigned short w1, unsigned short h1);
 	bool LoadArray(float* bits, unsigned short w1, unsigned short h1, Point p,

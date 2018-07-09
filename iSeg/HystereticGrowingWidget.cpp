@@ -203,7 +203,7 @@ void HystereticGrowingWidget::update_visible()
 		vbox5->show();
 		vbox7->show();
 		allslices->setText("Apply to all slices");
-		//		p1=NULL;
+		//		p1=nullptr;
 	}
 	else
 	{
@@ -211,7 +211,7 @@ void HystereticGrowingWidget::update_visible()
 		vbox5->hide();
 		vbox7->hide();
 		allslices->setText("3D");
-		//		if(p1!=NULL)
+		//		if(p1!=nullptr)
 	}
 
 	return;
@@ -558,7 +558,7 @@ void HystereticGrowingWidget::loadborders_execute()
 	if (!loadfilename.isEmpty())
 	{
 		FILE* fp = fopen(loadfilename.ascii(), "r");
-		if (fp != NULL)
+		if (fp != nullptr)
 		{
 			float ll, uu, lu, ul;
 			if (fscanf(fp, "%f %f %f %f", &ll, &ul, &lu, &uu) == 4)

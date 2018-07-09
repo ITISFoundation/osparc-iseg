@@ -52,8 +52,8 @@ signals:
 	void vm_changed(std::vector<Mark>* vm1);
 	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
 
-	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL, iseg::EndUndoAction undoAction = iseg::EndUndo);
+	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr, iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 protected slots:
 	void tissuenr_changed(int i) { on_tissuenr_changed(i); }

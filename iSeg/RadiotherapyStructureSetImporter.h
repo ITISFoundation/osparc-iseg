@@ -70,8 +70,8 @@ private:
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
-						  QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+						  QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 						iseg::EndUndoAction undoAction = iseg::EndUndo);
 
 private slots:

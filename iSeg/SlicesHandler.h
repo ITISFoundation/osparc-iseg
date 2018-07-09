@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 
 class QString;
 class vtkImageData;
@@ -44,11 +45,12 @@ public:
 	SlicesHandler();
 	~SlicesHandler();
 
-	void newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices);
+	void newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices, const std::function<void(float**)>& init_callback = std::function<void(float**)>());
 	void freebmp();
 	void clear_bmp();
 	void clear_work();
 	void clear_overlay();
+	void new_overlay();
 	void set_bmp(unsigned short slicenr, float* bits, unsigned char mode);
 	void set_work(unsigned short slicenr, float* bits, unsigned char mode);
 	void set_tissue(unsigned short slicenr, tissues_size_t* bits);
@@ -62,33 +64,14 @@ public:
 	void copyfromtissue(unsigned short slicenr, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
 	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits, unsigned short padding);
-	int LoadDIBitmap(
-			const char* filename, unsigned short slicenr,
-			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
-	int LoadDIBitmap(const char* filename, unsigned short slicenr,
-			unsigned short nrofslices, Point p, unsigned short dx,
-			unsigned short dy);
+	void set_rgb_factors(int redFactor, int greenFactor, int blueFactor);
 	int LoadDIBitmap(std::vector<const char*> filenames);
-	int LoadDIBitmap(std::vector<const char*> filenames, double refFactor,
-			double blueFactor, double greenFactor);
-	int LoadDIBitmap(std::vector<const char*> filenames, Point p,
-			unsigned short dx, unsigned short dy);
+	int LoadDIBitmap(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
 	int LoadPng(std::vector<const char*> filenames);
-	int LoadPng(std::vector<const char*> filenames, double refFactor,
-			double blueFactor, double greenFactor);
-	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx,
-			unsigned short dy);
-	int LoadDIJpg(
-			const char* filename, unsigned short slicenr,
-			unsigned short nrofslices); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
-	int LoadDIJpg(const char* filename, unsigned short slicenr,
-			unsigned short nrofslices, Point p, unsigned short dx,
-			unsigned short dy);
+	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
 	int LoadDIJpg(std::vector<const char*> filenames);
-	int LoadDIJpg(std::vector<const char*> filenames, Point p,
-			unsigned short dx, unsigned short dy);
-	int LoadDICOM(
-			std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+	int LoadDIJpg(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
+	int LoadDICOM(std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDICOM(std::vector<const char*> lfilename, Point p,
 			unsigned short dx, unsigned short dy);
 	int ReadImage(const char* filename);
@@ -144,8 +127,6 @@ public:
 	int SaveTissuesRaw_xy_swapped(const char* filename);
 	int SaveTissuesRaw_xz_swapped(const char* filename);
 	int SaveTissuesRaw_yz_swapped(const char* filename);
-	int ReloadDIBitmap(const char* filename, unsigned short slicenr);
-	int ReloadDIBitmap(const char* filename, Point p, unsigned short slicenr);
 	int ReloadDIBitmap(std::vector<const char*> filenames);
 	int ReloadDIBitmap(std::vector<const char*> filenames, Point p);
 	int ReloadDICOM(std::vector<const char*> lfilename);
@@ -418,7 +399,7 @@ public:
 
 	unsigned short active_slice() const override;
 	boost::signals2::signal<void(unsigned short)> on_active_slice_changed;
-	void set_active_slice(unsigned short slice, bool signal_change = false);
+	void set_active_slice(unsigned short slice, bool signal_change = false) override;
 
 	bmphandler* get_activebmphandler();
 	tissuelayers_size_t active_tissuelayer() const override;
@@ -517,9 +498,9 @@ public:
 	bool export_work(const char* filename, bool binary) const;
 
 	bool print_xmlregionextent(const char* filename, bool onlyactiveslices,
-			const char* projname = NULL);
+			const char* projname = nullptr);
 	bool print_tissueindex(const char* filename, bool onlyactiveslices,
-			const char* projname = NULL);
+			const char* projname = nullptr);
 	bool print_atlas(const char* filename);
 	vtkImageData* make_vtktissueimage();
 	float calculate_volume(Point p, unsigned short slicenr);

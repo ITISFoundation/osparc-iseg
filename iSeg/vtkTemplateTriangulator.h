@@ -72,9 +72,9 @@ protected:
 										int domain);
 
 	/// Determine subdivision case from lookup table
-	short DetermineTetraSubdivisionCase(short code[6], short edgeMap[6] = NULL,
-																			short vertexMap[4] = NULL,
-																			short triangleMap[4] = NULL);
+	short DetermineTetraSubdivisionCase(short code[6], short edgeMap[6] = nullptr,
+																			short vertexMap[4] = nullptr,
+																			short triangleMap[4] = nullptr);
 
 	class vtkPimple;
 	vtkPimple *Pimple;

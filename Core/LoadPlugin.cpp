@@ -72,14 +72,14 @@ inline void close(handle h)
 
 inline std::string error()
 {
-	LPTSTR msg = NULL;
+	LPTSTR msg = nullptr;
 
 	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-				  NULL, GetLastError(),
+				  nullptr, GetLastError(),
 				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msg, 0,
-				  NULL);
+				  nullptr);
 
-	std::string res(msg == NULL ? "Unable to get any error message" : msg);
+	std::string res(msg == nullptr ? "Unable to get any error message" : msg);
 
 	if (msg)
 		LocalFree(msg);

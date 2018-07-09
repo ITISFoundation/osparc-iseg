@@ -40,8 +40,8 @@ AtlasWidget::AtlasWidget(const char *filename, QDir picpath, QWidget *parent,
 	QString title("Atlas - ");
 	title = title + QFileInfo(filename).completeBaseName();
 	setCaption(title);
-	tissue = NULL;
-	image = NULL;
+	tissue = nullptr;
+	image = nullptr;
 	if (!loadfile(filename))
 	{
 		return;
@@ -181,10 +181,10 @@ bool AtlasWidget::loadfile(const char *filename)
 
 	unsigned dimtot = unsigned(dimx) * unsigned(dimy) * dimz;
 	image = new float[dimtot];
-	if (image == NULL)
+	if (image == nullptr)
 		return false;
 	tissue = new tissues_size_t[dimtot];
-	if (tissue == NULL)
+	if (tissue == nullptr)
 	{
 		delete[] image;
 		return false;

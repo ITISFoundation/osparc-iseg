@@ -111,7 +111,7 @@ UndoElem* UndoQueue::undo()
 		return undos[((--nrnow) + first) % nrundo];
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 UndoElem* UndoQueue::redo()
@@ -121,7 +121,7 @@ UndoElem* UndoQueue::redo()
 		return undos[((nrnow++) + first) % nrundo];
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 void UndoQueue::clear_undo()

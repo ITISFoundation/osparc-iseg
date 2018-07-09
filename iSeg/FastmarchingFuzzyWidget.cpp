@@ -163,8 +163,8 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 	hbox5->setFixedSize(hbox5->sizeHint());
 	vbox1->setFixedSize(vbox1->sizeHint());
 
-	IFTmarch = NULL;
-	IFTfuzzy = NULL;
+	IFTmarch = nullptr;
+	IFTfuzzy = nullptr;
 
 	QObject::connect(sl_extend, SIGNAL(valueChanged(int)), this,
 			SLOT(slextend_changed(int)));
@@ -216,9 +216,9 @@ FastmarchingFuzzyWidget::~FastmarchingFuzzyWidget()
 	delete bg_method;
 	delete bg_interact;
 
-	if (IFTmarch != NULL)
+	if (IFTmarch != nullptr)
 		delete IFTmarch;
-	if (IFTfuzzy != NULL)
+	if (IFTfuzzy != nullptr)
 		delete IFTfuzzy;
 }
 
@@ -230,12 +230,12 @@ void FastmarchingFuzzyWidget::on_slicenr_changed()
 
 void FastmarchingFuzzyWidget::bmphand_changed(bmphandler* bmph)
 {
-	if (IFTmarch != NULL)
+	if (IFTmarch != nullptr)
 		delete IFTmarch;
-	if (IFTfuzzy != NULL)
+	if (IFTfuzzy != nullptr)
 		delete IFTfuzzy;
-	IFTmarch = NULL;
-	IFTfuzzy = NULL;
+	IFTmarch = nullptr;
+	IFTfuzzy = nullptr;
 
 	bmphand = bmph;
 
@@ -252,12 +252,12 @@ void FastmarchingFuzzyWidget::init()
 
 	area = bmphand->return_height() * (unsigned)bmphand->return_width();
 
-	if (IFTmarch != NULL)
+	if (IFTmarch != nullptr)
 		delete IFTmarch;
-	if (IFTfuzzy != NULL)
+	if (IFTfuzzy != nullptr)
 		delete IFTfuzzy;
-	IFTmarch = NULL;
-	IFTfuzzy = NULL;
+	IFTmarch = nullptr;
+	IFTfuzzy = nullptr;
 
 	sl_extend->setEnabled(false);
 
@@ -272,12 +272,12 @@ void FastmarchingFuzzyWidget::newloaded()
 
 void FastmarchingFuzzyWidget::cleanup()
 {
-	if (IFTmarch != NULL)
+	if (IFTmarch != nullptr)
 		delete IFTmarch;
-	if (IFTfuzzy != NULL)
+	if (IFTfuzzy != nullptr)
 		delete IFTfuzzy;
-	IFTmarch = NULL;
-	IFTfuzzy = NULL;
+	IFTmarch = nullptr;
+	IFTfuzzy = nullptr;
 	sl_extend->setEnabled(false);
 }
 
@@ -296,17 +296,17 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 {
 	if (rb_fastmarch->isOn())
 	{
-		if (IFTmarch != NULL)
+		if (IFTmarch != nullptr)
 			delete IFTmarch;
 
 		IFTmarch = bmphand->fastmarching_init(p, sigma, thresh);
 
-		//		if(map!=NULL) free(map);
+		//		if(map!=nullptr) free(map);
 		map = IFTmarch->return_pf();
 	}
 	else
 	{
-		if (IFTfuzzy == NULL)
+		if (IFTfuzzy == nullptr)
 		{
 			IFTfuzzy = new ImageForestingTransformAdaptFuzzy;
 			IFTfuzzy->fuzzy_init(bmphand->return_width(),
@@ -319,7 +319,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 			IFTfuzzy->change_pt(p);
 		}
 
-		//		if(map!=NULL) free(map);
+		//		if(map!=nullptr) free(map);
 		map = IFTfuzzy->return_pf();
 	}
 
@@ -559,10 +559,10 @@ void FastmarchingFuzzyWidget::spinbox_changed()
 	{
 		thresh = sb_thresh->value();
 		sl_thresh->setValue(100);
-		if (IFTmarch != NULL)
+		if (IFTmarch != nullptr)
 		{
 			delete IFTmarch;
-			IFTmarch = NULL;
+			IFTmarch = nullptr;
 		}
 		sl_extend->setEnabled(false);
 	}
@@ -615,10 +615,10 @@ void FastmarchingFuzzyWidget::slider_changed()
 	s1 = sl_s1->value() * 0.01f * sb_s1->value();
 	s2 = sl_s2->value() * 0.01f * sb_s2->value();
 
-	if (rb_fastmarch->isOn() && IFTmarch != NULL)
+	if (rb_fastmarch->isOn() && IFTmarch != nullptr)
 	{
 		delete IFTmarch;
-		IFTmarch = NULL;
+		IFTmarch = nullptr;
 	}
 
 	sl_extend->setEnabled(false);

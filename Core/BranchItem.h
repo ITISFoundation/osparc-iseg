@@ -33,7 +33,7 @@ public:
 
 	void Initialize()
 	{
-		_parent = NULL;
+		_parent = nullptr;
 		_children.clear();
 		_centerList.clear();
 		_startVox[0] = _startVox[1] = _startVox[2] = 0;
@@ -52,13 +52,13 @@ public:
 	//! Destructor
 	~BranchItem(void)
 	{
-		if (_parent != NULL)
+		if (_parent != nullptr)
 			_parent->removeChild(getLabel());
 		_centerList.clear();
 		for (std::list<BranchItem*>::iterator it = _children.begin();
 				 it != _children.end(); it++)
 		{
-			(*it)->setParentDirty(NULL);
+			(*it)->setParentDirty(nullptr);
 			delete *it;
 		}
 		_children.clear();
@@ -84,17 +84,17 @@ public:
 			it++;
 		if (it != _children.end())
 		{
-			(*it)->setParentDirty(NULL);
+			(*it)->setParentDirty(nullptr);
 			//xxxa delete *it?
 			_children.erase(it);
 		}
 	}
 	void setParent(BranchItem* parent)
 	{
-		if (_parent != NULL)
+		if (_parent != nullptr)
 			_parent->removeChild(getLabel());
 		_parent = parent;
-		if (parent != NULL)
+		if (parent != nullptr)
 			parent->addChild(this);
 	}
 
@@ -228,7 +228,7 @@ protected:
 	void setParentDirty(BranchItem* parent)
 	{
 		_parent = parent;
-		if (parent != NULL)
+		if (parent != nullptr)
 			parent->addChild(this);
 	}
 
@@ -239,7 +239,7 @@ private:
 	static std::vector<unsigned> availablelabels;
 	// unique label of branch at runtime
 	unsigned _label;
-	// parent branch, root => NULL
+	// parent branch, root => nullptr
 	BranchItem* _parent;
 	// list of branch's children
 	std::list<BranchItem*> _children;

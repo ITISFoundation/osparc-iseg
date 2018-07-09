@@ -58,8 +58,8 @@ AtlasViewer::AtlasViewer(float* bmpbits1, tissues_size_t* tissue1,
 
 	bmpbits = bmpbits1;
 	tissue = tissue1;
-	current_bmpbits = NULL;
-	current_tissue = NULL;
+	current_bmpbits = nullptr;
+	current_tissue = nullptr;
 
 	orient = orient1;
 

@@ -48,9 +48,9 @@ public:
   static vtkLookupTable16 *New();
 
   vtkTypeMacro(vtkLookupTable16,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void Build();
+  void Build() override;
 
   void SetNumberOfTableValues(vtkIdType number);
 
@@ -70,7 +70,7 @@ void MapScalarsThroughTable2(void *input,
                                              int inputDataType,
                                              int numberOfValues,
                                              int inputIncrement,
-                                             int outputFormat);
+                                             int outputFormat) override;
 
 private:
   vtkLookupTable16(const vtkLookupTable16&);  // Not implemented.

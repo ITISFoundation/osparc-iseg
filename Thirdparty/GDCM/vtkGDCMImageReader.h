@@ -105,14 +105,14 @@ class vtkGDCM_API vtkGDCMImageReader : public vtkMedicalImageReader2
 public:
   static vtkGDCMImageReader *New();
   vtkTypeMacro(vtkGDCMImageReader,vtkMedicalImageReader2);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+  virtual void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description: is the given file name a DICOM file containing an image ?
-  virtual int CanReadFile(const char* fname);
+  virtual int CanReadFile(const char* fname) override;
 
   // Description:
   // Valid extensions
-  virtual const char* GetFileExtensions()
+  virtual const char* GetFileExtensions() override
     {
     // I would like to get rid of ACR/NEMA/IMA so only allow dcm extension for now
     return ".dcm .DCM";
@@ -120,7 +120,7 @@ public:
 
   // Description:
   // A descriptive name for this format
-  virtual const char* GetDescriptiveName()
+  virtual const char* GetDescriptiveName() override
     {
     return "DICOM";
     }
@@ -250,13 +250,13 @@ protected:
 #if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
   int ProcessRequest(vtkInformation* request,
                                  vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector);
+                                 vtkInformationVector* outputVector) override;
   int RequestInformation(vtkInformation *request,
                          vtkInformationVector **inputVector,
-                         vtkInformationVector *outputVector);
+                         vtkInformationVector *outputVector) override;
   int RequestData(vtkInformation *request,
                   vtkInformationVector **inputVector,
-                  vtkInformationVector *outputVector);
+                  vtkInformationVector *outputVector) override;
 #else /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
   void ExecuteInformation();
   void ExecuteData(vtkDataObject *out);
@@ -305,9 +305,9 @@ protected:
 
 protected:
   // TODO / FIXME
-  void SetFilePrefix(const char *) {}
+  void SetFilePrefix(const char *) override {}
   vtkGetStringMacro(FilePrefix);
-  void SetFilePattern(const char *) {}
+  void SetFilePattern(const char *) override {}
   vtkGetStringMacro(FilePattern);
 
 private:

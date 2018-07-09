@@ -58,7 +58,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	actual_color.setRgb(255, 255, 255);
 	crosshairxpos = 0;
 	crosshairypos = 0;
-	marks = NULL;
+	marks = nullptr;
 	overlayalpha = 0.0f;
 	//	vp=new vector<Point>;
 	//	vp_old=new vector<Point>;
@@ -171,7 +171,7 @@ void ImageViewerWidget::paintEvent(QPaintEvent* e)
 			painter.drawImage(0, 0, image_decorated);
 			painter.setPen(QPen(actual_color));
 
-			if (marks != NULL)
+			if (marks != nullptr)
 			{
 				unsigned char r, g, b;
 				for (auto& m : *marks)

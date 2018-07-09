@@ -59,7 +59,7 @@ bool ImageReader::getInfo2D(const char* filename, unsigned& width, unsigned& hei
 	return ImageReader::getInfo(filename, width, height, nrslices, spacing, tr);
 }
 
-bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey)
+bool ImageReader::getImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey)
 {
 	using rgbpixel = itk::RGBPixel<unsigned char>;
 	using input_image_type = itk::Image<rgbpixel, 3>;
@@ -70,7 +70,6 @@ bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, u
 	using rgbmapper_type = itk::UnaryFunctorImageFilter<input_image_type, output_image_type, functor_type>;
 
 	auto reader = reader_type::New();
-	reader->SetFileName(filename);
 
 	functor_type functor;
 	functor.m_Functor = color2grey;
@@ -79,26 +78,31 @@ bool ImageReader::getImage2D(const char* filename, float* img, unsigned width, u
 	mapper->SetInput(reader->GetOutput());
 	mapper->SetFunctor(functor);
 
-	try
+	for (size_t i=0, iend=filenames.size(); i<iend; ++i)
 	{
-		mapper->Update();
-	}
-	catch (itk::ExceptionObject& e)
-	{
-		std::cerr << "ERROR: an exception occurred " << e.what() << "\n";
-		return false;
-	}
+		reader->SetFileName(filenames[i]);
 
-	auto container = mapper->GetOutput()->GetPixelContainer();
-	size_t size = static_cast<size_t>(width) * height;
+		try
+		{
+			mapper->Update();
+		}
+		catch (itk::ExceptionObject& e)
+		{
+			std::cerr << "ERROR: an exception occurred " << e.what() << "\n";
+			return false;
+		}
 
-	if (size == container->Size())
-	{
+		auto container = mapper->GetOutput()->GetPixelContainer();
+		size_t size = static_cast<size_t>(width) * height;
+
+		if (size != container->Size())
+		{
+			return false;
+		}
 		auto buffer = container->GetImportPointer();
-		std::copy(buffer, buffer + size, img);
-		return true;
+		std::copy(buffer, buffer + size, img_stack[i]);
 	}
-	return false;
+	return true;
 }
 
 bool ImageReader::getSlice(const char* filename, float* slice, unsigned slicenr,

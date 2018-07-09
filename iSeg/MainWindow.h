@@ -91,9 +91,9 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 public:
 	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath,
-			const QDir& tmppath, bool editingmode = false, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0,
-			char** argv = NULL);
+			const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr,
+			const char* name = nullptr, Qt::WindowFlags wFlags = 0,
+			char** argv = nullptr);
 	~MainWindow();
 
 	friend class Settings;
@@ -134,12 +134,12 @@ signals:
 	void tissues_changed();
 	void drawing_changed();
 	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 	void begin_dataexport(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL);
-	void end_dataexport(QWidget* sender = NULL);
+			QWidget* sender = nullptr);
+	void end_dataexport(QWidget* sender = nullptr);
 
 private:
 	bool m_editingmode;
@@ -349,7 +349,6 @@ private slots:
 	void execute_saveContours();
 	void execute_loaddicom();
 	void execute_loadbmp();
-	void execute_loadbmp1();
 	void execute_loadpng();
 	void execute_loadjpg();
 	void execute_loadraw();
@@ -558,12 +557,12 @@ private slots:
 	void mousePosZoom_changed(const QPoint& point);
 
 	void handle_begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = NULL, bool beginUndo = true);
-	void handle_end_datachange(QWidget* sender = NULL,
+			QWidget* sender = nullptr, bool beginUndo = true);
+	void handle_end_datachange(QWidget* sender = nullptr,
 			iseg::EndUndoAction undoAction = iseg::EndUndo);
 
-	void handle_begin_dataexport(iseg::DataSelection& dataSelection, QWidget* sender = NULL);
-	void handle_end_dataexport(QWidget* sender = NULL);
+	void handle_begin_dataexport(iseg::DataSelection& dataSelection, QWidget* sender = nullptr);
+	void handle_end_dataexport(QWidget* sender = nullptr);
 
 	void DatasetChanged();
 

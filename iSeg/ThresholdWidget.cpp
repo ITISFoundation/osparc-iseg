@@ -294,7 +294,7 @@ void ThresholdWidget::execute()
 	else if (rb_kmeans->isOn())
 	{
 		FILE* fp = fopen("C:\\gamma.txt", "r");
-		if (fp != NULL)
+		if (fp != nullptr)
 		{
 			float** centers = new float*[sb_nrtissues->value()];
 			for (int i = 0; i < sb_nrtissues->value(); i++)
@@ -872,7 +872,7 @@ void ThresholdWidget::loadborders_execute()
 			std::vector<float> fvec;
 			FILE* fp = fopen(loadfilename.ascii(), "r");
 			float f;
-			if (fp != NULL)
+			if (fp != nullptr)
 			{
 				while (fscanf(fp, "%f", &f) == 1)
 				{

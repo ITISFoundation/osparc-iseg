@@ -12,8 +12,18 @@
 #define cimg_display 0
 #include "CImg.h"
 #include "LoaderWidgets.h"
+#include "XdmfImageReader.h"
 
 #include "Data/Point.h"
+#include "Data/ItkUtils.h" // for ScopedTimer
+
+#include "Core/ColorLookupTable.h"
+#include "Core/ImageReader.h"
+
+#include <vtkKdTree.h>
+#include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <qfiledialog.h>
 #include <q3hbox.h>
@@ -26,7 +36,7 @@
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qstring.h>
-#include <qwidget.h>
+#include <qgridLayout.h>
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -187,8 +197,6 @@ void LoaderDicom::ct_toggled()
 	{
 		vbox6->hide();
 	}
-
-	return;
 }
 
 void LoaderDicom::load_pushed()
@@ -268,166 +276,6 @@ void LoaderDicom::load_pushed()
 		close();
 		return;
 	}
-}
-
-LoaderBmp::LoaderBmp(SlicesHandler* hand3D, QWidget* parent, const char* name,
-					 Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
-{
-	vbox1 = new Q3VBox(this);
-	hbox1 = new Q3HBox(vbox1);
-	fileName = new QLabel(QString("File Name: "), hbox1);
-	nameEdit = new QLineEdit(hbox1);
-	nameEdit->show();
-	selectFile = new QPushButton("Select", hbox1);
-	selectFile->show();
-	hbox1->show();
-	hbox2 = new Q3HBox(vbox1);
-	subsect = new QCheckBox(QString("Subsection "), hbox2);
-	subsect->setChecked(false);
-	subsect->show();
-	vbox2 = new Q3VBox(hbox2);
-	hbox3 = new Q3HBox(vbox2);
-	xoffs = new QLabel(QString("x-Offset: "), hbox3);
-	xoffset = new QSpinBox(0, 2000, 1, hbox3);
-	xoffset->setValue(0);
-	xoffset->show();
-	yoffs = new QLabel(QString("y-Offset: "), hbox3);
-	yoffset = new QSpinBox(0, 2000, 1, hbox3);
-	yoffset->show();
-	xoffset->setValue(0);
-	hbox3->show();
-	hbox4 = new Q3HBox(vbox2);
-	xl = new QLabel(QString("x-Length: "), hbox4);
-	xlength = new QSpinBox(0, 2000, 1, hbox4);
-	xlength->show();
-	xlength->setValue(256);
-	yl = new QLabel(QString("y-Length: "), hbox4);
-	ylength = new QSpinBox(0, 2000, 1, hbox4);
-	ylength->show();
-	ylength->setValue(256);
-	hbox4->show();
-	vbox2->show();
-	hbox2->show();
-	lb_format = new QLabel("Format: namexxx.bmp (xxx=slicenr)", vbox1);
-	hbox5 = new Q3HBox(vbox1);
-	lb_slicenr = new QLabel("Start Nr.: ", hbox5);
-	sb_slicenr = new QSpinBox(0, 2000, 1, hbox5);
-	sb_slicenr->show();
-	sb_slicenr->setValue(1);
-	lb_nrslices = new QLabel("#Slices: ", hbox5);
-	sb_nrslices = new QSpinBox(1, 2000, 1, hbox5);
-	sb_nrslices->show();
-	sb_nrslices->setValue(10);
-	hbox5->show();
-	hbox6 = new Q3HBox(vbox1);
-	loadFile = new QPushButton("Open", hbox6);
-	cancelBut = new QPushButton("Cancel", hbox6);
-	hbox6->show();
-
-	/*	vbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	vbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox3->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox4->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox5->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));*/
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-
-	vbox1->setFixedSize(vbox1->sizeHint());
-
-	subsect_toggled(subsect->isChecked());
-
-	QObject::connect(selectFile, SIGNAL(clicked()), this,
-					 SLOT(select_pushed()));
-	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
-	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
-	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),this,SLOT(subsect_toggled(bool on)));
-	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
-	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),vbox2,SLOT(setShown(bool on)));
-
-	return;
-}
-
-LoaderBmp::~LoaderBmp() { delete vbox1; }
-
-void LoaderBmp::subsect_toggled(bool isset)
-{
-	if (isset)
-	{
-		vbox2->show();
-		//		nameEdit->setText(QString("ABC"));
-	}
-	else
-	{
-		vbox2->hide();
-		//		nameEdit->setText(QString("DEF"));
-	}
-
-	//	vbox1->setFixedSize(vbox1->sizeHint());
-
-	return;
-}
-
-void LoaderBmp::subsect_toggled()
-{
-	bool isset = subsect->isOn();
-	;
-	if (isset)
-	{
-		vbox2->show();
-		//		nameEdit->setText(QString("ABC"));
-	}
-	else
-	{
-		vbox2->hide();
-		//		nameEdit->setText(QString("DEF"));
-	}
-
-	//	vbox1->setFixedSize(vbox1->sizeHint());
-
-	return;
-}
-
-void LoaderBmp::load_pushed()
-{
-	if (!(nameEdit->text()).isEmpty())
-	{
-		if (subsect->isOn())
-		{
-			Point p;
-			p.px = xoffset->value();
-			p.py = yoffset->value();
-			handler3D->LoadDIBitmap(nameEdit->text().ascii(),
-									(unsigned short)(sb_slicenr->value()),
-									(unsigned short)(sb_nrslices->value()), p,
-									xlength->value(), ylength->value());
-		}
-		else
-		{
-			handler3D->LoadDIBitmap(nameEdit->text().ascii(),
-									(unsigned short)(sb_slicenr->value()),
-									(unsigned short)(sb_nrslices->value()));
-		}
-		close();
-		return;
-	}
-	else
-	{
-		return;
-	}
-}
-
-void LoaderBmp::select_pushed()
-{
-	QString loadfilename = QFileDialog::getOpenFileName(
-		QString::null,
-		"Images (*.bmp)\n"
-		"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
-		this);		//, filename);
-	nameEdit->setText(loadfilename);
-	return;
 }
 
 LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name,
@@ -609,9 +457,7 @@ void LoaderRaw::load_pushed()
 
 void LoaderRaw::select_pushed()
 {
-	QString loadfilename =
-		QFileDialog::getOpenFileName(QString::null, QString::null,
-									  this); //, filename);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, QString::null, this);
 	nameEdit->setText(loadfilename);
 	return;
 }
@@ -903,127 +749,6 @@ void SaverImg::select_pushed()
 	return;
 }
 
-ReloaderBmp::ReloaderBmp(SlicesHandler* hand3D, QWidget* parent,
-						 const char* name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags)
-{
-	handler3D = hand3D;
-
-	vbox1 = new Q3VBox(this);
-	hbox1 = new Q3HBox(vbox1);
-	fileName = new QLabel(QString("File Name: "), hbox1);
-	nameEdit = new QLineEdit(hbox1);
-	nameEdit->show();
-	selectFile = new QPushButton("Select", hbox1);
-	selectFile->show();
-	hbox1->show();
-	hbox2 = new Q3HBox(vbox1);
-	subsect = new QCheckBox(QString("Subsection "), hbox2);
-	subsect->setChecked(false);
-	subsect->show();
-	xoffs = new QLabel(QString("x-Offset: "), hbox2);
-	xoffset = new QSpinBox(0, 2000, 1, hbox2);
-	xoffset->setValue(0);
-	xoffset->show();
-	yoffs = new QLabel(QString("y-Offset: "), hbox2);
-	yoffset = new QSpinBox(0, 2000, 1, hbox2);
-	yoffset->show();
-	xoffset->setValue(0);
-	hbox2->show();
-	hbox4 = new Q3HBox(vbox1);
-	lb_startnr = new QLabel(QString("Start Nr.: "), hbox4);
-	sb_startnr = new QSpinBox(0, 2000, 1, hbox4);
-	sb_startnr->setValue(0);
-	sb_startnr->show();
-	hbox4->show();
-	hbox3 = new Q3HBox(vbox1);
-	loadFile = new QPushButton("Open", hbox3);
-	cancelBut = new QPushButton("Cancel", hbox3);
-	hbox3->show();
-
-	/*	vbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	vbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox3->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox4->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox5->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));*/
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-
-	vbox1->setFixedSize(vbox1->sizeHint());
-
-	subsect_toggled();
-
-	QObject::connect(selectFile, SIGNAL(clicked()), this,
-					 SLOT(select_pushed()));
-	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
-	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
-
-	return;
-}
-
-ReloaderBmp::~ReloaderBmp() { delete vbox1; }
-
-void ReloaderBmp::subsect_toggled()
-{
-	bool isset = subsect->isOn();
-	;
-	if (isset)
-	{
-		xoffset->show();
-		yoffs->show();
-		yoffset->show();
-		yoffs->show();
-	}
-	else
-	{
-		xoffset->hide();
-		xoffs->hide();
-		yoffset->hide();
-		yoffs->hide();
-	}
-
-	return;
-}
-
-void ReloaderBmp::load_pushed()
-{
-	if (!(nameEdit->text()).isEmpty())
-	{
-		if (subsect->isOn())
-		{
-			Point p;
-			p.px = xoffset->value();
-			p.py = yoffset->value();
-			handler3D->ReloadDIBitmap(nameEdit->text().ascii(), p,
-									  (unsigned short)sb_startnr->value());
-		}
-		else
-		{
-			handler3D->ReloadDIBitmap(nameEdit->text().ascii(),
-									  (unsigned short)sb_startnr->value());
-		}
-		close();
-		return;
-	}
-	else
-	{
-		return;
-	}
-}
-
-void ReloaderBmp::select_pushed()
-{
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-														 "Images (*.bmp)\n"
-														 "All(*.*)",
-														 this); //, filename);
-	nameEdit->setText(loadfilename);
-	return;
-}
-
 ReloaderRaw::ReloaderRaw(SlicesHandler* hand3D, QWidget* parent,
 						 const char* name, Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags)
@@ -1234,6 +959,8 @@ bool NewImg::new_pressed() const { return newPressed; }
 
 void NewImg::new_pushed()
 {
+	handler3D->UpdateColorLookupTable(nullptr);
+
 	handler3D->newbmp((unsigned short)xlength->value(),
 					  (unsigned short)ylength->value(),
 					  (unsigned short)sb_nrslices->value());
@@ -1254,80 +981,169 @@ LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std:
 	, type(typ)
 	, m_filenames(filenames)
 {
-	vbox1 = new Q3VBox(this);
-	hbox2 = new Q3HBox(vbox1);
-	subsect = new QCheckBox(QString("Subsection "), hbox2);
+	map_to_lut = new QCheckBox(QString("Map colors to lookup table"));
+	map_to_lut->setChecked(true);
+
+	subsect = new QCheckBox(QString("Subsection"));
 	subsect->setChecked(false);
-	subsect->show();
-	vbox2 = new Q3VBox(hbox2);
-	hbox3 = new Q3HBox(vbox2);
-	xoffs = new QLabel(QString("x-Offset: "), hbox3);
-	xoffset = new QSpinBox(0, 2000, 1, hbox3);
+
+	auto xoffs = new QLabel(QString("x-Offset: "));
+	xoffset = new QSpinBox(0, 2000, 1, nullptr);
 	xoffset->setValue(0);
-	xoffset->show();
-	yoffs = new QLabel(QString("y-Offset: "), hbox3);
-	yoffset = new QSpinBox(0, 2000, 1, hbox3);
-	yoffset->show();
+
+	auto yoffs = new QLabel(QString("y-Offset: "));
+	yoffset = new QSpinBox(0, 2000, 1, nullptr);
 	xoffset->setValue(0);
-	hbox3->show();
-	hbox4 = new Q3HBox(vbox2);
-	xl = new QLabel(QString("x-Length: "), hbox4);
-	xlength = new QSpinBox(0, 2000, 1, hbox4);
-	xlength->show();
+
+	auto xl = new QLabel(QString("x-Length: "));
+	xlength = new QSpinBox(0, 2000, 1, nullptr);
 	xlength->setValue(256);
-	yl = new QLabel(QString("y-Length: "), hbox4);
-	ylength = new QSpinBox(0, 2000, 1, hbox4);
-	ylength->show();
+
+	auto yl = new QLabel(QString("y-Length: "));
+	ylength = new QSpinBox(0, 2000, 1, nullptr);
 	ylength->setValue(256);
-	hbox4->show();
-	vbox2->show();
-	hbox2->show();
-	hbox6 = new Q3HBox(vbox1);
-	loadFile = new QPushButton("Open", hbox6);
-	cancelBut = new QPushButton("Cancel", hbox6);
-	hbox6->show();
 
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	auto subsect_layout = new QGridLayout(2,4);
+	subsect_layout->addWidget(xoffs);
+	subsect_layout->addWidget(xoffset);
+	subsect_layout->addWidget(xl);
+	subsect_layout->addWidget(xlength);
+	subsect_layout->addWidget(yoffs);
+	subsect_layout->addWidget(yoffset);
+	subsect_layout->addWidget(yl);
+	subsect_layout->addWidget(ylength);
+	auto subsect_options = new QWidget;
+	subsect_options->setLayout(subsect_layout);
 
-	vbox1->setFixedSize(vbox1->sizeHint());
+	loadFile = new QPushButton("Open");
+	cancelBut = new QPushButton("Cancel");
+	auto button_layout = new QHBoxLayout;
+	button_layout->addWidget(loadFile);
+	button_layout->addWidget(cancelBut);
+	auto button_row = new QWidget;
+	button_row->setLayout(button_layout);
 
-	subsect_toggled(subsect->isChecked());
+	auto top_layout = new QVBoxLayout;
+	top_layout->addWidget(map_to_lut);
+	top_layout->addWidget(subsect);
+	top_layout->addWidget(subsect_options);
+	top_layout->addWidget(button_row);
+	setLayout(top_layout);
+	setMinimumSize(150,200);
+
+	map_to_lut_toggled();
 
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
+	QObject::connect(map_to_lut, SIGNAL(clicked()), this, SLOT(map_to_lut_toggled()));
 }
 
-LoaderColorImages::~LoaderColorImages() { delete vbox1; }
+LoaderColorImages::~LoaderColorImages() {}
 
-void LoaderColorImages::subsect_toggled(bool isset)
+void LoaderColorImages::map_to_lut_toggled()
 {
-	if (isset)
-	{
-		vbox2->show();
-	}
-	else
-	{
-		vbox2->hide();
-	}
-}
-
-void LoaderColorImages::subsect_toggled()
-{
-	bool isset = subsect->isOn();
-	if (isset)
-	{
-		vbox2->show();
-	}
-	else
-	{
-		vbox2->hide();
-	}
+	// enable/disable
+	subsect->setEnabled(!map_to_lut->isChecked());
 }
 
 void LoaderColorImages::load_pushed()
 {
+	if (map_to_lut->isChecked())
+	{
+		load_quantize();
+	}
+	else
+	{
+		load_mixer();
+	}
+}
+
+void LoaderColorImages::load_quantize()
+{
+	QString filename = QFileDialog::getOpenFileName(QString::null,
+		"iSEG Color Lookup Table (*.lut *.h5)\nAll(*.*)", this);
+	if (!filename.isEmpty())
+	{
+		XdmfImageReader reader;
+		reader.SetFileName(filename.toStdString().c_str());
+		std::shared_ptr<ColorLookupTable> lut;
+		{
+			ScopedTimer t("Load LUT");
+			lut = reader.ReadColorLookup();
+		}
+		if (lut)
+		{
+			auto N = lut->NumberOfColors();
+
+			auto points = vtkSmartPointer<vtkPoints>::New();
+			points->SetDataTypeToFloat();
+			points->SetNumberOfPoints(N);
+
+			unsigned char rgb[3];
+			for (size_t i = 0; i < N; ++i)
+			{
+				lut->GetColor(i, rgb);
+				points->SetPoint(i, rgb[0], rgb[1], rgb[2]);
+			}
+
+			auto kdtree = vtkSmartPointer<vtkKdTree>::New();
+			{
+				ScopedTimer t("Build KdTree");
+				kdtree->BuildLocatorFromPoints(points);
+			}
+
+			unsigned w, h;
+			if (ImageReader::getInfo2D(m_filenames[0], w, h))
+			{
+				auto map_colors = [kdtree](unsigned char r, unsigned char g, unsigned char b) -> float
+				{
+					double dist2;
+					return static_cast<float>(kdtree->FindClosestPoint(r, g, b, dist2));
+				};
+
+				auto load = [&, this](float** slices)
+				{
+					ScopedTimer t("Load and map image stack");
+					ImageReader::getImageStack(m_filenames, slices, w, h, map_colors);
+				};
+
+				handler3D->newbmp(w, h, static_cast<unsigned short>(m_filenames.size()), load);
+				handler3D->UpdateColorLookupTable(lut);
+			}
+		}
+		else
+		{
+			QMessageBox::warning(this, "iSeg",
+				"Error occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+		}
+	}
+
+	close();
+}
+
+void LoaderColorImages::load_mixer()
+{
+	if ((type == eImageType::kBMP && bmphandler::CheckBMPDepth(m_filenames[0]) > 8) ||
+		(type == eImageType::kPNG && bmphandler::CheckPNGDepth(m_filenames[0]) > 8))
+	{
+		ChannelMixer channelMixer(m_filenames, nullptr);
+		channelMixer.move(QCursor::pos());
+		if (!channelMixer.exec())
+		{
+			close();
+			return;
+		}
+
+		int redFactor = channelMixer.GetRedFactor();
+		int greenFactor = channelMixer.GetGreenFactor();
+		int blueFactor = channelMixer.GetBlueFactor();
+		handler3D->set_rgb_factors(redFactor, greenFactor, blueFactor);
+	}
+	else
+	{
+		handler3D->set_rgb_factors(33, 33, 33);
+	}
+
 	if (subsect->isOn())
 	{
 		Point p;
@@ -1365,42 +1181,40 @@ void LoaderColorImages::load_pushed()
 	close();
 }
 
-ClickablaLabel::ClickablaLabel(QWidget* parent, Qt::WindowFlags f)
+ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
 	: QLabel(parent, f)
 {
 	centerX = width() / 2;
-	;
 	centerY = height() / 2;
-	;
 	squareWidth = 24;
 	squareHeight = 24;
 }
 
-ClickablaLabel::ClickablaLabel(const QString& text, QWidget* parent,
+ClickableLabel::ClickableLabel(const QString& text, QWidget* parent,
 							   Qt::WindowFlags f)
 	: QLabel(text, parent, f)
 {
 }
 
-void ClickablaLabel::SetSquareWidth(int width) { squareWidth = width; }
+void ClickableLabel::SetSquareWidth(int width) { squareWidth = width; }
 
-void ClickablaLabel::SetSquareHeight(int height) { squareHeight = height; }
+void ClickableLabel::SetSquareHeight(int height) { squareHeight = height; }
 
-void ClickablaLabel::SetCenter(QPoint newCenter)
+void ClickableLabel::SetCenter(QPoint newCenter)
 {
 	centerX = newCenter.x();
 	centerY = newCenter.y();
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::mousePressEvent(QMouseEvent* ev)
+void ClickableLabel::mousePressEvent(QMouseEvent* ev)
 {
 	centerX = ev->pos().x();
 	centerY = ev->pos().y();
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::paintEvent(QPaintEvent* e)
+void ClickableLabel::paintEvent(QPaintEvent* e)
 {
 	QLabel::paintEvent(e);
 
@@ -1458,7 +1272,7 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	hboxImageSource = new Q3HBox(hboxImageAndControl);
 	hboxImageSource->setFixedSize(standardBoxSize);
 	hboxImageSource->show();
-	imageSourceLabel = new ClickablaLabel(hboxImageSource);
+	imageSourceLabel = new ClickableLabel(hboxImageSource);
 	imageSourceLabel->setFixedSize(standardBoxSize);
 	imageSourceLabel->SetSquareWidth(25);
 	imageSourceLabel->SetSquareHeight(25);
@@ -1477,8 +1291,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	controlSize.setWidth(scaleX / 2);
 	hboxControl->setFixedSize(controlSize);
 
-	cbQuantizeToLookuptable = new QCheckBox("Map to color lookup table", hboxControl);
-	cbQuantizeToLookuptable->setChecked(true);
 	hboxChannelOptions = new Q3VBox(hboxControl);
 
 	vboxRed = new Q3HBox(hboxChannelOptions);
@@ -1547,7 +1359,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	spinSlice->setMaximum(filenames.size() - 1);
 	spinSlice->setValue(0);
 	selectedSlice = spinSlice->value();
-	//updateImage = new QPushButton("Update",vboxSlice);
 
 	loadFile = new QPushButton("Open", hboxButtons);
 	cancelBut = new QPushButton("Cancel", hboxButtons);
@@ -1558,9 +1369,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 	vboxMain->setFixedSize(vboxMain->sizeHint());
-
-	QObject::connect(cbQuantizeToLookuptable, SIGNAL(stateChanged(int)), this,
-					 SLOT(mapToColorChanged()));
 
 	QObject::connect(sliderRed, SIGNAL(valueChanged(int)), this,
 					 SLOT(sliderRedValueChanged(int)));
@@ -1586,8 +1394,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	QObject::connect(spinSlice, SIGNAL(valueChanged(int)), this,
 					 SLOT(sliceValueChanged(int)));
 
-	//QObject::connect(updateImage,SIGNAL(clicked()),this,SLOT(RefreshImage()));
-
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 
@@ -1598,7 +1404,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 
 	RefreshSourceImage();
 	ChangePreview();
-	mapToColorChanged();
 }
 
 ChannelMixer::~ChannelMixer() { delete vboxMain; }
@@ -1895,8 +1700,6 @@ void ChannelMixer::cancel_toggled()
 	blueFactorPV = 11;
 
 	vboxMain->hide();
-
-	return;
 }
 
 int ChannelMixer::GetRedFactor() { return redFactorPV; }
@@ -1908,19 +1711,6 @@ int ChannelMixer::GetBlueFactor() { return blueFactorPV; }
 void ChannelMixer::load_pushed()
 {
 	close();
-}
-
-void ChannelMixer::mapToColorChanged()
-{
-	bool show_mixer = !cbQuantizeToLookuptable->isChecked();
-	vboxRed->setVisible(show_mixer);
-	vboxBlue->setVisible(show_mixer);
-	vboxGreen->setVisible(show_mixer);
-}
-
-bool ChannelMixer::QuantizeColor() const
-{
-	return cbQuantizeToLookuptable->isChecked();
 }
 
 ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,

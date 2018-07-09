@@ -55,7 +55,7 @@ vtkGenericDataSetWriter::vtkGenericDataSetWriter()
 {
 	this->SetNumberOfInputPorts(1);
 	this->SetNumberOfOutputPorts(0);
-	this->FileName = NULL;
+	this->FileName = nullptr;
 	this->FileType = VTK_BINARY;
 	this->DataMode = vtkXMLWriter::Appended;
 	this->EncodeAppendedData = 0;
@@ -65,7 +65,7 @@ vtkGenericDataSetWriter::vtkGenericDataSetWriter()
 	this->FlipTriangles = false;
 }
 
-vtkGenericDataSetWriter::~vtkGenericDataSetWriter() { this->SetFileName(NULL); }
+vtkGenericDataSetWriter::~vtkGenericDataSetWriter() { this->SetFileName(nullptr); }
 
 void vtkGenericDataSetWriter::SetInput(vtkDataObject *input)
 {
@@ -78,7 +78,7 @@ void vtkGenericDataSetWriter::SetInput(int index, vtkDataObject *input)
 		this->SetInputData(index, input);
 	}
 	else {
-		// Setting a NULL input remove the connection.
+		// Setting a nullptr input remove the connection.
 		this->SetInputConnection(index, 0);
 	}
 }
@@ -173,11 +173,11 @@ void vtkGenericDataSetWriter::PrintSelf(ostream &os, vtkIndent indent)
 bool vtkGenericDataSetWriter::WriteEsraTriangles(vtkPolyData *surface,
 																								 const char *fname)
 {
-	if (surface == NULL)
+	if (surface == nullptr)
 		return false;
 
 	FILE *fp;
-	if ((fp = fopen(fname, "wb")) == NULL)
+	if ((fp = fopen(fname, "wb")) == nullptr)
 		return false;
 
 	// Find index array for tissues
@@ -185,13 +185,13 @@ bool vtkGenericDataSetWriter::WriteEsraTriangles(vtkPolyData *surface,
 			surface->GetCellData()->GetArray(this->MaterialArrayName);
 
 	// try other typical names
-	if (tissueArray == NULL) {
+	if (tissueArray == nullptr) {
 		tissueArray = surface->GetCellData()->GetArray("TissueIndex");
 	}
-	if (tissueArray == NULL) {
+	if (tissueArray == nullptr) {
 		tissueArray = surface->GetCellData()->GetArray("Material");
 	}
-	if (tissueArray == NULL && surface->GetCellData()->GetNumberOfArrays()) {
+	if (tissueArray == nullptr && surface->GetCellData()->GetNumberOfArrays()) {
 		tissueArray = surface->GetCellData()->GetArray(0);
 		std::cerr << "Warning: could not find named array " << std::endl;
 	}
@@ -207,7 +207,7 @@ bool vtkGenericDataSetWriter::WriteEsraTriangles(vtkPolyData *surface,
 	std::map<int, vtkCellArray *> tissueCells;
 	vtkIdType npts, *pts;
 	surface->BuildCells();
-	if (tissueArray != NULL) {
+	if (tissueArray != nullptr) {
 		for (vtkIdType k = 0; k < surface->GetNumberOfCells(); k++) {
 			//assert(surface->GetCellType(k) == VTK_TRIANGLE);
 			if (surface->GetCellType(k) != VTK_TRIANGLE) {
@@ -300,7 +300,7 @@ bool vtkGenericDataSetWriter::WriteEsraTriangles(vtkPolyData *surface,
 		fwrite(trisarray, Ntriids * sizeof(unsigned), 1, fp);
 		free(trisarray);
 
-		if (tissueArray != NULL)
+		if (tissueArray != nullptr)
 			(it->second)->Delete();
 	}
 

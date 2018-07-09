@@ -51,7 +51,7 @@ class vtkGDCM_API vtkGDCMImageWriter : public vtkImageWriter
 public:
   static vtkGDCMImageWriter *New();
   vtkTypeMacro(vtkGDCMImageWriter,vtkImageWriter);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+  virtual void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Pass in the vtkmedicalimageproperties object for medical information
@@ -71,7 +71,7 @@ public:
   vtkBooleanMacro(LossyFlag,int);
 
   // I need that...
-  virtual void Write();
+  virtual void Write() override;
 
   // Description:
   // Get the entension for this file format.
@@ -142,26 +142,26 @@ protected:
   ~vtkGDCMImageWriter();
 
 #if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
-  int FillInputPortInformation(int port, vtkInformation *info);
+  int FillInputPortInformation(int port, vtkInformation *info) override;
   int RequestInformation(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
+    vtkInformationVector *outputVector) override;
   int RequestUpdateExtent(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
+    vtkInformationVector *outputVector) override;
   int RequestData(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
+    vtkInformationVector *outputVector) override;
 #else
   void WriteSlice(vtkImageData *data);
 #endif /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
   int WriteGDCMData(vtkImageData *data, int timeStep);
 
 protected:
-  virtual /*const*/ char *GetFileName();
+  virtual /*const*/ char *GetFileName() override;
 
 private:
   vtkGDCMImageWriter(const vtkGDCMImageWriter&);  // Not implemented.

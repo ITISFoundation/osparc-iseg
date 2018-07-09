@@ -675,7 +675,7 @@ bool TissueInfos::SaveTissuesReadable(const char* filename,
 									  unsigned short version)
 {
 	FILE* fp;
-	if ((fp = fopen(filename, "w")) == NULL)
+	if ((fp = fopen(filename, "w")) == nullptr)
 	{
 		return false;
 	}
@@ -722,7 +722,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 
 	char name[100];
 	FILE* fp;
-	if ((fp = fopen(filename, "r")) == NULL)
+	if ((fp = fopen(filename, "r")) == nullptr)
 	{
 		InitTissues();
 		return false;
@@ -736,7 +736,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		if (fscanf(fp, "V%u\n", &tc) != 1)
 		{
 			fclose(fp);
-			if ((fp = fopen(filename, "r")) == NULL)
+			if ((fp = fopen(filename, "r")) == nullptr)
 			{
 				InitTissues();
 				return false;
@@ -753,7 +753,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		if (fscanf(fp, "N%u\n", &tc) != 1)
 		{
 			fclose(fp);
-			if ((fp = fopen(filename, "r")) == NULL)
+			if ((fp = fopen(filename, "r")) == nullptr)
 			{
 				InitTissues();
 				return false;
@@ -793,7 +793,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 			tc = labelMax;
 
 			fclose(fp);
-			if ((fp = fopen(filename, "r")) == NULL)
+			if ((fp = fopen(filename, "r")) == nullptr)
 			{
 				InitTissues();
 				return false;
@@ -963,7 +963,7 @@ bool TissueInfos::SaveDefaultTissueList(const char* filename)
 {
 	FILE* fp;
 	fp = fopen(filename, "w");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		return false;
 	}
@@ -985,7 +985,7 @@ bool TissueInfos::LoadDefaultTissueList(const char* filename)
 {
 	FILE* fp;
 	fp = fopen(filename, "r");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		InitTissues();
 	}

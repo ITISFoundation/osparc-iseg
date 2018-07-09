@@ -32,8 +32,8 @@ PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 	bmphand = handler3D->get_activebmphandler();
 
 	width = height = 0;
-	mask = currentselection = NULL;
-	valuedistrib = NULL;
+	mask = currentselection = nullptr;
+	valuedistrib = nullptr;
 
 	hasclipboard = false;
 	shiftpressed = false;

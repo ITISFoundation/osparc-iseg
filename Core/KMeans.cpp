@@ -23,8 +23,8 @@ using namespace iseg;
 
 KMeans::KMeans()
 {
-	m = NULL;
-	centers = NULL;
+	m = nullptr;
+	centers = nullptr;
 }
 
 void KMeans::init(short unsigned w, short unsigned h, short nrclass,
@@ -319,14 +319,14 @@ bool KMeans::get_centers_from_file(const std::string& fileName, float*& centers,
 	FILE* initFile;
 	char readChar[100];
 	initFile = fopen(fileName.c_str(), "r");
-	if (initFile == NULL)
+	if (initFile == nullptr)
 	{
 		perror("Error opening file");
 		return false;
 	}
 	else
 	{
-		while (fgets(readChar, 100, initFile) != NULL)
+		while (fgets(readChar, 100, initFile) != nullptr)
 		{
 			string str(readChar);
 			std::stringstream linestream(str);

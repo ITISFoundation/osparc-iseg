@@ -402,7 +402,7 @@ public:
 	/// Override
 	void GetPoint(vtkIdType v, double p[3]) override
 	{
-		assert(Points != NULL);
+		assert(Points != nullptr);
 		assert(v >= 0 && v < Points->GetNumberOfPoints());
 		Points->GetPoint(v, p);
 	}
@@ -410,7 +410,7 @@ public:
 	/// Override
 	virtual vtkIdType AddPoint(double x, double y, double z) override
 	{
-		assert(Locator != NULL);
+		assert(Locator != nullptr);
 		double p[3] = {x, y, z};
 		vtkIdType ptId;
 		Locator->InsertUniquePoint(p, ptId);
@@ -462,16 +462,16 @@ vtkImageExtractCompatibleMesher::vtkImageExtractCompatibleMesher()
 	this->GenerateTetMeshOutput = false;
 	this->NumberOfUnassignedLabels = -1;
 
-	this->Input = NULL;
-	//this->Grid = NULL;
-	this->Points = NULL;
-	this->ClipScalars = NULL;
-	this->Triangulator = NULL;
-	this->Locator = NULL;
-	this->Connectivity = NULL;
-	this->PointDomainArray = NULL;
-	this->Tetrahedra = NULL;
-	this->MyTriangulator = NULL;
+	this->Input = nullptr;
+	//this->Grid = nullptr;
+	this->Points = nullptr;
+	this->ClipScalars = nullptr;
+	this->Triangulator = nullptr;
+	this->Locator = nullptr;
+	this->Connectivity = nullptr;
+	this->PointDomainArray = nullptr;
+	this->Tetrahedra = nullptr;
+	this->MyTriangulator = nullptr;
 
 	// by default process active point scalars
 	this->SetInputArrayToProcess(0, 0, 0,
@@ -710,11 +710,11 @@ int vtkImageExtractCompatibleMesher::ContourSurface(
 	this->ExtractMeshDomainInterfaces(outputVector); // TODO
 
 	// Cleanup
-	this->Input = NULL;
+	this->Input = nullptr;
 	this->Points->Delete();
 	this->Connectivity->Delete();
 	this->CellDomainArray->Delete();
-	this->ClipScalars = NULL;
+	this->ClipScalars = nullptr;
 	delete this->Tetrahedra;
 
 	return 1;

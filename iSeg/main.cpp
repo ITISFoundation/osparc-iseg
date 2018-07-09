@@ -67,10 +67,10 @@ class vtkCustomOutputWindow : public vtkOutputWindow
 public:
 	static vtkCustomOutputWindow *New();
 	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream &os, vtkIndent indent) {}
+	virtual void PrintSelf(ostream &os, vtkIndent indent) override {}
 
 	// Put the text into the output stream.
-	virtual void DisplayText(const char *msg) { std::cerr << msg << std::endl; }
+	virtual void DisplayText(const char *msg) override { std::cerr << msg << std::endl; }
 
 protected:
 	vtkCustomOutputWindow() {}
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
 #endif
 	app.processEvents();
 
-	MainWindow *mainWindow = NULL;
+	MainWindow *mainWindow = nullptr;
 	if (argc > 1)
 	{
 		QString qstr(argv[1]);

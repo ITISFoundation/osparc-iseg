@@ -78,8 +78,8 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 	hbox1->setFixedSize(hbox1->sizeHint());
 	vbox1->setFixedSize(vbox1->sizeHint());
 
-	IFTrg = NULL;
-	lbmap = NULL;
+	IFTrg = nullptr;
+	lbmap = nullptr;
 	thresh = 0;
 
 	QObject::connect(pushclear, SIGNAL(clicked()), this, SLOT(clearmarks()));
@@ -95,9 +95,9 @@ ImageForestingTransformRegionGrowingWidget::~ImageForestingTransformRegionGrowin
 {
 	delete vbox1;
 
-	if (IFTrg != NULL)
+	if (IFTrg != nullptr)
 		delete IFTrg;
-	if (lbmap != NULL)
+	if (lbmap != nullptr)
 		delete lbmap;
 	return;
 }
@@ -139,7 +139,7 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 	}
 	emit vm_changed(&vm);
 	area = bmphand->return_height() * (unsigned)bmphand->return_width();
-	if (lbmap != NULL)
+	if (lbmap != nullptr)
 		free(lbmap);
 	lbmap = (float*)malloc(sizeof(float) * area);
 	for (unsigned i = 0; i < area; i++)
@@ -154,7 +154,7 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 		lbmap[width * it->py + it->px] = (float)tissuenr;
 	}
 
-	if (IFTrg != NULL)
+	if (IFTrg != nullptr)
 		delete (IFTrg);
 	IFTrg = bmphand->IFTrg_init(lbmap);
 
@@ -167,12 +167,12 @@ void ImageForestingTransformRegionGrowingWidget::init1()
 void ImageForestingTransformRegionGrowingWidget::cleanup()
 {
 	vmdyn.clear();
-	if (IFTrg != NULL)
+	if (IFTrg != nullptr)
 		delete IFTrg;
-	if (lbmap != NULL)
+	if (lbmap != nullptr)
 		delete lbmap;
-	IFTrg = NULL;
-	lbmap = NULL;
+	IFTrg = nullptr;
+	lbmap = nullptr;
 	sl_thresh->setEnabled(false);
 	emit vpdyn_changed(&vmdyn);
 	emit vm_changed(&vmempty);
@@ -282,7 +282,7 @@ void ImageForestingTransformRegionGrowingWidget::clearmarks()
 void ImageForestingTransformRegionGrowingWidget::slider_changed(int i)
 {
 	thresh = i * 0.01f * maxthresh;
-	if (IFTrg != NULL)
+	if (IFTrg != nullptr)
 	{
 		float* f1 = IFTrg->return_lb();
 		float* f2 = IFTrg->return_pf();
@@ -334,7 +334,7 @@ void ImageForestingTransformRegionGrowingWidget::bmphand_changed(bmphandler* bmp
 		lbmap[width * m.p.py + m.p.px] = static_cast<float>(m.mark);
 	}
 
-	if (IFTrg != NULL)
+	if (IFTrg != nullptr)
 		delete (IFTrg);
 	IFTrg = bmphand->IFTrg_init(lbmap);
 

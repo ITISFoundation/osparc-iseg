@@ -30,7 +30,7 @@ TissueCleaner::TissueCleaner(tissues_size_t** slices1, unsigned short n1,
 	n = n1;
 	width = width1;
 	height = height1;
-	volume = NULL;
+	volume = nullptr;
 	map.clear();
 }
 
@@ -41,7 +41,7 @@ bool TissueCleaner::Allocate()
 	//	volume=(int *)malloc(sizeof(int)*(unsigned)(width+1)*(unsigned)(height+1)*(unsigned)(n+1));
 	volume = (int*)malloc(sizeof(int) * (unsigned)(width) * (unsigned)(height) *
 						  (unsigned)(n));
-	if (volume == NULL)
+	if (volume == nullptr)
 		return false;
 	return true;
 }
@@ -270,7 +270,7 @@ void TissueCleaner::MakeStat()
 	for (unsigned i = 0; i < TISSUES_SIZE_MAX + 1; i++)
 		totvolumes[i] = 0;
 	volumes.resize(map.size(), 0);
-	if (volume == NULL)
+	if (volume == nullptr)
 		return;
 	unsigned maxi = n * (unsigned)width * unsigned(height);
 	for (unsigned long long i = 0; i < maxi; i++)
@@ -286,7 +286,7 @@ void TissueCleaner::MakeStat()
 
 void TissueCleaner::Clean(float ratio, unsigned minsize)
 {
-	if (volume == NULL)
+	if (volume == nullptr)
 		return;
 	std::vector<bool> erasemap;
 	erasemap.resize(map.size(), false);

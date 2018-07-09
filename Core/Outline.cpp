@@ -295,7 +295,7 @@ Point_type* OutlineSlice::return_line(tissues_size_t tissuetype,
 	{
 		return inner_lines[tissuetype][linenr].return_line();
 	}
-	return NULL;
+	return nullptr;
 }
 
 FILE* OutlineSlice::print(FILE* fp, tissues_size_t nr_tissues)
@@ -589,7 +589,7 @@ int OutlineSlices::print(const char* filename, tissues_size_t nr_tissues)
 
 	FILE* fp = printprologue(filename, nr_slices, nr_tissues);
 
-	if (fp == NULL)
+	if (fp == nullptr)
 		return 0;
 
 	for (unsigned i = 0; i < nr_slices; i++)
@@ -607,7 +607,7 @@ FILE* OutlineSlices::printprologue(const char* filename, unsigned nr_slices,
 {
 	FILE* fp;
 
-	if ((fp = fopen(filename, "w")) != NULL)
+	if ((fp = fopen(filename, "w")) != nullptr)
 	{
 		if (nr_tissues > 255)
 		{
@@ -638,7 +638,7 @@ int OutlineSlices::read(const char* filename)
 {
 	FILE* fp;
 
-	if ((fp = fopen(filename, "r")) == NULL)
+	if ((fp = fopen(filename, "r")) == nullptr)
 		return 0;
 
 	unsigned j, k, version;

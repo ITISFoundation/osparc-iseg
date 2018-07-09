@@ -57,12 +57,12 @@ RTDoseIODModule::RTDoseIODModule()
 	Rows = 0;
 	Columns = 0;
 	BitsAllocated = 0;
-	PixelData = NULL;
+	PixelData = nullptr;
 	NumberOfFrames = 0;
 	DoseUnits = Gray;
 	DoseType = Physical;
 	DoseSummationType = Plan;
-	GridFrameOffsetVector = NULL;
+	GridFrameOffsetVector = nullptr;
 	SOPInstanceUID = GenerateUID();
 }
 

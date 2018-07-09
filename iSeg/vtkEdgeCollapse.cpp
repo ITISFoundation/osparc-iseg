@@ -217,8 +217,8 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 	NumberOfEdgeFlips = 0;
 
 	// check some assumptions about the data
-	if (input->GetPolys() == NULL || input->GetPoints() == NULL ||
-		input->GetPointData() == NULL || input->GetFieldData() == NULL)
+	if (input->GetPolys() == nullptr || input->GetPoints() == nullptr ||
+		input->GetPointData() == nullptr || input->GetFieldData() == nullptr)
 	{
 		vtkErrorMacro("Nothing to decimate");
 		return 1;
@@ -1812,7 +1812,7 @@ enum interresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q,
 	REAL s1, s2, s3, s4;
 
 #ifdef SELF_CHECK
-	assert(R != NULL);
+	assert(R != nullptr);
 #endif
 	s1 = gp::orient3d(A, B, R, P);
 	s2 = gp::orient3d(A, B, R, Q);
@@ -1977,7 +1977,7 @@ enum interresult tri_vert_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* R)
 	int sign;
 
 #ifdef SELF_CHECK
-	assert(R != (REAL*)NULL);
+	assert(R != (REAL*)nullptr);
 #endif
 	// Adjust the orientation of a, b, c and r, so that we can assume that
 	//   r is strictly in ABC- (i.e., r is above ABC wrt. right-hand rule).

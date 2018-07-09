@@ -29,8 +29,8 @@ vectissuedescr* hypermeshascii_read(const char* filename)
 	V3F vertex;
 	tissuedescript ts;
 
-	if ((fp = fopen(filename, "r")) == NULL)
-		return NULL;
+	if ((fp = fopen(filename, "r")) == nullptr)
+		return nullptr;
 
 	unsigned dummy, corner1, corner2, corner3;
 	//	float x,y,z;
