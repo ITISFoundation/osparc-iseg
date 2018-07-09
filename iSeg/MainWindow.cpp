@@ -2741,11 +2741,8 @@ void MainWindow::execute_loadmhd()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-					"Metaheader (*.mhd *.mha)\n"
-					"All(*.*)",
-					this);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
+		"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());

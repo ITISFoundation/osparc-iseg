@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 
 class QString;
 class vtkImageData;
@@ -44,7 +45,7 @@ public:
 	SlicesHandler();
 	~SlicesHandler();
 
-	void newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices);
+	void newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices, const std::function<void(float**)>& init_callback = std::function<void(float**)>());
 	void freebmp();
 	void clear_bmp();
 	void clear_work();

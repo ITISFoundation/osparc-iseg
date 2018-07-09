@@ -114,26 +114,23 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	for (int i = 0; i < num_colors; ++i)
 	{
 		// group name
-		std::string const folder_name =
-				"/Lut/" + (boost::format("color%05d") % i).str();
-		;
+		std::string const folder_name = "/Lut/" + (boost::format("color%05d") % i).str();
 		writer.createGroup(folder_name);
 
 		// write color index
 		if (!writer.write(&i, dim_scalar, folder_name + "/index"))
 		{
-			cerr << "error writing index" << endl;
+			std::cerr << "error writing index\n";
 			return false;
 		}
 
 		// write rgb
 		unsigned char rgb[3];
-		lut->GetColor(i, rgb);
-		float float_rgb[3] = {rgb[0] / 255.0f, rgb[1] / 255.0f,
-				rgb[2] / 255.0f};
+		lut->GetColor(static_cast<size_t>(i), rgb);
+		float float_rgb[3] = {rgb[0] / 255.0f, rgb[1] / 255.0f, rgb[2] / 255.0f};
 		if (!writer.write(float_rgb, dim_rgb, folder_name + "/rgb"))
 		{
-			cerr << "error writing color" << endl;
+			std::cerr << "error writing color\n";
 			return false;
 		}
 	}

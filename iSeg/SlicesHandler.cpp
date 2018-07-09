@@ -296,15 +296,15 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 			j = _nrslices + 1;
 	}
 
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(_nrslices);
-	_slice_bmpranges.resize(_nrslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
 	if (j == _nrslices)
 	{
+		// Ranges
+		Pair dummy;
+		_slice_ranges.resize(_nrslices);
+		_slice_bmpranges.resize(_nrslices);
+		compute_range_mode1(&dummy);
+		compute_bmprange_mode1(&dummy);
+
 		_loaded = true;
 		return 1;
 	}
@@ -333,22 +333,21 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 		j += (_image_slices[i]).LoadDIBitmap(filenames[i], p, dx, dy);
 	}
 
-	_width = dx;
-	_height = dy;
-	_area = _height * (unsigned int)_width;
-
-	new_overlay();
-
-	// Ranges
-	Pair dummy;
-	_slice_ranges.resize(_nrslices);
-	_slice_bmpranges.resize(_nrslices);
-	compute_range_mode1(&dummy);
-	compute_bmprange_mode1(&dummy);
-
 	if (j == _nrslices)
 	{
+		// Ranges
+		Pair dummy;
+		_slice_ranges.resize(_nrslices);
+		_slice_bmpranges.resize(_nrslices);
+		compute_range_mode1(&dummy);
+		compute_bmprange_mode1(&dummy);
+
 		_loaded = true;
+		_width = dx;
+		_height = dy;
+		_area = _height * (unsigned int)_width;
+
+		new_overlay();
 		return 1;
 	}
 	else
@@ -3462,20 +3461,22 @@ bool SlicesHandler::remove_limit(Point p, unsigned radius,
 		return false;
 }
 
-void SlicesHandler::newbmp(unsigned short width1, unsigned short height1,
-		unsigned short nrofslices)
+void SlicesHandler::newbmp(unsigned short width1, unsigned short height1, unsigned short nrofslices, const std::function<void(float**)>& init_callback)
 {
 	_activeslice = 0;
 	_startslice = 0;
 	_endslice = _nrslices = nrofslices;
-	cerr << "nrslices = " << _nrslices << endl;
-	cerr << "nrofslices = " << nrofslices << endl;
 	_os.set_sizenr(_nrslices);
-
 	_image_slices.resize(nrofslices);
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 		(_image_slices[i]).newbmp(width1, height1);
+
+	// now that memory is allocated give callback a chance to 'initialize' the data
+	if (init_callback)
+	{
+		init_callback(source_slices().data());
+	}
 
 	// Ranges
 	Pair dummy;
@@ -3483,6 +3484,7 @@ void SlicesHandler::newbmp(unsigned short width1, unsigned short height1,
 	_slice_bmpranges.resize(nrofslices);
 	compute_range_mode1(&dummy);
 	compute_bmprange_mode1(&dummy);
+
 
 	_loaded = true;
 

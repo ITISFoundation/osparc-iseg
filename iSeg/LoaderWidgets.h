@@ -41,8 +41,6 @@ public:
 				QWidget* parent = 0, const char* name = 0,
 				Qt::WindowFlags wFlags = 0);
 	~LoaderDicom();
-	//	void update();
-	//protected:
 
 private:
 	SlicesHandler* handler3D;
@@ -124,17 +122,17 @@ private:
 	QPushButton* cancelBut;
 
 private slots:
-	void subsect_toggled();
+	void map_to_lut_toggled();
 	void load_pushed();
 };
 
-class ClickablaLabel : public QLabel
+class ClickableLabel : public QLabel
 {
 	Q_OBJECT
 
 public:
-	ClickablaLabel(QWidget* parent = 0, Qt::WindowFlags f = 0);
-	ClickablaLabel(const QString& text, QWidget* parent = 0,
+	ClickableLabel(QWidget* parent = 0, Qt::WindowFlags f = 0);
+	ClickableLabel(const QString& text, QWidget* parent = 0,
 				   Qt::WindowFlags f = 0);
 
 	void SetSquareWidth(int width);
@@ -167,13 +165,10 @@ public:
 	int GetGreenFactor();
 	int GetBlueFactor();
 
-	bool QuantizeColor() const;
-
 private:
 	std::vector<const char*> m_filenames;
 	SlicesHandler* handler3D;
 
-	QCheckBox* cbQuantizeToLookuptable;
 	Q3VBox* hboxChannelOptions;
 
 	Q3VBox* vboxMain;
@@ -184,7 +179,7 @@ private:
 	Q3HBox* hboxButtons;
 
 	Q3HBox* hboxImageSource;
-	ClickablaLabel* imageSourceLabel;
+	ClickableLabel* imageSourceLabel;
 
 	Q3HBox* hboxImage;
 	QLabel* imageLabel;
@@ -249,7 +244,6 @@ protected slots:
 	void NewCenterPreview(QPoint newCenter);
 
 private slots:
-	void mapToColorChanged();
 	void sliderRedValueChanged(int value);
 	void sliderGreenValueChanged(int value);
 	void sliderBlueValueChanged(int value);
@@ -277,8 +271,6 @@ public:
 	~LoaderRaw();
 
 	QString GetFileName();
-	//	void update();
-	//protected:
 
 private:
 	SlicesHandler* handler3D;

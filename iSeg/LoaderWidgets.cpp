@@ -12,8 +12,17 @@
 #define cimg_display 0
 #include "CImg.h"
 #include "LoaderWidgets.h"
+#include "XdmfImageReader.h"
 
 #include "Data/Point.h"
+
+#include "Core/ColorLookupTable.h"
+#include "Core/ImageReader.h"
+
+#include <vtkKdTree.h>
+#include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 
 #include <qfiledialog.h>
 #include <q3hbox.h>
@@ -447,9 +456,7 @@ void LoaderRaw::load_pushed()
 
 void LoaderRaw::select_pushed()
 {
-	QString loadfilename =
-		QFileDialog::getOpenFileName(QString::null, QString::null,
-									  this); //, filename);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, QString::null, this);
 	nameEdit->setText(loadfilename);
 	return;
 }
@@ -1021,18 +1028,19 @@ LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std:
 	setLayout(top_layout);
 	setMinimumSize(150,200);
 
-	subsect_toggled();
+	map_to_lut_toggled();
 
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
+	QObject::connect(map_to_lut, SIGNAL(clicked()), this, SLOT(map_to_lut_toggled()));
 }
 
 LoaderColorImages::~LoaderColorImages() {}
 
-void LoaderColorImages::subsect_toggled()
+void LoaderColorImages::map_to_lut_toggled()
 {
 	// enable/disable
+	subsect->setEnabled(!map_to_lut->isChecked());
 }
 
 void LoaderColorImages::load_pushed()
@@ -1049,7 +1057,56 @@ void LoaderColorImages::load_pushed()
 
 void LoaderColorImages::load_quantize()
 {
-	;
+	QString filename = QFileDialog::getOpenFileName(QString::null,
+		"iSEG Color Lookup Table (*.lut *.h5)\nAll(*.*)", this);
+	if (!filename.isEmpty())
+	{
+		XdmfImageReader reader;
+		reader.SetFileName(filename.toStdString().c_str());
+		if (auto lut = reader.ReadColorLookup())
+		{
+			auto N = lut->NumberOfColors();
+
+			auto points = vtkSmartPointer<vtkPoints>::New();
+			points->SetDataTypeToFloat();
+			points->SetNumberOfPoints(N);
+
+			unsigned char rgb[3];
+			for (size_t i = 0; i < N; ++i)
+			{
+				lut->GetColor(i, rgb);
+				points->SetPoint(i, rgb[0], rgb[1], rgb[2]);
+			}
+
+			auto kdtree = vtkSmartPointer<vtkKdTree>::New();
+			kdtree->BuildLocatorFromPoints(points);
+
+			unsigned w, h;
+			if (ImageReader::getInfo2D(m_filenames[0], w, h))
+			{
+				auto map_colors = [kdtree](unsigned char r, unsigned char g, unsigned char b) -> float
+				{
+					double dist2;
+					return static_cast<float>(kdtree->FindClosestPoint(r, g, b, dist2));
+				};
+
+				auto load = [&, this](float** slices)
+				{
+					ImageReader::getImageStack(m_filenames, slices, w, h, map_colors);
+				};
+
+				handler3D->newbmp(w, h, static_cast<unsigned short>(m_filenames.size()), load);
+				handler3D->UpdateColorLookupTable(lut);
+			}
+		}
+		else
+		{
+			QMessageBox::warning(this, "iSeg",
+				"Error occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+		}
+	}
+
+	close();
 }
 
 void LoaderColorImages::load_mixer()
@@ -1060,7 +1117,10 @@ void LoaderColorImages::load_mixer()
 		ChannelMixer channelMixer(m_filenames, nullptr);
 		channelMixer.move(QCursor::pos());
 		if (!channelMixer.exec())
+		{
+			close();
 			return;
+		}
 
 		int redFactor = channelMixer.GetRedFactor();
 		int greenFactor = channelMixer.GetGreenFactor();
@@ -1109,7 +1169,7 @@ void LoaderColorImages::load_mixer()
 	close();
 }
 
-ClickablaLabel::ClickablaLabel(QWidget* parent, Qt::WindowFlags f)
+ClickableLabel::ClickableLabel(QWidget* parent, Qt::WindowFlags f)
 	: QLabel(parent, f)
 {
 	centerX = width() / 2;
@@ -1118,31 +1178,31 @@ ClickablaLabel::ClickablaLabel(QWidget* parent, Qt::WindowFlags f)
 	squareHeight = 24;
 }
 
-ClickablaLabel::ClickablaLabel(const QString& text, QWidget* parent,
+ClickableLabel::ClickableLabel(const QString& text, QWidget* parent,
 							   Qt::WindowFlags f)
 	: QLabel(text, parent, f)
 {
 }
 
-void ClickablaLabel::SetSquareWidth(int width) { squareWidth = width; }
+void ClickableLabel::SetSquareWidth(int width) { squareWidth = width; }
 
-void ClickablaLabel::SetSquareHeight(int height) { squareHeight = height; }
+void ClickableLabel::SetSquareHeight(int height) { squareHeight = height; }
 
-void ClickablaLabel::SetCenter(QPoint newCenter)
+void ClickableLabel::SetCenter(QPoint newCenter)
 {
 	centerX = newCenter.x();
 	centerY = newCenter.y();
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::mousePressEvent(QMouseEvent* ev)
+void ClickableLabel::mousePressEvent(QMouseEvent* ev)
 {
 	centerX = ev->pos().x();
 	centerY = ev->pos().y();
 	emit newCenterPreview(QPoint(centerX, centerY));
 }
 
-void ClickablaLabel::paintEvent(QPaintEvent* e)
+void ClickableLabel::paintEvent(QPaintEvent* e)
 {
 	QLabel::paintEvent(e);
 
@@ -1200,7 +1260,7 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	hboxImageSource = new Q3HBox(hboxImageAndControl);
 	hboxImageSource->setFixedSize(standardBoxSize);
 	hboxImageSource->show();
-	imageSourceLabel = new ClickablaLabel(hboxImageSource);
+	imageSourceLabel = new ClickableLabel(hboxImageSource);
 	imageSourceLabel->setFixedSize(standardBoxSize);
 	imageSourceLabel->SetSquareWidth(25);
 	imageSourceLabel->SetSquareHeight(25);
@@ -1219,8 +1279,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	controlSize.setWidth(scaleX / 2);
 	hboxControl->setFixedSize(controlSize);
 
-	cbQuantizeToLookuptable = new QCheckBox("Map to color lookup table", hboxControl);
-	cbQuantizeToLookuptable->setChecked(true);
 	hboxChannelOptions = new Q3VBox(hboxControl);
 
 	vboxRed = new Q3HBox(hboxChannelOptions);
@@ -1289,7 +1347,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	spinSlice->setMaximum(filenames.size() - 1);
 	spinSlice->setValue(0);
 	selectedSlice = spinSlice->value();
-	//updateImage = new QPushButton("Update",vboxSlice);
 
 	loadFile = new QPushButton("Open", hboxButtons);
 	cancelBut = new QPushButton("Cancel", hboxButtons);
@@ -1300,9 +1357,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 	vboxMain->setFixedSize(vboxMain->sizeHint());
-
-	QObject::connect(cbQuantizeToLookuptable, SIGNAL(stateChanged(int)), this,
-					 SLOT(mapToColorChanged()));
 
 	QObject::connect(sliderRed, SIGNAL(valueChanged(int)), this,
 					 SLOT(sliderRedValueChanged(int)));
@@ -1328,8 +1382,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 	QObject::connect(spinSlice, SIGNAL(valueChanged(int)), this,
 					 SLOT(sliceValueChanged(int)));
 
-	//QObject::connect(updateImage,SIGNAL(clicked()),this,SLOT(RefreshImage()));
-
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 
@@ -1340,7 +1392,6 @@ ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
 
 	RefreshSourceImage();
 	ChangePreview();
-	mapToColorChanged();
 }
 
 ChannelMixer::~ChannelMixer() { delete vboxMain; }
@@ -1637,8 +1688,6 @@ void ChannelMixer::cancel_toggled()
 	blueFactorPV = 11;
 
 	vboxMain->hide();
-
-	return;
 }
 
 int ChannelMixer::GetRedFactor() { return redFactorPV; }
@@ -1650,19 +1699,6 @@ int ChannelMixer::GetBlueFactor() { return blueFactorPV; }
 void ChannelMixer::load_pushed()
 {
 	close();
-}
-
-void ChannelMixer::mapToColorChanged()
-{
-	bool show_mixer = !cbQuantizeToLookuptable->isChecked();
-	vboxRed->setVisible(show_mixer);
-	vboxBlue->setVisible(show_mixer);
-	vboxGreen->setVisible(show_mixer);
-}
-
-bool ChannelMixer::QuantizeColor() const
-{
-	return cbQuantizeToLookuptable->isChecked();
 }
 
 ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,
