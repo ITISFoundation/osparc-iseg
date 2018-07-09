@@ -26,7 +26,7 @@
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qstring.h>
-#include <qwidget.h>
+#include <qgridLayout.h>
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -971,80 +971,107 @@ LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std:
 	, type(typ)
 	, m_filenames(filenames)
 {
-	vbox1 = new Q3VBox(this);
-	hbox2 = new Q3HBox(vbox1);
-	subsect = new QCheckBox(QString("Subsection "), hbox2);
+	map_to_lut = new QCheckBox(QString("Map colors to lookup table"));
+	map_to_lut->setChecked(true);
+
+	subsect = new QCheckBox(QString("Subsection"));
 	subsect->setChecked(false);
-	subsect->show();
-	vbox2 = new Q3VBox(hbox2);
-	hbox3 = new Q3HBox(vbox2);
-	xoffs = new QLabel(QString("x-Offset: "), hbox3);
-	xoffset = new QSpinBox(0, 2000, 1, hbox3);
+
+	auto xoffs = new QLabel(QString("x-Offset: "));
+	xoffset = new QSpinBox(0, 2000, 1, nullptr);
 	xoffset->setValue(0);
-	xoffset->show();
-	yoffs = new QLabel(QString("y-Offset: "), hbox3);
-	yoffset = new QSpinBox(0, 2000, 1, hbox3);
-	yoffset->show();
+
+	auto yoffs = new QLabel(QString("y-Offset: "));
+	yoffset = new QSpinBox(0, 2000, 1, nullptr);
 	xoffset->setValue(0);
-	hbox3->show();
-	hbox4 = new Q3HBox(vbox2);
-	xl = new QLabel(QString("x-Length: "), hbox4);
-	xlength = new QSpinBox(0, 2000, 1, hbox4);
-	xlength->show();
+
+	auto xl = new QLabel(QString("x-Length: "));
+	xlength = new QSpinBox(0, 2000, 1, nullptr);
 	xlength->setValue(256);
-	yl = new QLabel(QString("y-Length: "), hbox4);
-	ylength = new QSpinBox(0, 2000, 1, hbox4);
-	ylength->show();
+
+	auto yl = new QLabel(QString("y-Length: "));
+	ylength = new QSpinBox(0, 2000, 1, nullptr);
 	ylength->setValue(256);
-	hbox4->show();
-	vbox2->show();
-	hbox2->show();
-	hbox6 = new Q3HBox(vbox1);
-	loadFile = new QPushButton("Open", hbox6);
-	cancelBut = new QPushButton("Cancel", hbox6);
-	hbox6->show();
 
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	auto subsect_layout = new QGridLayout(2,4);
+	subsect_layout->addWidget(xoffs);
+	subsect_layout->addWidget(xoffset);
+	subsect_layout->addWidget(xl);
+	subsect_layout->addWidget(xlength);
+	subsect_layout->addWidget(yoffs);
+	subsect_layout->addWidget(yoffset);
+	subsect_layout->addWidget(yl);
+	subsect_layout->addWidget(ylength);
+	auto subsect_options = new QWidget;
+	subsect_options->setLayout(subsect_layout);
 
-	vbox1->setFixedSize(vbox1->sizeHint());
+	loadFile = new QPushButton("Open");
+	cancelBut = new QPushButton("Cancel");
+	auto button_layout = new QHBoxLayout;
+	button_layout->addWidget(loadFile);
+	button_layout->addWidget(cancelBut);
+	auto button_row = new QWidget;
+	button_row->setLayout(button_layout);
 
-	subsect_toggled(subsect->isChecked());
+	auto top_layout = new QVBoxLayout;
+	top_layout->addWidget(map_to_lut);
+	top_layout->addWidget(subsect);
+	top_layout->addWidget(subsect_options);
+	top_layout->addWidget(button_row);
+	setLayout(top_layout);
+	setMinimumSize(150,200);
+
+	subsect_toggled();
 
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
 }
 
-LoaderColorImages::~LoaderColorImages() { delete vbox1; }
-
-void LoaderColorImages::subsect_toggled(bool isset)
-{
-	if (isset)
-	{
-		vbox2->show();
-	}
-	else
-	{
-		vbox2->hide();
-	}
-}
+LoaderColorImages::~LoaderColorImages() {}
 
 void LoaderColorImages::subsect_toggled()
 {
-	bool isset = subsect->isOn();
-	if (isset)
-	{
-		vbox2->show();
-	}
-	else
-	{
-		vbox2->hide();
-	}
+	// enable/disable
 }
 
 void LoaderColorImages::load_pushed()
 {
+	if (map_to_lut->isChecked())
+	{
+		load_quantize();
+	}
+	else
+	{
+		load_mixer();
+	}
+}
+
+void LoaderColorImages::load_quantize()
+{
+	;
+}
+
+void LoaderColorImages::load_mixer()
+{
+	if ((type == eImageType::kBMP && bmphandler::CheckBMPDepth(m_filenames[0]) > 8) ||
+		(type == eImageType::kPNG && bmphandler::CheckPNGDepth(m_filenames[0]) > 8))
+	{
+		ChannelMixer channelMixer(m_filenames, nullptr);
+		channelMixer.move(QCursor::pos());
+		if (!channelMixer.exec())
+			return;
+
+		int redFactor = channelMixer.GetRedFactor();
+		int greenFactor = channelMixer.GetGreenFactor();
+		int blueFactor = channelMixer.GetBlueFactor();
+		handler3D->set_rgb_factors(redFactor, greenFactor, blueFactor);
+	}
+	else
+	{
+		handler3D->set_rgb_factors(33, 33, 33);
+	}
+
 	if (subsect->isOn())
 	{
 		Point p;
@@ -1086,9 +1113,7 @@ ClickablaLabel::ClickablaLabel(QWidget* parent, Qt::WindowFlags f)
 	: QLabel(parent, f)
 {
 	centerX = width() / 2;
-	;
 	centerY = height() / 2;
-	;
 	squareWidth = 24;
 	squareHeight = 24;
 }

@@ -108,34 +108,22 @@ public:
 	eImageType type = kPNG;
 
 private:
+	void load_mixer();
+	void load_quantize();
+
 	std::vector<const char*> m_filenames;
 	SlicesHandler* handler3D;
-	short unsigned w;
-	short unsigned h;
-	Point p;
-	unsigned short dx;
-	unsigned short dy;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	QPushButton* loadFile;
-	QPushButton* cancelBut;
+
+	QCheckBox* map_to_lut;
+	QCheckBox* subsect;
 	QSpinBox* xoffset;
 	QSpinBox* yoffset;
 	QSpinBox* xlength;
 	QSpinBox* ylength;
-	QCheckBox* subsect;
-	QLabel* xoffs;
-	QLabel* yoffs;
-	QLabel* xl;
-	QLabel* yl;
+	QPushButton* loadFile;
+	QPushButton* cancelBut;
 
 private slots:
-	void subsect_toggled(bool isset);
 	void subsect_toggled();
 	void load_pushed();
 };

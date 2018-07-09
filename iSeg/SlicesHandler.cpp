@@ -17,7 +17,6 @@
 #include "AvwReader.h"
 #include "ChannelExtractor.h"
 #include "DicomReader.h"
-#include "LoaderWidgets.h"
 #include "Morpho.h"
 #include "TestingMacros.h"
 #include "TissueHierarchy.h"
@@ -276,27 +275,9 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	_startslice = 0;
 	_endslice = _nrslices = (unsigned short)filenames.size();
 	_os.set_sizenr(_nrslices);
-
 	_image_slices.resize(_nrslices);
+	
 	int j = 0;
-
-	if (_image_slices[0].CheckBMPDepth(filenames[0]) > 8)
-	{
-		ChannelMixer channelMixer(filenames, nullptr);
-		channelMixer.move(QCursor::pos());
-		if (!channelMixer.exec())
-			return 0;
-
-		int redFactor = channelMixer.GetRedFactor();
-		int greenFactor = channelMixer.GetGreenFactor();
-		int blueFactor = channelMixer.GetBlueFactor();
-
-		for (unsigned short i = 0; i < _nrslices; i++)
-		{
-			_image_slices[i].SetConverterFactors(redFactor, greenFactor, blueFactor);
-		}
-	}
-
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
 		j += (_image_slices[i]).LoadDIBitmap(filenames[i]);
@@ -377,6 +358,14 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 	}
 }
 
+void SlicesHandler::set_rgb_factors(int redFactor, int greenFactor, int blueFactor)
+{
+	for (unsigned short i = 0; i < _nrslices; i++)
+	{
+		_image_slices[i].SetConverterFactors(redFactor, greenFactor, blueFactor);
+	}
+}
+
 // TODO BL this function has a terrible impl, e.g. using member variables rgb, width/height, etc.
 int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 {
@@ -387,38 +376,9 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	_startslice = 0;
 	_endslice = _nrslices = (unsigned short)filenames.size();
 	_os.set_sizenr(_nrslices);
-
 	_image_slices.resize(_nrslices);
+
 	int j = 0;
-
-	if (_image_slices[0].CheckPNGDepth(filenames[0]) > 8)
-	{
-		ChannelMixer channelMixer(filenames, nullptr);
-		channelMixer.move(QCursor::pos());
-		if (!channelMixer.exec()) // TODO BL check this works
-			return 0;
-
-		int redFactor = channelMixer.GetRedFactor();
-		int greenFactor = channelMixer.GetGreenFactor();
-		int blueFactor = channelMixer.GetBlueFactor();
-
-		for (unsigned short i = 0; i < _nrslices; i++)
-		{
-			_image_slices[i].SetConverterFactors(redFactor, greenFactor, blueFactor);
-		}
-	}
-	else
-	{
-		int redFactor = 33;
-		int greenFactor = 33;
-		int blueFactor = 33;
-
-		for (unsigned short i = 0; i < _nrslices; i++)
-		{
-			_image_slices[i].SetConverterFactors(redFactor, greenFactor, blueFactor);
-		}
-	}
-
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
 		j += (_image_slices[i]).LoadPNGBitmap(filenames[i]);

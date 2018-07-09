@@ -63,17 +63,14 @@ public:
 	void copyfromtissue(unsigned short slicenr, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
 	void copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits, unsigned short padding);
+	void set_rgb_factors(int redFactor, int greenFactor, int blueFactor);
 	int LoadDIBitmap(std::vector<const char*> filenames);
-	int LoadDIBitmap(std::vector<const char*> filenames, Point p,
-			unsigned short dx, unsigned short dy);
+	int LoadDIBitmap(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
 	int LoadPng(std::vector<const char*> filenames);
-	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx,
-			unsigned short dy);
+	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
 	int LoadDIJpg(std::vector<const char*> filenames);
-	int LoadDIJpg(std::vector<const char*> filenames, Point p,
-			unsigned short dx, unsigned short dy);
-	int LoadDICOM(
-			std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+	int LoadDIJpg(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
+	int LoadDICOM(std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
 	int LoadDICOM(std::vector<const char*> lfilename, Point p,
 			unsigned short dx, unsigned short dy);
 	int ReadImage(const char* filename);
