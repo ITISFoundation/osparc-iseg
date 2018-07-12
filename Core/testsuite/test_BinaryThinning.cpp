@@ -10,6 +10,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../BinaryThinningImageFilter.h"
+#include "../ImageConnectivtyGraph.h"
 
 #define ENABLE_DUMP_IMAGE
 #include "Data/ItkUtils.h"
@@ -47,6 +48,33 @@ BOOST_AUTO_TEST_CASE(BinaryThinning_test)
 	thinning_filter->Update();
 
 	dump_image(thinning_filter->GetOutput(), "E:/temp/thinned.mha");
+}
+
+// TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/ImageConnectivityGraph_test --log_level=message
+BOOST_AUTO_TEST_CASE(ImageConnectivityGraph_test)
+{
+	using image_type = itk::Image<unsigned char, 3>;
+	itk::Index<3> start = {0, 0, 0};
+	itk::Size<3> size = {50, 70, 45};
+
+	auto input = image_type::New();
+	input->SetRegions(itk::ImageRegion<3>(start, size));
+	input->Allocate();
+	input->FillBuffer(0);
+
+	itk::Index<3> idx = {9, 10, 8};
+	input->SetPixel(idx, 1);
+
+	idx[1]++;
+	input->SetPixel(idx, 1);
+
+	idx[2]++;
+	input->SetPixel(idx, 1);
+
+	auto edges = ImageConnectivityGraph<image_type>(input, input->GetBufferedRegion());
+
+	// here I understand why I get 3 and must do post-processing to get 2!
+	BOOST_CHECK_GT(edges.size(), 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
