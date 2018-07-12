@@ -19,6 +19,7 @@ IF(ISEG_BUILD_TESTING)
 		test_ConnectedInterpolation.cpp
 		test_HDF5IO.cpp
 		test_ImageIO.cpp
+		test_BinaryThinning.cpp
 	)
 	
 	ADD_LIBRARY(TestSuite_iSegCore ${SOURCES} ${HEADERS})
