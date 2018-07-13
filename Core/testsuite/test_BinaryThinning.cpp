@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(BinaryThinning_test)
 	thinning_filter->SetInput(input);
 	thinning_filter->Update();
 
-	dump_image(thinning_filter->GetOutput(), "E:/temp/thinned.mha");
+	//dump_image(thinning_filter->GetOutput(), "E:/temp/thinned.mha");
 }
 
 // TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/ImageConnectivityGraph_test --log_level=message

@@ -48,6 +48,24 @@ std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TI
 	itk::Size<Dimension> radius;
 	radius.Fill(1);
 
+	std::vector<bool> axis_aligned(27, false);
+	{
+		using neighborhood_type = itk::Neighborhood<char,3>;
+		neighborhood_type neighborhood;
+		neighborhood.SetRadius(radius);
+		for(int k=-1; k<=1; k+=2)
+		{
+			for(int j=-1; j<=1; j+=2)
+			{
+				for(int i=-1; i<=1; i+=2)
+				{
+					neighborhood_type::OffsetType o = {{i, j, k}};
+					axis_aligned.at(neighborhood.GetNeighborhoodIndex(o)) = true;
+				}
+			}
+		}
+	}
+
 	itk::NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<TImage> face_calculator;
 	auto faces = face_calculator(image, region, radius);
 	if (!faces.empty())
@@ -56,13 +74,13 @@ std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TI
 		faces.erase(faces.begin());
 
 		using shaped_iterator_type = itk::ConstShapedNeighborhoodIterator<TImage>;
-		shaped_iterator_type::OffsetType o1 = {{1, 0, 0}};
-		shaped_iterator_type::OffsetType o2 = {{1, 1, 0}};
-		shaped_iterator_type::OffsetType o3 = {{1, 0, 1}};
-		shaped_iterator_type::OffsetType o4 = {{1, 1, 1}};
-		shaped_iterator_type::OffsetType o5 = {{0, 1, 0}};
-		shaped_iterator_type::OffsetType o6 = {{0, 0, 1}};
-		shaped_iterator_type::OffsetType o7 = {{0, 1, 1}};
+		typename shaped_iterator_type::OffsetType o1 = {{1, 0, 0}};
+		typename shaped_iterator_type::OffsetType o2 = {{0, 1, 0}};
+		typename shaped_iterator_type::OffsetType o3 = {{0, 0, 1}};
+		typename shaped_iterator_type::OffsetType o4 = {{1, 1, 0}};
+		typename shaped_iterator_type::OffsetType o5 = {{1, 0, 1}};
+		typename shaped_iterator_type::OffsetType o6 = {{0, 1, 1}};
+		typename shaped_iterator_type::OffsetType o7 = {{1, 1, 1}};
 
 		shaped_iterator_type it(radius, image, inner_region);
 		it.ActivateOffset(o1);
@@ -83,6 +101,11 @@ std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TI
 					if (i.Get() != 0)
 					{
 						auto n_idx = image->ComputeOffset(it.GetIndex() + i.GetNeighborhoodOffset());
+						std::cerr << i.GetNeighborhoodIndex() << " = id\n";
+						if (axis_aligned.at(i.GetNeighborhoodIndex()))
+						{
+							std::cerr << "found axis aligned\n";
+						}
 						edges.insert(Edge(center_idx, n_idx));
 					}
 				}

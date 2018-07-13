@@ -7,7 +7,7 @@ OpenThinning<TInputImage, TOutputImage>::OpenThinning()
 {
 	this->SetNumberOfRequiredOutputs(1);
 
-	OutputImagePointer thinImage = OutputImageType::New();
+	auto thinImage = OutputImageType::New();
 	this->SetNthOutput(0, thinImage.GetPointer());
 }
 
@@ -22,14 +22,14 @@ void itk::OpenThinning<TInputImage, TOutputImage>::SetLookupTable(const LookupTa
 {
 	m_LookupTable = lut;
 
-	Modified();
+	this->Modified();
 }
 
 template<class TInputImage, class TOutputImage>
 void OpenThinning<TInputImage, TOutputImage>::GenerateData()
 {
 	auto inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
-	auto thinImage = dynamic_cast<TOutputImage*>(GetOutput(0));
+	auto thinImage = dynamic_cast<TOutputImage*>(this->GetOutput(0));
 
 	// allocate output
 	auto region = thinImage->GetRequestedRegion();
