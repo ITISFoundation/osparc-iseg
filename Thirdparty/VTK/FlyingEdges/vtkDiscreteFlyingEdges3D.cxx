@@ -13,7 +13,7 @@
 
 =========================================================================*/
 //#ifdef WIN32
-//#include "Precompiled.h"
+#include "Precompiled.h"
 //#endif
 
 #include "vtkDiscreteFlyingEdges3D.h"

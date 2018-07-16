@@ -19,8 +19,8 @@ class LookupTable
 
 	public:
 		// Read/write a lookup table binary file
-		bool readFile ( const std::string &_filename );
-		bool writeFile( const std::string &_filename ) const;
+		inline bool readFile ( const std::string &_filename );
+		inline bool writeFile( const std::string &_filename ) const;
 
 		// Get the stored lookup table entry. The value of the middle voxel is ignored.
 		template<typename Voxel>

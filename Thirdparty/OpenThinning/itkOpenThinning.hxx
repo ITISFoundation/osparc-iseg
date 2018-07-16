@@ -66,17 +66,17 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 		inline Voxel getVoxelChecked(size_t _x, size_t _y, size_t _z) const
 		{
 			// unsigned: we only need to check upper bound
-			if (_x >= m_sizeX || _y >= m_sizeY || _z >= m_sizeZ)
+			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ)
 			{
-				return m_constant;
+				return m_voxels[getVoxelIdx(_x, _y, _z)];
 			}
-			return m_voxels[getVoxelIdx(_x, _y, _z)];
+			return m_constant;
 		}
 
 		// Get the 3x3x3 neighborhood of voxels around the given voxel position
 		void getNeighborhood(size_t _x, size_t _y, size_t _z, Voxel _neighborhood[27]) const
 		{
-			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ)
+			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ && _x > 0 && _y > 0 && _z > 0)
 			{
 				_neighborhood[0] = getVoxel(_x - 1, _y - 1, _z - 1);
 				_neighborhood[1] = getVoxel(_x, _y - 1, _z - 1);
