@@ -732,8 +732,8 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 				if (version > 1)
 				{
 					std::cerr
-						<< "Error: could not load color lookup table. The file "
-						"format is newer than this iSEG.\n";
+							<< "Error: could not load color lookup table. The file "
+								 "format is newer than this iSEG.\n";
 					return nullptr;
 				}
 
@@ -747,9 +747,9 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 						std::string const folder_name = "/Lut/" + name;
 
 						ok = ok &&
-							(reader.read(&index, folder_name + "/index") != 0);
+								 (reader.read(&index, folder_name + "/index") != 0);
 						ok = ok &&
-							(reader.read(float_rgb, folder_name + "/rgb") != 0);
+								 (reader.read(float_rgb, folder_name + "/rgb") != 0);
 
 						rgb[0] = static_cast<unsigned char>(float_rgb[0] * 255.0);
 						rgb[1] = static_cast<unsigned char>(float_rgb[1] * 255.0);
@@ -759,7 +759,7 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 				}
 			}
 		}
-		else if (version >= 2)
+		else if (version == 2)
 		{
 			std::vector<float> colors(3 * num_colors);
 			ok = ok && (reader.read(colors.data(), "/Lut/colors") != 0);
@@ -777,6 +777,25 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 					color_lookup_table->SetColor(static_cast<size_t>(i), rgb);
 				}
 			}
+		}
+		else if (version == 3)
+		{
+			std::vector<unsigned char> colors(3 * num_colors);
+			ok = ok && (reader.read(colors.data(), "/Lut/colors") != 0);
+			if (ok)
+			{
+				color_lookup_table = std::make_shared<ColorLookupTable>();
+				color_lookup_table->SetNumberOfColors(num_colors);
+
+				for (int i = 0; i < num_colors; ++i)
+				{
+					color_lookup_table->SetColor(static_cast<size_t>(i), &colors[i * 3]);
+				}
+			}
+		}
+		else
+		{
+			std::cerr << "ERROR: color lookup table was written with a newer version of iSEG\n";
 		}
 	}
 

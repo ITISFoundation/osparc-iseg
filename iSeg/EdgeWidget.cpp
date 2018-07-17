@@ -14,14 +14,16 @@
 #include "bmp_read_1.h"
 
 #include "Data/ItkUtils.h"
-#include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Point.h"
+#include "Data/SliceHandlerItkWrapper.h"
 
 #include "Core/BinaryThinningImageFilter.h"
+#include "Core/ImageConnectivtyGraph.h"
 
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>
+#include <qfiledialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
@@ -30,6 +32,11 @@
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
+
+#include <vtkCellArray.h>
+#include <vtkDataSetWriter.h>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
 using namespace iseg;
 
@@ -72,6 +79,7 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 	txt_thresh22 = new QLabel(" 150", hbox3);
 
 	cb_3d = new QCheckBox(QString("3D thinning"), hbox4);
+	btn_export_centerlines = new QPushButton(QString("Export"), hbox4);
 
 	rb_sobel = new QRadioButton(QString("Sobel"), vboxmethods);
 	rb_laplacian = new QRadioButton(QString("Laplacian"), vboxmethods);
@@ -117,6 +125,8 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 			SLOT(slider_changed(int)));
 	QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
 			SLOT(slider_changed(int)));
+
+	QObject::connect(btn_export_centerlines, SIGNAL(clicked()), this, SLOT(export_centerlines()));
 }
 
 EdgeWidget::~EdgeWidget()
@@ -134,6 +144,53 @@ void EdgeWidget::on_slicenr_changed()
 void EdgeWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
+}
+
+void EdgeWidget::export_centerlines()
+{
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
+	if (!savefilename.isEmpty())
+	{
+		SliceHandlerItkWrapper wrapper(handler3D);
+		auto target = wrapper.GetTarget(true);
+
+		using input_type = itk::SliceContiguousImage<float>;
+		auto edges = ImageConnectivityGraph<input_type>(target, target->GetBufferedRegion());
+
+		auto points = vtkSmartPointer<vtkPoints>::New();
+		auto lines = vtkSmartPointer<vtkCellArray>::New();
+
+		std::vector<vtkIdType> node_map(target->GetBufferedRegion().GetNumberOfPixels(), -1);
+		for (auto e : edges)
+		{
+			if (node_map[e.n1] == -1)
+			{
+				itk::Point<double, 3> p;
+				target->TransformIndexToPhysicalPoint(target->ComputeIndex(e.n1), p);
+				node_map[e.n1] = points->InsertNextPoint(p[0], p[1], p[2]);
+			}
+			if (node_map[e.n2] == -1)
+			{
+				itk::Point<double, 3> p;
+				target->TransformIndexToPhysicalPoint(target->ComputeIndex(e.n2), p);
+				node_map[e.n2] = points->InsertNextPoint(p[0], p[1], p[2]);
+			}
+
+			lines->InsertNextCell(2);
+			lines->InsertCellPoint(node_map[e.n1]);
+			lines->InsertCellPoint(node_map[e.n2]);
+		}
+
+		auto pd = vtkSmartPointer<vtkPolyData>::New();
+		pd->SetLines(lines);
+		pd->SetPoints(points);
+
+		auto writer = vtkSmartPointer<vtkDataSetWriter>::New();
+		writer->SetInputData(pd);
+		writer->SetFileTypeToBinary();
+		writer->SetFileName(savefilename.toStdString().c_str());
+		writer->Write();
+	}
 }
 
 void EdgeWidget::execute()

@@ -97,7 +97,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 
 	// write size and version
 	std::vector<HDF5Writer::size_type> dim_scalar(1, 1);
-	int version = 2;
+	int version = 3;
 	if (!writer.write(&version, dim_scalar, "/Lut/version"))
 	{
 		cerr << "error writing LUT version" << endl;
@@ -111,15 +111,11 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	}
 
 	// write colors
-	std::vector<HDF5Writer::size_type> dim_rgb(1, 3* num_colors);
-	std::vector<float> colors(3 * num_colors);
-	unsigned char rgb[3];
+	std::vector<HDF5Writer::size_type> dim_rgb(1, 3 * num_colors);
+	std::vector<unsigned char> colors(3 * num_colors);
 	for (int i = 0; i < num_colors; ++i)
 	{
-		lut->GetColor(static_cast<size_t>(i), rgb);
-		colors[i * 3 + 0] = rgb[0] / 255.0f;
-		colors[i * 3 + 1] = rgb[1] / 255.0f;
-		colors[i * 3 + 2] = rgb[2] / 255.0f;
+		lut->GetColor(static_cast<size_t>(i), &colors[i * 3]);
 	}
 
 	if (!writer.write(colors.data(), dim_rgb, "/Lut/colors"))

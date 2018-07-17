@@ -17,6 +17,7 @@
 
 #include <q3vbox.h>
 #include <qbuttongroup.h>
+#include <qcheckbox.h>
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qpixmap.h>
@@ -25,7 +26,6 @@
 #include <qsize.h>
 #include <qslider.h>
 #include <qspinbox.h>
-#include <qcheckbox.h>
 #include <qwidget.h>
 
 #include <algorithm>
@@ -71,6 +71,7 @@ private:
 	QSlider* sl_thresh1;
 	QSlider* sl_thresh2;
 	QCheckBox* cb_3d;
+	QPushButton* btn_export_centerlines;
 	QPushButton* btn_exec;
 
 	QRadioButton* rb_sobel;
@@ -86,6 +87,7 @@ private:
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void execute();
+	void export_centerlines();
 	void method_changed(int);
 	void slider_changed(int newval);
 };
