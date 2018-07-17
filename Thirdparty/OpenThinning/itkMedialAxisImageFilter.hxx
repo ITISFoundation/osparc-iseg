@@ -29,7 +29,7 @@ void MedialAxisImageFilter<TInputImage, TOutputImage>::GenerateData()
 		}
 	});
 
-	SetLookupTable(lookupTable);
+	Superclass::SetLookupTable(lookupTable);
 
 	Superclass::GenerateData();
 }

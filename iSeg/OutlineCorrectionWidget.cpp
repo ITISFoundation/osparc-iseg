@@ -27,7 +27,6 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-using namespace std;
 using namespace iseg;
 
 OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent,
@@ -35,10 +34,8 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("OutLine Correction routines that can be used to modify "
-										"the result of a "
-										"segmentation operation and to correct frequently "
-										"occurring segmentation "
-										"deficiencies."));
+		"the result of a segmentation operation and to correct frequently "
+		"occurring segmentation deficiencies."));
 	setObjectName("OLC");
 
 	f = 255;
@@ -95,33 +92,28 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	Q3HBox* hboxmethods4 = new Q3HBox(vboxmethods);
 
 	olcorr = new QRadioButton(QString("Outline Corr"), hboxmethods1);
-	olcorr->setToolTip(
-			Format("Draw an alternative boundary segment for a region.This segment "
-						 "will be connected to the region using the "
-						 "shortest possible lines and will replace the boundary segment "
-						 "between the connection points."));
+	olcorr->setToolTip(Format("Draw an alternative boundary segment for a region.This segment "
+			"will be connected to the region using the "
+			"shortest possible lines and will replace the boundary segment "
+			"between the connection points."));
 	brush = new QRadioButton(QString("Brush"), hboxmethods1);
-	brush->setToolTip(
-			Format("Manual correction and segmentation tool: a brush."));
+	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
 	holefill = new QRadioButton(QString("Fill Holes"), hboxmethods1);
-	holefill->setToolTip(
-			Format("Close all holes in the selected region or tissue that have a "
-						 "size smaller than the number of "
-						 "pixels specified by the Hole Size option."));
+	holefill->setToolTip(Format("Close all holes in the selected region or tissue that have a "
+			"size smaller than the number of "
+			"pixels specified by the Hole Size option."));
 	removeislands = new QRadioButton(QString("Remove Islands"), hboxmethods2);
-	removeislands->setToolTip(
-			Format("Remove all islands (speckles and outliers) with the selected "
-						 "gray value or tissue assignment."));
+	removeislands->setToolTip(Format("Remove all islands (speckles and outliers) with the selected "
+			"gray value or tissue assignment."));
 	gapfill = new QRadioButton(QString("Fill Gaps"), hboxmethods2);
 	gapfill->setToolTip(Format(
 			"Close gaps between multiple disconnected regions having the same "
 			"gray value or belonging to the same tissue."));
 	addskin = new QRadioButton(QString("Add Skin"), hboxmethods2);
 	addskin->setToolTip(Format("Add a skin layer to a segmentation with a "
-														 "specified Thickness (in pixels)."));
+			"specified Thickness (in pixels)."));
 	fillskin = new QRadioButton(QString("Fill Skin"), hboxmethods3);
-	fillskin->setToolTip(
-			Format("Thicken a skin layer to ensure it has a minimum Thickness."));
+	fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
 	allfill = new QRadioButton(QString("Fill All"), hboxmethods3);
 	allfill->setToolTip(Format("Make sure that there are no unassigned regions "
 														 "inside the segmented model."));
@@ -333,12 +325,12 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 
 		int const xradius = std::ceil(radius_corrected / spacing[0]);
 		int const yradius = std::ceil(radius_corrected / spacing[1]);
-		for (p1.px = max(0, p.px - xradius);
-				 p1.px <= min((int)bmphand->return_width() - 1, p.px + xradius);
+		for (p1.px = std::max(0, p.px - xradius);
+				 p1.px <= std::min((int)bmphand->return_width() - 1, p.px + xradius);
 				 p1.px++)
 		{
-			for (p1.py = max(0, p.py - yradius);
-					 p1.py <= min((int)bmphand->return_height() - 1, p.py + yradius);
+			for (p1.py = std::max(0, p.py - yradius);
+					 p1.py <= std::min((int)bmphand->return_height() - 1, p.py + yradius);
 					 p1.py++)
 			{
 				if (std::pow(spacing[0] * (p.px - p1.px), 2.f) + std::pow(spacing[1] * (p.py - p1.py), 2.f) <= radius_corrected2)
@@ -437,9 +429,9 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		if (work->isOn())
 		{
 			if (fb->isChecked())
-				f = 5000; // \hack by SK, remove
+				f = 255.f;
 			if (bg->isChecked())
-				f = -5000; // \hack by SK, remove
+				f = 0.f;
 
 			if (mm->isOn())
 				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw);
@@ -475,11 +467,10 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 		{
 			draw_circle(p);
 
-			vector<Point> vps;
+			std::vector<Point> vps;
 			vps.clear();
 			addLine(&vps, last_pt, p);
-			for (vector<Point>::iterator it = ++(vps.begin()); it != vps.end();
-					 it++)
+			for (auto it = ++(vps.begin()); it != vps.end(); it++)
 			{
 				if (work->isOn())
 				{
@@ -514,8 +505,8 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 				dummy1 = (int)last_pt.px;
 				dummy2 = (int)p.px;
 			}
-			rect.setLeft(max(0, dummy1 - sb_radius->value()));
-			rect.setRight(min((int)bmphand->return_width() - 1,
+			rect.setLeft(std::max(0, dummy1 - sb_radius->value()));
+			rect.setRight(std::min((int)bmphand->return_width() - 1,
 					dummy2 + sb_radius->value()));
 			if (p.py < last_pt.py)
 			{
@@ -527,8 +518,8 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 				dummy1 = (int)last_pt.py;
 				dummy2 = (int)p.py;
 			}
-			rect.setTop(max(0, dummy1 - sb_radius->value()));
-			rect.setBottom(min((int)bmphand->return_height() - 1,
+			rect.setTop(std::max(0, dummy1 - sb_radius->value()));
+			rect.setBottom(std::min((int)bmphand->return_height() - 1,
 					dummy2 + sb_radius->value()));
 			emit end_datachange(this, iseg::NoUndo);
 			last_pt = p;

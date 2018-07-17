@@ -7,7 +7,7 @@ OpenThinning<TInputImage, TOutputImage>::OpenThinning()
 {
 	this->SetNumberOfRequiredOutputs(1);
 
-	OutputImagePointer thinImage = OutputImageType::New();
+	auto thinImage = OutputImageType::New();
 	this->SetNthOutput(0, thinImage.GetPointer());
 }
 
@@ -22,14 +22,14 @@ void itk::OpenThinning<TInputImage, TOutputImage>::SetLookupTable(const LookupTa
 {
 	m_LookupTable = lut;
 
-	Modified();
+	this->Modified();
 }
 
 template<class TInputImage, class TOutputImage>
 void OpenThinning<TInputImage, TOutputImage>::GenerateData()
 {
 	auto inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
-	auto thinImage = dynamic_cast<TOutputImage*>(GetOutput(0));
+	auto thinImage = dynamic_cast<TOutputImage*>(this->GetOutput(0));
 
 	// allocate output
 	auto region = thinImage->GetRequestedRegion();
@@ -66,17 +66,17 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 		inline Voxel getVoxelChecked(size_t _x, size_t _y, size_t _z) const
 		{
 			// unsigned: we only need to check upper bound
-			if (_x >= m_sizeX || _y >= m_sizeY || _z >= m_sizeZ)
+			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ)
 			{
-				return m_constant;
+				return m_voxels[getVoxelIdx(_x, _y, _z)];
 			}
-			return m_voxels[getVoxelIdx(_x, _y, _z)];
+			return m_constant;
 		}
 
 		// Get the 3x3x3 neighborhood of voxels around the given voxel position
 		void getNeighborhood(size_t _x, size_t _y, size_t _z, Voxel _neighborhood[27]) const
 		{
-			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ)
+			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ && _x > 0 && _y > 0 && _z > 0)
 			{
 				_neighborhood[0] = getVoxel(_x - 1, _y - 1, _z - 1);
 				_neighborhood[1] = getVoxel(_x, _y - 1, _z - 1);
