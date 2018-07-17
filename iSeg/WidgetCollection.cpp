@@ -18,13 +18,14 @@
 #include "bmp_read_1.h"
 #include "config.h"
 
+#include "Interface/FormatTooltip.h"
+
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
 #include <QHeaderView>
 #include <QPaintEvent>
 #include <QProgressDialog>
 #include <QXmlInputSource>
-#include <qfiledialog.h>
 #include <q3hbox.h>
 #include <q3listbox.h>
 #include <q3mimefactory.h>
@@ -2967,8 +2968,8 @@ void bits_stack::poptissue_pressed() { pop_helper(false, false, true); }
 
 void bits_stack::loaditem_pressed()
 {
-	QStringList selectedFiles = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll(*.*)", 
-		QString::null, this, "open file dialog", "Select on or more files to open");
+	QStringList selectedFiles = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll(*.*)",
+			QString::null, this, "open file dialog", "Select on or more files to open");
 	if (selectedFiles.isEmpty())
 	{
 		return;
@@ -3694,7 +3695,7 @@ void MultiDataset_widget::AddDatasetPressed()
 			CopyImagesSlices(handler3D, dataInfo);
 			m_RadioButtons.push_back(dataInfo);
 
-			delete handler3D; //freed memory
+			delete handler3D;		 //freed memory
 			handler3D = nullptr; //pointed dangling ptr to nullptr
 		}
 	}
@@ -4646,8 +4647,10 @@ CleanerParams::CleanerParams(int* rate1, int* minsize1, QWidget* parent,
 	pb_doit = new QPushButton("OK", vbox1);
 	sb_rate = new QSpinBox(3, 10000, 1, vbox2);
 	sb_rate->setValue(4);
+	sb_rate->setToolTip(Format("1/rate is the percentage of the total (tissue) volume needed to force small regions to be kept (overrides Pixel Size criterion)."));
 	sb_minsize = new QSpinBox(2, 10000, 1, vbox2);
 	sb_minsize->setValue(10);
+	sb_minsize->setToolTip(Format("Minimum number of pixels required by an island."));
 	pb_dontdoit = new QPushButton("Cancel", vbox2);
 	QObject::connect(pb_doit, SIGNAL(clicked()), this, SLOT(doit_pressed()));
 	QObject::connect(pb_dontdoit, SIGNAL(clicked()), this,

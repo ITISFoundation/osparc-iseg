@@ -14,15 +14,16 @@
 #include <itkConstShapedNeighborhoodIterator.h>
 #include <itkNeighborhoodAlgorithm.h>
 
+#include <array>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
 namespace iseg {
 
-struct Edge : public std::array<size_t,2>
+struct Edge : public std::array<size_t, 2>
 {
-	Edge(size_t _n1=0, size_t _n2=0)
+	Edge(size_t _n1 = 0, size_t _n2 = 0)
 	{
 		(*this)[0] = n1 < n2 ? n1 : n2;
 		(*this)[1] = n1 < n2 ? n2 : n1;

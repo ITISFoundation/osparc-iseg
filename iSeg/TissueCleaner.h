@@ -34,8 +34,8 @@ private:
 	unsigned totvolumes[TISSUES_SIZE_MAX + 1];
 	int* volume;
 	tissues_size_t** slices;
-	unsigned short width, height;
-	unsigned short n;
+	size_t width, height;
+	size_t nrslices;
 };
 
 } // namespace iseg
