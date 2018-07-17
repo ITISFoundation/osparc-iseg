@@ -74,7 +74,8 @@ BOOST_AUTO_TEST_CASE(ImageConnectivityGraph_test)
 	auto edges = ImageConnectivityGraph<image_type>(input, input->GetBufferedRegion());
 
 	// here I understand why I get 3 and must do post-processing to get 2!
-	BOOST_CHECK_GT(edges.size(), 2);
+	BOOST_CHECK_EQUAL(edges.aligned_edges.size(), 2);
+	BOOST_CHECK_EQUAL(edges.diag_edges.size(), 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

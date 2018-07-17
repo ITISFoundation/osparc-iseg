@@ -9,28 +9,23 @@
 */
 #pragma
 
-#include <unordered_set>
-#include <utility>
+#include "PolyLines.h"
 
 #include <itkConstShapedNeighborhoodIterator.h>
 #include <itkNeighborhoodAlgorithm.h>
 
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 namespace iseg {
 
-struct Edge
+struct Edge : public std::array<size_t,2>
 {
-	Edge() {}
-	Edge(size_t _n1, size_t _n2) : n1(_n1), n2(_n2)
+	Edge(size_t _n1=0, size_t _n2=0)
 	{
-		if (n1 > n2)
-		{
-			std::swap(n1, n2);
-		}
-	}
-
-	inline bool operator==(const Edge& rhs) const
-	{
-		return n1 == rhs.n1 && n2 == rhs.n2;
+		(*this)[0] = n1 < n2 ? n1 : n2;
+		(*this)[1] = n1 < n2 ? n2 : n1;
 	}
 
 	inline size_t operator()(const Edge& e) const { return n1; }
@@ -38,32 +33,34 @@ struct Edge
 	size_t n1, n2;
 };
 
+struct Edges
+{
+	std::vector<Edge> aligned_edges;
+	std::vector<Edge> diag_edges;
+};
+
 template<class TImage>
-std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionType region)
+Edges ImageConnectivityGraph(TImage* image, typename TImage::RegionType region)
 {
 	itkStaticConstMacro(Dimension, unsigned int, TImage::ImageDimension);
 
-	std::unordered_set<Edge, Edge> edges;
+	std::unordered_set<Edge, Edge> aligned_edges;
+	std::unordered_set<Edge, Edge> diag_edges;
 
 	itk::Size<Dimension> radius;
 	radius.Fill(1);
 
 	std::vector<bool> axis_aligned(27, false);
 	{
-		using neighborhood_type = itk::Neighborhood<char,3>;
+		using neighborhood_type = itk::Neighborhood<char, 3>;
 		neighborhood_type neighborhood;
 		neighborhood.SetRadius(radius);
-		for(int k=-1; k<=1; k+=2)
-		{
-			for(int j=-1; j<=1; j+=2)
-			{
-				for(int i=-1; i<=1; i+=2)
-				{
-					neighborhood_type::OffsetType o = {{i, j, k}};
-					axis_aligned.at(neighborhood.GetNeighborhoodIndex(o)) = true;
-				}
-			}
-		}
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({0, 0, 1})) = true;
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({0, 0, -1})) = true;
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({0, 1, 0})) = true;
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({0, -1, 0})) = true;
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({1, 0, 0})) = true;
+		axis_aligned.at(neighborhood.GetNeighborhoodIndex({-1, 0, 0})) = true;
 	}
 
 	itk::NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<TImage> face_calculator;
@@ -101,12 +98,14 @@ std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TI
 					if (i.Get() != 0)
 					{
 						auto n_idx = image->ComputeOffset(it.GetIndex() + i.GetNeighborhoodOffset());
-						std::cerr << i.GetNeighborhoodIndex() << " = id\n";
 						if (axis_aligned.at(i.GetNeighborhoodIndex()))
 						{
-							std::cerr << "found axis aligned\n";
+							aligned_edges.insert(Edge(center_idx, n_idx));
 						}
-						edges.insert(Edge(center_idx, n_idx));
+						else
+						{
+							diag_edges.insert(Edge(center_idx, n_idx));
+						}
 					}
 				}
 			}
@@ -129,13 +128,35 @@ std::unordered_set<Edge, Edge> ImageConnectivityGraph(TImage* image, typename TI
 					if (inbounds && val != 0)
 					{
 						auto n_idx = image->ComputeOffset(it.GetIndex(i));
-						edges.insert(Edge(center_idx, n_idx));
+						if (axis_aligned.at(i))
+						{
+							aligned_edges.insert(Edge(center_idx, n_idx));
+						}
+						else
+						{
+							diag_edges.insert(Edge(center_idx, n_idx));
+						}
 					}
 				}
 			}
 		}
 	}
 
+	std::vector<std::vector<size_t>> lines;
+	EdgesToPolylines(std::vector<Edge>(aligned_edges.begin(), aligned_edges.end()), lines);
+
+	// next line id = lines.size()
+	// map node id to line id
+
+	// for each edge, check nodes
+	//   if nodes belong to same line, skip edge
+	//   if nodes belong to different lines, merge lines and add edge
+	//   if exactly one node belongs to line id, add other node to same line
+	//   if nodes don't belong to any line, add new line
+
+	Edges edges;
+	edges.aligned_edges.assign(aligned_edges.begin(), aligned_edges.end());
+	edges.diag_edges.assign(diag_edges.begin(), diag_edges.end());
 	return edges;
 }
 
