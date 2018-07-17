@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(BinaryThinning_test)
 
 	auto thinning_filter = itk::MedialAxisImageFilter<input_type, output_type>::New();
 	thinning_filter->SetInput(input);
-	thinning_filter->Update();
+	BOOST_CHECK_NO_THROW( thinning_filter->Update() );
 
 	//dump_image(thinning_filter->GetOutput(), "E:/temp/thinned.mha");
 }
@@ -65,17 +65,16 @@ BOOST_AUTO_TEST_CASE(ImageConnectivityGraph_test)
 	itk::Index<3> idx = {9, 10, 8};
 	input->SetPixel(idx, 1);
 
-	idx[1]++;
+	idx[1]++; // 9,11,8
 	input->SetPixel(idx, 1);
 
-	idx[2]++;
+	idx[2]++; // 9,11,9
 	input->SetPixel(idx, 1);
 
 	auto edges = ImageConnectivityGraph<image_type>(input, input->GetBufferedRegion());
 
 	// here I understand why I get 3 and must do post-processing to get 2!
-	BOOST_CHECK_EQUAL(edges.aligned_edges.size(), 2);
-	BOOST_CHECK_EQUAL(edges.diag_edges.size(), 1);
+	BOOST_CHECK_EQUAL(edges.size(), 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

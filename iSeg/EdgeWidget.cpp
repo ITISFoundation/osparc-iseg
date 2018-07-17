@@ -162,27 +162,21 @@ void EdgeWidget::export_centerlines()
 
 		std::vector<vtkIdType> node_map(target->GetBufferedRegion().GetNumberOfPixels(), -1);
 		itk::Point<double, 3> p;
-		std::vector<Edge> edges_vec[2] = { edges.aligned_edges, edges.diag_edges };
-		for (int k=0; k<2; ++k)
+		for (auto e : edges)
 		{
-			auto cedges = edges_vec[k];
-			for (auto e : cedges)
+			if (node_map[e[0]] == -1)
 			{
-				if (node_map[e.n1] == -1)
-				{
-					target->TransformIndexToPhysicalPoint(target->ComputeIndex(e.n1), p);
-					node_map[e.n1] = points->InsertNextPoint(p[0], p[1], p[2]);
-				}
-				if (node_map[e.n2] == -1)
-				{
-					target->TransformIndexToPhysicalPoint(target->ComputeIndex(e.n2), p);
-					node_map[e.n2] = points->InsertNextPoint(p[0], p[1], p[2]);
-				}
-
-				lines->InsertNextCell(2);
-				lines->InsertCellPoint(node_map[e.n1]);
-				lines->InsertCellPoint(node_map[e.n2]);
+				target->TransformIndexToPhysicalPoint(target->ComputeIndex(e[0]), p);
+				node_map[e[0]] = points->InsertNextPoint(p[0], p[1], p[2]);
 			}
+			if (node_map[e[1]] == -1)
+			{
+				target->TransformIndexToPhysicalPoint(target->ComputeIndex(e[1]), p);
+				node_map[e[1]] = points->InsertNextPoint(p[0], p[1], p[2]);
+			}
+			lines->InsertNextCell(2);
+			lines->InsertCellPoint(node_map[e[0]]);
+			lines->InsertCellPoint(node_map[e[1]]);
 		}
 
 		auto pd = vtkSmartPointer<vtkPolyData>::New();
