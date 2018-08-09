@@ -14406,51 +14406,17 @@ void bmphandler::change2mask_connectedtissue(tissuelayers_size_t idx,
 	}
 
 	free(results);
-	return;
 }
 
-void bmphandler::tissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype)
+void bmphandler::tissue2work(tissuelayers_size_t idx, const std::vector<float>& mask)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < area; i++)
 	{
-		if (tissues[i] == tissuetype)
-			work_bits[i] = 255.0f;
-		else
-			work_bits[i] = 0.0f;
+		work_bits[i] = mask.at(tissues[i]);
 	}
 
 	mode2 = 2;
-
-	return;
-}
-
-void bmphandler::setissue2work(tissuelayers_size_t idx,
-		tissues_size_t tissuetype)
-{
-	tissues_size_t* tissues = tissuelayers[idx];
-	for (unsigned int i = 0; i < area; i++)
-	{
-		if (tissues[i] == tissuetype)
-			work_bits[i] = 255.0f;
-	}
-
-	mode2 = 2;
-
-	return;
-}
-
-void bmphandler::tissue2mc(tissuelayers_size_t idx, tissues_size_t tissuetype,
-		unsigned char** voxels, int k)
-{
-	tissues_size_t* tissues = tissuelayers[idx];
-	for (unsigned int i = 0; i < area; i++)
-	{
-		if (tissues[i] == tissuetype)
-			voxels[0][i + k * area] = tissuetype;
-	}
-
-	return;
 }
 
 void bmphandler::tissue2work(tissuelayers_size_t idx)
@@ -14462,8 +14428,6 @@ void bmphandler::tissue2work(tissuelayers_size_t idx)
 	}
 
 	mode2 = 2;
-
-	return;
 }
 
 /*void bmphandler::work2tissue(tissuelayers_size_t idx)

@@ -6394,15 +6394,16 @@ void MainWindow::tissue2work()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	tissues_size_t nr = tissueTreeWidget->get_current_type();
+	std::vector<tissues_size_t> tissue_list;
+	tissue_list.push_back(tissueTreeWidget->get_current_type());
 
 	if (tissue3Dopt->isChecked())
 	{
-		handler3D->tissue2work3D(nr);
+		handler3D->selectedtissue2work3D(tissue_list);
 	}
 	else
 	{
-		handler3D->tissue2work(nr);
+		handler3D->selectedtissue2work(tissue_list);
 	}
 
 	emit end_datachange(this);
@@ -6416,22 +6417,28 @@ void MainWindow::selectedtissue2work()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	handler3D->clear_work();
-	QList<QTreeWidgetItem*> list;
-	list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
+	handler3D->clear_work(); // resets work to 0.0f, then adds each tissue one-by-one
 
+	std::vector<tissues_size_t> selected_tissues;
+	for (auto item: tissueTreeWidget->selectedItems())
+	{
+		selected_tissues.push_back(tissueTreeWidget->get_type(item));
+	}
+	
+	try
+	{
 		if (tissue3Dopt->isChecked())
 		{
-			handler3D->selectedtissue2work3D(currTissueType);
+			handler3D->selectedtissue2work3D(selected_tissues);
 		}
 		else
 		{
-			handler3D->selectedtissue2work(currTissueType);
+			handler3D->selectedtissue2work(selected_tissues);
 		}
+	}
+	catch(std::exception&)
+	{
+		std::cerr << "ERROR: could not get tissue. Something might be wrong with tissue list.\n";
 	}
 	emit end_datachange(this);
 }

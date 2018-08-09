@@ -105,8 +105,7 @@ public:
 	void change2mask_connectedtissue(tissuelayers_size_t idx, bool* mask,
 			Point p, bool addorsub);
 	void change2mask_connectedwork(bool* mask, Point p, bool addorsub);
-	void tissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype);
-	void setissue2work(tissuelayers_size_t idx, tissues_size_t tissuetype);
+	void tissue2work(tissuelayers_size_t idx, const std::vector<float>& mask);
 	void tissue2work(tissuelayers_size_t idx);
 	void work2tissue(tissuelayers_size_t idx);
 	void cleartissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
@@ -490,11 +489,8 @@ public:
 	void SetRGBtoGrayScaleFactors(double newRedFactor, double newGreenFactor,
 			double newBlueFactor);
 	void mergetissue(tissues_size_t tissuetype, tissuelayers_size_t idx);
-	void tissue2mc(tissuelayers_size_t idx, tissues_size_t tissuetype,
-			unsigned char** voxels, int k);
 
 protected:
-	//		static bool lockedtissues[TISSUES_SIZE_MAX+1];
 	static std::list<unsigned> stackindex;
 	static unsigned stackcounter;
 	Contour contour;

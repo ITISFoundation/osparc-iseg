@@ -6295,8 +6295,11 @@ void SlicesHandler::interpolatetissue_medianset(unsigned short slice1,
 		bool connectivity,
 		bool handleVanishingComp)
 {
-	_image_slices[slice1].tissue2work(_active_tissuelayer, tissuetype);
-	_image_slices[slice2].tissue2work(_active_tissuelayer, tissuetype);
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	mask.at(tissuetype) = 255.0f;
+
+	_image_slices[slice1].tissue2work(_active_tissuelayer, mask);
+	_image_slices[slice2].tissue2work(_active_tissuelayer, mask);
 	interpolateworkgrey_medianset(slice1, slice2, connectivity, true);
 }
 
@@ -7309,45 +7312,31 @@ void SlicesHandler::subtract_tissue_connected(tissues_size_t tissuetype,
 			tissuetype, p);
 }
 
-void SlicesHandler::tissue2work(tissues_size_t tissuetype)
+void SlicesHandler::selectedtissue2work(const std::vector<tissues_size_t>& tissuetype)
 {
-	_image_slices[_activeslice].tissue2work(_active_tissuelayer, tissuetype);
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	for (auto label : tissuetype)
+	{
+		mask.at(label) = 255.0f;
+	}
+
+	_image_slices[_activeslice].tissue2work(_active_tissuelayer, mask);
 }
 
-void SlicesHandler::tissue2work3D(tissues_size_t tissuetype)
+void SlicesHandler::selectedtissue2work3D(const std::vector<tissues_size_t>& tissuetype)
 {
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	for (auto label : tissuetype)
+	{
+		mask.at(label) = 255.0f;
+	}
+
 	int const iN = _endslice;
 
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		_image_slices[i].tissue2work(_active_tissuelayer, tissuetype);
-	}
-}
-
-void SlicesHandler::selectedtissue2work(tissues_size_t tissuetype)
-{
-	_image_slices[_activeslice].setissue2work(_active_tissuelayer, tissuetype);
-}
-
-void SlicesHandler::selectedtissue2work3D(tissues_size_t tissuetype)
-{
-	int const iN = _endslice;
-
-#pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
-	{
-		_image_slices[i].setissue2work(_active_tissuelayer, tissuetype);
-	}
-}
-
-void SlicesHandler::selectedtissue2mc(tissues_size_t tissuetype,
-		unsigned char** voxels)
-{
-	for (unsigned short i = _startslice; i < _endslice; i++)
-	{
-		int k = i - _startslice;
-		_image_slices[i].tissue2mc(_active_tissuelayer, tissuetype, voxels, k);
+		_image_slices[i].tissue2work(_active_tissuelayer, mask);
 	}
 }
 

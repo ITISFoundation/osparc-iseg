@@ -330,10 +330,8 @@ public:
 	void subtract_tissueall_connected(tissues_size_t tissuetype, Point p);
 	void tissue2workall3D();
 	void tissue2workall();
-	void tissue2work(tissues_size_t tissuetype);
-	void tissue2work3D(tissues_size_t tissuetype);
-	void selectedtissue2work(tissues_size_t tissuetype);
-	void selectedtissue2work3D(tissues_size_t tissuetype);
+	void selectedtissue2work(const std::vector<tissues_size_t>& tissuetype);
+	void selectedtissue2work3D(const std::vector<tissues_size_t>& tissuetype);
 	void cleartissue(tissues_size_t tissuetype);
 	void cleartissue3D(tissues_size_t tissuetype);
 	void cleartissues();
@@ -536,7 +534,6 @@ public:
 	TissueHiearchy* get_tissue_hierachy() { return _tissue_hierachy; }
 
 	void mergetissues(tissues_size_t tissuetype);
-	void selectedtissue2mc(tissues_size_t tissuetype, unsigned char** voxels);
 
 private:
 	unsigned short _activeslice;

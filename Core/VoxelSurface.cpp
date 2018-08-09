@@ -243,7 +243,7 @@ VoxelSurface::eSurfaceImageOverlap
 	return result;
 }
 
-VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* filename, const unsigned dims[3], const float spacing[3], const Transform& transform, float** slices, unsigned startslice, unsigned endslice)
+VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(const char* filename, const unsigned dims[3], const float spacing[3], const Transform& transform, float** slices, unsigned startslice, unsigned endslice, double rel_tolerance)
 {
 	vtkNew<vtkSTLReader> reader;
 	reader->SetFileName(filename);
@@ -284,7 +284,7 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 	surface->BuildCells();
 	auto num_cells = surface->GetNumberOfCells();
 
-	double tol = (*std::min_element(spacing, spacing + 3)) / 10.0;
+	double tol = (*std::min_element(spacing, spacing + 3)) * rel_tolerance;
 	vtkIdType *pts, npts;
 	double bb[6];
 	int bbi[6];
@@ -326,7 +326,7 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 						{
 							ijk[dir[0]] = i;
 							ijk[dir[1]] = j;
-							ijk[dir[2]] = bbi[dir[2] * 2] + std::floor(scale * t);
+							ijk[dir[2]] = bbi[dir[2] * 2] + std::floor(scale * t) - rel_tolerance;
 
 							if (ijk[0] < dims[0] &&
 									ijk[1] < dims[1] &&
@@ -334,6 +334,19 @@ VoxelSurface::eSurfaceImageOverlap iseg::VoxelSurface::Intersect(const char* fil
 							{
 								float* slice = slices[ijk[2]];
 								slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
+							}
+
+							auto old_k = ijk[dir[2]];
+							ijk[dir[2]] = bbi[dir[2] * 2] + std::floor(scale * t) + rel_tolerance;
+							if (old_k != ijk[dir[2]])
+							{
+								if (ijk[0] < dims[0] &&
+										ijk[1] < dims[1] &&
+										ijk[2] < dims[2])
+								{
+									float* slice = slices[ijk[2]];
+									slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
+								}
 							}
 						}
 					}
