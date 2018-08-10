@@ -13,6 +13,8 @@
 #include "TissueHierarchy.h"
 #include "TissueInfos.h"
 
+#include "Data/ScopedTimer.h"
+
 #include "Core/HDF5Reader.h"
 #include "Core/HDF5Writer.h"
 
@@ -408,6 +410,8 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 								 TissueHierarchyItem* hiearchy, bool naked,
 								 unsigned short version)
 {
+	ScopedTimer timer("Write Tissue List");
+
 	namespace fs = boost::filesystem;
 
 	int compression = 1;
@@ -608,6 +612,8 @@ FILE* TissueInfos::LoadTissues(FILE* fp, int tissuesVersion)
 
 bool TissueInfos::LoadTissuesHDF(const char* filename, int tissuesVersion)
 {
+	ScopedTimer timer("Read Tissue List");
+
 	HDF5Reader reader;
 	if (!reader.open(filename))
 	{

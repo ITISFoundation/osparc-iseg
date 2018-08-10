@@ -3846,8 +3846,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 	if (!loadfilename.isEmpty())
 	{
 		m_saveprojfilename = loadfilename;
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
-							 QString(" - ") + TruncateFileName(loadfilename));
+		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
 		AddLoadProj(m_saveprojfilename);
 		int tissuesVersion = 0;
 		fp = handler3D->LoadProject(loadfilename.ascii(), tissuesVersion);
@@ -3859,13 +3858,8 @@ void MainWindow::loadproj(const QString& loadfilename)
 	emit end_datachange(this, iseg::ClearUndo);
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
-	//if(xsliceshower!=nullptr) xsliceshower->thickness_changed(handler3D->get_slicethickness());
-	//if(ysliceshower!=nullptr) ysliceshower->thickness_changed(handler3D->get_slicethickness());
 	pixelsize_changed();
-	/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(handler3D->get_pixelsize());
-	if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(handler3D->get_pixelsize());
-	bmp_show->pixelsize_changed(handler3D->get_pixelsize());
-	work_show->pixelsize_changed(handler3D->get_pixelsize());*/
+
 	slicethickness_changed1();
 
 	if (stillopen)
@@ -3874,8 +3868,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 		if (fread(&combinedVersion, sizeof(unsigned short), 1, fp) > 0)
 		{
 			int loadProjVersion, tissuesVersion;
-			iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion,
-					tissuesVersion);
+			iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion, tissuesVersion);
 			/*for(size_t i=0;i<tabwidgets.size();i++){
 				fp=((QWidget1 *)(tabwidgets[i]))->LoadParams(fp,version);
 			}*/
@@ -3908,15 +3901,12 @@ void MainWindow::loadproj(const QString& loadfilename)
 			fp = load_notes(fp, loadProjVersion);
 		}
 
-		//		le_slicethick->setText(QString::number(handler3D->get_slicethickness()));
-
 		fclose(fp);
 	}
 
 	reset_brightnesscontrast();
 
 	EnableActionsAfterPrjLoaded(true);
-	//m_S4Lcommunicationfilename=QString("F:\\applications\\bifurcation\\bifurcation2.h5");xxxa
 }
 
 void MainWindow::loadS4Llink(const QString& loadfilename)

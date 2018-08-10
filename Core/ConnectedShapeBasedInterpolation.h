@@ -12,6 +12,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Types.h"
+#include "Data/ScopedTimer.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkCastImageFilter.h>

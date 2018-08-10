@@ -973,26 +973,15 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	transform.getOffset(origin);
 	arrayNames = reader.GetArrayNames();
 
-	cerr << "SlicesHandler::loadAllXdmf() : Extent = " << _width << " " << _height
-			 << " " << nrofslices << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Origin = " << origin[0] << " "
-			 << origin[1] << " " << origin[2] << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Spacing = " << pixsize[0] << " "
-			 << pixsize[1] << " " << pixsize[2] << endl;
+	cerr << "SlicesHandler::loadAllXdmf() : Extent = " << _width << " " << _height << " " << nrofslices << endl;
+	cerr << "SlicesHandler::loadAllXdmf() : Origin = " << origin[0] << " " << origin[1] << " " << origin[2] << endl;
+	cerr << "SlicesHandler::loadAllXdmf() : Spacing = " << pixsize[0] << " " << pixsize[1] << " " << pixsize[2] << endl;
 	const int NPA = arrayNames.size();
-	cerr << "SlicesHandler::loadAllXdmf() : number of point arrays: " << NPA
-			 << endl;
+	cerr << "SlicesHandler::loadAllXdmf() : number of point arrays: " << NPA << endl;
 	for (int i = 0; i < NPA; ++i)
 	{
-		cerr << "\tarray id = " << i
-				 << ", name = " << arrayNames[i].toAscii().data() << endl;
+		cerr << "\tarray id = " << i << ", name = " << arrayNames[i].toAscii().data() << endl;
 	}
-
-	//	if((w!=this->width) || (h!=this->height) || (nrofslices!=this->nrslices))
-	//	{
-	//		cerr << "error, invalid dimensions..." << endl;
-	//		return 0;
-	//	}
 
 	std::vector<float*> bmpslices(_nrslices);
 	std::vector<float*> workslices(_nrslices);
@@ -2137,15 +2126,13 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 		if (version > 2)
 		{
 			// Only load image file name extension
-			char imageFileExtension[10];
+			char imageFileExt[10];
 			unsigned char length1;
 			fread(&length1, sizeof(unsigned char), 1, fp);
-			fread(imageFileExtension, sizeof(char), length1, fp);
+			fread(imageFileExt, sizeof(char), length1, fp);
 			imageFileName = QString(filename);
 			int afterDot = imageFileName.lastIndexOf('.') + 1;
-			imageFileName = imageFileName.remove(
-													afterDot, imageFileName.length() - afterDot) +
-											QString(imageFileExtension);
+			imageFileName = imageFileName.remove(afterDot, imageFileName.length() - afterDot) + QString(imageFileExt);
 		}
 		else
 		{
@@ -2154,20 +2141,15 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 			unsigned char length1;
 			fread(&length1, sizeof(unsigned char), 1, fp);
 			fread(filenameimage, sizeof(char), length1, fp);
-			//fscanf(fp,"%s",filenameimage);
 			imageFileName = QString(filenameimage);
 		}
 
 		if (imageFileName.endsWith(".xmf", Qt::CaseInsensitive))
 		{
-			LoadAllXdmf(QFileInfo(filename)
-											.dir()
-											.absFilePath(imageFileName)
-											.toAscii()
-											.data());
+			LoadAllXdmf(QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data());
 		}
 		else
-			cerr << "error, unsupported format..." << endl;
+			std::cerr << "error, unsupported format..." << std::endl;
 	}
 
 	// Ranges

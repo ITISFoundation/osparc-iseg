@@ -11,6 +11,8 @@
 
 #include "XdmfImageWriter.h"
 
+#include "Data/ScopedTimer.h"
+
 #include "Core/ColorLookupTable.h"
 #include "Core/HDF5Writer.h"
 
@@ -68,6 +70,8 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 {
 	if (lut == nullptr)
 		return 1;
+
+	ScopedTimer timer("WriteColorLookup");
 
 	QString qFileName(this->FileName);
 	QFileInfo fileInfo(qFileName);
@@ -276,14 +280,17 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 	}
 	else // write slice-by-slice
 	{
+		ScopedTimer timer("Write Source");
 		if (!writer.write(slicesbmp, nrslices, dims[0] * dims[1], "Source"))
 		{
 			cerr << "error writing Source" << endl;
 		}
+		timer.new_scope("Write Target");
 		if (!writer.write(sliceswork, nrslices, dims[0] * dims[1], "Target"))
 		{
 			cerr << "error writing Target" << endl;
 		}
+		timer.new_scope("Write Tissue");
 		if (!writer.write(slicestissue, nrslices, dims[0] * dims[1], "Tissue"))
 		{
 			cerr << "error writing Tissue" << endl;

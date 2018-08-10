@@ -15,7 +15,7 @@
 #include "XdmfImageReader.h"
 
 #include "Data/Point.h"
-#include "Data/ItkUtils.h" // for ScopedTimer
+#include "Data/ScopedTimer.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/ImageReader.h"

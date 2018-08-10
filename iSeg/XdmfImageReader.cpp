@@ -12,6 +12,7 @@
 #include "XdmfImageReader.h"
 
 #include "Data/Transform.h"
+#include "Data/ScopedTimer.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/HDF5Reader.h"
@@ -110,6 +111,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		// Source
 		if (reader.exists(source_dname))
 		{
+			ScopedTimer timer("Read Source");
 			if (!reader.read(&bufferFloat[0], source_dname))
 			{
 				cerr << "Error reading Source dataset..." << endl;
@@ -135,6 +137,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		// Target
 		if (reader.exists(target_dname))
 		{
+			ScopedTimer timer("Read Target");
 			if (!reader.read(&bufferFloat[0], target_dname))
 			{
 				cerr << "Error reading Target dataset..." << endl;
@@ -161,6 +164,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		// Tissue
 		if (reader.exists(tissue_dname))
 		{
+			ScopedTimer timer("Read Tissue");
 			string type;
 			vector<HDF5Reader::size_type> dims;
 			if (!reader.getDatasetInfo(type, dims, tissue_dname))
@@ -293,6 +297,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 
 		if (reader.exists(source_dname))
 		{
+			ScopedTimer timer("Read Source");
 			bool ok = true;
 			size_t offset = 0;
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
@@ -303,6 +308,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		}
 		if (reader.exists(target_dname))
 		{
+			ScopedTimer timer("Read Target");
 			bool ok = true;
 			size_t offset = 0;
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
@@ -313,6 +319,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		}
 		if (reader.exists(tissue_dname))
 		{
+			ScopedTimer timer("Read Tissue");
 			bool ok = true;
 			size_t offset = 0;
 			for (int k = 0; k < NumberOfSlices; k++, offset += slice_size)
@@ -688,6 +695,8 @@ int HDFImageReader::Read()
 
 std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 {
+	ScopedTimer timer("ReadColorLookup");
+
 	std::shared_ptr<ColorLookupTable> color_lookup_table;
 
 	QString qFileName(this->FileName);
