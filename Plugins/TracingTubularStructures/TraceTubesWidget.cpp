@@ -12,7 +12,7 @@
 #include "itkWeightedDijkstraImageFilter.h"
 
 #include "Data/BrushInteraction.h"
-#define ENABLE_DUMP_IMAGE
+//#define ENABLE_DUMP_IMAGE
 #include "Data/ItkUtils.h"
 #include "Data/SliceHandlerItkWrapper.h"
 

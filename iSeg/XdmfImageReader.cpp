@@ -352,11 +352,10 @@ XdmfImageReader::~XdmfImageReader() { delete[] this->FileName; }
 
 int XdmfImageReader::ParseXML()
 {
-	cerr << "parsing file " << this->FileName << endl;
 	QFile file(FileName);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		cerr << "can not open " << FileName << endl;
+		cerr << "ERROR: cannot open " << FileName << endl;
 		return 0;
 	}
 
@@ -368,7 +367,7 @@ int XdmfImageReader::ParseXML()
 	if (!inputDocument.setContent(inputContent, false,
 					&msg)) // This function is not reentrant.
 	{
-		cerr << "error assigning content of " << FileName << ": "
+		cerr << "ERROR: assigning content of " << FileName << ": "
 				 << msg.toAscii().data() << endl;
 	}
 
@@ -391,7 +390,7 @@ int XdmfImageReader::ParseXML()
 				type = e.attribute(QString("GridType"));
 			if (type != QString("Uniform"))
 			{
-				cerr << "error, unsupported grid type: "
+				cerr << "ERROR: unsupported grid type: "
 						 << type.toAscii().data() << endl;
 				return 0;
 			}
@@ -403,7 +402,7 @@ int XdmfImageReader::ParseXML()
 					geometry.attribute(QString("GeometryType")) !=
 							QString("ORIGIN_DXDYDZ"))
 			{
-				cerr << "error, unsupported geometry type..." << endl;
+				cerr << "ERROR: unsupported geometry type..." << endl;
 				return 0;
 			}
 			QDomNodeList list2 = geometry.elementsByTagName("DataItem");
@@ -417,7 +416,7 @@ int XdmfImageReader::ParseXML()
 					QStringList textList = text.split(QString(" "));
 					if (textList.size() != 3)
 					{
-						cerr << "error, invalid origin..." << endl;
+						cerr << "ERROR: invalid origin..." << endl;
 						return 0;
 					}
 					float offset[3];
@@ -431,7 +430,7 @@ int XdmfImageReader::ParseXML()
 					QStringList textList = text.split(QString(" "));
 					if (textList.size() != 3)
 					{
-						cerr << "error, invalid spacing..." << endl;
+						cerr << "ERROR: invalid spacing..." << endl;
 						return 0;
 					}
 					for (int i3 = 0; i3 < textList.size(); ++i3)
@@ -439,7 +438,7 @@ int XdmfImageReader::ParseXML()
 				}
 				else
 				{
-					cerr << "error, expecting origin and spacing..." << endl;
+					cerr << "ERROR: expecting origin and spacing..." << endl;
 					return 0;
 				}
 			}
@@ -451,14 +450,14 @@ int XdmfImageReader::ParseXML()
 					topology.attribute(QString("TopologyType")) !=
 							QString("3DCORECTMesh"))
 			{
-				cerr << "error, unsupported topology type..." << endl;
+				cerr << "ERROR: unsupported topology type..." << endl;
 				return 0;
 			}
 			QStringList textList =
 					topology.attribute(QString("Dimensions")).split(QString(" "));
 			if (textList.size() != 3)
 			{
-				cerr << "error, invalid dimensions..." << endl;
+				cerr << "ERROR: invalid dimensions..." << endl;
 				return 0;
 			}
 			this->Width = textList[2].toInt();
@@ -477,8 +476,6 @@ int XdmfImageReader::ParseXML()
 				QString text = dataitem.text().trimmed();
 				int idx = text.indexOf(":");
 				QString datasetname = text.remove(0, idx + 1);
-				cerr << "mapping " << name.toAscii().data() << " to "
-						 << datasetname.toAscii().data() << endl;
 				this->mapArrayNames[name] = datasetname;
 			}
 
@@ -495,13 +492,7 @@ int XdmfImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
 									 (size_t)this->NumberOfSlices;
-	cerr << "XdmfImageReader::Read()" << endl;
-	cerr << "Width = " << this->Width << endl;
-	cerr << "Height = " << this->Height << endl;
-	cerr << "NumberOfSlices = " << this->NumberOfSlices << endl;
-	cerr << "Total size = " << N << endl;
-
-	//	vector<int> dims;
+	cerr << "INFO: Reading " << Width << " x " << Height << " x " << NumberOfSlices << "\n";
 
 	QString qFileName(this->FileName);
 	QFileInfo fileInfo(qFileName);
@@ -510,19 +501,15 @@ int XdmfImageReader::Read()
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
 	if (!reader.open(fname.toAscii().data()))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		cerr << "ERROR: opening " << fname.toAscii().data() << endl;
 		return 0;
 	}
 
@@ -535,8 +522,6 @@ int XdmfImageReader::Read()
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	cerr << "restored current folder "
-			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return r;
 }
@@ -662,19 +647,15 @@ int HDFImageReader::Read()
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + "." + suffix;
 	if (!reader.open(fname.toAscii().data()))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		cerr << "ERROR: opening " << fname.toAscii().data() << endl;
 		return 0;
 	}
 
@@ -687,8 +668,6 @@ int HDFImageReader::Read()
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	cerr << "restored current folder "
-			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return 1;
 }
@@ -710,9 +689,9 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 
 	HDF5Reader reader;
 	const QString fname = basename + "." + suffix;
-	if (!reader.open(fname.toAscii().data()))
+	if (!reader.open(fname.toStdString()))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		cerr << "ERROR: opening " << fname.toStdString() << endl;
 		return nullptr;
 	}
 

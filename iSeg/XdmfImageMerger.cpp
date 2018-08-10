@@ -82,12 +82,9 @@ int XdmfImageMerger::InternalWrite(
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	std::cerr << "storing current folder "
-						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	std::cerr << "changing current folder to " << fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	const size_t N = (size_t)width * (size_t)height * (size_t)nrslicesTotal;
 	const size_t slice_size = static_cast<size_t>(width) * height;
@@ -105,7 +102,7 @@ int XdmfImageMerger::InternalWrite(
 	const QString fname = basename + ".h5";
 	if (!writer.open(fname.toAscii().data()))
 	{
-		std::cerr << "error opening " << fname.toAscii().data() << std::endl;
+		std::cerr << "ERROR: opening " << fname.toAscii().data() << std::endl;
 	}
 	writer.compression = compression;
 
@@ -406,8 +403,6 @@ int XdmfImageMerger::InternalWrite(
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	std::cerr << "restored current folder "
-						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	for (XdmfImageReader* r : imageReaders)
 	{
@@ -428,13 +423,9 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	std::cerr << "storing current folder "
-						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	std::cerr << "changing current folder to "
-						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	reader.loud = 1;
@@ -479,13 +470,9 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	std::cerr << "storing current folder "
-						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	std::cerr << "changing current folder to "
-						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	reader.loud = 1;
@@ -533,13 +520,9 @@ int XdmfImageMerger::ReadTissues(
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	std::cerr << "storing current folder "
-						<< oldcwd.absolutePath().toAscii().data() << std::endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	std::cerr << "changing current folder to "
-						<< fileInfo.absolutePath().toAscii().data() << std::endl;
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";

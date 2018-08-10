@@ -15,7 +15,7 @@
 
 namespace iseg {
 
-template<typename TUnit=boost::chrono::milliseconds>
+template<typename TUnit>
 class ScopedTimerT
 {
 public:
@@ -33,7 +33,7 @@ public:
 	{
 		auto const after = boost::chrono::high_resolution_clock::now();
 		double count = static_cast<double>( boost::chrono::duration_cast<TUnit>(after - _before).count() );
-		std::cerr << "TIMER: " << count << "[" + _unit + "] in " + _scope_name + "\n";
+		std::cerr << "TIMER: " << count << " " << _unit + " in " + _scope_name + "\n";
 
 		_before = after;
 		_scope_name = scope_name;
@@ -49,14 +49,14 @@ class ScopedTimer : public ScopedTimerT<boost::chrono::seconds>
 {
 public:
 	ScopedTimer(const std::string& scope_name) 
-		: ScopedTimerT<boost::chrono::seconds>(scope_name, "[s]") {}
+		: ScopedTimerT<boost::chrono::seconds>(scope_name, "s") {}
 };
 
 class ScopedTimerMilli : public ScopedTimerT<boost::chrono::milliseconds>
 {
 public:
 	ScopedTimerMilli(const std::string& scope_name) 
-		: ScopedTimerT<boost::chrono::milliseconds>(scope_name, "[ms]") {}
+		: ScopedTimerT<boost::chrono::milliseconds>(scope_name, "ms") {}
 };
 
 }

@@ -422,12 +422,9 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 
 	// save working directory
 	auto oldcwd = fs::current_path();
-	cerr << "storing current folder " << oldcwd.string() << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	fs::current_path(qFileName.parent_path());
-
-	cerr << "changing current folder to " << qFileName.parent_path().string() << endl;
 
 	HDF5Writer writer;
 	writer.loud = 0;

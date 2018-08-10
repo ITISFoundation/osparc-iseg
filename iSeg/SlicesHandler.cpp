@@ -964,7 +964,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	nrofslices = reader.GetNumberOfSlices();
 	if ((w != _width) || (h != _height) || (_nrslices != nrofslices))
 	{
-		cerr << "loadAllXdmf() : inconsistent dimensions" << endl;
+		cerr << "ERROR: inconsistent dimensions in LoadAllXdmf" << endl;
 		return 0;
 	}
 	auto pixsize = reader.GetPixelSize();
@@ -973,15 +973,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	transform.getOffset(origin);
 	arrayNames = reader.GetArrayNames();
 
-	cerr << "SlicesHandler::loadAllXdmf() : Extent = " << _width << " " << _height << " " << nrofslices << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Origin = " << origin[0] << " " << origin[1] << " " << origin[2] << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Spacing = " << pixsize[0] << " " << pixsize[1] << " " << pixsize[2] << endl;
 	const int NPA = arrayNames.size();
-	cerr << "SlicesHandler::loadAllXdmf() : number of point arrays: " << NPA << endl;
-	for (int i = 0; i < NPA; ++i)
-	{
-		cerr << "\tarray id = " << i << ", name = " << arrayNames[i].toAscii().data() << endl;
-	}
 
 	std::vector<float*> bmpslices(_nrslices);
 	std::vector<float*> workslices(_nrslices);
@@ -1054,13 +1046,9 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Writer writer;
 	QString fname;
@@ -1134,6 +1122,8 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 	}
 
 	writer.close();
+
+	QDir::setCurrent(oldcwd.absolutePath());
 
 	return true;
 }
