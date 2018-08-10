@@ -17,6 +17,8 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
+#include "Data/Logger.h"
+
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
@@ -61,6 +63,14 @@ std::string timestamped(const std::string prefix, const std::string& suffix)
 	return prefix + "-" + tod + suffix;
 }
 
+//using text_sink = iseg::sinks::synchronous_sink<sinks::text_ostream_backend>;
+//boost::shared_ptr< text_sink > sink;
+
+void init_logger(const std::string& fname)
+{
+	auto sink = init_logging(fname, eSeverityLevel::timing);
+}
+
 // \brief Redirect VTK errors/warnings to file
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
@@ -89,61 +99,60 @@ int main(int argc, char **argv)
 	eow->SetInstance(eow);
 	eow->Delete();
 
-	cerr << "starting iSeg..." << endl;
 	QFileInfo fileinfo(argv[0]);
 
 	QDir tmpdir = QDir::home();
 	if (!tmpdir.exists("iSeg"))
 	{
-		cerr << "iSeg folder does not exist, creating..." << endl;
+		std::cerr << "iSeg folder does not exist, creating..." << endl;
 		if (!tmpdir.mkdir(QString("iSeg")))
 		{
-			cerr << "failed to create iSeg folder, exiting..." << endl;
+			std::cerr << "failed to create iSeg folder, exiting..." << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
 	if (!tmpdir.cd("iSeg"))
 	{
-		cerr << "failed to enter iSeg folder, exiting..." << endl;
+		std::cerr << "failed to enter iSeg folder, exiting..." << endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (!tmpdir.exists("tmp"))
 	{
-		cerr << "tmp folder does not exist, creating..." << endl;
+		std::cerr << "tmp folder does not exist, creating..." << endl;
 		if (!tmpdir.mkdir(QString("tmp")))
 		{
-			cerr << "failed to create tmp folder, exiting..." << endl;
+			std::cerr << "failed to create tmp folder, exiting..." << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
 	if (!tmpdir.cd("tmp"))
 	{
-		cerr << "failed to enter tmp folder, exiting..." << endl;
+		std::cerr << "failed to enter tmp folder, exiting..." << endl;
 		exit(EXIT_FAILURE);
 	}
 
-	cerr << "intercepting application's output to a log file..." << endl;
 	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
-	if (!interceptOutput(log_file_name))
-	{
-		error("intercepting output failed");
-	}
+	init_logger(log_file_name);
+	//if (!interceptOutput(log_file_name))
+	//{
+	//	error("intercepting output failed");
+	//}
 
 	QDir fileDirectory = fileinfo.dir();
-	cerr << "fileDirectory = " << fileDirectory.absolutePath().toStdString() << endl;
+	ISEG_INFO() << "fileDirectory = " << fileDirectory.absolutePath().toStdString();
 
 	QDir picpath = fileinfo.dir();
-	cerr << "picture path = " << picpath.absolutePath().toStdString() << endl;
+	ISEG_INFO() << "picture path = " << picpath.absolutePath().toStdString();
 	if (!picpath.cd("images"))
 	{
-		cerr << "images folder does not exist" << endl;
+		ISEG_WARNING() << "images folder does not exist" << endl;
 	}
 
 	QDir atlasdir = fileinfo.dir();
 	if (!atlasdir.cd("atlas"))
 	{
-		cerr << "atlas folder does not exist" << endl;
+		std::cerr << "atlas folder does not exist" << endl;
 	}
 
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));

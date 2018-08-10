@@ -263,9 +263,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 			{
 				ok = false;
 				if (type1 == 0 || type1 > tissueCount)
-					std::cerr << "old: " << name1 << " not in tissue list\n";
+					ISEG_WARNING() << "old: " << name1 << " not in tissue list\n";
 				if (type2 == 0 || type2 > tissueCount)
-					std::cerr << "new: " << name2 << " not in tissue list\n";
+					ISEG_WARNING() << "new: " << name2 << " not in tissue list\n";
 			}
 			memset(name1, 0, 1000);
 			memset(name2, 0, 1000);
@@ -283,9 +283,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 				{
 					ok = false;
 					if (type1 == 0 || type1 > tissueCount)
-						std::cerr << "old: " << name1 << " not in tissue list\n";
+						ISEG_WARNING() << "old: " << name1 << " not in tissue list\n";
 					if (type2 == 0 || type2 > tissueCount)
-						std::cerr << "new: " << name2 << " not in tissue list\n";
+						ISEG_WARNING() << "new: " << name2 << " not in tissue list\n";
 				}
 
 				memset(name1, 0, 1000);
@@ -321,7 +321,7 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 		else
 		{
 			ok = false;
-			std::cerr << name << " not in tissue list\n";
+			ISEG_WARNING() << name << " not in tissue list\n";
 		}
 	}
 
@@ -3580,26 +3580,19 @@ void MainWindow::LoadSettings(const char* loadfilename)
 
 	if (loadProjVersion > 7)
 	{
-		cerr << "LoadSettings() : restoring values..." << endl;
-		QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT",
-				"iSeg");
+		ISEG_INFO() << "LoadSettings() : restoring values...";
+		QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT", "iSeg");
 		settings.beginGroup("MainWindow");
 		restoreGeometry(settings.value("geometry").toByteArray());
 		restoreState(settings.value("state").toByteArray());
-		this->handler3D->SetNumberOfUndoSteps(
-				settings.value("NumberOfUndoSteps", 50).toUInt());
-		cerr << "NumberOfUndoSteps = " << this->handler3D->GetNumberOfUndoSteps()
-				 << endl;
-		this->handler3D->SetNumberOfUndoArrays(
-				settings.value("NumberOfUndoArrays", 20).toUInt());
-		cerr << "NumberOfUndoArrays = " << this->handler3D->GetNumberOfUndoArrays()
-				 << endl;
+		this->handler3D->SetNumberOfUndoSteps(settings.value("NumberOfUndoSteps", 50).toUInt());
+		ISEG_INFO() << "NumberOfUndoSteps = " << this->handler3D->GetNumberOfUndoSteps();
+		this->handler3D->SetNumberOfUndoArrays(settings.value("NumberOfUndoArrays", 20).toUInt());
+		ISEG_INFO() << "NumberOfUndoArrays = " << this->handler3D->GetNumberOfUndoArrays();
 		this->handler3D->SetCompression(settings.value("Compression", 0).toInt());
-		cerr << "Compression = " << this->handler3D->GetCompression() << endl;
-		this->handler3D->SetContiguousMemory(
-				settings.value("ContiguousMemory", true).toBool());
-		cerr << "ContiguousMemory = " << this->handler3D->GetContiguousMemory()
-				 << endl;
+		ISEG_INFO() << "Compression = " << this->handler3D->GetCompression();
+		this->handler3D->SetContiguousMemory(settings.value("ContiguousMemory", true).toBool());
+		ISEG_INFO() << "ContiguousMemory = " << this->handler3D->GetContiguousMemory();
 		settings.endGroup();
 
 		if (this->handler3D->return_nrundo() == 0)
@@ -6428,7 +6421,7 @@ void MainWindow::selectedtissue2work()
 	}
 	catch(std::exception&)
 	{
-		std::cerr << "ERROR: could not get tissue. Something might be wrong with tissue list.\n";
+		ISEG_ERROR() << "could not get tissue. Something might be wrong with tissue list.\n";
 	}
 	emit end_datachange(this);
 }
@@ -7076,7 +7069,7 @@ void MainWindow::tab_changed(QWidget* qw)
 {
 	if (qw != tab_old)
 	{
-		std::cerr << "Starting widget: " << qw->metaObject()->className() << std::endl;
+		ISEG_INFO() << "Starting widget: " << qw->metaObject()->className();
 
 		// disconnect signal-slots of previous widget
 
@@ -8124,6 +8117,6 @@ void MainWindow::execute_savecolorlookup()
 	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
 	{
 		QMessageBox::warning(this, "iSeg", 
-			"Error occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+			"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }

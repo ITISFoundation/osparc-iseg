@@ -1114,7 +1114,7 @@ void LoaderColorImages::load_quantize()
 		else
 		{
 			QMessageBox::warning(this, "iSeg",
-				"Error occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+				"ERROR: occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 		}
 	}
 

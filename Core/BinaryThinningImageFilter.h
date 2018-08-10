@@ -60,7 +60,7 @@ typename TOutputImage::Pointer BinaryThinning(TInputImage* input, typename TInpu
 	}
 	catch (itk::ExceptionObject& e)
 	{
-		std::cerr << "ERROR: exception occurred " << e.what() << "\n";
+		ISEG_ERROR() << "exception occurred " << e.what();
 	}
 	return nullptr;
 }

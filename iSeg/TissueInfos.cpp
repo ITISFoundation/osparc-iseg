@@ -436,7 +436,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 
 	if (!writer.open(fname, "append"))
 	{
-		cerr << "error opening " << fname << endl;
+		ISEG_ERROR() << "opening " << fname;
 	}
 	writer.compression = compression;
 
@@ -444,7 +444,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 
 	if (!writer.createGroup(std::string("Tissues")))
 	{
-		cerr << "error creating tissues section" << endl;
+		ISEG_ERROR() << "creating tissues section";
 	}
 
 	float rgbo[4];
@@ -459,7 +459,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 	index1[0] = (int)version;
 	if (!writer.write(index1, dim2, std::string("/Tissues/version")))
 	{
-		cerr << "error writing version" << endl;
+		ISEG_ERROR() << "writing version";
 	}
 
 	rgbo[0] = tissueInfosVector[0].color[0];
@@ -468,7 +468,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 	rgbo[3] = tissueInfosVector[0].opac;
 	if (!writer.write(rgbo, dim1, std::string("/Tissues/bkg_rgbo")))
 	{
-		cerr << "error writing rgbo" << endl;
+		ISEG_ERROR() << "writing rgbo";
 	}
 
 	TissueInfosVecType::iterator vecIt;
@@ -491,17 +491,17 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 		std::string path = hiearchy_map[tissuename];
 		if (!writer.write_attribute(path, groupname + "/path"))
 		{
-			cerr << "error writing index1" << endl;
+			ISEG_ERROR() << "writing path";
 		}
 		if (!writer.write(rgbo, dim1, groupname + "/rgbo"))
 		{
-			cerr << "error writing rgbo" << endl;
+			ISEG_ERROR() << "writing rgbo";
 		}
 		index1[0] = counter++;
 
 		if (!writer.write(index1, dim2, groupname + "/index"))
 		{
-			cerr << "error writing index1" << endl;
+			ISEG_ERROR() << "writing index";
 		}
 	}
 
@@ -596,7 +596,7 @@ FILE* TissueInfos::LoadTissues(FILE* fp, int tissuesVersion)
 		fread(&size, sizeof(int), 1, fp);
 		fread(name, sizeof(char) * size, 1, fp);
 		if (size > 99)
-			throw std::runtime_error("Error in tissue file: setting.bin");
+			throw std::runtime_error("ERROR: in tissue file: setting.bin");
 		name[size] = '\0';
 		std::string s(name);
 		vecIt->name = s;
@@ -614,7 +614,7 @@ bool TissueInfos::LoadTissuesHDF(const char* filename, int tissuesVersion)
 	HDF5Reader reader;
 	if (!reader.open(filename))
 	{
-		cerr << "error opening " << filename << endl;
+		ISEG_ERROR() << "opening " << filename;
 		return false;
 	}
 

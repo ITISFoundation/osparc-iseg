@@ -213,7 +213,7 @@ void SurfaceViewerWidget::load()
 		}
 		catch (std::exception& e)
 		{
-			std::cerr << "ERROR: bad tissue index map " << e.what() << "\n";
+			ISEG_ERROR() << "bad tissue index map " << e.what();
 			std::fill_n(field, slices.size() * slice_size, 0);
 		}
 	}

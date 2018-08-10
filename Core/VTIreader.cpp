@@ -196,7 +196,7 @@ bool VTIreader::getVolume(const char* filename, float** slices,
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
-		cerr << "VTIreader::getVolume() : can not read file " << filename
+		std::cerr << "VTIreader::getVolume() : can not read file " << filename
 			 << endl;
 		return false;
 	}
@@ -216,7 +216,7 @@ bool VTIreader::getVolume(const char* filename, float** slices,
 	vtkDataArray* scalars = img->GetPointData()->GetScalars(arrayName.c_str());
 	if (!scalars)
 	{
-		cerr << "no such array: " << arrayName << endl;
+		std::cerr << "no such array: " << arrayName << endl;
 	}
 	std::string className = scalars->GetClassName();
 
@@ -314,21 +314,21 @@ bool VTIreader::getVolumeAll(const char* filename, float** slicesbmp,
 	if (arraybmp == 0)
 	{
 		reader->Delete();
-		cerr << "VTIreader::getVolumeAll() : no Source array" << endl;
+		std::cerr << "VTIreader::getVolumeAll() : no Source array" << endl;
 		return false;
 	}
 	vtkDataArray* arraywork = img->GetPointData()->GetArray("Target", index);
 	if (arraywork == 0)
 	{
 		reader->Delete();
-		cerr << "VTIreader::getVolumeAll() : no Target array" << endl;
+		std::cerr << "VTIreader::getVolumeAll() : no Target array" << endl;
 		return false;
 	}
 	vtkDataArray* arraytissue = img->GetPointData()->GetArray("Tissue", index);
 	if (arraytissue == 0)
 	{
 		reader->Delete();
-		cerr << "VTIreader::getVolumeAll() : no Tissue array" << endl;
+		std::cerr << "VTIreader::getVolumeAll() : no Tissue array" << endl;
 		return false;
 	}
 	std::string classNamebmp = arraybmp->GetClassName();
@@ -344,7 +344,7 @@ bool VTIreader::getVolumeAll(const char* filename, float** slicesbmp,
 		classNamework.compare("vtkFloatArray") != 0)
 	{
 		reader->Delete();
-		cerr << "VTIreader::getVolumeAll() : unsupported array types for the "
+		std::cerr << "VTIreader::getVolumeAll() : unsupported array types for the "
 				"arrays"
 			 << endl;
 		return false;
@@ -442,7 +442,7 @@ bool VTIreader::getVolume(const char* filename, float** slices,
 	vtkDataArray* scalars = img->GetPointData()->GetScalars(arrayName.c_str());
 	if (!scalars)
 	{
-		cerr << "no such array: " << arrayName << endl;
+		std::cerr << "no such array: " << arrayName << endl;
 	}
 	std::string className = scalars->GetClassName();
 
@@ -546,11 +546,11 @@ bool VTIreader::getInfo(const char* filename, unsigned& width, unsigned& height,
 	offset[2] = origin[2];
 
 	const int NPA = reader->GetNumberOfPointArrays();
-	// cerr << "VTIreader::getInfo() : number of point arrays: " << NPA << endl;
+	// std::cerr << "VTIreader::getInfo() : number of point arrays: " << NPA << endl;
 	arrayNames.resize(NPA);
 	for (int i = 0; i < NPA; ++i)
 	{
-		// cerr << "\tarray id = " << i << ", name = " << reader->GetPointArrayName(i) << endl;
+		// std::cerr << "\tarray id = " << i << ", name = " << reader->GetPointArrayName(i) << endl;
 		arrayNames[i] = std::string(reader->GetPointArrayName(i));
 	}
 
@@ -611,7 +611,7 @@ bool VTIwriter::writeVolumeAll(const char* filename, float** slicesbmp,
 	}
 	else
 	{
-		cerr << "VTIwriter::writeVolumeAll: Error, tissues_size_t not "
+		std::cerr << "VTIwriter::writeVolumeAll: Error, tissues_size_t not "
 				"implemented."
 			 << endl;
 		return false;

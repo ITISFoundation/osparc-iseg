@@ -70,13 +70,13 @@ public:
 		HDF5Reader reader;
 		if (!reader.open(filename))
 		{
-			std::cerr << "error opening " + filename << std::endl;
+			ISEG_ERROR() << "opening " + filename;
 			return 0;
 		}
 
 		if (!reader.read(array, dataset))
 		{
-			std::cerr << "error reading " + dataset << std::endl;
+			ISEG_ERROR() << "reading " + dataset;
 			return 0;
 		}
 

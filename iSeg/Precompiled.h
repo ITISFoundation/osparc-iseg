@@ -9,6 +9,8 @@
  */
 #pragma once
 
+#include "Data/Logger.h"
+
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 

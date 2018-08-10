@@ -9,6 +9,7 @@
  */
 #include "LevelsetWidget.h"
 
+#include "Data/Logger.h"
 #include "Data/ItkUtils.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
@@ -317,7 +318,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	}
 	catch (itk::ExceptionObject e)
 	{
-		std::cerr << "Error: " << e.what() << "\n";
+		ISEG_ERROR() << "" << e.what();
 		return;
 	}
 
@@ -329,7 +330,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 
 	if (!iseg::Paste<mask_type, input_type>(threshold->GetOutput(), target))
 	{
-		std::cerr << "Error: could not set output because image regions don't match.\n";
+		ISEG_ERROR() << "could not set output because image regions don't match.";
 	}
 
 	emit end_datachange(this);

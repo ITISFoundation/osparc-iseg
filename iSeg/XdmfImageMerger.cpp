@@ -69,7 +69,7 @@ int XdmfImageMerger::InternalWrite(
 		reader->SetFileName(QFileInfo(*iterFilename).dir().absFilePath(imageFilename).toAscii().data());
 		if (reader->ParseXML() == 0)
 		{
-			std::cerr << "ERROR: XdmfImageMerger::InternalWrite while parsing xmls\n";
+			ISEG_ERROR() << "XdmfImageMerger::InternalWrite while parsing xmls\n";
 			return 0;
 		}
 		imageReaders.push_back(reader);
@@ -92,17 +92,13 @@ int XdmfImageMerger::InternalWrite(
 	float offset[3];
 	transform.getOffset(offset);
 
-	std::cerr << "XdmfImageReader::InternalWrite()" << std::endl;
-	std::cerr << "Width = " << width << std::endl;
-	std::cerr << "Height = " << height << std::endl;
-	std::cerr << "NumberOfSlices = " << nrslicesTotal << std::endl;
-	std::cerr << "Total size = " << N << std::endl;
+	ISEG_INFO() << "Writing " << width << " x " << height << " x " << nrslicesTotal;
 
 	HDF5Writer writer;
 	const QString fname = basename + ".h5";
-	if (!writer.open(fname.toAscii().data()))
+	if (!writer.open(fname.toStdString()))
 	{
-		std::cerr << "ERROR: opening " << fname.toAscii().data() << std::endl;
+		ISEG_ERROR() << "opening " << fname.toStdString();
 	}
 	writer.compression = compression;
 
@@ -129,27 +125,27 @@ int XdmfImageMerger::InternalWrite(
 		shape[0] = 3;
 		if (!writer.write(dimension, shape, std::string("dimensions")))
 		{
-			cerr << "error writing dimensions" << endl;
+			ISEG_ERROR() << "writing dimensions";
 		}
 		if (!writer.write(offset, shape, std::string("offset")))
 		{
-			cerr << "error writing offset" << endl;
+			ISEG_ERROR() << "writing offset";
 		}
 		if (!writer.write(pixelsize, shape, std::string("pixelsize")))
 		{
-			cerr << "error writing pixelsize" << endl;
+			ISEG_ERROR() << "writing pixelsize";
 		}
 
 		shape[0] = 6;
 		if (!writer.write(dc, shape, std::string("dc")))
 		{
-			cerr << "error writing dc" << endl;
+			ISEG_ERROR() << "writing dc";
 		}
 
 		shape[0] = 9;
 		if (!writer.write(rotation, shape, std::string("rotation")))
 		{
-			cerr << "error writing rotation" << endl;
+			ISEG_ERROR() << "writing rotation";
 		}
 	}
 
@@ -157,7 +153,7 @@ int XdmfImageMerger::InternalWrite(
 
 	// Source
 	{
-		std::cerr << "writing Source" << std::endl;
+		ISEG_INFO() << "writing Source";
 		// allocate in file
 		float** const null = nullptr;
 		if (writer.write(null, nrslicesTotal, slice_size, "Source"))
@@ -197,7 +193,7 @@ int XdmfImageMerger::InternalWrite(
 
 	// Target
 	{
-		std::cerr << "writing Target" << std::endl;
+		ISEG_INFO() << "writing Target";
 		// allocate in file
 		float** const null = nullptr;
 		if (writer.write(null, nrslicesTotal, slice_size, "Target"))
@@ -237,7 +233,7 @@ int XdmfImageMerger::InternalWrite(
 
 	// Tissue
 	{
-		std::cerr << "writing Tissue" << std::endl;
+		ISEG_INFO() << "writing Tissue";
 		// allocate in file
 		tissues_size_t** const null = nullptr;
 		if (writer.write(null, nrslicesTotal, slice_size, "Tissue"))
@@ -383,7 +379,7 @@ int XdmfImageMerger::InternalWrite(
 		dataitem.setAttribute("Precision", 4);
 		break;
 	default:
-		std::cerr << "tissues_size_t not supported!" << std::endl;
+		ISEG_ERROR() << "tissues_size_t not supported!";
 		return 0;
 	}
 	dataitem.setAttribute("Format", "HDF");
@@ -430,9 +426,9 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 	HDF5Reader reader;
 	reader.loud = 1;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toAscii().data()))
+	if (!reader.open(fname.toStdString()))
 	{
-		std::cerr << "error opening " << fname.toAscii().data() << std::endl;
+		ISEG_ERROR() << "opening " << fname.toStdString();
 		return 0;
 	}
 
@@ -440,21 +436,19 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 	QString mapSourceName = imageReader->GetMapArrayNames()["Source"];
 	if (mapSourceName.isEmpty())
 	{
-		std::cerr << "Error, no Source array..." << std::endl;
+		ISEG_ERROR() << "no Source array...";
 		return 0;
 	}
 	if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
 					mapSourceName.toAscii().data()))
 	{
-		std::cerr << "Error reading Source dataset..." << std::endl;
+		ISEG_ERROR() << "reading Source dataset...";
 		return 0;
 	}
 	sliceoffset += imageReader->GetNumberOfSlices();
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	std::cerr << "restored current folder "
-						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }
@@ -477,9 +471,9 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	HDF5Reader reader;
 	reader.loud = 1;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toAscii().data()))
+	if (!reader.open(fname.toStdString()))
 	{
-		std::cerr << "error opening " << fname.toAscii().data() << std::endl;
+		ISEG_ERROR() << "opening " << fname.toStdString();
 		return 0;
 	}
 
@@ -487,8 +481,7 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	QString mapTargetName = imageReader->GetMapArrayNames()["Target"];
 	if (mapTargetName.isEmpty())
 	{
-		std::cerr << "Warning, no Target array, will initialize to 0..."
-							<< std::endl;
+		ISEG_WARNING() << "no Target array, will initialize to 0...";
 		bufferFloat.assign(bufferFloat.size(), 0.0f);
 	}
 	else
@@ -496,7 +489,7 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 		if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
 						mapTargetName.toAscii().data()))
 		{
-			std::cerr << "Error reading Target dataset..." << std::endl;
+			ISEG_ERROR() << "reading Target dataset...";
 			return 0;
 		}
 	}
@@ -504,8 +497,6 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	std::cerr << "restored current folder "
-						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }
@@ -526,9 +517,9 @@ int XdmfImageMerger::ReadTissues(
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toAscii().data()))
+	if (!reader.open(fname.toStdString()))
 	{
-		std::cerr << "error opening " << fname.toAscii().data() << std::endl;
+		ISEG_ERROR() << "opening " << fname.toStdString();
 		return 0;
 	}
 
@@ -538,13 +529,13 @@ int XdmfImageMerger::ReadTissues(
 	std::vector<HDF5Reader::size_type> dims;
 	if (!reader.getDatasetInfo(type, dims, mapTissueName.toAscii().data()))
 	{
-		std::cerr << "Error reading Tissue data type..." << std::endl;
+		ISEG_ERROR() << "reading Tissue data type...";
 		return 0;
 	}
 
 	size_t const currNrslices = imageReader->GetNumberOfSlices();
 	size_t const N = (currNrslices * this->Width) * this->Height;
-	std::cerr << "N = " << N << std::endl;
+
 	if (type.compare("unsigned char") == 0)
 	{
 		std::vector<unsigned char> bufferUChar;
@@ -554,17 +545,17 @@ int XdmfImageMerger::ReadTissues(
 		}
 		catch (std::length_error& le)
 		{
-			std::cerr << "bufferUChar length error: " << le.what() << std::endl;
+			std::cerr << "bufferUChar length error: " << le.what();
 			return 0;
 		}
 		if (mapTissueName.isEmpty())
 		{
-			std::cerr << "Error, no Tissue array..." << std::endl;
+			ISEG_ERROR() << "no Tissue array...";
 			return 0;
 		}
 		if (!reader.read(&bufferUChar[0], mapTissueName.toAscii().data()))
 		{
-			std::cerr << "Error reading Tissue dataset..." << std::endl;
+			ISEG_ERROR() << "reading Tissue dataset...";
 			return 0;
 		}
 		std::vector<unsigned char>::iterator iterFrom = bufferUChar.begin();
@@ -589,14 +580,14 @@ int XdmfImageMerger::ReadTissues(
 				"Special case we read directly into the buffer.");
 		if (mapTissueName.isEmpty())
 		{
-			std::cerr << "Error, no Tissue array..." << std::endl;
+			ISEG_ERROR() << "no Tissue array...";
 			return 0;
 		}
 		if (!reader.read(
 						&bufferTissuesSizeT[(sliceoffset * this->Width) * this->Height],
 						mapTissueName.toAscii().data()))
 		{
-			std::cerr << "Error reading Tissue dataset..." << std::endl;
+			ISEG_ERROR() << "reading Tissue dataset...";
 			return 0;
 		}
 	}
@@ -609,17 +600,17 @@ int XdmfImageMerger::ReadTissues(
 		}
 		catch (std::length_error& le)
 		{
-			std::cerr << "bufferUInt length error: " << le.what() << std::endl;
+			ISEG_ERROR() << "bufferUInt length error: " << le.what();
 			return 0;
 		}
 		if (mapTissueName.isEmpty())
 		{
-			std::cerr << "Error, no Tissue array..." << std::endl;
+			ISEG_ERROR() << "no Tissue array...";
 			return 0;
 		}
 		if (!reader.read(&bufferUInt[0], mapTissueName.toAscii().data()))
 		{
-			std::cerr << "Error reading Tissue dataset..." << std::endl;
+			ISEG_ERROR() << "reading Tissue dataset...";
 			return 0;
 		}
 		std::vector<unsigned int>::iterator iterFrom = bufferUInt.begin();
@@ -640,15 +631,13 @@ int XdmfImageMerger::ReadTissues(
 	}
 	else
 	{
-		std::cerr << "Error, Tissue data type not supported..." << std::endl;
+		ISEG_ERROR() << "Tissue data type not supported...";
 		return 0;
 	}
 	sliceoffset += imageReader->GetNumberOfSlices();
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	std::cerr << "restored current folder "
-						<< QDir::current().absolutePath().toAscii().data() << std::endl;
 
 	return 1;
 }

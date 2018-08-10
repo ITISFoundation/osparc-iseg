@@ -181,7 +181,7 @@ void ImageForestingTransformRegionGrowingWidget::cleanup()
 void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 {
 	// \todo B
-	cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
+	std::cerr << "ImageForestingTransformRegionGrowingWidget: tissuenr = " << i << std::endl;
 	tissuenr = (unsigned)i + 1;
 }
 

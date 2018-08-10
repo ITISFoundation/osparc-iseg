@@ -3345,7 +3345,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3354,7 +3354,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3363,7 +3363,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3372,7 +3372,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		if (!tissuelayers[0])
 		{
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3386,7 +3386,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3395,7 +3395,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3404,7 +3404,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		{
 			/* Couldn't allocate memory - return nullptr! */
 			//       free(*info);
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3413,7 +3413,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 				(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 		if (!tissuelayers[0])
 		{
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3433,7 +3433,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3451,7 +3451,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, file operation failed"
+			std::cerr << "bmphandler::ReadRaw() : error, file operation failed"
 					 << endl;
 			free(bits_tmp);
 			fclose(fp);
@@ -3463,7 +3463,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, file operation failed"
+			std::cerr << "bmphandler::ReadRaw() : error, file operation failed"
 					 << endl;
 			free(bits_tmp);
 			fclose(fp);
@@ -3486,7 +3486,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			std::cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
 			fclose(fp);
 			return 0;
 		}
@@ -3504,7 +3504,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, file operation failed"
+			std::cerr << "bmphandler::ReadRaw() : error, file operation failed"
 					 << endl;
 			free(bits_tmp);
 			fclose(fp);
@@ -3516,7 +3516,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 			/*			sliceprovide->take_back(bmp_bits);
 			sliceprovide->take_back(work_bits);
 			sliceprovide->take_back(help_bits);*/
-			cerr << "bmphandler::ReadRaw() : error, file operation failed"
+			std::cerr << "bmphandler::ReadRaw() : error, file operation failed"
 					 << endl;
 			free(bits_tmp);
 			fclose(fp);
@@ -3535,7 +3535,7 @@ int bmphandler::ReadRaw(const char* filename, short unsigned w,
 		/*		sliceprovide->take_back(bmp_bits);
 		sliceprovide->take_back(work_bits);
 		sliceprovide->take_back(help_bits);*/
-		cerr << "bmphandler::ReadRaw() : error, unsupported depth..." << endl;
+		std::cerr << "bmphandler::ReadRaw() : error, unsupported depth..." << endl;
 		fclose(fp);
 		return 0;
 	}
@@ -13163,7 +13163,7 @@ void bmphandler::kmeans_png(short nrtissues, short dim,
 		else
 		{
 			QMessageBox msgBox;
-			msgBox.setText("Error reading centers initialization file.");
+			msgBox.setText("ERROR: reading centers initialization file.");
 			msgBox.exec();
 			return;
 		}

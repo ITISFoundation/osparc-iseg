@@ -9,6 +9,8 @@
 */
 #pragma once
 
+#include "iSegData.h"
+
 #include <boost/shared_ptr.hpp>
 
 #include <boost/log/core.hpp>
@@ -29,7 +31,7 @@ namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 namespace expr = boost::log::expressions;
 
-enum eSeverityLevel
+enum class eSeverityLevel
 {
 	debug = 0,
 	timing,
@@ -40,40 +42,27 @@ enum eSeverityLevel
 
 using Logger = src::severity_logger<eSeverityLevel>;
 
-boost::shared_ptr<Logger> iSegLogger()
-{
-	static boost::shared_ptr<Logger> logger(new Logger);
-	return logger;
-}
-
-#define ISEG_DEBUG() BOOST_LOG_SEV(*iSegLogger(), eSeverityLevel::debug)
-#define ISEG_INFO() BOOST_LOG_SEV(*iSegLogger(), eSeverityLevel::info)
-#define ISEG_WARNING() BOOST_LOG_SEV(*iSegLogger(), eSeverityLevel::warning)
-#define ISEG_ERROR() BOOST_LOG_SEV(*iSegLogger(), eSeverityLevel::error)
-
-
 BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", eSeverityLevel)
 
-std::ostream& operator<< (std::ostream& strm, eSeverityLevel level)
-{
-	static const char* strings[] =
-	{
-		"DEBUG",
-		"TIMING",
-		"INFO",
-		"WARNING",
-		"ERROR"
-	};
+ISEG_DATA_API std::ostream& operator<< (std::ostream& strm, eSeverityLevel level);
 
-	if (static_cast<std::size_t>(level) < sizeof(strings) / sizeof(*strings))
-		strm << strings[level];
-	else
-		strm << static_cast<int>(level);
 
-	return strm;
-}
+/** \brief Global logger object 
+*/
+ISEG_DATA_API boost::shared_ptr<Logger> iSegLogger();
 
-auto init_logging(const std::string& log_file_path, eSeverityLevel minimum_level)
+
+/** \brief Macros used to log a message
+*/
+#define ISEG_DEBUG() BOOST_LOG_SEV(*::iseg::iSegLogger(), ::iseg::eSeverityLevel::debug)
+#define ISEG_TIMER() BOOST_LOG_SEV(*::iseg::iSegLogger(), ::iseg::eSeverityLevel::timing)
+#define ISEG_INFO() BOOST_LOG_SEV(*::iseg::iSegLogger(), ::iseg::eSeverityLevel::info)
+#define ISEG_WARNING() BOOST_LOG_SEV(*::iseg::iSegLogger(), ::iseg::eSeverityLevel::warning)
+#define ISEG_ERROR() BOOST_LOG_SEV(*::iseg::iSegLogger(), ::iseg::eSeverityLevel::error)
+
+/** \brief Macros used to log a message
+*/
+inline auto init_logging(const std::string& log_file_path, eSeverityLevel minimum_level)
 {
 	logging::formatter formatter =
 		expr::stream
@@ -86,6 +75,7 @@ auto init_logging(const std::string& log_file_path, eSeverityLevel minimum_level
 	auto file_sink = logging::add_file_log(log_file_path);
 	file_sink->set_formatter(formatter);
 	file_sink->set_filter(severity >= minimum_level);
+	file_sink->locked_backend()->auto_flush(true);
 
 	// Register common attributes
 	//logging::add_common_attributes();

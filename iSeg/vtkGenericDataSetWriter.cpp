@@ -147,7 +147,7 @@ int vtkGenericDataSetWriter::RequestData(
 		writer->Update();
 	}
 	else {
-		cerr << "vtkGenericDataSetWriter::RequestData(): Cannot write this file "
+		std::cerr << "vtkGenericDataSetWriter::RequestData(): Cannot write this file "
 						"format."
 				 << endl;
 		return 0;

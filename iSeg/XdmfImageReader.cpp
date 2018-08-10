@@ -46,7 +46,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 {
 	if (!reader.exists(source_dname))
 	{
-		cerr << "Warning, no Source array, will initialize to 0..." << endl;
+		ISEG_WARNING() << "no Source array, will initialize to 0...";
 		for (int k = 0; k < NumberOfSlices; k++)
 		{
 			size_t pos = 0;
@@ -61,7 +61,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 	}
 	if (!reader.exists(target_dname))
 	{
-		cerr << "Warning, no Target array, will initialize to 0..." << endl;
+		ISEG_WARNING() << "no Target array, will initialize to 0...";
 		for (int k = 0; k < NumberOfSlices; k++)
 		{
 			size_t pos = 0;
@@ -76,7 +76,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 	}
 	if (!reader.exists(tissue_dname))
 	{
-		cerr << "Warning, no Tissue array, will initialize to 0..." << endl;
+		ISEG_WARNING() << "no Tissue array, will initialize to 0...";
 		for (int k = 0; k < NumberOfSlices; k++)
 		{
 			size_t pos = 0;
@@ -97,14 +97,12 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		vector<float> bufferFloat;
 		try
 		{
-			cerr << "N = " << N
-					 << ", bufferFloat.max_size() = " << bufferFloat.max_size()
-					 << endl;
+			ISEG_DEBUG() << "N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size();
 			bufferFloat.resize(N);
 		}
 		catch (length_error& le)
 		{
-			cerr << "bufferFloat length error: " << le.what() << endl;
+			std::cerr << "bufferFloat length error: " << le.what();
 			return 0;
 		}
 
@@ -114,7 +112,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			ScopedTimer timer("Read Source");
 			if (!reader.read(&bufferFloat[0], source_dname))
 			{
-				cerr << "Error reading Source dataset..." << endl;
+				ISEG_ERROR() << "reading Source dataset...";
 			}
 			else
 			{
@@ -140,7 +138,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			ScopedTimer timer("Read Target");
 			if (!reader.read(&bufferFloat[0], target_dname))
 			{
-				cerr << "Error reading Target dataset..." << endl;
+				ISEG_ERROR() << "reading Target dataset...";
 			}
 			else
 			{
@@ -169,7 +167,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			vector<HDF5Reader::size_type> dims;
 			if (!reader.getDatasetInfo(type, dims, tissue_dname))
 			{
-				cerr << "Error reading Tissue data type..." << endl;
+				ISEG_ERROR() << "reading Tissue data type...";
 				return 0;
 			}
 
@@ -180,18 +178,17 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 				{
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
-					cerr << "N = " << N << ", bufferUChar.max_size() = "
-							 << bufferUChar.max_size() << endl;
+					ISEG_DEBUG() << "N = " << N << ", bufferUChar.max_size() = " << bufferUChar.max_size();
 					bufferUChar.resize(N);
 				}
 				catch (length_error& le)
 				{
-					cerr << "bufferUChar length error: " << le.what() << endl;
+					ISEG_ERROR() << "bufferUChar length error: " << le.what();
 					return 0;
 				}
 				if (!reader.read(&bufferUChar[0], tissue_dname))
 				{
-					cerr << "Error reading Tissue dataset..." << endl;
+					ISEG_ERROR() << "reading Tissue dataset...";
 					return 0;
 				}
 				size_t n = 0;
@@ -217,18 +214,17 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 				{
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
-					cerr << "N = " << N << ", bufferUShort.max_size() = "
-							 << bufferUShort.max_size() << endl;
+					ISEG_DEBUG() << "N = " << N << ", bufferUShort.max_size() = " << bufferUShort.max_size();
 					bufferUShort.resize(N);
 				}
 				catch (length_error& le)
 				{
-					cerr << "bufferUShort length error: " << le.what() << endl;
+					ISEG_ERROR() << "bufferUShort length error: " << le.what();
 					return 0;
 				}
 				if (!reader.read(&bufferUShort[0], tissue_dname))
 				{
-					cerr << "Error reading Tissue dataset..." << endl;
+					ISEG_ERROR() << "reading Tissue dataset...";
 					return 0;
 				}
 				size_t n = 0;
@@ -254,18 +250,17 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 				{
 					// vector throws a length_error if resized above max_size
 					// vector<float> bufferFloat(N);
-					cerr << "N = " << N << ", bufferUInt.max_size() = "
-							 << bufferUInt.max_size() << endl;
+					ISEG_DEBUG() << "N = " << N << ", bufferUInt.max_size() = " << bufferUInt.max_size();
 					bufferUInt.resize(N);
 				}
 				catch (length_error& le)
 				{
-					cerr << "bufferUInt length error: " << le.what() << endl;
+					ISEG_ERROR() << "bufferUInt length error: " << le.what();
 					return 0;
 				}
 				if (!reader.read(&bufferUInt[0], tissue_dname))
 				{
-					cerr << "Error reading Tissue dataset..." << endl;
+					ISEG_ERROR() << "reading Tissue dataset...";
 					return 0;
 				}
 				size_t n = 0;
@@ -286,7 +281,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			}
 			else
 			{
-				cerr << "Error, Tissue data type not supported..." << endl;
+				ISEG_ERROR() << "Tissue data type not supported...";
 				return 0;
 			}
 		}
@@ -355,7 +350,7 @@ int XdmfImageReader::ParseXML()
 	QFile file(FileName);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		cerr << "ERROR: cannot open " << FileName << endl;
+		ISEG_ERROR() << "cannot open " << FileName;
 		return 0;
 	}
 
@@ -367,15 +362,13 @@ int XdmfImageReader::ParseXML()
 	if (!inputDocument.setContent(inputContent, false,
 					&msg)) // This function is not reentrant.
 	{
-		cerr << "ERROR: assigning content of " << FileName << ": "
-				 << msg.toAscii().data() << endl;
+		ISEG_ERROR() << "assigning content of " << FileName << ": " << msg.toStdString();
 	}
 
 	QDomElement root = inputDocument.documentElement();
 	if (root.tagName() != "Xdmf")
 	{
-		cerr << "invalid root element: " << root.tagName().toAscii().data()
-				 << endl;
+		ISEG_ERROR() << "invalid root element: " << root.tagName().toStdString();
 	}
 
 	QDomElement domain = root.firstChildElement(QString("Domain"));
@@ -390,8 +383,7 @@ int XdmfImageReader::ParseXML()
 				type = e.attribute(QString("GridType"));
 			if (type != QString("Uniform"))
 			{
-				cerr << "ERROR: unsupported grid type: "
-						 << type.toAscii().data() << endl;
+				ISEG_ERROR() << "unsupported grid type: " << type.toStdString();
 				return 0;
 			}
 
@@ -402,7 +394,7 @@ int XdmfImageReader::ParseXML()
 					geometry.attribute(QString("GeometryType")) !=
 							QString("ORIGIN_DXDYDZ"))
 			{
-				cerr << "ERROR: unsupported geometry type..." << endl;
+				ISEG_ERROR() << "unsupported geometry type...";
 				return 0;
 			}
 			QDomNodeList list2 = geometry.elementsByTagName("DataItem");
@@ -416,7 +408,7 @@ int XdmfImageReader::ParseXML()
 					QStringList textList = text.split(QString(" "));
 					if (textList.size() != 3)
 					{
-						cerr << "ERROR: invalid origin..." << endl;
+						ISEG_ERROR() << "invalid origin...";
 						return 0;
 					}
 					float offset[3];
@@ -430,7 +422,7 @@ int XdmfImageReader::ParseXML()
 					QStringList textList = text.split(QString(" "));
 					if (textList.size() != 3)
 					{
-						cerr << "ERROR: invalid spacing..." << endl;
+						ISEG_ERROR() << "invalid spacing...";
 						return 0;
 					}
 					for (int i3 = 0; i3 < textList.size(); ++i3)
@@ -438,7 +430,7 @@ int XdmfImageReader::ParseXML()
 				}
 				else
 				{
-					cerr << "ERROR: expecting origin and spacing..." << endl;
+					ISEG_ERROR() << "expecting origin and spacing...";
 					return 0;
 				}
 			}
@@ -450,14 +442,14 @@ int XdmfImageReader::ParseXML()
 					topology.attribute(QString("TopologyType")) !=
 							QString("3DCORECTMesh"))
 			{
-				cerr << "ERROR: unsupported topology type..." << endl;
+				ISEG_ERROR() << "unsupported topology type...";
 				return 0;
 			}
 			QStringList textList =
 					topology.attribute(QString("Dimensions")).split(QString(" "));
 			if (textList.size() != 3)
 			{
-				cerr << "ERROR: invalid dimensions..." << endl;
+				ISEG_ERROR() << "invalid dimensions...";
 				return 0;
 			}
 			this->Width = textList[2].toInt();
@@ -492,7 +484,7 @@ int XdmfImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
 									 (size_t)this->NumberOfSlices;
-	cerr << "INFO: Reading " << Width << " x " << Height << " x " << NumberOfSlices << "\n";
+	ISEG_INFO() << "Reading " << Width << " x " << Height << " x " << NumberOfSlices;
 
 	QString qFileName(this->FileName);
 	QFileInfo fileInfo(qFileName);
@@ -507,9 +499,9 @@ int XdmfImageReader::Read()
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toAscii().data()))
+	if (!reader.open(fname.toStdString()))
 	{
-		cerr << "ERROR: opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR() << "opening " << fname.toStdString();
 		return 0;
 	}
 
@@ -554,11 +546,11 @@ HDFImageReader::~HDFImageReader() { delete[] this->FileName; }
 
 int HDFImageReader::ParseHDF()
 {
-	cerr << "parsing file " << this->FileName << endl;
+	std::cerr << "parsing file " << this->FileName << endl;
 	HDF5Reader reader;
 	if (!reader.open(FileName))
 	{
-		cerr << "error opening " << FileName << endl;
+		ISEG_ERROR() << "opening " << FileName << endl;
 		return 0;
 	}
 
@@ -632,11 +624,7 @@ int HDFImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
 									 (size_t)this->NumberOfSlices;
-	cerr << "XdmfImageReader::Read()" << endl;
-	cerr << "Width = " << this->Width << endl;
-	cerr << "Height = " << this->Height << endl;
-	cerr << "NumberOfSlices = " << this->NumberOfSlices << endl;
-	cerr << "Total size = " << N << endl;
+	ISEG_INFO() << "Reading " << Width << " x " << Height << " x " << NumberOfSlices;
 
 	//	vector<int> dims;
 
@@ -655,7 +643,7 @@ int HDFImageReader::Read()
 	const QString fname = basename + "." + suffix;
 	if (!reader.open(fname.toAscii().data()))
 	{
-		cerr << "ERROR: opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR() << "opening " << fname.toAscii().data() << endl;
 		return 0;
 	}
 
@@ -691,7 +679,7 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 	const QString fname = basename + "." + suffix;
 	if (!reader.open(fname.toStdString()))
 	{
-		cerr << "ERROR: opening " << fname.toStdString() << endl;
+		ISEG_ERROR() << "opening " << fname.toStdString() << endl;
 		return nullptr;
 	}
 
@@ -714,7 +702,7 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 				ok = ok && (colors.size() == num_colors + 2);
 				if (!ok)
 				{
-					std::cerr << "Error: could not load color lookup table\n";
+					ISEG_ERROR() << "could not load color lookup table\n";
 					return nullptr;
 				}
 				if (version > 1)
@@ -783,7 +771,7 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 		}
 		else
 		{
-			std::cerr << "ERROR: color lookup table was written with a newer version of iSEG\n";
+			ISEG_ERROR() << "color lookup table was written with a newer version of iSEG\n";
 		}
 	}
 
