@@ -14,6 +14,7 @@
 #include "TissueInfos.h"
 
 #include "Data/ScopedTimer.h"
+#include "Data/Logger.h"
 
 #include "Core/HDF5Reader.h"
 #include "Core/HDF5Writer.h"
