@@ -257,7 +257,7 @@ void SaveOutlinesWidget::save_pushed()
 		QString loadfilename = le_file->text();
 		if (rb_triang->isOn())
 		{
-			ISEG_INFO() << "triangulating...";
+			ISEG_INFO_MSG("triangulating...");
 			// If no extension given, add a default one
 			if (loadfilename.length() > 4 &&
 				!loadfilename.toLower().endsWith(QString(".vtp")) &&

@@ -11,6 +11,8 @@
 
 #include "LoadPlugin.h"
 
+#include "../Data/Logger.h"
+
 //  warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead.
 #pragma warning(disable : 4996)
 #pragma warning(disable : 4091)
@@ -179,7 +181,7 @@ bool LoadPlugin(const std::string& plugin_file_path)
 
 bool LoadPlugins(const std::string& directory_path)
 {
-	std::cerr << "LoadPlugins: " << directory_path << std::endl;
+	ISEG_INFO("LoadPlugins: " << directory_path);
 
 	bool ok = true;
 	try

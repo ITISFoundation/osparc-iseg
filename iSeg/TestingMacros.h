@@ -19,20 +19,20 @@
 #define check(expr)                                                            \
 	if ((expr) == false)                                                       \
 	{                                                                          \
-		ISEG_ERROR() << "Expression false: " << (#expr) << std::endl;      \
+		ISEG_ERROR("Expression false: " << (#expr));      \
 		error_counter++;                                                       \
 	}
 #define check_equal(expr1, expr2)                                              \
 	if ((expr1) != (expr2))                                                    \
 	{                                                                          \
-		ISEG_ERROR() << "Expression false: " << (expr1)                    \
-				  << " != " << (expr2) << std::endl;                           \
+		ISEG_ERROR("Expression false: " << (expr1)                    \
+				  << " != " << (expr2));                           \
 		error_counter++;                                                       \
 	}
 #define check_not_equal(expr1, expr2)                                          \
 	if ((expr1) == (expr2))                                                    \
 	{                                                                          \
-		ISEG_ERROR() << "Expression false: " << (expr1)                    \
-				  << " == " << (expr2) << std::endl;                           \
+		ISEG_ERROR("Expression false: " << (expr1)                    \
+				  << " == " << (expr2));                           \
 		error_counter++;                                                       \
 	}

@@ -17,7 +17,6 @@ SET(SOURCES
 	addLine.cpp
 	BrushInteraction.cpp
 	LogApi.cpp
-	Logger.cpp
 	SliceHandlerItkWrapper.cpp
 	Transform.cpp
 )

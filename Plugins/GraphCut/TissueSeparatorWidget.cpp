@@ -310,11 +310,11 @@ typename itk::Image<unsigned char, Dim>::Pointer
 	}
 	catch (itk::ExceptionObject e)
 	{
-		iseg::error(e.what());
+		iseg::Log::error(e.what());
 	}
 	catch (std::exception e)
 	{
-		iseg::error(e.what());
+		iseg::Log::error(e.what());
 	}
 	return nullptr;
 }

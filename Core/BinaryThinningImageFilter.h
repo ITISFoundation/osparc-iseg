@@ -9,6 +9,8 @@
 */
 #pragma once
 
+#include "../Data/Logger.h"
+
 #include <itkBinaryThinningImageFilter.h>
 #include <itkBinaryThinningImageFilter3D.h>
 #include <itkBinaryThresholdImageFilter.h>
@@ -60,7 +62,7 @@ typename TOutputImage::Pointer BinaryThinning(TInputImage* input, typename TInpu
 	}
 	catch (itk::ExceptionObject& e)
 	{
-		ISEG_ERROR() << "exception occurred " << e.what();
+		ISEG_ERROR("exception occurred " << e.what());
 	}
 	return nullptr;
 }

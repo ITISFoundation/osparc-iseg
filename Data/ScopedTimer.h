@@ -9,6 +9,8 @@
 */
 #pragma once
 
+#include "Logger.h"
+
 #include <boost/chrono.hpp>
 
 #include <string>
@@ -33,7 +35,7 @@ public:
 	{
 		auto const after = boost::chrono::high_resolution_clock::now();
 		double count = static_cast<double>( boost::chrono::duration_cast<TUnit>(after - _before).count() );
-		std::cerr << "TIMER: " << count << " " << _unit + " in " + _scope_name + "\n";
+		Log::note("TIMER", "%g %s in %s", count, _unit.c_str(), _scope_name.c_str());
 
 		_before = after;
 		_scope_name = scope_name;

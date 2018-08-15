@@ -49,7 +49,7 @@ bool interceptOutput(const std::string& logname)
 		std::clog.rdbuf(flog.rdbuf());
 	}
 	else
-		ISEG_ERROR() << "while opening log file";
+		ISEG_ERROR_MSG("while opening log file");
 
 	FILE *outfile, *errfile;
 	if ((outfile = freopen(logname.c_str(), "a", stdout)) == nullptr)

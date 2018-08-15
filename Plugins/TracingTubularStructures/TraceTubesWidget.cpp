@@ -266,7 +266,7 @@ void TraceTubesWidget::on_mouse_released(Point x)
 	}
 	else
 	{
-		iseg::warning("no points selected, because slice is not in active slices");
+		iseg::Log::warning("no points selected, because slice is not in active slices");
 	}
 }
 

@@ -436,7 +436,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 
 	if (!writer.open(fname, "append"))
 	{
-		ISEG_ERROR() << "opening " << fname;
+		ISEG_ERROR("opening " << fname);
 	}
 	writer.compression = compression;
 
@@ -444,7 +444,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 
 	if (!writer.createGroup(std::string("Tissues")))
 	{
-		ISEG_ERROR() << "creating tissues section";
+		ISEG_ERROR_MSG("creating tissues section");
 	}
 
 	float rgbo[4];
@@ -459,7 +459,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 	index1[0] = (int)version;
 	if (!writer.write(index1, dim2, std::string("/Tissues/version")))
 	{
-		ISEG_ERROR() << "writing version";
+		ISEG_ERROR_MSG("writing version");
 	}
 
 	rgbo[0] = tissueInfosVector[0].color[0];
@@ -468,7 +468,7 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 	rgbo[3] = tissueInfosVector[0].opac;
 	if (!writer.write(rgbo, dim1, std::string("/Tissues/bkg_rgbo")))
 	{
-		ISEG_ERROR() << "writing rgbo";
+		ISEG_ERROR_MSG("writing rgbo");
 	}
 
 	TissueInfosVecType::iterator vecIt;
@@ -491,17 +491,17 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 		std::string path = hiearchy_map[tissuename];
 		if (!writer.write_attribute(path, groupname + "/path"))
 		{
-			ISEG_ERROR() << "writing path";
+			ISEG_ERROR_MSG("writing path");
 		}
 		if (!writer.write(rgbo, dim1, groupname + "/rgbo"))
 		{
-			ISEG_ERROR() << "writing rgbo";
+			ISEG_ERROR_MSG("writing rgbo");
 		}
 		index1[0] = counter++;
 
 		if (!writer.write(index1, dim2, groupname + "/index"))
 		{
-			ISEG_ERROR() << "writing index";
+			ISEG_ERROR_MSG("writing index");
 		}
 	}
 
@@ -614,7 +614,7 @@ bool TissueInfos::LoadTissuesHDF(const char* filename, int tissuesVersion)
 	HDF5Reader reader;
 	if (!reader.open(filename))
 	{
-		ISEG_ERROR() << "opening " << filename;
+		ISEG_ERROR("opening " << filename);
 		return false;
 	}
 

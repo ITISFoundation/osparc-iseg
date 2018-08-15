@@ -70,13 +70,13 @@ public:
 		HDF5Reader reader;
 		if (!reader.open(filename))
 		{
-			ISEG_ERROR() << "opening " + filename;
+			ISEG_ERROR_MSG("opening " + filename);
 			return 0;
 		}
 
 		if (!reader.read(array, dataset))
 		{
-			ISEG_ERROR() << "reading " + dataset;
+			ISEG_ERROR_MSG("reading " + dataset);
 			return 0;
 		}
 

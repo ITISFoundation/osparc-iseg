@@ -88,7 +88,7 @@ bool ImageReader::getImageStack(const std::vector<const char*>& filenames, float
 		}
 		catch (itk::ExceptionObject& e)
 		{
-			ISEG_ERROR() << "an exception occurred " << e.what();
+			ISEG_ERROR("an exception occurred " << e.what());
 			return false;
 		}
 

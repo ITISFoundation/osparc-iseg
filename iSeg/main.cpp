@@ -63,14 +63,6 @@ std::string timestamped(const std::string prefix, const std::string& suffix)
 	return prefix + "-" + tod + suffix;
 }
 
-//using text_sink = iseg::sinks::synchronous_sink<sinks::text_ostream_backend>;
-//boost::shared_ptr< text_sink > sink;
-
-void init_logger(const std::string& fname)
-{
-	auto sink = init_logging(fname, eSeverityLevel::timing);
-}
-
 // \brief Redirect VTK errors/warnings to file
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
@@ -133,26 +125,22 @@ int main(int argc, char **argv)
 	}
 
 	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
-	init_logger(log_file_name);
-	//if (!interceptOutput(log_file_name))
-	//{
-	//	error("intercepting output failed");
-	//}
+	init_logging(log_file_name, true);
 
 	QDir fileDirectory = fileinfo.dir();
-	ISEG_INFO() << "fileDirectory = " << fileDirectory.absolutePath().toStdString();
+	ISEG_INFO("fileDirectory = " << fileDirectory.absolutePath().toStdString());
 
 	QDir picpath = fileinfo.dir();
-	ISEG_INFO() << "picture path = " << picpath.absolutePath().toStdString();
+	ISEG_INFO("picture path = " << picpath.absolutePath().toStdString());
 	if (!picpath.cd("images"))
 	{
-		ISEG_WARNING() << "images folder does not exist" << endl;
+		ISEG_WARNING_MSG("images folder does not exist");
 	}
 
 	QDir atlasdir = fileinfo.dir();
 	if (!atlasdir.cd("atlas"))
 	{
-		std::cerr << "atlas folder does not exist" << endl;
+		ISEG_WARNING_MSG("atlas folder does not exist");
 	}
 
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));

@@ -25,7 +25,7 @@ Settings::Settings(QWidget* parent)
 {
 	assert(mainWindow);
 	ui->setupUi(this);
-	ISEG_INFO() << "using compression = " << mainWindow->handler3D->GetCompression();
+
 	this->ui->spinBoxCompression->setValue(
 		mainWindow->handler3D->GetCompression());
 	this->ui->checkBoxContiguousMemory->setChecked(
@@ -36,7 +36,7 @@ Settings::~Settings() { delete ui; }
 
 void Settings::accept()
 {
-	ISEG_INFO() << "setting compression = " << this->ui->spinBoxCompression->value();
+	ISEG_INFO("setting compression = " << this->ui->spinBoxCompression->value());
 	mainWindow->handler3D->SetCompression(
 		this->ui->spinBoxCompression->value());
 	mainWindow->handler3D->SetContiguousMemory(

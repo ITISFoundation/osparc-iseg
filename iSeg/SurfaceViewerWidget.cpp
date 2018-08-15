@@ -213,7 +213,7 @@ void SurfaceViewerWidget::load()
 		}
 		catch (std::exception& e)
 		{
-			ISEG_ERROR() << "bad tissue index map " << e.what();
+			ISEG_ERROR("bad tissue index map " << e.what());
 			std::fill_n(field, slices.size() * slice_size, 0);
 		}
 	}
@@ -357,9 +357,9 @@ void SurfaceViewerWidget::select_action(QAction* action)
 				{
 					std::vector<float> work(hand3D->return_area(), 0);
 
-					int i = static_cast<int>(std::round((worldPosition[0] - origin[0]) / spacing[0]));
-					int j = static_cast<int>(std::round((worldPosition[1] - origin[1]) / spacing[1]));
-					int idx = i + j * hand3D->width();
+					auto i = static_cast<int>(std::round((worldPosition[0] - origin[0]) / spacing[0]));
+					auto j = static_cast<int>(std::round((worldPosition[1] - origin[1]) / spacing[1]));
+					auto idx = static_cast<unsigned>(i + j * hand3D->width());
 					if (idx < hand3D->return_area())
 					{
 						work[idx] = 255.f;

@@ -587,7 +587,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 	}
 	else
 	{
-		ISEG_WARNING() << "loading failed in 'ReadRaw'";
+		ISEG_WARNING_MSG("loading failed in 'ReadRaw'");
 		newbmp(_width, _height, nrofslices);
 		return 0;
 	}
@@ -609,7 +609,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 		unsigned char* bits_tmp;
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == nullptr)
 		{
-			ISEG_ERROR() << "allocation failed in 'ReadRaw'";
+			ISEG_ERROR_MSG("allocation failed in 'ReadRaw'");
 			fclose(fp);
 			return 0;
 		}
@@ -626,7 +626,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 #endif
 		if (result)
 		{
-			ISEG_ERROR() << "bmphandler::ReadRawOverlay() : file operation failed";
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -641,7 +641,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if (fread(bits_tmp, 1, bitsize, fp) < _area)
 		{
-			ISEG_ERROR() << "bmphandler::ReadRawOverlay() : file operation failed";
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -660,7 +660,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == nullptr)
 		{
-			ISEG_ERROR() << "allocation failed in 'ReadRawOverlay'";
+			ISEG_ERROR_MSG("allocation failed in 'ReadRawOverlay'");
 			fclose(fp);
 			return 0;
 		}
@@ -675,7 +675,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 #endif
 		if (result)
 		{
-			ISEG_ERROR() << "bmphandler::ReadRawOverlay() : file operation failed";
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -683,7 +683,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if (fread(bits_tmp, 1, (size_t)(bitsize)*2, fp) < _area * 2)
 		{
-			ISEG_ERROR() << "bmphandler::ReadRawOverlay() : file operation failed";
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -698,7 +698,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 	}
 	else
 	{
-		ISEG_ERROR() << "unsupported depth in 'ReadRawOverlay'";
+		ISEG_ERROR_MSG("unsupported depth in 'ReadRawOverlay'");
 		fclose(fp);
 		return 0;
 	}
@@ -761,7 +761,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 	// Read size data
 	if (!RTDoseReader::ReadSizeData(filename, dims, spacing, origin, dc))
 	{
-		ISEG_ERROR() << "'ReadSizeData' failed";
+		ISEG_ERROR_MSG("'ReadSizeData' failed");
 		return 0;
 	}
 
@@ -807,7 +807,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 	}
 	else
 	{
-		ISEG_ERROR() << "ReadPixelData() failed";
+		ISEG_ERROR_MSG("ReadPixelData() failed");
 		newbmp(_width, _height, _nrslices);
 	}
 
@@ -870,7 +870,7 @@ int SlicesHandler::LoadAllHDF(const char* filename)
 
 	if ((w != _width) || (h != _height) || (_nrslices != nrofslices))
 	{
-		ISEG_ERROR() << "LoadAllHDF() : inconsistent dimensions";
+		ISEG_ERROR_MSG("LoadAllHDF() : inconsistent dimensions");
 		return 0;
 	}
 
@@ -924,7 +924,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	nrofslices = reader.GetNumberOfSlices();
 	if ((w != _width) || (h != _height) || (_nrslices != nrofslices))
 	{
-		ISEG_ERROR() << "inconsistent dimensions in LoadAllXdmf";
+		ISEG_ERROR_MSG("inconsistent dimensions in LoadAllXdmf");
 		return 0;
 	}
 	auto pixsize = reader.GetPixelSize();
@@ -1019,14 +1019,14 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 
 	if (!writer.open(fname.toStdString(), "append"))
 	{
-		ISEG_ERROR() << "opening " << fname.toStdString();
+		ISEG_ERROR("opening " << fname.toStdString());
 		return false;
 	}
 	writer.compression = compression;
 
 	if (!writer.createGroup(std::string("Markers")))
 	{
-		ISEG_ERROR() << "creating markers section";
+		ISEG_ERROR_MSG("creating markers section");
 		return false;
 	}
 
@@ -1038,7 +1038,7 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 	index1[0] = (int)version;
 	if (!writer.write(index1, dim2, std::string("/Markers/version")))
 	{
-		ISEG_ERROR() << "writing version";
+		ISEG_ERROR_MSG("writing version");
 		return false;
 	}
 
@@ -1074,7 +1074,7 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 									mark_name.toLocal8Bit().constData() +
 									std::string("/marker_pos")))
 			{
-				ISEG_ERROR() << "writing marker_pos";
+				ISEG_ERROR_MSG("writing marker_pos");
 				return false;
 			}
 		}
@@ -1093,7 +1093,6 @@ int SlicesHandler::SaveMergeAllXdmf(const char* filename,
 		int compression)
 {
 	float pixsize[3];
-	float offset[3];
 
 	auto active_slices_transform = get_transform_active_slices();
 
@@ -1539,7 +1538,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 
 	writer->SetFileName(filename);
 	if (!writer->Write()) {
-		ISEG_ERROR() << "WriteRTdose() : Write() failed";
+		ISEG_ERROR_MSG("WriteRTdose() : Write() failed");
 		delete writer;
 		return 0;
 	}
@@ -1584,7 +1583,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	rtDose->AddReferencedRTPlanInstanceUID(std::string("2.16.840.1.113669.2.931128.463871595.20120221120004.977868"));
 	if (!writer->Write(filename, rtDose)) 
 	{
-		ISEG_ERROR() << "WriteRTdose() : Write() failed";
+		ISEG_ERROR_MSG("WriteRTdose() : Write() failed");
 		return 0;
 	}
 
@@ -1603,7 +1602,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	// Read size data
 	if (!RTDoseReader::ReadSizeData(filename, dims, spacing, origin, dc))
 	{
-		ISEG_ERROR() << "ReloadRTdose() : ReadSizeData() failed";
+		ISEG_ERROR_MSG("ReloadRTdose() : ReadSizeData() failed");
 		return 0;
 	}
 
@@ -1626,7 +1625,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	}
 	else
 	{
-		ISEG_ERROR() << "ReloadRTdose() : ReadPixelData() failed";
+		ISEG_ERROR_MSG("ReloadRTdose() : ReadPixelData() failed");
 		newbmp(_width, _height, _nrslices);
 	}
 
@@ -2099,7 +2098,7 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 			LoadAllXdmf(QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data());
 		}
 		else
-			ISEG_ERROR() << "unsupported format...";
+			ISEG_ERROR_MSG("unsupported format...");
 	}
 
 	// Ranges
@@ -5490,7 +5489,7 @@ void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short sl
 		}
 		catch (std::exception& e)
 		{
-			ISEG_ERROR() << "failed to interpolate slices " << e.what();
+			ISEG_ERROR("failed to interpolate slices " << e.what());
 		}
 	}
 }
@@ -6205,7 +6204,7 @@ void SlicesHandler::interpolatetissue(unsigned short slice1, unsigned short slic
 		}
 		catch (std::exception& e)
 		{
-			ISEG_ERROR() << "failed to interpolate slices " << e.what();
+			ISEG_ERROR("failed to interpolate slices " << e.what());
 		}
 	}
 }
@@ -6791,11 +6790,11 @@ int SlicesHandler::extract_tissue_surfaces(
 		float passBand, float featureAngle)
 {
 	int error_counter = 0;
-	ISEG_INFO() << "SlicesHandler::extract_tissue_surfaces";
-	ISEG_INFO() << "\tratio " << ratio;
-	ISEG_INFO() << "\tsmoothingiterations " << smoothingiterations;
-	ISEG_INFO() << "\tfeatureAngle " << featureAngle;
-	ISEG_INFO() << "\tusediscretemc " << usediscretemc;
+	ISEG_INFO_MSG("SlicesHandler::extract_tissue_surfaces");
+	ISEG_INFO("\tratio " << ratio);
+	ISEG_INFO("\tsmoothingiterations " << smoothingiterations);
+	ISEG_INFO("\tfeatureAngle " << featureAngle);
+	ISEG_INFO("\tusediscretemc " << usediscretemc);
 
 	//
 	// Copy label field into a vtkImageData object
@@ -6817,7 +6816,7 @@ int SlicesHandler::extract_tissue_surfaces(
 	vtkDataArray* arr = labelField->GetPointData()->GetScalars();
 	if (!arr)
 	{
-		ISEG_ERROR() << "no scalars";
+		ISEG_ERROR_MSG("no scalars");
 		return -1;
 	}
 	arr->SetName(tissueIndexArrayName);
@@ -6854,7 +6853,7 @@ int SlicesHandler::extract_tissue_surfaces(
 			(tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
 	if (!field)
 	{
-		ISEG_ERROR() << "null pointer";
+		ISEG_ERROR_MSG("null pointer");
 		return -1;
 	}
 
@@ -8874,7 +8873,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	}
 	else
 	{
-		ISEG_ERROR() << "SlicesHandler::make_vtktissueimage: Error, tissues_size_t not implemented!";
+		ISEG_ERROR_MSG("SlicesHandler::make_vtktissueimage: Error, tissues_size_t not implemented!");
 		labelField->Delete();
 		return nullptr;
 	}
@@ -8896,11 +8895,10 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	for (tissues_size_t i = 1; i < num_tissues; i++)
 	{
 		int error_counter = 0;
-		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
-				i);
+		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		float* color = TissueInfos::GetTissueColor(i);
-		ISEG_INFO() << TissueInfos::GetTissueName(i).c_str() << " " << color[0] << "," << color[1] << "," << color[2];
+		ISEG_INFO(TissueInfos::GetTissueName(i).c_str() << " " << color[0] << "," << color[1] << "," << color[2]);
 		color_array->SetTuple(i, color);
 	}
 

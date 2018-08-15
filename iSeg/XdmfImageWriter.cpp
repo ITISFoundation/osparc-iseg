@@ -90,7 +90,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 		fname = basename + ".h5";
 	if (!writer.open(fname.toAscii().data(), "append"))
 	{
-		ISEG_ERROR() << "opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR("opening " << fname.toAscii().data());
 		return false;
 	}
 	writer.compression = Compression;
@@ -103,13 +103,13 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	int version = 3;
 	if (!writer.write(&version, dim_scalar, "/Lut/version"))
 	{
-		ISEG_ERROR() << "writing LUT version" << endl;
+		ISEG_ERROR_MSG("writing LUT version");
 		return false;
 	}
 	int num_colors = static_cast<int>(lut->NumberOfColors());
 	if (!writer.write(&num_colors, dim_scalar, "/Lut/size"))
 	{
-		ISEG_ERROR() << "writing LUT size" << endl;
+		ISEG_ERROR_MSG("writing LUT size");
 		return false;
 	}
 
@@ -123,7 +123,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 
 	if (!writer.write(colors.data(), dim_rgb, "/Lut/colors"))
 	{
-		ISEG_ERROR() << "writing LUT size" << endl;
+		ISEG_ERROR_MSG("writing LUT size");
 		return false;
 	}
 
@@ -160,7 +160,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 	dims[1] = height;
 	dims[2] = nrslices;
 
-	ISEG_INFO() << "Writing " << width << " x " << height << " x " << nrslices;
+	ISEG_INFO("Writing " << width << " x " << height << " x " << nrslices);
 
 	HDF5Writer writer;
 	writer.chunkSize.resize(1, width * height);
@@ -171,7 +171,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		fname = basename + ".h5";
 	if (!writer.open(fname.toAscii().data()))
 	{
-		ISEG_ERROR() << "opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR("opening " << fname.toStdString());
 	}
 	writer.compression = compression;
 
@@ -183,12 +183,12 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		try
 		{
 			// vector throws a length_error if resized above max_size
-			ISEG_INFO() << "N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size();
+			ISEG_INFO("N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size());
 			bufferFloat.resize(N);
 		}
 		catch (std::exception& le)
 		{
-			ISEG_ERROR() << "" << le.what() << endl;
+			ISEG_ERROR_MSG(le.what());
 			return 0;
 		}
 
@@ -208,7 +208,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferFloat, "Source"))
 		{
-			ISEG_ERROR() << "writing Source" << endl;
+			ISEG_ERROR_MSG("writing Source");
 		}
 
 		// Target
@@ -228,7 +228,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferFloat, "Target"))
 		{
-			ISEG_ERROR() << "writing Target" << endl;
+			ISEG_ERROR_MSG("writing Target");
 		}
 
 		bufferFloat.clear();
@@ -238,12 +238,12 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		try
 		{
 			// vector throws a length_error if resized above max_size
-			ISEG_INFO() << "N = " << N << ", bufferTissuesSizeT.max_size() = " << bufferTissuesSizeT.max_size();
+			ISEG_INFO("N = " << N << ", bufferTissuesSizeT.max_size() = " << bufferTissuesSizeT.max_size());
 			bufferTissuesSizeT.resize(N);
 		}
 		catch (std::exception& le)
 		{
-			ISEG_ERROR() << le.what() << endl;
+			ISEG_ERROR_MSG(le.what());
 			return 0;
 		}
 
@@ -263,7 +263,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferTissuesSizeT, "Tissue"))
 		{
-			ISEG_ERROR() << "writing Tissue" << endl;
+			ISEG_ERROR_MSG("writing Tissue");
 		}
 	}
 	else // write slice-by-slice
@@ -271,17 +271,17 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		ScopedTimer timer("Write Source");
 		if (!writer.write(slicesbmp, nrslices, dims[0] * dims[1], "Source"))
 		{
-			ISEG_ERROR() << "writing Source" << endl;
+			ISEG_ERROR_MSG("writing Source");
 		}
 		timer.new_scope("Write Target");
 		if (!writer.write(sliceswork, nrslices, dims[0] * dims[1], "Target"))
 		{
-			ISEG_ERROR() << "writing Target" << endl;
+			ISEG_ERROR_MSG("writing Target");
 		}
 		timer.new_scope("Write Tissue");
 		if (!writer.write(slicestissue, nrslices, dims[0] * dims[1], "Tissue"))
 		{
-			ISEG_ERROR() << "writing Tissue" << endl;
+			ISEG_ERROR_MSG("writing Tissue");
 		}
 	}
 
@@ -305,21 +305,21 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		shape[0] = 3;
 		if (!writer.write(dimension, shape, std::string("dimensions")))
 		{
-			ISEG_ERROR() << "writing dimensions" << endl;
+			ISEG_ERROR_MSG("writing dimensions");
 		}
 		if (!writer.write(offset, shape, std::string("offset")))
 		{
-			ISEG_ERROR() << "writing offset" << endl;
+			ISEG_ERROR_MSG("writing offset");
 		}
 		if (!writer.write(pixelsize, shape, std::string("pixelsize")))
 		{
-			ISEG_ERROR() << "writing pixelsize" << endl;
+			ISEG_ERROR_MSG("writing pixelsize");
 		}
 		shape[0] = 6;
 
 		if (!writer.write(dc, shape, std::string("dc")))
 		{
-			ISEG_ERROR() << "writing dc" << endl;
+			ISEG_ERROR_MSG("writing dc");
 		}
 
 		float rotation[9];
@@ -332,7 +332,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		shape[0] = 9;
 		if (!writer.write(rotation, shape, std::string("rotation")))
 		{
-			ISEG_ERROR() << "writing rotation" << endl;
+			ISEG_ERROR_MSG("writing rotation");
 		}
 	}
 

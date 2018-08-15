@@ -318,7 +318,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 	}
 	catch (itk::ExceptionObject e)
 	{
-		ISEG_ERROR() << "" << e.what();
+		ISEG_ERROR_MSG(e.what());
 		return;
 	}
 
@@ -330,7 +330,7 @@ void LevelsetWidget::do_work_nd(TInput* input, TInput* target)
 
 	if (!iseg::Paste<mask_type, input_type>(threshold->GetOutput(), target))
 	{
-		ISEG_ERROR() << "could not set output because image regions don't match.";
+		ISEG_ERROR_MSG("could not set output because image regions don't match.");
 	}
 
 	emit end_datachange(this);

@@ -198,7 +198,7 @@ typename itk::Image<T, Dimension>::Pointer MakeBall(const typename itk::ImageBas
 	}                                             \
 	catch (itk::ExceptionObject e)                \
 	{                                             \
-		ISEG_ERROR() << "" << e.what() << "\n"; \
+		ISEG_ERROR_MSG("" << e.what()); \
 		expr;                                       \
 	}
 
