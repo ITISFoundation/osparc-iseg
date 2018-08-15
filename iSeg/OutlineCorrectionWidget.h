@@ -63,9 +63,10 @@ private:
 
 	void draw_circle(Point p);
 
+	float get_object_value() const;
+
 	tissues_size_t tissuenr;
 	tissues_size_t tissuenrnew;
-	float f;
 	bool draw;
 	bool selectobj;
 	bmphandler* bmphand;
@@ -80,8 +81,6 @@ private:
 	Q3HBox* hbox3a;
 	Q3HBox* hboxoverall;
 	Q3VBox* vboxmethods;
-	//	Q3HBox *hbox3;
-	//	Q3HBox *hbox3cont;
 	Q3HBox* hbox4;
 	Q3HBox* hbox5o;
 	Q3HBox* hbox5;
@@ -135,9 +134,7 @@ private:
 	bool backgroundSelected;
 	bool skinSelected;
 
-	//public:
-	QCheckBox* fb;
-	QCheckBox* bg;
+	QLineEdit* object_value;
 
 signals:
 	void signal_request_selected_tissue_TS(); // TODO BL hack
@@ -153,7 +150,7 @@ public slots:
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void method_changed();
-	void removeholes_pushed();
+	void execute_pushed();
 	void selectobj_pushed();
 };
 

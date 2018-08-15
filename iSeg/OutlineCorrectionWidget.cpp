@@ -38,7 +38,6 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 		"occurring segmentation deficiencies."));
 	setObjectName("OLC");
 
-	f = 255;
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
@@ -186,12 +185,12 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	tissue->show();
 
 	pb_selectobj = new QPushButton("Select Object", hbox5o);
-	pb_selectobj->show();
 	pb_selectobj->setToolTip(
 			"Press this button and select the object in the target image. This "
 			"object will be considered as foreground by the current operation.");
-	fb = new QCheckBox(QString("Foreground"), hbox6);
-	bg = new QCheckBox(QString("Background"), hbox6);
+	auto obj_label = new QLabel(QString("Object value"), hbox6);
+	object_value = new QLineEdit(QString::number(255.f), hbox6);
+	object_value->setValidator(new QDoubleValidator);
 
 	in_or_out = new QButtonGroup(this);
 	//	in_or_out->hide();
@@ -242,7 +241,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	QObject::connect(pixelormm, SIGNAL(buttonClicked(int)), this,
 			SLOT(pixmm_changed()));
 	QObject::connect(pb_removeholes, SIGNAL(clicked()), this,
-			SLOT(removeholes_pushed()));
+			SLOT(execute_pushed()));
 	QObject::connect(pb_selectobj, SIGNAL(clicked()), this,
 			SLOT(selectobj_pushed()));
 
@@ -369,10 +368,13 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 {
 	if (selectobj)
 	{
-		f = bmphand->work_pt(p);
+		auto v = bmphand->work_pt(p);
+		object_value->setText(QString::number(v));
 		pb_selectobj->setDown(false);
 		return;
 	}
+
+	float const f = get_object_value();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->active_slice();
@@ -428,11 +430,6 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		emit begin_datachange(dataSelection, this);
 		if (work->isOn())
 		{
-			if (fb->isChecked())
-				f = 255.f;
-			if (bg->isChecked())
-				f = 0.f;
-
 			if (mm->isOn())
 				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw);
 			else
@@ -456,6 +453,8 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 {
 	if (!selectobj)
 	{
+		float const f = get_object_value();
+
 		if (olcorr->isOn())
 		{
 			vpdyn.pop_back();
@@ -535,6 +534,8 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 	}
 	else
 	{
+		float const f = get_object_value();
+
 		if (olcorr->isOn())
 		{
 			vpdyn.pop_back();
@@ -601,17 +602,14 @@ void OutlineCorrectionWidget::method_changed()
 		hboxpixormm->hide();
 		allslices->hide();
 		pb_removeholes->hide();
+		hbox6->hide();
 		if (work->isOn())
 		{
-			pb_selectobj->show();
-			bg->hide();
-			fb->hide();
+			hbox5o->show();
 		}
 		else
 		{
-			pb_selectobj->hide();
-			bg->hide();
-			fb->hide();
+			hbox5o->hide();
 		}
 	}
 	else if (brush->isOn())
@@ -628,15 +626,13 @@ void OutlineCorrectionWidget::method_changed()
 		pb_removeholes->hide();
 		if (work->isOn())
 		{
-			pb_selectobj->show();
-			bg->show();
-			fb->show();
+			hbox5o->show();
+			hbox6->show();
 		}
 		else
 		{
-			pb_selectobj->hide();
-			bg->hide();
-			fb->hide();
+			hbox5o->hide();
+			hbox6->hide();
 		}
 	}
 	else if (holefill->isOn())
@@ -655,17 +651,14 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Fill Holes");
 		pb_removeholes->show();
+		hbox6->hide();
 		if (work->isOn())
 		{
-			pb_selectobj->show();
-			bg->hide();
-			fb->hide();
+			hbox5o->show();
 		}
 		else
 		{
-			pb_selectobj->hide();
-			bg->hide();
-			fb->hide();
+			hbox5o->hide();
 		}
 	}
 	else if (removeislands->isOn())
@@ -684,17 +677,14 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Remove Islands");
 		pb_removeholes->show();
+		hbox6->hide();
 		if (work->isOn())
 		{
-			pb_selectobj->show();
-			bg->hide();
-			fb->hide();
+			hbox5o->show();
 		}
 		else
 		{
-			pb_selectobj->hide();
-			bg->hide();
-			fb->hide();
+			hbox5o->hide();
 		}
 	}
 	else if (gapfill->isOn())
@@ -712,9 +702,8 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Fill Gaps");
 		pb_removeholes->show();
-		pb_selectobj->hide();
-		fb->hide();
-		bg->hide();
+		hbox5o->hide();
+		hbox6->hide();
 	}
 	else if (addskin->isOn())
 	{
@@ -738,9 +727,8 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Add Skin");
 		pb_removeholes->show();
-		pb_selectobj->hide();
-		fb->hide();
-		bg->hide();
+		hbox5o->hide();
+		hbox6->hide();
 	}
 	else if (fillskin->isOn())
 	{
@@ -767,9 +755,8 @@ void OutlineCorrectionWidget::method_changed()
 			pb_removeholes->setEnabled(true);
 		else
 			pb_removeholes->setEnabled(false);
-		pb_selectobj->hide();
-		fb->hide();
-		bg->hide();
+		hbox5o->hide();
+		hbox6->hide();
 	}
 	else if (allfill->isOn())
 	{
@@ -783,9 +770,8 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Fill All");
 		pb_removeholes->show();
-		pb_selectobj->hide();
-		fb->hide();
-		bg->hide();
+		hbox5o->hide();
+		hbox6->hide();
 	}
 	else if (adapt->isOn())
 	{
@@ -799,16 +785,15 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->show();
 		pb_removeholes->setText("Adapt");
 		pb_removeholes->show();
-		pb_selectobj->show();
-		fb->hide();
-		bg->hide();
+		hbox5o->show();
+		hbox6->hide();
 	}
 	pixmm_changed();
 }
 
-void OutlineCorrectionWidget::removeholes_pushed()
+void OutlineCorrectionWidget::execute_pushed()
 {
-	//	bmphand->fill_holes(255.0f,sb_holesize->value());
+	float const f = get_object_value();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
@@ -879,7 +864,6 @@ void OutlineCorrectionWidget::removeholes_pushed()
 		{
 			if (allslices->isChecked())
 			{
-				//if(work->isOn()) handler3D->add_skin(sb_radius->value());xxxa
 				if (mm->isOn())
 				{
 					float thick1 = handler3D->get_slicethickness();
@@ -898,8 +882,7 @@ void OutlineCorrectionWidget::removeholes_pushed()
 								int(sb_radius->value() / ps1.high + 0.1f),
 								int(sb_radius->value() / ps1.low + 0.1f),
 								int(sb_radius->value() / thick1 + 0.1f), tissuenr);
-						atBoundary =
-								handler3D->tissuevalue_at_boundary3D(tissuenr);
+						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 				else
@@ -940,7 +923,6 @@ void OutlineCorrectionWidget::removeholes_pushed()
 		{
 			if (allslices->isChecked())
 			{
-				//if(work->isOn()) handler3D->add_skin(sb_radius->value());xxxa
 				if (mm->isOn())
 				{
 					float mm_rad = mm_radius->text().toFloat();
@@ -1094,6 +1076,8 @@ void OutlineCorrectionWidget::selectobj_pushed()
 
 void OutlineCorrectionWidget::workbits_changed()
 {
+	float const f = get_object_value();
+
 	bmphand = handler3D->get_activebmphandler();
 	float* workbits = bmphand->return_work();
 	unsigned area =
@@ -1105,7 +1089,10 @@ void OutlineCorrectionWidget::workbits_changed()
 	{
 		Pair p;
 		bmphand->get_range(&p);
-		f = p.high;
+		if (p.high > p.low)
+		{
+			object_value->setText(QString::number(p.high));
+		}
 	}
 }
 
@@ -1117,7 +1104,9 @@ void OutlineCorrectionWidget::on_slicenr_changed()
 		bmphand_changed(handler3D->get_activebmphandler());
 	}
 	else
+	{
 		workbits_changed();
+	}
 }
 
 void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
@@ -1280,4 +1269,15 @@ void OutlineCorrectionWidget::pixmm_changed()
 		mm_radius->hide();
 		txt_unit->setText(" pixel");
 	}
+}
+
+float iseg::OutlineCorrectionWidget::get_object_value() const
+{
+	bool ok = false;
+	float f = object_value->text().toFloat(&ok);
+	if (!ok)
+	{
+		f = 255.f;
+	}
+	return f;
 }

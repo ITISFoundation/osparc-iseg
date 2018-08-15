@@ -14,6 +14,7 @@
 #include "bmp_read_1.h"
 
 #include "Data/Point.h"
+#include "Data/Logger.h"
 
 #include <QFormLayout>
 #include <QProgressDialog>

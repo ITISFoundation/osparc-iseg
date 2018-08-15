@@ -5349,12 +5349,12 @@ private:
 };
 } // namespace
 
-void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::erosion(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kErode, _startslice, _endslice);
@@ -5362,12 +5362,12 @@ void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::dilation(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kDilate, _startslice, _endslice);
@@ -5375,12 +5375,12 @@ void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::closure(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kClose, _startslice, _endslice);
@@ -5388,12 +5388,12 @@ void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::open(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kOpen, _startslice, _endslice);
