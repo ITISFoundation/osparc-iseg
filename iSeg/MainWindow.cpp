@@ -1690,13 +1690,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(le_brightnesswork_val, SIGNAL(editingFinished()), this,
 			SLOT(le_brightnesswork_val_edited()));
 
-	QObject::connect(surface_viewer,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(surface_viewer,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
 	// \todo BL add generic connections here, e.g. begin/end_datachange
 
 	m_widget_signal_mapper = new QSignalMapper(this);
@@ -1710,6 +1703,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	}
 	for (auto widget : tabwidgets)
 	{
+		assert(widget);
 		QObject::connect(widget,
 				SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 				SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
@@ -1786,56 +1780,26 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 		if (xsliceshower != nullptr)
 		{
 			xsliceshower->close();
-			QObject::disconnect(bmp_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					xsliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(work_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					xsliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(xsliceshower, SIGNAL(slice_changed(int)), this,
-					SLOT(xshower_slicechanged()));
-			QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), xsliceshower,
-					SLOT(set_zoom(double)));
-			QObject::disconnect(xsliceshower, SIGNAL(hasbeenclosed()), this,
-					SLOT(xslice_closed()));
 			delete xsliceshower;
 		}
 		if (ysliceshower != nullptr)
 		{
 			ysliceshower->close();
-			QObject::disconnect(bmp_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					ysliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(work_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					ysliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(ysliceshower, SIGNAL(slice_changed(int)), this,
-					SLOT(yshower_slicechanged()));
-			QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), ysliceshower,
-					SLOT(set_zoom(double)));
-			QObject::disconnect(ysliceshower, SIGNAL(hasbeenclosed()), this,
-					SLOT(yslice_closed()));
 			delete ysliceshower;
 		}
 		if (surface_viewer != nullptr)
 		{
 			surface_viewer->close();
-			QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this,
-					SLOT(surface_viewer_closed()));
 			delete surface_viewer;
 		}
 		if (VV3D != nullptr)
 		{
 			VV3D->close();
-			QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
-					SLOT(VV3D_closed()));
 			delete VV3D;
 		}
 		if (VV3Dbmp != nullptr)
 		{
 			VV3Dbmp->close();
-			QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-					SLOT(VV3Dbmp_closed()));
 			delete VV3Dbmp;
 		}
 
@@ -2512,8 +2476,6 @@ void MainWindow::execute_loadbmp()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-
-	return;
 }
 
 void MainWindow::execute_loadpng()
@@ -2577,21 +2539,6 @@ void MainWindow::execute_loadjpg()
 		{
 			vi.push_back(jpgimgnr(&files[i]));
 		}
-		/*
-		int dummy;
-		QString dummys;
-		for(short k=0;k<nrelem-1;k++){
-			for(short j=nrelem-1;j>k;j--){
-				if(vi[j]>vi[j-1]){
-					dummy=vi[j];
-					vi[j]=vi[j-1];
-					vi[j-1]=dummy;
-					dummys=files[j];
-					files[j]=files[j-1];
-					files[j-1]=dummys;
-				}
-			}
-		}*/
 
 		vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
@@ -2618,8 +2565,6 @@ void MainWindow::execute_loadjpg()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-
-	return;
 }
 
 void MainWindow::execute_loaddicom()
@@ -2662,7 +2607,6 @@ void MainWindow::execute_loaddicom()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-	return;
 }
 
 void MainWindow::execute_reloaddicom()
@@ -2698,8 +2642,6 @@ void MainWindow::execute_reloaddicom()
 
 		reset_brightnesscontrast();
 	}
-
-	return;
 }
 
 void MainWindow::execute_loadraw()
@@ -2925,8 +2867,6 @@ void MainWindow::execute_reloadbmp()
 					"You have to select the same number of slices.\n");
 		}
 	}
-
-	return;
 }
 
 void MainWindow::execute_reloadraw()
@@ -2971,8 +2911,6 @@ void MainWindow::execute_reloadavw()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadmhd()
@@ -2996,8 +2934,6 @@ void MainWindow::execute_reloadmhd()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadvtk()
@@ -3020,8 +2956,6 @@ void MainWindow::execute_reloadvtk()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadnifti()
@@ -3046,8 +2980,6 @@ void MainWindow::execute_reloadnifti()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_loadsurface()
@@ -4608,7 +4540,6 @@ void MainWindow::start_surfaceviewer(int mode)
 	if (surface_viewer != nullptr)
 	{
 		surface_viewer->close();
-		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 		delete surface_viewer;
 	}
 
@@ -4621,6 +4552,13 @@ void MainWindow::start_surfaceviewer(int mode)
 	surface_viewer = new SurfaceViewerWidget(handler3D, static_cast<SurfaceViewerWidget::eInputType>(mode), 0);
 	QObject::connect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 
+	QObject::connect(surface_viewer,
+			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
+			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	QObject::connect(surface_viewer,
+			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+			
 	surface_viewer->show();
 	surface_viewer->raise();
 
@@ -4680,8 +4618,7 @@ void MainWindow::execute_3Dvolumeviewerbmp()
 	if (VV3Dbmp == nullptr)
 	{
 		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, 0);
-		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3Dbmp_closed()));
+		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(VV3Dbmp_closed()));
 	}
 
 	VV3Dbmp->show();
@@ -4741,19 +4678,6 @@ void MainWindow::xslice_closed()
 {
 	if (xsliceshower != nullptr)
 	{
-		QObject::disconnect(bmp_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				xsliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(work_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				xsliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(xsliceshower, SIGNAL(slice_changed(int)), this,
-				SLOT(xshower_slicechanged()));
-		QObject::disconnect(xsliceshower, SIGNAL(hasbeenclosed()), this,
-				SLOT(xslice_closed()));
-		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), xsliceshower,
-				SLOT(set_zoom(double)));
-
 		if (ysliceshower != nullptr)
 		{
 			ysliceshower->xyexists_changed(false);
@@ -4770,19 +4694,6 @@ void MainWindow::yslice_closed()
 {
 	if (ysliceshower != nullptr)
 	{
-		QObject::disconnect(bmp_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				ysliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(work_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				ysliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(ysliceshower, SIGNAL(slice_changed(int)), this,
-				SLOT(yshower_slicechanged()));
-		QObject::disconnect(ysliceshower, SIGNAL(hasbeenclosed()), this,
-				SLOT(yslice_closed()));
-		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), ysliceshower,
-				SLOT(set_zoom(double)));
-
 		if (xsliceshower != nullptr)
 		{
 			xsliceshower->xyexists_changed(false);
@@ -4799,7 +4710,6 @@ void MainWindow::surface_viewer_closed()
 {
 	if (surface_viewer != nullptr)
 	{
-		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 		delete surface_viewer;
 		surface_viewer = nullptr;
 	}
@@ -4809,8 +4719,6 @@ void MainWindow::VV3D_closed()
 {
 	if (VV3D != nullptr)
 	{
-		QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3D_closed()));
 		delete VV3D;
 		VV3D = nullptr;
 	}
@@ -4820,8 +4728,6 @@ void MainWindow::VV3Dbmp_closed()
 {
 	if (VV3Dbmp != nullptr)
 	{
-		QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3Dbmp_closed()));
 		delete VV3Dbmp;
 		VV3Dbmp = nullptr;
 	}
@@ -5649,14 +5555,6 @@ void MainWindow::addhold_tissue_clicked(Point p)
 	emit end_datachange(this);
 }
 
-/*void MainWindow::add_tissue_connected_clicked(Point p)
-{
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-	pb_addconn->setDown(false);
-	handler3D->add2tissue_connected((tissues_size_t)tissueTreeWidget->currentItem()+1,p);
-	emit tissues_changed();
-}*/
-
 void MainWindow::subtract_tissue_clicked(Point p)
 {
 	QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
@@ -5694,20 +5592,8 @@ void MainWindow::subtracthold_tissue_clicked(Point p)
 	emit end_datachange(this);
 }
 
-/*void MainWindow::add_tissue_3D_clicked(Point p)
-{
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-	pb_add3D->setDown(false);
-	handler3D->add2tissueall((tissues_size_t)tissueTreeWidget->currentItem()+1,p);
-	emit tissues_changed();
-}*/
-
 void MainWindow::add_tissue_pushed()
 {
-	/*	if(pb_addconn->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-		pb_addconn->setDown(false);
-	}*/
 	if (pb_sub->isOn())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
