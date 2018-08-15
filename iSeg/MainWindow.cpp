@@ -75,7 +75,6 @@
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
-using namespace std;
 using namespace iseg;
 
 namespace {
@@ -176,8 +175,8 @@ QString TruncateFileName(QString str)
 	return str;
 }
 
-bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
-		vector<tissues_size_t>& news)
+bool read_grouptissues(const char* filename, std::vector<tissues_size_t>& olds,
+		std::vector<tissues_size_t>& news)
 {
 	FILE* fp;
 	if ((fp = fopen(filename, "r")) == nullptr)
@@ -198,8 +197,8 @@ bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
 	}
 }
 
-bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
-		vector<tissues_size_t>& news,
+bool read_grouptissuescapped(const char* filename, std::vector<tissues_size_t>& olds,
+		std::vector<tissues_size_t>& news,
 		bool fail_on_unknown_tissue)
 {
 	FILE* fp;
@@ -717,7 +716,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
-		height_max = max(height_max, qs.height());
+		height_max = std::max(height_max, qs.height());
 	}
 	height_max += 65;
 
@@ -2310,7 +2309,7 @@ void MainWindow::le_contrastbmp_val_edited()
 {
 	// Clamp to range and round to precision
 	float contrast =
-			max(0.01f, min(le_contrastbmp_val->text().toFloat(), 100.0f));
+			std::max(0.01f, std::min(le_contrastbmp_val->text().toFloat(), 100.0f));
 	le_contrastbmp_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
@@ -2328,7 +2327,7 @@ void MainWindow::le_contrastwork_val_edited()
 {
 	// Clamp to range and round to precision
 	float contrast =
-			max(0.01f, min(le_contrastwork_val->text().toFloat(), 100.0f));
+			std::max(0.01f, std::min(le_contrastwork_val->text().toFloat(), 100.0f));
 	le_contrastwork_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
@@ -2345,9 +2344,7 @@ void MainWindow::le_contrastwork_val_edited()
 void MainWindow::le_brightnessbmp_val_edited()
 {
 	// Clamp to range and round to precision
-	int brightness = (int)max(
-			-50.0f,
-			min(std::floor(le_brightnessbmp_val->text().toFloat() + 0.5f), 50.0f));
+	int brightness = (int)std::max(-50.0f, std::min(std::floor(le_brightnessbmp_val->text().toFloat() + 0.5f), 50.0f));
 	le_brightnessbmp_val->setText(QString("%1").arg(brightness, 3));
 
 	// Update slider
@@ -2360,9 +2357,7 @@ void MainWindow::le_brightnessbmp_val_edited()
 void MainWindow::le_brightnesswork_val_edited()
 {
 	// Clamp to range and round to precision
-	int brightness = (int)max(
-			-50.0f,
-			min(std::floor(le_brightnesswork_val->text().toFloat() + 0.5f), 50.0f));
+	int brightness = (int)std::max(-50.0f, std::min(std::floor(le_brightnesswork_val->text().toFloat() + 0.5f), 50.0f));
 	le_brightnesswork_val->setText(QString("%1").arg(brightness, 3));
 
 	// Update slider
@@ -2528,9 +2523,9 @@ void MainWindow::execute_loadjpg()
 
 	if (!files.empty())
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
+		std::vector<int> vi;
 		vi.clear();
 
 		short nrelem = files.size();
@@ -2540,7 +2535,7 @@ void MainWindow::execute_loadjpg()
 			vi.push_back(jpgimgnr(&files[i]));
 		}
 
-		vector<const char*> vfilenames;
+		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
@@ -2571,8 +2566,7 @@ void MainWindow::execute_loaddicom()
 {
 	maybeSafe();
 
-	QStringList files =
-		QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
 																		 "All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
@@ -2805,9 +2799,9 @@ void MainWindow::execute_reloadbmp()
 			(unsigned short)files.size() ==
 					(handler3D->end_slice() - handler3D->start_slice()))
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
+		std::vector<int> vi;
 		vi.clear();
 
 		short nrelem = files.size();
@@ -2816,23 +2810,8 @@ void MainWindow::execute_reloadbmp()
 		{
 			vi.push_back(bmpimgnr(&files[i]));
 		}
-		/*
-		int dummy;
-		QString dummys;
-		for(short k=0;k<nrelem-1;k++){
-			for(short j=nrelem-1;j>k;j--){
-				if(vi[j]>vi[j-1]){
-					dummy=vi[j];
-					vi[j]=vi[j-1];
-					vi[j-1]=dummy;
-					dummys=files[j];
-					files[j]=files[j-1];
-					files[j-1]=dummys;
-				}
-			}
-		}*/
 
-		vector<const char*> vfilenames;
+		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
@@ -3615,7 +3594,7 @@ void MainWindow::execute_saveproj()
 			else
 				tempFileName = tempFileName + "Temp.prj";
 
-			string pjFN = m_saveprojfilename.toStdString();
+			std::string pjFN = m_saveprojfilename.toStdString();
 
 			QString sourceFileNameWithoutExtension;
 			afterDot = m_saveprojfilename.lastIndexOf('.');
@@ -5295,7 +5274,7 @@ void MainWindow::execute_removetissues()
 
 void MainWindow::execute_grouptissues()
 {
-	vector<tissues_size_t> olds, news;
+	std::vector<tissues_size_t> olds, news;
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
@@ -5328,8 +5307,7 @@ void MainWindow::execute_grouptissues()
 void MainWindow::execute_about()
 {
 	std::ostringstream ss;
-	ss << "\n\niSeg\n"
-		 << std::string(xstr(ISEG_DESCRIPTION));
+	ss << "\n\niSeg\n"  << std::string(xstr(ISEG_DESCRIPTION));
 	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 
@@ -5872,7 +5850,7 @@ void MainWindow::do_tissue2work()
 
 void MainWindow::do_work2tissue_grouped()
 {
-	vector<tissues_size_t> olds, news;
+	std::vector<tissues_size_t> olds, news;
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
