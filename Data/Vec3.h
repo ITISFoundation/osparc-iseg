@@ -18,7 +18,10 @@ class Vec3
 public:
 	typedef float value_type;
 
-	float v[3];
+	union {
+		float v[3];
+		struct { float x, y, z; };
+	};
 
 	Vec3()
 	{

@@ -866,22 +866,22 @@ void OutlineCorrectionWidget::execute_pushed()
 			{
 				if (mm->isOn())
 				{
-					float thick1 = handler3D->get_slicethickness();
-					Pair ps1 = handler3D->get_pixelsize();
+					// \warning creates block shaped kernel, instead of ellipsoid 
+					float mm_rad = mm_radius->text().toFloat();
 					if (work->isOn())
 					{
 						float setto = handler3D->add_skin3D_outside2(
-								int(sb_radius->value() / ps1.high + 0.1f),
-								int(sb_radius->value() / ps1.low + 0.1f),
-								int(sb_radius->value() / thick1 + 0.1f));
+							int(mm_rad / spacing[0] + 0.1f),
+							int(mm_rad / spacing[1] + 0.1f),
+							int(mm_rad / spacing[2] + 0.1f));
 						atBoundary = handler3D->value_at_boundary3D(setto);
 					}
 					else
 					{
 						handler3D->add_skintissue3D_outside2(
-								int(sb_radius->value() / ps1.high + 0.1f),
-								int(sb_radius->value() / ps1.low + 0.1f),
-								int(sb_radius->value() / thick1 + 0.1f), tissuenr);
+							int(mm_rad / spacing[0] + 0.1f),
+							int(mm_rad / spacing[1] + 0.1f),
+							int(mm_rad / spacing[2] + 0.1f), tissuenr);
 						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
@@ -902,7 +902,7 @@ void OutlineCorrectionWidget::execute_pushed()
 					}
 				}
 			}
-			else
+			else // active slice
 			{
 				if (work->isOn())
 				{
@@ -925,26 +925,23 @@ void OutlineCorrectionWidget::execute_pushed()
 			{
 				if (mm->isOn())
 				{
+					// \warning creates block shaped kernel, instead of ellipsoid 
 					float mm_rad = mm_radius->text().toFloat();
-					float thick1 = handler3D->get_slicethickness();
-					Pair ps1 = handler3D->get_pixelsize();
 					if (work->isOn())
 					{
-						//convert mm into pixels
-						float setto =
-								handler3D->add_skin3D(int(mm_rad / ps1.high + 0.1f),
-										int(mm_rad / ps1.low + 0.1f),
-										int(mm_rad / thick1 + 0.1f));
+						float setto = handler3D->add_skin3D(
+							int(mm_rad / spacing[0] + 0.1f),
+							int(mm_rad / spacing[1] + 0.1f),
+							int(mm_rad / spacing[2] + 0.1f));
 						atBoundary = handler3D->value_at_boundary3D(setto);
 					}
 					else
 					{
 						handler3D->add_skintissue3D(
-								int(mm_rad / ps1.high + 0.1f),
-								int(mm_rad / ps1.low + 0.1f),
-								int(mm_rad / thick1 + 0.1f), tissuenr);
-						atBoundary =
-								handler3D->tissuevalue_at_boundary3D(tissuenr);
+							int(mm_rad / spacing[0] + 0.1f),
+							int(mm_rad / spacing[1] + 0.1f),
+							int(mm_rad / spacing[2] + 0.1f), tissuenr);
+						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 				else
@@ -959,30 +956,26 @@ void OutlineCorrectionWidget::execute_pushed()
 						handler3D->add_skintissue3D(
 								sb_radius->value(), sb_radius->value(),
 								sb_radius->value(), tissuenr);
-						atBoundary =
-								handler3D->tissuevalue_at_boundary3D(tissuenr);
+						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
 					}
 				}
 			}
-			else
+			else // active slice
 			{
 				if (mm->isOn())
 				{
+					// \warning if spacing is anisotropic, skin thickness will be non-uniform   
 					float mm_rad = mm_radius->text().toFloat();
-					Pair ps1 = handler3D->get_pixelsize();
+					int n = static_cast<int>(mm_rad / spacing[1] + 0.1f);
 					if (work->isOn())
 					{
-						float setto =
-								bmphand->add_skin(int(mm_rad / ps1.high + 0.1f));
+						float setto = bmphand->add_skin(n);
 						atBoundary = bmphand->value_at_boundary(setto);
 					}
 					else
 					{
-						bmphand->add_skintissue(
-								handler3D->active_tissuelayer(),
-								int(mm_rad / ps1.high + 0.1f), tissuenr);
-						atBoundary = bmphand->tissuevalue_at_boundary(
-								handler3D->active_tissuelayer(), tissuenr);
+						bmphand->add_skintissue(handler3D->active_tissuelayer(), n, tissuenr);
+						atBoundary = bmphand->tissuevalue_at_boundary(handler3D->active_tissuelayer(), tissuenr);
 					}
 				}
 				else
@@ -1015,11 +1008,10 @@ void OutlineCorrectionWidget::execute_pushed()
 		int xThick, yThick, zThick;
 		if (mm->isOn())
 		{
-			float thickZ = handler3D->get_slicethickness();
-			Pair ps1 = handler3D->get_pixelsize();
-			xThick = sb_radius->value() / ps1.high + 0.1f;
-			yThick = sb_radius->value() / ps1.low + 0.1f;
-			zThick = sb_radius->value() / thickZ + 0.1f;
+			float mm_rad = mm_radius->text().toFloat();
+			xThick = mm_rad / spacing[0] + 0.1f;
+			yThick = mm_rad / spacing[1] + 0.1f;
+			zThick = mm_rad / spacing[2] + 0.1f;
 		}
 		else
 		{
