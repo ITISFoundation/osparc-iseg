@@ -163,7 +163,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 		case 1: input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
 		case 2: input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
 		default:
-			cerr << "volumeviewer3D::volumeviewer3D: tissues_size_t not "
+			std::cerr << "volumeviewer3D::volumeviewer3D: tissues_size_t not "
 							"implemented."
 					 << endl;
 		}
@@ -182,7 +182,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	input->GetBounds(bounds);
 	input->GetCenter(center);
 	input->GetScalarRange(range);
-	cerr << "input range = " << range[0] << " " << range[1] << endl;
+	std::cerr << "input range = " << range[0] << " " << range[1] << endl;
 
 	double level = 0.5 * (range[1] + range[0]);
 	double window = range[1] - range[0];
@@ -862,7 +862,7 @@ void VolumeViewerWidget::reload()
 
 void VolumeViewerWidget::vtkMySliceCallbackY::Execute(vtkObject* caller, unsigned long, void*)
 {
-	cerr << "ExecuteY\n";
+	std::cerr << "ExecuteY\n";
 	//
 	// The plane has moved, update the sampled data values.
 	//
@@ -875,7 +875,7 @@ void VolumeViewerWidget::vtkMySliceCallbackY::Execute(vtkObject* caller, unsigne
 
 void iseg::VolumeViewerWidget::vtkMySliceCallbackZ::Execute(vtkObject* caller, unsigned long, void*)
 {
-	cerr << "ExecuteZ\n";
+	std::cerr << "ExecuteZ\n";
 	//
 	// The plane has moved, update the sampled data values.
 	//

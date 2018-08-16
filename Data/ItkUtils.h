@@ -15,7 +15,6 @@
 #include <itkImageFileWriter.h>
 #include <itkImageRegionIterator.h>
 #include <itkImageRegionIteratorWithIndex.h>
-#include <itkTimeProbe.h>
 
 namespace iseg {
 
@@ -116,24 +115,6 @@ namespace Functor {
 
 }
 
-class ScopedTimer
-{
-public:
-	ScopedTimer(const std::string& scope_name) : _msg(scope_name)
-	{
-		_clock.Start();
-	}
-	~ScopedTimer()
-	{
-		_clock.Stop();
-		std::cerr << "Time in " << _msg << ": " << _clock.GetTotal() << "\n";
-	}
-
-private:
-	std::string _msg;
-	itk::TimeProbe _clock;
-};
-
 template<class T>
 void dump_image(T* img, const std::string& file_name)
 {
@@ -217,7 +198,7 @@ typename itk::Image<T, Dimension>::Pointer MakeBall(const typename itk::ImageBas
 	}                                             \
 	catch (itk::ExceptionObject e)                \
 	{                                             \
-		std::cerr << "Error: " << e.what() << "\n"; \
+		ISEG_ERROR_MSG("" << e.what()); \
 		expr;                                       \
 	}
 

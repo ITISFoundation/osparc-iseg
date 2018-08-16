@@ -13,6 +13,8 @@ IF(PLUGIN_GRAPHCUT)
 		${CMAKE_SOURCE_DIR}/Thirdparty/Gc
 	)
 
+	USE_BOOST()
+
 	QT4_WRAP_CPP(MOCSrcsext 
 		BoneSegmentationWidget.h
 		TissueSeparatorWidget.h

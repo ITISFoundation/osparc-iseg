@@ -9,9 +9,9 @@
  */
 #include "TissueSeparatorWidget.h"
 
-//#define DEBUG_GC
 #include "GraphCutAlgorithms.h"
 
+#include "Data/LogApi.h"
 #include "Data/ItkUtils.h"
 #include "Data/addLine.h"
 #include "Data/SliceHandlerItkWrapper.h"
@@ -310,11 +310,11 @@ typename itk::Image<unsigned char, Dim>::Pointer
 	}
 	catch (itk::ExceptionObject e)
 	{
-		std::cerr << "Error: " << e.what() << "\n";
+		iseg::Log::error(e.what());
 	}
 	catch (std::exception e)
 	{
-		std::cerr << "Error: " << e.what() << "\n";
+		iseg::Log::error(e.what());
 	}
 	return nullptr;
 }

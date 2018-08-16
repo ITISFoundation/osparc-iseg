@@ -23,11 +23,9 @@ using namespace iseg;
 Settings::Settings(QWidget* parent)
 	: QDialog(parent), mainWindow((MainWindow*)parent), ui(new Ui::Settings)
 {
-	std::cerr << "Settings::Settings()" << std::endl;
 	assert(mainWindow);
 	ui->setupUi(this);
-	std::cerr << "using compression = "
-			  << mainWindow->handler3D->GetCompression() << std::endl;
+
 	this->ui->spinBoxCompression->setValue(
 		mainWindow->handler3D->GetCompression());
 	this->ui->checkBoxContiguousMemory->setChecked(
@@ -38,9 +36,7 @@ Settings::~Settings() { delete ui; }
 
 void Settings::accept()
 {
-	std::cerr << "Settings::accept()" << std::endl;
-	std::cerr << "setting compression = "
-			  << this->ui->spinBoxCompression->value() << std::endl;
+	ISEG_INFO("setting compression = " << this->ui->spinBoxCompression->value());
 	mainWindow->handler3D->SetCompression(
 		this->ui->spinBoxCompression->value());
 	mainWindow->handler3D->SetContiguousMemory(
@@ -51,6 +47,5 @@ void Settings::accept()
 
 void Settings::reject()
 {
-	std::cerr << "Settings::reject()" << std::endl;
 	this->hide();
 }

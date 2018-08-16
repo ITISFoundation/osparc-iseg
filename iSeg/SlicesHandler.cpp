@@ -587,7 +587,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 	}
 	else
 	{
-		cerr << "SlicesHandler::ReadRaw() : warning, loading failed..." << endl;
+		ISEG_WARNING_MSG("loading failed in 'ReadRaw'");
 		newbmp(_width, _height, nrofslices);
 		return 0;
 	}
@@ -609,7 +609,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 		unsigned char* bits_tmp;
 		if ((bits_tmp = (unsigned char*)malloc(bitsize)) == nullptr)
 		{
-			cerr << "bmphandler::ReadRaw() : error, allocation failed" << endl;
+			ISEG_ERROR_MSG("allocation failed in 'ReadRaw'");
 			fclose(fp);
 			return 0;
 		}
@@ -626,9 +626,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 #endif
 		if (result)
 		{
-			cerr
-					<< "bmphandler::ReadRawOverlay() : error, file operation failed"
-					<< endl;
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -643,9 +641,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if (fread(bits_tmp, 1, bitsize, fp) < _area)
 		{
-			cerr
-					<< "bmphandler::ReadRawOverlay() : error, file operation failed"
-					<< endl;
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -664,8 +660,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if ((bits_tmp = (unsigned short*)malloc(bitsize * 2)) == nullptr)
 		{
-			cerr << "bmphandler::ReadRawOverlay() : error, allocation failed"
-					 << endl;
+			ISEG_ERROR_MSG("allocation failed in 'ReadRawOverlay'");
 			fclose(fp);
 			return 0;
 		}
@@ -680,9 +675,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 #endif
 		if (result)
 		{
-			cerr
-					<< "bmphandler::ReadRawOverlay() : error, file operation failed"
-					<< endl;
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -690,9 +683,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 
 		if (fread(bits_tmp, 1, (size_t)(bitsize)*2, fp) < _area * 2)
 		{
-			cerr
-					<< "bmphandler::ReadRawOverlay() : error, file operation failed"
-					<< endl;
+			ISEG_ERROR_MSG("bmphandler::ReadRawOverlay() : file operation failed");
 			free(bits_tmp);
 			fclose(fp);
 			return 0;
@@ -707,8 +698,7 @@ int SlicesHandler::ReadRawOverlay(const char* filename, unsigned bitdepth,
 	}
 	else
 	{
-		cerr << "bmphandler::ReadRawOverlay() : error, unsupported depth..."
-				 << endl;
+		ISEG_ERROR_MSG("unsupported depth in 'ReadRawOverlay'");
 		fclose(fp);
 		return 0;
 	}
@@ -771,20 +761,9 @@ int SlicesHandler::ReadRTdose(const char* filename)
 	// Read size data
 	if (!RTDoseReader::ReadSizeData(filename, dims, spacing, origin, dc))
 	{
-		cerr << "ReadRTdose() : ReadSizeData() failed" << endl;
+		ISEG_ERROR_MSG("'ReadSizeData' failed");
 		return 0;
 	}
-
-	cerr << "SlicesHandler::ReadRTdose() : Extent = " << dims[0] << " "
-			 << dims[1] << " " << dims[2] << endl;
-	cerr << "SlicesHandler::ReadRTdose() : Origin = " << origin[0] << " "
-			 << origin[1] << " " << origin[2] << endl;
-	cerr << "SlicesHandler::ReadRTdose() : Spacing = " << spacing[0] << " "
-			 << spacing[1] << " " << spacing[2] << endl;
-	cerr << "SlicesHandler::ReadRTdose() : Direction Cosines Row = " << dc[0]
-			 << " " << dc[1] << " " << dc[2] << endl;
-	cerr << "SlicesHandler::ReadRTdose() : Direction Cosines Column = " << dc[3]
-			 << " " << dc[4] << " " << dc[5] << endl;
 
 	// Reallocate slices
 	// taken from LoadProject()
@@ -828,7 +807,7 @@ int SlicesHandler::ReadRTdose(const char* filename)
 	}
 	else
 	{
-		cerr << "ReadRTdose() : ReadPixelData() failed" << endl;
+		ISEG_ERROR_MSG("ReadPixelData() failed");
 		newbmp(_width, _height, _nrslices);
 	}
 
@@ -891,7 +870,7 @@ int SlicesHandler::LoadAllHDF(const char* filename)
 
 	if ((w != _width) || (h != _height) || (_nrslices != nrofslices))
 	{
-		cerr << "LoadAllHDF() : inconsistent dimensions" << endl;
+		ISEG_ERROR_MSG("LoadAllHDF() : inconsistent dimensions");
 		return 0;
 	}
 
@@ -901,26 +880,7 @@ int SlicesHandler::LoadAllHDF(const char* filename)
 	}
 	arrayNames = reader.GetArrayNames();
 
-	cerr << "SlicesHandler::LoadAllHDF() : Extent = " << _width << " " << _height
-			 << " " << nrofslices << endl;
-	cerr << "SlicesHandler::LoadAllHDF() : Origin = " << offset[0] << " "
-			 << offset[1] << " " << offset[2] << endl;
-	cerr << "SlicesHandler::LoadAllHDF() : Spacing = " << pixsize[0] << " "
-			 << pixsize[1] << " " << pixsize[2] << endl;
 	const int NPA = arrayNames.size();
-	cerr << "SlicesHandler::LoadAllHDF() : number of point arrays: " << NPA
-			 << endl;
-	for (int i = 0; i < NPA; ++i)
-	{
-		cerr << "\tarray id = " << i
-				 << ", name = " << arrayNames[i].toAscii().data() << endl;
-	}
-
-	//	if((w!=this->width) || (h!=this->height) || (nrofslices!=this->nrslices))
-	//	{
-	//		cerr << "error, invalid dimensions..." << endl;
-	//		return 0;
-	//	}
 
 	// read colors if any
 	UpdateColorLookupTable(reader.ReadColorLookup());
@@ -964,7 +924,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	nrofslices = reader.GetNumberOfSlices();
 	if ((w != _width) || (h != _height) || (_nrslices != nrofslices))
 	{
-		cerr << "loadAllXdmf() : inconsistent dimensions" << endl;
+		ISEG_ERROR_MSG("inconsistent dimensions in LoadAllXdmf");
 		return 0;
 	}
 	auto pixsize = reader.GetPixelSize();
@@ -973,26 +933,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	transform.getOffset(origin);
 	arrayNames = reader.GetArrayNames();
 
-	cerr << "SlicesHandler::loadAllXdmf() : Extent = " << _width << " " << _height
-			 << " " << nrofslices << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Origin = " << origin[0] << " "
-			 << origin[1] << " " << origin[2] << endl;
-	cerr << "SlicesHandler::loadAllXdmf() : Spacing = " << pixsize[0] << " "
-			 << pixsize[1] << " " << pixsize[2] << endl;
 	const int NPA = arrayNames.size();
-	cerr << "SlicesHandler::loadAllXdmf() : number of point arrays: " << NPA
-			 << endl;
-	for (int i = 0; i < NPA; ++i)
-	{
-		cerr << "\tarray id = " << i
-				 << ", name = " << arrayNames[i].toAscii().data() << endl;
-	}
-
-	//	if((w!=this->width) || (h!=this->height) || (nrofslices!=this->nrslices))
-	//	{
-	//		cerr << "error, invalid dimensions..." << endl;
-	//		return 0;
-	//	}
 
 	std::vector<float*> bmpslices(_nrslices);
 	std::vector<float*> workslices(_nrslices);
@@ -1065,13 +1006,9 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	HDF5Writer writer;
 	QString fname;
@@ -1080,16 +1017,16 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 	else
 		fname = basename + ".h5";
 
-	if (!writer.open(fname.toAscii().data(), "append"))
+	if (!writer.open(fname.toStdString(), "append"))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR("opening " << fname.toStdString());
 		return false;
 	}
 	writer.compression = compression;
 
 	if (!writer.createGroup(std::string("Markers")))
 	{
-		cerr << "error creating markers section" << endl;
+		ISEG_ERROR_MSG("creating markers section");
 		return false;
 	}
 
@@ -1101,7 +1038,7 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 	index1[0] = (int)version;
 	if (!writer.write(index1, dim2, std::string("/Markers/version")))
 	{
-		cerr << "error writing version" << endl;
+		ISEG_ERROR_MSG("writing version");
 		return false;
 	}
 
@@ -1119,8 +1056,7 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 			QString mark_name = QString::fromStdString(cur_mark.name);
 			if (mark_name.isEmpty())
 			{
-				mark_name = QString::fromStdString(
-						"Mark_" + std::to_string(mark_counter));
+				mark_name = QString::fromStdString("Mark_" + std::to_string(mark_counter));
 				mark_counter++;
 			}
 			mark_name.replace(QString(" "), QString("_"), true);
@@ -1138,13 +1074,15 @@ bool SlicesHandler::SaveMarkersHDF(const char* filename, bool naked,
 									mark_name.toLocal8Bit().constData() +
 									std::string("/marker_pos")))
 			{
-				cerr << "error writing marker_pos" << endl;
+				ISEG_ERROR_MSG("writing marker_pos");
 				return false;
 			}
 		}
 	}
 
 	writer.close();
+
+	QDir::setCurrent(oldcwd.absolutePath());
 
 	return true;
 }
@@ -1155,7 +1093,6 @@ int SlicesHandler::SaveMergeAllXdmf(const char* filename,
 		int compression)
 {
 	float pixsize[3];
-	float offset[3];
 
 	auto active_slices_transform = get_transform_active_slices();
 
@@ -1601,7 +1538,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 
 	writer->SetFileName(filename);
 	if (!writer->Write()) {
-		cerr << "WriteRTdose() : Write() failed" << endl;
+		ISEG_ERROR_MSG("WriteRTdose() : Write() failed");
 		delete writer;
 		return 0;
 	}
@@ -1644,8 +1581,9 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	rtDose->SetStudyInstanceUID("1.3.12.2.1107.5.1.4.49212.3000001201090800348430000004");
 	rtDose->SetStudyTime(studyDateTime);
 	rtDose->AddReferencedRTPlanInstanceUID(std::string("2.16.840.1.113669.2.931128.463871595.20120221120004.977868"));
-	if (!writer->Write(filename, rtDose)) {
-		cerr << "WriteRTdose() : Write() failed" << endl;
+	if (!writer->Write(filename, rtDose)) 
+	{
+		ISEG_ERROR_MSG("WriteRTdose() : Write() failed");
 		return 0;
 	}
 
@@ -1664,7 +1602,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	// Read size data
 	if (!RTDoseReader::ReadSizeData(filename, dims, spacing, origin, dc))
 	{
-		cerr << "ReloadRTdose() : ReadSizeData() failed" << endl;
+		ISEG_ERROR_MSG("ReloadRTdose() : ReadSizeData() failed");
 		return 0;
 	}
 
@@ -1687,7 +1625,7 @@ int SlicesHandler::ReloadRTdose(const char* filename, unsigned short slicenr)
 	}
 	else
 	{
-		cerr << "ReloadRTdose() : ReadPixelData() failed" << endl;
+		ISEG_ERROR_MSG("ReloadRTdose() : ReadPixelData() failed");
 		newbmp(_width, _height, _nrslices);
 	}
 
@@ -2137,15 +2075,13 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 		if (version > 2)
 		{
 			// Only load image file name extension
-			char imageFileExtension[10];
+			char imageFileExt[10];
 			unsigned char length1;
 			fread(&length1, sizeof(unsigned char), 1, fp);
-			fread(imageFileExtension, sizeof(char), length1, fp);
+			fread(imageFileExt, sizeof(char), length1, fp);
 			imageFileName = QString(filename);
 			int afterDot = imageFileName.lastIndexOf('.') + 1;
-			imageFileName = imageFileName.remove(
-													afterDot, imageFileName.length() - afterDot) +
-											QString(imageFileExtension);
+			imageFileName = imageFileName.remove(afterDot, imageFileName.length() - afterDot) + QString(imageFileExt);
 		}
 		else
 		{
@@ -2154,20 +2090,15 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 			unsigned char length1;
 			fread(&length1, sizeof(unsigned char), 1, fp);
 			fread(filenameimage, sizeof(char), length1, fp);
-			//fscanf(fp,"%s",filenameimage);
 			imageFileName = QString(filenameimage);
 		}
 
 		if (imageFileName.endsWith(".xmf", Qt::CaseInsensitive))
 		{
-			LoadAllXdmf(QFileInfo(filename)
-											.dir()
-											.absFilePath(imageFileName)
-											.toAscii()
-											.data());
+			LoadAllXdmf(QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data());
 		}
 		else
-			cerr << "error, unsupported format..." << endl;
+			ISEG_ERROR_MSG("unsupported format...");
 	}
 
 	// Ranges
@@ -2200,18 +2131,7 @@ bool SlicesHandler::LoadS4Llink(const char* filename, int& tissuesVersion)
 	tr_1d = reader.GetImageTransform();
 	arrayNames = reader.GetArrayNames();
 
-	cerr << "SlicesHandler::LoadS4Llink() : Extent = " << _width << " " << _height
-			 << " " << nrofslices << endl;
-	cerr << "SlicesHandler::LoadS4Llink() : Spacing = " << pixsize[0] << " "
-			 << pixsize[1] << " " << pixsize[2] << endl;
 	const int NPA = arrayNames.size();
-	cerr << "SlicesHandler::LoadS4Llink() : number of point arrays: " << NPA
-			 << endl;
-	for (int i = 0; i < NPA; ++i)
-	{
-		cerr << "\tarray id = " << i
-				 << ", name = " << arrayNames[i].toAscii().data() << endl;
-	}
 
 	// taken from LoadProject()
 	_activeslice = 0;
@@ -4105,7 +4025,7 @@ void SlicesHandler::kmeans_png(unsigned short slicenr, short nrtissues,
 			else
 			{
 				QMessageBox msgBox;
-				msgBox.setText("Error reading centers initialization file.");
+				msgBox.setText("ERROR: reading centers initialization file.");
 				msgBox.exec();
 				return;
 			}
@@ -5429,12 +5349,12 @@ private:
 };
 } // namespace
 
-void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::erosion(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kErode, _startslice, _endslice);
@@ -5442,12 +5362,12 @@ void SlicesHandler::erosion(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::dilation(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kDilate, _startslice, _endslice);
@@ -5455,12 +5375,12 @@ void SlicesHandler::dilation(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::closure(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kClose, _startslice, _endslice);
@@ -5468,12 +5388,12 @@ void SlicesHandler::closure(boost::variant<int, float> n, bool connectivity)
 	iseg::Paste<unsigned char, float>(output, all_slices, _startslice, _endslice);
 }
 
-void SlicesHandler::open(boost::variant<int, float> n, bool connectivity)
+void SlicesHandler::open(boost::variant<int, float> radius, bool connectivity)
 {
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(false);
 
-	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), n);
+	auto ball = boost::apply_visitor(MyVisitor(all_slices->GetSpacing()), radius);
 
 	auto output = morpho::MorphologicalOperation<float>(
 			all_slices, ball, morpho::kOpen, _startslice, _endslice);
@@ -5569,7 +5489,7 @@ void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short sl
 		}
 		catch (std::exception& e)
 		{
-			std::cerr << "ERROR: failed to interpolate slices " << e.what() << "\n";
+			ISEG_ERROR("failed to interpolate slices " << e.what());
 		}
 	}
 }
@@ -6284,7 +6204,7 @@ void SlicesHandler::interpolatetissue(unsigned short slice1, unsigned short slic
 		}
 		catch (std::exception& e)
 		{
-			std::cerr << "ERROR: failed to interpolate slices " << e.what() << "\n";
+			ISEG_ERROR("failed to interpolate slices " << e.what());
 		}
 	}
 }
@@ -6295,8 +6215,11 @@ void SlicesHandler::interpolatetissue_medianset(unsigned short slice1,
 		bool connectivity,
 		bool handleVanishingComp)
 {
-	_image_slices[slice1].tissue2work(_active_tissuelayer, tissuetype);
-	_image_slices[slice2].tissue2work(_active_tissuelayer, tissuetype);
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	mask.at(tissuetype) = 255.0f;
+
+	_image_slices[slice1].tissue2work(_active_tissuelayer, mask);
+	_image_slices[slice2].tissue2work(_active_tissuelayer, mask);
 	interpolateworkgrey_medianset(slice1, slice2, connectivity, true);
 }
 
@@ -6867,11 +6790,11 @@ int SlicesHandler::extract_tissue_surfaces(
 		float passBand, float featureAngle)
 {
 	int error_counter = 0;
-	cerr << "SlicesHandler::extract_tissue_surfaces" << endl;
-	cerr << "\tratio " << ratio << endl;
-	cerr << "\tsmoothingiterations " << smoothingiterations << endl;
-	cerr << "\tfeatureAngle " << featureAngle << endl;
-	cerr << "\tusediscretemc " << usediscretemc << endl;
+	ISEG_INFO_MSG("SlicesHandler::extract_tissue_surfaces");
+	ISEG_INFO("\tratio " << ratio);
+	ISEG_INFO("\tsmoothingiterations " << smoothingiterations);
+	ISEG_INFO("\tfeatureAngle " << featureAngle);
+	ISEG_INFO("\tusediscretemc " << usediscretemc);
 
 	//
 	// Copy label field into a vtkImageData object
@@ -6893,7 +6816,7 @@ int SlicesHandler::extract_tissue_surfaces(
 	vtkDataArray* arr = labelField->GetPointData()->GetScalars();
 	if (!arr)
 	{
-		cerr << "ERROR: no scalars" << endl;
+		ISEG_ERROR_MSG("no scalars");
 		return -1;
 	}
 	arr->SetName(tissueIndexArrayName);
@@ -6930,7 +6853,7 @@ int SlicesHandler::extract_tissue_surfaces(
 			(tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
 	if (!field)
 	{
-		cerr << "ERROR: null pointer" << endl;
+		ISEG_ERROR_MSG("null pointer");
 		return -1;
 	}
 
@@ -6967,7 +6890,6 @@ int SlicesHandler::extract_tissue_surfaces(
 	//
 	// Now extract the surface from the label field
 	//
-	std::cerr << "Extract surface " << std::endl;
 	vtkSmartPointer<vtkImageExtractCompatibleMesher> contour =
 			vtkSmartPointer<vtkImageExtractCompatibleMesher>::New();
 	vtkSmartPointer<vtkDiscreteMarchingCubes> cubes =
@@ -7012,7 +6934,6 @@ int SlicesHandler::extract_tissue_surfaces(
 	//
 	// Smooth surface
 	//
-	std::cerr << "Smooth surface " << std::endl;
 	if (smoothingiterations > 0)
 	{
 		smoother->SetInputData(output);
@@ -7038,7 +6959,6 @@ int SlicesHandler::extract_tissue_surfaces(
 	// This originally used vtkDecimatePro (see svn rev. 2453 or earlier),
 	// however, vtkEdgeCollapse avoids topological errors and self-intersections.
 	//
-	std::cerr << "Simplify surface " << std::endl;
 	if (ratio < 0.02)
 		ratio = 0.02;
 	double targetReduction = 1.0 - ratio;
@@ -7131,7 +7051,6 @@ int SlicesHandler::extract_tissue_surfaces(
 	//
 	// Write output to file
 	//
-	std::cerr << "Save surface " << std::endl;
 	vtkNew<vtkGenericDataSetWriter> writer;
 	writer->SetFileName(filename.toAscii().data());
 	writer->SetInputConnection(transform_filter->GetOutputPort());
@@ -7309,45 +7228,31 @@ void SlicesHandler::subtract_tissue_connected(tissues_size_t tissuetype,
 			tissuetype, p);
 }
 
-void SlicesHandler::tissue2work(tissues_size_t tissuetype)
+void SlicesHandler::selectedtissue2work(const std::vector<tissues_size_t>& tissuetype)
 {
-	_image_slices[_activeslice].tissue2work(_active_tissuelayer, tissuetype);
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	for (auto label : tissuetype)
+	{
+		mask.at(label) = 255.0f;
+	}
+
+	_image_slices[_activeslice].tissue2work(_active_tissuelayer, mask);
 }
 
-void SlicesHandler::tissue2work3D(tissues_size_t tissuetype)
+void SlicesHandler::selectedtissue2work3D(const std::vector<tissues_size_t>& tissuetype)
 {
+	std::vector<float> mask(tissue_locks().size() + 1, 0.0f);
+	for (auto label : tissuetype)
+	{
+		mask.at(label) = 255.0f;
+	}
+
 	int const iN = _endslice;
 
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		_image_slices[i].tissue2work(_active_tissuelayer, tissuetype);
-	}
-}
-
-void SlicesHandler::selectedtissue2work(tissues_size_t tissuetype)
-{
-	_image_slices[_activeslice].setissue2work(_active_tissuelayer, tissuetype);
-}
-
-void SlicesHandler::selectedtissue2work3D(tissues_size_t tissuetype)
-{
-	int const iN = _endslice;
-
-#pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
-	{
-		_image_slices[i].setissue2work(_active_tissuelayer, tissuetype);
-	}
-}
-
-void SlicesHandler::selectedtissue2mc(tissues_size_t tissuetype,
-		unsigned char** voxels)
-{
-	for (unsigned short i = _startslice; i < _endslice; i++)
-	{
-		int k = i - _startslice;
-		_image_slices[i].tissue2mc(_active_tissuelayer, tissuetype, voxels, k);
+		_image_slices[i].tissue2work(_active_tissuelayer, mask);
 	}
 }
 
@@ -8968,9 +8873,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	}
 	else
 	{
-		cerr << "SlicesHandler::make_vtktissueimage: Error, tissues_size_t not "
-						"implemented!"
-				 << endl;
+		ISEG_ERROR_MSG("SlicesHandler::make_vtktissueimage: Error, tissues_size_t not implemented!");
 		labelField->Delete();
 		return nullptr;
 	}
@@ -8992,17 +8895,13 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	for (tissues_size_t i = 1; i < num_tissues; i++)
 	{
 		int error_counter = 0;
-		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
-				i);
+		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		float* color = TissueInfos::GetTissueColor(i);
-		std::cerr << TissueInfos::GetTissueName(i).c_str() << " " << color[0]
-							<< "," << color[1] << "," << color[2] << std::endl;
+		ISEG_INFO(TissueInfos::GetTissueName(i).c_str() << " " << color[0] << "," << color[1] << "," << color[2]);
 		color_array->SetTuple(i, color);
 	}
 
-	std::cerr << "vtkImageData::GetActualMemorySize = "
-						<< labelField->GetActualMemorySize() << " KB" << std::endl;
 	return labelField;
 }
 
@@ -9318,227 +9217,6 @@ void SlicesHandler::add_skin3D(int ix, int iy, int iz, float setto)
 			}
 		}
 	}
-
-	// I leave the old implementation just in case there is something that is want to be recovered
-	/*
-	float set_to=(float)123E10;
-	for(unsigned short z=startslice;z<endslice;z++) {
-		image_slices[z].flood_exterior(set_to);
-	}
-
-	//Point p;
-	//unsigned position;
-	std::vector<posit> s;
-	posit p1;
-
-//	p1.pxy=position;
-	p1.pz=activeslice;
-
-	float *work1;
-	float *work2;
-	for(unsigned short z=startslice;z+1<endslice;z++) {
-		work1=image_slices[z].return_work();
-		work2=image_slices[z+1].return_work();
-		for(unsigned long i=0;i<area;i++) {
-			if(work1[i]==0&&work2[i]==set_to) {
-				work1[i]=set_to;
-				p1.pxy=i;
-				p1.pz=z;
-				s.push_back(p1);
-			}
-		}
-	}
-	for(unsigned short z=endslice-1;z>startslice;z--) {
-		work1=image_slices[z].return_work();
-		work2=image_slices[z-1].return_work();
-		for(unsigned long i=0;i<area;i++) {
-			if(work1[i]==0&&work2[i]==set_to) {
-				work1[i]=set_to;
-				p1.pxy=i;
-				p1.pz=z;
-				s.push_back(p1);
-			}
-		}
-	}
-
-	posit i,j;
-	float *work;
-
-	while(!s.empty()){
-		i=s.back();
-		s.pop_back();
-
-		work=image_slices[i.pz].return_work();
-		if(i.pxy%width!=0&&work[i.pxy-1]==0) {
-			work[i.pxy-1]=set_to; 
-			j.pxy=i.pxy-1;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if((i.pxy+1)%width!=0&&work[i.pxy+1]==0) {
-			work[i.pxy+1]=set_to; 
-			j.pxy=i.pxy+1;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pxy>=width&&work[i.pxy-width]==0) {
-			work[i.pxy-width]=set_to; 
-			j.pxy=i.pxy-width;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pxy<area-width&&work[i.pxy+width]==0) {
-			work[i.pxy+width]=set_to; 
-			j.pxy=i.pxy+width;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pz>startslice){
-			work=image_slices[i.pz-1].return_work();
-			if(work[i.pxy]==0) {
-				work[i.pxy]=set_to; 
-				j.pxy=i.pxy;
-				j.pz=i.pz-1;
-				s.push_back(j);
-			}
-		}
-		if(i.pz+1<endslice){
-			work=image_slices[i.pz+1].return_work();
-			if(work[i.pxy]==0) {
-				work[i.pxy]=set_to; 
-				j.pxy=i.pxy;
-				j.pz=i.pz+1;
-				s.push_back(j);
-			}
-		}
-	}
-
-	unsigned short x,y;
-	unsigned long pos;
-	unsigned short i1;
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-
-		for(y=0;y<height;y++){
-			pos=y*width;
-			i1=0;
-			while(pos<(unsigned long)(y+1)*width){
-				if(work[pos]==set_to) i1=ix;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos++;
-			}
-		}
-
-		for(y=0;y<height;y++){
-			pos=(y+1)*width-1;
-			i1=0;
-			while(pos>(unsigned long)y*width){
-				if(work[pos]==set_to) i1=ix;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos--;
-			}
-			if(work[pos]==set_to) i1=ix;
-			else {
-				if(i1>0) {
-					work[pos]=setto;
-					i1--;
-				}
-			}
-		}
-
-		for(x=0;x<width;x++){
-			pos=x;
-			i1=0;
-			while(pos<area){
-				if(work[pos]==set_to) i1=iy;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos+=width;
-			}
-		}
-
-		for(x=0;x<width;x++){
-			pos=area+x-width;
-			i1=0;
-			while(pos>width){
-				if(work[pos]==set_to) i1=iy;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos-=width;
-			}
-			if(work[pos]==set_to) i1=iy;
-			else {
-				if(i1>0) {
-					work[pos]=setto;
-					i1--;
-				}
-			}
-		}
-	}
-
-	unsigned short *counter=(unsigned short*)malloc(sizeof(unsigned short)*area);
-	for(unsigned i1=0;i1<area;i1++) counter[i1]=0;
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-		for(pos=0;pos<area;pos++){
-			if(work[pos]==set_to) counter[pos]=iz;
-			else {
-				if(counter[pos]>0) {
-					work[pos]=setto;
-					counter[pos]--;
-				}
-			}
-		}
-	}
-	for(unsigned i1=0;i1<area;i1++) counter[i1]=0;
-	for(unsigned short z=endslice-1;z>startslice;z--){
-		work=image_slices[z].return_work();
-		for(pos=0;pos<area;pos++){
-			if(work[pos]==set_to) counter[pos]=iz;
-			else {
-				if(counter[pos]>0) {
-					work[pos]=setto;
-					counter[pos]--;
-				}
-			}
-		}
-	}
-	work=image_slices[startslice].return_work();
-	for(pos=0;pos<area;pos++){
-		if(work[pos]==set_to) counter[pos]=iz;
-		else {
-			if(counter[pos]>0) {
-				work[pos]=setto;
-				counter[pos]--;
-			}
-		}
-	}
-	free(counter);
-
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-		for(unsigned i1=0;i1<area;i1++) if(work[i1]==set_to) work[i1]=0;
-	}*/
-
-	return;
 }
 
 void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
@@ -9549,12 +9227,9 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 		_image_slices[z].flood_exterior(set_to);
 	}
 
-	//Point p;
-	//unsigned position;
 	std::vector<posit> s;
 	posit p1;
 
-	//	p1.pxy=position;
 	p1.pz = _activeslice;
 
 	float* work1;
@@ -9759,8 +9434,7 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 		}
 	}
 
-	unsigned short* counter =
-			(unsigned short*)malloc(sizeof(unsigned short) * _area);
+	unsigned short* counter = (unsigned short*)malloc(sizeof(unsigned short) * _area);
 	for (unsigned i1 = 0; i1 < _area; i1++)
 		counter[i1] = 0;
 	for (unsigned short z = _startslice; z < _endslice; z++)
@@ -9822,8 +9496,6 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 			if (work[i1] == set_to)
 				work[i1] = 0;
 	}
-
-	return;
 }
 
 void SlicesHandler::add_skin3D_outside2(int ix, int iy, int iz, float setto)
@@ -10273,8 +9945,7 @@ void SlicesHandler::add_skin3D_outside2(int ix, int iy, int iz, float setto)
 	return;
 }
 
-void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
-		tissues_size_t f)
+void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz, tissues_size_t f)
 {
 	tissues_size_t set_to = TISSUES_SIZE_MAX;
 	tissues_size_t set_to2 = TISSUES_SIZE_MAX - 1;
@@ -10283,12 +9954,9 @@ void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
 		_image_slices[z].flood_exteriortissue(_active_tissuelayer, set_to);
 	}
 
-	//Point p;
-	//unsigned position;
 	std::vector<posit> s;
 	posit p1;
 
-	//	p1.pxy=position;
 	p1.pz = _activeslice;
 
 	tissues_size_t* work1;
@@ -10717,8 +10385,6 @@ void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
 			if (work[i1] == set_to)
 				work[i1] = 0;
 	}
-
-	return;
 }
 
 float SlicesHandler::add_skin3D(int i1)

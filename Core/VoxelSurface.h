@@ -37,8 +37,8 @@ public:
 
 	eSurfaceImageOverlap Intersect(const char* filename, const unsigned dims[3],
 			const float spacing[3], const Transform& transform,
-			float** slices, unsigned startslice,
-			unsigned endslice);
+			float** slices, unsigned startslice, unsigned endslice,
+			double relative_tolerance = 0.1);
 
 private:
 	float m_ForeGroundValue;

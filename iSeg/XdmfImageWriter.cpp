@@ -11,6 +11,8 @@
 
 #include "XdmfImageWriter.h"
 
+#include "Data/ScopedTimer.h"
+
 #include "Core/ColorLookupTable.h"
 #include "Core/HDF5Writer.h"
 
@@ -30,7 +32,6 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace std;
 using namespace iseg;
 
 XdmfImageWriter::XdmfImageWriter()
@@ -69,6 +70,8 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	if (lut == nullptr)
 		return 1;
 
+	ScopedTimer timer("WriteColorLookup");
+
 	QString qFileName(this->FileName);
 	QFileInfo fileInfo(qFileName);
 	QString basename = fileInfo.completeBaseName();
@@ -87,7 +90,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 		fname = basename + ".h5";
 	if (!writer.open(fname.toAscii().data(), "append"))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR("opening " << fname.toAscii().data());
 		return false;
 	}
 	writer.compression = Compression;
@@ -100,13 +103,13 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 	int version = 3;
 	if (!writer.write(&version, dim_scalar, "/Lut/version"))
 	{
-		cerr << "error writing LUT version" << endl;
+		ISEG_ERROR_MSG("writing LUT version");
 		return false;
 	}
-	int num_colors = lut->NumberOfColors();
+	int num_colors = static_cast<int>(lut->NumberOfColors());
 	if (!writer.write(&num_colors, dim_scalar, "/Lut/size"))
 	{
-		cerr << "error writing LUT size" << endl;
+		ISEG_ERROR_MSG("writing LUT size");
 		return false;
 	}
 
@@ -120,7 +123,7 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 
 	if (!writer.write(colors.data(), dim_rgb, "/Lut/colors"))
 	{
-		cerr << "error writing LUT size" << endl;
+		ISEG_ERROR_MSG("writing LUT size");
 		return false;
 	}
 
@@ -144,28 +147,20 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 	// save working directory
 	QDir oldcwd = QDir::current();
-	cerr << "storing current folder " << oldcwd.absolutePath().toAscii().data()
-			 << endl;
 
 	std::string abc(fileInfo.absolutePath().toAscii().data());
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
-	cerr << "changing current folder to "
-			 << fileInfo.absolutePath().toAscii().data() << endl;
 
 	const size_t N = (size_t)width * (size_t)height * (size_t)nrslices;
 
-	vector<HDF5Writer::size_type> dims(3);
+	std::vector<HDF5Writer::size_type> dims(3);
 	dims[0] = width;
 	dims[1] = height;
 	dims[2] = nrslices;
 
-	cerr << "XdmfImageReader::InternalWrite()" << endl;
-	cerr << "Width = " << width << endl;
-	cerr << "Height = " << height << endl;
-	cerr << "NumberOfSlices = " << nrslices << endl;
-	cerr << "Total size = " << N << endl;
+	ISEG_INFO("Writing " << width << " x " << height << " x " << nrslices);
 
 	HDF5Writer writer;
 	writer.chunkSize.resize(1, width * height);
@@ -176,7 +171,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		fname = basename + ".h5";
 	if (!writer.open(fname.toAscii().data()))
 	{
-		cerr << "error opening " << fname.toAscii().data() << endl;
+		ISEG_ERROR("opening " << fname.toStdString());
 	}
 	writer.compression = compression;
 
@@ -184,28 +179,26 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 	if (this->CopyToContiguousMemory)
 	{
 		// Source
-		vector<float> bufferFloat;
+		std::vector<float> bufferFloat;
 		try
 		{
 			// vector throws a length_error if resized above max_size
-			cerr << "N = " << N
-					 << ", bufferFloat.max_size() = " << bufferFloat.max_size()
-					 << endl;
+			ISEG_INFO("N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size());
 			bufferFloat.resize(N);
 		}
-		catch (length_error& le)
+		catch (std::exception& le)
 		{
-			cerr << "bufferFloat length error: " << le.what() << endl;
+			ISEG_ERROR_MSG(le.what());
 			return 0;
 		}
 
 		size_t n = 0;
-		for (int k = 0; k < nrslices; k++)
+		for (unsigned k = 0; k < nrslices; k++)
 		{
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
+			for (unsigned j = 0; j < height; j++)
 			{
-				for (int i = 0; i < width; i++, pos++)
+				for (unsigned i = 0; i < width; i++, pos++)
 				{
 					bufferFloat[n] = slicesbmp[k][pos];
 					n++;
@@ -215,17 +208,17 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferFloat, "Source"))
 		{
-			cerr << "error writing Source" << endl;
+			ISEG_ERROR_MSG("writing Source");
 		}
 
 		// Target
 		n = 0;
-		for (int k = 0; k < nrslices; k++)
+		for (unsigned k = 0; k < nrslices; k++)
 		{
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
+			for (unsigned j = 0; j < height; j++)
 			{
-				for (int i = 0; i < width; i++, pos++)
+				for (unsigned i = 0; i < width; i++, pos++)
 				{
 					bufferFloat[n] = sliceswork[k][pos];
 					n++;
@@ -235,33 +228,32 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferFloat, "Target"))
 		{
-			cerr << "error writing Target" << endl;
+			ISEG_ERROR_MSG("writing Target");
 		}
 
 		bufferFloat.clear();
 
 		// Tissue
-		vector<tissues_size_t> bufferTissuesSizeT;
+		std::vector<tissues_size_t> bufferTissuesSizeT;
 		try
 		{
 			// vector throws a length_error if resized above max_size
-			cerr << "N = " << N << ", bufferTissuesSizeT.max_size() = "
-					 << bufferTissuesSizeT.max_size() << endl;
+			ISEG_INFO("N = " << N << ", bufferTissuesSizeT.max_size() = " << bufferTissuesSizeT.max_size());
 			bufferTissuesSizeT.resize(N);
 		}
-		catch (length_error& le)
+		catch (std::exception& le)
 		{
-			cerr << "bufferTissuesSizeT length error: " << le.what() << endl;
+			ISEG_ERROR_MSG(le.what());
 			return 0;
 		}
 
 		n = 0;
-		for (int k = 0; k < nrslices; k++)
+		for (unsigned k = 0; k < nrslices; k++)
 		{
 			size_t pos = 0;
-			for (int j = 0; j < height; j++)
+			for (unsigned j = 0; j < height; j++)
 			{
-				for (int i = 0; i < width; i++, pos++)
+				for (unsigned i = 0; i < width; i++, pos++)
 				{
 					bufferTissuesSizeT[n] = slicestissue[k][pos];
 					n++;
@@ -271,22 +263,25 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 		if (!writer.write(bufferTissuesSizeT, "Tissue"))
 		{
-			cerr << "error writing Tissue" << endl;
+			ISEG_ERROR_MSG("writing Tissue");
 		}
 	}
 	else // write slice-by-slice
 	{
+		ScopedTimer timer("Write Source");
 		if (!writer.write(slicesbmp, nrslices, dims[0] * dims[1], "Source"))
 		{
-			cerr << "error writing Source" << endl;
+			ISEG_ERROR_MSG("writing Source");
 		}
+		timer.new_scope("Write Target");
 		if (!writer.write(sliceswork, nrslices, dims[0] * dims[1], "Target"))
 		{
-			cerr << "error writing Target" << endl;
+			ISEG_ERROR_MSG("writing Target");
 		}
+		timer.new_scope("Write Tissue");
 		if (!writer.write(slicestissue, nrslices, dims[0] * dims[1], "Tissue"))
 		{
-			cerr << "error writing Tissue" << endl;
+			ISEG_ERROR_MSG("writing Tissue");
 		}
 	}
 
@@ -310,21 +305,21 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		shape[0] = 3;
 		if (!writer.write(dimension, shape, std::string("dimensions")))
 		{
-			cerr << "error writing dimensions" << endl;
+			ISEG_ERROR_MSG("writing dimensions");
 		}
 		if (!writer.write(offset, shape, std::string("offset")))
 		{
-			cerr << "error writing offset" << endl;
+			ISEG_ERROR_MSG("writing offset");
 		}
 		if (!writer.write(pixelsize, shape, std::string("pixelsize")))
 		{
-			cerr << "error writing pixelsize" << endl;
+			ISEG_ERROR_MSG("writing pixelsize");
 		}
 		shape[0] = 6;
 
 		if (!writer.write(dc, shape, std::string("dc")))
 		{
-			cerr << "error writing dc" << endl;
+			ISEG_ERROR_MSG("writing dc");
 		}
 
 		float rotation[9];
@@ -337,7 +332,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		shape[0] = 9;
 		if (!writer.write(rotation, shape, std::string("rotation")))
 		{
-			cerr << "error writing rotation" << endl;
+			ISEG_ERROR_MSG("writing rotation");
 		}
 	}
 
@@ -454,7 +449,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 			dataitem.setAttribute("NumberType", "UInt");
 			dataitem.setAttribute("Precision", 4);
 			break;
-		default: cerr << "tissues_size_t not supported!" << endl; return 0;
+		default: std::cerr << "tissues_size_t not supported!" << endl; return 0;
 		}
 		dataitem.setAttribute("Format", "HDF");
 		dataitem.setAttribute("Dimensions", qdims.toAscii().data());
@@ -474,8 +469,6 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
-	cerr << "restored current folder "
-			 << QDir::current().absolutePath().toAscii().data() << endl;
 
 	return 1;
 }

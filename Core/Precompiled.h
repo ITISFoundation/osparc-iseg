@@ -9,6 +9,8 @@
  */
 #pragma once
 
+#include "Data/Logger.h"
+
 #include <boost/filesystem.hpp>
 
 #include <itkImage.h>

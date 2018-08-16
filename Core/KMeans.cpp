@@ -321,7 +321,7 @@ bool KMeans::get_centers_from_file(const std::string& fileName, float*& centers,
 	initFile = fopen(fileName.c_str(), "r");
 	if (initFile == nullptr)
 	{
-		perror("Error opening file");
+		perror("ERROR: opening file");
 		return false;
 	}
 	else

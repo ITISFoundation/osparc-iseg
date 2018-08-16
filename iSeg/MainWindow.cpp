@@ -75,7 +75,6 @@
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
-using namespace std;
 using namespace iseg;
 
 namespace {
@@ -176,8 +175,8 @@ QString TruncateFileName(QString str)
 	return str;
 }
 
-bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
-		vector<tissues_size_t>& news)
+bool read_grouptissues(const char* filename, std::vector<tissues_size_t>& olds,
+		std::vector<tissues_size_t>& news)
 {
 	FILE* fp;
 	if ((fp = fopen(filename, "r")) == nullptr)
@@ -198,8 +197,8 @@ bool read_grouptissues(const char* filename, vector<tissues_size_t>& olds,
 	}
 }
 
-bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
-		vector<tissues_size_t>& news,
+bool read_grouptissuescapped(const char* filename, std::vector<tissues_size_t>& olds,
+		std::vector<tissues_size_t>& news,
 		bool fail_on_unknown_tissue)
 {
 	FILE* fp;
@@ -263,9 +262,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 			{
 				ok = false;
 				if (type1 == 0 || type1 > tissueCount)
-					std::cerr << "old: " << name1 << " not in tissue list\n";
+					ISEG_WARNING("old: " << name1 << " not in tissue list");
 				if (type2 == 0 || type2 > tissueCount)
-					std::cerr << "new: " << name2 << " not in tissue list\n";
+					ISEG_WARNING("new: " << name2 << " not in tissue list");
 			}
 			memset(name1, 0, 1000);
 			memset(name2, 0, 1000);
@@ -283,9 +282,9 @@ bool read_grouptissuescapped(const char* filename, vector<tissues_size_t>& olds,
 				{
 					ok = false;
 					if (type1 == 0 || type1 > tissueCount)
-						std::cerr << "old: " << name1 << " not in tissue list\n";
+						ISEG_WARNING("old: " << name1 << " not in tissue list");
 					if (type2 == 0 || type2 > tissueCount)
-						std::cerr << "new: " << name2 << " not in tissue list\n";
+						ISEG_WARNING("new: " << name2 << " not in tissue list");
 				}
 
 				memset(name1, 0, 1000);
@@ -321,7 +320,7 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 		else
 		{
 			ok = false;
-			std::cerr << name << " not in tissue list\n";
+			ISEG_WARNING(name << " not in tissue list");
 		}
 	}
 
@@ -717,7 +716,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	for (size_t i = 0; i < tabwidgets.size(); i++)
 	{
 		qs = tabwidgets[i]->sizeHint();
-		height_max = max(height_max, qs.height());
+		height_max = std::max(height_max, qs.height());
 	}
 	height_max += 65;
 
@@ -1607,13 +1606,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
-	QObject::connect(olc_widget,
-			SIGNAL(signal_request_selected_tissue_TS()), this,
-			SLOT(provide_selected_tissue_TS()));
-	QObject::connect(olc_widget,
-			SIGNAL(signal_request_selected_tissue_BG()), this,
-			SLOT(provide_selected_tissue_BG()));
-
 	QObject::connect(scale_dialog,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
@@ -1690,13 +1682,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(le_brightnesswork_val, SIGNAL(editingFinished()), this,
 			SLOT(le_brightnesswork_val_edited()));
 
-	QObject::connect(surface_viewer,
-			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(surface_viewer,
-			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
 	// \todo BL add generic connections here, e.g. begin/end_datachange
 
 	m_widget_signal_mapper = new QSignalMapper(this);
@@ -1710,6 +1695,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	}
 	for (auto widget : tabwidgets)
 	{
+		assert(widget);
 		QObject::connect(widget,
 				SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 				SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
@@ -1786,56 +1772,26 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 		if (xsliceshower != nullptr)
 		{
 			xsliceshower->close();
-			QObject::disconnect(bmp_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					xsliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(work_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					xsliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(xsliceshower, SIGNAL(slice_changed(int)), this,
-					SLOT(xshower_slicechanged()));
-			QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), xsliceshower,
-					SLOT(set_zoom(double)));
-			QObject::disconnect(xsliceshower, SIGNAL(hasbeenclosed()), this,
-					SLOT(xslice_closed()));
 			delete xsliceshower;
 		}
 		if (ysliceshower != nullptr)
 		{
 			ysliceshower->close();
-			QObject::disconnect(bmp_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					ysliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(work_show,
-					SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-					ysliceshower, SLOT(set_scale(float, float, bool)));
-			QObject::disconnect(ysliceshower, SIGNAL(slice_changed(int)), this,
-					SLOT(yshower_slicechanged()));
-			QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), ysliceshower,
-					SLOT(set_zoom(double)));
-			QObject::disconnect(ysliceshower, SIGNAL(hasbeenclosed()), this,
-					SLOT(yslice_closed()));
 			delete ysliceshower;
 		}
 		if (surface_viewer != nullptr)
 		{
 			surface_viewer->close();
-			QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this,
-					SLOT(surface_viewer_closed()));
 			delete surface_viewer;
 		}
 		if (VV3D != nullptr)
 		{
 			VV3D->close();
-			QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
-					SLOT(VV3D_closed()));
 			delete VV3D;
 		}
 		if (VV3Dbmp != nullptr)
 		{
 			VV3Dbmp->close();
-			QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-					SLOT(VV3Dbmp_closed()));
 			delete VV3Dbmp;
 		}
 
@@ -1884,39 +1840,6 @@ bool MainWindow::maybeSafe()
 }
 
 bool MainWindow::modified() { return m_Modified; }
-
-void MainWindow::provide_selected_tissue_BG()
-{
-	if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_current_type()))
-	{
-		QMessageBox::warning(this, "iSeg",
-				"Error: Unable to get " +
-						tissueTreeWidget->get_current_name() +
-						" because it is locked.\nPlease, unlock it.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
-	}
-
-	olc_widget->Select_selected_tissue_BG(
-			tissueTreeWidget->get_current_name(),
-			tissueTreeWidget->get_current_type());
-}
-void MainWindow::provide_selected_tissue_TS()
-{
-	if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_current_type()))
-	{
-		QMessageBox::warning(this, "iSeg",
-				"Error: Unable to get " +
-						tissueTreeWidget->get_current_name() +
-						" because it is locked.\nPlease, unlock it.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
-	}
-
-	olc_widget->Select_selected_tissue_TS(
-			tissueTreeWidget->get_current_name(),
-			tissueTreeWidget->get_current_type());
-}
 
 void MainWindow::execute_bmp2work()
 {
@@ -2346,7 +2269,7 @@ void MainWindow::le_contrastbmp_val_edited()
 {
 	// Clamp to range and round to precision
 	float contrast =
-			max(0.01f, min(le_contrastbmp_val->text().toFloat(), 100.0f));
+			std::max(0.01f, std::min(le_contrastbmp_val->text().toFloat(), 100.0f));
 	le_contrastbmp_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
@@ -2364,7 +2287,7 @@ void MainWindow::le_contrastwork_val_edited()
 {
 	// Clamp to range and round to precision
 	float contrast =
-			max(0.01f, min(le_contrastwork_val->text().toFloat(), 100.0f));
+			std::max(0.01f, std::min(le_contrastwork_val->text().toFloat(), 100.0f));
 	le_contrastwork_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
@@ -2381,9 +2304,7 @@ void MainWindow::le_contrastwork_val_edited()
 void MainWindow::le_brightnessbmp_val_edited()
 {
 	// Clamp to range and round to precision
-	int brightness = (int)max(
-			-50.0f,
-			min(std::floor(le_brightnessbmp_val->text().toFloat() + 0.5f), 50.0f));
+	int brightness = (int)std::max(-50.0f, std::min(std::floor(le_brightnessbmp_val->text().toFloat() + 0.5f), 50.0f));
 	le_brightnessbmp_val->setText(QString("%1").arg(brightness, 3));
 
 	// Update slider
@@ -2396,9 +2317,7 @@ void MainWindow::le_brightnessbmp_val_edited()
 void MainWindow::le_brightnesswork_val_edited()
 {
 	// Clamp to range and round to precision
-	int brightness = (int)max(
-			-50.0f,
-			min(std::floor(le_brightnesswork_val->text().toFloat() + 0.5f), 50.0f));
+	int brightness = (int)std::max(-50.0f, std::min(std::floor(le_brightnesswork_val->text().toFloat() + 0.5f), 50.0f));
 	le_brightnesswork_val->setText(QString("%1").arg(brightness, 3));
 
 	// Update slider
@@ -2512,8 +2431,6 @@ void MainWindow::execute_loadbmp()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-
-	return;
 }
 
 void MainWindow::execute_loadpng()
@@ -2566,9 +2483,9 @@ void MainWindow::execute_loadjpg()
 
 	if (!files.empty())
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
+		std::vector<int> vi;
 		vi.clear();
 
 		short nrelem = files.size();
@@ -2577,23 +2494,8 @@ void MainWindow::execute_loadjpg()
 		{
 			vi.push_back(jpgimgnr(&files[i]));
 		}
-		/*
-		int dummy;
-		QString dummys;
-		for(short k=0;k<nrelem-1;k++){
-			for(short j=nrelem-1;j>k;j--){
-				if(vi[j]>vi[j-1]){
-					dummy=vi[j];
-					vi[j]=vi[j-1];
-					vi[j-1]=dummy;
-					dummys=files[j];
-					files[j]=files[j-1];
-					files[j-1]=dummys;
-				}
-			}
-		}*/
 
-		vector<const char*> vfilenames;
+		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
@@ -2618,16 +2520,13 @@ void MainWindow::execute_loadjpg()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-
-	return;
 }
 
 void MainWindow::execute_loaddicom()
 {
 	maybeSafe();
 
-	QStringList files =
-		QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
 																		 "All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
@@ -2662,7 +2561,6 @@ void MainWindow::execute_loaddicom()
 
 		EnableActionsAfterPrjLoaded(true);
 	}
-	return;
 }
 
 void MainWindow::execute_reloaddicom()
@@ -2698,8 +2596,6 @@ void MainWindow::execute_reloaddicom()
 
 		reset_brightnesscontrast();
 	}
-
-	return;
 }
 
 void MainWindow::execute_loadraw()
@@ -2863,9 +2759,9 @@ void MainWindow::execute_reloadbmp()
 			(unsigned short)files.size() ==
 					(handler3D->end_slice() - handler3D->start_slice()))
 	{
-		sort(files.begin(), files.end());
+		std::sort(files.begin(), files.end());
 
-		vector<int> vi;
+		std::vector<int> vi;
 		vi.clear();
 
 		short nrelem = files.size();
@@ -2874,23 +2770,8 @@ void MainWindow::execute_reloadbmp()
 		{
 			vi.push_back(bmpimgnr(&files[i]));
 		}
-		/*
-		int dummy;
-		QString dummys;
-		for(short k=0;k<nrelem-1;k++){
-			for(short j=nrelem-1;j>k;j--){
-				if(vi[j]>vi[j-1]){
-					dummy=vi[j];
-					vi[j]=vi[j-1];
-					vi[j-1]=dummy;
-					dummys=files[j];
-					files[j]=files[j-1];
-					files[j-1]=dummys;
-				}
-			}
-		}*/
 
-		vector<const char*> vfilenames;
+		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
@@ -2925,8 +2806,6 @@ void MainWindow::execute_reloadbmp()
 					"You have to select the same number of slices.\n");
 		}
 	}
-
-	return;
 }
 
 void MainWindow::execute_reloadraw()
@@ -2971,8 +2850,6 @@ void MainWindow::execute_reloadavw()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadmhd()
@@ -2996,8 +2873,6 @@ void MainWindow::execute_reloadmhd()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadvtk()
@@ -3020,8 +2895,6 @@ void MainWindow::execute_reloadvtk()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_reloadnifti()
@@ -3046,8 +2919,6 @@ void MainWindow::execute_reloadnifti()
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
 }
 
 void MainWindow::execute_loadsurface()
@@ -3580,26 +3451,19 @@ void MainWindow::LoadSettings(const char* loadfilename)
 
 	if (loadProjVersion > 7)
 	{
-		cerr << "LoadSettings() : restoring values..." << endl;
-		QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT",
-				"iSeg");
+		ISEG_INFO_MSG("LoadSettings() : restoring values...");
+		QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT", "iSeg");
 		settings.beginGroup("MainWindow");
 		restoreGeometry(settings.value("geometry").toByteArray());
 		restoreState(settings.value("state").toByteArray());
-		this->handler3D->SetNumberOfUndoSteps(
-				settings.value("NumberOfUndoSteps", 50).toUInt());
-		cerr << "NumberOfUndoSteps = " << this->handler3D->GetNumberOfUndoSteps()
-				 << endl;
-		this->handler3D->SetNumberOfUndoArrays(
-				settings.value("NumberOfUndoArrays", 20).toUInt());
-		cerr << "NumberOfUndoArrays = " << this->handler3D->GetNumberOfUndoArrays()
-				 << endl;
+		this->handler3D->SetNumberOfUndoSteps(settings.value("NumberOfUndoSteps", 50).toUInt());
+		ISEG_INFO("NumberOfUndoSteps = " << this->handler3D->GetNumberOfUndoSteps());
+		this->handler3D->SetNumberOfUndoArrays(settings.value("NumberOfUndoArrays", 20).toUInt());
+		ISEG_INFO("NumberOfUndoArrays = " << this->handler3D->GetNumberOfUndoArrays());
 		this->handler3D->SetCompression(settings.value("Compression", 0).toInt());
-		cerr << "Compression = " << this->handler3D->GetCompression() << endl;
-		this->handler3D->SetContiguousMemory(
-				settings.value("ContiguousMemory", true).toBool());
-		cerr << "ContiguousMemory = " << this->handler3D->GetContiguousMemory()
-				 << endl;
+		ISEG_INFO("Compression = " << this->handler3D->GetCompression());
+		this->handler3D->SetContiguousMemory(settings.value("ContiguousMemory", true).toBool());
+		ISEG_INFO("ContiguousMemory = " << this->handler3D->GetContiguousMemory());
 		settings.endGroup();
 
 		if (this->handler3D->return_nrundo() == 0)
@@ -3690,7 +3554,7 @@ void MainWindow::execute_saveproj()
 			else
 				tempFileName = tempFileName + "Temp.prj";
 
-			string pjFN = m_saveprojfilename.toStdString();
+			std::string pjFN = m_saveprojfilename.toStdString();
 
 			QString sourceFileNameWithoutExtension;
 			afterDot = m_saveprojfilename.lastIndexOf('.');
@@ -3846,8 +3710,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 	if (!loadfilename.isEmpty())
 	{
 		m_saveprojfilename = loadfilename;
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
-							 QString(" - ") + TruncateFileName(loadfilename));
+		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
 		AddLoadProj(m_saveprojfilename);
 		int tissuesVersion = 0;
 		fp = handler3D->LoadProject(loadfilename.ascii(), tissuesVersion);
@@ -3859,13 +3722,8 @@ void MainWindow::loadproj(const QString& loadfilename)
 	emit end_datachange(this, iseg::ClearUndo);
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
-	//if(xsliceshower!=nullptr) xsliceshower->thickness_changed(handler3D->get_slicethickness());
-	//if(ysliceshower!=nullptr) ysliceshower->thickness_changed(handler3D->get_slicethickness());
 	pixelsize_changed();
-	/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(handler3D->get_pixelsize());
-	if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(handler3D->get_pixelsize());
-	bmp_show->pixelsize_changed(handler3D->get_pixelsize());
-	work_show->pixelsize_changed(handler3D->get_pixelsize());*/
+
 	slicethickness_changed1();
 
 	if (stillopen)
@@ -3874,8 +3732,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 		if (fread(&combinedVersion, sizeof(unsigned short), 1, fp) > 0)
 		{
 			int loadProjVersion, tissuesVersion;
-			iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion,
-					tissuesVersion);
+			iseg::ExtractTissuesVersion((int)combinedVersion, loadProjVersion, tissuesVersion);
 			/*for(size_t i=0;i<tabwidgets.size();i++){
 				fp=((QWidget1 *)(tabwidgets[i]))->LoadParams(fp,version);
 			}*/
@@ -3908,15 +3765,12 @@ void MainWindow::loadproj(const QString& loadfilename)
 			fp = load_notes(fp, loadProjVersion);
 		}
 
-		//		le_slicethick->setText(QString::number(handler3D->get_slicethickness()));
-
 		fclose(fp);
 	}
 
 	reset_brightnesscontrast();
 
 	EnableActionsAfterPrjLoaded(true);
-	//m_S4Lcommunicationfilename=QString("F:\\applications\\bifurcation\\bifurcation2.h5");xxxa
 }
 
 void MainWindow::loadS4Llink(const QString& loadfilename)
@@ -4625,7 +4479,6 @@ void MainWindow::start_surfaceviewer(int mode)
 	if (surface_viewer != nullptr)
 	{
 		surface_viewer->close();
-		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 		delete surface_viewer;
 	}
 
@@ -4638,6 +4491,13 @@ void MainWindow::start_surfaceviewer(int mode)
 	surface_viewer = new SurfaceViewerWidget(handler3D, static_cast<SurfaceViewerWidget::eInputType>(mode), 0);
 	QObject::connect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 
+	QObject::connect(surface_viewer,
+			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
+			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	QObject::connect(surface_viewer,
+			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+			
 	surface_viewer->show();
 	surface_viewer->raise();
 
@@ -4697,8 +4557,7 @@ void MainWindow::execute_3Dvolumeviewerbmp()
 	if (VV3Dbmp == nullptr)
 	{
 		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, 0);
-		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3Dbmp_closed()));
+		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(VV3Dbmp_closed()));
 	}
 
 	VV3Dbmp->show();
@@ -4758,19 +4617,6 @@ void MainWindow::xslice_closed()
 {
 	if (xsliceshower != nullptr)
 	{
-		QObject::disconnect(bmp_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				xsliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(work_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				xsliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(xsliceshower, SIGNAL(slice_changed(int)), this,
-				SLOT(xshower_slicechanged()));
-		QObject::disconnect(xsliceshower, SIGNAL(hasbeenclosed()), this,
-				SLOT(xslice_closed()));
-		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), xsliceshower,
-				SLOT(set_zoom(double)));
-
 		if (ysliceshower != nullptr)
 		{
 			ysliceshower->xyexists_changed(false);
@@ -4787,19 +4633,6 @@ void MainWindow::yslice_closed()
 {
 	if (ysliceshower != nullptr)
 	{
-		QObject::disconnect(bmp_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				ysliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(work_show,
-				SIGNAL(scaleoffsetfactor_changed(float, float, bool)),
-				ysliceshower, SLOT(set_scale(float, float, bool)));
-		QObject::disconnect(ysliceshower, SIGNAL(slice_changed(int)), this,
-				SLOT(yshower_slicechanged()));
-		QObject::disconnect(ysliceshower, SIGNAL(hasbeenclosed()), this,
-				SLOT(yslice_closed()));
-		QObject::disconnect(zoom_widget, SIGNAL(set_zoom(double)), ysliceshower,
-				SLOT(set_zoom(double)));
-
 		if (xsliceshower != nullptr)
 		{
 			xsliceshower->xyexists_changed(false);
@@ -4816,7 +4649,6 @@ void MainWindow::surface_viewer_closed()
 {
 	if (surface_viewer != nullptr)
 	{
-		QObject::disconnect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 		delete surface_viewer;
 		surface_viewer = nullptr;
 	}
@@ -4826,8 +4658,6 @@ void MainWindow::VV3D_closed()
 {
 	if (VV3D != nullptr)
 	{
-		QObject::disconnect(VV3D, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3D_closed()));
 		delete VV3D;
 		VV3D = nullptr;
 	}
@@ -4837,8 +4667,6 @@ void MainWindow::VV3Dbmp_closed()
 {
 	if (VV3Dbmp != nullptr)
 	{
-		QObject::disconnect(VV3Dbmp, SIGNAL(hasbeenclosed()), this,
-				SLOT(VV3Dbmp_closed()));
 		delete VV3Dbmp;
 		VV3Dbmp = nullptr;
 	}
@@ -5406,7 +5234,7 @@ void MainWindow::execute_removetissues()
 
 void MainWindow::execute_grouptissues()
 {
-	vector<tissues_size_t> olds, news;
+	std::vector<tissues_size_t> olds, news;
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
@@ -5439,8 +5267,7 @@ void MainWindow::execute_grouptissues()
 void MainWindow::execute_about()
 {
 	std::ostringstream ss;
-	ss << "\n\niSeg\n"
-		 << std::string(xstr(ISEG_DESCRIPTION));
+	ss << "\n\niSeg\n"  << std::string(xstr(ISEG_DESCRIPTION));
 	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 
@@ -5666,14 +5493,6 @@ void MainWindow::addhold_tissue_clicked(Point p)
 	emit end_datachange(this);
 }
 
-/*void MainWindow::add_tissue_connected_clicked(Point p)
-{
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-	pb_addconn->setDown(false);
-	handler3D->add2tissue_connected((tissues_size_t)tissueTreeWidget->currentItem()+1,p);
-	emit tissues_changed();
-}*/
-
 void MainWindow::subtract_tissue_clicked(Point p)
 {
 	QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
@@ -5711,20 +5530,8 @@ void MainWindow::subtracthold_tissue_clicked(Point p)
 	emit end_datachange(this);
 }
 
-/*void MainWindow::add_tissue_3D_clicked(Point p)
-{
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-	pb_add3D->setDown(false);
-	handler3D->add2tissueall((tissues_size_t)tissueTreeWidget->currentItem()+1,p);
-	emit tissues_changed();
-}*/
-
 void MainWindow::add_tissue_pushed()
 {
-	/*	if(pb_addconn->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-		pb_addconn->setDown(false);
-	}*/
 	if (pb_sub->isOn())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
@@ -6003,7 +5810,7 @@ void MainWindow::do_tissue2work()
 
 void MainWindow::do_work2tissue_grouped()
 {
-	vector<tissues_size_t> olds, news;
+	std::vector<tissues_size_t> olds, news;
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
@@ -6394,15 +6201,16 @@ void MainWindow::tissue2work()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	tissues_size_t nr = tissueTreeWidget->get_current_type();
+	std::vector<tissues_size_t> tissue_list;
+	tissue_list.push_back(tissueTreeWidget->get_current_type());
 
 	if (tissue3Dopt->isChecked())
 	{
-		handler3D->tissue2work3D(nr);
+		handler3D->selectedtissue2work3D(tissue_list);
 	}
 	else
 	{
-		handler3D->tissue2work(nr);
+		handler3D->selectedtissue2work(tissue_list);
 	}
 
 	emit end_datachange(this);
@@ -6416,22 +6224,28 @@ void MainWindow::selectedtissue2work()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	handler3D->clear_work();
-	QList<QTreeWidgetItem*> list;
-	list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
+	handler3D->clear_work(); // resets work to 0.0f, then adds each tissue one-by-one
 
+	std::vector<tissues_size_t> selected_tissues;
+	for (auto item: tissueTreeWidget->selectedItems())
+	{
+		selected_tissues.push_back(tissueTreeWidget->get_type(item));
+	}
+	
+	try
+	{
 		if (tissue3Dopt->isChecked())
 		{
-			handler3D->selectedtissue2work3D(currTissueType);
+			handler3D->selectedtissue2work3D(selected_tissues);
 		}
 		else
 		{
-			handler3D->selectedtissue2work(currTissueType);
+			handler3D->selectedtissue2work(selected_tissues);
 		}
+	}
+	catch(std::exception&)
+	{
+		ISEG_ERROR_MSG("could not get tissue. Something might be wrong with tissue list.");
 	}
 	emit end_datachange(this);
 }
@@ -7079,7 +6893,7 @@ void MainWindow::tab_changed(QWidget* qw)
 {
 	if (qw != tab_old)
 	{
-		std::cerr << "Starting widget: " << qw->metaObject()->className() << std::endl;
+		ISEG_INFO("Starting widget: " << qw->metaObject()->className());
 
 		// disconnect signal-slots of previous widget
 
@@ -8127,6 +7941,6 @@ void MainWindow::execute_savecolorlookup()
 	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
 	{
 		QMessageBox::warning(this, "iSeg", 
-			"Error occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+			"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }

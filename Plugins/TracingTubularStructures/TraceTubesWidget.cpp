@@ -11,8 +11,8 @@
 
 #include "itkWeightedDijkstraImageFilter.h"
 
+#include "Data/LogApi.h"
 #include "Data/BrushInteraction.h"
-#define ENABLE_DUMP_IMAGE
 #include "Data/ItkUtils.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
@@ -266,7 +266,7 @@ void TraceTubesWidget::on_mouse_released(Point x)
 	}
 	else
 	{
-		std::cerr << "WARNING: no points selected, because slice is not in active slices\n";
+		iseg::Log::warning("no points selected, because slice is not in active slices");
 	}
 }
 

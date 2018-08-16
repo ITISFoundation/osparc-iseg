@@ -15,7 +15,7 @@
 #include "XdmfImageReader.h"
 
 #include "Data/Point.h"
-#include "Data/ItkUtils.h" // for ScopedTimer
+#include "Data/ScopedTimer.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/ImageReader.h"
@@ -1114,7 +1114,7 @@ void LoaderColorImages::load_quantize()
 		else
 		{
 			QMessageBox::warning(this, "iSeg",
-				"Error occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+				"ERROR: occurred while reading color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 		}
 	}
 
