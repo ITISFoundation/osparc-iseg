@@ -9217,227 +9217,6 @@ void SlicesHandler::add_skin3D(int ix, int iy, int iz, float setto)
 			}
 		}
 	}
-
-	// I leave the old implementation just in case there is something that is want to be recovered
-	/*
-	float set_to=(float)123E10;
-	for(unsigned short z=startslice;z<endslice;z++) {
-		image_slices[z].flood_exterior(set_to);
-	}
-
-	//Point p;
-	//unsigned position;
-	std::vector<posit> s;
-	posit p1;
-
-//	p1.pxy=position;
-	p1.pz=activeslice;
-
-	float *work1;
-	float *work2;
-	for(unsigned short z=startslice;z+1<endslice;z++) {
-		work1=image_slices[z].return_work();
-		work2=image_slices[z+1].return_work();
-		for(unsigned long i=0;i<area;i++) {
-			if(work1[i]==0&&work2[i]==set_to) {
-				work1[i]=set_to;
-				p1.pxy=i;
-				p1.pz=z;
-				s.push_back(p1);
-			}
-		}
-	}
-	for(unsigned short z=endslice-1;z>startslice;z--) {
-		work1=image_slices[z].return_work();
-		work2=image_slices[z-1].return_work();
-		for(unsigned long i=0;i<area;i++) {
-			if(work1[i]==0&&work2[i]==set_to) {
-				work1[i]=set_to;
-				p1.pxy=i;
-				p1.pz=z;
-				s.push_back(p1);
-			}
-		}
-	}
-
-	posit i,j;
-	float *work;
-
-	while(!s.empty()){
-		i=s.back();
-		s.pop_back();
-
-		work=image_slices[i.pz].return_work();
-		if(i.pxy%width!=0&&work[i.pxy-1]==0) {
-			work[i.pxy-1]=set_to; 
-			j.pxy=i.pxy-1;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if((i.pxy+1)%width!=0&&work[i.pxy+1]==0) {
-			work[i.pxy+1]=set_to; 
-			j.pxy=i.pxy+1;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pxy>=width&&work[i.pxy-width]==0) {
-			work[i.pxy-width]=set_to; 
-			j.pxy=i.pxy-width;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pxy<area-width&&work[i.pxy+width]==0) {
-			work[i.pxy+width]=set_to; 
-			j.pxy=i.pxy+width;
-			j.pz=i.pz;
-			s.push_back(j);
-		}
-		if(i.pz>startslice){
-			work=image_slices[i.pz-1].return_work();
-			if(work[i.pxy]==0) {
-				work[i.pxy]=set_to; 
-				j.pxy=i.pxy;
-				j.pz=i.pz-1;
-				s.push_back(j);
-			}
-		}
-		if(i.pz+1<endslice){
-			work=image_slices[i.pz+1].return_work();
-			if(work[i.pxy]==0) {
-				work[i.pxy]=set_to; 
-				j.pxy=i.pxy;
-				j.pz=i.pz+1;
-				s.push_back(j);
-			}
-		}
-	}
-
-	unsigned short x,y;
-	unsigned long pos;
-	unsigned short i1;
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-
-		for(y=0;y<height;y++){
-			pos=y*width;
-			i1=0;
-			while(pos<(unsigned long)(y+1)*width){
-				if(work[pos]==set_to) i1=ix;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos++;
-			}
-		}
-
-		for(y=0;y<height;y++){
-			pos=(y+1)*width-1;
-			i1=0;
-			while(pos>(unsigned long)y*width){
-				if(work[pos]==set_to) i1=ix;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos--;
-			}
-			if(work[pos]==set_to) i1=ix;
-			else {
-				if(i1>0) {
-					work[pos]=setto;
-					i1--;
-				}
-			}
-		}
-
-		for(x=0;x<width;x++){
-			pos=x;
-			i1=0;
-			while(pos<area){
-				if(work[pos]==set_to) i1=iy;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos+=width;
-			}
-		}
-
-		for(x=0;x<width;x++){
-			pos=area+x-width;
-			i1=0;
-			while(pos>width){
-				if(work[pos]==set_to) i1=iy;
-				else {
-					if(i1>0) {
-						work[pos]=setto;
-						i1--;
-					}
-				}
-				pos-=width;
-			}
-			if(work[pos]==set_to) i1=iy;
-			else {
-				if(i1>0) {
-					work[pos]=setto;
-					i1--;
-				}
-			}
-		}
-	}
-
-	unsigned short *counter=(unsigned short*)malloc(sizeof(unsigned short)*area);
-	for(unsigned i1=0;i1<area;i1++) counter[i1]=0;
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-		for(pos=0;pos<area;pos++){
-			if(work[pos]==set_to) counter[pos]=iz;
-			else {
-				if(counter[pos]>0) {
-					work[pos]=setto;
-					counter[pos]--;
-				}
-			}
-		}
-	}
-	for(unsigned i1=0;i1<area;i1++) counter[i1]=0;
-	for(unsigned short z=endslice-1;z>startslice;z--){
-		work=image_slices[z].return_work();
-		for(pos=0;pos<area;pos++){
-			if(work[pos]==set_to) counter[pos]=iz;
-			else {
-				if(counter[pos]>0) {
-					work[pos]=setto;
-					counter[pos]--;
-				}
-			}
-		}
-	}
-	work=image_slices[startslice].return_work();
-	for(pos=0;pos<area;pos++){
-		if(work[pos]==set_to) counter[pos]=iz;
-		else {
-			if(counter[pos]>0) {
-				work[pos]=setto;
-				counter[pos]--;
-			}
-		}
-	}
-	free(counter);
-
-	for(unsigned short z=startslice;z<endslice;z++){
-		work=image_slices[z].return_work();
-		for(unsigned i1=0;i1<area;i1++) if(work[i1]==set_to) work[i1]=0;
-	}*/
-
-	return;
 }
 
 void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
@@ -9448,12 +9227,9 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 		_image_slices[z].flood_exterior(set_to);
 	}
 
-	//Point p;
-	//unsigned position;
 	std::vector<posit> s;
 	posit p1;
 
-	//	p1.pxy=position;
 	p1.pz = _activeslice;
 
 	float* work1;
@@ -9658,8 +9434,7 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 		}
 	}
 
-	unsigned short* counter =
-			(unsigned short*)malloc(sizeof(unsigned short) * _area);
+	unsigned short* counter = (unsigned short*)malloc(sizeof(unsigned short) * _area);
 	for (unsigned i1 = 0; i1 < _area; i1++)
 		counter[i1] = 0;
 	for (unsigned short z = _startslice; z < _endslice; z++)
@@ -9721,8 +9496,6 @@ void SlicesHandler::add_skin3D_outside(int ix, int iy, int iz, float setto)
 			if (work[i1] == set_to)
 				work[i1] = 0;
 	}
-
-	return;
 }
 
 void SlicesHandler::add_skin3D_outside2(int ix, int iy, int iz, float setto)
@@ -10172,8 +9945,7 @@ void SlicesHandler::add_skin3D_outside2(int ix, int iy, int iz, float setto)
 	return;
 }
 
-void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
-		tissues_size_t f)
+void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz, tissues_size_t f)
 {
 	tissues_size_t set_to = TISSUES_SIZE_MAX;
 	tissues_size_t set_to2 = TISSUES_SIZE_MAX - 1;
@@ -10182,12 +9954,9 @@ void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
 		_image_slices[z].flood_exteriortissue(_active_tissuelayer, set_to);
 	}
 
-	//Point p;
-	//unsigned position;
 	std::vector<posit> s;
 	posit p1;
 
-	//	p1.pxy=position;
 	p1.pz = _activeslice;
 
 	tissues_size_t* work1;
@@ -10616,8 +10385,6 @@ void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz,
 			if (work[i1] == set_to)
 				work[i1] = 0;
 	}
-
-	return;
 }
 
 float SlicesHandler::add_skin3D(int i1)
