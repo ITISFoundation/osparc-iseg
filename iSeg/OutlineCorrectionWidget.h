@@ -50,8 +50,8 @@ public:
 	std::string GetName() override { return std::string("OLC"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("olc.png"))); }
 
-	void Select_selected_tissue_BG(QString tissueName, tissues_size_t nr);
-	void Select_selected_tissue_TS(QString tissueName, tissues_size_t nr);
+	void select_background(QString tissueName, tissues_size_t nr);
+	void select_skin(QString tissueName, tissues_size_t nr);
 
 private:
 	void on_tissuenr_changed(int i) override;
@@ -117,7 +117,7 @@ private:
 	QLabel* txt_gapsize;
 	QSpinBox* sb_holesize;
 	QSpinBox* sb_gapsize;
-	QPushButton* pb_removeholes;
+	QPushButton* pb_execute;
 	QPushButton* pb_selectobj;
 	QCheckBox* allslices;
 	std::vector<Point> vpdyn;
@@ -136,16 +136,12 @@ private:
 
 	QLineEdit* object_value;
 
-signals:
-	void signal_request_selected_tissue_TS(); // TODO BL hack
-	void signal_request_selected_tissue_BG();
-
 public slots:
 	void pixmm_changed();
 	void workbits_changed();
 
-	void request_selected_tissue_BG();
-	void request_selected_tissue_TS();
+	void on_select_background();
+	void on_select_skin();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);

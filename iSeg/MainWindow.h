@@ -566,9 +566,6 @@ private slots:
 
 	void DatasetChanged();
 
-	void provide_selected_tissue_BG();
-	void provide_selected_tissue_TS();
-
 	void update_slice();
 
 	void EnableActionsAfterPrjLoaded(const bool enable);

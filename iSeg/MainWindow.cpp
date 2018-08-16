@@ -1606,13 +1606,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
-	QObject::connect(olc_widget,
-			SIGNAL(signal_request_selected_tissue_TS()), this,
-			SLOT(provide_selected_tissue_TS()));
-	QObject::connect(olc_widget,
-			SIGNAL(signal_request_selected_tissue_BG()), this,
-			SLOT(provide_selected_tissue_BG()));
-
 	QObject::connect(scale_dialog,
 			SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)), this,
 			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
@@ -1847,39 +1840,6 @@ bool MainWindow::maybeSafe()
 }
 
 bool MainWindow::modified() { return m_Modified; }
-
-void MainWindow::provide_selected_tissue_BG()
-{
-	if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_current_type()))
-	{
-		QMessageBox::warning(this, "iSeg",
-				"Error: Unable to get " +
-						tissueTreeWidget->get_current_name() +
-						" because it is locked.\nPlease, unlock it.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
-	}
-
-	olc_widget->Select_selected_tissue_BG(
-			tissueTreeWidget->get_current_name(),
-			tissueTreeWidget->get_current_type());
-}
-void MainWindow::provide_selected_tissue_TS()
-{
-	if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_current_type()))
-	{
-		QMessageBox::warning(this, "iSeg",
-				"Error: Unable to get " +
-						tissueTreeWidget->get_current_name() +
-						" because it is locked.\nPlease, unlock it.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
-	}
-
-	olc_widget->Select_selected_tissue_TS(
-			tissueTreeWidget->get_current_name(),
-			tissueTreeWidget->get_current_type());
-}
 
 void MainWindow::execute_bmp2work()
 {
