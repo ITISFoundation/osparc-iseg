@@ -201,7 +201,7 @@ bool ImageReader::getInfo(const char* filename, unsigned& width,
 
 		width = static_cast<unsigned>(imageIO->GetDimensions(0));
 		height = static_cast<unsigned>(imageIO->GetDimensions(1));
-		nrslices = static_cast<unsigned>(imageIO->GetDimensions(2));
+		nrslices = (N==3) ? static_cast<unsigned>(imageIO->GetDimensions(2)) : 1;
 
 		transform.setIdentity();
 		for (unsigned int r = 0; r < N; r++)
