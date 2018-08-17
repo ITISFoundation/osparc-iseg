@@ -9,6 +9,8 @@
 */
 #pragma once
 
+#include "Logger.h"
+
 #include "itkSliceContiguousImage.h"
 
 #include <itkImage.h>

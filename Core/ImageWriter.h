@@ -12,40 +12,33 @@
 #include "iSegCore.h"
 
 #include "Data/Types.h"
+#include "Data/Vec3.h"
 
 #include <string>
 #include <vector>
 
 namespace iseg {
 
-class Transform;
+class SliceHandlerInterface;
 
 /** \brief Image writer based on ITK image writer factory
 	*/
-class ISEG_CORE_API ImageWriter
+class ImageWriter
 {
 public:
 	ImageWriter(bool binary = true) : m_Binary(binary) {}
 
 	template<typename T>
-	bool writeVolume(const char* filename, const T** data, unsigned width,
-			unsigned height, unsigned nrslices, const float spacing[3],
-			const Transform& transform);
+	bool writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
 
 private:
 	bool m_Binary;
 };
 
 iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<float>(
-		const char* filename, const float** data, unsigned width, unsigned height,
-		unsigned nrslices, const float spacing[3], const Transform& transform);
+	const std::string& filename, const std::vector<float*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
 
-iSegCore_TEMPLATE template ISEG_CORE_API bool
-		ImageWriter::writeVolume<tissues_size_t>(const char* filename,
-				const tissues_size_t** data,
-				unsigned width, unsigned height,
-				unsigned nrslices,
-				const float spacing[3],
-				const Transform& transform);
+iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<tissues_size_t>(
+	const std::string& filename, const std::vector<tissues_size_t*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
 
 } // namespace iseg

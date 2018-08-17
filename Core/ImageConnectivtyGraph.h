@@ -149,7 +149,7 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 	std::vector<Edge> edges(aligned_set.begin(), aligned_set.end());
 	edges.insert(edges.end(), diag_set.begin(), diag_set.end());
 
-	// map nodes so we can us const map
+	// map nodes so we can use const map
 	std::unordered_map<size_t, unsigned int> node_id_map;
 	unsigned int id = 0;
 	for (auto &e: edges)

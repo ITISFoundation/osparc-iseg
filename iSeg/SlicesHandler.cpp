@@ -162,8 +162,7 @@ tissues_size_t SlicesHandler::get_tissue_pt(Point p, unsigned short slicenr)
 	return _image_slices[slicenr].tissues_pt(_active_tissuelayer, p);
 }
 
-void SlicesHandler::set_tissue_pt(Point p, unsigned short slicenr,
-		tissues_size_t f)
+void SlicesHandler::set_tissue_pt(Point p, unsigned short slicenr, tissues_size_t f)
 {
 	_image_slices[slicenr].set_tissue_pt(_active_tissuelayer, p, f);
 }
@@ -8907,29 +8906,20 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 
 bool SlicesHandler::export_tissue(const char* filename, bool binary) const
 {
-	// BL TODO startslice-endslice
-	auto slices = tissue_slices(_active_tissuelayer);
-	float spacing[3] = {_dx, _dy, _thickness};
-	return ImageWriter(binary).writeVolume(
-			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
+	auto slices = const_cast<SlicesHandler*>(this)->tissue_slices(_active_tissuelayer);
+	return ImageWriter(binary).writeVolume(filename, slices, true, this);
 }
 
 bool SlicesHandler::export_bmp(const char* filename, bool binary) const
 {
-	// BL TODO startslice-endslice
-	auto slices = source_slices();
-	float spacing[3] = {_dx, _dy, _thickness};
-	return ImageWriter(binary).writeVolume(
-			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
+	auto slices = const_cast<SlicesHandler*>(this)->source_slices();
+	return ImageWriter(binary).writeVolume(filename, slices, true, this);
 }
 
 bool SlicesHandler::export_work(const char* filename, bool binary) const
 {
-	// BL TODO startslice-endslice
-	auto slices = target_slices();
-	float spacing[3] = {_dx, _dy, _thickness};
-	return ImageWriter(binary).writeVolume(
-			filename, slices.data(), _width, _height, _nrslices, spacing, _transform);
+	auto slices = const_cast<SlicesHandler*>(this)->target_slices();
+	return ImageWriter(binary).writeVolume(filename, slices, true, this);
 }
 
 bool SlicesHandler::print_xmlregionextent(const char* filename,
