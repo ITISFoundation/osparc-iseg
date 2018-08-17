@@ -4,6 +4,7 @@
 # - library
 # - preprocessor definitions needed by package
 #
+cmake_policy(SET CMP0074 NEW)
 if(NOT HDF5_ROOT)
 	set(HDF5_ROOT "not defined" CACHE PATH "path to HDF5 root folder")	
 	message(FATAL_ERROR "Please define HDF5 root folder")

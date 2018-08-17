@@ -19,10 +19,9 @@ namespace iseg {
 class ImageToITK
 {
 public:
-	static void
-			copy(const Transform& transform,
-					typename itk::Point<itk::SpacePrecisionType, 3>& origin,
-					typename itk::Matrix<itk::SpacePrecisionType, 3, 3>& direction)
+	static void copy(const Transform& transform,
+			typename itk::Point<itk::SpacePrecisionType, 3>& origin,
+			typename itk::Matrix<itk::SpacePrecisionType, 3, 3>& direction)
 	{
 		transform.getRotation(direction);
 		transform.getOffset(origin);

@@ -16,6 +16,7 @@
 #include "Data/ItkUtils.h"
 #include "Data/Point.h"
 #include "Data/SliceHandlerItkWrapper.h"
+#include "Data/ScopedTimer.h"
 
 #include "Core/BinaryThinningImageFilter.h"
 #include "Core/ImageConnectivtyGraph.h"
@@ -226,41 +227,53 @@ void EdgeWidget::execute()
 	}
 	else if (rb_centerlines->isOn())
 	{
-		if (cb_3d->isChecked())
+		try
 		{
-			using input_type = itk::SliceContiguousImage<float>;
-			using output_type = itk::Image<unsigned char, 3>;
+			ScopedTimer timer("Skeletonization");
+			if (cb_3d->isChecked())
+			{
+				using input_type = itk::SliceContiguousImage<float>;
+				using output_type = itk::Image<unsigned char, 3>;
 
-			SliceHandlerItkWrapper wrapper(handler3D);
-			auto target = wrapper.GetTarget(true);
-			auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
+				SliceHandlerItkWrapper wrapper(handler3D);
+				auto target = wrapper.GetTarget(true);
+				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.work = true;
-			emit begin_datachange(dataSelection, this);
+				iseg::DataSelection dataSelection;
+				dataSelection.allSlices = true;
+				dataSelection.work = true;
+				emit begin_datachange(dataSelection, this);
 
-			iseg::Paste<output_type, input_type>(skeleton, target);
+				iseg::Paste<output_type, input_type>(skeleton, target);
 
-			emit end_datachange(this);
+				emit end_datachange(this);
+			}
+			else
+			{
+				using input_type = itk::Image<float, 2>;
+				using output_type = itk::Image<unsigned char, 2>;
+
+				SliceHandlerItkWrapper wrapper(handler3D);
+				auto target = wrapper.GetTargetSlice();
+				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
+
+				iseg::DataSelection dataSelection;
+				dataSelection.sliceNr = handler3D->active_slice();
+				dataSelection.work = true;
+				emit begin_datachange(dataSelection, this);
+
+				iseg::Paste<output_type, input_type>(skeleton, target);
+
+				emit end_datachange(this);
+			}
 		}
-		else
+		catch (itk::ExceptionObject& e)
 		{
-			using input_type = itk::Image<float, 2>;
-			using output_type = itk::Image<unsigned char, 2>;
-
-			SliceHandlerItkWrapper wrapper(handler3D);
-			auto target = wrapper.GetTargetSlice();
-			auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
-
-			iseg::DataSelection dataSelection;
-			dataSelection.sliceNr = handler3D->active_slice();
-			dataSelection.work = true;
-			emit begin_datachange(dataSelection, this);
-
-			iseg::Paste<output_type, input_type>(skeleton, target);
-
-			emit end_datachange(this);
+			ISEG_ERROR("Thinning failed: " << e.what());
+		}
+		catch (std::exception& e)
+		{
+			ISEG_ERROR("Thinning failed: " << e.what());
 		}
 	}
 	else

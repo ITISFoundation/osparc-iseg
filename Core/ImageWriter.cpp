@@ -12,11 +12,13 @@
 #include "ImageWriter.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
 
-#include "Data/ImageToITK.h"
+#include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Transform.h"
+#include "Data/Logger.h"
 
 #include <itkImage.h>
 #include <itkImageFileWriter.h>
+#include <itkCastImageFilter.h>
 
 #include <vtkNew.h>
 #include <vtkStructuredPointsWriter.h>
@@ -28,31 +30,31 @@
 using namespace iseg;
 
 template<typename T>
-bool ImageWriter::writeVolume(const char* filename, const T** data,
-		unsigned width, unsigned height,
-		unsigned nrslices, const float spacing[3],
-		const Transform& transform)
+bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler)
 {
-	typedef itk::Image<T, 3> image_type;
-	typedef itk::ImageFileWriter<image_type> writer_type;
-
-	auto image = ImageToITK::copy(data, width, height, 0, nrslices, spacing, transform);
+	auto image = SliceHandlerItkWrapper::GetITKView(all_slices, active_slices, handler);
 	if (image)
 	{
 		boost::filesystem::path path(filename);
-		std::string extension = boost::algorithm::to_lower_copy(
-				path.has_extension() ? path.extension().string() : "");
+		std::string extension = boost::algorithm::to_lower_copy(path.has_extension() ? path.extension().string() : "");
 		if (extension == ".vti" || extension == ".vtk")
 		{
-			typedef itk::ImageToVTKImageFilter<image_type> connector_type;
+			using image_type = itk::SliceContiguousImage<T>;
+			using contiguous_image_type = itk::Image<T, 3>;
+			using caster_type = itk::CastImageFilter<image_type, contiguous_image_type>;
+			using connector_type = itk::ImageToVTKImageFilter<contiguous_image_type>;
+
+			auto caster = caster_type::New();
+			caster->SetInput(image);
+
 			auto connector = connector_type::New();
-			connector->SetInput(image);
+			connector->SetInput(caster->GetOutput());
 			connector->Update();
 
 			if (extension == ".vti")
 			{
 				vtkNew<vtkXMLImageDataWriter> writer;
-				writer->SetFileName(filename);
+				writer->SetFileName(filename.c_str());
 				writer->SetInputData(connector->GetOutput());
 				writer->SetDataModeToAppended();
 				return writer->Write() != 0;
@@ -60,26 +62,34 @@ bool ImageWriter::writeVolume(const char* filename, const T** data,
 			else
 			{
 				vtkNew<vtkStructuredPointsWriter> writer;
-				writer->SetFileName(filename);
+				writer->SetFileName(filename.c_str());
 				writer->SetInputData(connector->GetOutput());
 				writer->SetFileType(m_Binary ? VTK_BINARY : VTK_ASCII);
 				return writer->Write() != 0;
 			}
 		}
+		else
+		{
+			using image_type = itk::SliceContiguousImage<T>;
+			using contiguous_image_type = itk::Image<T, 3>;
+			using caster_type = itk::CastImageFilter<image_type, contiguous_image_type>;
+			using writer_type = itk::ImageFileWriter<contiguous_image_type>;
 
-		auto writer = writer_type::New();
-		writer->SetInput(image);
-		writer->SetFileName(filename);
-		try
-		{
-			writer->Update();
-			return true;
-		}
-		catch (const itk::ExceptionObject& e)
-		{
-			std::string msg = e.GetDescription();
-			auto file = e.GetFile();
-			auto line = e.GetLine();
+			auto caster = caster_type::New();
+			caster->SetInput(image);
+
+			auto writer = writer_type::New();
+			writer->SetInput(caster->GetOutput());
+			writer->SetFileName(filename);
+			try
+			{
+				writer->Update();
+				return true;
+			}
+			catch (const itk::ExceptionObject& e)
+			{
+				ISEG_ERROR(e.GetDescription());
+			}
 		}
 	}
 	return false;

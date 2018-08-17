@@ -59,6 +59,7 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 		VolumeDataWrapper(Voxel* _voxels, size_t _sizeX, size_t _sizeY, size_t _sizeZ)
 				: m_voxels(_voxels), m_sizeX(_sizeX), m_sizeY(_sizeY), m_sizeZ(_sizeZ)
 		{
+			m_number_of_voxels = m_sizeX * m_sizeY * m_sizeZ;
 		}
 
 		inline void setVoxel(size_t _x, size_t _y, size_t _z, Voxel _voxel) { m_voxels[getVoxelIdx(_x, _y, _z)] = _voxel; }
@@ -76,7 +77,7 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 		// Get the 3x3x3 neighborhood of voxels around the given voxel position
 		void getNeighborhood(size_t _x, size_t _y, size_t _z, Voxel _neighborhood[27]) const
 		{
-			if (_x < m_sizeX && _y < m_sizeY && _z < m_sizeZ && _x > 0 && _y > 0 && _z > 0)
+			if (_x + 1 < m_sizeX && _y + 1 < m_sizeY && _z + 1 < m_sizeZ && _x > 0 && _y > 0 && _z > 0)
 			{
 				_neighborhood[0] = getVoxel(_x - 1, _y - 1, _z - 1);
 				_neighborhood[1] = getVoxel(_x, _y - 1, _z - 1);
@@ -144,7 +145,19 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 
 	private:
 		// Calculate the index in the stored data
-		inline size_t getVoxelIdx(size_t _x, size_t _y, size_t _z) const { return m_sizeX * (m_sizeY * _z + _y) + _x; }
+		inline size_t getVoxelIdx(size_t _x, size_t _y, size_t _z) const 
+		{ 
+#if 1
+			return m_sizeX * (m_sizeY * _z + _y) + _x;
+#else
+			size_t idx = m_sizeX * (m_sizeY * _z + _y) + _x;
+			if (idx < m_number_of_voxels)
+			{
+				return idx;
+			}
+			throw std::out_of_range("Index out of range");
+#endif
+		}
 
 	private:
 		Voxel* m_voxels = nullptr;
@@ -154,6 +167,7 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 		size_t m_sizeX = 0;
 		size_t m_sizeY = 0;
 		size_t m_sizeZ = 0;
+		size_t m_number_of_voxels = 0;
 	};
 
 	auto region = thinImage->GetRequestedRegion();
@@ -208,7 +222,7 @@ void OpenThinning<TInputImage, TOutputImage>::ComputeThinImage(TOutputImage* thi
 								continue;
 
 							// The predecessor voxel coming from the current direction has to be 0
-							if (volumeData.getVoxel(x + offset[0], y + offset[1], z + offset[2]))
+							if (volumeData.getVoxelChecked(x + offset[0], y + offset[1], z + offset[2]))
 								continue;
 
 							// Get the local neighborhood of the current voxel

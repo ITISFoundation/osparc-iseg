@@ -14,6 +14,7 @@
 
 #include "Data/Transform.h"
 #include "Data/Vec3.h"
+#include "Data/SlicesHandlerInterface.h"
 
 #include <itkImage.h>
 #include <itkRGBPixel.h>
@@ -26,6 +27,113 @@
 namespace iseg {
 
 namespace {
+
+class TestHandler : public SliceHandlerInterface
+{
+	unsigned short _dims[3];
+	unsigned short _start;
+	unsigned short _end;
+	unsigned short _active_slice = 0;
+
+public:
+	TestHandler(unsigned short w, unsigned short h, unsigned short nrslices, unsigned short start = 0, unsigned short end = 0)
+	{
+		_dims[0] = w;
+		_dims[1] = h;
+		_dims[2] = nrslices;
+		_start = start;
+		_end = (end == 0) ? nrslices : end;
+
+		_float_data.resize(_dims[0] * _dims[1], 1.3f);
+		_tissue_data.resize(_dims[0] * _dims[1], tissues_size_t(3));
+	}
+
+	std::vector<float> _float_data;
+	std::vector<tissues_size_t> _tissue_data;
+	Transform _transform;
+	Vec3 _spacing;
+
+	unsigned short width() const override { return _dims[0]; }
+	unsigned short height() const override { return _dims[1]; }
+	unsigned short num_slices() const override { return _dims[2]; }
+	unsigned short start_slice() const override { return _start; }
+	unsigned short end_slice() const override { return _end; }
+
+	unsigned short active_slice() const override { return _active_slice; }
+	void set_active_slice(unsigned short slice, bool signal_change) override { _active_slice = slice; }
+
+	Transform transform() const override { return _transform; }
+	Vec3 spacing() const override { return _spacing; }
+
+	tissuelayers_size_t active_tissuelayer() const override { return 0; }
+
+	std::vector<const tissues_size_t *> tissue_slices(tissuelayers_size_t layeridx) const override
+	{
+		return std::vector<const tissues_size_t *>(_dims[2], _tissue_data.data());
+	}
+
+	std::vector<tissues_size_t *> tissue_slices(tissuelayers_size_t layeridx) override
+	{
+		return std::vector<tissues_size_t *>(_dims[2], _tissue_data.data());
+	}
+
+	std::vector<const float *> source_slices() const override
+	{
+		return std::vector<const float *>(_dims[2], _float_data.data());
+	}
+
+	std::vector<float *> source_slices() override
+	{
+		return std::vector<float *>(_dims[2], _float_data.data());
+	}
+
+	std::vector<const float *> target_slices() const override
+	{
+		return std::vector<const float *>(_dims[2], _float_data.data());
+	}
+
+	std::vector<float *> target_slices() override
+	{
+		return std::vector<float *>(_dims[2], _float_data.data());
+	}
+
+	std::vector<std::string> tissue_names() const override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	std::vector<bool> tissue_locks() const override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	std::vector<tissues_size_t> tissue_selection() const override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	void set_tissue_selection(const std::vector<tissues_size_t>& sel) override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
+
+	bool has_colors() const override
+	{
+		return false;
+	}
+
+	size_t number_of_colors() const override
+	{
+		return 0;
+	}
+
+	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const override
+	{
+		throw std::logic_error("No colors available.");
+	}
+
+};
+
 class TestIO
 {
 public:
@@ -79,15 +187,13 @@ public:
 
 	void Write()
 	{
-		std::vector<const float*> slices(_dims[2]);
-		for (unsigned s = 0; s < _dims[2]; s++)
-		{
-			slices[s] = _data.data() + s * _dims[0] * _dims[1];
-		}
+		TestHandler handler(_dims[0], _dims[1], _dims[2]);
+		handler._float_data = _data;
+		handler._spacing = _spacing;
+		handler._transform = _transform;
 
-		BOOST_REQUIRE(ImageWriter().writeVolume(_file_name.string().c_str(),
-				slices.data(), _dims[0], _dims[1],
-				_dims[2], _spacing, _transform));
+		bool active_slices = false;
+		BOOST_REQUIRE(ImageWriter().writeVolume(_file_name.string(), handler.target_slices(), active_slices, &handler));
 	}
 
 	void Read()
@@ -95,8 +201,7 @@ public:
 		unsigned width, height, nrslices;
 		float spacing1[3];
 		Transform transform1;
-		BOOST_REQUIRE(ImageReader::getInfo(_file_name.string().c_str(), width,
-				height, nrslices, spacing1, transform1));
+		BOOST_REQUIRE(ImageReader::getInfo(_file_name.string().c_str(), width, height, nrslices, spacing1, transform1));
 
 		BOOST_CHECK_EQUAL(width, _dims[0]);
 		BOOST_CHECK_EQUAL(height, _dims[1]);
@@ -124,8 +229,7 @@ public:
 				slices[s] = data.data() + s * _dims[0] * _dims[1];
 			}
 			BOOST_REQUIRE(ImageReader::getVolume(_file_name.string().c_str(),
-					slices.data(), 0, nrslices, width,
-					height));
+					slices.data(), 0, nrslices, width, 	height));
 
 			bool ok = true;
 			for (size_t i = 0; i < data.size(); i++)
@@ -160,7 +264,7 @@ private:
 	boost::filesystem::path _file_name;
 	std::vector<float> _data;
 	unsigned _dims[3];
-	float _spacing[3];
+	Vec3 _spacing;
 	Transform _transform;
 	float _tolerance;
 };

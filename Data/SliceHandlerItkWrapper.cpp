@@ -4,111 +4,20 @@
 
 namespace iseg {
 
-template<typename T>
-typename itk::SliceContiguousImage<T>::Pointer _GetITKView(std::vector<T*>& slices, size_t dims[3], Vec3 spacing)
-{
-	typedef itk::SliceContiguousImage<T> SliceContiguousImageType;
-
-	auto image = SliceContiguousImageType::New();
-	image->SetSpacing(spacing.v);
-	// \bug Transform (rotation/offset) not set
-
-	typename SliceContiguousImageType::IndexType start;
-	start.Fill(0);
-
-	typename SliceContiguousImageType::SizeType size;
-	size[0] = dims[0];
-	size[1] = dims[1];
-	size[2] = dims[2];
-
-	typename SliceContiguousImageType::RegionType region(start, size);
-	image->SetRegions(region);
-	image->Allocate();
-
-	// Set slice pointers
-	auto container = SliceContiguousImageType::PixelContainer::New();
-	container->SetImportPointersForSlices(slices, size[0] * size[1], false);
-	image->SetPixelContainer(container);
-
-	return image;
-}
-
 itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(bool active_slices)
 {
-	auto spacing = _handler->spacing();
-	auto all_slices = _handler->source_slices();
-	if (!active_slices)
-	{
-		size_t dims[3] = {
-			_handler->width(),
-			_handler->height(),
-			_handler->num_slices()};
-
-		return _GetITKView(all_slices, dims, spacing);
-	}
-
-	std::vector<float*> slices;
-	for (unsigned i = _handler->start_slice(); i < _handler->end_slice(); ++i)
-	{
-		slices.push_back(all_slices[i]);
-	}
-	size_t dims[3] = {
-		_handler->width(),
-		_handler->height(),
-		static_cast<size_t>(_handler->end_slice() - _handler->start_slice()) };
-	return _GetITKView(slices, dims, spacing);
+	return GetITKView(_handler->source_slices(), active_slices, _handler);
 }
 
 itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool active_slices)
 {
-	auto spacing = _handler->spacing();
-	auto all_slices = _handler->target_slices();
-	if (!active_slices)
-	{
-		size_t dims[3] = {
-			_handler->width(),
-			_handler->height(),
-			_handler->num_slices()};
-
-		return _GetITKView(all_slices, dims, spacing);
-	}
-
-	std::vector<float*> slices;
-	for (unsigned i = _handler->start_slice(); i < _handler->end_slice(); ++i)
-	{
-		slices.push_back(all_slices[i]);
-	}
-	size_t dims[3] = {
-		_handler->width(),
-		_handler->height(),
-		static_cast<size_t>(_handler->end_slice() - _handler->start_slice()) };
-	return _GetITKView(slices, dims, spacing);
+	return GetITKView(_handler->target_slices(), active_slices, _handler);
 }
 
 itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTissues(bool active_slices)
 {
-	auto spacing = _handler->spacing();
 	auto all_slices = _handler->tissue_slices(_handler->active_tissuelayer());
-	if (!active_slices)
-	{
-		size_t dims[3] = {
-			_handler->width(),
-			_handler->height(),
-			_handler->num_slices() };
-
-		return _GetITKView(all_slices, dims, spacing);
-	}
-
-	std::vector<tissues_size_t*> slices;
-	for (unsigned i = _handler->start_slice(); i < _handler->end_slice(); ++i)
-	{
-		slices.push_back(all_slices[i]);
-	}
-	size_t dims[3] = {
-		_handler->width(),
-		_handler->height(),
-		static_cast<size_t>(_handler->end_slice() - _handler->start_slice()) };
-	return _GetITKView(slices, dims, spacing);
+	return GetITKView(all_slices, active_slices, _handler);
 }
 
 template<typename T>
