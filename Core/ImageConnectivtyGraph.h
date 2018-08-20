@@ -136,20 +136,11 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 		}
 	}
 
-	// next line id = lines.size()
-	// map node id to line id
-
-	// for each edge, check nodes
-	//   if nodes belong to same line, skip edge
-	//   if nodes belong to different lines, merge lines and add edge
-	//   if exactly one node belongs to line id, add other node to same line
-	//   if nodes don't belong to any line, add new line
-
 	// note: order here is important. first N edges are aligned edges!
 	std::vector<Edge> edges(aligned_set.begin(), aligned_set.end());
 	edges.insert(edges.end(), diag_set.begin(), diag_set.end());
 
-	// map nodes so we can use const map
+	// map nodes to compact range so we can use const map
 	std::unordered_map<size_t, unsigned int> node_id_map;
 	unsigned int id = 0;
 	for (auto &e: edges)
@@ -214,6 +205,7 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 				int base1 = ca.base_connection(id_region_map[e[1]]);
 				if (base0 != base1)
 				{
+					// \warning this might break existing indirections
 					region_connectivity[base0] = base1;
 				}
 				else

@@ -10,6 +10,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "../BinaryThinningImageFilter.h"
+#include "../Thinning/itkPalagyiKubaThinningImageFilter.h"
 #include "../ImageConnectivtyGraph.h"
 
 //#define ENABLE_DUMP_IMAGE
@@ -19,6 +20,13 @@ namespace iseg {
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
 BOOST_AUTO_TEST_SUITE(BinaryThinning_suite);
+
+BOOST_AUTO_TEST_CASE(Compile_test)
+{
+	using image_t = itk::Image<float, 3>;
+	using thinning_filter_t = itk::PalagyiKubaThinningImageFilter<image_t>;
+	auto t = thinning_filter_t::New();
+}
 
 // TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/BinaryThinning_test --log_level=message
 BOOST_AUTO_TEST_CASE(BinaryThinning_test)
@@ -91,9 +99,20 @@ BOOST_AUTO_TEST_CASE(ImageConnectivityGraph_test)
 		idx[1]++; // 7,7,5
 		input->SetPixel(idx, 1);
 
+		idx[0]++; //
+		idx[1]++; // 7,7,5
+		input->SetPixel(idx, 1);
+
+		idx[1]++; // 7,8,5
+		input->SetPixel(idx, 1);
+
+		idx[0]++; //
+		idx[1]++; // 8,9,5
+		input->SetPixel(idx, 1);
+
 		auto edges = ImageConnectivityGraph<image_type>(input, input->GetBufferedRegion());
 
-		BOOST_CHECK_EQUAL(edges.size(), 2);
+		BOOST_CHECK_EQUAL(edges.size(), 5);
 	}
 }
 
