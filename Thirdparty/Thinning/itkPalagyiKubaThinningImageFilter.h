@@ -32,7 +32,7 @@ public:
 	itkTypeMacro(PalagyiKubaThinningImageFilter, OpenThinning);
 
 protected:
-	PalagyiKubaThinningImageFilter() {}
+	PalagyiKubaThinningImageFilter();
 	virtual ~PalagyiKubaThinningImageFilter(){};
 
 	/** Compute thinning Image. */

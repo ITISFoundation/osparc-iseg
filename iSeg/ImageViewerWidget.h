@@ -45,12 +45,9 @@ public:
 	void set_crosshairxvisible(bool on);
 	void set_crosshairyvisible(bool on);
 	void get_scaleoffsetfactor(float& offset1, float& factor1);
-	/*	void set_tissuevisible(bool on);
-		void set_markvisible(bool on);
-		void set_workbordervisible(bool on);*/
+
 	bool return_workbordervisible();
-	//	QMouseEvent*e1;
-	//	float e1;
+
 	void setIsBmp(bool isBmpOrNot) { isBmp = isBmpOrNot; }
 	void setMousePosZoom(QPoint point) { mousePosZoom = point; }
 
@@ -86,8 +83,7 @@ signals:
 	void mousemoved_sign(Point p);
 	void wheelrotated_sign(int delta);
 	void wheelrotatedctrl_sign(int delta);
-	void scaleoffsetfactor_changed(float scaleoffset1, float scalefactor1,
-			bool bmporwork1);
+	void scaleoffsetfactor_changed(float scaleoffset1, float scalefactor1, bool bmporwork1);
 	void setcenter_sign(int x, int y);
 	void mousePosZoom_sign(QPoint mousePosZoom);
 

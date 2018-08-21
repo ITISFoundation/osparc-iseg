@@ -45,8 +45,26 @@ inline void CopyNeighborhoodInBuffer(unsigned char *vol, int L, int M, int N, in
 }
 
 template<class TInputImage>
+PalagyiKubaThinningImageFilter<TInputImage>::PalagyiKubaThinningImageFilter()
+{
+	this->SetNumberOfRequiredOutputs(1);
+
+	auto thinImage = OutputImage::New();
+	this->SetNthOutput(0, thinImage.GetPointer());
+}
+
+template<class TInputImage>
 void PalagyiKubaThinningImageFilter<TInputImage>::GenerateData()
 {
+	auto inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
+	auto thinImage = dynamic_cast<OutputImage*>(this->GetOutput(0));
+
+	//thinImage->SetRegions(region);
+	//thinImage->Allocate();
+	//thinImage->FillBuffer(0);
+	//thinImage->SetSpacing(inputImage->GetSpacing());
+	//thinImage->SetOrientation(inputImage->GetOrientation());
+
 	int volNeighbors[27] = {};
 	
 	// \todo BL cast input to output

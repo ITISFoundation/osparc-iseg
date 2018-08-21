@@ -402,17 +402,13 @@ void ImageViewerWidget::reload_bits()
 				}
 				else
 				{
-					r = g = b = (int)max(
-							0.0f, min(255.0f,
-												scaleoffset + scalefactor * (bmpbits1)[pos]));
+					r = g = b = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
 				}
 
 				// overlay only visible if picture is visible
 				if (overlayvisible)
 				{
-					f = max(0.0f,
-							min(255.0f, scaleoffset +
-															scalefactor * (overlaybits)[pos]));
+					f = max(0.0f, min(255.0f, scaleoffset + scalefactor * (overlaybits)[pos]));
 
 					r = (1.0f - overlayalpha) * r + overlayalpha * f;
 					g = (1.0f - overlayalpha) * g + overlayalpha * f;
@@ -429,12 +425,9 @@ void ImageViewerWidget::reload_bits()
 				// blend with tissue color
 				float* rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
 				float alpha = 0.5f; // rgbo[3];
-				r = static_cast<unsigned char>(r +
-																			 alpha * (255.0f * rgbo[0] - r));
-				g = static_cast<unsigned char>(g +
-																			 alpha * (255.0f * rgbo[1] - g));
-				b = static_cast<unsigned char>(b +
-																			 alpha * (255.0f * rgbo[2] - b));
+				r = static_cast<unsigned char>(r +  alpha * (255.0f * rgbo[0] - r));
+				g = static_cast<unsigned char>(g +  alpha * (255.0f * rgbo[1] - g));
+				b = static_cast<unsigned char>(b +  alpha * (255.0f * rgbo[2] - b));
 				image.setPixel(x, y, qRgb(r, g, b));
 			}
 			else // no tissue
@@ -469,8 +462,7 @@ void ImageViewerWidget::reload_bits()
 	for (auto& m : vm)
 	{
 		TissueInfos::GetTissueColorRGB(m.mark, r, g, b);
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1),
-				qRgb(r, g, b));
+		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
 	}
 
 	if (crosshairxvisible)
@@ -490,8 +482,6 @@ void ImageViewerWidget::reload_bits()
 			image.setPixel(crosshairypos, y, qRgb(0, 255, 0));
 		}
 	}
-
-	return;
 }
 
 void ImageViewerWidget::tissue_changed()
@@ -547,35 +537,30 @@ void ImageViewerWidget::set_tissuevisible(bool on)
 {
 	tissuevisible = on;
 	update();
-	return;
 }
 
 void ImageViewerWidget::set_picturevisible(bool on)
 {
 	picturevisible = on;
 	update();
-	return;
 }
 
 void ImageViewerWidget::set_markvisible(bool on)
 {
 	markvisible = on;
 	repaint();
-	return;
 }
 
 void ImageViewerWidget::set_overlayvisible(bool on)
 {
 	overlayvisible = on;
 	update();
-	return;
 }
 
 void ImageViewerWidget::set_overlayalpha(float alpha)
 {
 	overlayalpha = alpha;
 	update();
-	return;
 }
 
 void ImageViewerWidget::add_mark()
@@ -780,13 +765,8 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 	if (e->button() == Qt::LeftButton)
 	{
 		Point p;
-		//		p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
-		//		p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
-		p.px = (unsigned short)max(
-				min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-		p.py = (unsigned short)max(
-				min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-				0.0);
+		p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 		emit mousereleased_sign(p);
 	}
@@ -795,13 +775,8 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {
 	Point p;
-	//		p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
-	//		p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
-	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-			0.0);
+	p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{

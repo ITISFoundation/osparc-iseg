@@ -1704,15 +1704,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 				SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 	}
 
-	QObject::connect(bmp_show, SIGNAL(wheelrotatedctrl_sign(int)), this,
-			SLOT(wheelrotated(int)));
-	QObject::connect(work_show, SIGNAL(wheelrotatedctrl_sign(int)), this,
-			SLOT(wheelrotated(int)));
-
 	QObject::connect(bmp_show, SIGNAL(mousePosZoom_sign(QPoint)), this,
 			SLOT(mousePosZoom_changed(const QPoint&)));
 	QObject::connect(work_show, SIGNAL(mousePosZoom_sign(QPoint)), this,
 			SLOT(mousePosZoom_changed(const QPoint&)));
+
+	QObject::connect(bmp_show, SIGNAL(wheelrotatedctrl_sign(int)), this,
+			SLOT(wheelrotated(int)));
+	QObject::connect(work_show, SIGNAL(wheelrotatedctrl_sign(int)), this,
+			SLOT(wheelrotated(int)));
 
 	//	QObject::connect(pb_work2tissue,SIGNAL(clicked()),this,SLOT(do_work2tissue()));
 
