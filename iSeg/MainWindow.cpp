@@ -3832,9 +3832,8 @@ void MainWindow::execute_mergeprojects()
 	mergeDialog.get_filenames(mergefilenames);
 
 	// Get save file name
-	QString savefilename =
-			QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
-					"iSeg", "Save merged project as");
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
+		"iSeg", "Save merged project as");
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
 
@@ -3853,12 +3852,9 @@ void MainWindow::execute_mergeprojects()
 		fp = bitstack_widget->save_proj(fp);
 		unsigned short saveProjVersion = 12;
 		fp = TissueInfos::SaveTissues(fp, saveProjVersion);
-		unsigned short combinedVersion =
-				(unsigned short)iseg::CombineTissuesVersion(saveProjVersion, 1);
+		unsigned short combinedVersion = (unsigned short)iseg::CombineTissuesVersion(saveProjVersion, 1);
 		fwrite(&combinedVersion, 1, sizeof(unsigned short), fp);
-		/*for(size_t i=0;i<tabwidgets.size();i++){
-			fp=((QWidget1 *)(tabwidgets[i]))->SaveParams(fp,saveProjVersion);
-		}*/
+
 		threshold_widget->SaveParams(fp, saveProjVersion);
 		hyst_widget->SaveParams(fp, saveProjVersion);
 		livewire_widget->SaveParams(fp, saveProjVersion);
@@ -4101,8 +4097,7 @@ void MainWindow::execute_createatlas()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Atlas file (*.atl)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Atlas file (*.atl)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".atl")))
 		savefilename.append(".atl");
@@ -4123,8 +4118,7 @@ void MainWindow::execute_reloadatlases()
 
 void MainWindow::execute_savetissues()
 {
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, QString::null, this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, QString::null, this);
 
 	if (!savefilename.isEmpty())
 	{
@@ -4135,8 +4129,7 @@ void MainWindow::execute_savetissues()
 
 void MainWindow::execute_exportsurfacegenerationtoolxml()
 {
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, QString::null, this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, QString::null, this);
 
 	if (!savefilename.isEmpty())
 	{
@@ -4150,8 +4143,7 @@ void MainWindow::execute_exportlabelfield()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "AmiraMesh Ascii (*.am)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this); 
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".am")))
 		savefilename.append(".am");
@@ -4172,8 +4164,7 @@ void MainWindow::execute_exportmat()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Matlab (*.mat)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Matlab (*.mat)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".mat")))
 		savefilename.append(".mat");
@@ -4188,8 +4179,7 @@ void MainWindow::execute_exportmat()
 
 void MainWindow::execute_exporthdf()
 {
-	QString savefilename = QFileDialog::getSaveFileName(
-		QString::null, "HDF (*.h5)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "HDF (*.h5)", this);
 
 	if (savefilename.length() > 3 && !savefilename.endsWith(QString(".h5")))
 		savefilename.append(".h5");
@@ -4214,11 +4204,9 @@ void MainWindow::execute_exportvtkascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "VTK Ascii (*.vti *.vtk)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK Ascii (*.vti *.vtk)", this);
 
-	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) ||
-																			 savefilename.endsWith(QString(".vtk"))))
+	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) || savefilename.endsWith(QString(".vtk"))))
 		savefilename.append(".vti");
 
 	if (!savefilename.isEmpty())
@@ -4235,11 +4223,9 @@ void MainWindow::execute_exportvtkbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "VTK bin (*.vti *.vtk)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK bin (*.vti *.vtk)", this);
 
-	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) ||
-																			 savefilename.endsWith(QString(".vtk"))))
+	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) || savefilename.endsWith(QString(".vtk"))))
 		savefilename.append(".vti");
 
 	if (!savefilename.isEmpty())
@@ -4256,8 +4242,7 @@ void MainWindow::execute_exportvtkcompressedascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "VTK comp (*.vti)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK comp (*.vti)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
 		savefilename.append(".vti");
@@ -4276,8 +4261,7 @@ void MainWindow::execute_exportvtkcompressedbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "VTK comp (*.vti)", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK comp (*.vti)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
 		savefilename.append(".vti");
@@ -4296,8 +4280,7 @@ void MainWindow::execute_exportxmlregionextent()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename =
-			QFileDialog::getSaveFileName(QString::null, "XML extent (*.xml)", this);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "XML extent (*.xml)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".xml")))
 		savefilename.append(".xml");
@@ -4324,16 +4307,14 @@ void MainWindow::execute_exporttissueindex()
 	iseg::DataSelection dataSelection;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "tissue index (*.txt)", this);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "tissue index (*.txt)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
 
 	QString relfilename = QString("");
 	if (!m_saveprojfilename.isEmpty())
-		relfilename = m_saveprojfilename.right(m_saveprojfilename.length() -
-																					 m_saveprojfilename.findRev("/") - 1);
+		relfilename = m_saveprojfilename.right(m_saveprojfilename.length() - m_saveprojfilename.findRev("/") - 1);
 
 	if (!savefilename.isEmpty())
 	{
@@ -4349,21 +4330,15 @@ void MainWindow::execute_exporttissueindex()
 
 void MainWindow::execute_loadtissues()
 {
-	QString loadfilename = QFileDialog::getOpenFileName(
-			QString::null, QString::null, this); //, filename);
-
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, QString::null, this);
 	if (!loadfilename.isEmpty())
 	{
 		QMessageBox msgBox;
-		msgBox.setText("Do you want to append the new tissues or to replace "
-									 "the old tissues?");
-		QPushButton* appendButton =
-				msgBox.addButton(tr("Append"), QMessageBox::AcceptRole);
-		QPushButton* replaceButton =
-				msgBox.addButton(tr("Replace"), QMessageBox::AcceptRole);
+		msgBox.setText("Do you want to append the new tissues or to replace the old tissues?");
+		QPushButton* appendButton = msgBox.addButton(tr("Append"), QMessageBox::AcceptRole);
+		QPushButton* replaceButton = msgBox.addButton(tr("Replace"), QMessageBox::AcceptRole);
 		QPushButton* abortButton = msgBox.addButton(QMessageBox::Abort);
 		msgBox.setIcon(QMessageBox::Question);
-
 		msgBox.exec();
 
 		tissues_size_t removeTissuesRange;
