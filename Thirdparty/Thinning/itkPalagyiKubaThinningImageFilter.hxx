@@ -7,43 +7,6 @@
 
 namespace itk {
 
-inline void CopyNeighborhoodInBuffer(unsigned char *vol, int L, int M, int N, int idx, unsigned char nb[3][3][3], const int volNeighbors[27], bool changeValues = true)
-{
-	int nidx;
-	short i, j, k, ii;
-	
-	ii = 0;
-	for(k = 0; k < 3; k++) 
-	{
-		for(j = 0; j < 3; j++) 
-		{
-			for(i = 0; i < 3; i++)
-			{
-				nidx = idx + volNeighbors[ii];
-			
-				// \todo BL I can cast the input to '0' and OBJECT, so don't need to have any if/else here
-				if(!changeValues)
-				{
-					nb[i][j][k] = vol[nidx];
-				} 
-				else 
-				{
-					if(vol[nidx] != 0)
-					{
-						nb[i][j][k] = OBJECT;
-					}
-					else
-					{
-						nb[i][j][k] = 0;
-					}
-				}
-			
-				ii++;
-			}
-		}
-	}
-}
-
 template<class TInputImage>
 PalagyiKubaThinningImageFilter<TInputImage>::PalagyiKubaThinningImageFilter()
 {
@@ -56,40 +19,25 @@ PalagyiKubaThinningImageFilter<TInputImage>::PalagyiKubaThinningImageFilter()
 template<class TInputImage>
 void PalagyiKubaThinningImageFilter<TInputImage>::GenerateData()
 {
+	using namespace pk;
+
 	auto inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
 	auto thinImage = dynamic_cast<OutputImage*>(this->GetOutput(0));
 
-	//thinImage->SetRegions(region);
-	//thinImage->Allocate();
-	//thinImage->FillBuffer(0);
-	//thinImage->SetSpacing(inputImage->GetSpacing());
-	//thinImage->SetOrientation(inputImage->GetOrientation());
+	// allocate output
+	auto region = thinImage->GetRequestedRegion();
+	thinImage->SetBufferedRegion(region);
+	thinImage->CopyInformation(inputImage);
+	thinImage->Allocate();
 
-	int volNeighbors[27] = {};
-	
-	// \todo BL cast input to output
-	unsigned char* vol = nullptr;
-	
-	// \todo BL use 64bit integer type where necessary
-
-	// run thinning
-	long lsize;
-	int nrDel;
-	long idx;
-	char dir;
-	unsigned char nb[3][3][3];
-	unsigned char USn[3][3][3];
-	int i, j, k;
-	int maxnsp;
-	int sz, slsz;
-	int L, M, N;
-	int *dim = image->GetDimensions();
-	L = dim[0];
-	M = dim[1];
-	N = dim[2];
-
-	sz = L * M * N;
-	slsz = L * M;
+	// image dimensions
+	using index_t = long long;
+	index_t L = static_cast<index_t>(region.GetSize(0));
+	index_t M = static_cast<index_t>(region.GetSize(1));
+	index_t N = static_cast<index_t>(region.GetSize(2));
+	index_t slsz = L * M;
+	index_t sz = slsz * N;
+	index_t volNeighbors[27] = {};
 
 	// initialize global neighbors array
 	// lower plane
@@ -123,124 +71,152 @@ void PalagyiKubaThinningImageFilter<TInputImage>::GenerateData()
 	volNeighbors[25] = (+slsz + L + 0);
 	volNeighbors[26] = (+slsz + L + 1);
 
-	assert(image->GetScalarType() == VTK_UNSIGNED_CHAR);
-	vol = (unsigned char *)image->GetScalarPointer();
-	lsize = sz;
+	// neighbor index in 18 directions (only last 6 used)
+	index_t neighborOffset[18] = {
+		+slsz - L,  // UP_SOUTH,   0
+		+L + 1,     // NORT_EAST   1
+		-slsz - 1,  // DOWN_WEST,  2 
 
-	//Threshold8bit(thres, vol, lsize);
+		-L + 1,     // SOUTH_EAST  3
+		+slsz - 1,  // UP_WEST,    4
+		-slsz + L,  // DOWN_NORTH, 5 
 
+		-L - 1,     // SOUTH_WEST  6
+		+slsz + L,  // UP_NORTH,   7
+		-slsz + 1,  // DOWN_EAST,  8
+
+		+L - 1,     // NORT_WEST   9
+		+slsz + 1,  // UP_EAST,   10
+		-slsz - L   // DOWN_SOUTH 11
+
+		+ slsz,     // UP         12
+		-slsz,      // DOWN       13
+		+1,         // EAST,      14
+		-1,         // WEST,      15
+		+L,         // NORTH,     16
+		-L,         // SOUTH,     17
+	};
 
 	// set all object voxels to OBJECT
-	int nFG = 0, nBG = 0;
-	for (idx = 0; idx < lsize; idx++) {
-		if (vol[idx] == 01) {
-			vol[idx] = OBJECT;
-			nFG++;
-		}
-		else {
-			nBG++;
-		}
+	itk::ImageRegionConstIterator<TInputImage> iit(inputImage, region);
+	itk::ImageRegionIterator<OutputImage> oit(thinImage, region);
+	for (iit.GoToBegin(), oit.GoToBegin(); !iit.IsAtEnd(); ++iit, ++oit)
+	{
+		bool change = iit.Get() != 0;
+		oit.Set(iit.Get() != 0 ? SpecialValues::OBJECT : 0);
 	}
 
-	nrDel = 1;
-	maxnsp = 0;
+	// pointer to output image
+	unsigned char* vol = thinImage->GetPixelContainer()->GetImportPointer();
+
+	// run thinning
+	char dir;
+	unsigned char nb[3][3][3];
+	unsigned char USn[3][3][3];
+	index_t idx;
+	index_t i, j, k;
+	index_t nrDel = 1;
 
 	while (nrDel > 0) 
 	{
 		nrDel = 0;
-		for (dir = 0; dir < 12; dir++) {
-
+		for (dir = 0; dir < 12; dir++) 
+		{
 			switch (dir) {
 			case 0: // UP_SOUTH = 0,
 					// UP
-				markBoundaryInDirection(vol, L, M, N, 12);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[12]);
 				// SOUTH
-				markBoundaryInDirection(vol, L, M, N, 17);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[17]);
 				break;
 			case 1: // NORT_EAST,
 					// NOTH
-				markBoundaryInDirection(vol, L, M, N, 16);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[16]);
 				// EAST
-				markBoundaryInDirection(vol, L, M, N, 14);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[14]);
 				break;
 			case 2: // DOWN_WEST,
 					// DOWN
-				markBoundaryInDirection(vol, L, M, N, 13);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[13]);
 				// WEST
-				markBoundaryInDirection(vol, L, M, N, 15);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[15]);
 				break;
 			case 3: //  SOUTH_EAST,
 					// SOUTH
-				markBoundaryInDirection(vol, L, M, N, 17);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[17]);
 				// EAST
-				markBoundaryInDirection(vol, L, M, N, 14);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[14]);
 				break;
 			case 4: // UP_WEST,
 					// UP
-				markBoundaryInDirection(vol, L, M, N, 12);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[12]);
 				// WEST
-				markBoundaryInDirection(vol, L, M, N, 15);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[15]);
 				break;
 			case 5: // DOWN_NORTH,
 					// DOWN
-				markBoundaryInDirection(vol, L, M, N, 13);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[13]);
 				// NORTH
-				markBoundaryInDirection(vol, L, M, N, 16);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[16]);
 				break;
 			case 6: // SOUTH_WEST,
 					// SOUTH
-				markBoundaryInDirection(vol, L, M, N, 17);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[17]);
 				// WEST
-				markBoundaryInDirection(vol, L, M, N, 15);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[15]);
 				break;
 			case 7: // UP_NORTH,
 					// UP
-				markBoundaryInDirection(vol, L, M, N, 12);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[12]);
 				// NORTH
-				markBoundaryInDirection(vol, L, M, N, 16);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[16]);
 				break;
 			case 8: // DOWN_EAST,
 					// DOWN
-				markBoundaryInDirection(vol, L, M, N, 13);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[13]);
 				// EAST
-				markBoundaryInDirection(vol, L, M, N, 14);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[14]);
 				break;
 			case 9: //  NORT_WEST,
 					// NORTH
-				markBoundaryInDirection(vol, L, M, N, 16);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[16]);
 				// WEST
-				markBoundaryInDirection(vol, L, M, N, 15);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[15]);
 				break;
 			case 10: // UP_EAST,
 					 // UP
-				markBoundaryInDirection(vol, L, M, N, 12);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[12]);
 				// EAST
-				markBoundaryInDirection(vol, L, M, N, 14);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[14]);
 				break;
 			case 11: // DOWN_SOUTH,
 					 // DOWN
-				markBoundaryInDirection(vol, L, M, N, 13);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[13]);
 				// SOUTH
-				markBoundaryInDirection(vol, L, M, N, 17);
+				markBoundaryInDirection(vol, L, M, N, neighborOffset[17]);
 				break;
 			}
 
 			// check each boundary point and remove it if it matches a template
-			for (k = 1; k < (N - 1); k++) {
-				for (j = 1; j < (M - 1); j++) {
-					for (i = 1; i < (L - 1); i++) {
+			for (k = 1; k < (N - 1); k++) 
+			{
+				for (j = 1; j < (M - 1); j++) 
+				{
+					for (i = 1; i < (L - 1); i++) 
+					{
 						idx = k * slsz + j * L + i;
 
-						if (vol[idx] == D_BORDER) {
+						if (vol[idx] == SpecialValues::D_BORDER)
+						{
 							// copy neighborhood into buffer
-							CopyNeighborhoodInBuffer(vol, L, M, N, idx, nb, volNeighbors);
+							copyNeighborhoodInBuffer(vol, idx, volNeighbors, nb);
 
-							TransformNeighborhood(nb, dir, USn);
+							transformNeighborhood(nb, dir, USn);
 
-							if (MatchesATemplate(USn)) {
-								// delete the point
+							if (matchesATemplate(USn)) 
+							{
 								// can be removed
-								vol[idx] = SIMPLE;
+								vol[idx] = SpecialValues::SIMPLE;
 								nrDel++;
 							}
 						}
@@ -249,12 +225,13 @@ void PalagyiKubaThinningImageFilter<TInputImage>::GenerateData()
 			}
 
 			// reset all object voxels to OBJECT
-			for (idx = 0; idx < lsize; idx++) {
+			for (idx = 0; idx < sz; idx++) 
+			{
 				// delete simple points
-				if (vol[idx] == SIMPLE)
+				if (vol[idx] == SpecialValues::SIMPLE)
 					vol[idx] = 0;
 				if (vol[idx] != 0)
-					vol[idx] = OBJECT;
+					vol[idx] = SpecialValues::OBJECT;
 			}
 		}
 	}

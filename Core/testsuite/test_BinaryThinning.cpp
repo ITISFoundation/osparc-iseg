@@ -21,11 +21,34 @@ namespace iseg {
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
 BOOST_AUTO_TEST_SUITE(BinaryThinning_suite);
 
-BOOST_AUTO_TEST_CASE(Compile_test)
+// TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/PalagyiKubaThinning_test --log_level=message
+BOOST_AUTO_TEST_CASE(PalagyiKubaThinning_test)
 {
-	using image_t = itk::Image<float, 3>;
-	using thinning_filter_t = itk::PalagyiKubaThinningImageFilter<image_t>;
-	auto t = thinning_filter_t::New();
+	using input_type = itk::Image<float, 3>;
+	using output_type = itk::Image<unsigned short, 3>;
+
+	itk::Index<3> start = { 0, 0, 0 };
+	itk::Size<3> size = { 50, 70, 45 };
+
+	auto input = input_type::New();
+	input->SetRegions(itk::ImageRegion<3>(start, size));
+	input->Allocate();
+	input->FillBuffer(0.f);
+
+	itk::Index<3> start2 = { 10, 10, 10 };
+	itk::Size<3> size2 = { 5, 50, 5 };
+
+	itk::ImageRegionIterator<input_type> it(input, itk::ImageRegion<3>(start2, size2));
+	for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+	{
+		it.Set(1.f);
+	}
+
+	auto thinning_filter = itk::PalagyiKubaThinningImageFilter<input_type>::New();
+	thinning_filter->SetInput(input);
+	BOOST_CHECK_NO_THROW(thinning_filter->Update());
+
+	dump_image(thinning_filter->GetOutput(), "E:/temp/_pk_thinned.mha");
 }
 
 // TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/BinaryThinning_test --log_level=message

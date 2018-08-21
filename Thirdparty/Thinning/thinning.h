@@ -1,5 +1,4 @@
-#ifndef thinning_h
-#define thinning_h
+#pragma once
 
 
 // implement thinning templates given by 
@@ -7,6 +6,8 @@
 //
 #include <iostream>
 #include <cstdio>
+
+namespace pk {
 
 enum SpecialValues
 {
@@ -40,7 +41,7 @@ enum Direction {
 	SOUTH
 };
 
-bool MatchesATemplate(unsigned char n[3][3][3]) {
+bool matchesATemplate(unsigned char n[3][3][3]) {
 	// T1
 	if (
 		((n[1][1][1] == OBJECT) && (n[1][1][0] == OBJECT))
@@ -243,7 +244,7 @@ bool MatchesATemplate(unsigned char n[3][3][3]) {
 }
 
 // transform neighborhood from a different direction
-bool TransformNeighborhood(const unsigned char n[3][3][3], char direction, unsigned char USn[3][3][3])
+void transformNeighborhood(const unsigned char n[3][3][3], char direction, unsigned char USn[3][3][3])
 {
 	short i, j, k;
 	unsigned char tmp[3][3][3];
@@ -404,42 +405,13 @@ bool TransformNeighborhood(const unsigned char n[3][3][3], char direction, unsig
 		}
 		break;
 	}
-
-	return true;
 }
 
-bool markBoundaryInDirection(unsigned char *vol, int L, int M, int N, short direction)
+template<typename TIndex>
+void markBoundaryInDirection(unsigned char *vol, TIndex L, TIndex M, TIndex N, TIndex offset)
 {
-	long long slsz = L*M;
-	long long idx;
-	int i, j, k;
-
-	// neighbor index in 18 directions (only first 6 used)
-	long long nb[18] = {
-	  +slsz - L,  // UP_SOUTH,   0
-	  +L + 1,   // NORT_EAST     1
-	  -slsz - 1,  // DOWN_WEST,  2 
-
-	  -L + 1,   // SOUTH_EAST    3
-	  +slsz - 1,  // UP_WEST,    4
-	  -slsz + L,  // DOWN_NORTH, 5 
-
-	  -L - 1,   // SOUTH_WEST    6
-	  +slsz + L,  // UP_NORTH,   7
-	  -slsz + 1,  // DOWN_EAST,  8
-
-	  +L - 1,   // NORT_WEST     9
-	  +slsz + 1,  // UP_EAST,   10
-	  -slsz - L  // DOWN_SOUTH  11
-
-	  + slsz, // UP              12
-	  -slsz, // DOWN            13
-	  +1,  // EAST,             14
-	  -1,  // WEST,             15
-	  +L,  // NORTH,            16
-	  -L,  // SOUTH,            17
-
-	};
+	TIndex idx;
+	TIndex i, j, k;
 
 	for (k = 1; k < (N - 1); k++) 
 	{
@@ -447,17 +419,32 @@ bool markBoundaryInDirection(unsigned char *vol, int L, int M, int N, short dire
 		{
 			for (i = 1; i < (L - 1); i++)
 			{
-				idx = k*slsz + j*L + i;
-				if ((vol[idx] == OBJECT) && (vol[idx + nb[direction]] == 0)) 
+				idx = (k*M + j)*L + i;
+				if (vol[idx] == OBJECT && vol[idx + offset] == 0)
 				{
 					vol[idx] = D_BORDER;
 				}
 			}
 		}
 	}
-
-	return true;
 }
 
-#endif
+template<typename TIndex>
+void copyNeighborhoodInBuffer(const unsigned char *vol, const TIndex idx, const TIndex volNeighbors[27], unsigned char nb[3][3][3])
+{
+	short i, j, k, ii;
 
+	ii = 0;
+	for (k = 0; k < 3; ++k)
+	{
+		for (j = 0; j < 3; ++j)
+		{
+			for (i = 0; i < 3; ++i, ++ii)
+			{
+				nb[i][j][k] = (vol[idx + volNeighbors[ii]] != 0) ? OBJECT: 0;
+			}
+		}
+	}
+}
+
+} // namespace pk

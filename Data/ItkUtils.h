@@ -21,7 +21,7 @@
 namespace iseg {
 
 template<typename TInputPixel, typename TOutputPixel>
-bool Paste(itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutputPixel>* destination,
+bool Paste(const itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutputPixel>* destination,
 		size_t startslice, size_t endslice)
 {
 	if (source->GetLargestPossibleRegion() ==
@@ -37,7 +37,7 @@ bool Paste(itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutput
 		// copy active slices into destination, starting at startslice
 		auto active_region = itk::ImageBase<3>::RegionType(start, size);
 
-		typedef itk::ImageRegionIterator<itk::Image<TInputPixel, 3>> image_iterator;
+		typedef itk::ImageRegionConstIterator<itk::Image<TInputPixel, 3>> image_iterator;
 		typedef itk::ImageRegionIterator<itk::SliceContiguousImage<TOutputPixel>> slice_image_iterator;
 		image_iterator sit(source, active_region);
 		slice_image_iterator dit(destination, active_region);
@@ -52,13 +52,13 @@ bool Paste(itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutput
 }
 
 template<class TInputImage, class TOutputImage>
-bool Paste(TInputImage* source, TOutputImage* destination)
+bool Paste(const TInputImage* source, TOutputImage* destination)
 {
 	using OutputPixel = typename TOutputImage::PixelType;
 
 	if (source->GetBufferedRegion().GetSize() == destination->GetBufferedRegion().GetSize())
 	{
-		itk::ImageRegionIterator<TInputImage> sit(source, source->GetBufferedRegion());
+		itk::ImageRegionConstIterator<TInputImage> sit(source, source->GetBufferedRegion());
 		itk::ImageRegionIterator<TOutputImage> dit(destination, destination->GetBufferedRegion());
 
 		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
@@ -71,13 +71,13 @@ bool Paste(TInputImage* source, TOutputImage* destination)
 }
 
 template<class TInputImage, class TOutputImage>
-bool Paste(TInputImage* source, TOutputImage* destination, const typename TInputImage::RegionType& region)
+bool Paste(const TInputImage* source, TOutputImage* destination, const typename TInputImage::RegionType& region)
 {
 	using OutputPixel = typename TOutputImage::PixelType;
 
 	if (source->GetBufferedRegion().IsInside(region) && destination->GetBufferedRegion().IsInside(region))
 	{
-		itk::ImageRegionIterator<TInputImage> sit(source, region);
+		itk::ImageRegionConstIterator<TInputImage> sit(source, region);
 		itk::ImageRegionIterator<TOutputImage> dit(destination, region);
 
 		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)

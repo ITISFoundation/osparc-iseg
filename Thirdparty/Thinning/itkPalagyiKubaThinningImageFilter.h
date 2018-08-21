@@ -10,6 +10,7 @@
 #pragma once
 
 #include <itkImageToImageFilter.h>
+#include <itkImageRegionIterator.h>
 
 namespace itk {
 
@@ -21,7 +22,7 @@ public:
 	
 	/** Standard class typedefs. */
 	using Self = PalagyiKubaThinningImageFilter;
-	using Superclass = OpenThinning<TInputImage, OutputImage>;
+	using Superclass = ImageToImageFilter<TInputImage, OutputImage>;
 	using Pointer = SmartPointer<Self>;
 	using ConstPointer = SmartPointer<const Self>;
 
@@ -29,7 +30,7 @@ public:
 	itkNewMacro(Self);
 
 	/** Run-time type information (and related methods). */
-	itkTypeMacro(PalagyiKubaThinningImageFilter, OpenThinning);
+	itkTypeMacro(PalagyiKubaThinningImageFilter, ImageToImageFilter);
 
 protected:
 	PalagyiKubaThinningImageFilter();
