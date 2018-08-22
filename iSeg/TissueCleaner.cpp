@@ -10,6 +10,7 @@
 #include "Precompiled.h"
 
 #include "TissueCleaner.h"
+#include "TissueInfos.h"
 
 #include <cstdlib>
 
@@ -267,9 +268,14 @@ void TissueCleaner::Clean(float ratio, unsigned minsize)
 	erasemap.resize(map.size(), false);
 	for (size_t i = 0; i < map.size(); i++)
 	{
-		if (volumes[i] < minsize &&
-				volumes[i] < ratio * totvolumes[tissuemap[i]])
-			erasemap[i] = true;
+		if (volumes[i] < minsize && volumes[i] < ratio * totvolumes[tissuemap[i]])
+		{
+			// only remove small components if tissue is NOT locked!
+			if (!TissueInfos::GetTissueLocked(tissuemap[i]))
+			{
+				erasemap[i] = true;
+			}
+		}
 	}
 
 	tissues_size_t curchar = 0;
