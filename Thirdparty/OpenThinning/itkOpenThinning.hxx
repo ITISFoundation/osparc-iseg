@@ -34,6 +34,7 @@ void OpenThinning<TInputImage, TOutputImage>::GenerateData()
 	// allocate output
 	auto region = thinImage->GetRequestedRegion();
 	thinImage->SetBufferedRegion(region);
+	thinImage->CopyInformation(inputImage);
 	thinImage->Allocate();
 
 	// copy input to output

@@ -1876,8 +1876,7 @@ FILE* SlicesHandler::SaveActiveSlices(const char* filename,
 	return fp;
 }
 
-FILE* SlicesHandler::MergeProjects(const char* savefilename,
-		std::vector<QString>& mergeFilenames)
+FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString>& mergeFilenames)
 {
 	// Get number of slices to total
 	unsigned short nrslicesTotal = _nrslices;
@@ -1917,7 +1916,9 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename,
 	for (unsigned short i = 0; i < mergeFilenames.size(); i++)
 	{
 		if ((fpMerge = fopen(mergeFilenames[i].toAscii().data(), "rb")) == nullptr)
+		{
 			return nullptr;
+		}
 
 		// Skip header
 		int version = 0;
@@ -1955,19 +1956,16 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename,
 
 	QString imageFileName = QString(savefilename);
 	int afterDot = imageFileName.lastIndexOf('.') + 1;
-	imageFileName =
-			imageFileName.remove(afterDot, imageFileName.length() - afterDot) +
-			imageFileExtension;
-	if (!SaveMergeAllXdmf(QFileInfo(savefilename)
-														.dir()
-														.absFilePath(imageFileName)
-														.toAscii()
-														.data(),
-					mergeFilenames, nrslicesTotal, this->_hdf5_compression))
+	imageFileName = imageFileName.remove(afterDot, imageFileName.length() - afterDot) + imageFileExtension;
+
+	auto imageFilePath = QFileInfo(savefilename).dir().absFilePath(imageFileName).toStdString();
+	if (!SaveMergeAllXdmf(imageFilePath.c_str(), mergeFilenames, nrslicesTotal, this->_hdf5_compression))
+	{
 		return nullptr;
+	}
+
 	_startslice = startslice1;
 	_endslice = endslice1;
-
 	return fp;
 }
 
