@@ -25,11 +25,11 @@
 #include <QPaintEvent>
 #include <QWheelEvent>
 #include <algorithm>
-#include <qfiledialog.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>
+#include <qfiledialog.h>
 #include <qimage.h>
 #include <qinputdialog.h>
 #include <qlineedit.h>
@@ -236,11 +236,14 @@ void ImageViewerWidget::bmphand_changed(bmphandler* bmph)
 	if (workborder)
 	{
 		if (bmporwork)
+		{
 			workborder_changed();
+		}
 	}
 	else
+	{
 		repaint();
-	return;
+	}
 }
 
 void ImageViewerWidget::overlay_changed()
@@ -283,7 +286,6 @@ void ImageViewerWidget::update(QRect rect)
 
 	if (bmphand->return_width() != width || bmphand->return_height() != height)
 	{
-		//		marks=bmphand->return_marks();
 		vp.clear();
 		vp_old.clear();
 		vp1.clear();
@@ -349,7 +351,6 @@ void ImageViewerWidget::init(SlicesHandler* hand3D, bool bmporwork1)
 			repaint();
 	}
 	show();
-	return;
 }
 
 void ImageViewerWidget::update_range()
@@ -425,9 +426,9 @@ void ImageViewerWidget::reload_bits()
 				// blend with tissue color
 				float* rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
 				float alpha = 0.5f; // rgbo[3];
-				r = static_cast<unsigned char>(r +  alpha * (255.0f * rgbo[0] - r));
-				g = static_cast<unsigned char>(g +  alpha * (255.0f * rgbo[1] - g));
-				b = static_cast<unsigned char>(b +  alpha * (255.0f * rgbo[2] - b));
+				r = static_cast<unsigned char>(r + alpha * (255.0f * rgbo[0] - r));
+				g = static_cast<unsigned char>(g + alpha * (255.0f * rgbo[1] - g));
+				b = static_cast<unsigned char>(b + alpha * (255.0f * rgbo[2] - b));
 				image.setPixel(x, y, qRgb(r, g, b));
 			}
 			else // no tissue

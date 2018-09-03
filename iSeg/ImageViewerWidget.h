@@ -32,7 +32,7 @@ public:
 	ImageViewerWidget(QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
 	~ImageViewerWidget();
-	void init(SlicesHandler* hand3D, bool bmporwork1);
+	void init(SlicesHandler* hand3D, bool bmporwork);
 	void update();
 	void update(QRect rect);
 	void update_range();
@@ -62,8 +62,6 @@ protected:
 	void update_scaleoffsetfactor();
 
 signals:
-	//	void marks_changed();
-	//	void tissues_changed();
 	void addmark_sign(Point p);
 	void addlabel_sign(Point p, std::string str);
 	void clearmarks_sign();
@@ -88,6 +86,14 @@ signals:
 	void mousePosZoom_sign(QPoint mousePosZoom);
 
 private:
+	void reload_bits();
+	void vp_to_image_decorator();
+	void vp_changed();
+	void vp_changed(QRect rect);
+	void vpdyn_changed();
+	void vp1dyn_changed();
+	void mode_changed(unsigned char newmode, bool updatescale = true);
+
 	QPainter* painter;
 	unsigned char mode;
 	float brightness;
@@ -101,14 +107,7 @@ private:
 	int crosshairypos;
 	Pair pixelsize;
 	QColor actual_color;
-	void reload_bits();
-	void vp_to_image_decorator();
-	void vp_changed();
-	void vp_changed(QRect rect);
-	void vpdyn_changed();
-	void vp1dyn_changed();
-	void mode_changed(unsigned char newmode, bool updatescale = true);
-	//	void vp_changed1();
+
 	QImage image;
 	QImage image_decorated;
 
@@ -130,7 +129,6 @@ private:
 	bool workborderlimit;
 	bool isBmp;
 	QPoint mousePosZoom;
-	//	bool showvp;
 	std::vector<Mark>* marks;
 	int eventx, eventy;
 	Q3Action* addmark;

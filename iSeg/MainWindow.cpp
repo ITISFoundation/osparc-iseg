@@ -58,9 +58,9 @@
 #include <boost/filesystem.hpp>
 
 #include <QDesktopWidget>
+#include <QFileDialog>
 #include <QSignalMapper.h>
 #include <q3accel.h>
-#include <QFileDialog>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qdockwidget.h>
@@ -413,7 +413,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		slice_changed();
 	});
 
-	if (!(handler3D->isloaded()))
+	if (!handler3D->isloaded())
 	{
 		handler3D->newbmp(512, 512, 10);
 	}
@@ -431,8 +431,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_workpicturevisible = new QCheckBox("Show Image", this);
 	cb_workpicturevisible->setChecked(true);
 
-	bmp_show = new ImageViewerWidget(
-			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	bmp_show = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	lb_source = new QLabel("Source", this);
 	lb_target = new QLabel("Target", this);
 	bmp_scroller = new Q3ScrollView(this);
@@ -2437,9 +2436,9 @@ void MainWindow::execute_loadpng()
 {
 	maybeSafe();
 
-	QStringList files =	QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
-		QString::null, this, "open files dialog",
-		"Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if (!files.empty())
 	{
@@ -2476,8 +2475,8 @@ void MainWindow::execute_loadjpg()
 	maybeSafe();
 
 	QStringList files =
-		QFileDialog::getOpenFileNames("Images (*.jpg)\n"
-																		 "All(*.*)",
+			QFileDialog::getOpenFileNames("Images (*.jpg)\n"
+																		"All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -2527,9 +2526,9 @@ void MainWindow::execute_loaddicom()
 	maybeSafe();
 
 	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
-																		 "All(*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
+																										"All(*.*)",
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if (!files.empty())
 	{
@@ -2638,7 +2637,7 @@ void MainWindow::execute_loadmhd()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-		"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
+			"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
@@ -2752,8 +2751,8 @@ void MainWindow::execute_loadavw()
 void MainWindow::execute_reloadbmp()
 {
 	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
-		QString::null, this, "open files dialog",
-		"Select one or more files to open");
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if ((unsigned short)files.size() == handler3D->num_slices() ||
 			(unsigned short)files.size() ==
@@ -3833,7 +3832,7 @@ void MainWindow::execute_mergeprojects()
 
 	// Get save file name
 	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
-		"iSeg", "Save merged project as");
+			"iSeg", "Save merged project as");
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
 
@@ -4143,7 +4142,7 @@ void MainWindow::execute_exportlabelfield()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this); 
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".am")))
 		savefilename.append(".am");
@@ -4472,7 +4471,7 @@ void MainWindow::start_surfaceviewer(int mode)
 	QObject::connect(surface_viewer,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-			
+
 	surface_viewer->show();
 	surface_viewer->raise();
 
@@ -5242,7 +5241,8 @@ void MainWindow::execute_grouptissues()
 void MainWindow::execute_about()
 {
 	std::ostringstream ss;
-	ss << "\n\niSeg\n"  << std::string(xstr(ISEG_DESCRIPTION));
+	ss << "\n\niSeg\n"
+		 << std::string(xstr(ISEG_DESCRIPTION));
 	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 
@@ -6202,11 +6202,11 @@ void MainWindow::selectedtissue2work()
 	handler3D->clear_work(); // resets work to 0.0f, then adds each tissue one-by-one
 
 	std::vector<tissues_size_t> selected_tissues;
-	for (auto item: tissueTreeWidget->selectedItems())
+	for (auto item : tissueTreeWidget->selectedItems())
 	{
 		selected_tissues.push_back(tissueTreeWidget->get_type(item));
 	}
-	
+
 	try
 	{
 		if (tissue3Dopt->isChecked())
@@ -6218,7 +6218,7 @@ void MainWindow::selectedtissue2work()
 			handler3D->selectedtissue2work(selected_tissues);
 		}
 	}
-	catch(std::exception&)
+	catch (std::exception&)
 	{
 		ISEG_ERROR_MSG("could not get tissue. Something might be wrong with tissue list.");
 	}
@@ -7910,12 +7910,12 @@ void MainWindow::execute_savecolorlookup()
 
 	if (!savefilename.endsWith(QString(".lut")))
 		savefilename.append(".lut");
-	
+
 	XdmfImageWriter writer(savefilename.toStdString().c_str());
 	writer.SetCompression(handler3D->GetCompression());
 	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
 	{
-		QMessageBox::warning(this, "iSeg", 
-			"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+		QMessageBox::warning(this, "iSeg",
+				"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }
