@@ -370,12 +370,11 @@ void OutlineCorrectionWidget::draw_guide()
 	{
 		int slice = static_cast<int>(handler3D->active_slice()) + sb_guide_offset->value();
 		unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
-		unsigned w = handler3D->width();
-		unsigned h = handler3D->height();
 		if (slice == slice_clamped)
 		{
 			std::vector<Mark> marks;
-
+			auto w = handler3D->width();
+			auto h = handler3D->height();
 			if (work->isOn())
 			{
 				Mark m(Mark::WHITE);
@@ -384,7 +383,8 @@ void OutlineCorrectionWidget::draw_guide()
 			else
 			{
 				Mark m(tissuenr);
-				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m, tissuenr);
+				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m, 
+					[this](tissues_size_t v){ return (v == tissuenr); });
 			}
 
 			emit vm_changed(&marks);
@@ -399,7 +399,41 @@ void OutlineCorrectionWidget::draw_guide()
 
 void OutlineCorrectionWidget::copy_guide()
 {
-	//BL
+	int slice = static_cast<int>(handler3D->active_slice()) + sb_guide_offset->value();
+	unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
+	if (slice == slice_clamped)
+	{
+		size_t w = handler3D->width();
+		size_t h = handler3D->height();
+
+		iseg::DataSelection dataSelection;
+		dataSelection.sliceNr = handler3D->active_slice();
+		dataSelection.work = work->isOn();
+		dataSelection.tissues = !work->isOn();
+		emit begin_datachange(dataSelection, this);
+
+		if (work->isOn())
+		{
+			auto ref = handler3D->target_slices().at(slice_clamped);
+			auto current = handler3D->target_slices().at(handler3D->active_slice());
+
+			std::transform(ref, ref + w*h, current, current, 
+				[](float r, float c){ return (r!=0.f ? r : c); });
+		}
+		else
+		{
+			auto ref = handler3D->tissue_slices(0).at(slice_clamped);
+			auto current = handler3D->tissue_slices(0).at(handler3D->active_slice());
+			std::transform(ref, ref + w*h, current, current, 
+				[this](tissues_size_t r, tissues_size_t c){ return (r==tissuenr ? r : c); });
+		}
+
+		emit end_datachange(this);
+	}
+	else
+	{
+		//BL
+	}
 }
 
 void OutlineCorrectionWidget::on_mouse_clicked(Point p)
