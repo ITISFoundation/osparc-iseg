@@ -22,6 +22,9 @@
 #include <qpushbutton.h>
 #include <qstring.h>
 #include <qwidget.h>
+#include <QDoubleValidator>
+#include <QFormLayout>
+
 
 using namespace std;
 using namespace iseg;
@@ -75,133 +78,100 @@ bool orthonormalize(float* vecA, float* vecB)
 
 PixelResize::PixelResize(SlicesHandler* hand3D, QWidget* parent,
 						 const char* name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+	: QDialog(parent, name, TRUE, wFlags)
+	, handler3D(hand3D)
 {
-	vbox1 = new Q3VBox(this);
-	hbox1 = new Q3HBox(vbox1);
-	vbox2 = new Q3VBox(hbox1);
-	vbox3 = new Q3VBox(hbox1);
-	hbox2 = new Q3HBox(vbox1);
+	auto dx = handler3D->spacing();
 
-	lb_dx = new QLabel(QString("dx (mm): "), vbox2);
-	lb_dy = new QLabel(QString("dy (mm): "), vbox2);
-	lb_lx = new QLabel(QString("lx (mm): "), vbox2);
-	lb_ly = new QLabel(QString("ly (mm): "), vbox2);
+	le_dx = new QLineEdit(QString::number(dx[0]));
+	le_dx->setValidator(new QDoubleValidator);
+	le_dy = new QLineEdit(QString::number(dx[1]));
+	le_dy->setValidator(new QDoubleValidator);
+	le_dz = new QLineEdit(QString::number(dx[2]));
+	le_dz->setValidator(new QDoubleValidator);
 
-	Pair p1 = handler3D->get_pixelsize();
+	le_lx = new QLineEdit(QString::number(dx[0] * handler3D->width()));
+	le_lx->setValidator(new QDoubleValidator);
+	le_ly = new QLineEdit(QString::number(dx[1] * handler3D->height()));
+	le_ly->setValidator(new QDoubleValidator);
+	le_lz = new QLineEdit(QString::number(dx[2] * handler3D->num_slices()));
+	le_lz->setValidator(new QDoubleValidator);
 
-	dx = p1.high;
-	dy = p1.low;
-	le_dx = new QLineEdit(QString::number(p1.high), vbox3);
-	le_dy = new QLineEdit(QString::number(p1.low), vbox3);
-	le_lx = new QLineEdit(QString::number(p1.high * handler3D->width()),
-						  vbox3);
-	le_ly = new QLineEdit(QString::number(p1.low * handler3D->height()),
-						  vbox3);
+	pb_resize = new QPushButton("Resize");
+	pb_close = new QPushButton("Close");
 
-	pb_resize = new QPushButton("Resize", hbox2);
-	pb_close = new QPushButton("Close", hbox2);
+	auto layout = new QFormLayout;
+	layout->addRow("dx (mm)", le_dx);
+	layout->addRow("dy (mm)", le_dy);
+	layout->addRow("dz (mm)", le_dz);
+	layout->addRow("lx (mm)", le_lx);
+	layout->addRow("ly (mm)", le_ly);
+	layout->addRow("lz (mm)", le_lz);
+	layout->addRow(pb_resize, pb_close);
 
-	hbox2->show();
-	vbox2->show();
-	vbox3->show();
-	hbox1->show();
-	vbox1->show();
-	//setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+	setLayout(layout);
+	setMinimumHeight(std::max(200, layout->sizeHint().height()));
+	setMinimumWidth(std::max(200, layout->sizeHint().width()));
 
-	vbox1->setFixedSize(vbox1->sizeHint());
-
-	QObject::connect(pb_resize, SIGNAL(clicked()), this,
-					 SLOT(resize_pressed()));
+	QObject::connect(pb_resize, SIGNAL(clicked()), this, SLOT(resize_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dx, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dx_changed()));
-	QObject::connect(le_dy, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dy_changed()));
-	QObject::connect(le_lx, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(lx_changed()));
-	QObject::connect(le_ly, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(ly_changed()));
-
-	return;
+	QObject::connect(le_dx, SIGNAL(textChanged(const QString&)), this, SLOT(dx_changed()));
+	QObject::connect(le_dy, SIGNAL(textChanged(const QString&)), this, SLOT(dy_changed()));
+	QObject::connect(le_dz, SIGNAL(textChanged(const QString&)), this, SLOT(dz_changed()));
+	QObject::connect(le_lx, SIGNAL(textChanged(const QString&)), this, SLOT(lx_changed()));
+	QObject::connect(le_ly, SIGNAL(textChanged(const QString&)), this, SLOT(ly_changed()));
+	QObject::connect(le_lz, SIGNAL(textChanged(const QString&)), this, SLOT(lz_changed()));
 }
-
-PixelResize::~PixelResize() { delete vbox1; }
 
 void PixelResize::dx_changed()
 {
-	bool b1;
-	float dx1 = le_dx->text().toFloat(&b1);
-	if (b1)
-	{
-		unsigned w = handler3D->width();
-		le_lx->setText(QString::number(w * dx1));
-		dx = dx1;
-	}
-	else
-	{
-		if (le_dx->text() != QString("."))
-			QApplication::beep();
-	}
+	float dx1 = le_dx->text().toFloat();
+	unsigned w = handler3D->width();
+	le_lx->setText(QString::number(w * dx1));
 }
 
 void PixelResize::dy_changed()
 {
-	bool b1;
-	float dy1 = le_dy->text().toFloat(&b1);
-	if (b1)
-	{
-		unsigned h = handler3D->height();
-		le_ly->setText(QString::number(h * dy1));
-		dy = dy1;
-	}
-	else
-	{
-		if (le_dy->text() != QString("."))
-			QApplication::beep();
-	}
+	float dy1 = le_dy->text().toFloat();
+	unsigned h = handler3D->height();
+	le_ly->setText(QString::number(h * dy1));
+}
+
+void PixelResize::dz_changed()
+{
+	float dz1 = le_dz->text().toFloat();
+	unsigned n = handler3D->num_slices();
+	le_lz->setText(QString::number(n * dz1));
 }
 
 void PixelResize::lx_changed()
 {
-	bool b1;
-	float lx1 = le_lx->text().toFloat(&b1);
-	if (b1)
-	{
-		unsigned w = handler3D->width();
-		le_dx->setText(QString::number(lx1 / w));
-		dx = lx1 / w;
-	}
-	else
-	{
-		if (le_lx->text() != QString("."))
-			QApplication::beep();
-	}
+	float lx1 = le_lx->text().toFloat();
+	unsigned w = handler3D->width();
+	le_dx->setText(QString::number(lx1 / w));
 }
 
 void PixelResize::ly_changed()
 {
-	bool b1;
-	float ly1 = le_ly->text().toFloat(&b1);
-	if (b1)
-	{
-		unsigned h = handler3D->height();
-		le_dy->setText(QString::number(ly1 / h));
-		dy = ly1 / h;
-	}
-	else
-	{
-		if (le_ly->text() != QString("."))
-			QApplication::beep();
-	}
+	float ly1 = le_ly->text().toFloat();
+	unsigned h = handler3D->height();
+	le_dy->setText(QString::number(ly1 / h));
+}
+
+void PixelResize::lz_changed()
+{
+	float lz1 = le_lz->text().toFloat();
+	unsigned n = handler3D->num_slices();
+	le_dz->setText(QString::number(lz1 / n));
 }
 
 void PixelResize::resize_pressed()
 {
-	bool bx, by;
-	float dx1 = le_dx->text().toFloat(&bx);
-	float dy1 = le_dy->text().toFloat(&by);
-	if (bx && by)
+	bool bx, by, bz;
+	le_dx->text().toFloat(&bx);
+	le_dy->text().toFloat(&by);
+	le_dz->text().toFloat(&bz);
+	if (bx && by && bz)
 	{
 		accept();
 	}
@@ -211,105 +181,60 @@ void PixelResize::resize_pressed()
 	}
 }
 
-Pair PixelResize::return_pixelsize()
+Vec3 PixelResize::get_pixelsize()
 {
-	Pair p1;
-	p1.high = dx;
-	p1.low = dy;
-	return p1;
+	Vec3 dx;
+	dx[0] = le_dx->text().toFloat();
+	dx[1] = le_dy->text().toFloat();
+	dx[2] = le_dz->text().toFloat();
+	return dx;
 }
 
 DisplacementDialog::DisplacementDialog(SlicesHandler* hand3D, QWidget* parent,
 									   const char* name, Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	vbox1 = new Q3VBox(this);
-	hbox1 = new Q3HBox(vbox1);
-	vbox2 = new Q3VBox(hbox1);
-	vbox3 = new Q3VBox(hbox1);
-	hbox2 = new Q3HBox(vbox1);
-
-	lb_dispx = new QLabel(QString("displacement x (mm): "), vbox2);
-	lb_dispy = new QLabel(QString("displacement y (mm): "), vbox2);
-	lb_dispz = new QLabel(QString("displacement z (mm): "), vbox2);
-
 	handler3D->get_displacement(displacement);
-	le_dispx = new QLineEdit(QString::number(displacement[0]), vbox3);
-	le_dispy = new QLineEdit(QString::number(displacement[1]), vbox3);
-	le_dispz = new QLineEdit(QString::number(displacement[2]), vbox3);
+	le_dispx = new QLineEdit(QString::number(displacement[0]));
+	le_dispx->setValidator(new QDoubleValidator);
+	le_dispy = new QLineEdit(QString::number(displacement[1]));
+	le_dispy->setValidator(new QDoubleValidator);
+	le_dispz = new QLineEdit(QString::number(displacement[2]));
+	le_dispz->setValidator(new QDoubleValidator);
 
-	pb_set = new QPushButton("Set", hbox2);
-	pb_close = new QPushButton("Close", hbox2);
+	pb_set = new QPushButton("Set");
+	pb_close = new QPushButton("Close");
 
-	hbox2->show();
-	vbox2->show();
-	vbox3->show();
-	hbox1->show();
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	auto layout = new QFormLayout;
+	layout->addRow("Offset x (mm)", le_dispx);
+	layout->addRow("Offset y (mm)", le_dispy);
+	layout->addRow("Offset z (mm)", le_dispz);
+	layout->addRow(pb_set, pb_close);
 
-	vbox1->setFixedSize(vbox1->sizeHint());
+	setLayout(layout);
+	setMinimumHeight(layout->sizeHint().height());
+	setMinimumWidth(std::max(200, layout->sizeHint().width()));
 
 	QObject::connect(pb_set, SIGNAL(clicked()), this, SLOT(set_pressed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(reject()));
-	QObject::connect(le_dispx, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dispx_changed()));
-	QObject::connect(le_dispy, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dispy_changed()));
-	QObject::connect(le_dispz, SIGNAL(textChanged(const QString&)), this,
-					 SLOT(dispz_changed()));
-
-	return;
+	QObject::connect(le_dispx, SIGNAL(textChanged(const QString&)), this, SLOT(dispx_changed()));
+	QObject::connect(le_dispy, SIGNAL(textChanged(const QString&)), this, SLOT(dispy_changed()));
+	QObject::connect(le_dispz, SIGNAL(textChanged(const QString&)), this, SLOT(dispz_changed()));
 }
-
-DisplacementDialog::~DisplacementDialog() { delete vbox1; }
 
 void DisplacementDialog::dispx_changed()
 {
-	bool b1;
-	float dx1 = le_dispx->text().toFloat(&b1);
-	if (b1)
-	{
-		displacement[0] = dx1;
-	}
-	else
-	{
-		if (le_dispx->text() != QString(".") &&
-			le_dispx->text() != QString("-"))
-			QApplication::beep();
-	}
+	displacement[0] = le_dispx->text().toFloat();
 }
 
 void DisplacementDialog::dispy_changed()
 {
-	bool b1;
-	float dy1 = le_dispy->text().toFloat(&b1);
-	if (b1)
-	{
-		displacement[1] = dy1;
-	}
-	else
-	{
-		if (le_dispy->text() != QString(".") &&
-			le_dispy->text() != QString("-"))
-			QApplication::beep();
-	}
+	displacement[1] = le_dispy->text().toFloat();
 }
 
 void DisplacementDialog::dispz_changed()
 {
-	bool b1;
-	float dz1 = le_dispz->text().toFloat(&b1);
-	if (b1)
-	{
-		displacement[2] = dz1;
-	}
-	else
-	{
-		if (le_dispz->text() != QString(".") &&
-			le_dispz->text() != QString("-"))
-			QApplication::beep();
-	}
+	displacement[2] = le_dispz->text().toFloat();
 }
 
 void DisplacementDialog::set_pressed()

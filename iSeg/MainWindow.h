@@ -119,7 +119,6 @@ protected:
 	void cancel_transform_helper();
 	void update_ranges_helper();
 	void pixelsize_changed();
-	void slicethickness_changed1();
 	void do_undostepdone();
 	void do_clearundo();
 	void reset_brightnesscontrast();
@@ -265,9 +264,7 @@ private:
 	QScrollBar* scb_slicenr;
 	QPushButton* pb_first;
 	QPushButton* pb_last;
-	Q3HBoxLayout* hboxslicethick;
-	QLabel* lb_slicethick;
-	QLineEdit* le_slicethick;
+
 	QLabel* lb_source;
 	QLabel* lb_target;
 	Q3ScrollView* bmp_scroller;

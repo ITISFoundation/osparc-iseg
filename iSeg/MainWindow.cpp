@@ -595,7 +595,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	unsigned short slicenr = handler3D->active_slice() + 1;
 	pb_first = new QPushButton("|<<", this);
 	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1, Qt::Horizontal, this);
-	scb_slicenr->setFixedWidth(500);
+	scb_slicenr->setMinimumWidth(350);
 	scb_slicenr->setValue(int(slicenr));
 	pb_last = new QPushButton(">>|", this);
 	sb_slicenr = new QSpinBox(1, (int)handler3D->num_slices(), 1, this);
@@ -606,18 +606,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 
-	lb_slicethick = new QLabel("Slice Thickness (mm): ", this);
-	le_slicethick = new QLineEdit(QString::number(handler3D->get_slicethickness()), this);
-	le_slicethick->setFixedWidth(80);
-
-	threshold_widget = new ThresholdWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	threshold_widget = new ThresholdWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
-	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
-	livewire_widget = new LivewireWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	livewire_widget = new LivewireWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(livewire_widget);
 	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(
 			handler3D, this, "new window",
@@ -763,7 +756,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QWidget* hbox1w = new QWidget;
 	QWidget* hboxslicew = new QWidget;
 	QWidget* hboxslicenrw = new QWidget;
-	QWidget* hboxslicethickw = new QWidget;
 	vboxbmpw = new QWidget;
 	vboxworkw = new QWidget;
 	QWidget* vbox1w = new QWidget;
@@ -857,13 +849,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hbox1->addWidget(vboxworkw);
 	hbox1w->setLayout(hbox1);
 
-	QHBoxLayout* hboxslicethick = new QHBoxLayout;
-	hboxslicethick->setSpacing(0);
-	hboxslicethick->setMargin(0);
-	hboxslicethick->addWidget(lb_slicethick);
-	hboxslicethick->addWidget(le_slicethick);
-	hboxslicethickw->setLayout(hboxslicethick);
-
 	QHBoxLayout* hboxslicenr = new QHBoxLayout;
 	hboxslicenr->setSpacing(0);
 	hboxslicenr->setMargin(0);
@@ -880,7 +865,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hboxslice->setMargin(0);
 	hboxslice->addWidget(hboxslicenrw);
 	hboxslice->addStretch();
-	hboxslice->addWidget(hboxslicethickw);
 	hboxslicew->setLayout(hboxslice);
 
 	auto add_widget_filter = [this](QVBoxLayout* vbox, QPushButton* pb,
@@ -1566,9 +1550,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
 			SLOT(scb_slicenr_changed()));
 
-	QObject::connect(le_slicethick, SIGNAL(textChanged(const QString&)), this,
-			SLOT(slicethickness_changed()));
-
 	QObject::connect(pb_add, SIGNAL(clicked()), this, SLOT(add_tissue_pushed()));
 	QObject::connect(pb_sub, SIGNAL(clicked()), this,
 			SLOT(subtract_tissue_pushed()));
@@ -2052,7 +2033,7 @@ void MainWindow::execute_swapxz()
 		handler3D->set_pixelsize(thick, p.low);
 		handler3D->set_slicethickness(p.high);
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 	}
 
 	clear_stack();
@@ -2130,7 +2111,7 @@ void MainWindow::execute_swapyz()
 		handler3D->set_pixelsize(p.high, thick);
 		handler3D->set_slicethickness(p.low);
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 	}
 	clear_stack();
 }
@@ -2546,7 +2527,7 @@ void MainWindow::execute_loaddicom()
 		emit end_datachange(this, iseg::ClearUndo);
 
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 
 		//	handler3D->LoadDICOM();
 
@@ -2581,7 +2562,7 @@ void MainWindow::execute_reloaddicom()
 		LD.move(QCursor::pos());
 		LD.exec();
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 
 		//	handler3D->LoadDICOM();
 
@@ -2645,7 +2626,7 @@ void MainWindow::execute_loadmhd()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2675,7 +2656,7 @@ void MainWindow::execute_loadvtk()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2712,7 +2693,7 @@ void MainWindow::execute_loadnifti()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2741,7 +2722,7 @@ void MainWindow::execute_loadavw()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -3029,7 +3010,7 @@ void MainWindow::execute_loadrtdose()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -3722,8 +3703,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
 	pixelsize_changed();
-
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	if (stillopen)
 	{
@@ -3800,7 +3780,7 @@ void MainWindow::loadS4Llink(const QString& loadfilename)
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	if (stillopen)
 	{
@@ -4783,8 +4763,6 @@ void MainWindow::execute_overlay()
 	QObject::disconnect(
 			&IO, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
-	return;
 }
 
 void MainWindow::execute_pixelsize()
@@ -4793,16 +4771,15 @@ void MainWindow::execute_pixelsize()
 	PR.move(QCursor::pos());
 	if (PR.exec())
 	{
-		Pair p = PR.return_pixelsize();
-		handler3D->set_pixelsize(p.high, p.low);
-		pixelsize_changed();
-		/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(p);
-		if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(p);
-		bmp_show->pixelsize_changed(p);
-		work_show->pixelsize_changed(p);*/
+		auto p = PR.get_pixelsize();
+		if (!(p == handler3D->spacing()))
+		{
+			handler3D->set_pixelsize(p.x, p.y);
+			handler3D->set_slicethickness(p.z);
+			pixelsize_changed();
+			slicethickness_changed();
+		}
 	}
-
-	return;
 }
 
 void MainWindow::pixelsize_changed()
@@ -6422,24 +6399,19 @@ void MainWindow::slice_changed()
 	qw->on_slicenr_changed();
 
 	unsigned short slicenr = handler3D->active_slice() + 1;
-	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
+	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
 	scb_slicenr->setValue(int(slicenr));
-	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
-	QObject::disconnect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
+	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
+	QObject::disconnect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
 	sb_slicenr->setValue(int(slicenr));
-	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
+	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
 	bmp_show->slicenr_changed();
 	work_show->slicenr_changed();
 	scale_dialog->slicenr_changed();
 	imagemath_dialog->slicenr_changed();
 	imageoverlay_dialog->slicenr_changed();
 	overlay_widget->slicenr_changed();
-	if (handler3D->start_slice() >= slicenr ||
-			handler3D->end_slice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -6447,8 +6419,7 @@ void MainWindow::slice_changed()
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(
-				this->paletteBackgroundColor());
+		lb_inactivewarning->setPaletteBackgroundColor(this->paletteBackgroundColor());
 	}
 
 	if (xsliceshower != nullptr)
@@ -6589,43 +6560,17 @@ void MainWindow::pb_last_pressed()
 
 void MainWindow::slicethickness_changed()
 {
-	bool b1;
-	float thickness = le_slicethick->text().toFloat(&b1);
-	if (b1)
-	{
-		handler3D->set_slicethickness(thickness);
-		if (xsliceshower != nullptr)
-			xsliceshower->thickness_changed(thickness);
-		if (ysliceshower != nullptr)
-			ysliceshower->thickness_changed(thickness);
-		if (VV3D != nullptr)
-			VV3D->thickness_changed(thickness);
-		if (VV3Dbmp != nullptr)
-			VV3Dbmp->thickness_changed(thickness);
-		if (surface_viewer != nullptr)
-			surface_viewer->thickness_changed(thickness);
-	}
-	else
-	{
-		if (le_slicethick->text() != QString("."))
-			QApplication::beep();
-	}
-}
-
-void MainWindow::slicethickness_changed1()
-{
-	le_slicethick->setText(QString::number(handler3D->get_slicethickness()));
-
+	float thickness = handler3D->get_slicethickness();
 	if (xsliceshower != nullptr)
-		xsliceshower->thickness_changed(handler3D->get_slicethickness());
+		xsliceshower->thickness_changed(thickness);
 	if (ysliceshower != nullptr)
-		ysliceshower->thickness_changed(handler3D->get_slicethickness());
+		ysliceshower->thickness_changed(thickness);
 	if (VV3D != nullptr)
-		VV3D->thickness_changed(handler3D->get_slicethickness());
+		VV3D->thickness_changed(thickness);
 	if (VV3Dbmp != nullptr)
-		VV3Dbmp->thickness_changed(handler3D->get_slicethickness());
+		VV3Dbmp->thickness_changed(thickness);
 	if (surface_viewer != nullptr)
-		surface_viewer->thickness_changed(handler3D->get_slicethickness());
+		surface_viewer->thickness_changed(thickness);
 }
 
 void MainWindow::tissuenr_changed(int i)
