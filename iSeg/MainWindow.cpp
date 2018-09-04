@@ -60,6 +60,7 @@
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QSignalMapper.h>
+#include <QStackedWidget>
 #include <q3accel.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
@@ -68,8 +69,7 @@
 #include <qprogressdialog.h>
 #include <qsettings.h>
 #include <qtooltip.h>
-
-#include <q3widgetstack.h>
+//#include <q3widgetstack.h>
 #include <qtextedit.h>
 
 #define str_macro(s) #s
@@ -684,7 +684,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		pb_tab[i]->setStyleSheet("text-align: left");
 	}
 
-	methodTab = new Q3WidgetStack(this);
+	methodTab = new QStackedWidget(this);
 	methodTab->setFrameStyle(Q3Frame::Box | Q3Frame::Sunken);
 	methodTab->setLineWidth(2);
 
@@ -693,17 +693,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		methodTab->addWidget(tabwidgets[i]);
 	}
 
-	methodTab->setMargin(10);
-
 	{
 		unsigned short posi = 0;
 		while (posi < nrtabbuttons && !showpb_tab[posi])
 			posi++;
 		if (posi < nrtabbuttons)
-			methodTab->raiseWidget(tabwidgets[posi]);
+			methodTab->setCurrentWidget(tabwidgets[posi]);
 	}
 
-	tab_changed((WidgetInterface*)methodTab->visibleWidget());
+	tab_changed(methodTab->currentIndex());
 
 	updateTabvisibility();
 
@@ -931,8 +929,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QDockWidget* methodTabdock = new QDockWidget(tr("Parameters"), this);
 	style_dockwidget(methodTabdock);
 	methodTabdock->setObjectName("Parameters");
-	methodTabdock->setAllowedAreas(Qt::TopDockWidgetArea |
-																 Qt::BottomDockWidgetArea);
+	methodTabdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	//	Q3ScrollView *tab_scroller=new Q3ScrollView(this);xxxa
 	//	tab_scroller->addChild(methodTab);
 	//	methodTabdock->setWidget(tab_scroller);
@@ -953,24 +950,21 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QDockWidget* bitstackdock = new QDockWidget(tr("Img Clipboard"), this);
 	style_dockwidget(bitstackdock);
 	bitstackdock->setObjectName("Clipboard");
-	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea |
-																Qt::BottomDockWidgetArea);
+	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	bitstackdock->setWidget(bitstack_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, bitstackdock);
 
 	QDockWidget* multiDatasetDock = new QDockWidget(tr("Multi Dataset"), this);
 	style_dockwidget(multiDatasetDock);
 	multiDatasetDock->setObjectName("Multi Dataset");
-	multiDatasetDock->setAllowedAreas(Qt::TopDockWidgetArea |
-																		Qt::BottomDockWidgetArea);
+	multiDatasetDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	multiDatasetDock->setWidget(multidataset_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, multiDatasetDock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
 	style_dockwidget(overlaydock);
 	overlaydock->setObjectName("Overlay");
-	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea |
-															 Qt::BottomDockWidgetArea);
+	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	overlaydock->setWidget(overlay_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, overlaydock);
 
@@ -1518,8 +1512,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(clearTissue, SIGNAL(clicked()), this, SLOT(clearselected()));
 	QObject::connect(clearTissues, SIGNAL(clicked()), this, SLOT(cleartissues()));
 
-	QObject::connect(methodTab, SIGNAL(aboutToShow(QWidget*)), this,
-			SLOT(tab_changed(QWidget*)));
+	QObject::connect(methodTab, SIGNAL(currentChanged(int)), this,
+			SLOT(tab_changed(int)));
 
 	tissueTreeWidget->setSelectionMode(
 			QAbstractItemView::SelectionMode::ExtendedSelection);
@@ -1745,11 +1739,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	m_Modified = false;
 	m_NewDataAfterSwap = false;
-
-	methodTab->raiseWidget(methodTab->visibleWidget());
 }
-
-MainWindow::~MainWindow() {}
 
 void MainWindow::closeEvent(QCloseEvent* qce)
 {
@@ -5042,7 +5032,7 @@ void MainWindow::execute_showtabtoggled(bool)
 		showpb_tab[i] = showtab_action[i]->isOn();
 	}
 
-	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->visibleWidget());
+	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->currentWidget());
 	unsigned short i = 0;
 	while ((i < nrtabbuttons) && (currentwidget != tabwidgets[i]))
 		i++;
@@ -5059,8 +5049,7 @@ void MainWindow::execute_showtabtoggled(bool)
 			i++;
 		if (i != nrtabbuttons)
 		{
-			int pos = methodTab->id(tabwidgets[i]);
-			methodTab->raiseWidget(pos);
+			methodTab->setCurrentWidget(tabwidgets[i]);
 		}
 	}
 	updateTabvisibility();
@@ -6401,7 +6390,7 @@ void MainWindow::workpicturevisible_changed()
 
 void MainWindow::slice_changed()
 {
-	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->currentWidget();
 	qw->on_slicenr_changed();
 
 	unsigned short slicenr = handler3D->active_slice() + 1;
@@ -6452,7 +6441,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 		((WidgetInterface*)(tabwidgets[i]))->newloaded();
 	}
 
-	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->currentWidget();
 
 	if (handler3D->num_slices() != nrslices)
 	{
@@ -6587,7 +6576,7 @@ void MainWindow::slicethickness_changed()
 
 void MainWindow::tissuenr_changed(int i)
 {
-	QWidget* qw = methodTab->visibleWidget();
+	QWidget* qw = methodTab->currentWidget();
 	if (auto tool = dynamic_cast<WidgetInterface*>(qw))
 	{
 		tool->on_tissuenr_changed(i);
@@ -6740,7 +6729,7 @@ void MainWindow::execute_undo()
 	if (handler3D->return_nrundo() > 0)
 	{
 		iseg::DataSelection selectedData;
-		if (methodTab->visibleWidget() == transform_widget)
+		if (methodTab->currentWidget() == transform_widget)
 		{
 			cancel_transform_helper();
 			selectedData = handler3D->undo();
@@ -6769,7 +6758,7 @@ void MainWindow::execute_undo()
 void MainWindow::execute_redo()
 {
 	iseg::DataSelection selectedData;
-	if (methodTab->visibleWidget() == transform_widget)
+	if (methodTab->currentWidget() == transform_widget)
 	{
 		cancel_transform_helper();
 		selectedData = handler3D->redo();
@@ -6821,8 +6810,9 @@ void MainWindow::do_clearundo()
 	editmenu->setItemEnabled(undonr, false);
 }
 
-void MainWindow::tab_changed(QWidget* qw)
+void MainWindow::tab_changed(int idx)
 {
+	QWidget* qw = methodTab->widget(idx);
 	if (qw != tab_old)
 	{
 		ISEG_INFO("Starting widget: " << qw->metaObject()->className());
@@ -7172,7 +7162,7 @@ void MainWindow::updateTabvisibility()
 		counter1++;
 	}
 
-	WidgetInterface* qw = static_cast<WidgetInterface*>(methodTab->visibleWidget());
+	WidgetInterface* qw = static_cast<WidgetInterface*>(methodTab->currentWidget());
 	updateMethodButtonsPressed(qw);
 }
 
@@ -7404,7 +7394,7 @@ void MainWindow::pb_tab_pressed(int nr)
 		pos2++;
 	}
 	pos2--;
-	methodTab->raiseWidget(tabwidgets[pos2]);
+	methodTab->setCurrentWidget(tabwidgets[pos2]);
 }
 
 void MainWindow::bmpcrosshairvisible_changed()
@@ -7628,7 +7618,7 @@ void MainWindow::handle_begin_datachange(iseg::DataSelection& dataSelection,
 	changeData = dataSelection;
 
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transform_widget && sender != transform_widget)
+	if (methodTab->currentWidget() == transform_widget && sender != transform_widget)
 	{
 		cancel_transform_helper();
 	}
@@ -7708,7 +7698,7 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	update_ranges_helper();
 
 	// Block changed data signals for visible widget
-	if (sender == methodTab->visibleWidget())
+	if (sender == methodTab->currentWidget())
 	{
 		QObject::disconnect(this, SIGNAL(bmp_changed()), sender,
 				SLOT(bmp_changed()));
@@ -7753,7 +7743,7 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 		}
 	}
 
-	if (sender == methodTab->visibleWidget())
+	if (sender == methodTab->currentWidget())
 	{
 		QObject::connect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
 		QObject::connect(this, SIGNAL(work_changed()), sender,
@@ -7840,7 +7830,7 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 		QWidget* sender)
 {
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transform_widget &&
+	if (methodTab->currentWidget() == transform_widget &&
 			(dataSelection.bmp || dataSelection.work || dataSelection.tissues))
 	{
 		cancel_transform_helper();

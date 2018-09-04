@@ -34,7 +34,7 @@ class QTreeWidgetItem;
 class QSignalMapper;
 class QCloseEvent;
 
-class Q3WidgetStack;
+class QStackedWidget;
 class QScrollBar;
 class Q3ScrollView;
 class Q3PopupMenu;
@@ -92,7 +92,7 @@ public:
 			const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr,
 			const char* name = nullptr, Qt::WindowFlags wFlags = 0,
 			char** argv = nullptr);
-	~MainWindow();
+	~MainWindow() {}
 
 	friend class Settings;
 
@@ -220,7 +220,7 @@ private:
 	Q3Action* hidetarget;
 	std::vector<Q3Action*> showtab_action;
 	QCheckBox* tissue3Dopt;
-	Q3WidgetStack* methodTab;
+	QStackedWidget* methodTab;
 	ThresholdWidget* threshold_widget;
 	MeasurementWidget* measurement_widget;
 	VesselWidget* vesselextr_widget;
@@ -486,7 +486,7 @@ private slots:
 	void cleartissue();
 	void cleartissues();
 	void clearselected();
-	void tab_changed(QWidget*);
+	void tab_changed(int);
 	void bmptissuevisible_changed();
 	void bmpoutlinevisible_changed();
 	void worktissuevisible_changed();
