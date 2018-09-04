@@ -208,12 +208,12 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	pixelormm->insert(mm);
 	pixel->setChecked(TRUE);
 
-	show_prev_outline = new QCheckBox(QString("Show guide"), hbox_prev_slice);
-	show_prev_outline->setChecked(false);
+	cb_show_guide = new QCheckBox(QString("Show guide"), hbox_prev_slice);
+	cb_show_guide->setChecked(false);
 	auto prev_offset_label = new QLabel(QString("Offset: "), hbox_prev_slice);
-	prev_offset = new QSpinBox(-100, 100, 1, hbox_prev_slice);
-	prev_offset->setValue(1);
-	//copy_prev = new QPushButton(QString("Copy"), hbox_prev_slice);
+	sb_guide_offset = new QSpinBox(-100, 100, 1, hbox_prev_slice);
+	sb_guide_offset->setValue(1);
+	pb_copy_guide = new QPushButton(QString("Copy"), hbox_prev_slice);
 
 	vboxmethods->setMargin(5);
 	vbox1->setMargin(4);
@@ -229,8 +229,9 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	QObject::connect(pb_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	QObject::connect(pb_selectobj, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
-	QObject::connect(show_prev_outline, SIGNAL(clicked()), this, SLOT(draw_guide()));
-	QObject::connect(prev_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
+	QObject::connect(cb_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
+	QObject::connect(sb_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
+	QObject::connect(pb_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
 
 	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this, SLOT(on_select_background()));
 	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
@@ -365,9 +366,9 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 
 void OutlineCorrectionWidget::draw_guide()
 {
-	if (brush->isOn() && show_prev_outline->isChecked())
+	if (brush->isOn() && cb_show_guide->isChecked())
 	{
-		int slice = static_cast<int>(handler3D->active_slice()) + prev_offset->value();
+		int slice = static_cast<int>(handler3D->active_slice()) + sb_guide_offset->value();
 		unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
 		unsigned w = handler3D->width();
 		unsigned h = handler3D->height();
@@ -394,6 +395,11 @@ void OutlineCorrectionWidget::draw_guide()
 		std::vector<Mark> marks;
 		emit vm_changed(&marks);
 	}
+}
+
+void OutlineCorrectionWidget::copy_guide()
+{
+	//BL
 }
 
 void OutlineCorrectionWidget::on_mouse_clicked(Point p)

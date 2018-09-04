@@ -137,9 +137,9 @@ private:
 	QLineEdit* object_value;
 
 	Q3HBox* hbox_prev_slice;
-	QCheckBox* show_prev_outline;
-	QSpinBox* prev_offset;
-	//QPushButton* copy_prev;
+	QCheckBox* cb_show_guide;
+	QSpinBox* sb_guide_offset;
+	QPushButton* pb_copy_guide;
 
 public slots:
 	void pixmm_changed();
@@ -154,6 +154,7 @@ private slots:
 	void execute_pushed();
 	void selectobj_pushed();
 	void draw_guide();
+	void copy_guide();
 };
 
 } // namespace iseg
