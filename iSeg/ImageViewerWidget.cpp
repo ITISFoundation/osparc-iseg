@@ -891,14 +891,9 @@ void ImageViewerWidget::vp_changed()
 
 	repaint();
 
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vp_changed(QRect rect)
@@ -918,14 +913,9 @@ void ImageViewerWidget::vp_changed(QRect rect)
 			(int)ceil(rect.width() * zoom * pixelsize.high),
 			(int)ceil(rect.height() * zoom * pixelsize.low));
 
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vp1dyn_changed()
@@ -981,17 +971,10 @@ void ImageViewerWidget::vp1dyn_changed()
 
 	repaint();
 
-	vpdyn_old.clear();
-	vpdyn_old.insert(vpdyn_old.begin(), vpdyn.begin(), vpdyn.end());
-
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vpdyn_old = vpdyn;
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vpdyn_changed()

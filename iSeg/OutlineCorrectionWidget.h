@@ -63,8 +63,6 @@ private:
 
 	void draw_circle(Point p);
 
-	void draw_guide();
-
 	float get_object_value() const;
 
 	tissues_size_t tissuenr;
@@ -155,6 +153,7 @@ private slots:
 	void method_changed();
 	void execute_pushed();
 	void selectobj_pushed();
+	void draw_guide();
 };
 
 } // namespace iseg

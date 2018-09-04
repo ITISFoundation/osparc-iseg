@@ -229,6 +229,9 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	QObject::connect(pb_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	QObject::connect(pb_selectobj, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
+	QObject::connect(show_prev_outline, SIGNAL(clicked()), this, SLOT(draw_guide()));
+	QObject::connect(prev_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
+
 	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this, SLOT(on_select_background()));
 	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
 
