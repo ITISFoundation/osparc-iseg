@@ -6502,12 +6502,6 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 	qw->init();
 }
 
-void MainWindow::slicenr_up()
-{
-	handler3D->set_active_slice(handler3D->active_slice() + 1);
-	slice_changed();
-}
-
 void MainWindow::zoom_in()
 {
 	//	bmp_show->set_zoom(bmp_show->return_zoom()*2);
@@ -6523,9 +6517,17 @@ void MainWindow::zoom_out()
 	zoom_widget->zoom_changed(work_show->return_zoom() / 2);
 }
 
+void MainWindow::slicenr_up()
+{
+	auto n = std::min(handler3D->active_slice() + sb_stride->value(), handler3D->num_slices() - 1);
+	handler3D->set_active_slice(n);
+	slice_changed();
+}
+
 void MainWindow::slicenr_down()
 {
-	handler3D->set_active_slice(handler3D->active_slice() - 1);
+	auto n = std::max(handler3D->active_slice() - sb_stride->value(), 0);
+	handler3D->set_active_slice(n);
 	slice_changed();
 }
 
