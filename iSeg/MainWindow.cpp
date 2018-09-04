@@ -602,6 +602,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	sb_slicenr->setValue(slicenr);
 	lb_slicenr = new QLabel(QString(" of ") + QString::number((int)handler3D->num_slices()), this);
 
+	lb_stride = new QLabel(QString("Stride"));
+	sb_stride = new QSpinBox(1, 1000, 1, this);
+	sb_stride->setValue(1);
+
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
 	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -712,19 +716,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	}
 	height_max += 65;
 
-	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imagemath_dialog = new ImageMath(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imageoverlay_dialog = new ImageOverlay(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	imagemath_dialog = new ImageMath(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	imageoverlay_dialog = new ImageOverlay(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
-	bitstack_widget = new bits_stack(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	overlay_widget = new extoverlay_widget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	bitstack_widget = new bits_stack(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	overlay_widget = new extoverlay_widget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
 	int height_max1 = height_max;
 
@@ -756,6 +754,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QWidget* hbox1w = new QWidget;
 	QWidget* hboxslicew = new QWidget;
 	QWidget* hboxslicenrw = new QWidget;
+	QWidget* hboxstridew = new QWidget;
 	vboxbmpw = new QWidget;
 	vboxworkw = new QWidget;
 	QWidget* vbox1w = new QWidget;
@@ -860,11 +859,19 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hboxslicenr->addWidget(lb_inactivewarning);
 	hboxslicenrw->setLayout(hboxslicenr);
 
+	QHBoxLayout* hboxstride = new QHBoxLayout;
+	hboxstride->setSpacing(0);
+	hboxstride->setMargin(0);
+	hboxstride->addWidget(lb_stride);
+	hboxstride->addWidget(sb_stride);
+	hboxstridew->setLayout(hboxstride);
+
 	QHBoxLayout* hboxslice = new QHBoxLayout;
 	hboxslice->setSpacing(0);
 	hboxslice->setMargin(0);
 	hboxslice->addWidget(hboxslicenrw);
 	hboxslice->addStretch();
+	hboxslice->addWidget(hboxstridew);
 	hboxslicew->setLayout(hboxslice);
 
 	auto add_widget_filter = [this](QVBoxLayout* vbox, QPushButton* pb,
@@ -1545,10 +1552,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	QObject::connect(pb_first, SIGNAL(clicked()), this, SLOT(pb_first_pressed()));
 	QObject::connect(pb_last, SIGNAL(clicked()), this, SLOT(pb_last_pressed()));
-	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
-	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
+	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
+	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
+	QObject::connect(sb_stride, SIGNAL(valueChanged(int)), this, SLOT(sb_stride_changed()));
 
 	QObject::connect(pb_add, SIGNAL(clicked()), this, SLOT(add_tissue_pushed()));
 	QObject::connect(pb_sub, SIGNAL(clicked()), this,
@@ -6544,6 +6550,12 @@ void MainWindow::scb_slicenr_changed()
 {
 	handler3D->set_active_slice(scb_slicenr->value() - 1);
 	slice_changed();
+}
+
+void MainWindow::sb_stride_changed()
+{
+	sb_slicenr->setSingleStep(sb_stride->value());
+	scb_slicenr->setSingleStep(sb_stride->value());
 }
 
 void MainWindow::pb_first_pressed()

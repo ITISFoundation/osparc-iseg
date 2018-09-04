@@ -34,8 +34,6 @@ class QTreeWidgetItem;
 class QSignalMapper;
 class QCloseEvent;
 
-class Q3VBox;
-class Q3HBoxLayout;
 class Q3WidgetStack;
 class QScrollBar;
 class Q3ScrollView;
@@ -256,14 +254,14 @@ private:
 	void slice_changed();
 	unsigned short nrslices;
 	void slices3d_changed(bool new_bitstack);
-	Q3HBoxLayout* hboxslice;
-	Q3HBoxLayout* hboxslicenr;
 	QLabel* lb_slicenr;
 	QLabel* lb_inactivewarning;
 	QSpinBox* sb_slicenr;
 	QScrollBar* scb_slicenr;
 	QPushButton* pb_first;
 	QPushButton* pb_last;
+	QLabel* lb_stride;
+	QSpinBox* sb_stride;
 
 	QLabel* lb_source;
 	QLabel* lb_target;
@@ -316,9 +314,6 @@ private:
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;
 	std::vector<bool> showpb_tab;
-	Q3HBoxLayout* hboxtabs;
-	Q3VBox* vboxtabs1;
-	Q3VBox* vboxtabs2;
 	void updateMethodButtonsPressed(WidgetInterface*);
 	void updateTabvisibility();
 	std::vector<WidgetInterface*> tabwidgets;
@@ -502,6 +497,7 @@ private slots:
 	void zoom_out();
 	void sb_slicenr_changed();
 	void scb_slicenr_changed();
+	void sb_stride_changed();
 	void pb_first_pressed();
 	void pb_last_pressed();
 	void slicethickness_changed();
