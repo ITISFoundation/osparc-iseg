@@ -20,6 +20,10 @@ struct Mark
 	Mark(unsigned label = 0) : mark(label) {}
 	Mark(const Mark& r) : p(r.p), mark(r.mark), name(r.name) {}
 
+	static const unsigned RED = -1;
+	static const unsigned GREEN = -2;
+	static const unsigned BLUE = -3;
+
 	Point p;
 	unsigned mark;
 	std::string name;

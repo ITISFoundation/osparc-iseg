@@ -14,6 +14,7 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
+#include "Data/ExtractBoundary.h"
 #include "Data/Point.h"
 
 #include "Core/ColorLookupTable.h"
@@ -817,102 +818,7 @@ void ImageViewerWidget::wheelEvent(QWheelEvent* e)
 void ImageViewerWidget::recompute_workborder()
 {
 	bmphand = handler3D->get_activebmphandler();
-	vp.clear();
-	Point p;
-
-	float* bits = bmphand->return_work();
-	unsigned pos = 0;
-
-	if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width])
-	{
-		p.px = 0;
-		p.py = 0;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-	for (unsigned short j = 1; j + 1 < width; j++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos + width])
-		{
-			p.px = j;
-			p.py = 0;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width])
-	{
-		p.px = width - 1;
-		p.py = 0;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-
-	for (unsigned short i = 1; i + 1 < height; i++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = 0;
-			p.py = i;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-		for (unsigned short j = 1; j + 1 < width; j++)
-		{
-			if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-					bits[pos] != bits[pos + width] ||
-					bits[pos] != bits[pos - width])
-			{
-				p.px = j;
-				p.py = i;
-				if (bits[pos] != 0)
-					vp.push_back(p);
-			}
-			pos++;
-		}
-		if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = width - 1;
-			p.py = i;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - width])
-	{
-		p.px = 0;
-		p.py = height - 1;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-	for (unsigned short j = 1; j + 1 < width; j++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = j;
-			p.py = height - 1;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos - width])
-	{
-		p.px = width - 1;
-		p.py = height - 1;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
+	vp = extract_boundary(bmphand->return_work(), width, height, Point());
 }
 
 void ImageViewerWidget::workborder_changed()

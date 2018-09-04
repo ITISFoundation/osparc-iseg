@@ -29,13 +29,13 @@
 
 using namespace iseg;
 
-OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
+OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(Format("OutLine Correction routines that can be used to modify "
-		"the result of a segmentation operation and to correct frequently "
-		"occurring segmentation deficiencies."));
+	setToolTip(Format(
+			"OutLine Correction routines that can be used to modify "
+			"the result of a segmentation operation and to correct frequently "
+			"occurring segmentation deficiencies."));
 	setObjectName("OLC");
 
 	activeslice = handler3D->active_slice();
@@ -63,7 +63,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	hbox6 = new Q3HBox(vbox1);
 	hbox5 = new Q3HBox(vbox1);
 	hboxpixormm = new Q3HBox(vbox1);
-	Q3HBox* dummyBox = new Q3HBox(vbox1);
+	hbox_prev_slice = new Q3HBox(vbox1);
 
 	txt_radius = new QLabel("Thickness: ", hbox1);
 	sb_radius = new QSpinBox(0, 99, 2, hbox1);
@@ -91,31 +91,34 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	Q3HBox* hboxmethods4 = new Q3HBox(vboxmethods);
 
 	olcorr = new QRadioButton(QString("Outline Corr"), hboxmethods1);
-	olcorr->setToolTip(Format("Draw an alternative boundary segment for a region.This segment "
-			"will be connected to the region using the "
-			"shortest possible lines and will replace the boundary segment "
-			"between the connection points."));
+	olcorr->setToolTip(Format(
+			"Draw an alternative boundary segment for a region.This segment "
+			"will be connected to the region using the shortest possible lines "
+			"and will replace the boundary segment between the connection points."));
 	brush = new QRadioButton(QString("Brush"), hboxmethods1);
 	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
 	holefill = new QRadioButton(QString("Fill Holes"), hboxmethods1);
-	holefill->setToolTip(Format("Close all holes in the selected region or tissue that have a "
-			"size smaller than the number of "
-			"pixels specified by the Hole Size option."));
+	holefill->setToolTip(Format(
+			"Close all holes in the selected region or tissue that have a "
+			"size smaller than the number of pixels specified by the Hole Size option."));
 	removeislands = new QRadioButton(QString("Remove Islands"), hboxmethods2);
-	removeislands->setToolTip(Format("Remove all islands (speckles and outliers) with the selected "
+	removeislands->setToolTip(Format(
+			"Remove all islands (speckles and outliers) with the selected "
 			"gray value or tissue assignment."));
 	gapfill = new QRadioButton(QString("Fill Gaps"), hboxmethods2);
 	gapfill->setToolTip(Format(
 			"Close gaps between multiple disconnected regions having the same "
 			"gray value or belonging to the same tissue."));
 	addskin = new QRadioButton(QString("Add Skin"), hboxmethods2);
-	addskin->setToolTip(Format("Add a skin layer to a segmentation with a "
+	addskin->setToolTip(Format(
+			"Add a skin layer to a segmentation with a "
 			"specified Thickness (in pixels)."));
 	fillskin = new QRadioButton(QString("Fill Skin"), hboxmethods3);
 	fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
 	allfill = new QRadioButton(QString("Fill All"), hboxmethods3);
-	allfill->setToolTip(Format("Make sure that there are no unassigned regions "
-														 "inside the segmented model."));
+	allfill->setToolTip(Format(
+			"Make sure that there are no unassigned regions "
+			"inside the segmented model."));
 	adapt = new QRadioButton(QString("Adapt"), hboxmethods3);
 
 	method->insert(olcorr);
@@ -150,21 +153,17 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	modifybrush = new QRadioButton(QString("Modify"), hbox3a);
 	modifybrush->setToolTip(Format(
-			"The Modify mode depends on where the mouse is initially pressed "
-			"down. If it is pressed down within the selected region or tissue, it "
-			"acts "
+			"The Modify mode depends on where the mouse is initially pressed down. "
+			"If it is pressed down within the selected region or tissue, it acts "
 			"as a drawing brush. In contrast, when it is pressed down outside, it "
 			"will overwrite the selected region or tissue with the gray value or "
-			"tissue "
-			"assignment of the point where the mouse has initially been pressed "
-			"down."));
+			"tissue assignment of the point where the mouse has initially been pressed down."));
 	drawbrush = new QRadioButton(QString("Draw"), hbox3a);
-	drawbrush->setToolTip(
-			Format("Use the brush to draw with the currently selected gray "
-						 "value(TargetPict) or tissue assignment (Tissue)."));
+	drawbrush->setToolTip(Format(
+			"Use the brush to draw with the currently selected gray "
+			"value(TargetPict) or tissue assignment (Tissue)."));
 	erasebrush = new QRadioButton(QString("Erase"), hbox3a);
-	erasebrush->setToolTip(
-			Format("Erase a region leaving black or no tissue assignment behind."));
+	erasebrush->setToolTip(Format("Erase a region leaving black or no tissue assignment behind."));
 
 	brushtype->insert(modifybrush);
 	brushtype->insert(drawbrush);
@@ -185,15 +184,14 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	tissue->show();
 
 	pb_selectobj = new QPushButton("Select Object", hbox5o);
-	pb_selectobj->setToolTip(
+	pb_selectobj->setToolTip(Format(
 			"Press this button and select the object in the target image. This "
-			"object will be considered as foreground by the current operation.");
+			"object will be considered as foreground by the current operation."));
 	auto obj_label = new QLabel(QString("Object value"), hbox6);
 	object_value = new QLineEdit(QString::number(255.f), hbox6);
 	object_value->setValidator(new QDoubleValidator);
 
 	in_or_out = new QButtonGroup(this);
-	//	in_or_out->hide();
 	inside = new QRadioButton(QString("Inside"), hbox5);
 	outside = new QRadioButton(QString("Outside"), hbox5);
 	in_or_out->insert(inside);
@@ -203,52 +201,35 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	outside->show();
 
 	pixelormm = new QButtonGroup(this);
-	//	target->hide();
 	pixel = new QRadioButton(QString("pixel"), hboxpixormm);
 	mm = new QRadioButton(QString("mm"), hboxpixormm);
 	pixelormm->insert(pixel);
 	pixelormm->insert(mm);
-	pixel->show();
 	pixel->setChecked(TRUE);
-	mm->show();
+
+	show_prev_outline = new QCheckBox(QString("Show guide"), hbox_prev_slice);
+	show_prev_outline->setChecked(false);
+	auto prev_offset_label = new QLabel(QString("Offset: "), hbox_prev_slice);
+	prev_offset = new QSpinBox(-100, 100, 1, hbox_prev_slice);
+	prev_offset->setValue(1);
+	//copy_prev = new QPushButton(QString("Copy"), hbox_prev_slice);
 
 	vboxmethods->setMargin(5);
-	vbox1->setMargin(1);
+	vbox1->setMargin(4);
 	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 	vboxmethods->setLineWidth(1);
 
-	hbox1->setFixedSize(hbox1->sizeHint());
-	hbox2->setFixedSize(hbox2->sizeHint());
-	hbox2a->setFixedSize(hbox2a->sizeHint());
-	//	hbox3->setFixedSize(hbox3->sizeHint());
-	//	hbox3cont->setFixedSize(hbox3cont->sizeHint());
-	hbox3a->setFixedSize(hbox3a->sizeHint());
-	hbox4->setFixedSize(hbox4->sizeHint());
-	hbox5->setFixedSize(hbox5->sizeHint());
-	hboxpixormm->setFixedSize(hboxpixormm->sizeHint());
-	vbox1->setFixedSize(vbox1->sizeHint());
-	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
-	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());//	setFixedSize(vbox1->size());
-
 	method_changed();
 
-	QObject::connect(method, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(target, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(allslices, SIGNAL(clicked()), this,
-			SLOT(method_changed()));
-	QObject::connect(pixelormm, SIGNAL(buttonClicked(int)), this,
-			SLOT(pixmm_changed()));
-	QObject::connect(pb_execute, SIGNAL(clicked()), this,
-			SLOT(execute_pushed()));
-	QObject::connect(pb_selectobj, SIGNAL(clicked()), this,
-			SLOT(selectobj_pushed()));
+	QObject::connect(method, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+	QObject::connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+	QObject::connect(allslices, SIGNAL(clicked()), this, SLOT(method_changed()));
+	QObject::connect(pixelormm, SIGNAL(buttonClicked(int)), this, SLOT(pixmm_changed()));
+	QObject::connect(pb_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
+	QObject::connect(pb_selectobj, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
-	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this,
-			SLOT(on_select_background()));
-	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this,
-			SLOT(on_select_skin()));
+	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this, SLOT(on_select_background()));
+	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
 
 	selectobj = false;
 
@@ -376,6 +357,16 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 
 	emit vpdyn_changed(&vpdyn);
 	vpdyn.clear();
+}
+
+void OutlineCorrectionWidget::draw_guide()
+{
+	//if ()
+	{
+		std::vector<Mark> marks;
+
+		emit vm_changed(&marks);
+	}
 }
 
 void OutlineCorrectionWidget::on_mouse_clicked(Point p)
@@ -617,6 +608,7 @@ void OutlineCorrectionWidget::method_changed()
 		allslices->hide();
 		pb_execute->hide();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 		if (work->isOn())
 		{
 			hbox5o->show();
@@ -636,6 +628,7 @@ void OutlineCorrectionWidget::method_changed()
 		hbox4->show();
 		hbox5->hide();
 		hboxpixormm->show();
+		hbox_prev_slice->show();
 		allslices->hide();
 		pb_execute->hide();
 		if (work->isOn())
@@ -666,6 +659,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->setText("Fill Holes");
 		pb_execute->show();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 		if (work->isOn())
 		{
 			hbox5o->show();
@@ -692,6 +686,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->setText("Remove Islands");
 		pb_execute->show();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 		if (work->isOn())
 		{
 			hbox5o->show();
@@ -718,6 +713,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->show();
 		hbox5o->hide();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 	}
 	else if (addskin->isOn())
 	{
@@ -743,6 +739,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->show();
 		hbox5o->hide();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 	}
 	else if (fillskin->isOn())
 	{
@@ -771,6 +768,7 @@ void OutlineCorrectionWidget::method_changed()
 			pb_execute->setEnabled(false);
 		hbox5o->hide();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 	}
 	else if (allfill->isOn())
 	{
@@ -786,6 +784,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->show();
 		hbox5o->hide();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 	}
 	else if (adapt->isOn())
 	{
@@ -801,6 +800,7 @@ void OutlineCorrectionWidget::method_changed()
 		pb_execute->show();
 		hbox5o->show();
 		hbox6->hide();
+		hbox_prev_slice->hide();
 	}
 	pixmm_changed();
 }
@@ -880,7 +880,7 @@ void OutlineCorrectionWidget::execute_pushed()
 			{
 				if (mm->isOn())
 				{
-					// \warning creates block shaped kernel, instead of ellipsoid 
+					// \warning creates block shaped kernel, instead of ellipsoid
 					if (work->isOn())
 					{
 						float setto = handler3D->add_skin3D_outside2(rx, ry, rz);
@@ -926,7 +926,7 @@ void OutlineCorrectionWidget::execute_pushed()
 			{
 				if (mm->isOn())
 				{
-					// \warning creates block shaped kernel, instead of ellipsoid 
+					// \warning creates block shaped kernel, instead of ellipsoid
 					float mm_rad = mm_radius->text().toFloat();
 					if (work->isOn())
 					{
@@ -957,7 +957,7 @@ void OutlineCorrectionWidget::execute_pushed()
 			{
 				if (mm->isOn())
 				{
-					// \warning if spacing is anisotropic, skin thickness will be non-uniform   
+					// \warning if spacing is anisotropic, skin thickness will be non-uniform
 					if (work->isOn())
 					{
 						float setto = bmphand->add_skin(rx);
@@ -1159,10 +1159,8 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(method, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
-		QObject::disconnect(target, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
+		QObject::disconnect(method, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+		QObject::disconnect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);

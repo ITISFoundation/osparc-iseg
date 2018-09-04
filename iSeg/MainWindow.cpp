@@ -602,7 +602,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	sb_slicenr->setValue(slicenr);
 	lb_slicenr = new QLabel(QString(" of ") + QString::number((int)handler3D->num_slices()), this);
 
-	lb_stride = new QLabel(QString("Stride"));
+	lb_stride = new QLabel(QString("Stride: "));
 	sb_stride = new QSpinBox(1, 1000, 1, this);
 	sb_stride->setValue(1);
 

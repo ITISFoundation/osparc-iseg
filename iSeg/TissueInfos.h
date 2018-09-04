@@ -103,8 +103,7 @@ public:
 	static tissues_size_t GetTissueType(std::string tissuename);
 	static bool GetTissueLocked(tissues_size_t tissuetype);
 
-	static void SetTissueColor(tissues_size_t tissuetype, float r, float g,
-			float b);
+	static void SetTissueColor(tissues_size_t tissuetype, float r, float g, float b);
 	static void SetTissueOpac(tissues_size_t tissuetype, float val);
 	static void SetTissueName(tissues_size_t tissuetype, std::string val);
 	static void SetTissueLocked(tissues_size_t tissuetype, bool val);

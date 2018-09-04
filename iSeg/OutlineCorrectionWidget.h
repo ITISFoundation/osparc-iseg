@@ -63,6 +63,8 @@ private:
 
 	void draw_circle(Point p);
 
+	void draw_guide();
+
 	float get_object_value() const;
 
 	tissues_size_t tissuenr;
@@ -135,6 +137,11 @@ private:
 	bool skinSelected;
 
 	QLineEdit* object_value;
+
+	Q3HBox* hbox_prev_slice;
+	QCheckBox* show_prev_outline;
+	QSpinBox* prev_offset;
+	//QPushButton* copy_prev;
 
 public slots:
 	void pixmm_changed();
