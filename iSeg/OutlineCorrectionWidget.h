@@ -131,7 +131,7 @@ private:
 	QPushButton* getCurrentTissueSkin;
 	QLineEdit* backgroundText;
 	QLineEdit* skinText;
-	tissues_size_t selectedBacgroundID;
+	tissues_size_t selectedBackgroundID;
 	tissues_size_t selectedSkinID;
 	bool backgroundSelected;
 	bool skinSelected;

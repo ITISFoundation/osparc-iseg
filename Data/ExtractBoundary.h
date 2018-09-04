@@ -9,10 +9,12 @@
 */
 #pragma once
 
+#include <vector>
+
 namespace iseg {
 
 template<typename TPoint, typename T>
-std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned height, const TPoint& exemplar)
+std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned height, const TPoint& exemplar, T X = T(0))
 {
 	std::vector<TPoint> vp;
 	TPoint p = exemplar;
@@ -23,18 +25,17 @@ std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned hei
 	{
 		p.px = 0;
 		p.py = 0;
-		if (bits[pos] != 0)
+		if (bits[pos] != X)
 			vp.push_back(p);
 	}
 	pos++;
 	for (unsigned short j = 1; j + 1 < width; j++)
 	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos + width])
+		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width])
 		{
 			p.px = j;
 			p.py = 0;
-			if (bits[pos] != 0)
+			if (bits[pos] != X)
 				vp.push_back(p);
 		}
 		pos++;
@@ -43,41 +44,38 @@ std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned hei
 	{
 		p.px = width - 1;
 		p.py = 0;
-		if (bits[pos] != 0)
+		if (bits[pos] != X)
 			vp.push_back(p);
 	}
 	pos++;
 
 	for (unsigned short i = 1; i + 1 < height; i++)
 	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
+		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width] || bits[pos] != bits[pos - width])
 		{
 			p.px = 0;
 			p.py = i;
-			if (bits[pos] != 0)
+			if (bits[pos] != X)
 				vp.push_back(p);
 		}
 		pos++;
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
 			if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-					bits[pos] != bits[pos + width] ||
-					bits[pos] != bits[pos - width])
+					bits[pos] != bits[pos + width] || bits[pos] != bits[pos - width])
 			{
 				p.px = j;
 				p.py = i;
-				if (bits[pos] != 0)
+				if (bits[pos] != X)
 					vp.push_back(p);
 			}
 			pos++;
 		}
-		if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
+		if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width] || bits[pos] != bits[pos - width])
 		{
 			p.px = width - 1;
 			p.py = i;
-			if (bits[pos] != 0)
+			if (bits[pos] != X)
 				vp.push_back(p);
 		}
 		pos++;
@@ -86,7 +84,7 @@ std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned hei
 	{
 		p.px = 0;
 		p.py = height - 1;
-		if (bits[pos] != 0)
+		if (bits[pos] != X)
 			vp.push_back(p);
 	}
 	pos++;
@@ -97,7 +95,7 @@ std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned hei
 		{
 			p.px = j;
 			p.py = height - 1;
-			if (bits[pos] != 0)
+			if (bits[pos] != X)
 				vp.push_back(p);
 		}
 		pos++;
@@ -106,7 +104,7 @@ std::vector<TPoint> extract_boundary(const T* bits, unsigned width, unsigned hei
 	{
 		p.px = width - 1;
 		p.py = height - 1;
-		if (bits[pos] != 0)
+		if (bits[pos] != X)
 			vp.push_back(p);
 	}
 

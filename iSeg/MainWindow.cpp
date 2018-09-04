@@ -6526,7 +6526,7 @@ void MainWindow::slicenr_up()
 
 void MainWindow::slicenr_down()
 {
-	auto n = std::max(handler3D->active_slice() - sb_stride->value(), 0);
+	auto n = std::max(static_cast<int>(handler3D->active_slice()) - sb_stride->value(), 0);
 	handler3D->set_active_slice(n);
 	slice_changed();
 }

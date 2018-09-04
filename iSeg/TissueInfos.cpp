@@ -78,6 +78,12 @@ void TissueInfos::GetTissueColorRGB(tissues_size_t tissuetype, unsigned char& r,
 			g = 0;
 			b = 255;
 		}
+		else if (tissuetype == Mark::WHITE)
+		{
+			r = 255;
+			g = 255;
+			b = 255;
+		}
 	}
 }
 

@@ -23,8 +23,12 @@ struct Mark
 	static const unsigned RED = -1;
 	static const unsigned GREEN = -2;
 	static const unsigned BLUE = -3;
+	static const unsigned WHITE = -4;
 
-	Point p;
+	union {
+		Point p;
+		struct { short px, py; };
+	};
 	unsigned mark;
 	std::string name;
 };

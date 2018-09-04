@@ -13,6 +13,7 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Data/ExtractBoundary.h"
 #include "Data/Point.h"
 #include "Data/addLine.h"
 
@@ -279,7 +280,7 @@ void OutlineCorrectionWidget::select_background(QString tissueName, tissues_size
 	backgroundText->clear();
 	backgroundText->setText(tissueName);
 
-	selectedBacgroundID = nr;
+	selectedBackgroundID = nr;
 	backgroundSelected = true;
 
 	if (backgroundSelected && skinSelected)
@@ -361,10 +362,33 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 
 void OutlineCorrectionWidget::draw_guide()
 {
-	//if ()
+	if (brush->isOn() && show_prev_outline->isChecked())
+	{
+		int slice = static_cast<int>(handler3D->active_slice()) + prev_offset->value();
+		unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
+		unsigned w = handler3D->width();
+		unsigned h = handler3D->height();
+		if (slice == slice_clamped)
+		{
+			std::vector<Mark> marks;
+
+			if (work->isOn())
+			{
+				Mark m(Mark::WHITE);
+				marks = extract_boundary<Mark, float>(handler3D->target_slices().at(slice_clamped), w, h, m);
+			}
+			else
+			{
+				Mark m(tissuenr);
+				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m, tissuenr);
+			}
+
+			emit vm_changed(&marks);
+		}
+	}
+	else
 	{
 		std::vector<Mark> marks;
-
 		emit vm_changed(&marks);
 	}
 }
@@ -548,8 +572,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 			if (work->isOn())
 				bmphand->correct_outline(f, &vpdyn);
 			else
-				bmphand->correct_outlinetissue(
-						handler3D->active_tissuelayer(), tissuenr, &vpdyn);
+				bmphand->correct_outlinetissue(handler3D->active_tissuelayer(), tissuenr, &vpdyn);
 			emit end_datachange(this);
 
 			vpdyn.clear();
@@ -803,6 +826,7 @@ void OutlineCorrectionWidget::method_changed()
 		hbox_prev_slice->hide();
 	}
 	pixmm_changed();
+	draw_guide();
 }
 
 void OutlineCorrectionWidget::execute_pushed()
@@ -999,9 +1023,9 @@ void OutlineCorrectionWidget::execute_pushed()
 		int const zThick = mm->isOn() ? static_cast<int>(mm_rad / spacing[2] + 0.1f) : sb_radius->value();
 
 		if (allslices->isChecked())
-			handler3D->fill_skin_3d(xThick, yThick, zThick, selectedBacgroundID, selectedSkinID);
+			handler3D->fill_skin_3d(xThick, yThick, zThick, selectedBackgroundID, selectedSkinID);
 		else
-			bmphand->fill_skin(xThick, yThick, selectedBacgroundID, selectedSkinID);
+			bmphand->fill_skin(xThick, yThick, selectedBackgroundID, selectedSkinID);
 	}
 	else if (allfill->isOn())
 	{
@@ -1073,6 +1097,7 @@ void OutlineCorrectionWidget::on_slicenr_changed()
 	{
 		workbits_changed();
 	}
+	draw_guide();
 }
 
 void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
@@ -1099,12 +1124,15 @@ void OutlineCorrectionWidget::newloaded()
 void OutlineCorrectionWidget::on_tissuenr_changed(int tissuenr1)
 {
 	tissuenr = (tissues_size_t)(tissuenr1 + 1);
+	draw_guide();
 }
 
 void OutlineCorrectionWidget::cleanup()
 {
 	vpdyn.clear();
 	emit vpdyn_changed(&vpdyn);
+	std::vector<Mark> vm;
+	emit vm_changed(&vm);
 }
 
 FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
