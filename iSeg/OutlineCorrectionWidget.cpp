@@ -11,8 +11,10 @@
 
 #include "OutlineCorrectionWidget.h"
 #include "SlicesHandler.h"
+#include "TissueInfos.h"
 #include "bmp_read_1.h"
 
+#include "Data/AddConnected.h"
 #include "Data/ExtractBoundary.h"
 #include "Data/Point.h"
 #include "Data/addLine.h"
@@ -89,7 +91,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	Q3HBox* hboxmethods1 = new Q3HBox(vboxmethods);
 	Q3HBox* hboxmethods2 = new Q3HBox(vboxmethods);
 	Q3HBox* hboxmethods3 = new Q3HBox(vboxmethods);
-	Q3HBox* hboxmethods4 = new Q3HBox(vboxmethods);
+	//Q3HBox* hboxmethods4 = new Q3HBox(vboxmethods);
 
 	olcorr = new QRadioButton(QString("Outline Corr"), hboxmethods1);
 	olcorr->setToolTip(Format(
@@ -214,11 +216,13 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	sb_guide_offset = new QSpinBox(-100, 100, 1, hbox_prev_slice);
 	sb_guide_offset->setValue(1);
 	pb_copy_guide = new QPushButton(QString("Copy"), hbox_prev_slice);
+	pb_copy_pick_guide = new QPushButton(QString("Copy Picked"), hbox_prev_slice);
 
 	vboxmethods->setMargin(5);
 	vbox1->setMargin(4);
 	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 	vboxmethods->setLineWidth(1);
+	vboxmethods->setMargin(4);
 
 	method_changed();
 
@@ -232,6 +236,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	QObject::connect(cb_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
 	QObject::connect(sb_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
 	QObject::connect(pb_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
+	QObject::connect(pb_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
 
 	QObject::connect(getCurrentTissueBackground, SIGNAL(clicked()), this, SLOT(on_select_background()));
 	QObject::connect(getCurrentTissueSkin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
@@ -383,28 +388,28 @@ void OutlineCorrectionWidget::draw_guide()
 			else
 			{
 				Mark m(tissuenr);
-				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m, 
-					[this](tissues_size_t v){ return (v == tissuenr); });
+				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m,
+						[this](tissues_size_t v) { return (v == tissuenr); });
 			}
 
 			emit vm_changed(&marks);
+
+			return;
 		}
 	}
-	else
-	{
-		std::vector<Mark> marks;
-		emit vm_changed(&marks);
-	}
+
+	std::vector<Mark> marks;
+	emit vm_changed(&marks);
 }
 
-void OutlineCorrectionWidget::copy_guide()
+void OutlineCorrectionWidget::copy_guide(Point* p)
 {
 	int slice = static_cast<int>(handler3D->active_slice()) + sb_guide_offset->value();
 	unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
 	if (slice == slice_clamped)
 	{
-		size_t w = handler3D->width();
-		size_t h = handler3D->height();
+		unsigned w = handler3D->width();
+		unsigned h = handler3D->height();
 
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
@@ -417,15 +422,35 @@ void OutlineCorrectionWidget::copy_guide()
 			auto ref = handler3D->target_slices().at(slice_clamped);
 			auto current = handler3D->target_slices().at(handler3D->active_slice());
 
-			std::transform(ref, ref + w*h, current, current, 
-				[](float r, float c){ return (r!=0.f ? r : c); });
+			if (p)
+			{
+				unsigned pos = p->px + w * p->py;
+				add_connected_2d(ref, current, w, h, pos, 255.f,
+						[&](unsigned idx) { return (ref[idx] != 0.f); });
+			}
+			else
+			{
+				std::transform(ref, ref + w * h, current, current,
+						[](float r, float c) { return (r != 0.f ? r : c); });
+			}
 		}
 		else
 		{
 			auto ref = handler3D->tissue_slices(0).at(slice_clamped);
 			auto current = handler3D->tissue_slices(0).at(handler3D->active_slice());
-			std::transform(ref, ref + w*h, current, current, 
-				[this](tissues_size_t r, tissues_size_t c){ return (r==tissuenr ? r : c); });
+
+			if (p)
+			{
+				unsigned pos = p->px + w * p->py;
+				std::vector<tissues_size_t> temp(w * h, 0);
+				add_connected_2d(ref, temp.data(), w, h, pos, tissuenr,
+						[&](unsigned idx) { return ref[idx] == tissuenr; });
+				ref = temp.data();
+			}
+
+			std::transform(ref, ref + w * h, current, current, [this](tissues_size_t r, tissues_size_t c) {
+				return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
+			});
 		}
 
 		emit end_datachange(this);
@@ -440,9 +465,18 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 {
 	if (selectobj)
 	{
-		auto v = bmphand->work_pt(p);
-		object_value->setText(QString::number(v));
-		pb_selectobj->setDown(false);
+		if (copy_mode)
+		{
+			copy_mode = false;
+			copy_guide(&p);
+			pb_copy_pick_guide->setDown(false);
+		}
+		else
+		{
+			auto v = bmphand->work_pt(p);
+			object_value->setText(QString::number(v));
+			pb_selectobj->setDown(false);
+		}
 		return;
 	}
 
@@ -661,6 +695,8 @@ void OutlineCorrectionWidget::method_changed()
 	tissuesListBackground->hide();
 	tissuesListSkin->hide();
 	pb_execute->setEnabled(true);
+	selectobj = false; // make sure we are not expecting a mouse click
+	copy_mode = false; // ensure this is reset
 
 	if (olcorr->isOn())
 	{
@@ -1108,6 +1144,13 @@ void OutlineCorrectionWidget::selectobj_pushed()
 	pb_selectobj->setDown(true);
 }
 
+void OutlineCorrectionWidget::copy_pick_pushed()
+{
+	selectobj = true;
+	copy_mode = true;
+	pb_copy_pick_guide->setDown(true);
+}
+
 void OutlineCorrectionWidget::workbits_changed()
 {
 	float const f = get_object_value();
@@ -1162,6 +1205,7 @@ void OutlineCorrectionWidget::newloaded()
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	spacing = handler3D->spacing();
+	draw_guide();
 }
 
 void OutlineCorrectionWidget::on_tissuenr_changed(int tissuenr1)

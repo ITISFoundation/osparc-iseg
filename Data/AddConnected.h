@@ -15,7 +15,7 @@
 namespace iseg {
 
 template<typename T1, typename T2, typename TWritable>
-void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned height, unsigned position, T2 tissuetype, const TWritable& writable)
+void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, unsigned position, T2 new_value, const TWritable& writable)
 {
 	//T1 f = work_bits[position];
 
@@ -89,7 +89,7 @@ void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned heigh
 		{
 			if (results[i] == kObject)
 			{
-				tissues[i2] = tissuetype;
+				target[i2] = new_value;
 			}
 		}
 	}

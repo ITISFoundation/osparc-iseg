@@ -140,6 +140,8 @@ private:
 	QCheckBox* cb_show_guide;
 	QSpinBox* sb_guide_offset;
 	QPushButton* pb_copy_guide;
+	QPushButton* pb_copy_pick_guide;
+	bool copy_mode = false;
 
 public slots:
 	void pixmm_changed();
@@ -154,7 +156,8 @@ private slots:
 	void execute_pushed();
 	void selectobj_pushed();
 	void draw_guide();
-	void copy_guide();
+	void copy_guide(Point* p = nullptr);
+	void copy_pick_pushed();
 };
 
 } // namespace iseg
