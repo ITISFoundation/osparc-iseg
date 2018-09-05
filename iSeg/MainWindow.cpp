@@ -2421,9 +2421,9 @@ void MainWindow::execute_loadpng()
 	{
 		std::sort(files.begin(), files.end());
 
-		size_t nrelem = files.size();
+		int nrelem = files.size();
 		std::vector<const char*> vfilenames;
-		for (size_t i = 0; i < nrelem; i++)
+		for (int i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
 		}
@@ -7211,7 +7211,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 	m_atlasfilename.nratlases = (int)names1.size();
 	if (m_atlasfilename.nratlases > m_atlasfilename.maxnr)
 		m_atlasfilename.nratlases = m_atlasfilename.maxnr;
-	for (size_t i = 0; i < m_atlasfilename.nratlases; i++)
+	for (int i = 0; i < m_atlasfilename.nratlases; i++)
 	{
 		m_atlasfilename.m_atlasfilename[i] = names1[i];
 		QFileInfo names1fi(names1[i]);
@@ -7219,7 +7219,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 				names1fi.completeBaseName());
 		atlasmenu->setItemVisible(m_atlasfilename.atlasnr[i], true);
 	}
-	for (size_t i = m_atlasfilename.nratlases; i < m_atlasfilename.maxnr; i++)
+	for (int i = m_atlasfilename.nratlases; i < m_atlasfilename.maxnr; i++)
 	{
 		atlasmenu->setItemVisible(m_atlasfilename.atlasnr[i], false);
 	}

@@ -103,7 +103,7 @@ public:
 
 	// Centerlist stuff (centerline of vessel)
 	std::vector<Vec3>* getCenterList() { return &_centerList; }
-	unsigned getCenterListSize() { return _centerList.size(); }
+	unsigned getCenterListSize() { return static_cast<unsigned>(_centerList.size()); }
 	Vec3 getCenterPointAt(unsigned index) { return _centerList.at(index); }
 	void correct_branchpoints()
 	{

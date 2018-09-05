@@ -29,7 +29,7 @@ public:
 	~BranchTree(void)
 	{
 		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
-			 it != _branchTree.end(); it++)
+				 it != _branchTree.end(); it++)
 		{
 			delete *it;
 		}
@@ -39,14 +39,14 @@ public:
 	void clear()
 	{
 		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
-			 it != _branchTree.end(); it++)
+				 it != _branchTree.end(); it++)
 		{
 			delete *it;
 		}
 		_branchTree.clear();
 	}
 
-	unsigned getSize() { return _branchTree.size(); };
+	unsigned getSize() { return static_cast<unsigned>(_branchTree.size()); };
 
 	// adds a new branch to _branchTree and returns the created branchItem
 	BranchItem* addNewBranch()

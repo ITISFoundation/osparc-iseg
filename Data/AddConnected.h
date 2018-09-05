@@ -22,13 +22,14 @@ void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned heigh
 	const unsigned char kObject = 1;
 	const unsigned char kBackground = 0;
 	const unsigned char kWritable = -1;
+	const unsigned area = width * height;
 	std::vector<unsigned char> results(area + 2 * width + 2 * height + 4);
 
-	int i = width + 3;
-	int i1 = 0;
-	for (int j = 0; j < height; j++, i += 2)
+	unsigned i = width + 3;
+	unsigned i1 = 0;
+	for (unsigned j = 0; j < height; j++, i += 2)
 	{
-		for (int k = 0; k < width; k++, i++, i1++)
+		for (unsigned k = 0; k < width; k++, i++, i1++)
 		{
 			//if (work_bits[i1] == f && (tissues[i1] == 0 || (override && !TissueInfos::GetTissueLocked(tissues[i1]))))
 			if (writable(i1))
@@ -42,17 +43,17 @@ void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned heigh
 		}
 	}
 
-	for (int j = 0; j < width + 2; j++)
-		results[j] = results[j + ((unsigned)width + 2) * (height + 1)] = 0;
-	for (int j = 0; j <= ((int)width + 2) * (height + 1); j += width + 2)
+	for (unsigned j = 0; j < width + 2; j++)
+		results[j] = results[j + (width + 2) * (height + 1)] = 0;
+	for (unsigned j = 0; j <= (width + 2) * (height + 1); j += width + 2)
 		results[j] = results[j + width + 1] = 0;
 
-	std::vector<int> s;
+	std::vector<unsigned> s;
 	s.push_back(position % width + 1 + (position / width + 1) * (width + 2));
 	if (results[s.back()] == kWritable)
 		results[s.back()] = kObject;
 
-	int w = width + 2;
+	unsigned w = width + 2;
 
 	while (!s.empty())
 	{
@@ -81,10 +82,10 @@ void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned heigh
 	}
 
 	i = width + 3;
-	int i2 = 0;
-	for (int j = 0; j < height; j++, i += 2)
+	unsigned i2 = 0;
+	for (unsigned j = 0; j < height; j++, i += 2)
 	{
-		for (int k = 0; k < width; k++, i++, i2++)
+		for (unsigned k = 0; k < width; k++, i++, i2++)
 		{
 			if (results[i] == kObject)
 			{
@@ -94,4 +95,4 @@ void add_connected_2d(T1* work_bits, T2* tissues, unsigned width, unsigned heigh
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

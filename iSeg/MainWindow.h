@@ -360,7 +360,7 @@ private slots:
 	void execute_loadrtdose();
 	void execute_reloadrtdose();
 	void execute_loads4llivelink();
-	//void execute_loadrtss();
+
 	void execute_saveimg();
 	void execute_saveprojas();
 	void execute_savecopyas();
