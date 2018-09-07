@@ -425,8 +425,8 @@ void ImageViewerWidget::reload_bits()
 			if (tissuevisible && tissue1[pos] != 0)
 			{
 				// blend with tissue color
-				float* rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
-				float alpha = 0.5f; // rgbo[3];
+				auto rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
+				float alpha = 0.5f;
 				r = static_cast<unsigned char>(r + alpha * (255.0f * rgbo[0] - r));
 				g = static_cast<unsigned char>(g + alpha * (255.0f * rgbo[1] - g));
 				b = static_cast<unsigned char>(b + alpha * (255.0f * rgbo[2] - b));

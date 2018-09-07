@@ -5734,7 +5734,6 @@ void MainWindow::do_work2tissue()
 	tissues_size_t m;
 	handler3D->get_rangetissue(&m);
 	handler3D->buildmissingtissues(m);
-	//	handler3D->build255tissues();
 	tissueTreeWidget->update_tree_widget();
 
 	tissues_size_t currTissueType = tissueTreeWidget->get_current_type();
@@ -5913,42 +5912,39 @@ void MainWindow::removeTissueFolderPressed()
 
 void MainWindow::removeselected()
 {
-	bool anyLocked = false;
-	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->selectedItems();
-	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)
+	// check if any tissue is locked
+	for (auto a: tissueTreeWidget->selectedItems())
 	{
-		anyLocked |= TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(*a));
-	}
-	if (anyLocked)
-	{
-		QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
+		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(a)))
+		{
+			QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.", QMessageBox::Ok | QMessageBox::Default);
+			return;
+		}
 	}
 
-	bool removeCompletely = false;
-	int ret = QMessageBox::warning(
-			this, "iSeg", "Do you really want to remove the selected tissues?",
-			QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
-			QMessageBox::Cancel | QMessageBox::Escape);
-	if (ret == QMessageBox::Yes)
-	{
-		removeCompletely = true;
-	}
-	else
+	int ret = QMessageBox::warning(this, "iSeg", "Do you really want to remove the selected tissues?",
+			QMessageBox::Yes | QMessageBox::Default, QMessageBox::Cancel | QMessageBox::Escape);
+	if (ret != QMessageBox::Yes)
 	{
 		return; // Cancel
 	}
-	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
+
+	auto allItems = tissueTreeWidget->get_all_items();
+	std::set<tissues_size_t> tissuesToRemove;
+	std::vector<QTreeWidgetItem*> itemsToRemove;
+
+	for (auto item: tissueTreeWidget->selectedItems())
 	{
-		QTreeWidgetItem* item = *a;
+		itemsToRemove.push_back(item);
+
+		bool removeCompletely = true;
 		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
+		// \bug BL this does not consider folders -> get_type returns '0'
+
 		if (tissueTreeWidget->get_tissue_instance_count(currTissueType) > 1)
 		{
 			// There are more than one instance of the same tissue in the tree
-			int ret = QMessageBox::question(
-					this, "iSeg",
+			int ret = QMessageBox::question(this, "iSeg",
 					"There are multiple occurrences\nof a selected tissue in the "
 					"hierarchy.\nDo you want to remove them all?",
 					QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
@@ -5973,42 +5969,51 @@ void MainWindow::removeselected()
 
 		if (removeCompletely)
 		{
-			// Remove tissue completely
-			tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-			if (tissueCount < 2)
+			tissuesToRemove.insert(currTissueType);
+
+			// find all tree items with that name and delete
+			for (auto other: allItems)
 			{
-				QMessageBox::information(this, "iSeg",
-						"It is not possible to erase this tissue.\nAt "
-						"least one tissue must be defined.");
-				return;
+				if (other != item && tissueTreeWidget->get_type(other) == currTissueType)
+				{
+					itemsToRemove.push_back(other);
+				}
 			}
-
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.tissues = true;
-			emit begin_datachange(dataSelection, this, false);
-
-			QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
-			handler3D->remove_tissue(currTissueType, tissueCount);
-			tissueTreeWidget->remove_tissue(tissueName);
-
-			emit end_datachange(this, iseg::ClearUndo);
-
-			currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType - 1);
 		}
-		else
-		{
-			// Remove only tissue tree item
-			tissueTreeWidget->remove_current_item();
-			currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType - 1);
-		}
+	}
+
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = true;
+	dataSelection.tissues = true;
+	emit begin_datachange(dataSelection, this, false);
+
+	handler3D->remove_tissues(tissuesToRemove);
+	tissueTreeWidget->remove_items(itemsToRemove);
+
+	emit end_datachange(this, iseg::ClearUndo);
+
+	if (TissueInfos::GetTissueCount() == 0)
+	{
+		TissueInfoStruct tissueInfo;
+		tissueInfo.name = "Foreground";
+		tissueInfo.color[0] = 1.0f;
+		tissueInfo.color[1] = 0.f;
+		tissueInfo.color[2] = 0.2f;
+		TissueInfos::AddTissue(tissueInfo);
+
+		// Insert new tissue in hierarchy
+		tissueTreeWidget->insert_item(false, ToQ(tissueInfo.name));
+	}
+	else
+	{
+		auto currTissueType = tissueTreeWidget->get_current_type();
+		tissuenr_changed(currTissueType - 1);
 	}
 }
 
 void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
 {
+	ISEG_INFO("removeselectedmerge");
 	for (auto a = list.begin(); a != list.end(); ++a)
 	{
 		QTreeWidgetItem* item = *a;
@@ -6020,7 +6025,7 @@ void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
 		emit begin_datachange(dataSelection, this, false);
 
 		QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
-		handler3D->remove_tissue(currTissueType, tissueCount);
+		handler3D->remove_tissue(currTissueType);
 		tissueTreeWidget->remove_tissue(tissueName);
 
 		emit end_datachange(this, iseg::ClearUndo);
@@ -6032,14 +6037,13 @@ void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
 
 void MainWindow::removeFolder()
 {
+	ISEG_INFO("removeFolder");
 	if (tissueTreeWidget->get_current_has_children())
 	{
 		QMessageBox msgBox;
 		msgBox.setText("Remove Folder");
-		msgBox.setInformativeText("Do you want to keep all tissues\nand folders "
-															"contained in this folder?");
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
-															QMessageBox::Cancel);
+		msgBox.setInformativeText("Do you want to keep all tissues\nand folders contained in this folder?");
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 		msgBox.setDefaultButton(QMessageBox::Yes);
 		int ret = msgBox.exec();
 		if (ret == QMessageBox::Yes)
@@ -6055,12 +6059,9 @@ void MainWindow::removeFolder()
 			// Only remove tissues completely with no corresponding item left in the tissue tree
 			bool anyLocked = false;
 			std::set<tissues_size_t> removeTissues;
-			for (std::map<tissues_size_t, unsigned short>::iterator iter =
-							 childTissues.begin();
-					 iter != childTissues.end(); ++iter)
+			for (auto iter = childTissues.begin(); iter != childTissues.end(); ++iter)
 			{
-				if (iter->second ==
-						tissueTreeWidget->get_tissue_instance_count(iter->first))
+				if (iter->second == tissueTreeWidget->get_tissue_instance_count(iter->first))
 				{
 					anyLocked |= TissueInfos::GetTissueLocked(iter->first);
 					removeTissues.insert(iter->first);
@@ -6105,6 +6106,7 @@ void MainWindow::removeFolder()
 
 void MainWindow::removeTissueFolderAllPressed()
 {
+	ISEG_INFO("removeTissueFolderAllPressed");
 	bool anyLocked = false;
 	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->get_all_items();
 	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)

@@ -473,12 +473,11 @@ public:
 	void set_undo3D(bool undo3D1);
 	void set_undonr(unsigned nr);
 	void set_undoarraynr(unsigned nr);
-	void permute_tissue_indices(tissues_size_t* indexMap);
-	void remove_tissue(tissues_size_t tissuenr, tissues_size_t tissuecount1);
+	void map_tissue_indices(const std::vector<tissues_size_t>& indexMap);
+	void remove_tissue(tissues_size_t tissuenr);
 	void remove_tissues(const std::set<tissues_size_t>& tissuenrs);
 	void remove_tissueall();
 	void cap_tissue(tissues_size_t maxval);
-	void build255tissues();
 	void buildmissingtissues(tissues_size_t j);
 	void group_tissues(std::vector<tissues_size_t>& olds,
 			std::vector<tissues_size_t>& news);

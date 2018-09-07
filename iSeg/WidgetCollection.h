@@ -310,6 +310,7 @@ public:
 	void remove_tissue(const QString& name);
 	void remove_current_item(bool removeChildren = false);
 	void remove_all_folders(bool removeChildren = false);
+	void remove_items(const std::vector<QTreeWidgetItem*>& items);
 
 	// Update items
 	void update_tissue_name(const QString& oldName, const QString& newName);

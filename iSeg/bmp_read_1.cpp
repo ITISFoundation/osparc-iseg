@@ -3076,19 +3076,17 @@ int bmphandler::SaveTissueBitmap(tissuelayers_size_t idx, const char* filename)
 	unsigned char* field =
 			(unsigned char*)imageSource->GetScalarPointer(0, 0, 0);
 
-	float* tissueColor;
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < (unsigned int)width * height; ++i)
 	{
-		tissueColor = TissueInfos::GetTissueColor(tissues[i]);
+		auto tissueColor = TissueInfos::GetTissueColor(tissues[i]);
 		field[i * 4] = (tissueColor[0]) * 255;
 		field[i * 4 + 1] = (tissueColor[1]) * 255;
 		field[i * 4 + 2] = (tissueColor[2]) * 255;
 		field[i * 4 + 3] = 0;
 	}
 
-	vtkSmartPointer<vtkBMPWriter> bmpWriter =
-			vtkSmartPointer<vtkBMPWriter>::New();
+	auto bmpWriter = vtkSmartPointer<vtkBMPWriter>::New();
 	bmpWriter->SetFileName(filename);
 	bmpWriter->SetInputData(imageSource);
 	bmpWriter->Write();
@@ -16003,7 +16001,7 @@ void bmphandler::copy2limits(std::vector<std::vector<Point>>* limits1)
 	limits = *limits1;
 }
 
-void bmphandler::permute_tissue_indices(tissues_size_t* indexMap)
+void bmphandler::map_tissue_indices(const std::vector<tissues_size_t>& indexMap)
 {
 	for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
 	{
@@ -16015,10 +16013,7 @@ void bmphandler::permute_tissue_indices(tissues_size_t* indexMap)
 	}
 }
 
-void bmphandler::remove_tissue(
-		tissues_size_t tissuenr,
-		tissues_size_t
-				tissuecount1) //assumes tissue[tissuecount] has not been erased yet
+void bmphandler::remove_tissue(tissues_size_t tissuenr)
 {
 	for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
 	{

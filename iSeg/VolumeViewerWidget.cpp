@@ -256,12 +256,10 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 		lut->SetNumberOfColors(tissuecount + 1);
 		lut->Build();
 		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
-		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1],
-					tissuecolor[2], 1.0);
+			auto tissuecolor = TissueInfos::GetTissueColor(i);
+			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
 		}
 	}
 	//
@@ -310,17 +308,13 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 		colorTransferFunction =
 				vtkSmartPointer<vtkColorTransferFunction>::New();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint((double)i - 0.1, tissuecolor[0],
-					tissuecolor[1], tissuecolor[2]);
+			auto tissuecolor = TissueInfos::GetTissueColor(i);
+			colorTransferFunction->AddRGBPoint((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
-		tissuecolor = TissueInfos::GetTissueColor(tissuecount);
-		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1,
-				tissuecolor[0], tissuecolor[1],
-				tissuecolor[2]);
+		auto tissuecolor = TissueInfos::GetTissueColor(tissuecount);
+		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 	}
 	else
 	{
@@ -549,12 +543,10 @@ void VolumeViewerWidget::tissue_changed()
 		colorTransferFunction->RemoveAllPoints();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
-		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0],
-					tissuecolor[1], tissuecolor[2]);
+			auto tissuecolor = TissueInfos::GetTissueColor(i);
+			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
 
 		opacityTransferFunction->RemoveAllPoints();
@@ -803,17 +795,13 @@ void VolumeViewerWidget::reload()
 		lut->SetNumberOfColors(tissuecount + 1);
 		lut->Build();
 		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
-		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			lut->SetTableValue((double)i - 0.1, tissuecolor[0], tissuecolor[1],
-					tissuecolor[2], 1.0);
+			auto tissuecolor = TissueInfos::GetTissueColor(i);
+			lut->SetTableValue((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
 		}
-		tissuecolor = TissueInfos::GetTissueColor(tissuecount + 1);
-		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1,
-				tissuecolor[0], tissuecolor[1],
-				tissuecolor[2]);
+		auto tissuecolor = TissueInfos::GetTissueColor(tissuecount + 1);
+		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 	}
 	sliceY->SetScalarRange(range);
 	sliceY->SetLookupTable(lut);
@@ -845,12 +833,10 @@ void VolumeViewerWidget::reload()
 
 		colorTransferFunction->RemoveAllPoints();
 		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
-		float* tissuecolor;
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
-			tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0],
-					tissuecolor[1], tissuecolor[2]);
+			auto tissuecolor = TissueInfos::GetTissueColor(i);
+			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
 	}
 

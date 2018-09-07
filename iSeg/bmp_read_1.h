@@ -453,8 +453,8 @@ public:
 	bool del_limit(Point p, short radius);
 	std::vector<std::vector<Point>>* return_limits();
 	void copy2limits(std::vector<std::vector<Point>>* limits1);
-	void permute_tissue_indices(tissues_size_t* indexMap);
-	void remove_tissue(tissues_size_t tissuenr, tissues_size_t tissuecount1);
+	void map_tissue_indices(const std::vector<tissues_size_t>& indexMap);
+	void remove_tissue(tissues_size_t tissuenr);
 	void group_tissues(tissuelayers_size_t idx,
 			std::vector<tissues_size_t>& olds,
 			std::vector<tissues_size_t>& news);

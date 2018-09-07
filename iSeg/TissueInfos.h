@@ -15,6 +15,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <array>
 
 namespace iseg {
 
@@ -23,34 +24,14 @@ class TissueHierarchyItem; // BL TODO get rid of this?
 
 struct TissueInfoStruct
 {
-	TissueInfoStruct()
-	{
-		SetColor(0.0f, 0.0f, 0.0f, 0.5f);
-		name = "?";
-		locked = false;
-	};
-
-	TissueInfoStruct(const TissueInfoStruct& other)
-	{
-		SetColor(other.color[0], other.color[1], other.color[2], other.opac);
-		name = other.name;
-		locked = other.locked;
-	};
-
-	TissueInfoStruct& operator=(const TissueInfoStruct& other)
-	{
-		SetColor(other.color[0], other.color[1], other.color[2], other.opac);
-		name = other.name;
-		locked = other.locked;
-		return *this;
-	};
+	TissueInfoStruct() {}
 
 	void SetColor(float r, float g, float b)
 	{
 		color[0] = r;
 		color[1] = g;
 		color[2] = b;
-	};
+	}
 
 	void SetColor(float r, float g, float b, float a)
 	{
@@ -58,27 +39,26 @@ struct TissueInfoStruct
 		color[1] = g;
 		color[2] = b;
 		opac = a;
-	};
+	}
 
 	void GetColorRGB(unsigned char& r, unsigned char& g, unsigned char& b)
 	{
 		r = (unsigned char)(255.0f * color[0]);
 		g = (unsigned char)(255.0f * color[1]);
 		b = (unsigned char)(255.0f * color[2]);
-	};
+	}
 
-	void GetColorBlendedRGB(unsigned char& r, unsigned char& g,
-			unsigned char& b, unsigned char offset = 0)
+	void GetColorBlendedRGB(unsigned char& r, unsigned char& g, unsigned char& b, unsigned char offset = 0)
 	{
 		r = (unsigned char)(offset + opac * (255.0f * color[0] - offset));
 		g = (unsigned char)(offset + opac * (255.0f * color[1] - offset));
 		b = (unsigned char)(offset + opac * (255.0f * color[2] - offset));
-	};
+	}
 
-	float color[3];
-	float opac;
-	std::string name;
-	bool locked;
+	std::array<float,3> color = {0.f, 0.f, 0.f};
+	float opac = 0.5f;
+	std::string name = "?";
+	bool locked = false;
 };
 
 typedef std::vector<TissueInfoStruct> TissueInfosVecType;
@@ -91,7 +71,7 @@ public:
 	static tissues_size_t GetTissueCount();
 	static TissueInfoStruct* GetTissueInfo(tissues_size_t tissuetype);
 
-	static float* GetTissueColor(tissues_size_t tissuetype);
+	static const std::array<float,3>& GetTissueColor(tissues_size_t tissuetype);
 	static void GetTissueColorRGB(tissues_size_t tissuetype, unsigned char& r,
 			unsigned char& g, unsigned char& b);
 	static void GetTissueColorBlendedRGB(tissues_size_t tissuetype,

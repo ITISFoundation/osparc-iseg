@@ -47,7 +47,7 @@ TissueInfoStruct* TissueInfos::GetTissueInfo(tissues_size_t tissuetype)
 	return &tissueInfosVector[tissuetype];
 }
 
-float* TissueInfos::GetTissueColor(tissues_size_t tissuetype)
+const std::array<float,3>& TissueInfos::GetTissueColor(tissues_size_t tissuetype)
 {
 	return tissueInfosVector[tissuetype].color;
 }
@@ -955,18 +955,15 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		}
 
 		// Permute tissue indices according to ordering in input file
-		tissues_size_t* idxMap = new tissues_size_t[tissueInfosVector.size()];
-		for (tissues_size_t oldIdx = 0; oldIdx < tissueInfosVector.size();
-				 ++oldIdx)
+		std::vector<tissues_size_t> idxMap(tissueInfosVector.size());
+		for (tissues_size_t oldIdx = 0; oldIdx < tissueInfosVector.size(); ++oldIdx)
 		{
 			idxMap[oldIdx] = oldIdx;
 		}
 		bool permute = false;
-		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size();
-				 ++newIdx)
+		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size();  ++newIdx)
 		{
-			tissues_size_t oldIdx =
-					GetTissueType(newTissueInfosVec[newIdx].name);
+			tissues_size_t oldIdx = GetTissueType(newTissueInfosVec[newIdx].name);
 			if (oldIdx > 0 && oldIdx != newIdx)
 			{
 				idxMap[oldIdx] = newIdx;
@@ -975,14 +972,13 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		}
 		if (permute)
 		{
-			handler3D->permute_tissue_indices(idxMap);
+			handler3D->map_tissue_indices(idxMap);
 		}
 
 		// Assign new infos vector
 		tissueInfosVector = newTissueInfosVec;
 
 		fclose(fp);
-		delete[] idxMap;
 		CreateTissueTypeMap();
 		return true;
 	}
@@ -1043,15 +1039,13 @@ bool TissueInfos::LoadDefaultTissueList(const char* filename)
 
 tissues_size_t TissueInfos::GetTissueCount()
 {
-	return (tissues_size_t)tissueInfosVector.size() -
-				 1; // Tissue index 0 is the background
+	return static_cast<tissues_size_t>(tissueInfosVector.size()) - 1; // Tissue index 0 is the background
 }
 
 void TissueInfos::AddTissue(TissueInfoStruct& tissue)
 {
 	tissueInfosVector.push_back(tissue);
-	tissueTypeMap.insert(
-			TissueTypeMapEntryType(str_tolower(tissue.name), GetTissueCount()));
+	tissueTypeMap.insert(TissueTypeMapEntryType(str_tolower(tissue.name), GetTissueCount()));
 }
 
 void TissueInfos::RemoveTissue(tissues_size_t tissuetype)
@@ -1064,8 +1058,7 @@ void TissueInfos::RemoveTissue(tissues_size_t tissuetype)
 void TissueInfos::RemoveTissues(const std::set<tissues_size_t>& tissuetypes)
 {
 	// Remove in descending order
-	for (auto riter = tissuetypes.rbegin(); riter != tissuetypes.rend();
-			 ++riter)
+	for (auto riter = tissuetypes.rbegin(); riter != tissuetypes.rend(); ++riter)
 	{
 		// tissueTypeMap.erase(tissueInfosVector[*riter].name.toLower());
 		tissueInfosVector.erase(tissueInfosVector.begin() + *riter);
