@@ -308,7 +308,8 @@ public:
 
 	// Delete tree items
 	void remove_tissue(const QString& name);
-	void remove_current_item(bool removeChildren = false);
+	void remove_item(QTreeWidgetItem* currItem, bool removeChildren = false, bool updateRepresentation = true);
+	void remove_items(const std::vector<QTreeWidgetItem*>& items);
 	void remove_all_folders(bool removeChildren = false);
 
 	// Update items
@@ -353,7 +354,9 @@ public:
 	// Display
 	bool get_tissue_indices_hidden() const;
 
-	QList<QTreeWidgetItem*> get_all_items() const;
+	std::vector<QTreeWidgetItem*> get_all_items(bool leaves_only = false) const;
+
+	std::vector<QTreeWidgetItem*> collect(const std::vector<QTreeWidgetItem*>& list) const;
 
 public slots:
 	void toggle_show_tissue_indices();

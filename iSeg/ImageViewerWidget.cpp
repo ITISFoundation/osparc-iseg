@@ -14,6 +14,7 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
+#include "Data/ExtractBoundary.h"
 #include "Data/Point.h"
 
 #include "Core/ColorLookupTable.h"
@@ -25,11 +26,11 @@
 #include <QPaintEvent>
 #include <QWheelEvent>
 #include <algorithm>
-#include <qfiledialog.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>
+#include <qfiledialog.h>
 #include <qimage.h>
 #include <qinputdialog.h>
 #include <qlineedit.h>
@@ -236,11 +237,14 @@ void ImageViewerWidget::bmphand_changed(bmphandler* bmph)
 	if (workborder)
 	{
 		if (bmporwork)
+		{
 			workborder_changed();
+		}
 	}
 	else
+	{
 		repaint();
-	return;
+	}
 }
 
 void ImageViewerWidget::overlay_changed()
@@ -283,7 +287,6 @@ void ImageViewerWidget::update(QRect rect)
 
 	if (bmphand->return_width() != width || bmphand->return_height() != height)
 	{
-		//		marks=bmphand->return_marks();
 		vp.clear();
 		vp_old.clear();
 		vp1.clear();
@@ -349,7 +352,6 @@ void ImageViewerWidget::init(SlicesHandler* hand3D, bool bmporwork1)
 			repaint();
 	}
 	show();
-	return;
 }
 
 void ImageViewerWidget::update_range()
@@ -423,11 +425,11 @@ void ImageViewerWidget::reload_bits()
 			if (tissuevisible && tissue1[pos] != 0)
 			{
 				// blend with tissue color
-				float* rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
-				float alpha = 0.5f; // rgbo[3];
-				r = static_cast<unsigned char>(r +  alpha * (255.0f * rgbo[0] - r));
-				g = static_cast<unsigned char>(g +  alpha * (255.0f * rgbo[1] - g));
-				b = static_cast<unsigned char>(b +  alpha * (255.0f * rgbo[2] - b));
+				auto rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
+				float alpha = 0.5f;
+				r = static_cast<unsigned char>(r + alpha * (255.0f * rgbo[0] - r));
+				g = static_cast<unsigned char>(g + alpha * (255.0f * rgbo[1] - g));
+				b = static_cast<unsigned char>(b + alpha * (255.0f * rgbo[2] - b));
 				image.setPixel(x, y, qRgb(r, g, b));
 			}
 			else // no tissue
@@ -816,102 +818,7 @@ void ImageViewerWidget::wheelEvent(QWheelEvent* e)
 void ImageViewerWidget::recompute_workborder()
 {
 	bmphand = handler3D->get_activebmphandler();
-	vp.clear();
-	Point p;
-
-	float* bits = bmphand->return_work();
-	unsigned pos = 0;
-
-	if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width])
-	{
-		p.px = 0;
-		p.py = 0;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-	for (unsigned short j = 1; j + 1 < width; j++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos + width])
-		{
-			p.px = j;
-			p.py = 0;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width])
-	{
-		p.px = width - 1;
-		p.py = 0;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-
-	for (unsigned short i = 1; i + 1 < height; i++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = 0;
-			p.py = i;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-		for (unsigned short j = 1; j + 1 < width; j++)
-		{
-			if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-					bits[pos] != bits[pos + width] ||
-					bits[pos] != bits[pos - width])
-			{
-				p.px = j;
-				p.py = i;
-				if (bits[pos] != 0)
-					vp.push_back(p);
-			}
-			pos++;
-		}
-		if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos + width] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = width - 1;
-			p.py = i;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - width])
-	{
-		p.px = 0;
-		p.py = height - 1;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
-	pos++;
-	for (unsigned short j = 1; j + 1 < width; j++)
-	{
-		if (bits[pos] != bits[pos + 1] || bits[pos] != bits[pos - 1] ||
-				bits[pos] != bits[pos - width])
-		{
-			p.px = j;
-			p.py = height - 1;
-			if (bits[pos] != 0)
-				vp.push_back(p);
-		}
-		pos++;
-	}
-	if (bits[pos] != bits[pos - 1] || bits[pos] != bits[pos - width])
-	{
-		p.px = width - 1;
-		p.py = height - 1;
-		if (bits[pos] != 0)
-			vp.push_back(p);
-	}
+	vp = extract_boundary(bmphand->return_work(), width, height, Point());
 }
 
 void ImageViewerWidget::workborder_changed()
@@ -984,14 +891,9 @@ void ImageViewerWidget::vp_changed()
 
 	repaint();
 
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vp_changed(QRect rect)
@@ -1011,14 +913,9 @@ void ImageViewerWidget::vp_changed(QRect rect)
 			(int)ceil(rect.width() * zoom * pixelsize.high),
 			(int)ceil(rect.height() * zoom * pixelsize.low));
 
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vp1dyn_changed()
@@ -1074,17 +971,10 @@ void ImageViewerWidget::vp1dyn_changed()
 
 	repaint();
 
-	vpdyn_old.clear();
-	vpdyn_old.insert(vpdyn_old.begin(), vpdyn.begin(), vpdyn.end());
-
-	vp_old.clear();
-	vp_old.insert(vp_old.begin(), vp.begin(), vp.end());
-
-	vp1_old.clear();
-	vp1_old.insert(vp1_old.begin(), vp1.begin(), vp1.end());
-
-	vm_old.clear();
-	vm_old.insert(vm_old.begin(), vm.begin(), vm.end());
+	vpdyn_old = vpdyn;
+	vp_old = vp;
+	vp1_old = vp1;
+	vm_old = vm;
 }
 
 void ImageViewerWidget::vpdyn_changed()

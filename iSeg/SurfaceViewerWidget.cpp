@@ -408,7 +408,7 @@ void SurfaceViewerWidget::build_lookuptable()
 	{
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
-			float* tissuecolor = nullptr;
+			std::array<float,3> tissuecolor = {0.f, 0.f, 0.f};
 			if (index_tissue_map.count(i) != 0)
 			{
 				tissuecolor = TissueInfos::GetTissueColor(index_tissue_map.at(i));
@@ -418,10 +418,7 @@ void SurfaceViewerWidget::build_lookuptable()
 				tissuecolor = TissueInfos::GetTissueColor(i);
 			}
 
-			if (tissuecolor)
-			{
-				lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1);
-			}
+			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1);
 		}
 	}
 

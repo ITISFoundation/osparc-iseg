@@ -58,9 +58,10 @@
 #include <boost/filesystem.hpp>
 
 #include <QDesktopWidget>
-#include <QSignalMapper.h>
-#include <q3accel.h>
 #include <QFileDialog>
+#include <QSignalMapper.h>
+#include <QStackedWidget>
+#include <q3accel.h>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qdockwidget.h>
@@ -68,8 +69,7 @@
 #include <qprogressdialog.h>
 #include <qsettings.h>
 #include <qtooltip.h>
-
-#include <q3widgetstack.h>
+//#include <q3widgetstack.h>
 #include <qtextedit.h>
 
 #define str_macro(s) #s
@@ -413,7 +413,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		slice_changed();
 	});
 
-	if (!(handler3D->isloaded()))
+	if (!handler3D->isloaded())
 	{
 		handler3D->newbmp(512, 512, 10);
 	}
@@ -431,8 +431,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_workpicturevisible = new QCheckBox("Show Image", this);
 	cb_workpicturevisible->setChecked(true);
 
-	bmp_show = new ImageViewerWidget(
-			this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	bmp_show = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	lb_source = new QLabel("Source", this);
 	lb_target = new QLabel("Target", this);
 	bmp_scroller = new Q3ScrollView(this);
@@ -596,29 +595,26 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	unsigned short slicenr = handler3D->active_slice() + 1;
 	pb_first = new QPushButton("|<<", this);
 	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1, Qt::Horizontal, this);
-	scb_slicenr->setFixedWidth(500);
+	scb_slicenr->setMinimumWidth(350);
 	scb_slicenr->setValue(int(slicenr));
 	pb_last = new QPushButton(">>|", this);
 	sb_slicenr = new QSpinBox(1, (int)handler3D->num_slices(), 1, this);
 	sb_slicenr->setValue(slicenr);
 	lb_slicenr = new QLabel(QString(" of ") + QString::number((int)handler3D->num_slices()), this);
 
+	lb_stride = new QLabel(QString("Stride: "));
+	sb_stride = new QSpinBox(1, 1000, 1, this);
+	sb_stride->setValue(1);
+
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
 	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 
-	lb_slicethick = new QLabel("Slice Thickness (mm): ", this);
-	le_slicethick = new QLineEdit(QString::number(handler3D->get_slicethickness()), this);
-	le_slicethick->setFixedWidth(80);
-
-	threshold_widget = new ThresholdWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	threshold_widget = new ThresholdWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
-	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
-	livewire_widget = new LivewireWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	livewire_widget = new LivewireWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(livewire_widget);
 	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(
 			handler3D, this, "new window",
@@ -688,7 +684,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		pb_tab[i]->setStyleSheet("text-align: left");
 	}
 
-	methodTab = new Q3WidgetStack(this);
+	methodTab = new QStackedWidget(this);
 	methodTab->setFrameStyle(Q3Frame::Box | Q3Frame::Sunken);
 	methodTab->setLineWidth(2);
 
@@ -697,17 +693,15 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		methodTab->addWidget(tabwidgets[i]);
 	}
 
-	methodTab->setMargin(10);
-
 	{
 		unsigned short posi = 0;
 		while (posi < nrtabbuttons && !showpb_tab[posi])
 			posi++;
 		if (posi < nrtabbuttons)
-			methodTab->raiseWidget(tabwidgets[posi]);
+			methodTab->setCurrentWidget(tabwidgets[posi]);
 	}
 
-	tab_changed((WidgetInterface*)methodTab->visibleWidget());
+	tab_changed(methodTab->currentIndex());
 
 	updateTabvisibility();
 
@@ -720,19 +714,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	}
 	height_max += 65;
 
-	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imagemath_dialog = new ImageMath(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	imageoverlay_dialog = new ImageOverlay(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	scale_dialog = new ScaleWork(handler3D, m_picpath, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	imagemath_dialog = new ImageMath(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	imageoverlay_dialog = new ImageOverlay(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
-	bitstack_widget = new bits_stack(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	overlay_widget = new extoverlay_widget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	bitstack_widget = new bits_stack(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	overlay_widget = new extoverlay_widget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
 	int height_max1 = height_max;
 
@@ -764,7 +752,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QWidget* hbox1w = new QWidget;
 	QWidget* hboxslicew = new QWidget;
 	QWidget* hboxslicenrw = new QWidget;
-	QWidget* hboxslicethickw = new QWidget;
+	QWidget* hboxstridew = new QWidget;
 	vboxbmpw = new QWidget;
 	vboxworkw = new QWidget;
 	QWidget* vbox1w = new QWidget;
@@ -858,13 +846,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hbox1->addWidget(vboxworkw);
 	hbox1w->setLayout(hbox1);
 
-	QHBoxLayout* hboxslicethick = new QHBoxLayout;
-	hboxslicethick->setSpacing(0);
-	hboxslicethick->setMargin(0);
-	hboxslicethick->addWidget(lb_slicethick);
-	hboxslicethick->addWidget(le_slicethick);
-	hboxslicethickw->setLayout(hboxslicethick);
-
 	QHBoxLayout* hboxslicenr = new QHBoxLayout;
 	hboxslicenr->setSpacing(0);
 	hboxslicenr->setMargin(0);
@@ -876,12 +857,19 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hboxslicenr->addWidget(lb_inactivewarning);
 	hboxslicenrw->setLayout(hboxslicenr);
 
+	QHBoxLayout* hboxstride = new QHBoxLayout;
+	hboxstride->setSpacing(0);
+	hboxstride->setMargin(0);
+	hboxstride->addWidget(lb_stride);
+	hboxstride->addWidget(sb_stride);
+	hboxstridew->setLayout(hboxstride);
+
 	QHBoxLayout* hboxslice = new QHBoxLayout;
 	hboxslice->setSpacing(0);
 	hboxslice->setMargin(0);
 	hboxslice->addWidget(hboxslicenrw);
 	hboxslice->addStretch();
-	hboxslice->addWidget(hboxslicethickw);
+	hboxslice->addWidget(hboxstridew);
 	hboxslicew->setLayout(hboxslice);
 
 	auto add_widget_filter = [this](QVBoxLayout* vbox, QPushButton* pb,
@@ -941,8 +929,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QDockWidget* methodTabdock = new QDockWidget(tr("Parameters"), this);
 	style_dockwidget(methodTabdock);
 	methodTabdock->setObjectName("Parameters");
-	methodTabdock->setAllowedAreas(Qt::TopDockWidgetArea |
-																 Qt::BottomDockWidgetArea);
+	methodTabdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	//	Q3ScrollView *tab_scroller=new Q3ScrollView(this);xxxa
 	//	tab_scroller->addChild(methodTab);
 	//	methodTabdock->setWidget(tab_scroller);
@@ -963,24 +950,21 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QDockWidget* bitstackdock = new QDockWidget(tr("Img Clipboard"), this);
 	style_dockwidget(bitstackdock);
 	bitstackdock->setObjectName("Clipboard");
-	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea |
-																Qt::BottomDockWidgetArea);
+	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	bitstackdock->setWidget(bitstack_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, bitstackdock);
 
 	QDockWidget* multiDatasetDock = new QDockWidget(tr("Multi Dataset"), this);
 	style_dockwidget(multiDatasetDock);
 	multiDatasetDock->setObjectName("Multi Dataset");
-	multiDatasetDock->setAllowedAreas(Qt::TopDockWidgetArea |
-																		Qt::BottomDockWidgetArea);
+	multiDatasetDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	multiDatasetDock->setWidget(multidataset_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, multiDatasetDock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
 	style_dockwidget(overlaydock);
 	overlaydock->setObjectName("Overlay");
-	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea |
-															 Qt::BottomDockWidgetArea);
+	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	overlaydock->setWidget(overlay_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, overlaydock);
 
@@ -1365,6 +1349,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	toolmenu->insertItem("In&verse Slice Order", this,
 			SLOT(execute_inversesliceorder()));
 	toolmenu->insertItem("Clean Up", this, SLOT(execute_cleanup()));
+	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
 	toolmenu->insertItem("Smooth Steps", this, SLOT(execute_smoothsteps()));
 	// toolmenu->insertItem( "Smooth Tissues", this,  SLOT(execute_smoothtissues()));
 	if (!m_editingmode)
@@ -1528,8 +1513,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(clearTissue, SIGNAL(clicked()), this, SLOT(clearselected()));
 	QObject::connect(clearTissues, SIGNAL(clicked()), this, SLOT(cleartissues()));
 
-	QObject::connect(methodTab, SIGNAL(aboutToShow(QWidget*)), this,
-			SLOT(tab_changed(QWidget*)));
+	QObject::connect(methodTab, SIGNAL(currentChanged(int)), this,
+			SLOT(tab_changed(int)));
 
 	tissueTreeWidget->setSelectionMode(
 			QAbstractItemView::SelectionMode::ExtendedSelection);
@@ -1562,13 +1547,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	QObject::connect(pb_first, SIGNAL(clicked()), this, SLOT(pb_first_pressed()));
 	QObject::connect(pb_last, SIGNAL(clicked()), this, SLOT(pb_last_pressed()));
-	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
-	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
-
-	QObject::connect(le_slicethick, SIGNAL(textChanged(const QString&)), this,
-			SLOT(slicethickness_changed()));
+	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
+	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
+	QObject::connect(sb_stride, SIGNAL(valueChanged(int)), this, SLOT(sb_stride_changed()));
 
 	QObject::connect(pb_add, SIGNAL(clicked()), this, SLOT(add_tissue_pushed()));
 	QObject::connect(pb_sub, SIGNAL(clicked()), this,
@@ -1759,11 +1740,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	m_Modified = false;
 	m_NewDataAfterSwap = false;
-
-	methodTab->raiseWidget(methodTab->visibleWidget());
 }
-
-MainWindow::~MainWindow() {}
 
 void MainWindow::closeEvent(QCloseEvent* qce)
 {
@@ -2053,7 +2030,7 @@ void MainWindow::execute_swapxz()
 		handler3D->set_pixelsize(thick, p.low);
 		handler3D->set_slicethickness(p.high);
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 	}
 
 	clear_stack();
@@ -2131,7 +2108,7 @@ void MainWindow::execute_swapyz()
 		handler3D->set_pixelsize(p.high, thick);
 		handler3D->set_slicethickness(p.low);
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 	}
 	clear_stack();
 }
@@ -2437,17 +2414,17 @@ void MainWindow::execute_loadpng()
 {
 	maybeSafe();
 
-	QStringList files =	QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
-		QString::null, this, "open files dialog",
-		"Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if (!files.empty())
 	{
 		std::sort(files.begin(), files.end());
 
-		size_t nrelem = files.size();
+		int nrelem = files.size();
 		std::vector<const char*> vfilenames;
-		for (size_t i = 0; i < nrelem; i++)
+		for (int i = 0; i < nrelem; i++)
 		{
 			vfilenames.push_back(files[i].ascii());
 		}
@@ -2476,8 +2453,8 @@ void MainWindow::execute_loadjpg()
 	maybeSafe();
 
 	QStringList files =
-		QFileDialog::getOpenFileNames("Images (*.jpg)\n"
-																		 "All(*.*)",
+			QFileDialog::getOpenFileNames("Images (*.jpg)\n"
+																		"All(*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -2527,9 +2504,9 @@ void MainWindow::execute_loaddicom()
 	maybeSafe();
 
 	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
-																		 "All(*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
+																										"All(*.*)",
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if (!files.empty())
 	{
@@ -2547,7 +2524,7 @@ void MainWindow::execute_loaddicom()
 		emit end_datachange(this, iseg::ClearUndo);
 
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 
 		//	handler3D->LoadDICOM();
 
@@ -2582,7 +2559,7 @@ void MainWindow::execute_reloaddicom()
 		LD.move(QCursor::pos());
 		LD.exec();
 		pixelsize_changed();
-		slicethickness_changed1();
+		slicethickness_changed();
 
 		//	handler3D->LoadDICOM();
 
@@ -2638,7 +2615,7 @@ void MainWindow::execute_loadmhd()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-		"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
+			"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
@@ -2646,7 +2623,7 @@ void MainWindow::execute_loadmhd()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2676,7 +2653,7 @@ void MainWindow::execute_loadvtk()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2713,7 +2690,7 @@ void MainWindow::execute_loadnifti()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2742,7 +2719,7 @@ void MainWindow::execute_loadavw()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -2752,8 +2729,8 @@ void MainWindow::execute_loadavw()
 void MainWindow::execute_reloadbmp()
 {
 	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
-		QString::null, this, "open files dialog",
-		"Select one or more files to open");
+			QString::null, this, "open files dialog",
+			"Select one or more files to open");
 
 	if ((unsigned short)files.size() == handler3D->num_slices() ||
 			(unsigned short)files.size() ==
@@ -3030,7 +3007,7 @@ void MainWindow::execute_loadrtdose()
 
 	emit end_datachange(this, iseg::ClearUndo);
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	reset_brightnesscontrast();
 
@@ -3723,8 +3700,7 @@ void MainWindow::loadproj(const QString& loadfilename)
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
 	pixelsize_changed();
-
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	if (stillopen)
 	{
@@ -3801,7 +3777,7 @@ void MainWindow::loadS4Llink(const QString& loadfilename)
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
 	pixelsize_changed();
-	slicethickness_changed1();
+	slicethickness_changed();
 
 	if (stillopen)
 	{
@@ -3833,7 +3809,7 @@ void MainWindow::execute_mergeprojects()
 
 	// Get save file name
 	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
-		"iSeg", "Save merged project as");
+			"iSeg", "Save merged project as");
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
 
@@ -4143,7 +4119,7 @@ void MainWindow::execute_exportlabelfield()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this); 
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".am")))
 		savefilename.append(".am");
@@ -4472,7 +4448,7 @@ void MainWindow::start_surfaceviewer(int mode)
 	QObject::connect(surface_viewer,
 			SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-			
+
 	surface_viewer->show();
 	surface_viewer->raise();
 
@@ -4784,8 +4760,6 @@ void MainWindow::execute_overlay()
 	QObject::disconnect(
 			&IO, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
-	return;
 }
 
 void MainWindow::execute_pixelsize()
@@ -4794,16 +4768,15 @@ void MainWindow::execute_pixelsize()
 	PR.move(QCursor::pos());
 	if (PR.exec())
 	{
-		Pair p = PR.return_pixelsize();
-		handler3D->set_pixelsize(p.high, p.low);
-		pixelsize_changed();
-		/*if(xsliceshower!=nullptr) xsliceshower->pixelsize_changed(p);
-		if(ysliceshower!=nullptr) ysliceshower->pixelsize_changed(p);
-		bmp_show->pixelsize_changed(p);
-		work_show->pixelsize_changed(p);*/
+		auto p = PR.get_pixelsize();
+		if (!(p == handler3D->spacing()))
+		{
+			handler3D->set_pixelsize(p.x, p.y);
+			handler3D->set_slicethickness(p.z);
+			pixelsize_changed();
+			slicethickness_changed();
+		}
 	}
-
-	return;
 }
 
 void MainWindow::pixelsize_changed()
@@ -5060,7 +5033,7 @@ void MainWindow::execute_showtabtoggled(bool)
 		showpb_tab[i] = showtab_action[i]->isOn();
 	}
 
-	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->visibleWidget());
+	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->currentWidget());
 	unsigned short i = 0;
 	while ((i < nrtabbuttons) && (currentwidget != tabwidgets[i]))
 		i++;
@@ -5077,8 +5050,7 @@ void MainWindow::execute_showtabtoggled(bool)
 			i++;
 		if (i != nrtabbuttons)
 		{
-			int pos = methodTab->id(tabwidgets[i]);
-			methodTab->raiseWidget(pos);
+			methodTab->setCurrentWidget(tabwidgets[i]);
 		}
 	}
 	updateTabvisibility();
@@ -5242,7 +5214,8 @@ void MainWindow::execute_grouptissues()
 void MainWindow::execute_about()
 {
 	std::ostringstream ss;
-	ss << "\n\niSeg\n"  << std::string(xstr(ISEG_DESCRIPTION));
+	ss << "\n\niSeg\n"
+		 << std::string(xstr(ISEG_DESCRIPTION));
 	QMessageBox::about(this, "About", QString(ss.str().c_str()));
 }
 
@@ -5762,7 +5735,6 @@ void MainWindow::do_work2tissue()
 	tissues_size_t m;
 	handler3D->get_rangetissue(&m);
 	handler3D->buildmissingtissues(m);
-	//	handler3D->build255tissues();
 	tissueTreeWidget->update_tree_widget();
 
 	tissues_size_t currTissueType = tissueTreeWidget->get_current_type();
@@ -5834,17 +5806,14 @@ void MainWindow::newTissuePressed()
 
 void MainWindow::merge()
 {
-	bool anyLocked = false;
-	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->selectedItems();
-	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)
+	for (auto item: tissueTreeWidget->selectedItems())
 	{
-		anyLocked |= TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(*a));
-	}
-	if (anyLocked)
-	{
-		QMessageBox::warning(this, "iSeg", "Locked tissues can not be merged.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
+		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
+		{
+			QMessageBox::warning(this, "iSeg", "Locked tissues can not be merged.",
+					QMessageBox::Ok | QMessageBox::Default);
+			return;
+		}
 	}
 
 	int ret = QMessageBox::warning(
@@ -5853,22 +5822,20 @@ void MainWindow::merge()
 			QMessageBox::Cancel | QMessageBox::Escape);
 	if (ret == QMessageBox::Yes)
 	{
-		bool tmp;
-		tmp = tissue3Dopt->isChecked();
+		bool option_3d_checked = tissue3Dopt->isChecked();
 		tissue3Dopt->setChecked(true);
 		selectedtissue2work();
-		QList<QTreeWidgetItem*> list;
-		list = tissueTreeWidget->selectedItems();
+
+		auto list = tissueTreeWidget->selectedItems();
 		TissueAdder TA(false, tissueTreeWidget, this);
-		//TA.move(QCursor::pos());
 		TA.exec();
 
 		tissues_size_t currTissueType = tissueTreeWidget->get_current_type();
 		tissuenr_changed(currTissueType - 1);
 		handler3D->mergetissues(currTissueType);
-		removeselectedmerge(list);
-		if (tmp == false)
-			tissue3Dopt->setChecked(false);
+
+		removeselected(std::vector<QTreeWidgetItem*>(list.begin(), list.end()), false);
+		tissue3Dopt->setChecked(option_3d_checked);
 	}
 }
 
@@ -5909,7 +5876,6 @@ void MainWindow::modifTissue()
 	tissues_size_t nr = tissueTreeWidget->get_current_type() - 1;
 
 	TissueAdder TA(true, tissueTreeWidget, this);
-	//TA.move(QCursor::pos());
 	TA.exec();
 
 	emit end_datachange(this, iseg::ClearUndo);
@@ -5931,7 +5897,27 @@ void MainWindow::removeTissueFolderPressed()
 {
 	if (tissueTreeWidget->get_current_is_folder())
 	{
-		removeFolder();
+		if (tissueTreeWidget->get_current_has_children())
+		{
+			QMessageBox msgBox;
+			msgBox.setText("Remove Folder");
+			msgBox.setInformativeText("Do you want to keep all tissues\nand folders contained in this folder?");
+			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+			msgBox.setDefaultButton(QMessageBox::Yes);
+			int ret = msgBox.exec();
+			if (ret == QMessageBox::Yes)
+			{
+				tissueTreeWidget->remove_item(tissueTreeWidget->currentItem(), false);
+			}
+			else if (ret == QMessageBox::No)
+			{
+				removeselected();
+			}
+		}
+		else
+		{
+			tissueTreeWidget->remove_item(tissueTreeWidget->currentItem(), false);
+		}
 	}
 	else
 	{
@@ -5941,211 +5927,135 @@ void MainWindow::removeTissueFolderPressed()
 
 void MainWindow::removeselected()
 {
-	bool anyLocked = false;
-	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->selectedItems();
-	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)
-	{
-		anyLocked |= TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(*a));
-	}
-	if (anyLocked)
-	{
-		QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
-	}
+	auto list = tissueTreeWidget->selectedItems();
+	removeselected(std::vector<QTreeWidgetItem*>(list.begin(), list.end()), true);
+}
 
-	bool removeCompletely = false;
-	int ret = QMessageBox::warning(
-			this, "iSeg", "Do you really want to remove the selected tissues?",
-			QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
-			QMessageBox::Cancel | QMessageBox::Escape);
-	if (ret == QMessageBox::Yes)
+void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool perform_checks)
+{
+	auto list = tissueTreeWidget->collect(input);
+	std::vector<QTreeWidgetItem*> itemsToRemove;
+	std::set<tissues_size_t> tissuesToRemove;
+	if (perform_checks)
 	{
-		removeCompletely = true;
-	}
-	else
-	{
-		return; // Cancel
-	}
-	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
-		if (tissueTreeWidget->get_tissue_instance_count(currTissueType) > 1)
+		// check if any tissue is locked
+		for (auto item: list)
 		{
-			// There are more than one instance of the same tissue in the tree
-			int ret = QMessageBox::question(
-					this, "iSeg",
-					"There are multiple occurrences\nof a selected tissue in the "
-					"hierarchy.\nDo you want to remove them all?",
-					QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
-					QMessageBox::Cancel | QMessageBox::Escape);
-			if (ret == QMessageBox::Yes)
+			if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
 			{
-				removeCompletely = true;
-			}
-			else if (ret == QMessageBox::No)
-			{
-				removeCompletely = false;
-			}
-			else
-			{
-				return; // Cancel
-			}
-		}
-		else
-		{
-			// There is only a single instance of the tissue in the tree
-		}
-
-		if (removeCompletely)
-		{
-			// Remove tissue completely
-			tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-			if (tissueCount < 2)
-			{
-				QMessageBox::information(this, "iSeg",
-						"It is not possible to erase this tissue.\nAt "
-						"least one tissue must be defined.");
+				QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.", QMessageBox::Ok | QMessageBox::Default);
 				return;
 			}
-
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.tissues = true;
-			emit begin_datachange(dataSelection, this, false);
-
-			QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
-			handler3D->remove_tissue(currTissueType, tissueCount);
-			tissueTreeWidget->remove_tissue(tissueName);
-
-			emit end_datachange(this, iseg::ClearUndo);
-
-			currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType - 1);
 		}
-		else
+
+		// confirm that user really intends to remove tissues/delete segmentation
+		int ret = QMessageBox::warning(this, "iSeg", "Do you really want to remove the selected tissues?",
+				QMessageBox::Yes | QMessageBox::Default, QMessageBox::Cancel | QMessageBox::Escape);
+		if (ret != QMessageBox::Yes)
 		{
-			// Remove only tissue tree item
-			tissueTreeWidget->remove_current_item();
-			currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType - 1);
+			return; // Cancel
 		}
-	}
-}
 
-void MainWindow::removeselectedmerge(QList<QTreeWidgetItem*> list)
-{
-	for (auto a = list.begin(); a != list.end(); ++a)
-	{
-		QTreeWidgetItem* item = *a;
-		tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
-		tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-		iseg::DataSelection dataSelection;
-		dataSelection.allSlices = true;
-		dataSelection.tissues = true;
-		emit begin_datachange(dataSelection, this, false);
-
-		QString tissueName = ToQ(TissueInfos::GetTissueName(currTissueType));
-		handler3D->remove_tissue(currTissueType, tissueCount);
-		tissueTreeWidget->remove_tissue(tissueName);
-
-		emit end_datachange(this, iseg::ClearUndo);
-
-		currTissueType = tissueTreeWidget->get_current_type();
-		tissuenr_changed(currTissueType - 1);
-	}
-}
-
-void MainWindow::removeFolder()
-{
-	if (tissueTreeWidget->get_current_has_children())
-	{
-		QMessageBox msgBox;
-		msgBox.setText("Remove Folder");
-		msgBox.setInformativeText("Do you want to keep all tissues\nand folders "
-															"contained in this folder?");
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
-															QMessageBox::Cancel);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		int ret = msgBox.exec();
-		if (ret == QMessageBox::Yes)
+		// check if any tissues are in the hierarchy more than once
+		auto allItems = tissueTreeWidget->get_all_items();
+		for (auto item: list)
 		{
-			tissueTreeWidget->remove_current_item(false);
-		}
-		else if (ret == QMessageBox::No)
-		{
-			// Get child tissues and their instance count in the subtree
-			std::map<tissues_size_t, unsigned short> childTissues;
-			tissueTreeWidget->get_current_child_tissues(childTissues);
+			itemsToRemove.push_back(item);
 
-			// Only remove tissues completely with no corresponding item left in the tissue tree
-			bool anyLocked = false;
-			std::set<tissues_size_t> removeTissues;
-			for (std::map<tissues_size_t, unsigned short>::iterator iter =
-							 childTissues.begin();
-					 iter != childTissues.end(); ++iter)
+			tissues_size_t currTissueType = tissueTreeWidget->get_type(item);
+
+			// if currTissueType==0 -> item is a folder
+			bool removeCompletely = currTissueType != 0;
+			if (removeCompletely && tissueTreeWidget->get_tissue_instance_count(currTissueType) > 1)
 			{
-				if (iter->second ==
-						tissueTreeWidget->get_tissue_instance_count(iter->first))
+				// There are more than one instance of the same tissue in the tree
+				int ret = QMessageBox::question(this, "iSeg",
+						"There are multiple occurrences\nof a selected tissue in the "
+						"hierarchy.\nDo you want to remove them all?",
+						QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
+						QMessageBox::Cancel | QMessageBox::Escape);
+				if (ret == QMessageBox::Yes)
 				{
-					anyLocked |= TissueInfos::GetTissueLocked(iter->first);
-					removeTissues.insert(iter->first);
+					removeCompletely = true;
+				}
+				else if (ret == QMessageBox::No)
+				{
+					removeCompletely = false;
+				}
+				else
+				{
+					return; // Cancel
 				}
 			}
-			if (anyLocked)
+
+			if (removeCompletely)
 			{
-				QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.",
-						QMessageBox::Ok | QMessageBox::Default);
-				return;
+				tissuesToRemove.insert(currTissueType);
+
+				// find all tree items with that name and delete
+				for (auto other: allItems)
+				{
+					if (other != item && tissueTreeWidget->get_type(other) == currTissueType)
+					{
+						itemsToRemove.push_back(other);
+					}
+				}
 			}
-			if (removeTissues.size() >= TissueInfos::GetTissueCount())
-			{
-				QMessageBox::information(this, "iSeg",
-						"It is not possible to erase this folder.\nAt "
-						"least one tissue must be defined.");
-				return;
-			}
-
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.tissues = true;
-			emit begin_datachange(dataSelection, this, false);
-
-			// Remove child tissues in SlicesHandler
-			handler3D->remove_tissues(removeTissues);
-
-			// Remove item in tree widget
-			tissueTreeWidget->remove_current_item(true);
-
-			emit end_datachange(this, iseg::ClearUndo);
-
-			tissues_size_t currTissueType = tissueTreeWidget->get_current_type();
-			tissuenr_changed(currTissueType - 1);
 		}
 	}
 	else
 	{
-		tissueTreeWidget->remove_current_item(false);
+		itemsToRemove = list;
+		for (auto item: list)
+		{
+			auto currTissueType = tissueTreeWidget->get_type(item);
+			if (currTissueType != 0)
+			{
+				tissuesToRemove.insert(currTissueType);
+			}
+		}
+	}
+
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = true;
+	dataSelection.tissues = true;
+	emit begin_datachange(dataSelection, this, false);
+
+	handler3D->remove_tissues(tissuesToRemove);
+	tissueTreeWidget->remove_items(itemsToRemove);
+
+	emit end_datachange(this, iseg::ClearUndo);
+
+	if (TissueInfos::GetTissueCount() == 0)
+	{
+		TissueInfoStruct tissueInfo;
+		tissueInfo.name = "Tissue1";
+		tissueInfo.SetColor(1.0f, 0.0f, 0.1f);
+		TissueInfos::AddTissue(tissueInfo);
+
+		// Insert new tissue in hierarchy
+		tissueTreeWidget->insert_item(false, ToQ(tissueInfo.name));
+	}
+	else
+	{
+		auto currTissueType = tissueTreeWidget->get_current_type();
+		tissuenr_changed(currTissueType - 1);
 	}
 }
 
 void MainWindow::removeTissueFolderAllPressed()
 {
-	bool anyLocked = false;
-	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->get_all_items();
-	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)
+	// check if any tissue is locked
+	for (auto item: tissueTreeWidget->get_all_items())
 	{
-		anyLocked |= TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(*a));
-	}
-	if (anyLocked)
-	{
-		QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
+		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
+		{
+			QMessageBox::warning(this, "iSeg", "Locked tissues can not be removed.", QMessageBox::Ok | QMessageBox::Default);
+			return;
+		}
 	}
 
+	// confirm that user really intends to remove tissues/delete segmentation
 	int ret = QMessageBox::warning(
 			this, "iSeg", "Do you really want to remove all tissues and folders?",
 			QMessageBox::Yes | QMessageBox::Default, QMessageBox::No,
@@ -6202,11 +6112,11 @@ void MainWindow::selectedtissue2work()
 	handler3D->clear_work(); // resets work to 0.0f, then adds each tissue one-by-one
 
 	std::vector<tissues_size_t> selected_tissues;
-	for (auto item: tissueTreeWidget->selectedItems())
+	for (auto item : tissueTreeWidget->selectedItems())
 	{
 		selected_tissues.push_back(tissueTreeWidget->get_type(item));
 	}
-	
+
 	try
 	{
 		if (tissue3Dopt->isChecked())
@@ -6218,7 +6128,7 @@ void MainWindow::selectedtissue2work()
 			handler3D->selectedtissue2work(selected_tissues);
 		}
 	}
-	catch(std::exception&)
+	catch (std::exception&)
 	{
 		ISEG_ERROR_MSG("could not get tissue. Something might be wrong with tissue list.");
 	}
@@ -6247,17 +6157,14 @@ void MainWindow::tissue2workall()
 
 void MainWindow::cleartissues()
 {
-	bool anyLocked = false;
-	QList<QTreeWidgetItem*> list_ = tissueTreeWidget->get_all_items();
-	for (auto a = list_.begin(); a != list_.end() && !anyLocked; ++a)
+	// check if any tissue is locked
+	for (auto item: tissueTreeWidget->get_all_items())
 	{
-		anyLocked |= TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(*a));
-	}
-	if (anyLocked)
-	{
-		QMessageBox::warning(this, "iSeg", "Locked tissues can not be cleared.",
-				QMessageBox::Ok | QMessageBox::Default);
-		return;
+		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
+		{
+			QMessageBox::warning(this, "iSeg", "Locked tissues can not be cleared.", QMessageBox::Ok | QMessageBox::Default);
+			return;
+		}
 	}
 
 	int ret = QMessageBox::warning(
@@ -6418,28 +6325,23 @@ void MainWindow::workpicturevisible_changed()
 
 void MainWindow::slice_changed()
 {
-	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->currentWidget();
 	qw->on_slicenr_changed();
 
 	unsigned short slicenr = handler3D->active_slice() + 1;
-	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
+	QObject::disconnect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
 	scb_slicenr->setValue(int(slicenr));
-	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
-	QObject::disconnect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
+	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(scb_slicenr_changed()));
+	QObject::disconnect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
 	sb_slicenr->setValue(int(slicenr));
-	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(sb_slicenr_changed()));
+	QObject::connect(sb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(sb_slicenr_changed()));
 	bmp_show->slicenr_changed();
 	work_show->slicenr_changed();
 	scale_dialog->slicenr_changed();
 	imagemath_dialog->slicenr_changed();
 	imageoverlay_dialog->slicenr_changed();
 	overlay_widget->slicenr_changed();
-	if (handler3D->start_slice() >= slicenr ||
-			handler3D->end_slice() + 1 <= slicenr)
+	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
 		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
@@ -6447,8 +6349,7 @@ void MainWindow::slice_changed()
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(
-				this->paletteBackgroundColor());
+		lb_inactivewarning->setPaletteBackgroundColor(this->paletteBackgroundColor());
 	}
 
 	if (xsliceshower != nullptr)
@@ -6475,7 +6376,7 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 		((WidgetInterface*)(tabwidgets[i]))->newloaded();
 	}
 
-	WidgetInterface* qw = (WidgetInterface*)methodTab->visibleWidget();
+	WidgetInterface* qw = (WidgetInterface*)methodTab->currentWidget();
 
 	if (handler3D->num_slices() != nrslices)
 	{
@@ -6536,12 +6437,6 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 	qw->init();
 }
 
-void MainWindow::slicenr_up()
-{
-	handler3D->set_active_slice(handler3D->active_slice() + 1);
-	slice_changed();
-}
-
 void MainWindow::zoom_in()
 {
 	//	bmp_show->set_zoom(bmp_show->return_zoom()*2);
@@ -6557,9 +6452,17 @@ void MainWindow::zoom_out()
 	zoom_widget->zoom_changed(work_show->return_zoom() / 2);
 }
 
+void MainWindow::slicenr_up()
+{
+	auto n = std::min(handler3D->active_slice() + sb_stride->value(), handler3D->num_slices() - 1);
+	handler3D->set_active_slice(n);
+	slice_changed();
+}
+
 void MainWindow::slicenr_down()
 {
-	handler3D->set_active_slice(handler3D->active_slice() - 1);
+	auto n = std::max(static_cast<int>(handler3D->active_slice()) - sb_stride->value(), 0);
+	handler3D->set_active_slice(n);
 	slice_changed();
 }
 
@@ -6573,6 +6476,12 @@ void MainWindow::scb_slicenr_changed()
 {
 	handler3D->set_active_slice(scb_slicenr->value() - 1);
 	slice_changed();
+}
+
+void MainWindow::sb_stride_changed()
+{
+	sb_slicenr->setSingleStep(sb_stride->value());
+	scb_slicenr->setSingleStep(sb_stride->value());
 }
 
 void MainWindow::pb_first_pressed()
@@ -6589,48 +6498,22 @@ void MainWindow::pb_last_pressed()
 
 void MainWindow::slicethickness_changed()
 {
-	bool b1;
-	float thickness = le_slicethick->text().toFloat(&b1);
-	if (b1)
-	{
-		handler3D->set_slicethickness(thickness);
-		if (xsliceshower != nullptr)
-			xsliceshower->thickness_changed(thickness);
-		if (ysliceshower != nullptr)
-			ysliceshower->thickness_changed(thickness);
-		if (VV3D != nullptr)
-			VV3D->thickness_changed(thickness);
-		if (VV3Dbmp != nullptr)
-			VV3Dbmp->thickness_changed(thickness);
-		if (surface_viewer != nullptr)
-			surface_viewer->thickness_changed(thickness);
-	}
-	else
-	{
-		if (le_slicethick->text() != QString("."))
-			QApplication::beep();
-	}
-}
-
-void MainWindow::slicethickness_changed1()
-{
-	le_slicethick->setText(QString::number(handler3D->get_slicethickness()));
-
+	float thickness = handler3D->get_slicethickness();
 	if (xsliceshower != nullptr)
-		xsliceshower->thickness_changed(handler3D->get_slicethickness());
+		xsliceshower->thickness_changed(thickness);
 	if (ysliceshower != nullptr)
-		ysliceshower->thickness_changed(handler3D->get_slicethickness());
+		ysliceshower->thickness_changed(thickness);
 	if (VV3D != nullptr)
-		VV3D->thickness_changed(handler3D->get_slicethickness());
+		VV3D->thickness_changed(thickness);
 	if (VV3Dbmp != nullptr)
-		VV3Dbmp->thickness_changed(handler3D->get_slicethickness());
+		VV3Dbmp->thickness_changed(thickness);
 	if (surface_viewer != nullptr)
-		surface_viewer->thickness_changed(handler3D->get_slicethickness());
+		surface_viewer->thickness_changed(thickness);
 }
 
 void MainWindow::tissuenr_changed(int i)
 {
-	QWidget* qw = methodTab->visibleWidget();
+	QWidget* qw = methodTab->currentWidget();
 	if (auto tool = dynamic_cast<WidgetInterface*>(qw))
 	{
 		tool->on_tissuenr_changed(i);
@@ -6783,7 +6666,7 @@ void MainWindow::execute_undo()
 	if (handler3D->return_nrundo() > 0)
 	{
 		iseg::DataSelection selectedData;
-		if (methodTab->visibleWidget() == transform_widget)
+		if (methodTab->currentWidget() == transform_widget)
 		{
 			cancel_transform_helper();
 			selectedData = handler3D->undo();
@@ -6812,7 +6695,7 @@ void MainWindow::execute_undo()
 void MainWindow::execute_redo()
 {
 	iseg::DataSelection selectedData;
-	if (methodTab->visibleWidget() == transform_widget)
+	if (methodTab->currentWidget() == transform_widget)
 	{
 		cancel_transform_helper();
 		selectedData = handler3D->redo();
@@ -6864,8 +6747,9 @@ void MainWindow::do_clearundo()
 	editmenu->setItemEnabled(undonr, false);
 }
 
-void MainWindow::tab_changed(QWidget* qw)
+void MainWindow::tab_changed(int idx)
 {
+	QWidget* qw = methodTab->widget(idx);
 	if (qw != tab_old)
 	{
 		ISEG_INFO("Starting widget: " << qw->metaObject()->className());
@@ -7215,7 +7099,7 @@ void MainWindow::updateTabvisibility()
 		counter1++;
 	}
 
-	WidgetInterface* qw = static_cast<WidgetInterface*>(methodTab->visibleWidget());
+	WidgetInterface* qw = static_cast<WidgetInterface*>(methodTab->currentWidget());
 	updateMethodButtonsPressed(qw);
 }
 
@@ -7262,7 +7146,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 	m_atlasfilename.nratlases = (int)names1.size();
 	if (m_atlasfilename.nratlases > m_atlasfilename.maxnr)
 		m_atlasfilename.nratlases = m_atlasfilename.maxnr;
-	for (size_t i = 0; i < m_atlasfilename.nratlases; i++)
+	for (int i = 0; i < m_atlasfilename.nratlases; i++)
 	{
 		m_atlasfilename.m_atlasfilename[i] = names1[i];
 		QFileInfo names1fi(names1[i]);
@@ -7270,7 +7154,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 				names1fi.completeBaseName());
 		atlasmenu->setItemVisible(m_atlasfilename.atlasnr[i], true);
 	}
-	for (size_t i = m_atlasfilename.nratlases; i < m_atlasfilename.maxnr; i++)
+	for (int i = m_atlasfilename.nratlases; i < m_atlasfilename.maxnr; i++)
 	{
 		atlasmenu->setItemVisible(m_atlasfilename.atlasnr[i], false);
 	}
@@ -7447,7 +7331,7 @@ void MainWindow::pb_tab_pressed(int nr)
 		pos2++;
 	}
 	pos2--;
-	methodTab->raiseWidget(tabwidgets[pos2]);
+	methodTab->setCurrentWidget(tabwidgets[pos2]);
 }
 
 void MainWindow::bmpcrosshairvisible_changed()
@@ -7470,8 +7354,6 @@ void MainWindow::bmpcrosshairvisible_changed()
 		bmp_show->set_crosshairxvisible(false);
 		bmp_show->set_crosshairyvisible(false);
 	}
-
-	return;
 }
 
 void MainWindow::workcrosshairvisible_changed()
@@ -7494,8 +7376,6 @@ void MainWindow::workcrosshairvisible_changed()
 		work_show->set_crosshairxvisible(false);
 		work_show->set_crosshairyvisible(false);
 	}
-
-	return;
 }
 
 void MainWindow::execute_inversesliceorder()
@@ -7511,8 +7391,6 @@ void MainWindow::execute_inversesliceorder()
 
 	//	pixelsize_changed();
 	emit end_datachange(this, iseg::NoUndo);
-
-	return;
 }
 
 void MainWindow::execute_smoothsteps()
@@ -7538,24 +7416,55 @@ void MainWindow::execute_smoothtissues()
 
 	emit end_datachange(this);
 }
+void MainWindow::execute_remove_unused_tissues()
+{
+	// get all unused tissue ids
+	auto unused = handler3D->find_unused_tissues();
+
+	if (unused.empty())
+	{
+		QMessageBox::information(this, "iSeg", "No unused tissues found");
+		return;
+	}
+	else
+	{
+		int ret = QMessageBox::warning(this, "iSeg", "Found " + QString::number(unused.size()) + " unused tissues. Do you want to remove them?",
+				QMessageBox::Yes | QMessageBox::Default, QMessageBox::Cancel | QMessageBox::Escape);
+		if (ret != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
+
+	auto all = tissueTreeWidget->get_all_items(true);
+
+	// collect tree items matching the list of tissue ids
+	std::vector<QTreeWidgetItem*> list;
+	for (auto item: all)
+	{
+		auto type = tissueTreeWidget->get_type(item);
+		if (std::find(unused.begin(), unused.end(), type) != unused.end())
+		{
+			list.push_back(item);
+		}
+	}
+	removeselected(list, false);
+}
 
 void MainWindow::execute_cleanup()
 {
 	tissues_size_t** slices = new tissues_size_t*[handler3D->end_slice() - handler3D->start_slice()];
 	tissuelayers_size_t activelayer = handler3D->active_tissuelayer();
-	for (unsigned short i = handler3D->start_slice();
-			 i < handler3D->end_slice(); i++)
+	for (unsigned short i = handler3D->start_slice(); i < handler3D->end_slice(); i++)
 	{
-		slices[i - handler3D->start_slice()] =
-				handler3D->return_tissues(activelayer, i);
+		slices[i - handler3D->start_slice()] = handler3D->return_tissues(activelayer, i);
 	}
 	TissueCleaner TC(
 			slices, handler3D->end_slice() - handler3D->start_slice(),
 			handler3D->width(), handler3D->height());
 	if (!TC.Allocate())
 	{
-		QMessageBox::information(
-				0, "iSeg", "Not enough memory.\nThis operation cannot be performed.\n");
+		QMessageBox::information(this, "iSeg", "Not enough memory.\nThis operation cannot be performed.\n");
 	}
 	else
 	{
@@ -7671,7 +7580,7 @@ void MainWindow::handle_begin_datachange(iseg::DataSelection& dataSelection,
 	changeData = dataSelection;
 
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transform_widget && sender != transform_widget)
+	if (methodTab->currentWidget() == transform_widget && sender != transform_widget)
 	{
 		cancel_transform_helper();
 	}
@@ -7751,7 +7660,7 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	update_ranges_helper();
 
 	// Block changed data signals for visible widget
-	if (sender == methodTab->visibleWidget())
+	if (sender == methodTab->currentWidget())
 	{
 		QObject::disconnect(this, SIGNAL(bmp_changed()), sender,
 				SLOT(bmp_changed()));
@@ -7796,7 +7705,7 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 		}
 	}
 
-	if (sender == methodTab->visibleWidget())
+	if (sender == methodTab->currentWidget())
 	{
 		QObject::connect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
 		QObject::connect(this, SIGNAL(work_changed()), sender,
@@ -7883,7 +7792,7 @@ void MainWindow::handle_begin_dataexport(iseg::DataSelection& dataSelection,
 		QWidget* sender)
 {
 	// Handle pending transforms
-	if (methodTab->visibleWidget() == transform_widget &&
+	if (methodTab->currentWidget() == transform_widget &&
 			(dataSelection.bmp || dataSelection.work || dataSelection.tissues))
 	{
 		cancel_transform_helper();
@@ -7910,12 +7819,12 @@ void MainWindow::execute_savecolorlookup()
 
 	if (!savefilename.endsWith(QString(".lut")))
 		savefilename.append(".lut");
-	
+
 	XdmfImageWriter writer(savefilename.toStdString().c_str());
 	writer.SetCompression(handler3D->GetCompression());
 	if (!writer.WriteColorLookup(handler3D->GetColorLookupTable().get(), true))
 	{
-		QMessageBox::warning(this, "iSeg", 
-			"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+		QMessageBox::warning(this, "iSeg",
+				"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }

@@ -3076,19 +3076,17 @@ int bmphandler::SaveTissueBitmap(tissuelayers_size_t idx, const char* filename)
 	unsigned char* field =
 			(unsigned char*)imageSource->GetScalarPointer(0, 0, 0);
 
-	float* tissueColor;
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < (unsigned int)width * height; ++i)
 	{
-		tissueColor = TissueInfos::GetTissueColor(tissues[i]);
+		auto tissueColor = TissueInfos::GetTissueColor(tissues[i]);
 		field[i * 4] = (tissueColor[0]) * 255;
 		field[i * 4 + 1] = (tissueColor[1]) * 255;
 		field[i * 4 + 2] = (tissueColor[2]) * 255;
 		field[i * 4 + 3] = 0;
 	}
 
-	vtkSmartPointer<vtkBMPWriter> bmpWriter =
-			vtkSmartPointer<vtkBMPWriter>::New();
+	auto bmpWriter = vtkSmartPointer<vtkBMPWriter>::New();
 	bmpWriter->SetFileName(filename);
 	bmpWriter->SetInputData(imageSource);
 	bmpWriter->Write();
@@ -13235,13 +13233,9 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 	return;
 }
 
-void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
-		tissues_size_t tissuetype, Point p,
-		bool override)
+void bmphandler::add2tissue_connected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override)
 {
 	unsigned position = pt2coord(p);
-	std::vector<int> s;
-
 	float f = work_bits[position];
 	float* results = (float*)malloc(sizeof(float) * (area + 2 * width + 2 * height + 4));
 
@@ -13252,10 +13246,7 @@ void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
 	{
 		for (int k = 0; k < width; k++)
 		{
-			//if(work_bits[i1]==f&&(override||tissues[i1]==0)) results[i]=-1;
-			if (work_bits[i1] == f &&
-					(tissues[i1] == 0 || (override && TissueInfos::GetTissueLocked(
-																								tissues[i1]) == false)))
+			if (work_bits[i1] == f && (tissues[i1] == 0 || (override && !TissueInfos::GetTissueLocked(tissues[i1]))))
 				results[i] = -1;
 			else
 				results[i] = 0;
@@ -13271,6 +13262,7 @@ void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
 	for (int j = 0; j <= ((int)width + 2) * (height + 1); j += width + 2)
 		results[j] = results[j + width + 1] = 0;
 
+	std::vector<int> s;
 	s.push_back(position % width + 1 + (position / width + 1) * (width + 2));
 	if (results[s.back()] == -1)
 		results[s.back()] = 255.0f;
@@ -13320,19 +13312,16 @@ void bmphandler::add2tissue_connected(tissuelayers_size_t idx,
 	}
 
 	free(results);
-	return;
 }
 
-void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
-		Point p, bool override)
+void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override)
 {
 	float f = work_pt(p);
 	tissues_size_t* tissues = tissuelayers[idx];
 	if (override)
 	{
 		for (unsigned int i = 0; i < area; i++)
-			if (work_bits[i] == f &&
-					TissueInfos::GetTissueLocked(tissues[i]) == false)
+			if (work_bits[i] == f && !TissueInfos::GetTissueLocked(tissues[i]))
 				tissues[i] = tissuetype;
 	}
 	else
@@ -13340,10 +13329,7 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 		for (unsigned int i = 0; i < area; i++)
 			if (work_bits[i] == f && tissues[i] == 0)
 				tissues[i] = tissuetype;
-		//for(unsigned int i=0;i<area;i++) if(work_bits[i]==f&&tissuelocked[tissues[i]]==false) tissues[i]=tissuetype;
 	}
-
-	return;
 }
 
 void bmphandler::add2tissue_thresh(tissuelayers_size_t idx,
@@ -16015,7 +16001,7 @@ void bmphandler::copy2limits(std::vector<std::vector<Point>>* limits1)
 	limits = *limits1;
 }
 
-void bmphandler::permute_tissue_indices(tissues_size_t* indexMap)
+void bmphandler::map_tissue_indices(const std::vector<tissues_size_t>& indexMap)
 {
 	for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
 	{
@@ -16027,10 +16013,7 @@ void bmphandler::permute_tissue_indices(tissues_size_t* indexMap)
 	}
 }
 
-void bmphandler::remove_tissue(
-		tissues_size_t tissuenr,
-		tissues_size_t
-				tissuecount1) //assumes tissue[tissuecount] has not been erased yet
+void bmphandler::remove_tissue(tissues_size_t tissuenr)
 {
 	for (tissuelayers_size_t idx = 0; idx < tissuelayers.size(); ++idx)
 	{

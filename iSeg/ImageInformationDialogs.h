@@ -10,7 +10,7 @@
 #ifndef PIXELSIZE_28June05
 #define PIXELSIZE_28June05
 
-#include "Core/Pair.h"
+#include "Data/Vec3.h"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -33,37 +33,29 @@ class PixelResize : public QDialog
 public:
 	PixelResize(SlicesHandler* hand3D, QWidget* parent = 0,
 				const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~PixelResize();
-	Pair return_pixelsize();
+	~PixelResize() {}
+	Vec3 get_pixelsize();
 
 private:
-	float dx;
-	float dy;
 	SlicesHandler* handler3D;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	QLabel* lb_dx;
-	QLabel* lb_dy;
-	QLabel* lb_lx;
-	QLabel* lb_ly;
+
 	QLineEdit* le_dx;
 	QLineEdit* le_dy;
+	QLineEdit* le_dz;
 	QLineEdit* le_lx;
 	QLineEdit* le_ly;
+	QLineEdit* le_lz;
+
 	QPushButton* pb_resize;
 	QPushButton* pb_close;
-
-signals:
-	void pixelsize_changed(Pair p);
 
 private slots:
 	void dx_changed();
 	void dy_changed();
+	void dz_changed();
 	void lx_changed();
 	void ly_changed();
+	void lz_changed();
 	void resize_pressed();
 };
 
@@ -73,20 +65,13 @@ class DisplacementDialog : public QDialog
 public:
 	DisplacementDialog(SlicesHandler* hand3D, QWidget* parent = 0,
 					   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~DisplacementDialog();
+	~DisplacementDialog() {}
 	void return_displacement(float disp[3]);
 
 private:
 	float displacement[3];
 	SlicesHandler* handler3D;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	QLabel* lb_dispx;
-	QLabel* lb_dispy;
-	QLabel* lb_dispz;
+
 	QLineEdit* le_dispx;
 	QLineEdit* le_dispy;
 	QLineEdit* le_dispz;

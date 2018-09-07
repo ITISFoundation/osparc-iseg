@@ -34,9 +34,7 @@ class QTreeWidgetItem;
 class QSignalMapper;
 class QCloseEvent;
 
-class Q3VBox;
-class Q3HBoxLayout;
-class Q3WidgetStack;
+class QStackedWidget;
 class QScrollBar;
 class Q3ScrollView;
 class Q3PopupMenu;
@@ -94,7 +92,7 @@ public:
 			const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr,
 			const char* name = nullptr, Qt::WindowFlags wFlags = 0,
 			char** argv = nullptr);
-	~MainWindow();
+	~MainWindow() {}
 
 	friend class Settings;
 
@@ -112,14 +110,12 @@ protected:
 	void closeEvent(QCloseEvent*);
 	bool maybeSafe();
 	bool modified();
-	void removeFolder();
 	void modifTissue();
 	void modifFolder();
 	void end_undo_helper(iseg::EndUndoAction undoAction);
 	void cancel_transform_helper();
 	void update_ranges_helper();
 	void pixelsize_changed();
-	void slicethickness_changed1();
 	void do_undostepdone();
 	void do_clearundo();
 	void reset_brightnesscontrast();
@@ -223,7 +219,7 @@ private:
 	Q3Action* hidetarget;
 	std::vector<Q3Action*> showtab_action;
 	QCheckBox* tissue3Dopt;
-	Q3WidgetStack* methodTab;
+	QStackedWidget* methodTab;
 	ThresholdWidget* threshold_widget;
 	MeasurementWidget* measurement_widget;
 	VesselWidget* vesselextr_widget;
@@ -257,17 +253,15 @@ private:
 	void slice_changed();
 	unsigned short nrslices;
 	void slices3d_changed(bool new_bitstack);
-	Q3HBoxLayout* hboxslice;
-	Q3HBoxLayout* hboxslicenr;
 	QLabel* lb_slicenr;
 	QLabel* lb_inactivewarning;
 	QSpinBox* sb_slicenr;
 	QScrollBar* scb_slicenr;
 	QPushButton* pb_first;
 	QPushButton* pb_last;
-	Q3HBoxLayout* hboxslicethick;
-	QLabel* lb_slicethick;
-	QLineEdit* le_slicethick;
+	QLabel* lb_stride;
+	QSpinBox* sb_stride;
+
 	QLabel* lb_source;
 	QLabel* lb_target;
 	Q3ScrollView* bmp_scroller;
@@ -319,9 +313,6 @@ private:
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;
 	std::vector<bool> showpb_tab;
-	Q3HBoxLayout* hboxtabs;
-	Q3VBox* vboxtabs1;
-	Q3VBox* vboxtabs2;
 	void updateMethodButtonsPressed(WidgetInterface*);
 	void updateTabvisibility();
 	std::vector<WidgetInterface*> tabwidgets;
@@ -368,7 +359,7 @@ private slots:
 	void execute_loadrtdose();
 	void execute_reloadrtdose();
 	void execute_loads4llivelink();
-	//void execute_loadrtss();
+
 	void execute_saveimg();
 	void execute_saveprojas();
 	void execute_savecopyas();
@@ -487,6 +478,7 @@ private slots:
 	void modifTissueFolderPressed();
 	void removeTissueFolderPressed();
 	void removeselected();
+	void removeselected(const std::vector<QTreeWidgetItem*>& sel, bool perform_checks);
 	void removeTissueFolderAllPressed();
 	void tissue2work();
 	void selectedtissue2work();
@@ -494,7 +486,7 @@ private slots:
 	void cleartissue();
 	void cleartissues();
 	void clearselected();
-	void tab_changed(QWidget*);
+	void tab_changed(int);
 	void bmptissuevisible_changed();
 	void bmpoutlinevisible_changed();
 	void worktissuevisible_changed();
@@ -505,6 +497,7 @@ private slots:
 	void zoom_out();
 	void sb_slicenr_changed();
 	void scb_slicenr_changed();
+	void sb_stride_changed();
 	void pb_first_pressed();
 	void pb_last_pressed();
 	void slicethickness_changed();
@@ -524,6 +517,7 @@ private slots:
 	void execute_undo();
 	void execute_redo();
 	void execute_inversesliceorder();
+	void execute_remove_unused_tissues();
 	void execute_cleanup();
 	void execute_smoothsteps();
 	void execute_smoothtissues();
@@ -547,7 +541,6 @@ private slots:
 	void le_brightnesswork_val_edited();
 	void reconnectmouse_afterrelease(Point);
 	void merge();
-	void removeselectedmerge(QList<QTreeWidgetItem*> list);
 	void unselectall();
 
 	void pb_tab_pressed(int nr);

@@ -6836,18 +6836,16 @@ int SlicesHandler::extract_tissue_surfaces(
 
 	for (tissues_size_t i = 1; i < num_tissues; i++)
 	{
-		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
-				i);
+		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
-		float* color = TissueInfos::GetTissueColor(i);
-		color_array->SetTuple(i, color);
+		auto color = TissueInfos::GetTissueColor(i);
+		color_array->SetTuple(i, color.data());
 	}
 
 	labelField->GetFieldData()->AddArray(names_array);
 	labelField->GetFieldData()->AddArray(color_array);
 
-	tissues_size_t* field =
-			(tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
+	tissues_size_t* field = (tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
 	if (!field)
 	{
 		ISEG_ERROR_MSG("null pointer");
@@ -6999,15 +6997,12 @@ int SlicesHandler::extract_tissue_surfaces(
 
 			for (tissues_size_t i = 1; i < num_tissues; i++)
 			{
-				float* color = TissueInfos::GetTissueColor(i);
-				check_equal(
-						TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)),
-						i);
+				check_equal( TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 				if (i == tissuevec[0])
 				{
-					names_array_1->SetValue(
-							0, TissueInfos::GetTissueName(i).c_str());
-					color_array_1->SetTuple(0, color);
+					names_array_1->SetValue( 0, TissueInfos::GetTissueName(i).c_str());
+					auto color = TissueInfos::GetTissueColor(i);
+					color_array_1->SetTuple(0, color.data());
 				}
 			}
 
@@ -7057,123 +7052,23 @@ int SlicesHandler::extract_tissue_surfaces(
 	return error_counter;
 }
 
-void SlicesHandler::triangulate(const char* filename,
-		std::vector<tissues_size_t>& tissuevec)
+void SlicesHandler::add2tissue(tissues_size_t tissuetype, Point p, bool override)
 {
-	tissues_size_t** tissuebits = (tissues_size_t**)malloc(
-			sizeof(tissues_size_t*) * (_endslice - _startslice));
-	for (unsigned short i = _startslice; i < _endslice; i++)
-		tissuebits[i - _startslice] =
-				_image_slices[i].return_tissues(_active_tissuelayer);
-
-	std::vector<std::string> vstring;
-	std::vector<RGB> colorvec;
-	TissueInfoStruct* tissueInfo;
-	for (std::vector<tissues_size_t>::iterator it = tissuevec.begin();
-			 it != tissuevec.end(); it++)
-	{
-		tissueInfo = TissueInfos::GetTissueInfo(*it);
-		vstring.push_back(tissueInfo->name);
-		RGB dummy;
-		dummy.r = tissueInfo->color[0];
-		dummy.g = tissueInfo->color[1];
-		dummy.b = tissueInfo->color[2];
-		colorvec.push_back(dummy);
-	}
-
-	MarchingCubes mc;
-	mc.init(tissuebits, _width, _height, _endslice - _startslice, _thickness, _dx,
-			_dy);
-	mc.marchingcubeprint(filename, tissuevec, colorvec, vstring);
-
-	free(tissuebits);
-	return;
+	_image_slices[_activeslice].add2tissue(_active_tissuelayer, tissuetype, p, override);
 }
 
-void SlicesHandler::triangulate(const char* filename,
-		std::vector<tissues_size_t>& tissuevec,
-		std::vector<RGB>& colorvec)
+void SlicesHandler::add2tissue(tissues_size_t tissuetype, bool* mask, unsigned short slicenr, bool override)
 {
-	tissues_size_t** tissuebits = (tissues_size_t**)malloc(
-			sizeof(tissues_size_t*) * (_endslice - _startslice));
-	for (unsigned short i = _startslice; i < _endslice; i++)
-		tissuebits[i - _startslice] =
-				_image_slices[i].return_tissues(_active_tissuelayer);
-
-	std::vector<std::string> vstring;
-	for (std::vector<tissues_size_t>::iterator it = tissuevec.begin();
-			 it != tissuevec.end(); it++)
-	{
-		vstring.push_back((std::string)TissueInfos::GetTissueName(
-				*it + 1)); // TODO: why +1???
-	}
-
-	MarchingCubes mc;
-	mc.init(tissuebits, _width, _height, _endslice - _startslice, _thickness, _dx,
-			_dy);
-	mc.marchingcubeprint(filename, tissuevec, colorvec, vstring);
-
-	free(tissuebits);
-	return;
+	_image_slices[slicenr].add2tissue(_active_tissuelayer, tissuetype, mask, override);
 }
 
-void SlicesHandler::triangulatesimpl(const char* filename,
-		std::vector<tissues_size_t>& tissuevec,
-		float ratio)
-{
-	//QGenTriangleMesh Mesh;
-	tissues_size_t** tissuebits = (tissues_size_t**)malloc(
-			sizeof(tissues_size_t*) * (_endslice - _startslice));
-	for (unsigned short i = _startslice; i < _endslice; i++)
-		tissuebits[i - _startslice] =
-				_image_slices[i].return_tissues(_active_tissuelayer);
-
-	std::vector<std::string> vstring;
-	std::vector<RGB> colorvec;
-	TissueInfoStruct* tissueInfo;
-	for (std::vector<tissues_size_t>::iterator it = tissuevec.begin();
-			 it != tissuevec.end(); it++)
-	{
-		tissueInfo = TissueInfos::GetTissueInfo(*it);
-		vstring.push_back(tissueInfo->name);
-		RGB dummy;
-		dummy.r = tissueInfo->color[0];
-		dummy.g = tissueInfo->color[1];
-		dummy.b = tissueInfo->color[2];
-		colorvec.push_back(dummy);
-	}
-
-	MarchingCubes mc;
-	mc.init(tissuebits, _width, _height, _endslice - _startslice, _thickness, _dx, _dy);
-	mc.marchingcubeprint(filename, tissuevec, colorvec, vstring);
-
-	free(tissuebits);
-	return;
-}
-
-void SlicesHandler::add2tissue(tissues_size_t tissuetype, Point p,
-		bool override)
-{
-	_image_slices[_activeslice].add2tissue(_active_tissuelayer, tissuetype, p,
-			override);
-}
-
-void SlicesHandler::add2tissue(tissues_size_t tissuetype, bool* mask,
-		unsigned short slicenr, bool override)
-{
-	_image_slices[slicenr].add2tissue(_active_tissuelayer, tissuetype, mask,
-			override);
-}
-
-void SlicesHandler::add2tissueall(tissues_size_t tissuetype, Point p,
-		bool override)
+void SlicesHandler::add2tissueall(tissues_size_t tissuetype, Point p, bool override)
 {
 	float f = _image_slices[_activeslice].work_pt(p);
 	add2tissueall(tissuetype, f, override);
 }
 
-void SlicesHandler::add2tissue_connected(tissues_size_t tissuetype, Point p,
-		bool override)
+void SlicesHandler::add2tissue_connected(tissues_size_t tissuetype, Point p, bool override)
 {
 	_image_slices[_activeslice].add2tissue_connected(_active_tissuelayer,
 			tissuetype, p, override);
@@ -7181,14 +7076,12 @@ void SlicesHandler::add2tissue_connected(tissues_size_t tissuetype, Point p,
 
 void SlicesHandler::add2tissue_thresh(tissues_size_t tissuetype, Point p)
 {
-	_image_slices[_activeslice].add2tissue_thresh(_active_tissuelayer, tissuetype,
-			p);
+	_image_slices[_activeslice].add2tissue_thresh(_active_tissuelayer, tissuetype, p);
 }
 
 void SlicesHandler::subtract_tissue(tissues_size_t tissuetype, Point p)
 {
-	_image_slices[_activeslice].subtract_tissue(_active_tissuelayer, tissuetype,
-			p);
+	_image_slices[_activeslice].subtract_tissue(_active_tissuelayer, tissuetype, p);
 }
 
 void SlicesHandler::subtract_tissueall(tissues_size_t tissuetype, Point p)
@@ -8572,39 +8465,45 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	std::sort(dicomseriesnr->begin(), dicomseriesnr->end());
 }
 
-void SlicesHandler::permute_tissue_indices(tissues_size_t* indexMap)
+void SlicesHandler::map_tissue_indices(const std::vector<tissues_size_t>& indexMap)
 {
-	for (short unsigned i = 0; i < _nrslices; i++)
+	int const iN = _nrslices;
+
+#pragma omp parallel for
+	for (short unsigned i = 0; i < iN; i++)
 	{
-		_image_slices[i].permute_tissue_indices(indexMap);
+		_image_slices[i].map_tissue_indices(indexMap);
 	}
 }
 
-void SlicesHandler::remove_tissue(tissues_size_t tissuenr,
-		tissues_size_t tissuecount1)
+void SlicesHandler::remove_tissue(tissues_size_t tissuenr)
 {
 	for (short unsigned i = 0; i < _nrslices; i++)
 	{
-		_image_slices[i].remove_tissue(tissuenr, tissuecount1);
+		_image_slices[i].remove_tissue(tissuenr);
 	}
 	TissueInfos::RemoveTissue(tissuenr);
 }
 
 void SlicesHandler::remove_tissues(const std::set<tissues_size_t>& tissuenrs)
 {
-	// Remove in descending order
-	tissues_size_t tissuecount = TissueInfos::GetTissueCount();
-	for (auto riter = tissuenrs.rbegin(); riter != tissuenrs.rend(); ++riter)
+	std::vector<bool> isSelected(TissueInfos::GetTissueCount()+1, false);
+	for (auto id: tissuenrs)
 	{
-		int const iN = _nrslices;
-
-#pragma omp parallel for
-		for (int i = 0; i < iN; i++)
-		{
-			_image_slices[i].remove_tissue(*riter, tissuecount);
-		}
-		tissuecount--;
+		isSelected.at(id) = true;
 	}
+
+	std::vector<tissues_size_t> idxMap(isSelected.size(), 0);
+	for (tissues_size_t oldIdx = 1, newIdx = 1; oldIdx < idxMap.size(); ++oldIdx)
+	{
+		if (!isSelected[oldIdx])
+		{
+			idxMap[oldIdx] = newIdx++;
+		}
+	}
+
+	map_tissue_indices(idxMap);
+
 	TissueInfos::RemoveTissues(tissuenrs);
 }
 
@@ -8617,7 +8516,7 @@ void SlicesHandler::remove_tissueall()
 	TissueInfos::RemoveAllTissues();
 	TissueInfoStruct tissue;
 	tissue.locked = false;
-	tissue.SetColor(1.0f, 0.0f, 0.0f);
+	tissue.SetColor(1.0f, 0.0f, 0.1f);
 	tissue.name = "Tissue1";
 	TissueInfos::AddTissue(tissue);
 }
@@ -8627,22 +8526,6 @@ void SlicesHandler::cap_tissue(tissues_size_t maxval)
 	for (short unsigned i = 0; i < _nrslices; i++)
 	{
 		_image_slices[i].cap_tissue(maxval);
-	}
-}
-
-void SlicesHandler::build255tissues()
-{
-	TissueInfos::RemoveAllTissues();
-	QString sdummy;
-	TissueInfoStruct tissue;
-	tissue.locked = false;
-	for (unsigned i = 0; i < 255; i++)
-	{
-		tissue.color[0] = (i % 7) * 0.166666666f;
-		tissue.color[1] = ((i / 7) % 7) * 0.166666666f;
-		tissue.color[2] = (i / 49) * 0.19f;
-		tissue.name = (boost::format("Tissue%d") % static_cast<int>(i + 1)).str();
-		TissueInfos::AddTissue(tissue);
 	}
 }
 
@@ -8666,8 +8549,33 @@ void SlicesHandler::buildmissingtissues(tissues_size_t j)
 	}
 }
 
-void SlicesHandler::group_tissues(std::vector<tissues_size_t>& olds,
-		std::vector<tissues_size_t>& news)
+std::vector<tissues_size_t> SlicesHandler::find_unused_tissues()
+{
+	std::vector<unsigned char> is_used(TissueInfos::GetTissueCount()+1, 0);
+
+	for (int i = 0, iN = _nrslices; i < iN; i++)
+	{
+		auto tissues = _image_slices[i].return_tissues(_active_tissuelayer);
+		for (unsigned k=0; k<_area; ++k)
+		{
+			is_used[tissues[k]] = 1;
+		}
+	}
+	
+	std::vector<tissues_size_t> unused_tissues;
+	for (size_t i=1; i<is_used.size(); ++i)
+	{
+		if (is_used[i] == 0)
+		{
+			ISEG_INFO("Unused tissue: " << TissueInfos::GetTissueName(i) << " (" << i << ")");
+			unused_tissues.push_back(i);
+		}
+	}
+
+	return unused_tissues;
+}
+
+void SlicesHandler::group_tissues(std::vector<tissues_size_t>& olds, std::vector<tissues_size_t>& news)
 {
 	int const iN = _nrslices;
 
@@ -8894,9 +8802,9 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 		int error_counter = 0;
 		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
-		float* color = TissueInfos::GetTissueColor(i);
+		auto color = TissueInfos::GetTissueColor(i);
 		ISEG_INFO(TissueInfos::GetTissueName(i).c_str() << " " << color[0] << "," << color[1] << "," << color[2]);
-		color_array->SetTuple(i, color);
+		color_array->SetTuple(i, color.data());
 	}
 
 	return labelField;

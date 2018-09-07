@@ -129,12 +129,19 @@ private:
 	QPushButton* getCurrentTissueSkin;
 	QLineEdit* backgroundText;
 	QLineEdit* skinText;
-	tissues_size_t selectedBacgroundID;
+	tissues_size_t selectedBackgroundID;
 	tissues_size_t selectedSkinID;
 	bool backgroundSelected;
 	bool skinSelected;
 
 	QLineEdit* object_value;
+
+	Q3HBox* hbox_prev_slice;
+	QCheckBox* cb_show_guide;
+	QSpinBox* sb_guide_offset;
+	QPushButton* pb_copy_guide;
+	QPushButton* pb_copy_pick_guide;
+	bool copy_mode = false;
 
 public slots:
 	void pixmm_changed();
@@ -148,6 +155,9 @@ private slots:
 	void method_changed();
 	void execute_pushed();
 	void selectobj_pushed();
+	void draw_guide();
+	void copy_guide(Point* p = nullptr);
+	void copy_pick_pushed();
 };
 
 } // namespace iseg

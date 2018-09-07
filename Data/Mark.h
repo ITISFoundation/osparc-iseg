@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Point.h"
+#include "Types.h"
 
 #include <string>
 
@@ -20,7 +21,15 @@ struct Mark
 	Mark(unsigned label = 0) : mark(label) {}
 	Mark(const Mark& r) : p(r.p), mark(r.mark), name(r.name) {}
 
-	Point p;
+	static const tissues_size_t RED = -1;
+	static const tissues_size_t GREEN = -2;
+	static const tissues_size_t BLUE = -3;
+	static const tissues_size_t WHITE = -4;
+
+	union {
+		Point p;
+		struct { short px, py; };
+	};
 	unsigned mark;
 	std::string name;
 };
