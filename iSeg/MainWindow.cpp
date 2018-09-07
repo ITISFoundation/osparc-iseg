@@ -7354,8 +7354,6 @@ void MainWindow::bmpcrosshairvisible_changed()
 		bmp_show->set_crosshairxvisible(false);
 		bmp_show->set_crosshairyvisible(false);
 	}
-
-	return;
 }
 
 void MainWindow::workcrosshairvisible_changed()
@@ -7378,8 +7376,6 @@ void MainWindow::workcrosshairvisible_changed()
 		work_show->set_crosshairxvisible(false);
 		work_show->set_crosshairyvisible(false);
 	}
-
-	return;
 }
 
 void MainWindow::execute_inversesliceorder()
@@ -7395,8 +7391,6 @@ void MainWindow::execute_inversesliceorder()
 
 	//	pixelsize_changed();
 	emit end_datachange(this, iseg::NoUndo);
-
-	return;
 }
 
 void MainWindow::execute_smoothsteps()
@@ -7426,6 +7420,22 @@ void MainWindow::execute_remove_unused_tissues()
 {
 	// get all unused tissue ids
 	auto unused = handler3D->find_unused_tissues();
+
+	if (unused.empty())
+	{
+		QMessageBox::information(this, "iSeg", "No unused tissues found");
+		return;
+	}
+	else
+	{
+		int ret = QMessageBox::warning(this, "iSeg", "Found " + QString::number(unused.size()) + " unused tissues. Do you want to remove them?",
+				QMessageBox::Yes | QMessageBox::Default, QMessageBox::Cancel | QMessageBox::Escape);
+		if (ret != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
+
 	auto all = tissueTreeWidget->get_all_items(true);
 
 	// collect tree items matching the list of tissue ids
@@ -7454,8 +7464,7 @@ void MainWindow::execute_cleanup()
 			handler3D->width(), handler3D->height());
 	if (!TC.Allocate())
 	{
-		QMessageBox::information(
-				0, "iSeg", "Not enough memory.\nThis operation cannot be performed.\n");
+		QMessageBox::information(this, "iSeg", "Not enough memory.\nThis operation cannot be performed.\n");
 	}
 	else
 	{

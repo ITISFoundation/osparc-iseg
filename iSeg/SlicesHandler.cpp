@@ -8567,6 +8567,7 @@ std::vector<tissues_size_t> SlicesHandler::find_unused_tissues()
 	{
 		if (is_used[i] == 0)
 		{
+			ISEG_INFO("Unused tissue: " << TissueInfos::GetTissueName(i) << " (" << i << ")");
 			unused_tissues.push_back(i);
 		}
 	}
