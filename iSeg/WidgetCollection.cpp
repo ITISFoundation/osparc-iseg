@@ -970,8 +970,7 @@ void TissueTreeWidget::remove_tissue(const QString& name)
 	hierarchies->update_hierarchies();
 }
 
-void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent,
-		const QString& name)
+void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent, const QString& name)
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
@@ -998,18 +997,17 @@ void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent,
 
 void TissueTreeWidget::remove_items(const std::vector<QTreeWidgetItem*>& items)
 {
+	std::set<QTreeWidgetItem*> deleted;
 	for (auto currItem: items)
 	{
-		auto currParent = currItem->parent();
-		if (currParent == 0)
+		if (deleted.count(currItem) == 0)
 		{
-			takeTopLevelItem(indexOfTopLevelItem(currItem));
-			delete currItem;
+			remove_item(currItem, false, false);
+			deleted.insert(currItem);
 		}
 		else
 		{
-			currParent->removeChild(currItem);
-			delete currItem;
+			ISEG_WARNING("trying to delete item again");
 		}
 	}
 
@@ -1023,11 +1021,9 @@ void TissueTreeWidget::remove_items(const std::vector<QTreeWidgetItem*>& items)
 	update_tissue_indices();
 }
 
-void TissueTreeWidget::remove_current_item(bool removeChildren)
+void TissueTreeWidget::remove_item(QTreeWidgetItem* currItem, bool removeChildren, bool updateRepresentation)
 {
-	// Removes current item in QTreeWidget and internal representations
-
-	QTreeWidgetItem* currItem = currentItem();
+	// Removes item in QTreeWidget and internal representations
 	QTreeWidgetItem* currParent = currItem->parent();
 	bool updateTissues = false;
 
@@ -1060,15 +1056,13 @@ void TissueTreeWidget::remove_current_item(bool removeChildren)
 			// Insert children into parent and delete current item
 			if (currParent == 0)
 			{
-				insertTopLevelItems(indexOfTopLevelItem(currItem),
-						currItem->takeChildren());
+				insertTopLevelItems(indexOfTopLevelItem(currItem), currItem->takeChildren());
 				takeTopLevelItem(indexOfTopLevelItem(currItem));
 				delete currItem;
 			}
 			else
 			{
-				currParent->insertChildren(currParent->indexOfChild(currItem),
-						currItem->takeChildren());
+				currParent->insertChildren(currParent->indexOfChild(currItem), currItem->takeChildren());
 				currParent->removeChild(currItem);
 				delete currItem;
 			}
@@ -1092,15 +1086,18 @@ void TissueTreeWidget::remove_current_item(bool removeChildren)
 	}
 
 	// Update internal representation
-	update_hierarchy();
-
-	// Propagate tissue removal to other hierarchies
-	if (updateTissues)
+	if (updateRepresentation)
 	{
-		hierarchies->update_hierarchies();
+		update_hierarchy();
 
-		// Update tissue indices
-		update_tissue_indices();
+		// Propagate tissue removal to other hierarchies
+		if (updateTissues)
+		{
+			hierarchies->update_hierarchies();
+
+			// Update tissue indices
+			update_tissue_indices();
+		}
 	}
 }
 
@@ -1888,29 +1885,30 @@ bool TissueTreeWidget::get_tissue_indices_hidden() const
 	return isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE);
 }
 
-QList<QTreeWidgetItem*> get_my_children(QTreeWidgetItem* item)
+std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeWidgetItem*>& list) const
 {
-	QList<QTreeWidgetItem*> my_children;
+	std::vector<QTreeWidgetItem*> my_children;
 
-	if (item->childCount() == 0)
+	for (auto item: list)
 	{
-		my_children.append(item);
-	}
+		if (item != invisibleRootItem())
+		{
+			my_children.push_back(item);
+		}
 
-	for (int i = 0; i < item->childCount(); ++i)
-	{
-		my_children.append(get_my_children(item->child(i)));
+		for (int i = 0; i < item->childCount(); ++i)
+		{
+			auto extra = collect({item->child(i)});
+			my_children.insert(my_children.end(), extra.begin(), extra.end());
+		}
 	}
 
 	return my_children;
 }
 
-QList<QTreeWidgetItem*> TissueTreeWidget::get_all_items() const
+std::vector<QTreeWidgetItem*> TissueTreeWidget::get_all_items() const
 {
-	QList<QTreeWidgetItem*> all_items;
-	all_items.append(get_my_children(invisibleRootItem()));
-	auto nItems = all_items.size();
-	return all_items;
+	return collect({invisibleRootItem()});
 }
 
 void TissueTreeWidget::resize_columns_to_contents()

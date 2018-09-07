@@ -110,7 +110,6 @@ protected:
 	void closeEvent(QCloseEvent*);
 	bool maybeSafe();
 	bool modified();
-	void removeFolder();
 	void modifTissue();
 	void modifFolder();
 	void end_undo_helper(iseg::EndUndoAction undoAction);
@@ -479,6 +478,7 @@ private slots:
 	void modifTissueFolderPressed();
 	void removeTissueFolderPressed();
 	void removeselected();
+	void removeselected(const std::vector<QTreeWidgetItem*>& sel, bool perform_checks);
 	void removeTissueFolderAllPressed();
 	void tissue2work();
 	void selectedtissue2work();
@@ -540,7 +540,6 @@ private slots:
 	void le_brightnesswork_val_edited();
 	void reconnectmouse_afterrelease(Point);
 	void merge();
-	void removeselectedmerge(QList<QTreeWidgetItem*> list);
 	void unselectall();
 
 	void pb_tab_pressed(int nr);

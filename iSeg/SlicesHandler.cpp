@@ -8618,7 +8618,7 @@ void SlicesHandler::remove_tissueall()
 	TissueInfos::RemoveAllTissues();
 	TissueInfoStruct tissue;
 	tissue.locked = false;
-	tissue.SetColor(1.0f, 0.0f, 0.0f);
+	tissue.SetColor(1.0f, 0.0f, 0.1f);
 	tissue.name = "Tissue1";
 	TissueInfos::AddTissue(tissue);
 }
