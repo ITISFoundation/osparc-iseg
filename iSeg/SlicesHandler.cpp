@@ -8470,7 +8470,7 @@ void SlicesHandler::map_tissue_indices(const std::vector<tissues_size_t>& indexM
 	int const iN = _nrslices;
 
 #pragma omp parallel for
-	for (short unsigned i = 0; i < iN; i++)
+	for (int i = 0; i < iN; i++)
 	{
 		_image_slices[i].map_tissue_indices(indexMap);
 	}
