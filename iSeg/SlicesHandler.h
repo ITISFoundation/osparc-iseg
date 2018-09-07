@@ -342,11 +342,9 @@ public:
 			tissues_size_t tissuetype,
 			bool connectivity,
 			bool handleVanishingComp = true);
-	void extrapolatetissue(unsigned short origin1, unsigned short origin2,
-			unsigned short target, tissues_size_t tissuetype);
+	void extrapolatetissue(unsigned short origin1, unsigned short origin2, unsigned short target, tissues_size_t tissuetype);
 	void interpolatework(unsigned short slice1, unsigned short slice2);
-	void extrapolatework(unsigned short origin1, unsigned short origin2,
-			unsigned short target);
+	void extrapolatework(unsigned short origin1, unsigned short origin2, unsigned short target);
 	void interpolatetissuegrey(unsigned short slice1, unsigned short slice2);
 	void interpolatetissuegrey_medianset(unsigned short slice1,
 			unsigned short slice2,
@@ -357,10 +355,8 @@ public:
 			unsigned short slice2, bool connectivity,
 			bool handleVanishingComp = true);
 	void interpolate(unsigned short slice1, unsigned short slice2);
-	void extrapolate(unsigned short origin1, unsigned short origin2,
-			unsigned short target);
-	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1,
-			float* bmp2);
+	void extrapolate(unsigned short origin1, unsigned short origin2, unsigned short target);
+	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1, float* bmp2);
 	void set_slicethickness(float t);
 	float get_slicethickness();
 	void set_pixelsize(float dx1, float dy1);
@@ -384,13 +380,6 @@ public:
 			unsigned smoothingiterations = 15,
 			float passBand = 0.1f,
 			float featureAngle = 180);
-	void triangulate(const char* filename,
-			std::vector<tissues_size_t>& tissuevec);
-	void triangulate(const char* filename,
-			std::vector<tissues_size_t>& tissuevec,
-			std::vector<RGB>& colorvec);
-	void triangulatesimpl(const char* filename,
-			std::vector<tissues_size_t>& tissuevec, float ratio);
 	void next_slice();
 	void prev_slice();
 	unsigned short get_next_featuring_slice(tissues_size_t type, bool& found);
@@ -418,8 +407,7 @@ public:
 	void getstack_work(unsigned int slice, unsigned i);
 	void getstack_help(unsigned i);
 	void getstack_tissue(unsigned i, tissues_size_t tissuenr, bool override);
-	void getstack_tissue(unsigned int slice, unsigned i,
-			tissues_size_t tissuenr, bool override);
+	void getstack_tissue(unsigned int slice, unsigned i, tissues_size_t tissuenr, bool override);
 	void popstack_bmp();
 	void popstack_work();
 	void popstack_help();
@@ -477,10 +465,10 @@ public:
 	void remove_tissue(tissues_size_t tissuenr);
 	void remove_tissues(const std::set<tissues_size_t>& tissuenrs);
 	void remove_tissueall();
+	std::vector<tissues_size_t> find_unused_tissues();
 	void cap_tissue(tissues_size_t maxval);
 	void buildmissingtissues(tissues_size_t j);
-	void group_tissues(std::vector<tissues_size_t>& olds,
-			std::vector<tissues_size_t>& news);
+	void group_tissues(std::vector<tissues_size_t>& olds, std::vector<tissues_size_t>& news);
 	void GetDICOMseriesnr(std::vector<const char*>* vnames,
 			std::vector<unsigned>* dicomseriesnr,
 			std::vector<unsigned>* dicomseriesnrlist);
@@ -494,10 +482,8 @@ public:
 	bool export_bmp(const char* filename, bool binary) const;
 	bool export_work(const char* filename, bool binary) const;
 
-	bool print_xmlregionextent(const char* filename, bool onlyactiveslices,
-			const char* projname = nullptr);
-	bool print_tissueindex(const char* filename, bool onlyactiveslices,
-			const char* projname = nullptr);
+	bool print_xmlregionextent(const char* filename, bool onlyactiveslices, const char* projname = nullptr);
+	bool print_tissueindex(const char* filename, bool onlyactiveslices, const char* projname = nullptr);
 	bool print_atlas(const char* filename);
 	vtkImageData* make_vtktissueimage();
 	float calculate_volume(Point p, unsigned short slicenr);
@@ -513,10 +499,8 @@ public:
 	void get_direction_cosines(float dc[6]) const;
 	void set_direction_cosines(const float dc[6]);
 
-	bool get_extent(tissues_size_t tissuenr, bool onlyactiveslices,
-			unsigned short extent[3][2]);
-	void regrow(unsigned short sourceslicenr, unsigned short targetslicenr,
-			int n);
+	bool get_extent(tissues_size_t tissuenr, bool onlyactiveslices, unsigned short extent[3][2]);
+	void regrow(unsigned short sourceslicenr, unsigned short targetslicenr, int n);
 	bool unwrap(float jumpratio, float shift = 0);
 	unsigned GetNumberOfUndoSteps();
 	void SetNumberOfUndoSteps(unsigned);

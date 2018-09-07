@@ -517,6 +517,7 @@ private slots:
 	void execute_undo();
 	void execute_redo();
 	void execute_inversesliceorder();
+	void execute_remove_unused_tissues();
 	void execute_cleanup();
 	void execute_smoothsteps();
 	void execute_smoothtissues();

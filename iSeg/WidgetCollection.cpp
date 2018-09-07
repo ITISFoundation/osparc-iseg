@@ -1906,9 +1906,17 @@ std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeW
 	return my_children;
 }
 
-std::vector<QTreeWidgetItem*> TissueTreeWidget::get_all_items() const
+std::vector<QTreeWidgetItem*> TissueTreeWidget::get_all_items(bool leaves_only) const
 {
-	return collect({invisibleRootItem()});
+	auto all = collect({invisibleRootItem()});
+	if (leaves_only)
+	{
+		std::vector<QTreeWidgetItem*> leaves;
+		std::copy_if(all.begin(), all.end(), std::back_inserter(leaves), 
+			[this](QTreeWidgetItem* item){ return !get_is_folder(item); });
+		return leaves;
+	}
+	return all;
 }
 
 void TissueTreeWidget::resize_columns_to_contents()

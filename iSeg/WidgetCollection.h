@@ -354,7 +354,7 @@ public:
 	// Display
 	bool get_tissue_indices_hidden() const;
 
-	std::vector<QTreeWidgetItem*> get_all_items() const;
+	std::vector<QTreeWidgetItem*> get_all_items(bool leaves_only = false) const;
 
 	std::vector<QTreeWidgetItem*> collect(const std::vector<QTreeWidgetItem*>& list) const;
 

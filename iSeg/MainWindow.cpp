@@ -1349,6 +1349,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	toolmenu->insertItem("In&verse Slice Order", this,
 			SLOT(execute_inversesliceorder()));
 	toolmenu->insertItem("Clean Up", this, SLOT(execute_cleanup()));
+	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
 	toolmenu->insertItem("Smooth Steps", this, SLOT(execute_smoothsteps()));
 	// toolmenu->insertItem( "Smooth Tissues", this,  SLOT(execute_smoothtissues()));
 	if (!m_editingmode)
@@ -7421,16 +7422,32 @@ void MainWindow::execute_smoothtissues()
 
 	emit end_datachange(this);
 }
+void MainWindow::execute_remove_unused_tissues()
+{
+	// get all unused tissue ids
+	auto unused = handler3D->find_unused_tissues();
+	auto all = tissueTreeWidget->get_all_items(true);
+
+	// collect tree items matching the list of tissue ids
+	std::vector<QTreeWidgetItem*> list;
+	for (auto item: all)
+	{
+		auto type = tissueTreeWidget->get_type(item);
+		if (std::find(unused.begin(), unused.end(), type) != unused.end())
+		{
+			list.push_back(item);
+		}
+	}
+	removeselected(list, false);
+}
 
 void MainWindow::execute_cleanup()
 {
 	tissues_size_t** slices = new tissues_size_t*[handler3D->end_slice() - handler3D->start_slice()];
 	tissuelayers_size_t activelayer = handler3D->active_tissuelayer();
-	for (unsigned short i = handler3D->start_slice();
-			 i < handler3D->end_slice(); i++)
+	for (unsigned short i = handler3D->start_slice(); i < handler3D->end_slice(); i++)
 	{
-		slices[i - handler3D->start_slice()] =
-				handler3D->return_tissues(activelayer, i);
+		slices[i - handler3D->start_slice()] = handler3D->return_tissues(activelayer, i);
 	}
 	TissueCleaner TC(
 			slices, handler3D->end_slice() - handler3D->start_slice(),
