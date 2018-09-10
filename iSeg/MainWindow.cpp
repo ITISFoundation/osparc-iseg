@@ -1355,8 +1355,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	if (!m_editingmode)
 		toolmenu->insertItem("Merge Projects...", this,
 				SLOT(execute_mergeprojects()));
-	toolmenu->insertItem("Check Bone Connectivity", this,
-			SLOT(execute_boneconnectivity()));
+	toolmenu->insertItem("Check Bone Connectivity", this, SLOT(execute_boneconnectivity()));
+	toolmenu->insertItem("Compute Target Connectivity", this, SLOT(execute_target_connected_components()));
 
 	atlasmenu = menuBar()->addMenu(tr("Atlas"));
 	// todo: make atlas method generic, i.e. for loop
@@ -5806,7 +5806,7 @@ void MainWindow::newTissuePressed()
 
 void MainWindow::merge()
 {
-	for (auto item: tissueTreeWidget->selectedItems())
+	for (auto item : tissueTreeWidget->selectedItems())
 	{
 		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
 		{
@@ -5939,7 +5939,7 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 	if (perform_checks)
 	{
 		// check if any tissue is locked
-		for (auto item: list)
+		for (auto item : list)
 		{
 			if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
 			{
@@ -5958,7 +5958,7 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 
 		// check if any tissues are in the hierarchy more than once
 		auto allItems = tissueTreeWidget->get_all_items();
-		for (auto item: list)
+		for (auto item : list)
 		{
 			itemsToRemove.push_back(item);
 
@@ -5993,7 +5993,7 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 				tissuesToRemove.insert(currTissueType);
 
 				// find all tree items with that name and delete
-				for (auto other: allItems)
+				for (auto other : allItems)
 				{
 					if (other != item && tissueTreeWidget->get_type(other) == currTissueType)
 					{
@@ -6006,7 +6006,7 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 	else
 	{
 		itemsToRemove = list;
-		for (auto item: list)
+		for (auto item : list)
 		{
 			auto currTissueType = tissueTreeWidget->get_type(item);
 			if (currTissueType != 0)
@@ -6046,7 +6046,7 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 void MainWindow::removeTissueFolderAllPressed()
 {
 	// check if any tissue is locked
-	for (auto item: tissueTreeWidget->get_all_items())
+	for (auto item : tissueTreeWidget->get_all_items())
 	{
 		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
 		{
@@ -6158,7 +6158,7 @@ void MainWindow::tissue2workall()
 void MainWindow::cleartissues()
 {
 	// check if any tissue is locked
-	for (auto item: tissueTreeWidget->get_all_items())
+	for (auto item : tissueTreeWidget->get_all_items())
 	{
 		if (TissueInfos::GetTissueLocked(tissueTreeWidget->get_type(item)))
 		{
@@ -7440,7 +7440,7 @@ void MainWindow::execute_remove_unused_tissues()
 
 	// collect tree items matching the list of tissue ids
 	std::vector<QTreeWidgetItem*> list;
-	for (auto item: all)
+	for (auto item : all)
 	{
 		auto type = tissueTreeWidget->get_type(item);
 		if (std::find(unused.begin(), unused.end(), type) != unused.end())
@@ -7827,4 +7827,9 @@ void MainWindow::execute_savecolorlookup()
 		QMessageBox::warning(this, "iSeg",
 				"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
 	}
+}
+
+void MainWindow::execute_target_connected_components()
+{
+	handler3D->compute_target_connectivity();
 }

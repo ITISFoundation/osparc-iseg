@@ -24,9 +24,9 @@
 #endif
 #include <boost/variant.hpp>
 
+#include <functional>
 #include <memory>
 #include <string>
-#include <functional>
 
 class QString;
 class vtkImageData;
@@ -357,6 +357,9 @@ public:
 	void interpolate(unsigned short slice1, unsigned short slice2);
 	void extrapolate(unsigned short origin1, unsigned short origin2, unsigned short target);
 	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1, float* bmp2);
+
+	void compute_target_connectivity();
+
 	void set_slicethickness(float t);
 	float get_slicethickness();
 	void set_pixelsize(float dx1, float dy1);
