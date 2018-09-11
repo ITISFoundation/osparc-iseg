@@ -38,6 +38,7 @@ class Transform;
 class TissueHiearchy;
 class ColorLookupTable;
 class bmphandler;
+class ProgressInfo;
 
 class SlicesHandler : public SliceHandlerInterface
 {
@@ -197,6 +198,8 @@ public:
 	bool has_colors() const override { return _color_lookup_table != 0; }
 	size_t number_of_colors() const override;
 	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const override;
+
+	void set_target_fixed_range(bool on) override { set_modeall(on ? 2 : 1, false); }
 
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
@@ -358,7 +361,7 @@ public:
 	void extrapolate(unsigned short origin1, unsigned short origin2, unsigned short target);
 	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1, float* bmp2);
 
-	void compute_target_connectivity();
+	bool compute_target_connectivity(ProgressInfo* progress = nullptr);
 
 	void set_slicethickness(float t);
 	float get_slicethickness();

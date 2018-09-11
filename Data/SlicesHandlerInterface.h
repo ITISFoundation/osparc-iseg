@@ -54,6 +54,8 @@ public:
 	virtual bool has_colors() const = 0;
 	virtual size_t number_of_colors() const = 0;
 	virtual void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const = 0;
+
+	virtual void set_target_fixed_range(bool on) = 0;
 };
 
 } // namespace iseg

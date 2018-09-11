@@ -49,6 +49,7 @@
 #endif
 
 #include "Interface/Plugin.h"
+#include "Interface/ProgressDialog.h"
 
 #include "Data/Transform.h"
 
@@ -7831,12 +7832,14 @@ void MainWindow::execute_savecolorlookup()
 
 void MainWindow::execute_target_connected_components()
 {
+	ProgressDialog progress("Connected component analysis", this);
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	handler3D->compute_target_connectivity();
+	bool ok = handler3D->compute_target_connectivity(&progress);
 
-	emit end_datachange(this);
+	emit end_datachange(this, ok ? iseg::EndUndo : iseg::AbortUndo);
 }

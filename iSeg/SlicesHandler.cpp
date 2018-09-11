@@ -28,10 +28,9 @@
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
+#include "Data/ItkProgressObserver.h"
 #include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Transform.h"
-
-#include "Interface/ItkProgressDialog.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/ConnectedShapeBasedInterpolation.h"
@@ -11587,7 +11586,7 @@ void SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, un
 	}
 }
 
-void SlicesHandler::compute_target_connectivity()
+bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
 {
 	using input_type = SliceHandlerItkWrapper::image_ref_type;
 	using image_type = itk::Image<unsigned, 3>;
@@ -11595,15 +11594,34 @@ void SlicesHandler::compute_target_connectivity()
 	SliceHandlerItkWrapper wrapper(this);
 	auto all_slices = wrapper.GetTarget(true);
 
-	//auto observer = CommandIterationUpdate::New();
-
+	auto observer = ItkProgressObserver::New();
 
 	auto filter = itk::ConnectedComponentImageFilter<input_type, image_type>::New();
 	filter->SetInput(all_slices);
 	filter->SetFullyConnected(true);
-	filter->Update();
+	if (progress)
+	{
+		observer->SetProgressInfo(progress);
+		filter->AddObserver(itk::ProgressEvent(), observer);
+	}
+	try
+	{
+		filter->Update();
 
-	iseg::Paste<image_type, input_type>(filter->GetOutput(), all_slices);
+		if (!progress || (progress && !progress->wasCanceled()))
+		{
+			// copy result back
+			iseg::Paste<image_type, input_type>(filter->GetOutput(), all_slices);
 
-	set_modeall(1, false);
+			// auto-scale target rendering
+			set_target_fixed_range(false);
+
+			return true;
+		}
+	}
+	catch (itk::ExceptionObject& e)
+	{
+		ISEG_ERROR("Exception occurred: " << e.what());
+	}
+	return false;
 }

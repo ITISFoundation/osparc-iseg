@@ -12,13 +12,13 @@
 #include "../ImageReader.h"
 #include "../ImageWriter.h"
 
+#include "Data/SlicesHandlerInterface.h"
 #include "Data/Transform.h"
 #include "Data/Vec3.h"
-#include "Data/SlicesHandlerInterface.h"
 
 #include <itkImage.h>
-#include <itkRGBPixel.h>
 #include <itkImageFileWriter.h>
+#include <itkRGBPixel.h>
 
 #include <boost/filesystem.hpp>
 
@@ -67,34 +67,34 @@ public:
 
 	tissuelayers_size_t active_tissuelayer() const override { return 0; }
 
-	std::vector<const tissues_size_t *> tissue_slices(tissuelayers_size_t layeridx) const override
+	std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const override
 	{
-		return std::vector<const tissues_size_t *>(_dims[2], _tissue_data.data());
+		return std::vector<const tissues_size_t*>(_dims[2], _tissue_data.data());
 	}
 
-	std::vector<tissues_size_t *> tissue_slices(tissuelayers_size_t layeridx) override
+	std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) override
 	{
-		return std::vector<tissues_size_t *>(_dims[2], _tissue_data.data());
+		return std::vector<tissues_size_t*>(_dims[2], _tissue_data.data());
 	}
 
-	std::vector<const float *> source_slices() const override
+	std::vector<const float*> source_slices() const override
 	{
-		return std::vector<const float *>(_dims[2], _float_data.data());
+		return std::vector<const float*>(_dims[2], _float_data.data());
 	}
 
-	std::vector<float *> source_slices() override
+	std::vector<float*> source_slices() override
 	{
-		return std::vector<float *>(_dims[2], _float_data.data());
+		return std::vector<float*>(_dims[2], _float_data.data());
 	}
 
-	std::vector<const float *> target_slices() const override
+	std::vector<const float*> target_slices() const override
 	{
-		return std::vector<const float *>(_dims[2], _float_data.data());
+		return std::vector<const float*>(_dims[2], _float_data.data());
 	}
 
-	std::vector<float *> target_slices() override
+	std::vector<float*> target_slices() override
 	{
-		return std::vector<float *>(_dims[2], _float_data.data());
+		return std::vector<float*>(_dims[2], _float_data.data());
 	}
 
 	std::vector<std::string> tissue_names() const override
@@ -132,6 +132,10 @@ public:
 		throw std::logic_error("No colors available.");
 	}
 
+	virtual void set_target_fixed_range(bool on) override
+	{
+		throw std::logic_error("The method or operation is not implemented.");
+	}
 };
 
 class TestIO
@@ -229,7 +233,7 @@ public:
 				slices[s] = data.data() + s * _dims[0] * _dims[1];
 			}
 			BOOST_REQUIRE(ImageReader::getVolume(_file_name.string().c_str(),
-					slices.data(), 0, nrslices, width, 	height));
+					slices.data(), 0, nrslices, width, height));
 
 			bool ok = true;
 			for (size_t i = 0; i < data.size(); i++)
@@ -282,13 +286,13 @@ public:
 		BOOST_REQUIRE_EQUAL(w, img->GetBufferedRegion().GetSize()[0]);
 		BOOST_REQUIRE_EQUAL(h, img->GetBufferedRegion().GetSize()[1]);
 
-		std::vector<float> data(w*h, 0);
+		std::vector<float> data(w * h, 0);
 		std::vector<float*> stack(1, data.data());
 		std::vector<const char*> files(1, file_path.c_str());
 		BOOST_REQUIRE(ImageReader::getImageStack(files, stack.data(), w, h,
-			[](unsigned char, unsigned char g, unsigned char) { return static_cast<float>(g); }));
+				[](unsigned char, unsigned char g, unsigned char) { return static_cast<float>(g); }));
 
-		itk::Index<2> idx = { 0,0 };
+		itk::Index<2> idx = {0, 0};
 		BOOST_CHECK_EQUAL(data[0], img->GetPixel(idx)[1]);
 
 		boost::system::error_code ec;
