@@ -31,6 +31,8 @@
 #include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Transform.h"
 
+#include "Interface/ItkProgressDialog.h"
+
 #include "Core/ColorLookupTable.h"
 #include "Core/ConnectedShapeBasedInterpolation.h"
 #include "Core/ExpectationMaximization.h"
@@ -8447,11 +8449,10 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	DicomReader dcmread;
 
 	dicomseriesnr->clear();
-	for (std::vector<const char*>::iterator it = vnames->begin();
-			 it != vnames->end(); it++)
+	for (auto it = vnames->begin(); it != vnames->end(); it++)
 	{
 		dcmread.opendicom(*it);
-		std::vector<unsigned>::iterator it1 = dicomseriesnr->begin();
+		auto it1 = dicomseriesnr->begin();
 		unsigned u = dcmread.seriesnr();
 		dicomseriesnrlist->push_back(u);
 		dcmread.closedicom();
@@ -8479,7 +8480,10 @@ void SlicesHandler::map_tissue_indices(const std::vector<tissues_size_t>& indexM
 
 void SlicesHandler::remove_tissue(tissues_size_t tissuenr)
 {
-	for (short unsigned i = 0; i < _nrslices; i++)
+	int const iN = _nrslices;
+
+#pragma omp parallel for
+	for (int i = 0; i < iN; i++)
 	{
 		_image_slices[i].remove_tissue(tissuenr);
 	}
@@ -11589,15 +11593,17 @@ void SlicesHandler::compute_target_connectivity()
 	using image_type = itk::Image<unsigned, 3>;
 
 	SliceHandlerItkWrapper wrapper(this);
-
 	auto all_slices = wrapper.GetTarget(true);
+
+	//auto observer = CommandIterationUpdate::New();
+
 
 	auto filter = itk::ConnectedComponentImageFilter<input_type, image_type>::New();
 	filter->SetInput(all_slices);
 	filter->SetFullyConnected(true);
 	filter->Update();
 
-	auto output = filter->GetOutput();
+	iseg::Paste<image_type, input_type>(filter->GetOutput(), all_slices);
 
-	iseg::Paste<image_type, input_type>(output, all_slices);
+	set_modeall(1, false);
 }

@@ -7831,5 +7831,12 @@ void MainWindow::execute_savecolorlookup()
 
 void MainWindow::execute_target_connected_components()
 {
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = true;
+	dataSelection.work = true;
+	emit begin_datachange(dataSelection, this);
+
 	handler3D->compute_target_connectivity();
+
+	emit end_datachange(this);
 }
