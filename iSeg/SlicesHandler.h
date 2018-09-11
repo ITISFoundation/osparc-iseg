@@ -24,9 +24,9 @@
 #endif
 #include <boost/variant.hpp>
 
+#include <functional>
 #include <memory>
 #include <string>
-#include <functional>
 
 class QString;
 class vtkImageData;
@@ -38,6 +38,7 @@ class Transform;
 class TissueHiearchy;
 class ColorLookupTable;
 class bmphandler;
+class ProgressInfo;
 
 class SlicesHandler : public SliceHandlerInterface
 {
@@ -198,6 +199,8 @@ public:
 	size_t number_of_colors() const override;
 	void get_color(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const override;
 
+	void set_target_fixed_range(bool on) override { set_modeall(on ? 2 : 1, false); }
+
 	float* return_bmp(unsigned short slicenr1);
 	float* return_work(unsigned short slicenr1);
 	tissues_size_t* return_tissues(tissuelayers_size_t layeridx, unsigned short slicenr1);
@@ -357,6 +360,9 @@ public:
 	void interpolate(unsigned short slice1, unsigned short slice2);
 	void extrapolate(unsigned short origin1, unsigned short origin2, unsigned short target);
 	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1, float* bmp2);
+
+	bool compute_target_connectivity(ProgressInfo* progress = nullptr);
+
 	void set_slicethickness(float t);
 	float get_slicethickness();
 	void set_pixelsize(float dx1, float dy1);

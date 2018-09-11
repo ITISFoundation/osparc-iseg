@@ -1,7 +1,7 @@
 #include "BrushInteraction.h"
 
-#include "addLine.h"
 #include "Brush.h"
+#include "addLine.h"
 
 namespace iseg {
 
@@ -39,11 +39,10 @@ void BrushInteraction::on_mouse_clicked(Point p)
 	else
 	{
 		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
-		brush(tissue, _width, _height, _dx, _dy, p, _radius, true, _tissue_value, tissues_size_t(0), 
-			[this](tissues_size_t v) 
-		{ 
-			return v < _cached_tissue_locks.size() && _cached_tissue_locks[v]; 
-		});
+		brush(tissue, _width, _height, _dx, _dy, p, _radius, true, _tissue_value, tissues_size_t(0),
+				[this](tissues_size_t v) {
+					return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
+				});
 	}
 
 	end_datachange(iseg::NoUndo);
@@ -70,11 +69,10 @@ void BrushInteraction::on_mouse_moved(Point p)
 		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
 		for (auto pi : vps)
 		{
-			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0), 
-				[this](tissues_size_t v) 
-			{ 
-				return v < _cached_tissue_locks.size() && _cached_tissue_locks[v]; 
-			});
+			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0),
+					[this](tissues_size_t v) {
+						return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
+					});
 		}
 	}
 
@@ -99,11 +97,10 @@ void BrushInteraction::on_mouse_released(Point p)
 		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
 		for (auto pi : vps)
 		{
-			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0), 
-				[this](tissues_size_t v) 
-			{ 
-				return v < _cached_tissue_locks.size() && _cached_tissue_locks[v]; 
-			});
+			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0),
+					[this](tissues_size_t v) {
+						return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
+					});
 		}
 	}
 
@@ -118,12 +115,10 @@ void BrushInteraction::draw_circle(Point p)
 	Point p1;
 	std::vector<Point> vpdyn;
 
-	float radius_corrected = (_dx > _dy)
-					? std::floor(_radius / _dx + 0.5f) * _dx
-					: std::floor(_radius / _dy + 0.5f) * _dy;
+	float radius_corrected = (_dx > _dy) ? std::floor(_radius / _dx + 0.5f) * _dx : std::floor(_radius / _dy + 0.5f) * _dy;
 	float const radius_corrected2 = radius_corrected * radius_corrected;
-	int const xradius = std::ceil(radius_corrected / _dx);
-	int const yradius = std::ceil(radius_corrected / _dy);
+	int const xradius = static_cast<int>(std::ceil(radius_corrected / _dx));
+	int const yradius = static_cast<int>(std::ceil(radius_corrected / _dy));
 	for (p1.px = std::max(0, p.px - xradius);
 			 p1.px <= std::min((int)_width - 1, p.px + xradius);
 			 p1.px++)
@@ -143,4 +138,4 @@ void BrushInteraction::draw_circle(Point p)
 	vpdyn.clear();
 }
 
-}
+} // namespace iseg

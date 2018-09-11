@@ -28,6 +28,7 @@
 #include "vtkGenericDataSetWriter.h"
 #include "vtkImageExtractCompatibleMesher.h"
 
+#include "Data/ItkProgressObserver.h"
 #include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Transform.h"
 
@@ -67,6 +68,8 @@
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkWindowedSincPolyDataFilter.h>
+
+#include <itkConnectedComponentImageFilter.h>
 
 #include <boost/format.hpp>
 
@@ -275,7 +278,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	_endslice = _nrslices = (unsigned short)filenames.size();
 	_os.set_sizenr(_nrslices);
 	_image_slices.resize(_nrslices);
-	
+
 	int j = 0;
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
@@ -3401,7 +3404,6 @@ void SlicesHandler::newbmp(unsigned short width1, unsigned short height1, unsign
 	_slice_bmpranges.resize(nrofslices);
 	compute_range_mode1(&dummy);
 	compute_bmprange_mode1(&dummy);
-
 
 	_loaded = true;
 
@@ -6997,10 +6999,10 @@ int SlicesHandler::extract_tissue_surfaces(
 
 			for (tissues_size_t i = 1; i < num_tissues; i++)
 			{
-				check_equal( TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
+				check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 				if (i == tissuevec[0])
 				{
-					names_array_1->SetValue( 0, TissueInfos::GetTissueName(i).c_str());
+					names_array_1->SetValue(0, TissueInfos::GetTissueName(i).c_str());
 					auto color = TissueInfos::GetTissueColor(i);
 					color_array_1->SetTuple(0, color.data());
 				}
@@ -8446,11 +8448,10 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	DicomReader dcmread;
 
 	dicomseriesnr->clear();
-	for (std::vector<const char*>::iterator it = vnames->begin();
-			 it != vnames->end(); it++)
+	for (auto it = vnames->begin(); it != vnames->end(); it++)
 	{
 		dcmread.opendicom(*it);
-		std::vector<unsigned>::iterator it1 = dicomseriesnr->begin();
+		auto it1 = dicomseriesnr->begin();
 		unsigned u = dcmread.seriesnr();
 		dicomseriesnrlist->push_back(u);
 		dcmread.closedicom();
@@ -8478,7 +8479,10 @@ void SlicesHandler::map_tissue_indices(const std::vector<tissues_size_t>& indexM
 
 void SlicesHandler::remove_tissue(tissues_size_t tissuenr)
 {
-	for (short unsigned i = 0; i < _nrslices; i++)
+	int const iN = _nrslices;
+
+#pragma omp parallel for
+	for (int i = 0; i < iN; i++)
 	{
 		_image_slices[i].remove_tissue(tissuenr);
 	}
@@ -8487,8 +8491,8 @@ void SlicesHandler::remove_tissue(tissues_size_t tissuenr)
 
 void SlicesHandler::remove_tissues(const std::set<tissues_size_t>& tissuenrs)
 {
-	std::vector<bool> isSelected(TissueInfos::GetTissueCount()+1, false);
-	for (auto id: tissuenrs)
+	std::vector<bool> isSelected(TissueInfos::GetTissueCount() + 1, false);
+	for (auto id : tissuenrs)
 	{
 		isSelected.at(id) = true;
 	}
@@ -8551,19 +8555,19 @@ void SlicesHandler::buildmissingtissues(tissues_size_t j)
 
 std::vector<tissues_size_t> SlicesHandler::find_unused_tissues()
 {
-	std::vector<unsigned char> is_used(TissueInfos::GetTissueCount()+1, 0);
+	std::vector<unsigned char> is_used(TissueInfos::GetTissueCount() + 1, 0);
 
 	for (int i = 0, iN = _nrslices; i < iN; i++)
 	{
 		auto tissues = _image_slices[i].return_tissues(_active_tissuelayer);
-		for (unsigned k=0; k<_area; ++k)
+		for (unsigned k = 0; k < _area; ++k)
 		{
 			is_used[tissues[k]] = 1;
 		}
 	}
-	
+
 	std::vector<tissues_size_t> unused_tissues;
-	for (size_t i=1; i<is_used.size(); ++i)
+	for (size_t i = 1; i < is_used.size(); ++i)
 	{
 		if (is_used[i] == 0)
 		{
@@ -11580,4 +11584,44 @@ void SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, un
 	{
 		_color_lookup_table->GetColor(idx, r, g, b);
 	}
+}
+
+bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
+{
+	using input_type = SliceHandlerItkWrapper::image_ref_type;
+	using image_type = itk::Image<unsigned, 3>;
+
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetTarget(true);
+
+	auto observer = ItkProgressObserver::New();
+
+	auto filter = itk::ConnectedComponentImageFilter<input_type, image_type>::New();
+	filter->SetInput(all_slices);
+	filter->SetFullyConnected(true);
+	if (progress)
+	{
+		observer->SetProgressInfo(progress);
+		filter->AddObserver(itk::ProgressEvent(), observer);
+	}
+	try
+	{
+		filter->Update();
+
+		if (!progress || (progress && !progress->wasCanceled()))
+		{
+			// copy result back
+			iseg::Paste<image_type, input_type>(filter->GetOutput(), all_slices);
+
+			// auto-scale target rendering
+			set_target_fixed_range(false);
+
+			return true;
+		}
+	}
+	catch (itk::ExceptionObject& e)
+	{
+		ISEG_ERROR("Exception occurred: " << e.what());
+	}
+	return false;
 }

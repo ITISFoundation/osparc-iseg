@@ -12,10 +12,13 @@ USE_ITK()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
+	ProgressDialog.cpp
 	Plugin.cpp
 	WidgetInterface.cpp
 )
 
-QT4_WRAP_CPP(MOCSrcs WidgetInterface.h)
+QT4_WRAP_CPP(MOCSrcs ProgressDialog.h WidgetInterface.h)
 ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${HEADERS} ${MOCSrcs})
-TARGET_LINK_LIBRARIES(iSegInterface ${MY_EXTERNAL_LINK_LIBRARIES} )
+TARGET_LINK_LIBRARIES(iSegInterface 
+	iSegData
+	${MY_EXTERNAL_LINK_LIBRARIES} )
