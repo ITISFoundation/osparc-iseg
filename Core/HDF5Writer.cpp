@@ -38,12 +38,12 @@ int HDF5Writer::open(const std::string& fname, const std::string& fileMode)
 	if (loud)
 	{
 		std::cerr << "HDF5Writer::open() : opening file " << fname << " in "
-				  << fileMode << " mode" << std::endl;
+							<< fileMode << " mode" << std::endl;
 	}
 	if (file >= 0)
 	{
 		std::cerr << "HDF5Writer::open() : error, file " << fname
-				  << " is already open, close first" << std::endl;
+							<< " is already open, close first" << std::endl;
 		return 0;
 	}
 
@@ -73,7 +73,7 @@ int HDF5Writer::open(const std::string& fname, const std::string& fileMode)
 	if (file < 0)
 	{
 		std::cerr << "HDF5Writer::write() : error, no files were opened"
-				  << std::endl;
+							<< std::endl;
 		return 0;
 	}
 	else
@@ -81,7 +81,7 @@ int HDF5Writer::open(const std::string& fname, const std::string& fileMode)
 		if (loud)
 		{
 			std::cerr << "HDF5Writer::write() : created file id = " << file
-					  << std::endl;
+								<< std::endl;
 		}
 		return 1;
 	}
@@ -121,13 +121,13 @@ int HDF5Writer::close()
 		if (loud)
 		{
 			std::cerr << "HDF5Writer::close() : closing file id " << file
-					  << std::endl;
+								<< std::endl;
 		}
 		herr_t status = H5Fclose(file);
 		if (status < 0)
 		{
 			std::cerr << "HDF5Writer::close() : error, closing file failed"
-					  << std::endl;
+								<< std::endl;
 			return 0;
 		}
 		file = -1;
@@ -151,93 +151,79 @@ int HDF5Writer::createGroup(const std::string& gname)
 		return 0;
 	}
 
-	hid_t group =
-		H5Gcreate2(file, gname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	hid_t group = H5Gcreate2(file, gname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	if (group < 0)
 	{
-		std::cerr << "HDF5Writer::createGroup() : creating group failed"
-				  << std::endl;
+		std::cerr << "HDF5Writer::createGroup() : creating group failed\n";
 		return 0;
 	}
 	herr_t status = H5Gclose(group);
 	if (status < 0)
 	{
-		std::cerr << "HDF5Writer::createGroup() : closing group failed"
-				  << std::endl;
+		std::cerr << "HDF5Writer::createGroup() : closing group failed\n";
 		return 0;
 	}
 	return 1;
 }
 
 int HDF5Writer::write(float** const slice_data, size_type num_slices,
-					  size_type slice_size, const std::string& name,
-					  size_t offset)
+		size_type slice_size, const std::string& name, size_t offset)
 {
-	return HDF5IO(compression)
-				   .writeData(file, name, slice_data, num_slices, slice_size,
-							  offset)
-			   ? 1
-			   : 0;
+	return HDF5IO(compression).writeData(file, name, slice_data, num_slices, slice_size, offset) ? 1 : 0;
 }
 
-int HDF5Writer::write(unsigned short** const slice_data,
-					  size_type num_slices, size_type slice_size,
-					  const std::string& name, size_t offset)
+int HDF5Writer::write(unsigned short** const slice_data, size_type num_slices,
+		size_type slice_size, const std::string& name, size_t offset)
 {
-	return HDF5IO(compression)
-				   .writeData(file, name, slice_data, num_slices, slice_size,
-							  offset)
-			   ? 1
-			   : 0;
+	return HDF5IO(compression).writeData(file, name, slice_data, num_slices, slice_size, offset) ? 1 : 0;
 }
 
-int HDF5Writer::write(const double* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+int HDF5Writer::write(const double* data, const std::vector<size_type>& dims, const std::string& name)
 {
 	const std::string type = "double";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const float* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::string& name)
 {
 	const std::string type = "float";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const int* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::string& name)
 {
 	const std::string type = "int";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const unsigned int* data,
-					  const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::vector<size_type>& dims,
+		const std::string& name)
 {
 	const std::string type = "unsigned int";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const long* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::string& name)
 {
 	const std::string type = "long";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const unsigned char* data,
-					  const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::vector<size_type>& dims,
+		const std::string& name)
 {
 	const std::string type = "unsigned char";
 	return this->writeData(data, type, dims, name);
 }
 
 int HDF5Writer::write(const unsigned short* data,
-					  const std::vector<size_type>& dims,
-					  const std::string& name)
+		const std::vector<size_type>& dims,
+		const std::string& name)
 {
 	const std::string type = "unsigned short";
 	return this->writeData(data, type, dims, name);
@@ -252,7 +238,7 @@ int HDF5Writer::write(const std::vector<int>& v, const std::string& name)
 }
 
 int HDF5Writer::write(const std::vector<unsigned int>& v,
-					  const std::string& name)
+		const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -285,7 +271,7 @@ int HDF5Writer::write(const std::vector<float>& v, const std::string& name)
 }
 
 int HDF5Writer::write(const std::vector<unsigned char>& v,
-					  const std::string& name)
+		const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -294,7 +280,7 @@ int HDF5Writer::write(const std::vector<unsigned char>& v,
 }
 
 int HDF5Writer::write(const std::vector<unsigned short>& v,
-					  const std::string& name)
+		const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -302,14 +288,12 @@ int HDF5Writer::write(const std::vector<unsigned short>& v,
 	return this->writeData(&v[0], type, dims, name);
 }
 
-int HDF5Writer::write_attribute(const std::string& value,
-								const std::string& name)
+int HDF5Writer::write_attribute(const std::string& value, const std::string& name)
 {
 	int result = 0;
 
 	std::vector<std::string> path;
-	boost::algorithm::split(path, name, boost::algorithm::is_any_of("/"),
-							boost::algorithm::token_compress_off);
+	boost::algorithm::split(path, name, boost::algorithm::is_any_of("/"), boost::algorithm::token_compress_off);
 
 	std::string attribute_name = path.back();
 	path.resize(path.size() - 1);
@@ -326,7 +310,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 	}
 
 	hid_t parent_handle = file;
-	hid_t group_andle;
+	hid_t group_handle;
 	std::string parent_path = "";
 	for (size_t iter_path = 0; iter_path < path.size(); ++iter_path)
 	{
@@ -335,7 +319,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 			parent_path += path[iter_path];
 			if (H5Lexists(parent_handle, parent_path.c_str(), H5P_DEFAULT) <= 0)
 			{
-				if (group_andle < 0)
+				if (group_handle < 0)
 				{
 					break;
 				}
@@ -352,7 +336,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 				if (iter_path == path.size() - 1)
 				{
 					// open compartment if last location exists
-					group_andle = H5Gopen(parent_handle, parent_path.c_str());
+					group_handle = H5Gopen(parent_handle, parent_path.c_str());
 				}
 			}
 		}
@@ -360,7 +344,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 	}
 
 	//hid_t dataset_id = H5Dopen2(file, "/Tissues", H5P_DEFAULT);
-	if (group_andle >= 0)
+	if (group_handle >= 0)
 	{
 		//  Note: HDF5 insists on writing a 0 byte when given an
 		//  empty string. Reading will then return a size of 1!
@@ -370,7 +354,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 		{
 			hid_t tid1 = H5Tcopy(H5T_C_S1);
 			herr_t ret = H5Tset_size(tid1, value.length() + 1);
-			hid_t attribute_id = H5Acreate(group_andle, attribute_name.c_str(), tid1, dataspace_id, H5P_DEFAULT);
+			hid_t attribute_id = H5Acreate(group_handle, attribute_name.c_str(), tid1, dataspace_id, H5P_DEFAULT);
 			if (attribute_id >= 0)
 			{
 				herr_t status = H5Awrite(attribute_id, tid1, value.c_str());
@@ -389,7 +373,7 @@ int HDF5Writer::write_attribute(const std::string& value,
 			return 0;
 		}
 
-		herr_t status = H5Gclose(group_andle);
+		herr_t status = H5Gclose(group_handle);
 	}
 	else
 	{
@@ -400,12 +384,12 @@ int HDF5Writer::write_attribute(const std::string& value,
 }
 
 int HDF5Writer::writeData(const void* data, const std::string& type,
-						  const std::vector<size_type>& extents,
-						  const std::string& name) const
+		const std::vector<size_type>& extents,
+		const std::string& name) const
 {
 	if (name.empty())
 	{
-		std::cerr << "HDF5Writer::write() : error, no dataname given" << std::endl;
+		std::cerr << "HDF5Writer::write() : error, no dataname given\n";
 		return 0;
 	}
 	hid_t datatype, plist;
@@ -423,8 +407,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 
 	if (!data)
 	{
-		std::cerr << "HDF5Writer::write() : error, no pointer to data : " << name
-				  << std::endl;
+		std::cerr << "HDF5Writer::write() : error, no pointer to data : " << name << std::endl;
 		return 0;
 	}
 
@@ -474,10 +457,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 	}
 	else
 	{
-		std::cerr << "HDF5Writer::write() : error, unsupported data type"
-				  << std::endl;
-		throw std::runtime_error(
-			"HDF5Writer::write() : error, unsupported data type");
+		throw std::runtime_error("HDF5Writer::write() : error, unsupported data type");
 	}
 
 	status = H5Tset_order(datatype, H5T_ORDER_LE);
@@ -491,7 +471,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		if (loud)
 		{
 			std::cerr << "HDF5Writer::write() extents[" << j << "] = " << extents[j]
-					  << std::endl;
+								<< std::endl;
 		}
 		if (ordering == "reverse" || ordering == "matlab")
 		{
@@ -514,9 +494,6 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 			{
 				if (chunkSize[j] <= 0 || chunkSize[j] > dimsf[j])
 				{
-					if (loud)
-						std::cerr << "HDF5Writer::write() : invalid chunk size"
-								  << std::endl;
 					chunk_ok = false;
 				}
 				cdims[j] = chunkSize[j];
@@ -524,12 +501,6 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		}
 		if (!chunk_ok)
 		{
-			if (loud)
-			{
-				std::cerr << "HDF5Writer::write() : using automatic chunk size with "
-							 "buffer size "
-						  << bufsize << std::endl;
-			}
 			for (int j = 0; j < rank; j++)
 			{
 				cdims[j] = std::min(dimsf[j], hsize_t(bufsize / elemsize));
@@ -539,19 +510,18 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		H5Pset_chunk(plist, rank, cdims.data());
 		H5Pset_deflate(plist, compression);
 	}
+
 	hid_t dataspace = H5Screate_simple(rank, dimsf.data(), nullptr);
 	if (dataspace >= 0)
 	{
 		hid_t dataset;
 		if (compression)
 		{
-			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT,
-								 plist, H5P_DEFAULT);
+			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
 		}
 		else
 		{
-			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT,
-								 H5P_DEFAULT, H5P_DEFAULT);
+			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		}
 		if (dataset < 0)
 		{
@@ -559,70 +529,59 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		}
 		else if (dataset >= 0 && data != 0)
 		{
-			if (loud)
-			{
-				std::cerr << "HDF5Writer : writing " << name << " of type " << type
-						  << std::endl;
-			}
-
 			if (type == "double")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (double*)data);
+						H5P_DEFAULT, (double*)data);
 			}
 			else if (type == "float")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (float*)data);
+						H5P_DEFAULT, (float*)data);
 			}
 			else if (type == "int")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (int*)data);
+						H5P_DEFAULT, (int*)data);
 			}
 			else if (type == "unsigned int")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (unsigned int*)data);
+						H5P_DEFAULT, (unsigned int*)data);
 			}
 			else if (type == "long")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (long*)data);
+						H5P_DEFAULT, (long*)data);
 			}
 			else if (type == "unsigned char")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (unsigned char*)data);
+						H5P_DEFAULT, (unsigned char*)data);
 			}
 			else if (type == "unsigned short")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_USHORT, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (unsigned short*)data);
+						H5P_DEFAULT, (unsigned short*)data);
 			}
 			else if (type == "char")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL,
-								  H5P_DEFAULT, (char*)data);
+						H5P_DEFAULT, (char*)data);
 			}
 			else
 			{
-				std::cerr << "HDF5Writer::write() : error, unsupported data type"
-						  << std::endl;
-				throw std::runtime_error(
-					"HDF5Writer::write() : error, unsupported data type");
+				throw std::runtime_error("HDF5Writer::write() : error, unsupported data type");
 			}
 
 			if (status < 0)
 			{
-				std::cerr << "HDF5Writer::write() : writing dataset failed"
-						  << std::endl;
+				std::cerr << "HDF5Writer::write() : writing dataset failed\n";
 				ok = 0;
 			}
 			else if (loud)
 			{
-				std::cerr << "HDF5Writer::write() : " << name << " writen succesfully"
-						  << std::endl;
+				std::cerr << "HDF5Writer::write() : " << name << " written successfully\n";
 			}
 
 			H5Dclose(dataset);
@@ -653,14 +612,6 @@ std::vector<std::string> HDF5Writer::tokenize(std::string& line, char delim)
 			tokens.push_back(ts);
 		}
 	}
-	//	if(loud)
-	//	{
-	std::cerr << "HDF5Writer::tokenize() : " << tokens.size() << std::endl;
-	for (int i = 0; i < tokens.size(); i++)
-	{
-		std::cerr << "\t" << tokens[i].length() << " " << tokens[i] << std::endl;
-	}
-	//	}
 	return tokens;
 }
 

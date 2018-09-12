@@ -513,7 +513,7 @@ public:
 	unsigned GetNumberOfUndoArrays();
 	void SetNumberOfUndoArrays(unsigned);
 	int GetCompression() const { return this->_hdf5_compression; };
-	void SetCompression(int c) { this->_hdf5_compression = c; };
+	void SetCompression(int c) { this->_hdf5_compression = c > 0 ? c : -1; };
 	bool GetContiguousMemory() const { return _contiguous_memory_io; }
 	void SetContiguousMemory(bool v) { _contiguous_memory_io = v; }
 
