@@ -3634,8 +3634,10 @@ void SlicesHandler::adaptwork2bmp(float f)
 
 void SlicesHandler::fill_gapstissue(int minsize, bool connectivity)
 {
+	int const iN = _endslice;
+
 #pragma omp parallel for
-	for (int i = _startslice, iN = _endslice; i < iN; i++)
+	for (int i = _startslice; i < iN; i++)
 	{
 		_image_slices[i].fill_gapstissue(_active_tissuelayer, minsize, connectivity);
 	}
@@ -3840,8 +3842,10 @@ void SlicesHandler::fill_unassigned()
 
 void SlicesHandler::fill_unassignedtissue(tissues_size_t f)
 {
+	int const iN = _endslice;
+
 #pragma omp parallel for
-	for (int i = _startslice, iN = _endslice; i < iN; i++)
+	for (int i = _startslice; i < iN; i++)
 	{
 		_image_slices[i].fill_unassignedtissue(_active_tissuelayer, f);
 	}
@@ -4136,8 +4140,10 @@ void SlicesHandler::sigmafilter(float sigma, unsigned short nx,
 
 void SlicesHandler::threshold(float* thresholds)
 {
+	int const iN = _endslice;
+
 #pragma omp parallel for
-	for (int i = _startslice, iN = _endslice; i < iN; i++)
+	for (int i = _startslice; i < iN; i++)
 	{
 		_image_slices[i].threshold(thresholds);
 	}
@@ -4471,8 +4477,9 @@ void SlicesHandler::compute_range_mode1(Pair* pp)
 		float low = FLT_MAX;
 		float high = 0.f;
 
+		const int iN = _nrslices;
 #pragma omp for
-		for (int i = 0, iN = _nrslices; i < iN; i++)
+		for (int i = 0; i < iN; i++)
 		{
 			if (_image_slices[i].return_mode(false) == 1)
 			{
@@ -4558,8 +4565,9 @@ void SlicesHandler::compute_bmprange_mode1(Pair* pp)
 		float low = FLT_MAX;
 		float high = 0.f;
 
+		const int iN = _nrslices;
 #pragma omp for
-		for (int i = 0, iN = _nrslices; i < iN; i++)
+		for (int i = 0; i < iN; ++i)
 		{
 			if (_image_slices[i].return_mode(true) == 1)
 			{
@@ -4609,7 +4617,7 @@ void SlicesHandler::compute_bmprange_mode1(unsigned short updateSlicenr, Pair* p
 			pp->low = p.low;
 	}
 
-	if (pp->high == 0.0f && pp->low == FLT_MAX)
+	if (pp->high < pp->low)
 	{
 		// No mode 1 slices: Set to mode 2 range
 		pp->low = 255.0f;
