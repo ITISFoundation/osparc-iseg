@@ -5169,8 +5169,6 @@ void bmphandler::convolute(float* mask, unsigned short direction)
 			work_bits[i] = 0;
 		break;
 	}
-
-	return;
 }
 
 void bmphandler::convolute_hist(float* mask)
@@ -5212,8 +5210,6 @@ void bmphandler::convolute_hist(float* mask)
 
 	for (int k = 0; k < 256; k++)
 		histogram[k] = (unsigned int)(histo[k] + 0.5);
-
-	return;
 }
 
 void bmphandler::gaussian_hist(float sigma)
@@ -5301,7 +5297,7 @@ void bmphandler::gaussian(float sigma)
 	mode2 = 1;
 }
 
-void bmphandler::average(short unsigned n)
+void bmphandler::average(unsigned short n)
 {
 	unsigned char dummymode1 = mode1;
 	float* dummy1;
