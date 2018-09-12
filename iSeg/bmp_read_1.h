@@ -143,7 +143,7 @@ public:
 	void bmp_neg();
 	void bmp_overlay(float alpha);
 	void transparent_add(float* pict2);
-	void newbmp(unsigned short width1, unsigned short height1);
+	void newbmp(unsigned short width1, unsigned short height1, bool init = true);
 	void newbmp(unsigned short width1, unsigned short height1, float* bits);
 	void freebmp();
 	static int CheckBMPDepth(const char* filename);
@@ -168,7 +168,7 @@ public:
 	bool ReloadDICOM(const char* filename, Point p);
 	FILE* save_proj(FILE* fp, bool inclpics = true);
 	FILE* save_stack(FILE* fp);
-	FILE* load_proj(FILE* fp, int tissuesVersion, bool inclpics = true);
+	FILE* load_proj(FILE* fp, int tissuesVersion, bool inclpics = true, bool init = true);
 	FILE* load_stack(FILE* fp);
 	int SaveDIBitmap(const char* filename);
 	int SaveWorkBitmap(const char* filename);

@@ -282,7 +282,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	int j = 0;
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadDIBitmap(filenames[i]);
+		j += _image_slices[i].LoadDIBitmap(filenames[i]);
 	}
 
 	_width = _image_slices[0].return_width();
@@ -332,7 +332,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p,
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadDIBitmap(filenames[i], p, dx, dy);
+		j += _image_slices[i].LoadDIBitmap(filenames[i], p, dx, dy);
 	}
 
 	if (j == _nrslices)
@@ -382,7 +382,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	int j = 0;
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadPNGBitmap(filenames[i]);
+		j += _image_slices[i].LoadPNGBitmap(filenames[i]);
 	}
 
 	_width = _image_slices[0].return_width();
@@ -432,7 +432,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p,
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadDIBitmap(filenames[i], p, dx, dy);
+		j += _image_slices[i].LoadDIBitmap(filenames[i], p, dx, dy);
 	}
 
 	_width = dx;
@@ -475,7 +475,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadDIBitmap(filenames[i]);
+		j += _image_slices[i].LoadDIBitmap(filenames[i]);
 	}
 
 	_width = _image_slices[0].return_width();
@@ -525,7 +525,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames, Point p,
 
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		j += (_image_slices[i]).LoadDIBitmap(filenames[i], p, dx, dy);
+		j += _image_slices[i].LoadDIBitmap(filenames[i], p, dx, dy);
 	}
 
 	_width = dx;
@@ -571,7 +571,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 	_image_slices.resize(nrofslices);
 	int j = 0;
 	for (unsigned short i = 0; i < nrofslices; i++)
-		j += (_image_slices[i]).ReadRaw(filename, w, h, bitdepth, slicenr + i);
+		j += _image_slices[i].ReadRaw(filename, w, h, bitdepth, slicenr + i);
 
 	new_overlay();
 
@@ -1163,7 +1163,7 @@ int SlicesHandler::ReadAvw(const char* filename)
 	_image_slices.resize(nrofslices);
 	int j = 0;
 	for (unsigned short i = 0; i < nrofslices; i++)
-		j += (_image_slices[i]).ReadAvw(filename, i);
+		j += _image_slices[i].ReadAvw(filename, i);
 
 	new_overlay();
 
@@ -1205,7 +1205,7 @@ int SlicesHandler::ReadRaw(const char* filename, short unsigned w,
 	_image_slices.resize(nrofslices);
 	int j = 0;
 	for (unsigned short i = 0; i < nrofslices; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReadRaw(filename, w, h, bitdepth, slicenr + i, p, dx, dy);
 
 	new_overlay();
@@ -1247,7 +1247,7 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w,
 	_image_slices.resize(nrofslices);
 	int j = 0;
 	for (unsigned short i = 0; i < nrofslices; i++)
-		j += (_image_slices[i]).ReadRawFloat(filename, w, h, slicenr + i);
+		j += _image_slices[i].ReadRawFloat(filename, w, h, slicenr + i);
 
 	new_overlay();
 
@@ -1289,8 +1289,9 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w,
 	_image_slices.resize(nrofslices);
 	int j = 0;
 	for (unsigned short i = 0; i < nrofslices; i++)
-		j += (_image_slices[i])
-						 .ReadRawFloat(filename, w, h, slicenr + i, p, dx, dy);
+	{
+		j += _image_slices[i].ReadRawFloat(filename, w, h, slicenr + i, p, dx, dy);
+	}
 
 	new_overlay();
 
@@ -1323,7 +1324,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
 	{
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
-			j += (_image_slices[i]).ReloadDIBitmap(filenames[i]);
+			j += _image_slices[i].ReloadDIBitmap(filenames[i]);
 		}
 
 		for (unsigned short i = 0; i < _nrslices; i++)
@@ -1345,7 +1346,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
 	{
 		for (unsigned short i = _startslice; i < _endslice; i++)
 		{
-			j += (_image_slices[i]).ReloadDIBitmap(filenames[i - _startslice]);
+			j += _image_slices[i].ReloadDIBitmap(filenames[i - _startslice]);
 		}
 
 		for (unsigned short i = _startslice; i < _endslice; i++)
@@ -1377,7 +1378,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
 	{
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
-			j += (_image_slices[i]).ReloadDIBitmap(filenames[i], p);
+			j += _image_slices[i].ReloadDIBitmap(filenames[i], p);
 		}
 
 		if (j == _nrslices)
@@ -1392,7 +1393,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
 	{
 		for (unsigned short i = _startslice; i < _endslice; i++)
 		{
-			j += (_image_slices[i]).ReloadDIBitmap(filenames[i - _startslice], p);
+			j += _image_slices[i].ReloadDIBitmap(filenames[i - _startslice], p);
 		}
 
 		if (j == (_endslice - _startslice))
@@ -1413,7 +1414,7 @@ int SlicesHandler::ReloadRaw(const char* filename, unsigned bitdepth, unsigned s
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRaw(filename, bitdepth,
 								 (unsigned)slicenr + i - _startslice);
 
@@ -1650,7 +1651,7 @@ int SlicesHandler::ReloadAVW(const char* filename, unsigned short slicenr)
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i]).ReadAvw(filename, i);
+		j += _image_slices[i].ReadAvw(filename, i);
 
 	if (j == (_endslice - _startslice))
 		return 1;
@@ -1665,7 +1666,7 @@ int SlicesHandler::ReloadRaw(const char* filename, short unsigned w,
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRaw(filename, w, h, bitdepth,
 								 (unsigned)slicenr + i - _startslice, p);
 
@@ -1697,7 +1698,7 @@ int SlicesHandler::ReloadRawFloat(const char* filename, unsigned short slicenr)
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRawFloat(filename, (unsigned)slicenr + i - _startslice);
 
 	if (j == (_endslice - _startslice))
@@ -1714,7 +1715,7 @@ int SlicesHandler::ReloadRawFloat(const char* filename, short unsigned w,
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRawFloat(filename, w, h,
 								 (unsigned)slicenr + i - _startslice, p);
 
@@ -1731,7 +1732,7 @@ int SlicesHandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRawTissues(filename, bitdepth,
 								 (unsigned)slicenr + i - _startslice);
 
@@ -1749,7 +1750,7 @@ int SlicesHandler::ReloadRawTissues(const char* filename, short unsigned w,
 
 	int j = 0;
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		j += (_image_slices[i])
+		j += _image_slices[i]
 						 .ReloadRawTissues(filename, w, h, bitdepth,
 								 (unsigned)slicenr + i - _startslice, p);
 
@@ -1797,7 +1798,7 @@ FILE* SlicesHandler::SaveProject(const char* filename,
 
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
-		fp = (_image_slices[j]).save_proj(fp, false);
+		fp = _image_slices[j].save_proj(fp, false);
 	}
 	fp = (_image_slices[0]).save_stack(fp);
 
@@ -1858,7 +1859,7 @@ FILE* SlicesHandler::SaveActiveSlices(const char* filename,
 
 	for (unsigned short j = _startslice; j < _endslice; j++)
 	{
-		fp = (_image_slices[j]).save_proj(fp, false);
+		fp = _image_slices[j].save_proj(fp, false);
 	}
 	fp = (_image_slices[0]).save_stack(fp);
 	unsigned char length1 = 0;
@@ -1911,7 +1912,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString
 	// Save current project slices
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
-		fp = (_image_slices[j]).save_proj(fp, false);
+		fp = _image_slices[j].save_proj(fp, false);
 	}
 
 	FILE* fpMerge;
@@ -2044,19 +2045,10 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 
 	_os.set_sizenr(_nrslices);
 
-	if (version > 1)
+	for (unsigned short j = 0; j < _nrslices; ++j)
 	{
-		for (unsigned short j = 0; j < _nrslices; j++)
-		{
-			fp = (_image_slices[j]).load_proj(fp, tissuesVersion, false);
-		}
-	}
-	else
-	{
-		for (unsigned short j = 0; j < _nrslices; j++)
-		{
-			fp = (_image_slices[j]).load_proj(fp, tissuesVersion);
-		}
+		// skip initializing because we load real data into the arrays below
+		fp = _image_slices[j].load_proj(fp, tissuesVersion, version <= 1, false);
 	}
 
 	set_slicethickness(_thickness);
@@ -2098,7 +2090,9 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 			LoadAllXdmf(QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data());
 		}
 		else
+		{
 			ISEG_ERROR_MSG("unsupported format...");
+		}
 	}
 
 	// Ranges
@@ -2200,9 +2194,9 @@ int SlicesHandler::SaveRaw(const char* filename, bool work)
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
 		if (work)
-			p_bits = (_image_slices[j]).return_work();
+			p_bits = _image_slices[j].return_work();
 		else
-			p_bits = (_image_slices[j]).return_bmp();
+			p_bits = _image_slices[j].return_bmp();
 		for (unsigned int i = 0; i < _area; i++)
 		{
 			bits_tmp[i] = (unsigned char)(std::min(
@@ -2237,7 +2231,7 @@ int SlicesHandler::SaveTissueRaw(const char* filename)
 		unsigned char* ucharBuffer = new unsigned char[bitsize];
 		for (unsigned short j = 0; j < _nrslices; j++)
 		{
-			bits_tmp = (_image_slices[j]).return_tissues(_active_tissuelayer);
+			bits_tmp = _image_slices[j].return_tissues(_active_tissuelayer);
 			for (unsigned int i = 0; i < bitsize; ++i)
 			{
 				ucharBuffer[i] = (unsigned char)bits_tmp[i];
@@ -2255,7 +2249,7 @@ int SlicesHandler::SaveTissueRaw(const char* filename)
 	{
 		for (unsigned short j = 0; j < _nrslices; j++)
 		{
-			bits_tmp = (_image_slices[j]).return_tissues(_active_tissuelayer);
+			bits_tmp = _image_slices[j].return_tissues(_active_tissuelayer);
 			if (fwrite(bits_tmp, sizeof(tissues_size_t), bitsize, fp) <
 					(unsigned int)bitsize)
 			{
@@ -2351,9 +2345,9 @@ int SlicesHandler::SaveRaw_resized(const char* filename, int dxm, int dxp,
 			 j < _nrslices - (unsigned short)std::max(0, -dzp); j++)
 	{
 		if (work)
-			p_bits = (_image_slices[j]).return_work();
+			p_bits = _image_slices[j].return_work();
 		else
-			p_bits = (_image_slices[j]).return_bmp();
+			p_bits = _image_slices[j].return_bmp();
 
 		unsigned pos1, pos2;
 		pos1 = posstart1;
@@ -2477,7 +2471,7 @@ int SlicesHandler::SaveTissuesRaw_resized(const char* filename, int dxm,
 			 j < _nrslices - (unsigned short)std::max(0, -dzp); j++)
 	{
 		tissues_size_t* p_bits =
-				(_image_slices[j]).return_tissues(_active_tissuelayer);
+				_image_slices[j].return_tissues(_active_tissuelayer);
 		unsigned pos1, pos2;
 		pos1 = posstart1;
 		pos2 = posstart2;
@@ -2734,9 +2728,9 @@ int SlicesHandler::SaveRaw_xy_swapped(const char* filename, bool work)
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
 		if (work)
-			p_bits = (_image_slices[j]).return_work();
+			p_bits = _image_slices[j].return_work();
 		else
-			p_bits = (_image_slices[j]).return_bmp();
+			p_bits = _image_slices[j].return_bmp();
 		unsigned pos1, pos2;
 		pos1 = 0;
 		for (unsigned short y = 0; y < _height; y++)
@@ -3014,7 +3008,7 @@ int SlicesHandler::SaveTissuesRaw(const char* filename)
 
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
-		bits_tmp = (_image_slices[j]).return_tissues(_active_tissuelayer);
+		bits_tmp = _image_slices[j].return_tissues(_active_tissuelayer);
 		if (fwrite(bits_tmp, sizeof(tissues_size_t), bitsize, fp) <
 				(unsigned int)bitsize)
 		{
@@ -3044,7 +3038,7 @@ int SlicesHandler::SaveTissuesRaw_xy_swapped(const char* filename)
 
 	for (unsigned short j = 0; j < _nrslices; j++)
 	{
-		p_bits = (_image_slices[j]).return_tissues(_active_tissuelayer); // TODO
+		p_bits = _image_slices[j].return_tissues(_active_tissuelayer); // TODO
 		unsigned pos1, pos2;
 		pos1 = 0;
 		for (unsigned short y = 0; y < _height; y++)
@@ -3169,7 +3163,7 @@ int SlicesHandler::SaveBmpBitmap(const char* filename)
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
 		sprintf(name, "%s%u.bmp", filename, i);
-		j += (_image_slices[i]).SaveDIBitmap(name);
+		j += _image_slices[i].SaveDIBitmap(name);
 	}
 
 	if (j == 0)
@@ -3188,7 +3182,7 @@ int SlicesHandler::SaveWorkBitmap(const char* filename)
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
 		sprintf(name, "%s%u.bmp", filename, i);
-		j += (_image_slices[i]).SaveWorkBitmap(name);
+		j += _image_slices[i].SaveWorkBitmap(name);
 	}
 
 	if (j == 0)
@@ -3207,7 +3201,7 @@ int SlicesHandler::SaveTissueBitmap(const char* filename)
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
 		sprintf(name, "%s%u.bmp", filename, i);
-		j += (_image_slices[i]).SaveTissueBitmap(_active_tissuelayer, name);
+		j += _image_slices[i].SaveTissueBitmap(_active_tissuelayer, name);
 	}
 
 	if (j == 0)
@@ -3230,7 +3224,7 @@ void SlicesHandler::swap_bmpwork()
 void SlicesHandler::work2bmpall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).work2bmp();
+		_image_slices[i].work2bmp();
 
 	return;
 }
@@ -3238,7 +3232,7 @@ void SlicesHandler::work2bmpall()
 void SlicesHandler::bmp2workall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).bmp2work();
+		_image_slices[i].bmp2work();
 
 	return;
 }
@@ -3246,7 +3240,7 @@ void SlicesHandler::bmp2workall()
 void SlicesHandler::work2tissueall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).work2tissue(_active_tissuelayer);
+		_image_slices[i].work2tissue(_active_tissuelayer);
 
 	return;
 }
@@ -3254,7 +3248,7 @@ void SlicesHandler::work2tissueall()
 void SlicesHandler::mergetissues(tissues_size_t tissuetype)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).mergetissue(tissuetype, _active_tissuelayer);
+		_image_slices[i].mergetissue(tissuetype, _active_tissuelayer);
 }
 
 void SlicesHandler::tissue2workall()
@@ -3265,13 +3259,13 @@ void SlicesHandler::tissue2workall()
 void SlicesHandler::tissue2workall3D()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).tissue2work(_active_tissuelayer);
+		_image_slices[i].tissue2work(_active_tissuelayer);
 }
 
 void SlicesHandler::swap_bmpworkall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).swap_bmpwork();
+		_image_slices[i].swap_bmpwork();
 }
 
 void SlicesHandler::add_mark(Point p, unsigned label)
@@ -3319,7 +3313,7 @@ void SlicesHandler::get_labels(std::vector<augmentedmark>* labels)
 	std::vector<Mark> labels1;
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		(_image_slices[i]).get_labels(&labels1);
+		_image_slices[i].get_labels(&labels1);
 		for (size_t j = 0; j < labels1.size(); j++)
 		{
 			augmentedmark am;
@@ -3390,7 +3384,7 @@ void SlicesHandler::newbmp(unsigned short width1, unsigned short height1, unsign
 	_image_slices.resize(nrofslices);
 
 	for (unsigned short i = 0; i < _nrslices; i++)
-		(_image_slices[i]).newbmp(width1, height1);
+		_image_slices[i].newbmp(width1, height1);
 
 	// now that memory is allocated give callback a chance to 'initialize' the data
 	if (init_callback)
@@ -3418,7 +3412,7 @@ void SlicesHandler::newbmp(unsigned short width1, unsigned short height1, unsign
 void SlicesHandler::freebmp()
 {
 	for (unsigned short i = 0; i < _nrslices; i++)
-		(_image_slices[i]).freebmp();
+		_image_slices[i].freebmp();
 
 	_loaded = false;
 }
@@ -3426,13 +3420,13 @@ void SlicesHandler::freebmp()
 void SlicesHandler::clear_bmp()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).clear_bmp();
+		_image_slices[i].clear_bmp();
 }
 
 void SlicesHandler::clear_work()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).clear_work();
+		_image_slices[i].clear_work();
 }
 
 void SlicesHandler::clear_overlay()
@@ -3521,7 +3515,7 @@ unsigned int SlicesHandler::make_histogram(bool includeoutofrange)
 	unsigned int l = 0;
 
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		l += (_image_slices[i]).make_histogram(includeoutofrange);
+		l += _image_slices[i].make_histogram(includeoutofrange);
 
 	dummy = (_image_slices[_startslice]).return_histogram();
 	for (unsigned short i = 0; i < 255; i++)
@@ -3529,7 +3523,7 @@ unsigned int SlicesHandler::make_histogram(bool includeoutofrange)
 
 	for (unsigned short j = _startslice + 1; j < _endslice; j++)
 	{
-		dummy = (_image_slices[j]).return_histogram();
+		dummy = _image_slices[j].return_histogram();
 		for (unsigned short i = 0; i < 255; i++)
 			histogram[i] += dummy[i];
 	}
@@ -3567,7 +3561,7 @@ bool SlicesHandler::isloaded() { return _loaded; }
 void SlicesHandler::gaussian(float sigma)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).gaussian(sigma);
+		_image_slices[i].gaussian(sigma);
 
 	return;
 }
@@ -3579,7 +3573,7 @@ void SlicesHandler::fill_holes(float f, int minsize)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).fill_holes(f, minsize);
+		_image_slices[i].fill_holes(f, minsize);
 	}
 }
 
@@ -3590,7 +3584,7 @@ void SlicesHandler::fill_holestissue(tissues_size_t f, int minsize)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).fill_holestissue(_active_tissuelayer, f, minsize);
+		_image_slices[i].fill_holestissue(_active_tissuelayer, f, minsize);
 	}
 }
 
@@ -3601,7 +3595,7 @@ void SlicesHandler::remove_islands(float f, int minsize)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).remove_islands(f, minsize);
+		_image_slices[i].remove_islands(f, minsize);
 	}
 }
 
@@ -3612,7 +3606,7 @@ void SlicesHandler::remove_islandstissue(tissues_size_t f, int minsize)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).remove_islandstissue(_active_tissuelayer, f, minsize);
+		_image_slices[i].remove_islandstissue(_active_tissuelayer, f, minsize);
 	}
 }
 
@@ -3623,7 +3617,7 @@ void SlicesHandler::fill_gaps(int minsize, bool connectivity)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).fill_gaps(minsize, connectivity);
+		_image_slices[i].fill_gaps(minsize, connectivity);
 	}
 }
 
@@ -3634,19 +3628,16 @@ void SlicesHandler::adaptwork2bmp(float f)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).adaptwork2bmp(f);
+		_image_slices[i].adaptwork2bmp(f);
 	}
 }
 
 void SlicesHandler::fill_gapstissue(int minsize, bool connectivity)
 {
-	int const iN = _endslice;
-
 #pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
+	for (int i = _startslice, iN = _endslice; i < iN; i++)
 	{
-		(_image_slices[i])
-				.fill_gapstissue(_active_tissuelayer, minsize, connectivity);
+		_image_slices[i].fill_gapstissue(_active_tissuelayer, minsize, connectivity);
 	}
 }
 
@@ -3665,7 +3656,7 @@ bool SlicesHandler::value_at_boundary3D(float value)
 	// Sides
 	for (unsigned short i = _startslice + 1; i < _endslice - 1; i++)
 	{
-		if ((_image_slices[i]).value_at_boundary(value))
+		if (_image_slices[i].value_at_boundary(value))
 		{
 			return true;
 		}
@@ -3687,8 +3678,7 @@ bool SlicesHandler::value_at_boundary3D(float value)
 bool SlicesHandler::tissuevalue_at_boundary3D(tissues_size_t value)
 {
 	// Top
-	tissues_size_t* tmp =
-			&(_image_slices[_startslice].return_tissues(_active_tissuelayer)[0]);
+	tissues_size_t* tmp = &(_image_slices[_startslice].return_tissues(_active_tissuelayer)[0]);
 	for (unsigned pos = 0; pos < _area; pos++, tmp++)
 	{
 		if (*tmp == value)
@@ -3700,7 +3690,7 @@ bool SlicesHandler::tissuevalue_at_boundary3D(tissues_size_t value)
 	// Sides
 	for (unsigned short i = _startslice + 1; i < _endslice - 1; i++)
 	{
-		if ((_image_slices[i])
+		if (_image_slices[i]
 						.tissuevalue_at_boundary(_active_tissuelayer, value))
 		{
 			return true;
@@ -3750,7 +3740,7 @@ float SlicesHandler::add_skin(int i1)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).add_skin(i1, setto);
+		_image_slices[i].add_skin(i1, setto);
 	}
 
 	return setto;
@@ -3786,7 +3776,7 @@ float SlicesHandler::add_skin_outside(int i1)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).add_skin_outside(i1, setto);
+		_image_slices[i].add_skin_outside(i1, setto);
 	}
 
 	return setto;
@@ -3799,7 +3789,7 @@ void SlicesHandler::add_skintissue(int i1, tissues_size_t f)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).add_skintissue(_active_tissuelayer, i1, f);
+		_image_slices[i].add_skintissue(_active_tissuelayer, i1, f);
 	}
 }
 
@@ -3810,7 +3800,7 @@ void SlicesHandler::add_skintissue_outside(int i1, tissues_size_t f)
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).add_skintissue_outside(_active_tissuelayer, i1, f);
+		_image_slices[i].add_skintissue_outside(_active_tissuelayer, i1, f);
 	}
 }
 
@@ -3844,23 +3834,20 @@ void SlicesHandler::fill_unassigned()
 #pragma omp parallel for
 	for (int i = _startslice; i < iN; i++)
 	{
-		(_image_slices[i]).fill_unassigned(setto);
+		_image_slices[i].fill_unassigned(setto);
 	}
 }
 
 void SlicesHandler::fill_unassignedtissue(tissues_size_t f)
 {
-	int const iN = _endslice;
-
 #pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
+	for (int i = _startslice, iN = _endslice; i < iN; i++)
 	{
-		(_image_slices[i]).fill_unassignedtissue(_active_tissuelayer, f);
+		_image_slices[i].fill_unassignedtissue(_active_tissuelayer, f);
 	}
 }
 
-void SlicesHandler::kmeans(unsigned short slicenr, short nrtissues,
-		unsigned int iternr, unsigned int converge)
+void SlicesHandler::kmeans(unsigned short slicenr, short nrtissues, unsigned int iternr, unsigned int converge)
 {
 	if (slicenr >= _startslice && slicenr < _endslice)
 	{
@@ -4114,7 +4101,7 @@ void SlicesHandler::aniso_diff(float dt, int n, float (*f)(float, float),
 		float k, float restraint)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).aniso_diff(dt, n, f, k, restraint);
+		_image_slices[i].aniso_diff(dt, n, f, k, restraint);
 
 	return;
 }
@@ -4123,7 +4110,7 @@ void SlicesHandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
 		float k, float restraint)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).cont_anisodiff(dt, n, f, k, restraint);
+		_image_slices[i].cont_anisodiff(dt, n, f, k, restraint);
 
 	return;
 }
@@ -4131,36 +4118,28 @@ void SlicesHandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
 void SlicesHandler::median_interquartile(bool median)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).median_interquartile(median);
-
-	return;
+		_image_slices[i].median_interquartile(median);
 }
 
 void SlicesHandler::average(unsigned short n)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).average(n);
-
-	return;
+		_image_slices[i].average(n);
 }
 
 void SlicesHandler::sigmafilter(float sigma, unsigned short nx,
 		unsigned short ny)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
-		(_image_slices[i]).sigmafilter(sigma, nx, ny);
-
-	return;
+		_image_slices[i].sigmafilter(sigma, nx, ny);
 }
 
 void SlicesHandler::threshold(float* thresholds)
 {
-	int const iN = _endslice;
-
 #pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
+	for (int i = _startslice, iN = _endslice; i < iN; i++)
 	{
-		(_image_slices[i]).threshold(thresholds);
+		_image_slices[i].threshold(thresholds);
 	}
 }
 
@@ -4210,10 +4189,6 @@ void SlicesHandler::extractinterpolatesave_contours2_xmirrored(
 		int minsize, std::vector<tissues_size_t>& tissuevec, unsigned short between,
 		bool dp, float epsilon, const char* filename)
 {
-	/*	os.clear();
-	os.set_sizenr((between+1)*nrslices-between);
-	os.set_thickness(thickness/(between+1));*/
-
 	std::vector<std::vector<Point>> v1, v2;
 	std::vector<Point_type> vP;
 
@@ -4257,12 +4232,6 @@ void SlicesHandler::extractinterpolatesave_contours2_xmirrored(
 	fp = dummy3D.save_tissuenamescolors(fp);
 
 	fclose(fp);
-
-	/*	os.clear();
-	os.set_sizenr(nrslices);
-	os.set_thickness(thickness);*/
-
-	return;
 }
 
 void SlicesHandler::extract_contours(int minsize,
@@ -4279,7 +4248,7 @@ void SlicesHandler::extract_contours(int minsize,
 		{
 			v1.clear();
 			v2.clear();
-			(_image_slices[i])
+			_image_slices[i]
 					.get_tissuecontours(_active_tissuelayer, *it1, &v1, &v2,
 							minsize);
 			for (std::vector<std::vector<Point>>::iterator it = v1.begin();
@@ -4298,16 +4267,11 @@ void SlicesHandler::extract_contours(int minsize,
 			}
 		}
 	}
-
-	return;
 }
 
 void SlicesHandler::extract_contours2_xmirrored(
 		int minsize, std::vector<tissues_size_t>& tissuevec)
 {
-	/*float px=os.get_pixelsize().px;
-	float py=os.get_pixelsize().py;
-	os.set_pixelsize(p.px/2,p.py/2);*/
 	_os.clear();
 	std::vector<std::vector<Point>> v1, v2;
 	std::vector<Point_type> vP;
@@ -4319,7 +4283,7 @@ void SlicesHandler::extract_contours2_xmirrored(
 		{
 			v1.clear();
 			v2.clear();
-			(_image_slices[i])
+			_image_slices[i]
 					.get_tissuecontours2_xmirrored(_active_tissuelayer, *it1, &v1,
 							&v2, minsize);
 			for (std::vector<std::vector<Point>>::iterator it = v1.begin();
@@ -4338,18 +4302,11 @@ void SlicesHandler::extract_contours2_xmirrored(
 			}
 		}
 	}
-
-	//os.set_pixelsize();
-
-	return;
 }
 
 void SlicesHandler::extract_contours2_xmirrored(
 		int minsize, std::vector<tissues_size_t>& tissuevec, float epsilon)
 {
-	/*float px=os.get_pixelsize().px;
-	float py=os.get_pixelsize().py;
-	os.set_pixelsize(p.px/2,p.py/2);*/
 	_os.clear();
 	std::vector<std::vector<Point>> v1, v2;
 	std::vector<Point_type> vP;
@@ -4361,7 +4318,7 @@ void SlicesHandler::extract_contours2_xmirrored(
 		{
 			v1.clear();
 			v2.clear();
-			(_image_slices[i])
+			_image_slices[i]
 					.get_tissuecontours2_xmirrored(_active_tissuelayer, *it1, &v1,
 							&v2, minsize, epsilon);
 			for (std::vector<std::vector<Point>>::iterator it = v1.begin();
@@ -4380,16 +4337,11 @@ void SlicesHandler::extract_contours2_xmirrored(
 			}
 		}
 	}
-
-	//os.set_pixelsize();
-
-	return;
 }
 
 void SlicesHandler::extract_contours(float f, int minsize,
 		tissues_size_t tissuetype)
 {
-	//	os.clear();
 	std::vector<std::vector<Point>> v1, v2;
 	std::vector<Point_type> vP;
 
@@ -4397,167 +4349,134 @@ void SlicesHandler::extract_contours(float f, int minsize,
 	{
 		v1.clear();
 		v2.clear();
-		(_image_slices[i]).get_contours(f, &v1, &v2, minsize);
+		_image_slices[i].get_contours(f, &v1, &v2, minsize);
 		for (std::vector<std::vector<Point>>::iterator it = v1.begin();
 				 it != v1.end(); it++)
 		{
-			//			Pointconvert(*it,vP);
-			//			os.add_line(i,tissuetype,&vP,true);
 			_os.add_line(i, tissuetype, &(*it), true);
 		}
 		for (std::vector<std::vector<Point>>::iterator it = v2.begin();
 				 it != v2.end(); it++)
 		{
-			//			Pointconvert(*it,vP);
-			//			os.add_line(i,tissuetype,&vP,false);
 			_os.add_line(i, tissuetype, &(*it), false);
 		}
 	}
-
-	return;
 }
-
-/*void SlicesHandler::Pointconvert(std::vector<Point> &v1, std::vector<Point_type> &v2)
-{
-	v2.clear();
-	Point_type P;
-
-	for(std::vector<Point>::iterator it=v1.begin();it!=v1.end();it++){
-		P.px=(float)it->px;
-		P.py=(float)it->py;
-		v2.push_back(P);
-	}
-
-	return;
-}*/
 
 void SlicesHandler::bmp_sum()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_sum();
+		_image_slices[i].bmp_sum();
 	}
-	return;
 }
 
 void SlicesHandler::bmp_add(float f)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_add(f);
+		_image_slices[i].bmp_add(f);
 	}
-	return;
 }
 
 void SlicesHandler::bmp_diff()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_diff();
+		_image_slices[i].bmp_diff();
 	}
-	return;
 }
 
 void SlicesHandler::bmp_mult()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_mult();
+		_image_slices[i].bmp_mult();
 	}
-	return;
 }
 
 void SlicesHandler::bmp_mult(float f)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_mult(f);
+		_image_slices[i].bmp_mult(f);
 	}
-	return;
 }
 
 void SlicesHandler::bmp_overlay(float alpha)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_overlay(alpha);
+		_image_slices[i].bmp_overlay(alpha);
 	}
-	return;
 }
 
 void SlicesHandler::bmp_abs()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_abs();
+		_image_slices[i].bmp_abs();
 	}
-	return;
 }
 
 void SlicesHandler::bmp_neg()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).bmp_neg();
+		_image_slices[i].bmp_neg();
 	}
-	return;
 }
 
 void SlicesHandler::scale_colors(Pair p)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).scale_colors(p);
+		_image_slices[i].scale_colors(p);
 	}
-	return;
 }
 
 void SlicesHandler::crop_colors()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).crop_colors();
+		_image_slices[i].crop_colors();
 	}
-	return;
 }
 
 void SlicesHandler::get_range(Pair* pp)
 {
 	Pair p;
-	(_image_slices[_startslice]).get_range(pp);
+	_image_slices[_startslice].get_range(pp);
 
 	for (unsigned short i = _startslice + 1; i < _endslice; i++)
 	{
-		(_image_slices[i]).get_range(&p);
+		_image_slices[i].get_range(&p);
 		if ((*pp).high < p.high)
 			(*pp).high = p.high;
 		if ((*pp).low > p.low)
 			(*pp).low = p.low;
 	}
-
-	return;
 }
 
 void SlicesHandler::compute_range_mode1(Pair* pp)
 {
 	// Update ranges for all mode 1 slices and compute total range
-	pp->high = 0.0f;
 	pp->low = FLT_MAX;
+	pp->high = 0.f;
 
 #pragma omp parallel
 	{
 		// this data is thread private
 		Pair p;
-		float high = 0.f;
 		float low = FLT_MAX;
+		float high = 0.f;
 
-		int const iN = _nrslices;
 #pragma omp for
-		for (int i = 0; i < iN; i++)
+		for (int i = 0, iN = _nrslices; i < iN; i++)
 		{
 			if (_image_slices[i].return_mode(false) == 1)
 			{
-				(_image_slices[i]).get_range(&p);
+				_image_slices[i].get_range(&p);
 				_slice_ranges[i] = p;
 				if (high < p.high)
 					high = p.high;
@@ -4575,7 +4494,7 @@ void SlicesHandler::compute_range_mode1(Pair* pp)
 		}
 	}
 
-	if (pp->high == 0.0f && pp->low == FLT_MAX)
+	if (pp->high < pp->low)
 	{
 		// No mode 1 slices: Set to mode 2 range
 		pp->low = 255.0f;
@@ -4587,7 +4506,7 @@ void SlicesHandler::compute_range_mode1(unsigned short updateSlicenr, Pair* pp)
 	// Update range for single mode 1 slice
 	if (_image_slices[updateSlicenr].return_mode(false) == 1)
 	{
-		(_image_slices[updateSlicenr]).get_range(&_slice_ranges[updateSlicenr]);
+		_image_slices[updateSlicenr].get_range(&_slice_ranges[updateSlicenr]);
 	}
 
 	// Compute total range
@@ -4614,45 +4533,41 @@ void SlicesHandler::compute_range_mode1(unsigned short updateSlicenr, Pair* pp)
 void SlicesHandler::get_bmprange(Pair* pp)
 {
 	Pair p;
-	(_image_slices[_startslice]).get_bmprange(pp);
+	_image_slices[_startslice].get_bmprange(pp);
 
 	for (unsigned short i = _startslice + 1; i < _endslice; i++)
 	{
-		(_image_slices[i]).get_bmprange(&p);
+		_image_slices[i].get_bmprange(&p);
 		if ((*pp).high < p.high)
 			(*pp).high = p.high;
 		if ((*pp).low > p.low)
 			(*pp).low = p.low;
 	}
-
-	return;
 }
 
 void SlicesHandler::compute_bmprange_mode1(Pair* pp)
 {
 	// Update ranges for all mode 1 slices and compute total range
-	pp->high = 0.0f;
 	pp->low = FLT_MAX;
+	pp->high = 0.f;
 
 #pragma omp parallel
 	{
 		// this data is thread private
 		Pair p;
-		float high = 0.f;
 		float low = FLT_MAX;
+		float high = 0.f;
 
-		int const iN = _nrslices;
 #pragma omp for
-		for (int i = 0; i < iN; i++)
+		for (int i = 0, iN = _nrslices; i < iN; i++)
 		{
 			if (_image_slices[i].return_mode(true) == 1)
 			{
-				(_image_slices[i]).get_bmprange(&p);
+				_image_slices[i].get_bmprange(&p);
 				_slice_bmpranges[i] = p;
-				if (high < p.high)
-					high = p.high;
-				if (low > p.low)
-					low = p.low;
+
+				high = std::max(high, p.high);
+				low = std::min(low, p.low);
 			}
 		}
 
@@ -4665,21 +4580,19 @@ void SlicesHandler::compute_bmprange_mode1(Pair* pp)
 		}
 	}
 
-	if (pp->high == 0.0f && pp->low == FLT_MAX)
+	if (pp->high < pp->low)
 	{
 		// No mode 1 slices: Set to mode 2 range
 		pp->low = 255.0f;
 	}
 }
 
-void SlicesHandler::compute_bmprange_mode1(unsigned short updateSlicenr,
-		Pair* pp)
+void SlicesHandler::compute_bmprange_mode1(unsigned short updateSlicenr, Pair* pp)
 {
 	// Update range for single mode 1 slice
 	if (_image_slices[updateSlicenr].return_mode(true) == 1)
 	{
-		(_image_slices[updateSlicenr])
-				.get_bmprange(&_slice_bmpranges[updateSlicenr]);
+		_image_slices[updateSlicenr].get_bmprange(&_slice_bmpranges[updateSlicenr]);
 	}
 
 	// Compute total range
@@ -4706,25 +4619,22 @@ void SlicesHandler::compute_bmprange_mode1(unsigned short updateSlicenr,
 void SlicesHandler::get_rangetissue(tissues_size_t* pp)
 {
 	tissues_size_t p;
-	(_image_slices[_startslice]).get_rangetissue(_active_tissuelayer, pp);
+	_image_slices[_startslice].get_rangetissue(_active_tissuelayer, pp);
 
 	for (unsigned short i = _startslice + 1; i < _endslice; i++)
 	{
-		(_image_slices[i]).get_rangetissue(_active_tissuelayer, &p);
+		_image_slices[i].get_rangetissue(_active_tissuelayer, &p);
 		if ((*pp) < p)
 			(*pp) = p;
 	}
-
-	return;
 }
 
 void SlicesHandler::zero_crossings(bool connectivity)
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).zero_crossings(connectivity);
+		_image_slices[i].zero_crossings(connectivity);
 	}
-	return;
 }
 
 void SlicesHandler::save_contours(const char* filename)
@@ -4733,7 +4643,6 @@ void SlicesHandler::save_contours(const char* filename)
 	FILE* fp = fopen(filename, "a");
 	fp = save_tissuenamescolors(fp);
 	fclose(fp);
-	return;
 }
 
 void SlicesHandler::shift_contours(int dx, int dy)
@@ -4759,17 +4668,14 @@ void SlicesHandler::resetextrusion_contours()
 	}
 }
 
-FILE* SlicesHandler::save_contourprologue(const char* filename,
-		unsigned nr_slices)
+FILE* SlicesHandler::save_contourprologue(const char* filename, unsigned nr_slices)
 {
 	return _os.printprologue(filename, nr_slices, TissueInfos::GetTissueCount());
 }
 
-FILE* SlicesHandler::save_contoursection(FILE* fp, unsigned startslice1,
-		unsigned endslice1, unsigned offset)
+FILE* SlicesHandler::save_contoursection(FILE* fp, unsigned startslice1, unsigned endslice1, unsigned offset)
 {
-	_os.printsection(fp, startslice1, endslice1, offset,
-			TissueInfos::GetTissueCount());
+	_os.printsection(fp, startslice1, endslice1, offset, TissueInfos::GetTissueCount());
 	return fp;
 }
 
@@ -4816,8 +4722,7 @@ void SlicesHandler::dougpeuck_line(float epsilon)
 	_os.doug_peuck(epsilon, true);
 }
 
-void SlicesHandler::hysteretic(float thresh_low, float thresh_high,
-		bool connectivity, unsigned short nrpasses)
+void SlicesHandler::hysteretic(float thresh_low, float thresh_high, bool connectivity, unsigned short nrpasses)
 {
 	float setvalue = 255;
 	unsigned short slicenr = _startslice;
@@ -4869,8 +4774,7 @@ void SlicesHandler::thresholded_growing(short unsigned slicenr, Point p,
 		clear_work();
 
 		_image_slices[slicenr].thresholded_growing(p, threshfactor_low,
-				threshfactor_high,
-				connectivity, setvalue, &tp);
+				threshfactor_high, connectivity, setvalue, &tp);
 
 		for (unsigned short i = 0; i < nrpasses; i++)
 		{
@@ -5320,7 +5224,7 @@ void SlicesHandler::double_hysteretic_allslices(float thresh_low_l,
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 	{
-		(_image_slices[i]).double_hysteretic(thresh_low_l, thresh_low_h, thresh_high_l, thresh_high_h, connectivity, set_to);
+		_image_slices[i].double_hysteretic(thresh_low_l, thresh_low_h, thresh_high_l, thresh_high_h, connectivity, set_to);
 	}
 }
 
@@ -7218,14 +7122,14 @@ unsigned short SlicesHandler::get_next_featuring_slice(tissues_size_t type,
 	found = true;
 	for (unsigned i = _activeslice + 1; i < _nrslices; i++)
 	{
-		if ((_image_slices[i]).has_tissue(_active_tissuelayer, type))
+		if (_image_slices[i].has_tissue(_active_tissuelayer, type))
 		{
 			return i;
 		}
 	}
 	for (unsigned i = 0; i <= _activeslice; i++)
 	{
-		if ((_image_slices[i]).has_tissue(_active_tissuelayer, type))
+		if (_image_slices[i].has_tissue(_active_tissuelayer, type))
 		{
 			return i;
 		}
@@ -8088,7 +7992,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 						return 0;
 					}
 
-					(_image_slices[i])
+					_image_slices[i]
 							.LoadArray(&(bits[(unsigned long)(a)*b * 0]), a, b);
 
 					free(bits);
@@ -8155,7 +8059,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 			int j = 0;
 			for (unsigned short i = 0; i < _nrslices; i++)
 			{
-				if ((_image_slices[i]).LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p, dx, dy))
+				if (_image_slices[i].LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p, dx, dy))
 					j++;
 			}
 
@@ -8198,7 +8102,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 	float thick1 = DICOMsort(&lfilename);
 	for (unsigned short i = 0; i < _nrslices; i++)
 	{
-		if ((_image_slices[i]).LoadDICOM(lfilename[i], p, dx, dy))
+		if (_image_slices[i].LoadDICOM(lfilename[i], p, dx, dy))
 			j++;
 	}
 
@@ -8257,7 +8161,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		DICOMsort(&lfilename);
 		for (unsigned short i = _startslice; i < _endslice; i++)
 		{
-			if ((_image_slices[i]).ReloadDICOM(lfilename[i - _startslice]))
+			if (_image_slices[i].ReloadDICOM(lfilename[i - _startslice]))
 				j++;
 		}
 
@@ -8273,7 +8177,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		DICOMsort(&lfilename);
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
-			if ((_image_slices[i]).ReloadDICOM(lfilename[i]))
+			if (_image_slices[i].ReloadDICOM(lfilename[i]))
 				j++;
 		}
 
@@ -8307,7 +8211,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 			int j = 0;
 			for (unsigned short i = _startslice; i < _endslice; i++)
 			{
-				if ((_image_slices[i])
+				if (_image_slices[i]
 								.LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b))
 					j++;
 			}
@@ -8330,7 +8234,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		DICOMsort(&lfilename);
 		for (unsigned short i = _startslice; i < _endslice; i++)
 		{
-			if ((_image_slices[i]).ReloadDICOM(lfilename[i - _startslice], p))
+			if (_image_slices[i].ReloadDICOM(lfilename[i - _startslice], p))
 				j++;
 		}
 
@@ -8346,7 +8250,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		DICOMsort(&lfilename);
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
-			if ((_image_slices[i]).ReloadDICOM(lfilename[i], p))
+			if (_image_slices[i].ReloadDICOM(lfilename[i], p))
 				j++;
 		}
 
@@ -8380,7 +8284,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 			int j = 0;
 			for (unsigned short i = _startslice; i < _endslice; i++)
 			{
-				if ((_image_slices[i])
+				if (_image_slices[i]
 								.LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p,
 										_width, _height))
 					j++;
@@ -8586,7 +8490,7 @@ void SlicesHandler::group_tissues(std::vector<tissues_size_t>& olds, std::vector
 #pragma omp parallel for
 	for (int i = 0; i < iN; i++)
 	{
-		(_image_slices[i]).group_tissues(_active_tissuelayer, olds, news);
+		_image_slices[i].group_tissues(_active_tissuelayer, olds, news);
 	}
 }
 void SlicesHandler::set_modeall(unsigned char mode, bool bmporwork)
@@ -11513,15 +11417,15 @@ bool SlicesHandler::unwrap(float jumpratio, float shift)
 		if (i > _startslice)
 		{
 			if ((_image_slices[i - 1]).return_bmp()[0] -
-							(_image_slices[i]).return_bmp()[0] >
+							_image_slices[i].return_bmp()[0] >
 					jumpabs)
 				shift += range;
-			else if ((_image_slices[i]).return_bmp()[0] -
+			else if (_image_slices[i].return_bmp()[0] -
 									 (_image_slices[i - 1]).return_bmp()[0] >
 							 jumpabs)
 				shift -= range;
 		}
-		ok &= (_image_slices[i]).unwrap(jumpratio, range, shift);
+		ok &= _image_slices[i].unwrap(jumpratio, range, shift);
 		;
 	}
 	if (_area > 0)
@@ -11529,10 +11433,10 @@ bool SlicesHandler::unwrap(float jumpratio, float shift)
 		for (unsigned short i = _startslice + 1; i < _endslice; i++)
 		{
 			if ((_image_slices[i - 1]).return_work()[_area - 1] -
-							(_image_slices[i]).return_work()[_area - 1] >
+							_image_slices[i].return_work()[_area - 1] >
 					jumpabs)
 				return false;
-			if ((_image_slices[i]).return_work()[_area - 1] -
+			if (_image_slices[i].return_work()[_area - 1] -
 							(_image_slices[i - 1]).return_work()[_area - 1] >
 					jumpabs)
 				return false;

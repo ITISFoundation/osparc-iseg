@@ -557,7 +557,7 @@ void bmphandler::copy_tissue(tissuelayers_size_t idx, tissues_size_t* output)
 	return;
 }
 
-void bmphandler::newbmp(unsigned short width1, unsigned short height1)
+void bmphandler::newbmp(unsigned short width1, unsigned short height1, bool init)
 {
 	unsigned areanew = unsigned(width1) * height1;
 	width = width1;
@@ -594,17 +594,19 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1)
 			bmp_bits = sliceprovide->give_me();
 			work_bits = sliceprovide->give_me();
 			help_bits = sliceprovide->give_me();
-			tissuelayers.push_back(
-					(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+			tissuelayers.push_back((tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 			clear_tissue(0);
 		}
 	}
 
 	tissues_size_t* tissues = tissuelayers[0];
-	for (unsigned i = 0; i < area; i++)
+
+	if (init)
 	{
-		bmp_bits[i] = work_bits[i] = help_bits[i] = 0;
-		tissues[i] = 0;
+		std::fill(bmp_bits, bmp_bits + area, 0.f);
+		std::fill(work_bits, work_bits + area, 0.f);
+		std::fill(help_bits, help_bits + area, 0.f);
+		std::fill(tissues, tissues + area, 0);
 	}
 
 	loaded = true;
@@ -650,8 +652,7 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1,
 			bmp_bits = bits;
 			work_bits = sliceprovide->give_me();
 			help_bits = sliceprovide->give_me();
-			tissuelayers.push_back(
-					(tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
+			tissuelayers.push_back((tissues_size_t*)malloc(sizeof(tissues_size_t) * area));
 			clear_tissue(0);
 		}
 	}
@@ -660,8 +661,6 @@ void bmphandler::newbmp(unsigned short width1, unsigned short height1,
 	clear_marks();
 	clear_vvm();
 	clear_limits();
-
-	return;
 }
 
 void bmphandler::freebmp()
@@ -2475,13 +2474,13 @@ FILE* bmphandler::save_stack(FILE* fp)
 	return fp;
 }
 
-FILE* bmphandler::load_proj(FILE* fp, int tissuesVersion, bool inclpics)
+FILE* bmphandler::load_proj(FILE* fp, int tissuesVersion, bool inclpics, bool init)
 {
 	unsigned short width1, height1;
 	fread(&width1, sizeof(unsigned short), 1, fp);
 	fread(&height1, sizeof(unsigned short), 1, fp);
 
-	newbmp(width1, height1);
+	newbmp(width1, height1, init);
 
 	if (inclpics)
 	{
@@ -5243,12 +5242,10 @@ void bmphandler::get_range(Pair* pp)
 
 void bmphandler::get_rangetissue(tissuelayers_size_t idx, tissues_size_t* pp)
 {
-	tissues_size_t* tissues = tissuelayers[idx];
-	*pp = tissues[0];
-
-	for (unsigned int i = 1; i < area; i++)
+	if (area > 0)
 	{
-		*pp = std::max(*pp, tissues[i]);
+		tissues_size_t* tissues = tissuelayers[idx];
+		*pp = *std::max_element(tissues, tissues + area);
 	}
 }
 
@@ -5257,7 +5254,7 @@ void bmphandler::get_bmprange(Pair* pp)
 	pp->low = bmp_bits[0];
 	pp->high = bmp_bits[0];
 
-	for (unsigned int i = 1; i < area; i++)
+	for (unsigned int i = 0; i < area; ++i)
 	{
 		pp->low = std::min(pp->low, bmp_bits[i]);
 		pp->high = std::max(pp->high, bmp_bits[i]);
@@ -5270,16 +5267,12 @@ void bmphandler::scale_colors(Pair p)
 
 	for (unsigned int i = 0; i < area; i++)
 		work_bits[i] = (work_bits[i] - p.low) * step;
-
-	return;
 }
 
 void bmphandler::crop_colors()
 {
 	for (unsigned int i = 0; i < area; i++)
 		work_bits[i] = std::min(std::max(work_bits[i], 0.0f), 255.0f);
-
-	return;
 }
 
 void bmphandler::gaussian(float sigma)
