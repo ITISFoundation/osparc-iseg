@@ -42,7 +42,7 @@ MACRO(SET_COMPILER_AND_LINKER_FLAGS)
 		SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} /debug:fastlink")
 		SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /debug:fastlink")
 	ELSEIF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override -Wunreachable-code-aggressive")
 	ENDIF()
 ENDMACRO()
 

@@ -400,8 +400,6 @@ public:
 	bool get_extent(tissuelayers_size_t idx, tissues_size_t tissuenr, unsigned short extent[2][2]);
 	bool unwrap(float jumpratio, float range = 0, float shift = 0);
 
-	unsigned getfirststackindexxxxxxxxx();
-
 	int ConvertImageTo8BitBMP(const char* filename, unsigned char*& bits_tmp);
 	int ConvertPNGImageTo8BitBMP(const char* filename,
 			unsigned char*& bits_tmp);
@@ -439,15 +437,6 @@ protected:
 	void _brush(T* data, T f, Point p, float radius, float dx, float dy, bool draw, T f1, F);
 
 private:
-	// \todo these are unused ==> move to test-suite?
-	void classifytest();
-	void EMtest();
-	float* classifytest1();
-	void livewire_test();
-	void levelsettest(float sigma, float epsilon, float alpha, float beta, float stepsize, unsigned nrsteps, unsigned reinitfreq);
-	void levelsettest1(float sigma, float epsilon, float alpha, float beta, float stepsize, unsigned nrsteps, unsigned reinitfreq);
-	void cannylevelsettest(float sigma, float thresh_low, float thresh_high, float epsilon, float stepsize, unsigned nrsteps, unsigned reinitfreq);
-
 	unsigned int histogram[256];
 	float* bmp_bits;
 	float* work_bits;

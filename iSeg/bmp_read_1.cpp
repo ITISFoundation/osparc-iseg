@@ -4407,8 +4407,7 @@ int bmphandler::ReloadRawFloat(const char* filename, short unsigned w,
 	return 1;
 }
 
-int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
-		unsigned slicenr)
+int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth, unsigned slicenr)
 {
 	if (!loaded)
 		return 0;
@@ -4419,7 +4418,7 @@ int bmphandler::ReloadRawTissues(const char* filename, unsigned bitdepth,
 	if ((fp = fopen(filename, "rb")) == nullptr)
 		return 0;
 
-	bitsize = area * tissuelayers.size();
+	bitsize = area * static_cast<unsigned>(tissuelayers.size());
 
 	unsigned bytedepth = (bitdepth + 7) / 8;
 
@@ -4526,7 +4525,7 @@ int bmphandler::ReloadRawTissues(const char* filename, short unsigned w,
 	if ((fp = fopen(filename, "rb")) == nullptr)
 		return 0;
 
-	bitsize = area * tissuelayers.size();
+	bitsize = area * static_cast<unsigned>(tissuelayers.size());
 	unsigned long area2 = (unsigned long)(w)*h;
 
 	unsigned bytedepth = (bitdepth + 7) / 8;
@@ -10746,73 +10745,6 @@ ImageForestingTransformLivewire* bmphandler::livewireinit(Point pt)
 	return lw;
 }
 
-void bmphandler::livewire_test()
-{
-	unsigned char dummymode = mode1;
-
-	float* sobelx = sliceprovide->give_me();
-	float* sobely = sliceprovide->give_me();
-	float* tmp = sliceprovide->give_me();
-	float* dummy;
-	float* grad;
-
-	gaussian(1);
-	dummy = bmp_bits;
-	bmp_bits = tmp;
-	tmp = dummy;
-	swap_bmpwork();
-	sobelxy(&sobelx, &sobely);
-
-	dummy = direction_map(sobelx, sobely);
-
-	Pair p;
-	get_range(&p);
-
-	grad = work_bits;
-	work_bits = sobelx;
-
-	laplacian_zero(2.0f, 30, false);
-
-	for (unsigned i = 0; i < area; i++)
-		work_bits[i] = (0.43f * (1 - grad[i] / p.high) +
-										0.43f * ((work_bits[i] + 1) / 256));
-
-	ImageForestingTransformLivewire lw;
-
-	Point P1;
-	P1.px = 140;
-	P1.py = 370;
-	lw.lw_init(width, height, work_bits, dummy, P1);
-
-	/*	P1.px=140;
-	P1.py=300;
-	lw.change_pt(P1);*/
-
-	std::vector<Point> Pt_vec;
-	Point p2;
-	p2.px = 355;
-	p2.py = 390;
-	//	p2.py=410;
-	lw.return_path(p2, &Pt_vec);
-	for (unsigned i = 0; i < area; i++)
-		work_bits[i] = tmp[i];
-	for (std::vector<Point>::iterator it = Pt_vec.begin(); it != Pt_vec.end(); it++)
-		work_bits[(*it).py * width + (*it).px] = 255;
-
-	sliceprovide->take_back(dummy);
-	sliceprovide->take_back(grad);
-	sliceprovide->take_back(sobely);
-	//	free(work_bits);
-	//	work_bits=dummy;
-	sliceprovide->take_back(bmp_bits);
-	bmp_bits = tmp;
-
-	mode1 = dummymode;
-	mode2 = 2;
-
-	return;
-}
-
 void bmphandler::fill_contour(std::vector<Point>* vp, bool continuous)
 {
 	unsigned char dummymode = mode1;
@@ -12168,87 +12100,6 @@ void bmphandler::classify(short nrclasses, short dim, float** bits,
 	return;
 }
 
-void bmphandler::classifytest()
-{
-	float* bits[1];
-	bits[0] = bmp_bits;
-	float weights[1];
-	weights[0] = 1;
-	float centers[4];
-	centers[0] = 0;
-	centers[1] = 100;
-	centers[2] = 120;
-	centers[3] = 236;
-	KMeans kmeans;
-	kmeans.init(width, height, 4, 1, bits, weights);
-	kmeans.make_iter(100, 1000);
-	kmeans.return_m(work_bits);
-	//	classify(4,1,bits,weights,centers,20);
-
-	mode2 = 2;
-
-	return;
-}
-
-void bmphandler::EMtest()
-{
-	float* bits[1];
-	bits[0] = bmp_bits;
-	float weights[1];
-	weights[0] = 1;
-	ExpectationMaximization em;
-	/*	float centers[4];
-	centers[0]=0;
-	centers[1]=60;
-	centers[2]=120;
-	centers[3]=190;
-	float devs[4];
-	devs[0]=10;
-	devs[1]=10;
-	devs[2]=10;
-	devs[3]=10;
-	float ampls[4];
-	ampls[0]=0.25;
-	ampls[1]=0.25;
-	ampls[2]=0.25;
-	ampls[3]=0.25;*/
-	em.init(width, height, 4, 1, bits, weights);
-	//	em.init(width,height,4,1,bits,weights,centers,devs,ampls);
-	em.make_iter(100, 101);
-	em.classify(work_bits);
-
-	mode2 = 2;
-
-	return;
-}
-
-float* bmphandler::classifytest1()
-{
-	float* bits[1];
-	bits[0] = bmp_bits;
-	float weights[1];
-	weights[0] = 1;
-	short nrclasses = 4;
-	float* centers = (float*)malloc(sizeof(float) * nrclasses);
-	//	float *centers= new float[nrclasses];
-	KMeans kmeans;
-	kmeans.init(width, height, nrclasses, 1, bits, weights, centers);
-	kmeans.init_centers();
-	kmeans.make_iter(100, 1000);
-	kmeans.return_m(work_bits);
-	float* dummy = kmeans.return_centers();
-	for (short i = 0; i < nrclasses; i++)
-		centers[i] = dummy[i];
-	std::sort(centers, centers + nrclasses);
-	for (short i = nrclasses - 1; i > 0; i--)
-		centers[i] = (centers[i] + centers[i - 1]) / 2;
-	centers[0] = float(nrclasses - 1);
-
-	mode2 = 2;
-
-	return centers;
-}
-
 void bmphandler::kmeans(short nrtissues, short dim, float** bits,
 		float* weights, unsigned int iternr,
 		unsigned int converge)
@@ -12441,137 +12292,6 @@ void bmphandler::em(short nrtissues, short dim, float** bits, float* weights,
 	mode2 = 2;
 }
 
-void bmphandler::levelsettest(float sigma, float epsilon, float alpha,
-		float beta, float stepsize, unsigned nrsteps,
-		unsigned reinitfreq)
-{
-	unsigned char dummymode = mode1;
-	float* tmp = sliceprovide->give_me();
-	float* dummy;
-
-	gaussian(sigma);
-	dummy = bmp_bits;
-	bmp_bits = tmp;
-	tmp = dummy;
-	swap_bmpwork();
-	sobel();
-	//	sobel_finer();
-	Pair p;
-	get_range(&p);
-	p.high *= 256;
-	p.low *= 256;
-	scale_colors(p);
-
-	for (unsigned i = 0; i < area; ++i)
-		bmp_bits[i] = 1 / (1 + alpha * work_bits[i]);
-	//	SaveDIBitmap("D:\\Development\\segmentation\\sample images\\testt1.bmp");
-	//	for(unsigned i=0;i<area;++i) bmp_bits[i]=1;
-	//	cout << "muss raus"<<endl;
-	for (unsigned i = 0; i < area; ++i)
-		work_bits[i] = -beta * work_bits[i];
-
-	Levelset levset;
-	Point Pt;
-	Pt.px = 376;
-	Pt.py = 177;
-	/*	Pt.px=215;
-	Pt.py=266;*/
-	levset.init(height, width, Pt, bmp_bits, work_bits, 1.0f, epsilon,
-			stepsize);
-	levset.iterate(nrsteps, reinitfreq);
-	levset.return_levelset(bmp_bits);
-	float thresh[2];
-	thresh[0] = 1;
-	thresh[1] = 0;
-	//	threshold(thresh);
-	for (unsigned i = 0; i < area; i++)
-	{
-		if (bmp_bits[i] < 0)
-			//			work_bits[i]=tmp[i];
-			work_bits[i] = 0.0f;
-		else
-			//			work_bits[i]=256-tmp[i];
-			work_bits[i] = 256.0f;
-	}
-	sliceprovide->take_back(bmp_bits);
-	bmp_bits = tmp;
-
-	//	float *fp=copy_work();
-	//	cannylevelset(fp,256.0f,1.4f,30,120,epsilon,stepsize,20,reinitfreq);
-	//	sliceprovide->take_back(fp);
-
-	mode1 = dummymode;
-	mode2 = 2;
-
-	return;
-}
-
-void bmphandler::levelsettest1(float sigma, float epsilon, float alpha,
-		float beta, float stepsize, unsigned nrsteps,
-		unsigned reinitfreq)
-{
-	unsigned char dummymode = mode1;
-	float* tmp = sliceprovide->give_me();
-	float* dummy;
-	float* dummy1 = work_bits;
-	work_bits = sliceprovide->give_me();
-
-	gaussian(sigma);
-	dummy = bmp_bits;
-	bmp_bits = tmp;
-	tmp = dummy;
-	swap_bmpwork();
-	sobel();
-	Pair p;
-	get_range(&p);
-	p.high *= 256;
-	p.low *= 256;
-	scale_colors(p);
-
-	for (unsigned i = 0; i < area; ++i)
-		bmp_bits[i] = 1 / (1 + alpha * work_bits[i]);
-	//	SaveDIBitmap("D:\\Development\\segmentation\\sample images\\testt1.bmp");
-	//	for(unsigned i=0;i<area;++i) bmp_bits[i]=1;
-	for (unsigned i = 0; i < area; ++i)
-		work_bits[i] = -beta * work_bits[i];
-
-	Levelset levset;
-	Point Pt;
-	Pt.px = 376;
-	Pt.py = 177;
-	/*	Pt.px=215;
-	Pt.py=266;*/
-	levset.init(height, width, dummy1, 256.0f, bmp_bits, work_bits, 1.0f,
-			epsilon, stepsize);
-	levset.iterate(nrsteps, reinitfreq);
-	levset.return_levelset(bmp_bits);
-	float thresh[2];
-	thresh[0] = 1;
-	thresh[1] = 0;
-	//	threshold(thresh);
-	for (unsigned i = 0; i < area; i++)
-	{
-		if (bmp_bits[i] < 0)
-			//			work_bits[i]=tmp[i];
-			work_bits[i] = 0.0f;
-		else
-			//			work_bits[i]=256-tmp[i];
-			work_bits[i] = 256.0f;
-	}
-	sliceprovide->take_back(bmp_bits);
-	sliceprovide->take_back(dummy1);
-	bmp_bits = tmp;
-
-	//	float *fp=copy_work();
-	//	cannylevelset(fp,256.0f,1.4f,30,120,epsilon,stepsize,20,reinitfreq);
-	//	sliceprovide->take_back(fp);
-
-	mode1 = dummymode;
-	mode2 = 2;
-
-	return;
-}
-
 void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 		float thresh_low, float thresh_high,
 		float epsilon, float stepsize, unsigned nrsteps,
@@ -12635,74 +12355,6 @@ void bmphandler::cannylevelset(float* initlev, float f, float sigma,
 	return;
 }
 
-void bmphandler::cannylevelsettest(float sigma, float thresh_low,
-		float thresh_high, float epsilon,
-		float stepsize, unsigned nrsteps,
-		unsigned reinitfreq)
-{
-	unsigned char dummymode = mode1;
-
-	Point Pt;
-	Pt.px = 376;
-	Pt.py = 177;
-
-	float* tmp = sliceprovide->give_me();
-	float* dummy;
-
-	canny_line(sigma, thresh_low, thresh_high);
-	dummy = tmp;
-	tmp = bmp_bits;
-	bmp_bits = dummy;
-	swap_bmpwork();
-	//	dead_reckoning_squared(255.0f);
-	//	IFT_distance1(255.0f);
-	dead_reckoning(255.0f);
-	dummy = tmp;
-	tmp = bmp_bits;
-	bmp_bits = dummy;
-	//	for(unsigned i=0;i<area;i++) work_bits[i]=work_bits[i];
-	Pair p;
-	get_range(&p);
-	//	cout << p.low << " " << p.high << endl;
-	/*	p.low=p.low*10;
-	p.high=p.high*10;*/
-	//	p.low=p.high*10;
-	scale_colors(p);
-	get_range(&p);
-
-	//	for(unsigned i=0;i<area;i++) work_bits[i]=0.0f;
-	for (unsigned i = 0; i < area; i++)
-		tmp[i] = 1.0f;
-
-	//	SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testtest.bmp");
-
-	Levelset levset;
-	levset.init(height, width, Pt, tmp, work_bits, 0.0f, epsilon, stepsize);
-	levset.iterate(nrsteps, reinitfreq);
-	levset.return_levelset(work_bits);
-	//	SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testdump1.bmp");
-
-	float thresh[2];
-	thresh[0] = 1;
-	thresh[1] = 0;
-	//	threshold(thresh);
-	for (unsigned i = 0; i < area; i++)
-	{
-		if (work_bits[i] < 0)
-			//			work_bits[i]=tmp[i];
-			work_bits[i] = 0;
-		else
-			//			work_bits[i]=256-tmp[i];
-			work_bits[i] = 256;
-	}
-	sliceprovide->take_back(tmp);
-
-	mode1 = dummymode;
-	mode2 = 2;
-
-	return;
-}
-
 void bmphandler::threshlevelset(float thresh_low, float thresh_high,
 		float epsilon, float stepsize, unsigned nrsteps,
 		unsigned reinitfreq)
@@ -12711,7 +12363,6 @@ void bmphandler::threshlevelset(float thresh_low, float thresh_high,
 	float halfdiff = (thresh_high - thresh_low) / 2;
 	for (unsigned i = 0; i < area; ++i)
 		work_bits[i] = 1 - abs(bmp_bits[i] - mean) / halfdiff;
-	//SaveWorkBitmap("D:\\Development\\segmentation\\sample images\\testt1.bmp");
 
 	Levelset levset;
 	Point Pt;
@@ -12930,8 +12581,6 @@ void bmphandler::removestack(unsigned i)
 		stackindex.erase(it1);
 		mode_stack.erase(it2);
 	}
-
-	return;
 }
 
 void bmphandler::getstack_bmp(unsigned i)
@@ -12956,19 +12605,10 @@ void bmphandler::getstack_bmp(unsigned i)
 	}
 
 	mode1 = (*it2);
-
-	return;
-}
-
-unsigned bmphandler::getfirststackindexxxxxxxxx()
-{
-	return *(stackindex.begin());
 }
 
 void bmphandler::getstack_work(unsigned i)
 {
-	//	sliceprovide->take_back(work_bits);
-
 	std::list<float*>::iterator it = bits_stack.begin();
 	std::list<unsigned>::iterator it1 = stackindex.begin();
 	std::list<unsigned char>::iterator it2 = mode_stack.begin();
@@ -12987,8 +12627,6 @@ void bmphandler::getstack_work(unsigned i)
 	}
 
 	mode2 = (*it2);
-
-	return;
 }
 
 void bmphandler::getstack_tissue(tissuelayers_size_t idx, unsigned i,
@@ -13027,8 +12665,6 @@ void bmphandler::getstack_tissue(tissuelayers_size_t idx, unsigned i,
 			}
 		}
 	}
-
-	return;
 }
 
 void bmphandler::getstack_help(unsigned i)
@@ -13049,8 +12685,6 @@ void bmphandler::getstack_help(unsigned i)
 		for (unsigned i = 0; i < area; i++)
 			help_bits[i] = (*it)[i];
 	}
-
-	return;
 }
 
 float* bmphandler::getstack(unsigned i, unsigned char& mode)
@@ -13065,13 +12699,16 @@ float* bmphandler::getstack(unsigned i, unsigned char& mode)
 		it1++;
 		it2++;
 	}
+
 	if (it != bits_stack.end())
 	{
 		mode = *it2;
 		return *it;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 void bmphandler::popstack_bmp()
@@ -13085,8 +12722,6 @@ void bmphandler::popstack_bmp()
 		stackindex.pop_back();
 		mode_stack.pop_back();
 	}
-
-	return;
 }
 
 void bmphandler::popstack_work()
@@ -13100,8 +12735,6 @@ void bmphandler::popstack_work()
 		stackindex.pop_back();
 		mode_stack.pop_back();
 	}
-
-	return;
 }
 
 void bmphandler::popstack_help()
@@ -13114,44 +12747,14 @@ void bmphandler::popstack_help()
 		stackindex.pop_back();
 		mode_stack.pop_back();
 	}
-
-	return;
 }
 
 bool bmphandler::isloaded() { return loaded; }
 
-/*void bmphandler::set_sliceprovider(sliceprovider<float> *sp)
-{
-	if(sp->return_area()==area){
-		if(ownsliceprovider){
-			sliceprovide->merge(sp);
-			delete sliceprovide;
-		}
-	}
-	else {
-		if(ownsliceprovider){
-			delete sliceprovide;
-		}
-		area=sp->return_area();
-		if(loaded){
-			free(bmp_bits);
-			free(work_bits);
-			free(help_bits);
-			loaded=false;
-		}
-	}
-
-	sliceprovide=sp;
-	ownsliceprovider=false;
-
-	return;
-}*/
-
 void bmphandler::clear_tissue(tissuelayers_size_t idx)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
-	for (unsigned int i = 0; i < area; i++)
-		tissues[i] = 0;
+	std::fill(tissues, tissues + area, 0);
 }
 
 bool bmphandler::has_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype)
@@ -13189,8 +12792,6 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 			}
 		//for(unsigned int i=0;i<area;i++) if(work_bits[i]==f&&tissuelocked[tissues[i]]==false) {tissues[i]=tissuetype;}
 	}
-
-	return;
 }
 
 void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
@@ -13214,8 +12815,6 @@ void bmphandler::add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype,
 			}
 		//for(unsigned int i=0;i<area;i++) if(work_bits[i]==f&&tissuelocked[tissues[i]]==false) {tissues[i]=tissuetype;}
 	}
-
-	return;
 }
 
 void bmphandler::add2tissue_connected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override)
@@ -13325,8 +12924,6 @@ void bmphandler::add2tissue_thresh(tissuelayers_size_t idx,
 	for (unsigned int i = 0; i < area; i++)
 		if (work_bits[i] >= f)
 			tissues[i] = tissuetype;
-
-	return;
 }
 
 void bmphandler::subtract_tissue(tissuelayers_size_t idx,
@@ -13334,8 +12931,6 @@ void bmphandler::subtract_tissue(tissuelayers_size_t idx,
 {
 	float f = work_pt(p);
 	subtract_tissue(idx, tissuetype, f);
-
-	return;
 }
 
 void bmphandler::subtract_tissue_connected(tissuelayers_size_t idx,
@@ -13419,22 +13014,14 @@ void bmphandler::subtract_tissue_connected(tissuelayers_size_t idx,
 	}
 
 	free(results);
-	return;
 }
 
-/*void subtract_tissueall_connected(tissues_size_t tissuetype, Point p)
-{
-}*/
-
-void bmphandler::subtract_tissue(tissuelayers_size_t idx,
-		tissues_size_t tissuetype, float f)
+void bmphandler::subtract_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f)
 {
 	tissues_size_t* tissues = tissuelayers[idx];
 	for (unsigned int i = 0; i < area; i++)
 		if (work_bits[i] == f && tissues[i] == tissuetype)
 			tissues[i] = 0;
-
-	return;
 }
 
 void bmphandler::change2mask_connectedwork(bool* mask, Point p, bool addorsub)
@@ -13516,11 +13103,9 @@ void bmphandler::change2mask_connectedwork(bool* mask, Point p, bool addorsub)
 	}
 
 	free(results);
-	return;
 }
 
-void bmphandler::change2mask_connectedtissue(tissuelayers_size_t idx,
-		bool* mask, Point p, bool addorsub)
+void bmphandler::change2mask_connectedtissue(tissuelayers_size_t idx, bool* mask, Point p, bool addorsub)
 {
 	unsigned position = pt2coord(p);
 	std::vector<int> s;
@@ -13623,16 +13208,6 @@ void bmphandler::tissue2work(tissuelayers_size_t idx)
 
 	mode2 = 2;
 }
-
-/*void bmphandler::work2tissue(tissuelayers_size_t idx)
-{
-	tissues_size_t *tissues = tissuelayers[idx];
-	for(unsigned int i=0;i<area;i++){
-		tissues[i]=(tissues_size_t)floor(work_bits[i]+0.5f);
-	}
-
-	return;
-}*/
 
 void bmphandler::cleartissue(tissuelayers_size_t idx, tissues_size_t tissuetype)
 {
