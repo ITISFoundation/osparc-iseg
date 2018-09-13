@@ -141,9 +141,17 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 			chunk_size == 0 ? std::min<hsize_t>(slice_size, giga / sizeof(T))
 							: chunk_size};
 		H5Pset_chunk(properties, rank, dim_chunks);
-		if (CompressionLevel >= 0) // if negative: disable compression
+		if (CompressionLevel > 0) // disable filter when compression <= 0
 		{
+#ifdef USE_HDF5_BLOSC
+			unsigned int cd_values[7];
+			cd_values[4] = CompressionLevel; /* compression level */
+			cd_values[5] = 1;           /* 0: shuffle not active, 1: shuffle active */
+	    	cd_values[6] = BLOSC_BLOSCLZ; /* the actual compressor to use */
+			H5Pset_filter(properties, FILTER_BLOSC, H5Z_FLAG_OPTIONAL, 7, cd_values);
+#else
 			H5Pset_deflate(properties, std::min(CompressionLevel, 9));
+#endif
 		}
 
 		/*

@@ -17,6 +17,21 @@
 #include <boost/filesystem.hpp>
 
 #include <hdf5.h>
+#ifdef USE_HDF5_BLOSC
+#include <blosc_filter.h>
+#endif
+
+
+#ifdef USE_HDF5_BLOSC
+struct RegisterBlosc
+{
+	RegisterBlosc()
+	{
+		char *version, *date;
+		static int r = register_blosc(&version, &date);
+	}
+} _init_blosc;
+#endif
 
 namespace fs = boost::filesystem;
 
@@ -173,40 +188,27 @@ int HDF5Writer::write(float** const slice_data, size_type num_slices,
 					  size_type slice_size, const std::string& name,
 					  size_t offset)
 {
-	return HDF5IO(compression)
-				   .writeData(file, name, slice_data, num_slices, slice_size,
-							  offset)
-			   ? 1
-			   : 0;
+	return HDF5IO(compression).writeData(file, name, slice_data, num_slices, slice_size, offset) ? 1 : 0;
 }
 
-int HDF5Writer::write(unsigned short** const slice_data,
-					  size_type num_slices, size_type slice_size,
-					  const std::string& name, size_t offset)
+int HDF5Writer::write(unsigned short** const slice_data, size_type num_slices, size_type slice_size, const std::string& name, size_t offset)
 {
-	return HDF5IO(compression)
-				   .writeData(file, name, slice_data, num_slices, slice_size,
-							  offset)
-			   ? 1
-			   : 0;
+	return HDF5IO(compression).writeData(file, name, slice_data, num_slices, slice_size, offset) ? 1 : 0;
 }
 
-int HDF5Writer::write(const double* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+int HDF5Writer::write(const double* data, const std::vector<size_type>& dims, const std::string& name)
 {
 	const std::string type = "double";
 	return this->writeData(data, type, dims, name);
 }
 
-int HDF5Writer::write(const float* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+int HDF5Writer::write(const float* data, const std::vector<size_type>& dims, const std::string& name)
 {
 	const std::string type = "float";
 	return this->writeData(data, type, dims, name);
 }
 
-int HDF5Writer::write(const int* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+int HDF5Writer::write(const int* data, const std::vector<size_type>& dims, const std::string& name)
 {
 	const std::string type = "int";
 	return this->writeData(data, type, dims, name);
@@ -220,8 +222,7 @@ int HDF5Writer::write(const unsigned int* data,
 	return this->writeData(data, type, dims, name);
 }
 
-int HDF5Writer::write(const long* data, const std::vector<size_type>& dims,
-					  const std::string& name)
+int HDF5Writer::write(const long* data, const std::vector<size_type>& dims, const std::string& name)
 {
 	const std::string type = "long";
 	return this->writeData(data, type, dims, name);
@@ -251,8 +252,7 @@ int HDF5Writer::write(const std::vector<int>& v, const std::string& name)
 	return this->writeData(&v[0], type, dims, name);
 }
 
-int HDF5Writer::write(const std::vector<unsigned int>& v,
-					  const std::string& name)
+int HDF5Writer::write(const std::vector<unsigned int>& v, const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -284,8 +284,7 @@ int HDF5Writer::write(const std::vector<float>& v, const std::string& name)
 	return this->writeData(&v[0], type, dims, name);
 }
 
-int HDF5Writer::write(const std::vector<unsigned char>& v,
-					  const std::string& name)
+int HDF5Writer::write(const std::vector<unsigned char>& v, const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -293,8 +292,7 @@ int HDF5Writer::write(const std::vector<unsigned char>& v,
 	return this->writeData(&v[0], type, dims, name);
 }
 
-int HDF5Writer::write(const std::vector<unsigned short>& v,
-					  const std::string& name)
+int HDF5Writer::write(const std::vector<unsigned short>& v, const std::string& name)
 {
 	std::vector<size_type> dims(1);
 	dims[0] = v.size();
@@ -302,8 +300,7 @@ int HDF5Writer::write(const std::vector<unsigned short>& v,
 	return this->writeData(&v[0], type, dims, name);
 }
 
-int HDF5Writer::write_attribute(const std::string& value,
-								const std::string& name)
+int HDF5Writer::write_attribute(const std::string& value, const std::string& name)
 {
 	int result = 0;
 
@@ -408,7 +405,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		std::cerr << "HDF5Writer::write() : error, no dataname given" << std::endl;
 		return 0;
 	}
-	hid_t datatype, plist;
+	hid_t datatype, plist = -1;
 	herr_t status;
 
 	if (file < 0)
@@ -474,25 +471,14 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 	}
 	else
 	{
-		std::cerr << "HDF5Writer::write() : error, unsupported data type"
-				  << std::endl;
-		throw std::runtime_error(
-			"HDF5Writer::write() : error, unsupported data type");
+		throw std::runtime_error("HDF5Writer::write() : error, unsupported data type");
 	}
 
 	status = H5Tset_order(datatype, H5T_ORDER_LE);
 	std::vector<hsize_t> dimsf(rank);
-	if (loud)
-	{
-		std::cerr << "HDF5Writer::write() rank = " << extents.size() << std::endl;
-	}
+	hsize_t total_size = 1;
 	for (int j = 0; j < rank; j++)
 	{
-		if (loud)
-		{
-			std::cerr << "HDF5Writer::write() extents[" << j << "] = " << extents[j]
-					  << std::endl;
-		}
 		if (ordering == "reverse" || ordering == "matlab")
 		{
 			dimsf[j] = extents[rank - 1 - j];
@@ -501,8 +487,9 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		{
 			dimsf[j] = extents[j];
 		}
+		total_size *= dimsf[j];
 	}
-	if (compression)
+	if (compression > 0 && total_size > 1024)
 	{
 		// hsize_t cdims[rank];
 		std::vector<hsize_t> cdims(rank);
@@ -537,34 +524,27 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		}
 		plist = H5Pcreate(H5P_DATASET_CREATE);
 		H5Pset_chunk(plist, rank, cdims.data());
+#ifdef USE_HDF5_BLOSC
+		unsigned int cd_values[7];
+		cd_values[4] = compression; /* compression level */
+		cd_values[5] = 1;           /* 0: shuffle not active, 1: shuffle active */
+    	cd_values[6] = BLOSC_BLOSCLZ; /* the actual compressor to use */
+		H5Pset_filter(plist, FILTER_BLOSC, H5Z_FLAG_OPTIONAL, 7, cd_values);
+#else
 		H5Pset_deflate(plist, compression);
+#endif
 	}
 	hid_t dataspace = H5Screate_simple(rank, dimsf.data(), nullptr);
 	if (dataspace >= 0)
 	{
-		hid_t dataset;
-		if (compression)
-		{
-			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT,
-								 plist, H5P_DEFAULT);
-		}
-		else
-		{
-			dataset = H5Dcreate2(file, name.c_str(), datatype, dataspace, H5P_DEFAULT,
-								 H5P_DEFAULT, H5P_DEFAULT);
-		}
+		hid_t dataset = H5Dcreate2(file, name.c_str(), 
+				datatype, dataspace, H5P_DEFAULT, plist < 0 ? H5P_DEFAULT : plist, H5P_DEFAULT);
 		if (dataset < 0)
 		{
 			ok = 0;
 		}
 		else if (dataset >= 0 && data != 0)
 		{
-			if (loud)
-			{
-				std::cerr << "HDF5Writer : writing " << name << " of type " << type
-						  << std::endl;
-			}
-
 			if (type == "double")
 			{
 				status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
@@ -630,11 +610,10 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		H5Sclose(dataspace);
 	}
 
-	if (compression)
-	{
+	if (plist >= 0)
 		H5Pclose(plist);
-	}
-	H5Tclose(datatype);
+	if (datatype >= 0)
+		H5Tclose(datatype);
 
 	return ok;
 }

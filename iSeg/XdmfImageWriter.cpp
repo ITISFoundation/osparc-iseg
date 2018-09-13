@@ -160,7 +160,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 	dims[1] = height;
 	dims[2] = nrslices;
 
-	ISEG_INFO("Writing " << width << " x " << height << " x " << nrslices);
+	ISEG_INFO("Writing " << filename << ": " << width << " x " << height << " x " << nrslices);
 
 	HDF5Writer writer;
 	writer.chunkSize.resize(1, width * height);

@@ -22,7 +22,7 @@ IF(PLUGIN_LEVELSET)
 		${MOCSrcslevel}
 	)
 
-	TARGET_LINK_LIBRARIES( Levelset.ext 
+	TARGET_LINK_LIBRARIES( Levelset.ext PRIVATE
 		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES} 

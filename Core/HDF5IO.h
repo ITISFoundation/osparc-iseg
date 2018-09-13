@@ -12,6 +12,9 @@
 #include "iSegCore.h"
 
 #include <hdf5.h>
+#ifdef USE_HDF5_BLOSC
+#include <blosc_filter.h>
+#endif
 
 #include <cstdint>
 #include <string>
