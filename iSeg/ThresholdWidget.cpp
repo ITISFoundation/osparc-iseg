@@ -18,13 +18,13 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QtGui>
-#include <qfiledialog.h>
 #include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qdialog.h>
+#include <qfiledialog.h>
 #include <qimage.h>
 #include <qinputdialog.h>
 #include <qlabel.h>
@@ -43,8 +43,8 @@
 using namespace iseg;
 
 ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
-								 const char* name, Qt::WindowFlags wFlags)
-	: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
 	setToolTip(Format("Segment tissues based on thresholding techniques."));
 
@@ -206,41 +206,41 @@ ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
 	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-					 SLOT(method_changed(int)));
+			SLOT(method_changed(int)));
 	//	QObject::connect(pushrange,SIGNAL(clicked()),this,SLOT(getrange()));
 	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
 	QObject::connect(pb_saveborders, SIGNAL(clicked()), this,
-					 SLOT(saveborders_execute()));
+			SLOT(saveborders_execute()));
 	QObject::connect(pb_loadborders, SIGNAL(clicked()), this,
-					 SLOT(loadborders_execute()));
+			SLOT(loadborders_execute()));
 	QObject::connect(sb_nrtissues, SIGNAL(valueChanged(int)), this,
-					 SLOT(nrtissues_changed(int)));
+			SLOT(nrtissues_changed(int)));
 	QObject::connect(sb_dim, SIGNAL(valueChanged(int)), this,
-					 SLOT(dim_changed(int)));
+			SLOT(dim_changed(int)));
 	QObject::connect(sb_tissuenr, SIGNAL(valueChanged(int)), this,
-					 SLOT(tissuenr_changed(int)));
+			SLOT(tissuenr_changed(int)));
 	QObject::connect(slider, SIGNAL(sliderMoved(int)), this,
-					 SLOT(slider_changed(int)));
+			SLOT(slider_changed(int)));
 	QObject::connect(slider, SIGNAL(sliderPressed()), this,
-					 SLOT(slider_pressed()));
+			SLOT(slider_pressed()));
 	QObject::connect(slider, SIGNAL(sliderReleased()), this,
-					 SLOT(slider_released()));
+			SLOT(slider_released()));
 	QObject::connect(le_borderval, SIGNAL(editingFinished()), this,
-					 SLOT(le_borderval_returnpressed()));
+			SLOT(le_borderval_returnpressed()));
 	QObject::connect(pushfilename, SIGNAL(clicked()), this,
-					 SLOT(select_pushed()));
+			SLOT(select_pushed()));
 	QObject::connect(buttonR, SIGNAL(stateChanged(int)), this,
-					 SLOT(RGBA_changed(int)));
+			SLOT(RGBA_changed(int)));
 	QObject::connect(buttonG, SIGNAL(stateChanged(int)), this,
-					 SLOT(RGBA_changed(int)));
+			SLOT(RGBA_changed(int)));
 	QObject::connect(buttonB, SIGNAL(stateChanged(int)), this,
-					 SLOT(RGBA_changed(int)));
+			SLOT(RGBA_changed(int)));
 	QObject::connect(buttonA, SIGNAL(stateChanged(int)), this,
-					 SLOT(RGBA_changed(int)));
+			SLOT(RGBA_changed(int)));
 	QObject::connect(cb_useCenterFile, SIGNAL(stateChanged(int)), this,
-					 SLOT(useCenterFile_changed(int)));
+			SLOT(useCenterFile_changed(int)));
 	QObject::connect(pushcenterFilename, SIGNAL(clicked()), this,
-					 SLOT(selectCenterFile_pushed()));
+			SLOT(selectCenterFile_pushed()));
 }
 
 ThresholdWidget::~ThresholdWidget()
@@ -284,7 +284,7 @@ void ThresholdWidget::execute()
 		bmphand->swap_bmpwork();
 
 		float* thresh1 = bmphand->find_modal((unsigned)sb_minpix->value(),
-											 0.005f * ratio->value());
+				0.005f * ratio->value());
 		if (allslices->isChecked())
 			handler3D->threshold(thresh1);
 		else
@@ -317,14 +317,14 @@ void ThresholdWidget::execute()
 				mhdfiles.push_back(std::string(filenames[i].ascii()));
 			if (allslices->isChecked())
 				handler3D->gamma_mhd(handler3D->active_slice(),
-									 (short)sb_nrtissues->value(),
-									 (short)sb_dim->value(), mhdfiles, weights,
-									 centers, tol_f, tol_d);
+						(short)sb_nrtissues->value(),
+						(short)sb_dim->value(), mhdfiles, weights,
+						centers, tol_f, tol_d);
 			else
 				bmphand->gamma_mhd(
-					(short)sb_nrtissues->value(), (short)sb_dim->value(),
-					mhdfiles, handler3D->active_slice(), weights, centers,
-					tol_f, tol_d, handler3D->get_pixelsize());
+						(short)sb_nrtissues->value(), (short)sb_dim->value(),
+						mhdfiles, handler3D->active_slice(), weights, centers,
+						tol_f, tol_d, handler3D->get_pixelsize());
 			delete[] tol_d;
 			delete[] tol_f;
 			for (int i = 0; i < sb_nrtissues->value(); i++)
@@ -339,7 +339,7 @@ void ThresholdWidget::execute()
 			if (kmeansfiles.size() > 0)
 			{
 				if (kmeansfiles[0].substr(kmeansfiles[0].find_last_of(".") +
-										  1) == "png")
+																	1) == "png")
 				{
 					std::vector<int> extractChannels;
 					if (buttonR->isChecked())
@@ -354,81 +354,56 @@ void ThresholdWidget::execute()
 						return;
 					if (allslices->isChecked())
 						handler3D->kmeans_png(
-							handler3D->active_slice(),
-							(short)sb_nrtissues->value(),
-							(short)sb_dim->value(), kmeansfiles,
-							extractChannels, weights,
-							(unsigned int)sb_iternr->value(),
-							(unsigned int)sb_converge->value(),
-							centerFilename.toStdString());
+								handler3D->active_slice(),
+								(short)sb_nrtissues->value(),
+								(short)sb_dim->value(), kmeansfiles,
+								extractChannels, weights,
+								(unsigned int)sb_iternr->value(),
+								(unsigned int)sb_converge->value(),
+								centerFilename.toStdString());
 					else
 						bmphand->kmeans_png(
-							(short)sb_nrtissues->value(),
-							(short)sb_dim->value(), kmeansfiles,
-							extractChannels, handler3D->active_slice(),
-							weights, (unsigned int)sb_iternr->value(),
-							(unsigned int)sb_converge->value(),
-							centerFilename.toStdString());
+								(short)sb_nrtissues->value(),
+								(short)sb_dim->value(), kmeansfiles,
+								extractChannels, handler3D->active_slice(),
+								weights, (unsigned int)sb_iternr->value(),
+								(unsigned int)sb_converge->value(),
+								centerFilename.toStdString());
 				}
 				else
 				{
 					if (allslices->isChecked())
 						handler3D->kmeans_mhd(
-							handler3D->active_slice(),
-							(short)sb_nrtissues->value(),
-							(short)sb_dim->value(), kmeansfiles, weights,
-							(unsigned int)sb_iternr->value(),
-							(unsigned int)sb_converge->value());
+								handler3D->active_slice(),
+								(short)sb_nrtissues->value(),
+								(short)sb_dim->value(), kmeansfiles, weights,
+								(unsigned int)sb_iternr->value(),
+								(unsigned int)sb_converge->value());
 					else
 						bmphand->kmeans_mhd((short)sb_nrtissues->value(),
-											(short)sb_dim->value(), kmeansfiles,
-											handler3D->active_slice(),
-											weights,
-											(unsigned int)sb_iternr->value(),
-											(unsigned int)sb_converge->value());
+								(short)sb_dim->value(), kmeansfiles,
+								handler3D->active_slice(),
+								weights,
+								(unsigned int)sb_iternr->value(),
+								(unsigned int)sb_converge->value());
 				}
 			}
 			else
 			{
 				if (allslices->isChecked())
 					handler3D->kmeans_mhd(
-						handler3D->active_slice(),
-						(short)sb_nrtissues->value(), (short)sb_dim->value(),
-						kmeansfiles, weights, (unsigned int)sb_iternr->value(),
-						(unsigned int)sb_converge->value());
+							handler3D->active_slice(),
+							(short)sb_nrtissues->value(), (short)sb_dim->value(),
+							kmeansfiles, weights, (unsigned int)sb_iternr->value(),
+							(unsigned int)sb_converge->value());
 				else
 					bmphand->kmeans_mhd((short)sb_nrtissues->value(),
-										(short)sb_dim->value(), kmeansfiles,
-										handler3D->active_slice(), weights,
-										(unsigned int)sb_iternr->value(),
-										(unsigned int)sb_converge->value());
+							(short)sb_dim->value(), kmeansfiles,
+							handler3D->active_slice(), weights,
+							(unsigned int)sb_iternr->value(),
+							(unsigned int)sb_converge->value());
 			}
 		}
-
-		//		unsigned w=bmphand->return_width();
-		//		unsigned h=bmphand->return_height();
-		//		float *slice1=new float[(unsigned long)124*164];
-		//		MHDreader::getSclice("C:\\Documents and Settings\\michael\\Desktop\\example3d.mhd",slice1,1,124,164);
-		//		delete[] slice1;
-		//		return;
-		//
-		////		k_means kmeans;
-		//		for(int i=0;i<sb_dim->value();i++){
-		//			if(i==0) bits[i]=bmphand->return_bmp();
-		////			else bits[i]=bmphand->getstack(i,modedummy);
-		//			else bits[i]=bmphand->getstack(bmphand->getfirststackindexxxxxxxxx(),modedummy);
-		////xxx			//if(bits1[i]==0)
-		//			//	bits[i]=bmphand->return_bmp();
-		//			//else
-		//			//	bits[i]=bmphand->getstack(bits1[i],modedummy);
-		//		}
-		////		kmeans.init(bmphand->return_width(),bmphand->return_height(),sb_nrtissues->value(),sb_dim->value(),bits,weights);
-		////		kmeans.make_iter(sb_iternr->value(),sb_converge->value());
-		////		kmeans.return_m(bmphand->return_work());
-		//		if(allslices->isChecked())
-		//			handler3D->kmeans(handler3D->get_activeslice(),(short)sb_nrtissues->value(),(unsigned int)sb_iternr->value(),(unsigned int)sb_converge->value());
-		//		else
-		//			bmphand->kmeans((short)sb_nrtissues->value(),(short)sb_dim->value(),bits,weights,(unsigned int)sb_iternr->value(),(unsigned int)sb_converge->value());
 	}
 	else
 	{
@@ -440,18 +415,16 @@ void ThresholdWidget::execute()
 			else
 				bits[i] = bmphand->getstack(bits1[i], modedummy);
 		}
-		//		em.init(bmphand->return_width(),bmphand->return_height(),sb_nrtissues->value(),sb_dim->value(),bits,weights);
-		//		em.make_iter(sb_iternr->value(),sb_converge->value());
-		//		em.classify(bmphand->return_work());
+
 		if (allslices->isChecked())
 			handler3D->em(handler3D->active_slice(),
-						  (short)sb_nrtissues->value(),
-						  (unsigned int)sb_iternr->value(),
-						  (unsigned int)sb_converge->value());
+					(short)sb_nrtissues->value(),
+					(unsigned int)sb_iternr->value(),
+					(unsigned int)sb_converge->value());
 		else
 			bmphand->em((short)sb_nrtissues->value(), (short)sb_dim->value(),
-						bits, weights, (unsigned int)sb_iternr->value(),
-						(unsigned int)sb_converge->value());
+					bits, weights, (unsigned int)sb_iternr->value(),
+					(unsigned int)sb_converge->value());
 	}
 
 	emit end_datachange(this);
@@ -489,7 +462,7 @@ void ThresholdWidget::method_changed(int)
 		txt_slider->setText("Thresh: ");
 		txt_tissuenr->setText("Limit-Nr: ");
 		le_borderval->setText(
-			QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+				QString::number(threshs[sb_tissuenr->value()], 'g', 3));
 		le_borderval->show();
 		txt_lower->show();
 		txt_upper->show();
@@ -594,10 +567,10 @@ void ThresholdWidget::getrange()
 	if (rb_manual->isOn())
 	{
 		int i = int((threshs[sb_tissuenr->value()] - lower) * 200 /
-					(upper - lower));
+								(upper - lower));
 		slider->setValue(i);
 		le_borderval->setText(
-			QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+				QString::number(threshs[sb_tissuenr->value()], 'g', 3));
 	}
 
 	return;
@@ -608,7 +581,7 @@ void ThresholdWidget::on_tissuenr_changed(int newval)
 	if (rb_manual->isOn())
 	{
 		slider->setValue(
-			int(200 * (threshs[newval] - lower) / (upper - lower)));
+				int(200 * (threshs[newval] - lower) / (upper - lower)));
 		le_borderval->setText(QString::number(threshs[newval], 'g', 3));
 	}
 	else if (rb_kmeans->isOn() || rb_EM->isOn())
@@ -713,9 +686,9 @@ void ThresholdWidget::slider_changed(int newval)
 	if (rb_manual->isOn())
 	{
 		threshs[sb_tissuenr->value()] =
-			newval * 0.005f * (upper - lower) + lower;
+				newval * 0.005f * (upper - lower) + lower;
 		le_borderval->setText(
-			QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+				QString::number(threshs[sb_tissuenr->value()], 'g', 3));
 
 		if (allslices->isChecked())
 			handler3D->threshold(threshs);
@@ -813,10 +786,10 @@ void ThresholdWidget::le_borderval_returnpressed()
 				threshs[sb_tissuenr->value()] = val;
 
 			int i = int((threshs[sb_tissuenr->value()] - lower) * 200 /
-						(upper - lower));
+									(upper - lower));
 			slider->setValue(i);
 			le_borderval->setText(
-				QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+					QString::number(threshs[sb_tissuenr->value()], 'g', 3));
 
 			iseg::DataSelection dataSelection;
 			dataSelection.allSlices = allslices->isChecked();
@@ -836,14 +809,14 @@ void ThresholdWidget::le_borderval_returnpressed()
 	{
 		QApplication::beep();
 		le_borderval->setText(
-			QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+				QString::number(threshs[sb_tissuenr->value()], 'g', 3));
 	}
 }
 
 void ThresholdWidget::saveborders_execute()
 {
 	QString savefilename = QFileDialog::getSaveFileName(
-		QString::null, "Boarders (*.txt)\n", this); //, filename);
+			QString::null, "Boarders (*.txt)\n", this); //, filename);
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
@@ -862,10 +835,10 @@ void ThresholdWidget::loadborders_execute()
 	if (rb_manual->isOn())
 	{
 		QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-										  "Boarders (*.txt)\n"
-										  "All(*.*)",
-										  this);
+				QFileDialog::getOpenFileName(QString::null,
+						"Boarders (*.txt)\n"
+						"All(*.*)",
+						this);
 
 		if (!loadfilename.isEmpty())
 		{
@@ -898,7 +871,7 @@ void ThresholdWidget::loadborders_execute()
 				}
 				sb_tissuenr->setValue(1);
 				slider->setValue(
-					int(200 * (threshs[1] - lower) / (upper - lower)));
+						int(200 * (threshs[1] - lower) / (upper - lower)));
 				le_borderval->setText(QString::number(threshs[1], 'g', 3));
 			}
 		}
@@ -961,19 +934,19 @@ FILE* ThresholdWidget::LoadParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		QObject::disconnect(sb_nrtissues, SIGNAL(valueChanged(int)), this,
-							SLOT(nrtissues_changed(int)));
+				SLOT(nrtissues_changed(int)));
 		QObject::disconnect(sb_dim, SIGNAL(valueChanged(int)), this,
-							SLOT(dim_changed(int)));
+				SLOT(dim_changed(int)));
 		QObject::disconnect(sb_tissuenr, SIGNAL(valueChanged(int)), this,
-							SLOT(tissuenr_changed(int)));
+				SLOT(tissuenr_changed(int)));
 		QObject::disconnect(slider, SIGNAL(sliderMoved(int)), this,
-							SLOT(slider_changed(int)));
+				SLOT(slider_changed(int)));
 		QObject::disconnect(le_borderval, SIGNAL(returnPressed()), this,
-							SLOT(le_borderval_returnpressed()));
+				SLOT(le_borderval_returnpressed()));
 		QObject::disconnect(subsect, SIGNAL(clicked()), this,
-							SLOT(subsect_toggled()));
+				SLOT(subsect_toggled()));
 		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-							SLOT(method_changed(int)));
+				SLOT(method_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -1028,19 +1001,19 @@ FILE* ThresholdWidget::LoadParams(FILE* fp, int version)
 		on_tissuenr_changed(dummy);
 
 		QObject::connect(subsect, SIGNAL(clicked()), this,
-						 SLOT(subsect_toggled()));
+				SLOT(subsect_toggled()));
 		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-						 SLOT(method_changed(int)));
+				SLOT(method_changed(int)));
 		QObject::connect(sb_nrtissues, SIGNAL(valueChanged(int)), this,
-						 SLOT(nrtissues_changed(int)));
+				SLOT(nrtissues_changed(int)));
 		QObject::connect(sb_dim, SIGNAL(valueChanged(int)), this,
-						 SLOT(dim_changed(int)));
+				SLOT(dim_changed(int)));
 		QObject::connect(sb_tissuenr, SIGNAL(valueChanged(int)), this,
-						 SLOT(tissuenr_changed(int)));
+				SLOT(tissuenr_changed(int)));
 		QObject::connect(slider, SIGNAL(sliderMoved(int)), this,
-						 SLOT(slider_changed(int)));
+				SLOT(slider_changed(int)));
 		QObject::connect(le_borderval, SIGNAL(returnPressed()), this,
-						 SLOT(le_borderval_returnpressed()));
+				SLOT(le_borderval_returnpressed()));
 	}
 	return fp;
 }
@@ -1050,11 +1023,11 @@ void ThresholdWidget::hideparams_changed() { method_changed(0); }
 void ThresholdWidget::select_pushed()
 {
 	QString loadfilename = QFileDialog::getOpenFileName(
-		QString::null,
-		"Images (*.png)\n"
-		"Images (*.mhd)\n"
-		"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
-		this);		//, filename);
+			QString::null,
+			"Images (*.png)\n"
+			"Images (*.mhd)\n"
+			"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
+			this);			//, filename);
 	le_filename->setText(loadfilename);
 	filenames[sb_tissuenr->value() - 2] = loadfilename;
 
@@ -1085,7 +1058,7 @@ void ThresholdWidget::select_pushed()
 void ThresholdWidget::selectCenterFile_pushed()
 {
 	centerFilename = QFileDialog::getOpenFileName(QString::null,
-												   "Text File (*.txt*)", this);
+			"Text File (*.txt*)", this);
 	le_centerFilename->setText(centerFilename);
 }
 
@@ -1093,7 +1066,7 @@ void ThresholdWidget::RGBA_changed(int change)
 {
 	int buttonsChecked = 0;
 	buttonsChecked = buttonR->isChecked() + buttonG->isChecked() +
-					 buttonB->isChecked() + buttonA->isChecked();
+									 buttonB->isChecked() + buttonA->isChecked();
 	sb_dim->setValue(buttonsChecked + 1);
 
 	if (buttonsChecked > 0)

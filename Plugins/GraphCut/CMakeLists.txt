@@ -30,7 +30,7 @@ IF(PLUGIN_GRAPHCUT)
 		${MOCSrcsext})
 
 	# todo check libs in linker command
-	TARGET_LINK_LIBRARIES( GraphCut.ext
+	TARGET_LINK_LIBRARIES( GraphCut.ext PRIVATE
 		iSegData
 		iSegInterface
 		Gc 

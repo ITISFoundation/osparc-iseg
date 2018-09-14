@@ -24,7 +24,7 @@ IF(PLUGIN_TRACE_TUBES)
 		${MOCSrcsbias}
 	)
 	
-	TARGET_LINK_LIBRARIES( TraceTubesWidget.ext 
+	TARGET_LINK_LIBRARIES( TraceTubesWidget.ext PRIVATE
 		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}

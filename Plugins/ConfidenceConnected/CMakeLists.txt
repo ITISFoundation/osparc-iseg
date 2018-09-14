@@ -19,7 +19,7 @@ IF(PLUGIN_CONFIDENCE)
 		${MOCSrcscon}
 	)
 
-	TARGET_LINK_LIBRARIES( Confidence.ext 
+	TARGET_LINK_LIBRARIES( Confidence.ext PRIVATE
 		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}

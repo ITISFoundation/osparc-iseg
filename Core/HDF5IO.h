@@ -12,6 +12,9 @@
 #include "iSegCore.h"
 
 #include <hdf5.h>
+#ifdef USE_HDF5_BLOSC
+#include <blosc_filter.h>
+#endif
 
 #include <cstdint>
 #include <string>
@@ -40,12 +43,12 @@ public:
 
 	template<typename T>
 	bool readData(handle_id_type file_id, const std::string& name,
-				  size_t arg_offset, size_t arg_length, T* data_out);
+			size_t arg_offset, size_t arg_length, T* data_out);
 
 	template<typename T>
 	bool writeData(handle_id_type file_id, const std::string& name,
-				   T** const slice_data, size_t num_slices, size_t slice_size,
-				   size_t offset = 0);
+			T** const slice_data, size_t num_slices, size_t slice_size,
+			size_t offset = 0);
 
 	static std::string dumpErrorStack();
 

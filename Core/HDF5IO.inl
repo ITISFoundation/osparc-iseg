@@ -38,19 +38,19 @@ HDF5IO::handle_id_type HDF5IO::getTypeValue()
 
 template<typename T>
 bool HDF5IO::readData(handle_id_type file, const std::string& name,
-					  size_t arg_offset, size_t arg_length, T* data_out)
+		size_t arg_offset, size_t arg_length, T* data_out)
 {
 	hid_t dataset; /* handles */
 	hid_t datatype, dataspace;
 	hid_t memspace;
 
-	hsize_t dimsm[1];	/* memory space dimensions */
+	hsize_t dimsm[1];		 /* memory space dimensions */
 	hsize_t dims_out[1]; /* dataset dimensions */
 	herr_t status;
 
-	hsize_t offset_in[1];  /* size of the hyperslab in the file */
-	hsize_t count[1];	  /* size of the hyperslab in the file */
-	hsize_t count_out[1];  /* size of the hyperslab in memory */
+	hsize_t offset_in[1];	/* size of the hyperslab in the file */
+	hsize_t count[1];			 /* size of the hyperslab in the file */
+	hsize_t count_out[1];	/* size of the hyperslab in memory */
 	hsize_t offset_out[1]; /* size of the hyperslab in memory */
 	int status_n, rank;
 
@@ -76,7 +76,7 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 	offset_in[0] = arg_offset;
 	count[0] = arg_length;
 	status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset_in, NULL,
-								 count, NULL);
+			count, NULL);
 
 	/*
 		* Define the memory dataspace.
@@ -90,14 +90,14 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 	offset_out[0] = 0;
 	count_out[0] = arg_length;
 	status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
-								 count_out, NULL);
+			count_out, NULL);
 
 	/*
 		* Read data from hyperslab in the file into the hyperslab in
 		* memory and display.
 		*/
 	status = H5Dread(dataset, getTypeValue<T>(), memspace, dataspace,
-					 H5P_DEFAULT, data_out);
+			H5P_DEFAULT, data_out);
 
 	H5Tclose(datatype);
 	H5Dclose(dataset);
@@ -109,47 +109,46 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 
 template<typename T>
 bool HDF5IO::writeData(handle_id_type file, const std::string& name,
-					   T** const slice_data, size_t num_slices,
-					   size_t slice_size, size_t offset)
+		T** const slice_data, size_t num_slices,
+		size_t slice_size, size_t offset)
 {
 	hid_t properties = -1, datatype = -1;
 	hid_t dataspace = -1, dataset = -1;
 	herr_t status = 0;
 
-	/*
-		* Create a new dataset within the file using defined dataspace and
-		* datatype and default dataset creation properties.
-		*/
+	// Create a new dataset within the file using defined dataspace and
+	// datatype and default dataset creation properties.
 	if (H5Lexists(file, name.c_str(), H5P_DEFAULT) <= 0)
 	{
-		/*
-			* Describe the size of the array and create the data space for fixed
-			* size dataset.
-			*/
+		// Describe the size of the array and create the data space for fixed
+		// size dataset.
 		int rank = 1;
 		hsize_t dimsf[1] = {num_slices * slice_size};
 		dataspace = H5Screate_simple(rank, dimsf, 0);
 
-		/*
-			* Modify dataset creation properties by enable chunking and gzip compression
-			*/
+		// Modify dataset creation properties by enable chunking and gzip compression
 		properties = H5Pcreate(H5P_DATASET_CREATE);
 
+		// Limit chunk size to 1GB, not sure if a much smaller number would be better
 		hsize_t const mega = 1024 * 1024;
 		hsize_t const giga = 1024 * mega;
-		hsize_t dim_chunks[1] = {
-			chunk_size == 0 ? std::min<hsize_t>(slice_size, giga / sizeof(T))
-							: chunk_size};
+		hsize_t dim_chunks[1] = {chunk_size == 0 ? std::min(slice_size, giga / sizeof(T)) : chunk_size};
 		H5Pset_chunk(properties, rank, dim_chunks);
-		if (CompressionLevel >= 0) // if negative: disable compression
+		if (CompressionLevel > 0) // disable filter when compression <= 0
 		{
+#ifdef USE_HDF5_BLOSC
+			unsigned int cd_values[7];
+			cd_values[4] = CompressionLevel; /* compression level */
+			cd_values[5] = 1;           /* 0: shuffle not active, 1: shuffle active */
+	    	cd_values[6] = BLOSC_BLOSCLZ; /* the actual compressor to use */
+			H5Pset_filter(properties, FILTER_BLOSC, H5Z_FLAG_OPTIONAL, 7, cd_values);
+#else
 			H5Pset_deflate(properties, std::min(CompressionLevel, 9));
+#endif
 		}
 
-		/*
-			* Define datatype for the data in the file.
-			* We will store little endian numbers.
-			*/
+		// Define datatype for the data in the file.
+		// We will store little endian numbers.
 		datatype = H5Tcopy(getTypeValue<T>());
 		status = H5Tset_order(datatype, H5T_ORDER_LE);
 
@@ -175,33 +174,28 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 			hsize_t dim_offset[1] = {current_offset};
 			hsize_t dim_slab[1] = {slice_size};
 
-			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset,
-										 0, dim_slab, 0);
+			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset, 0, dim_slab, 0);
 			if (status >= 0)
 			{
 				status = H5Sselect_valid(dataspace);
 				if (status >= 0)
 				{
 					int mem_rank = 1;
-					hsize_t dim_mem[1] = {slice_size};
-					//We create the dataspace in the memory
+					hsize_t dim_mem[1] = {dim_slab[0]};
+					// We create the dataspace in the memory
 					hid_t memspace = H5Screate_simple(mem_rank, dim_mem, 0);
 					if (memspace >= 0)
 					{
-						//We select the slab in memory
+						// We select the slab in memory
 						hsize_t dim_memoffset[1] = {0};
-						hsize_t dim_memslab[1] = {slice_size};
-						status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET,
-													 dim_memoffset, 0,
-													 dim_memslab, 0);
+						hsize_t dim_memslab[1] = {dim_slab[0]};
+						status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, dim_memoffset, 0, dim_memslab, 0);
 						if (status >= 0)
 						{
 							status = H5Sselect_valid(memspace);
 							if (status >= 0)
 							{
-								status = H5Dwrite(dataset, getTypeValue<T>(),
-												  memspace, dataspace,
-												  H5P_DEFAULT, slice_data[i]);
+								status = H5Dwrite(dataset, getTypeValue<T>(), memspace, dataspace, H5P_DEFAULT, slice_data[i]);
 							}
 						}
 
@@ -212,9 +206,7 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 		}
 	}
 
-	/*
-		* Close/release resources.
-		*/
+	// Close/release resources.
 	if (dataspace >= 0)
 		H5Sclose(dataspace);
 	if (dataset >= 0)

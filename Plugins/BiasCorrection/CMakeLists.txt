@@ -19,7 +19,7 @@ IF(PLUGIN_BIAS)
 		${MOCSrcs}
 	)
 	
-	TARGET_LINK_LIBRARIES( BiasCorrection.ext 
+	TARGET_LINK_LIBRARIES( BiasCorrection.ext PRIVATE
 		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}

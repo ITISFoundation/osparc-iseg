@@ -484,7 +484,7 @@ int XdmfImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
 									 (size_t)this->NumberOfSlices;
-	ISEG_INFO("Reading " << Width << " x " << Height << " x " << NumberOfSlices);
+	ISEG_INFO("Reading " << this->FileName << ": " << Width << " x " << Height << " x " << NumberOfSlices);
 
 	QString qFileName(this->FileName);
 	QFileInfo fileInfo(qFileName);
@@ -624,7 +624,7 @@ int HDFImageReader::Read()
 {
 	const size_t N = (size_t)this->Width * (size_t)this->Height *
 									 (size_t)this->NumberOfSlices;
-	ISEG_INFO("Reading " << Width << " x " << Height << " x " << NumberOfSlices);
+	ISEG_INFO("Reading " << this->FileName << ": " << Width << " x " << Height << " x " << NumberOfSlices);
 
 	//	vector<int> dims;
 
