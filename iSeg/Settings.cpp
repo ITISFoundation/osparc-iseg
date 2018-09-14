@@ -15,6 +15,8 @@
 #include "MainWindow.h"
 #include "SlicesHandler.h"
 
+#include "../Core/HDF5Blosc.h"
+
 #include <cassert>
 #include <iostream>
 
@@ -30,6 +32,7 @@ Settings::Settings(QWidget* parent)
 		mainWindow->handler3D->GetCompression());
 	this->ui->checkBoxContiguousMemory->setChecked(
 		mainWindow->handler3D->GetContiguousMemory());
+	this->ui->checkBoxEnableBlosc->setChecked(BloscEnabled());
 }
 
 Settings::~Settings() { delete ui; }
@@ -41,6 +44,8 @@ void Settings::accept()
 		this->ui->spinBoxCompression->value());
 	mainWindow->handler3D->SetContiguousMemory(
 		this->ui->checkBoxContiguousMemory->isChecked());
+	SetBloscEnabled(this->ui->checkBoxEnableBlosc->isChecked());
+
 	mainWindow->SaveSettings();
 	this->hide();
 }

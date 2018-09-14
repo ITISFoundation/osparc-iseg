@@ -24,6 +24,7 @@ SET(SOURCES
 	ExpectationMaximization.cpp
 	FeatureExtractor.cpp
 	fillcontour.cpp
+	HDF5Blosc.cpp
 	HDF5IO.cpp
 	HDF5Reader.cpp
 	HDF5Writer.cpp

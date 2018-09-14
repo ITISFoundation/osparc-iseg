@@ -16,10 +16,10 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="spinBoxCompression">
-       <property name="toolTip">
-        <string>Compression refers to gzip compression of image arrays in the HDF5 file. Zero ('0') is no compression, '9' is maximum compression.</string>
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelContiguousMemory">
+       <property name="text">
+        <string>Contiguous Memory IO</string>
        </property>
       </widget>
      </item>
@@ -33,6 +33,13 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="spinBoxCompression">
+       <property name="toolTip">
+        <string>Compression refers to gzip compression of image arrays in the HDF5 file. Zero ('0') is no compression, '9' is maximum compression.</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="labelCompression">
        <property name="text">
@@ -40,10 +47,17 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="labelContiguousMemory">
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="checkBoxEnableBlosc">
        <property name="text">
-        <string>Contiguous Memory IO</string>
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelEnableBlosc">
+       <property name="text">
+        <string>Enable Blosc HDF5 Compression</string>
        </property>
       </widget>
      </item>

@@ -55,6 +55,7 @@
 
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
+#include "Core/HDF5Blosc.h"
 
 #include <boost/filesystem.hpp>
 
@@ -3311,12 +3312,11 @@ void MainWindow::SaveSettings()
 	settings.beginGroup("MainWindow");
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("state", saveState());
-	settings.setValue("NumberOfUndoSteps",
-			this->handler3D->GetNumberOfUndoSteps());
-	settings.setValue("NumberOfUndoArrays",
-			this->handler3D->GetNumberOfUndoArrays());
+	settings.setValue("NumberOfUndoSteps", this->handler3D->GetNumberOfUndoSteps());
+	settings.setValue("NumberOfUndoArrays", this->handler3D->GetNumberOfUndoArrays());
 	settings.setValue("Compression", this->handler3D->GetCompression());
 	settings.setValue("ContiguousMemory", this->handler3D->GetContiguousMemory());
+	settings.setValue("BloscEnabled", BloscEnabled());
 	settings.endGroup();
 	settings.sync();
 }
@@ -3393,8 +3393,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	execute_showtabtoggled(flag);
 
 	fp = TissueInfos::LoadTissues(fp, tissuesVersion);
-	const char* defaultTissuesFilename =
-			m_tmppath.absFilePath(QString("def_tissues.txt"));
+	const char* defaultTissuesFilename = m_tmppath.absFilePath(QString("def_tissues.txt"));
 	FILE* fpTmp = fopen(defaultTissuesFilename, "r");
 	if (fpTmp != nullptr || TissueInfos::GetTissueCount() <= 0)
 	{
@@ -3442,6 +3441,8 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		ISEG_INFO("Compression = " << this->handler3D->GetCompression());
 		this->handler3D->SetContiguousMemory(settings.value("ContiguousMemory", true).toBool());
 		ISEG_INFO("ContiguousMemory = " << this->handler3D->GetContiguousMemory());
+		SetBloscEnabled(settings.value("BloscEnabled", false).toBool());
+		ISEG_INFO("BloscEnabled = " << BloscEnabled());
 		settings.endGroup();
 
 		if (this->handler3D->return_nrundo() == 0)
