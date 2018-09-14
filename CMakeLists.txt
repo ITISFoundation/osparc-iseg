@@ -27,6 +27,7 @@ LIST( APPEND ISEG_CMAKE_FILES_INCLUDES
 	${CMAKE_SOURCE_DIR}/CMake/PrecompiledHeaderSupport.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyBoost.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyHDF5.cmake
+	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyBlosc.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyITK.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyQT4.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyVTK.cmake

@@ -25,6 +25,7 @@ IF(ISEG_BUILD_TESTING)
 	ADD_LIBRARY(TestSuite_iSegCore ${SOURCES} ${HEADERS})
 	TARGET_LINK_LIBRARIES(TestSuite_iSegCore
 		iSegCore
+		iSegData
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
 	VS_SET_PROPERTY(TestSuite_iSegCore "TestSuite")
