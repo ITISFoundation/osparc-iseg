@@ -11,6 +11,7 @@
 
 #include "HDF5IO.h"
 #include "HDF5Writer.h"
+#include "HDF5Blosc.h"
 #include "Log.h"
 
 #include <boost/algorithm/string.hpp>
@@ -510,14 +511,19 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		plist = H5Pcreate(H5P_DATASET_CREATE);
 		H5Pset_chunk(plist, rank, cdims.data());
 #ifdef USE_HDF5_BLOSC
-		unsigned int cd_values[7];
-		cd_values[4] = compression; /* compression level */
-		cd_values[5] = 1;           /* 0: shuffle not active, 1: shuffle active */
-    	cd_values[6] = BLOSC_BLOSCLZ; /* the actual compressor to use */
-		H5Pset_filter(plist, FILTER_BLOSC, H5Z_FLAG_OPTIONAL, 7, cd_values);
-#else
-		H5Pset_deflate(plist, compression);
+		if (BloscEnabled())
+		{
+			unsigned int cd_values[7];
+			cd_values[4] = compression; /* compression level */
+			cd_values[5] = 1;           /* 0: shuffle not active, 1: shuffle active */
+    		cd_values[6] = BLOSC_BLOSCLZ; /* the actual compressor to use */
+			H5Pset_filter(plist, FILTER_BLOSC, H5Z_FLAG_OPTIONAL, 7, cd_values);
+		}
+		else
 #endif
+		{
+			H5Pset_deflate(plist, compression);
+		}
 	}
 
 	hid_t dataspace = H5Screate_simple(rank, dimsf.data(), nullptr);
