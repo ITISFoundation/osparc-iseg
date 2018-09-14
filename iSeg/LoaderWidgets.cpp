@@ -42,10 +42,14 @@
 #include <QMouseEvent>
 #include <QPainter>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
+
+namespace algo = boost::algorithm;
+namespace fs = boost::filesystem;
 
 LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
 		bool breload, QWidget* parent, const char* name,
@@ -114,15 +118,13 @@ LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
 
 	if (!lnames->empty())
 	{
-		vector<const char*> vnames;
-		for (QStringList::iterator it = lnames->begin(); it != lnames->end();
-				 it++)
+		std::vector<const char*> vnames;
+		for (auto it = lnames->begin(); it != lnames->end(); it++)
 		{
 			vnames.push_back((*it).ascii());
 		}
 		dicomseriesnr.clear();
-		handler3D->GetDICOMseriesnr(&vnames, &dicomseriesnr,
-				&dicomseriesnrlist);
+		handler3D->GetDICOMseriesnr(&vnames, &dicomseriesnr, &dicomseriesnrlist);
 		if (dicomseriesnr.size() > 1)
 		{
 			hbox6 = new Q3HBox(vbox1);
@@ -204,16 +206,14 @@ void LoaderDicom::load_pushed()
 {
 	if (!lnames->empty())
 	{
-		vector<const char*> vnames;
+		std::vector<const char*> vnames;
 		unsigned pos = 0;
 
 		if (dicomseriesnr.size() > 1)
 		{
-			for (QStringList::iterator it = lnames->begin();
-					 it != lnames->end(); it++)
+			for (auto it = lnames->begin(); it != lnames->end(); it++)
 			{
-				if (dicomseriesnrlist[pos] ==
-						dicomseriesnr[seriesnrselection->currentItem()])
+				if (dicomseriesnrlist[pos] == dicomseriesnr[seriesnrselection->currentItem()])
 				{
 					vnames.push_back((*it).ascii());
 				}
@@ -222,8 +222,7 @@ void LoaderDicom::load_pushed()
 		}
 		else
 		{
-			for (QStringList::iterator it = lnames->begin();
-					 it != lnames->end(); it++)
+			for (auto it = lnames->begin(); it != lnames->end(); it++)
 				vnames.push_back((*it).ascii());
 		}
 
@@ -1059,7 +1058,25 @@ void LoaderColorImages::load_pushed()
 
 void LoaderColorImages::load_quantize()
 {
-	QString filename = QFileDialog::getOpenFileName(QString::null,
+	QString initialDir = QString::null;
+
+	auto lut_path = boost::dll::program_location().parent_path() / fs::path("lut");
+	if (fs::exists(lut_path))
+	{
+		fs::directory_iterator dir_itr(lut_path);
+		fs::directory_iterator end_iter;
+		for (; dir_itr != end_iter; ++dir_itr)
+		{
+			fs::path lut_file(dir_itr->path());
+			if (algo::iends_with(lut_file.string(), ".lut"))
+			{
+				initialDir = QString::fromStdString(lut_file.parent_path().string());
+				break;
+			}
+		}
+	}
+
+	QString filename = QFileDialog::getOpenFileName(initialDir,
 			"iSEG Color Lookup Table (*.lut *.h5)\nAll(*.*)", this);
 	if (!filename.isEmpty())
 	{
@@ -1230,7 +1247,7 @@ void ClickableLabel::paintEvent(QPaintEvent* e)
 	painter.drawPath(square);
 }
 
-ChannelMixer::ChannelMixer(vector<const char*> filenames, QWidget* parent,
+ChannelMixer::ChannelMixer(std::vector<const char*> filenames, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags), m_filenames(filenames)
 {
@@ -1610,7 +1627,7 @@ void ChannelMixer::RefreshSourceImage()
 			squareWidth = 300;
 		else
 		{
-			squareWidth = min(imageSourceWidth / 3, imageSourceHeight / 3);
+			squareWidth = std::min(imageSourceWidth / 3, imageSourceHeight / 3);
 		}
 
 		widthPV = heightPV = squareWidth;
@@ -1622,9 +1639,7 @@ void ChannelMixer::RefreshSourceImage()
 		int smallImageCenterY = smallImageHeight / 2;
 		int smallImageCenterSquareHalfSide = squareWidth / scaledFactor / 2;
 		smallImageCenterSquareHalfSide = 0;
-		imageSourceLabel->SetCenter(
-				QPoint(smallImageCenterX,
-						smallImageCenterY + smallImageCenterSquareHalfSide));
+		imageSourceLabel->SetCenter(QPoint(smallImageCenterX, smallImageCenterY + smallImageCenterSquareHalfSide));
 	}
 
 	RefreshImage();
@@ -1713,7 +1728,7 @@ void ChannelMixer::load_pushed()
 	close();
 }
 
-ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, vector<const char*> filenames,
+ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, TRUE, wFlags)
@@ -1887,3 +1902,5 @@ int SupportedMultiDatasetTypes::GetSelectedType()
 	}
 	return -1;
 }
+
+} // namespace iseg
