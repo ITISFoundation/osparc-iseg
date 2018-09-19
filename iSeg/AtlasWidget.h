@@ -12,6 +12,8 @@
 
 #include "WidgetCollection.h"
 
+#include "AtlasViewer.h"
+
 #include "Data/Point.h"
 
 #include "Core/Pair.h"
@@ -35,7 +37,8 @@
 
 #include <vector>
 
-#include "AtlasViewer.h"
+class QHBoxLayout;
+class QVBoxLayout;
 
 namespace iseg {
 
@@ -43,36 +46,36 @@ class AtlasWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasWidget(const char *filename, QDir picpath, QWidget *parent = 0,
-			const char *name = 0, Qt::WindowFlags wFlags = 0);
+	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = 0,
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasWidget();
 	bool isOK;
 
 private:
-	QLabel *lb_contrast;
-	QLabel *lb_brightness;
-	QLabel *lb_transp;
-	QLabel *lb_name;
-	QSlider *sl_contrast;
-	QSlider *sl_brightness;
-	QSlider *sl_transp;
-	AtlasViewer *atlasViewer;
-	QScrollArea *sa_viewer;
-	ZoomWidget *zoomer;
-	QScrollBar *scb_slicenr;
-	QButtonGroup *bg_orient;
-	QRadioButton *rb_x;
-	QRadioButton *rb_y;
-	QRadioButton *rb_z;
-	QHBoxLayout *hbox1;
-	QHBoxLayout *hbox2;
-	QHBoxLayout *hbox3;
-	QVBoxLayout *vbox1;
+	QLabel* lb_contrast;
+	QLabel* lb_brightness;
+	QLabel* lb_transp;
+	QLabel* lb_name;
+	QSlider* sl_contrast;
+	QSlider* sl_brightness;
+	QSlider* sl_transp;
+	AtlasViewer* atlasViewer;
+	QScrollArea* sa_viewer;
+	ZoomWidget* zoomer;
+	QScrollBar* scb_slicenr;
+	QButtonGroup* bg_orient;
+	QRadioButton* rb_x;
+	QRadioButton* rb_y;
+	QRadioButton* rb_z;
+	QHBoxLayout* hbox1;
+	QHBoxLayout* hbox2;
+	QHBoxLayout* hbox3;
+	QVBoxLayout* vbox1;
 
-	bool loadfile(const char *filename);
+	bool loadfile(const char* filename);
 
-	float *image;
-	tissues_size_t *tissue;
+	float* image;
+	tissues_size_t* tissue;
 	float minval, maxval;
 	float dx, dy, dz;
 	unsigned short dimx, dimy, dimz;

@@ -470,10 +470,8 @@ bool TissueInfos::SaveTissuesHDF(const char* filename,
 		ISEG_ERROR_MSG("writing rgbo");
 	}
 
-	TissueInfosVecType::iterator vecIt;
 	int counter = 1;
-	for (vecIt = tissueInfosVector.begin() + 1;
-			 vecIt != tissueInfosVector.end(); ++vecIt)
+	for (auto vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		std::string tissuename1 = vecIt->name;
 		boost::replace_all(tissuename1, "\\", "_");

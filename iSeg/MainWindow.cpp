@@ -37,6 +37,7 @@
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
+#include "TissueTreeWidget.h"
 #include "TransformWidget.h"
 #include "UndoConfigurationDialog.h"
 #include "VesselWidget.h"
