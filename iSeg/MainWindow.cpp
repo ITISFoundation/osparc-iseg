@@ -37,6 +37,7 @@
 #include "ThresholdWidget.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
+#include "TissueTreeWidget.h"
 #include "TransformWidget.h"
 #include "UndoConfigurationDialog.h"
 #include "VesselWidget.h"
@@ -53,9 +54,9 @@
 
 #include "Data/Transform.h"
 
+#include "Core/HDF5Blosc.h"
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
-#include "Core/HDF5Blosc.h"
 
 #include <boost/filesystem.hpp>
 
@@ -76,6 +77,8 @@
 
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
+
+#define UNREFERENCED_PARAMETER(P) (P)
 
 using namespace iseg;
 
@@ -1054,6 +1057,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 															 Qt::RightDockWidgetArea);
 	tissuewdock->setWidget(vboxtissuew);
 	addDockWidget(Qt::RightDockWidgetArea, tissuewdock);
+	tissuesDock = tissuewdock;
 
 	QDockWidget* tissuehierarchydock =
 			new QDockWidget(tr("Tissue Hierarchy"), this);
@@ -2375,7 +2379,7 @@ void MainWindow::execute_loadbmp()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();
@@ -2422,7 +2426,7 @@ void MainWindow::execute_loadpng()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		int nrelem = files.size();
 		std::vector<const char*> vfilenames;
@@ -2462,7 +2466,7 @@ void MainWindow::execute_loadjpg()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();
@@ -2738,7 +2742,7 @@ void MainWindow::execute_reloadbmp()
 			(unsigned short)files.size() ==
 					(handler3D->end_slice() - handler3D->start_slice()))
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();
@@ -5791,6 +5795,34 @@ void MainWindow::do_work2tissue_grouped()
 	}
 }
 
+void MainWindow::randomize_colors()
+{
+	const float golden_ratio_conjugate = 0.618033988749895f;
+
+	if (!tissueTreeWidget->selectedItems().empty())
+	{
+		static Color random = Color(0.1f, 0.9f, 0.1f);
+		float h, s, l;
+		for (auto item : tissueTreeWidget->selectedItems())
+		{
+			tissues_size_t label = tissueTreeWidget->get_type(item);
+
+			std::tie(h, s, l) = random.toHSL();
+
+			// See http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+			h += golden_ratio_conjugate;
+			h = std::fmod(h, 1.0f);
+
+			random = Color::fromHSL(h, s, l);
+			TissueInfos::SetTissueColor(label, random.r, random.g, random.b);
+		}
+
+		tissueTreeWidget->update_tissue_icons();
+	}
+
+	update_tissue();
+}
+
 void MainWindow::tissueFilterChanged(const QString& text)
 {
 	tissueTreeWidget->set_tissue_filter(text);
@@ -6030,9 +6062,9 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 
 	if (TissueInfos::GetTissueCount() == 0)
 	{
-		TissueInfoStruct tissueInfo;
+		TissueInfo tissueInfo;
 		tissueInfo.name = "Tissue1";
-		tissueInfo.SetColor(1.0f, 0.0f, 0.1f);
+		tissueInfo.color = Color(1.0f, 0.0f, 0.1f);
 		TissueInfos::AddTissue(tissueInfo);
 
 		// Insert new tissue in hierarchy
@@ -6545,6 +6577,8 @@ void MainWindow::tissue_selection_changed()
 		updateTabvisibility();
 	}
 
+	tissuesDock->setWindowTitle(QString("Tissues (%1)").arg(list.size()));
+
 	if (list.size() > 0)
 	{
 		tissuenr_changed((int)tissueTreeWidget->get_current_type() - 1);
@@ -6587,10 +6621,8 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 			contextMenu.insertSeparator();
 			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
 			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Folder...", this,
-					SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Folder...", this,
-					SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("Mod. Folder...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Folder...", this, SLOT(removeTissueFolderPressed()));
 		}
 		else
 		{
@@ -6598,16 +6630,13 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 			contextMenu.insertSeparator();
 			contextMenu.insertItem("New Tissue...", this, SLOT(newTissuePressed()));
 			contextMenu.insertItem("New Folder...", this, SLOT(newFolderPressed()));
-			contextMenu.insertItem("Mod. Tissue...", this,
-					SLOT(modifTissueFolderPressed()));
-			contextMenu.insertItem("Del. Tissue...", this,
-					SLOT(removeTissueFolderPressed()));
+			contextMenu.insertItem("Mod. Tissue...", this, SLOT(modifTissueFolderPressed()));
+			contextMenu.insertItem("Del. Tissue...", this, SLOT(removeTissueFolderPressed()));
 			contextMenu.insertSeparator();
 			contextMenu.insertItem("Get Tissue", this, SLOT(tissue2work()));
 			contextMenu.insertItem("Clear Tissue", this, SLOT(cleartissue()));
 			contextMenu.insertSeparator();
-			contextMenu.insertItem("Next Feat. Slice", this,
-					SLOT(next_featuring_slice()));
+			contextMenu.insertItem("Next Feat. Slice", this, SLOT(next_featuring_slice()));
 		}
 	}
 	else // multi-selection
@@ -6618,10 +6647,14 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 		contextMenu.insertItem("Clear Selected", this, SLOT(clearselected()));
 		contextMenu.insertItem("Get Selected", this, SLOT(selectedtissue2work()));
 		contextMenu.insertItem("Merge", this, SLOT(merge()));
-		contextMenu.insertItem("Unselect All", this, SLOT(unselectall()));
 	}
 
-	contextMenu.insertItem("View Tissue Surface", this, SLOT(execute_selectedtissue_surfaceviewer()));
+	if (list.size() > 0)
+	{
+		contextMenu.insertItem("Unselect All", this, SLOT(unselectall()));
+		contextMenu.insertItem("Assign Random Colors", this, SLOT(randomize_colors()));
+		contextMenu.insertItem("View Tissue Surface", this, SLOT(execute_selectedtissue_surfaceviewer()));
+	}
 	contextMenu.insertSeparator();
 	int itemId = contextMenu.insertItem("Show Tissue Indices", tissueTreeWidget, SLOT(toggle_show_tissue_indices()));
 	contextMenu.setItemChecked(itemId, !tissueTreeWidget->get_tissue_indices_hidden());

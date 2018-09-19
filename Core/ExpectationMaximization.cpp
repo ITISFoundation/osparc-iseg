@@ -16,13 +16,10 @@
 #include <cstdlib>
 #include <iostream>
 
-using namespace std;
-using namespace iseg;
-
-#define UNREFERENCED_PARAMETER(P) (P)
+namespace iseg {
 
 void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
-								   short dimension, float** bit, float* weight)
+		short dimension, float** bit, float* weight)
 {
 	width = wi;
 	height = h;
@@ -45,8 +42,8 @@ void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nr
 }
 
 void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
-								   short dimension, float** bit, float* weight, float* center,
-								   float* dev, float* ampl)
+		short dimension, float** bit, float* weight, float* center,
+		float* dev, float* ampl)
 {
 	width = wi;
 	height = h;
@@ -97,9 +94,8 @@ void ExpectationMaximization::classify(float* result_bits)
 	return;
 }
 
-void ExpectationMaximization::apply_to(float** sources, float* result_bits)
+void ExpectationMaximization::apply_to(float** /* sources */, float* result_bits)
 {
-	UNREFERENCED_PARAMETER(sources);
 	float dist, wmax, wdummy;
 	short unsigned cindex;
 	short dummy;
@@ -111,7 +107,7 @@ void ExpectationMaximization::apply_to(float** sources, float* result_bits)
 		for (short n = 0; n < dim; n++)
 		{
 			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
-					weights[n];
+							weights[n];
 		}
 		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
 		cindex = dim;
@@ -121,7 +117,7 @@ void ExpectationMaximization::apply_to(float** sources, float* result_bits)
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (bits[n][i] - centers[cindex]) *
-						(bits[n][i] - centers[cindex]) * weights[n];
+								(bits[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
@@ -169,8 +165,8 @@ void ExpectationMaximization::recompute_centers()
 				for (short k = 0; k < dim; k++)
 				{
 					devs[i] += w[j + area * i] *
-							   (bits[k][j] - centers[k + i * dim]) *
-							   (bits[k][j] - centers[k + i * dim]) * weights[k];
+										 (bits[k][j] - centers[k + i * dim]) *
+										 (bits[k][j] - centers[k + i * dim]) * weights[k];
 				}
 			}
 			devs[i] /= sw[i];
@@ -204,7 +200,7 @@ unsigned ExpectationMaximization::recompute_membership()
 		for (short n = 0; n < dim; n++)
 		{
 			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
-					weights[n];
+							weights[n];
 		}
 		//		wsum=wmax=w[i]=exp(-dist/(2*devs[0]))/sqrt(devs[0])*ampls[0];
 		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
@@ -217,7 +213,7 @@ unsigned ExpectationMaximization::recompute_membership()
 			for (short n = 0; n < dim; n++)
 			{
 				dist += (bits[n][i] - centers[cindex]) *
-						(bits[n][i] - centers[cindex]) * weights[n];
+								(bits[n][i] - centers[cindex]) * weights[n];
 				cindex++;
 			}
 			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
@@ -280,7 +276,6 @@ void ExpectationMaximization::init_centers()
 
 	recompute_centers();
 
-	//	for(short i=0;i<nrclasses;i++) devs[i]=float(width)/nrclasses;
 	for (short i = 0; i < nrclasses; i++)
 		ampls[i] = 1.0f / nrclasses;
 
@@ -297,7 +292,6 @@ void ExpectationMaximization::init_centers_rand()
 		for (short k = 0; k < dim; k++)
 		{
 			centers[i + k * dim] = bits[k][j];
-			//			cout << j << "-"<<centers[i+k*dim] << ":";
 		}
 	}
 
@@ -349,3 +343,5 @@ ExpectationMaximization::~ExpectationMaximization()
 	free(ampls);
 	return;
 }
+
+} // namespace iseg

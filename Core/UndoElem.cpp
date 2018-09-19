@@ -14,8 +14,7 @@
 #include <cstdlib>
 #include <vector>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 UndoElem::UndoElem()
 {
@@ -110,17 +109,17 @@ void UndoElem::merge(UndoElem* ue)
 		dataSelection.CombineSelection(ue->dataSelection);
 	}
 	/*	if(bmp_new!=nullptr) free(bmp_new);
-	if(work_new!=nullptr) free(work_new);
-	if(tissue_new!=nullptr) free(tissue_new);
-	bmp_new=ue->bmp_new;
-	work_new=ue->work_new;
-	tissue_new=ue->tissue_new;
-	vvm_new.clear();
-	limits_new.clear();
-	marks_new.clear();
-	vvm_new=ue->vvm_new;
-	limits_new=ue->limits_new;
-	marks_new=ue->marks_new;*/
+		if(work_new!=nullptr) free(work_new);
+		if(tissue_new!=nullptr) free(tissue_new);
+		bmp_new=ue->bmp_new;
+		work_new=ue->work_new;
+		tissue_new=ue->tissue_new;
+		vvm_new.clear();
+		limits_new.clear();
+		marks_new.clear();
+		vvm_new=ue->vvm_new;
+		limits_new=ue->limits_new;
+		marks_new=ue->marks_new;*/
 }
 
 unsigned UndoElem::arraynr()
@@ -148,8 +147,8 @@ MultiUndoElem::MultiUndoElem() { multi = true; }
 
 MultiUndoElem::~MultiUndoElem()
 {
-	vector<float*>::iterator itf;
-	vector<tissues_size_t*>::iterator it8;
+	std::vector<float*>::iterator itf;
+	std::vector<tissues_size_t*>::iterator it8;
 
 	for (itf = vbmp_old.begin(); itf != vbmp_old.end(); itf++)
 		free(*itf);
@@ -187,3 +186,5 @@ unsigned MultiUndoElem::arraynr()
 
 	return i * vslicenr.size();
 }
+
+} // namespace iseg

@@ -16,8 +16,6 @@
 #include <algorithm>
 #include <functional>
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 namespace iseg {
 
 struct coef
@@ -29,11 +27,12 @@ struct coef
 
 inline bool operator!=(coef c, unsigned short f) { return c.a != f; }
 
-template<typename T> class ImageForestingTransform
+template<typename T>
+class ImageForestingTransform
 {
 public:
 	void IFTinit(unsigned short w, unsigned short h, float* E_bit,
-				 float* directivity_bit, T* lbl, bool connectivity)
+			float* directivity_bit, T* lbl, bool connectivity)
 	{
 		width = w;
 		height = h;
@@ -51,8 +50,6 @@ public:
 		}
 
 		reinit(lbl, E_bit, connectivity);
-
-		return;
 	}
 	void reinit(T* lbl, bool connectivity)
 	{
@@ -99,8 +96,6 @@ public:
 					update_step(position, position + width + 1, 225);
 			}
 		}
-
-		return;
 	}
 	void reinit(T* lbl, bool connectivity, std::vector<unsigned> pts)
 	{
@@ -156,8 +151,6 @@ public:
 		}
 
 		Q->clear();
-
-		return;
 	}
 	void reinit(T* lbl, float* E_bit, bool connectivity)
 	{
@@ -170,11 +163,8 @@ public:
 		}
 
 		reinit(lbl, connectivity);
-
-		return;
 	}
-	void reinit(T* lbl, float* E_bit, bool connectivity,
-				std::vector<unsigned> pts)
+	void reinit(T* lbl, float* E_bit, bool connectivity, std::vector<unsigned> pts)
 	{
 		if (E_bits != E_bit)
 		{
@@ -185,12 +175,8 @@ public:
 		}
 
 		reinit(lbl, connectivity, pts);
-
-		return;
 	}
 	float* return_pf() { return pf; }
-	//		float *return_E() {return E_bits;};
-	//		float *return_directivity() {return directivity_bits;};
 	T* return_lb() { return lb; }
 	void return_path(Point p, std::vector<Point>* Pt_vec)
 	{
@@ -204,8 +190,6 @@ public:
 			p1.py = pos / width;
 			Pt_vec->push_back(p1);
 		}
-
-		return;
 	}
 	void return_path(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
@@ -216,8 +200,6 @@ public:
 		{
 			Pt_vec->push_back(pos);
 		}
-
-		return;
 	}
 	void append_path(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
@@ -239,8 +221,6 @@ public:
 		free(E_bits);
 		free(directivity_bits);
 		free(Q);
-
-		return;
 	}
 
 protected:
@@ -281,51 +261,41 @@ private:
 	virtual inline void compute_lb(unsigned p, unsigned q)
 	{
 		lb[q] = lb[p];
-		UNREFERENCED_PARAMETER(p);
-		UNREFERENCED_PARAMETER(q);
-		return;
 	}
 	virtual inline void recompute_lb(unsigned p, unsigned q)
 	{
 		lb[q] = lb[p];
-		UNREFERENCED_PARAMETER(p);
-		UNREFERENCED_PARAMETER(q);
-		return;
 	}
 	virtual inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
-		UNREFERENCED_PARAMETER(p);
-		UNREFERENCED_PARAMETER(q);
-		UNREFERENCED_PARAMETER(direction);
 		return 1;
 	}
 };
 
 class ImageForestingTransformRegionGrowing
-	: public ImageForestingTransform<float>
+		: public ImageForestingTransform<float>
 {
 public:
 	void rg_init(unsigned short w, unsigned short h, float* gradient,
-				 float* lbl)
+			float* lbl)
 	{
 		IFTinit(w, h, gradient, gradient, lbl, false);
 		return;
 	}
 
 private:
-	inline float compute_pf(unsigned p, unsigned q, float direction)
+	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		UNREFERENCED_PARAMETER(direction);
 		return std::max(pf[p], std::abs(E_bits[p] - E_bits[q]));
 	}
 };
 
 class ImageForestingTransformLivewire
-	: public ImageForestingTransform<unsigned short>
+		: public ImageForestingTransform<unsigned short>
 {
 public:
 	void lw_init(unsigned short w, unsigned short h, float* E_bits,
-				 float* direction, Point p)
+			float* direction, Point p)
 	{
 		lbl = (unsigned short*)malloc((unsigned)w * h * sizeof(unsigned short));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
@@ -359,12 +329,12 @@ private:
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
 		return E_bits[q] + pf[p] +
-			   (abs(direction + directivity_bits[p] -
-					floor((direction + directivity_bits[p]) / 180) * 180 - 90) +
-				abs(direction + directivity_bits[q] -
-					floor((direction + directivity_bits[q]) / 180) * 180 -
-					90)) *
-				   0.14f / 270;
+					 (abs(direction + directivity_bits[p] -
+								floor((direction + directivity_bits[p]) / 180) * 180 - 90) +
+							 abs(direction + directivity_bits[q] -
+									 floor((direction + directivity_bits[q]) / 180) * 180 -
+									 90)) *
+							 0.14f / 270;
 	}
 };
 
@@ -372,20 +342,17 @@ class ImageForestingTransformAdaptFuzzy : public ImageForestingTransform<float>
 {
 public:
 	void fuzzy_init(unsigned short w, unsigned short h, float* E_bits, Point p,
-					float fm1, float fs1, float fs2)
+			float fm1, float fs1, float fs2)
 	{
 		m1 = 2 * fm1;
 		s1 = -1 / (fs1 * fs1 * 8);
 		s2 = -1 / (fs2 * 2);
-		//			float f;
 		lbl = (float*)malloc((unsigned)w * h * sizeof(float));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
 			lbl[i] = 0;
 		pt = p.px + p.py * (unsigned)w;
 		lbl[pt] = 1;
-		//			IFTinit(w,h,E_bits,&f,lbl,false);
 		IFTinit(w, h, E_bits, E_bits, lbl, false);
-		return;
 	}
 	void change_pt(Point p)
 	{
@@ -408,11 +375,10 @@ private:
 	unsigned pt;
 	float m1, s1, s2;
 	float* lbl;
-	inline float compute_pf(unsigned p, unsigned q, float direction)
+	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		UNREFERENCED_PARAMETER(direction);
 		float h1 = exp((E_bits[p] + E_bits[q] - m1) *
-					   (E_bits[p] + E_bits[q] - m1) * s1);
+									 (E_bits[p] + E_bits[q] - m1) * s1);
 		float h2 = exp((E_bits[p] - E_bits[q]) * (E_bits[p] - E_bits[q]) * s2);
 		return std::max(pf[p], 1 - (h1 * h1 + h2 * h2) / (h1 + h2));
 	}
@@ -422,7 +388,7 @@ class ImageForestingTransformFastMarching : public ImageForestingTransform<coef>
 {
 public:
 	void fastmarch_init(unsigned short w, unsigned short h, float* E_bits,
-						float* lbl)
+			float* lbl)
 	{
 		Ebits = (float*)malloc((unsigned)w * h * sizeof(float));
 		lb1 = (coef*)malloc((unsigned)w * h * sizeof(coef));
@@ -442,8 +408,6 @@ public:
 			}
 			lb1[i].b = lb1[i].c = 0;
 		}
-		//			float f;
-		//			IFTinit(w,h,Ebits,&f,lb1,false);
 		IFTinit(w, h, Ebits, Ebits, lb1, false);
 		return;
 	}
@@ -456,28 +420,21 @@ public:
 private:
 	float* Ebits;
 	coef* lb1;
-	inline float compute_pf(unsigned p, unsigned q, float direction)
+	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		UNREFERENCED_PARAMETER(direction);
 		(lb[q].a)++;
 		lb[q].b += pf[p];
 		lb[q].c += pf[p] * pf[p];
 		float f = (lb[q].b +
-				   sqrt(lb[q].b * lb[q].b + E_bits[q] - lb[q].a * lb[q].c)) /
-				  (lb[q].a);
-		//			cout << f << " ";
+									sqrt(lb[q].b * lb[q].b + E_bits[q] - lb[q].a * lb[q].c)) /
+							(lb[q].a);
 		return f;
-		//			return (lb[q].b+sqrt(lb[q].b*lb[q].b+E_bits[q]-lb[q].a*lb[q].c))/(lb[q].a);
 	}
 	inline void compute_lb(unsigned p, unsigned q)
 	{
-		UNREFERENCED_PARAMETER(p);
-		UNREFERENCED_PARAMETER(q);
 	}
 	inline void recompute_lb(unsigned p, unsigned q)
 	{
-		UNREFERENCED_PARAMETER(p);
-		UNREFERENCED_PARAMETER(q);
 	}
 };
 
@@ -507,18 +464,10 @@ public:
 				if (lbl[i] == f && lbl[i1] != f)
 				{
 					lbel[i].a = 1;
-					/*						if(float(k)!=lbel[i].b) cout << "a1";
-												if(float(j)!=lbel[i].c) cout << "a2";
-												lbel[i].b=float(k);
-												lbel[i].c=float(j);*/
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
 					lbel[i1].a = 1;
-					/*						if(float(k)!=lbel[i1].b) cout << "a3";
-												if(float(j+1)!=lbel[i1].c) cout << "a4";
-												lbel[i1].b=float(k);
-												lbel[i1].c=float(j+1);*/
 				}
 				i++;
 				i1++;
@@ -533,18 +482,10 @@ public:
 				if (lbl[i] == f && lbl[i1] != f)
 				{
 					lbel[i].a = 1;
-					/*						if(float(k)!=lbel[i].b) cout << "b1";
-												if(float(j)!=lbel[i].c) cout << "b2";
-												lbel[i].b=float(k);
-												lbel[i].c=float(j);*/
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
 					lbel[i1].a = 1;
-					/*						if(float(k+1)!=lbel[i1].b) cout << "b3"<<i<<":"<<float(k+1)-lbel[i1].b<<" ";
-												if(float(j)!=lbel[i1].c) cout << "b4";
-												lbel[i1].b=float(k+1);
-												lbel[i1].c=float(j);*/
 				}
 				i++;
 				i1++;
@@ -562,13 +503,11 @@ public:
 private:
 	float* Ebits;
 	coef* lbel;
-	inline float compute_pf(unsigned p, unsigned q, float direction)
+	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		UNREFERENCED_PARAMETER(direction);
 		float x = float(q % width);
 		float y = float(q / width);
-		return sqrt((x - lb[p].b) * (x - lb[p].b) +
-					(y - lb[p].c) * (y - lb[p].c));
+		return sqrt((x - lb[p].b) * (x - lb[p].b) + (y - lb[p].c) * (y - lb[p].c));
 	}
 	inline void compute_lb(unsigned p, unsigned q)
 	{

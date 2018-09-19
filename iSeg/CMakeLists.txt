@@ -74,6 +74,7 @@ SET(ViewerSrcs
 	TissueHierarchy.cpp
 	TissueInfos.cpp
 	TissueLayerInfos.cpp
+	TissueTreeWidget.cpp
 	TransformWidget.cpp
 	UndoConfigurationDialog.cpp
 	VesselWidget.cpp
@@ -115,6 +116,7 @@ SET(MyMocHeaders
 	SliceViewerWidget.h
 	SmoothingWidget.h
 	SurfaceViewerWidget.h
+	TissueTreeWidget.h
 	ThresholdWidget.h
 	TransformWidget.h
 	UndoConfigurationDialog.h

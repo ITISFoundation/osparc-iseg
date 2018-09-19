@@ -408,7 +408,7 @@ void SurfaceViewerWidget::build_lookuptable()
 	{
 		for (unsigned int i = startLabel; i <= endLabel; i++)
 		{
-			std::array<float,3> tissuecolor = {0.f, 0.f, 0.f};
+			Color tissuecolor;
 			if (index_tissue_map.count(i) != 0)
 			{
 				tissuecolor = TissueInfos::GetTissueColor(index_tissue_map.at(i));
