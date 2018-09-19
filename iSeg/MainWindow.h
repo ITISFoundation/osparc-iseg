@@ -33,6 +33,7 @@ class QSlider;
 class QTreeWidgetItem;
 class QSignalMapper;
 class QCloseEvent;
+class QDockWidget;
 
 class QStackedWidget;
 class QScrollBar;
@@ -194,6 +195,7 @@ private:
 	Q3PopupMenu* saveactiveslicesmenu;
 	Q3PopupMenu* hidemenu;
 	Q3PopupMenu* hidesubmenu;
+	QDockWidget* tissuesDock;
 	TissueTreeWidget* tissueTreeWidget; // Widget visualizing the tissue hierarchy
 	QLineEdit* tissueFilter;
 	TissueHierarchyWidget* tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
@@ -471,6 +473,7 @@ private slots:
 	void subtract_tissue_shortkey();
 	void subtracthold_tissue_pushed();
 	//	void add_tissue_3D_pushed();
+	void randomize_colors();
 	void tissueFilterChanged(const QString&);
 	void newTissuePressed();
 	void newFolderPressed();
