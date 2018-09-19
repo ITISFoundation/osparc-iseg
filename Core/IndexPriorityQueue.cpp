@@ -11,8 +11,7 @@
 
 #include "IndexPriorityQueue.h"
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 IndexPriorityQueue::IndexPriorityQueue(unsigned size2, float* valuemap1)
 {
@@ -23,7 +22,6 @@ IndexPriorityQueue::IndexPriorityQueue(unsigned size2, float* valuemap1)
 	valuemap = valuemap1;
 	l = 0;
 	size1 = size2;
-	return;
 }
 
 void IndexPriorityQueue::clear()
@@ -32,7 +30,6 @@ void IndexPriorityQueue::clear()
 		indexmap[Q[i]] = -1;
 	Q.clear();
 	l = 0;
-	return;
 }
 
 unsigned IndexPriorityQueue::pop()
@@ -112,8 +109,6 @@ void IndexPriorityQueue::insert(unsigned pos, float value)
 	}
 	else
 		change(pos, value);
-
-	return;
 }
 
 void IndexPriorityQueue::insert(unsigned pos)
@@ -143,7 +138,6 @@ void IndexPriorityQueue::insert(unsigned pos)
 
 		l++;
 	}
-	return;
 }
 
 void IndexPriorityQueue::remove(unsigned pos)
@@ -176,7 +170,7 @@ void IndexPriorityQueue::remove(unsigned pos)
 				if ((child + 1) >= l)
 					break;
 				if ((child + 2) < l &&
-					valuemap[Q[child]] > valuemap[Q[child + 1]])
+						valuemap[Q[child]] > valuemap[Q[child + 1]])
 					child++;
 				if (val > valuemap[Q[child]])
 				{
@@ -202,7 +196,6 @@ void IndexPriorityQueue::remove(unsigned pos)
 			Q.pop_back();
 		}
 	}
-	return;
 }
 
 void IndexPriorityQueue::change(unsigned pos, float value)
@@ -246,8 +239,6 @@ void IndexPriorityQueue::change(unsigned pos, float value)
 		Q[test_node] = pos;
 		indexmap[pos] = test_node;
 	}
-
-	return;
 }
 
 void IndexPriorityQueue::make_smaller(unsigned pos, float value)
@@ -274,8 +265,6 @@ void IndexPriorityQueue::make_smaller(unsigned pos, float value)
 		Q[test_node] = pos;
 		indexmap[pos] = test_node;
 	}
-
-	return;
 }
 
 void IndexPriorityQueue::make_larger(unsigned pos, float value)
@@ -306,15 +295,13 @@ void IndexPriorityQueue::make_larger(unsigned pos, float value)
 		Q[test_node] = pos;
 		indexmap[pos] = test_node;
 	}
-
-	return;
 }
 
 void IndexPriorityQueue::print_queue()
 {
-	for (vector<unsigned>::iterator it = Q.begin(); it != Q.end(); it++)
-		cout << valuemap[*it] << ", ";
-	cout << "." << endl;
+	for (auto it = Q.begin(); it != Q.end(); it++)
+		std::cout << valuemap[*it] << ", ";
+	std::cout << "." << std::endl;
 }
 
 bool IndexPriorityQueue::empty() { return l == 0; }
@@ -327,3 +314,5 @@ IndexPriorityQueue::~IndexPriorityQueue()
 }
 
 unsigned IndexPriorityQueue::size() { return l; }
+
+} // namespace iseg

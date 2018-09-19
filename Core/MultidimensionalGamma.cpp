@@ -11,19 +11,14 @@
 
 #include "MultidimensionalGamma.h"
 
-#include <algorithm>
-#include <cstdlib>
-#include <vector>
-
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 MultidimensionalGamma::MultidimensionalGamma() { m = nullptr; }
 
 void MultidimensionalGamma::init(short unsigned w, short unsigned h,
-								 short nrclass, short dimension, float** bit,
-								 float* weight, float** centers1, float* tol_f1,
-								 float* tol_d1, float dx1, float dy1)
+		short nrclass, short dimension, float** bit,
+		float* weight, float** centers1, float* tol_f1,
+		float* tol_d1, float dx1, float dy1)
 {
 	width = w;
 	height = h;
@@ -70,16 +65,16 @@ void MultidimensionalGamma::execute()
 		for (unsigned i = 0; i < area; i++)
 		{
 			val = (bits[0][i] - centers[classnr][0]) *
-				  (bits[0][i] - centers[classnr][0]) * weights[0] * weights[0] /
-				  (tol_f[0] * tol_f[0]);
+						(bits[0][i] - centers[classnr][0]) * weights[0] * weights[0] /
+						(tol_f[0] * tol_f[0]);
 			for (short dimnr = 1; dimnr < dim; dimnr++)
 			{
 				float factor1 =
-					tol_f[dimnr] * tol_f[dimnr] / (tol_d[dimnr] * tol_d[dimnr]);
+						tol_f[dimnr] * tol_f[dimnr] / (tol_d[dimnr] * tol_d[dimnr]);
 				float minvaldim = (bits[dimnr][i] - centers[classnr][dimnr]) *
-								  (bits[dimnr][i] - centers[classnr][dimnr]);
+													(bits[dimnr][i] - centers[classnr][dimnr]);
 				float dummy = (bits[dimnr][i] - centers[classnr][dimnr]) *
-							  tol_d[dimnr] / tol_f[dimnr];
+											tol_d[dimnr] / tol_f[dimnr];
 				if (dummy < 0)
 					dummy = -dummy;
 				if (dummy > 3 * tol_d[dimnr])
@@ -97,9 +92,9 @@ void MultidimensionalGamma::execute()
 					for (int nx = nxmin; nx < nxmax; nx++)
 					{
 						float valdim =
-							(bits[dimnr][j] - centers[classnr][dimnr]) *
-								(bits[dimnr][j] - centers[classnr][dimnr]) +
-							factor1 * (nx * nx + ny * ny);
+								(bits[dimnr][j] - centers[classnr][dimnr]) *
+										(bits[dimnr][j] - centers[classnr][dimnr]) +
+								factor1 * (nx * nx + ny * ny);
 						if (valdim < minvaldim)
 							minvaldim = valdim;
 						j++;
@@ -107,7 +102,7 @@ void MultidimensionalGamma::execute()
 					j += width + nxmin - nxmax;
 				}
 				val += minvaldim * weights[dimnr] * weights[dimnr] /
-					   (tol_f[dimnr] * tol_f[dimnr]);
+							 (tol_f[dimnr] * tol_f[dimnr]);
 			}
 			if (val < minvals[i])
 			{
@@ -117,3 +112,5 @@ void MultidimensionalGamma::execute()
 		}
 	}
 }
+
+} // namespace iseg

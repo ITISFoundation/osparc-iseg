@@ -78,6 +78,8 @@
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace iseg;
 
 namespace {
@@ -2377,7 +2379,7 @@ void MainWindow::execute_loadbmp()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();
@@ -2424,7 +2426,7 @@ void MainWindow::execute_loadpng()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		int nrelem = files.size();
 		std::vector<const char*> vfilenames;
@@ -2464,7 +2466,7 @@ void MainWindow::execute_loadjpg()
 
 	if (!files.empty())
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();
@@ -2740,7 +2742,7 @@ void MainWindow::execute_reloadbmp()
 			(unsigned short)files.size() ==
 					(handler3D->end_slice() - handler3D->start_slice()))
 	{
-		std::sort(files.begin(), files.end());
+		files.sort();
 
 		std::vector<int> vi;
 		vi.clear();

@@ -16,9 +16,9 @@
 #include "Data/Point.h"
 #include "Data/Types.h"
 
+#include <cstdio>
 #include <map>
 #include <set>
-#include <stdio.h>
 #include <vector>
 
 namespace iseg {

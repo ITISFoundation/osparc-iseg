@@ -11,8 +11,7 @@
 
 #include "UndoQueue.h"
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 UndoQueue::UndoQueue()
 {
@@ -184,7 +183,7 @@ void UndoQueue::set_nrundo(unsigned nr)
 			delete undos[(first + nrin) % nrundo];
 		}
 
-		vector<UndoElem*> vue;
+		std::vector<UndoElem*> vue;
 		vue.clear();
 		vue.insert(vue.begin(), undos.begin(), undos.end());
 
@@ -205,5 +204,7 @@ void UndoQueue::reverse_undosliceorder(unsigned short nrslices)
 {
 	for (unsigned i = 0; i < nrin; i++)
 		undos[i]->dataSelection.sliceNr =
-			nrslices - 1 - undos[i]->dataSelection.sliceNr;
+				nrslices - 1 - undos[i]->dataSelection.sliceNr;
 }
+
+} // namespace iseg

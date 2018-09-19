@@ -35,6 +35,8 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace std;
 using namespace iseg;
 

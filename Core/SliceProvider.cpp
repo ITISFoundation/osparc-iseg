@@ -13,8 +13,7 @@
 
 #include <cstdlib>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 SliceProvider::SliceProvider(unsigned area1) { area = area1; }
 
@@ -88,15 +87,7 @@ bool SliceProviderInstaller::unused() { return counter == 0; }
 
 SliceProvider* SliceProviderInstaller::install(unsigned area1)
 {
-	/*	FILE *fp1=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-	fprintf(fp1,"E %u",(unsigned)&splist);
-	fclose(fp1);*/
-
-	list<spobj>::iterator it = splist.begin();
-
-	/*	fp1=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-	fprintf(fp1,"E1");
-	fclose(fp1);*/
+	auto it = splist.begin();
 
 	while (it != splist.end() && (it->area != area1))
 		it++;
@@ -119,7 +110,7 @@ SliceProvider* SliceProviderInstaller::install(unsigned area1)
 
 void SliceProviderInstaller::uninstall(SliceProvider* sp)
 {
-	list<spobj>::iterator it = splist.begin();
+	auto it = splist.begin();
 	while (it != splist.end() && (it->area != sp->return_area()))
 		it++;
 
@@ -136,7 +127,7 @@ void SliceProviderInstaller::uninstall(SliceProvider* sp)
 
 SliceProviderInstaller::~SliceProviderInstaller()
 {
-	for (list<spobj>::iterator it = splist.begin(); it != splist.end(); it++)
+	for (auto it = splist.begin(); it != splist.end(); it++)
 	{
 		free(it->spp);
 	}
@@ -173,3 +164,5 @@ void SliceProviderInstaller::report() const
 	}
 	std::cerr << "Debug:-------------------\n";
 }
+
+} // namespace iseg
