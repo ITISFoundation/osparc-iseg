@@ -1433,16 +1433,17 @@ int SlicesHandler::ReloadImage(const char* filename, unsigned short slicenr)
 	Transform transform1;
 	if (ImageReader::getInfo(filename, w, h, nrofslices, spacing1, transform1))
 	{
-		if ((w != _width) || (h != _height) ||
-				(_endslice - _startslice + slicenr > nrofslices))
+		if ((w != _width) || (h != _height) || (_endslice + slicenr - _startslice > nrofslices))
+		{
 			return 0;
+		}
+
 		std::vector<float*> slices(_endslice - _startslice);
 		for (unsigned i = _startslice; i < _endslice; i++)
 		{
 			slices[i - _startslice] = _image_slices[i].return_bmp();
 		}
-		ImageReader::getVolume(filename, slices.data(), slicenr,
-				_endslice - _startslice, _width, _height);
+		ImageReader::getVolume(filename, slices.data(), slicenr, _endslice - _startslice, _width, _height);
 		return 1;
 	}
 	return 0;
@@ -4690,7 +4691,7 @@ FILE* SlicesHandler::save_contoursection(FILE* fp, unsigned startslice1, unsigne
 FILE* SlicesHandler::save_tissuenamescolors(FILE* fp)
 {
 	tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-	TissueInfoStruct* tissueInfo;
+	TissueInfo* tissueInfo;
 
 	fprintf(fp, "NT%u\n", tissueCount);
 
@@ -6753,7 +6754,7 @@ int SlicesHandler::extract_tissue_surfaces(
 		check_equal(TissueInfos::GetTissueType(TissueInfos::GetTissueName(i)), i);
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		auto color = TissueInfos::GetTissueColor(i);
-		color_array->SetTuple(i, color.data());
+		color_array->SetTuple(i, color.v.data());
 	}
 
 	labelField->GetFieldData()->AddArray(names_array);
@@ -6916,7 +6917,7 @@ int SlicesHandler::extract_tissue_surfaces(
 				{
 					names_array_1->SetValue(0, TissueInfos::GetTissueName(i).c_str());
 					auto color = TissueInfos::GetTissueColor(i);
-					color_array_1->SetTuple(0, color.data());
+					color_array_1->SetTuple(0, color.v.data());
 				}
 			}
 
@@ -8430,9 +8431,9 @@ void SlicesHandler::remove_tissueall()
 		_image_slices[i].cleartissuesall();
 	}
 	TissueInfos::RemoveAllTissues();
-	TissueInfoStruct tissue;
+	TissueInfo tissue;
 	tissue.locked = false;
-	tissue.SetColor(1.0f, 0.0f, 0.1f);
+	tissue.color = Color(1.0f, 0.0f, 0.1f);
 	tissue.name = "Tissue1";
 	TissueInfos::AddTissue(tissue);
 }
@@ -8451,7 +8452,7 @@ void SlicesHandler::buildmissingtissues(tissues_size_t j)
 	if (j > tissueCount)
 	{
 		QString sdummy;
-		TissueInfoStruct tissue;
+		TissueInfo tissue;
 		tissue.locked = false;
 		tissue.opac = 0.5f;
 		for (tissues_size_t i = tissueCount + 1; i <= j; i++)
@@ -8557,7 +8558,7 @@ bool SlicesHandler::print_atlas(const char* filename)
 	out << (float)_dx << (float)_dy << (float)_thickness;
 	tissues_size_t tissueCount = TissueInfos::GetTissueCount();
 	out << (quint32)tissueCount;
-	TissueInfoStruct* tissueInfo;
+	TissueInfo* tissueInfo;
 	for (tissues_size_t tissuenr = 1; tissuenr <= tissueCount; tissuenr++)
 	{
 		tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
@@ -8596,7 +8597,7 @@ bool SlicesHandler::print_amascii(const char* filename)
 		streamname << "            Id 1" << endl;
 		streamname << "        }" << endl;
 		tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-		TissueInfoStruct* tissueInfo;
+		TissueInfo* tissueInfo;
 		for (tissues_size_t tc = 0; tc < tissueCount; tc++)
 		{
 			tissueInfo = TissueInfos::GetTissueInfo(tc + 1);
@@ -8670,8 +8671,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	float offset[3];
 	get_displacement(offset);
 	labelField->SetSpacing(ps.high, ps.low, _thickness);
-	labelField->SetOrigin(offset[0], offset[1],
-			offset[2] + _thickness * _startslice);
+	labelField->SetOrigin(offset[0], offset[1], offset[2] + _thickness * _startslice);
 	if (TissueInfos::GetTissueCount() <= 255)
 	{
 		labelField->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
@@ -8685,8 +8685,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 	else if (sizeof(tissues_size_t) == sizeof(unsigned short))
 	{
 		labelField->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
-		tissues_size_t* field =
-				(tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
+		tissues_size_t* field = (tissues_size_t*)labelField->GetScalarPointer(0, 0, 0);
 		for (unsigned short i = _startslice; i < _endslice; i++)
 		{
 			copyfromtissue(i, &(field[i * (unsigned long long)return_area()]));
@@ -8701,14 +8700,12 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 
 	// copy tissue names and colors
 	tissues_size_t num_tissues = TissueInfos::GetTissueCount();
-	vtkSmartPointer<vtkStringArray> names_array =
-			vtkSmartPointer<vtkStringArray>::New();
+	auto names_array = vtkSmartPointer<vtkStringArray>::New();
 	names_array->SetNumberOfTuples(num_tissues + 1);
 	names_array->SetName(tissueNameArrayName);
 	labelField->GetFieldData()->AddArray(names_array);
 
-	vtkSmartPointer<vtkFloatArray> color_array =
-			vtkSmartPointer<vtkFloatArray>::New();
+	auto color_array = vtkSmartPointer<vtkFloatArray>::New();
 	color_array->SetNumberOfComponents(3);
 	color_array->SetNumberOfTuples(num_tissues + 1);
 	color_array->SetName(tissueColorArrayName);
@@ -8720,7 +8717,7 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 		names_array->SetValue(i, TissueInfos::GetTissueName(i).c_str());
 		auto color = TissueInfos::GetTissueColor(i);
 		ISEG_INFO(TissueInfos::GetTissueName(i).c_str() << " " << color[0] << "," << color[1] << "," << color[2]);
-		color_array->SetTuple(i, color.data());
+		color_array->SetTuple(i, color.v.data());
 	}
 
 	return labelField;
@@ -8760,7 +8757,7 @@ bool SlicesHandler::print_xmlregionextent(const char* filename,
 		streamname << "<IndexFile type=\"Extent\" version=\"0.1\">" << endl;
 		unsigned short extent[3][2];
 		tissues_size_t tissueCount = TissueInfos::GetTissueCount();
-		TissueInfoStruct* tissueInfo;
+		TissueInfo* tissueInfo;
 		for (tissues_size_t tissuenr = 1; tissuenr <= tissueCount; tissuenr++)
 		{
 			if (get_extent(tissuenr, onlyactiveslices, extent))

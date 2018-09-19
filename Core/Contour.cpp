@@ -48,7 +48,7 @@ void Contour::add_point(Point p)
 void Contour::add_points(vector<Point>* Pt_vec)
 {
 	for (vector<Point>::iterator it = (*Pt_vec).begin(); it != (*Pt_vec).end();
-		 it++)
+			 it++)
 		plist.push_back(*it);
 	n = (unsigned)plist.size();
 	return;
@@ -135,7 +135,7 @@ void Contour::return_contour(vector<Point>* Pt_vec)
 }
 
 void Contour::doug_peuck_sub(float epsilon, const unsigned int p1,
-							 const unsigned int p2, vector<bool>* v1_p)
+		const unsigned int p2, vector<bool>* v1_p)
 {
 	//	cout << p1<<" "<<p2<<endl;
 	if (p2 <= p1 + 1)
@@ -178,8 +178,8 @@ void Contour::doug_peuck_sub(float epsilon, const unsigned int p1,
 
 //abcd void contour_class2::doug_peuck(float epsilon,vector<Point> *Pt_vec,vector<unsigned short> *Meetings_vec,vector<Point> *Result_vec)
 void Contour2::doug_peuck(float epsilon, vector<Point>* Pt_vec,
-						  vector<unsigned>* Meetings_vec,
-						  vector<Point>* Result_vec)
+		vector<unsigned>* Meetings_vec,
+		vector<Point>* Result_vec)
 {
 	n = Pt_vec->size();
 	m = Meetings_vec->size();
@@ -202,10 +202,10 @@ void Contour2::doug_peuck(float epsilon, vector<Point>* Pt_vec,
 		for (unsigned int i = 0; i + 1 < m; i++)
 		{
 			doug_peuck_sub(epsilon, Pt_vec, (*Meetings_vec)[i],
-						   (*Meetings_vec)[i + 1], &v1);
+					(*Meetings_vec)[i + 1], &v1);
 		}
 		doug_peuck_sub2(epsilon, Pt_vec, (*Meetings_vec)[m - 1],
-						(*Meetings_vec)[0], &v1);
+				(*Meetings_vec)[0], &v1);
 
 		Result_vec->clear();
 		for (unsigned int i = 0; i < n; i++)
@@ -219,8 +219,8 @@ void Contour2::doug_peuck(float epsilon, vector<Point>* Pt_vec,
 }
 
 void Contour2::doug_peuck_sub(float epsilon, vector<Point>* Pt_vec,
-							  unsigned short p1, unsigned short p2,
-							  vector<bool>* v1_p)
+		unsigned short p1, unsigned short p2,
+		vector<bool>* v1_p)
 {
 	if (p2 <= p1 + 1)
 		return;
@@ -276,8 +276,8 @@ void Contour2::doug_peuck_sub(float epsilon, vector<Point>* Pt_vec,
 }
 
 void Contour2::doug_peuck_sub2(float epsilon, vector<Point>* Pt_vec,
-							   unsigned short p1, unsigned short p2,
-							   vector<bool>* v1_p)
+		unsigned short p1, unsigned short p2,
+		vector<bool>* v1_p)
 {
 	if ((p2 == 0 && p1 + 1 == n) || p1 < p2)
 		return;

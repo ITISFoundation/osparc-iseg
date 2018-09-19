@@ -23,9 +23,9 @@
 using namespace iseg;
 
 RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadfilename, SlicesHandler* hand3D,
-																   QWidget* parent, const char* name,
-																   Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+		QWidget* parent, const char* name,
+		Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = nullptr;
 
@@ -37,7 +37,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 
 	tissues.clear();
 	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(),
-														tissues);
+			tissues);
 
 	vecignore.resize(tissues.size());
 	vecpriorities.resize(tissues.size());
@@ -65,9 +65,9 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 		}
 
 		for (tissuenr = 0;
-			 tissuenr < TissueInfos::GetTissueCount() &&
-			 tissues[i]->name != TissueInfos::GetTissueName(tissuenr + 1);
-			 tissuenr++)
+				 tissuenr < TissueInfos::GetTissueCount() &&
+				 tissues[i]->name != TissueInfos::GetTissueName(tissuenr + 1);
+				 tissuenr++)
 		{}
 		if (tissuenr == (tissues_size_t)TissueInfos::GetTissueCount())
 		{
@@ -106,7 +106,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	hbox2 = new Q3HBox(vbox1);
 	lb_namele = new QLabel(QString("Name: "), hbox2);
 	le_name =
-		new QLineEdit(vectissuenames[cb_solids->currentItem()].c_str(), hbox2);
+			new QLineEdit(vectissuenames[cb_solids->currentItem()].c_str(), hbox2);
 
 	hbox3 = new Q3HBox(vbox1);
 	lb_namecb = new QLabel(QString("Name: "), hbox3);
@@ -127,14 +127,14 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	updatevisibility();
 
 	QObject::connect(cb_solids, SIGNAL(activated(int)), this,
-					 SLOT(solid_changed(int)));
+			SLOT(solid_changed(int)));
 	QObject::connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
 	QObject::connect(cb_ignore, SIGNAL(clicked()), this,
-					 SLOT(ignore_changed()));
+			SLOT(ignore_changed()));
 	QObject::connect(pb_ok, SIGNAL(clicked()), this, SLOT(ok_pressed()));
 	QObject::connect(infoButton, SIGNAL(clicked()), this,
-					 SLOT(show_priorityInfo()));
+			SLOT(show_priorityInfo()));
 }
 
 RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() { delete vbox1; }
@@ -144,7 +144,7 @@ void RadiotherapyStructureSetImporter::solid_changed(int i)
 	storeparams();
 	QObject::disconnect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
 	QObject::disconnect(cb_ignore, SIGNAL(clicked()), this,
-						SLOT(ignore_changed()));
+			SLOT(ignore_changed()));
 	currentitem = i;
 	cb_ignore->setChecked(vecignore[i]);
 	sb_priority->setValue(vecpriorities[i]);
@@ -153,7 +153,7 @@ void RadiotherapyStructureSetImporter::solid_changed(int i)
 	cb_names->setCurrentItem(vectissuenrs[i]);
 	QObject::connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
 	QObject::connect(cb_ignore, SIGNAL(clicked()), this,
-					 SLOT(ignore_changed()));
+			SLOT(ignore_changed()));
 	updatevisibility();
 }
 
@@ -179,7 +179,7 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	for (size_t i = 0; i < tissues.size(); i++)
 	{
 		if ((vecignore[i] == false) && (!vectissuenames[i].empty()) &&
-			(vecnew[i] == true))
+				(vecnew[i] == true))
 			nrnew++;
 	}
 	if (nrnew >= TISSUES_SIZE_MAX - 1 - TissueInfos::GetTissueCount())
@@ -196,14 +196,14 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	float dc[6];
 	handler3D->get_direction_cosines(dc);
 	unsigned short pixel_extents[2] = {handler3D->width(),
-									   handler3D->height()};
+			handler3D->height()};
 	float pixel_size[2] = {p.high, p.low};
 
 	if (abs(dc[0]) != 1.0f || abs(dc[4]) != 1.0f)
 	{
 		QMessageBox::about(
-			this, "Warning",
-			"Arbitrary rotations of image orientation (patient) not supported");
+				this, "Warning",
+				"Arbitrary rotations of image orientation (patient) not supported");
 		return;
 	}
 
@@ -224,11 +224,11 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 		while (vecpriorities[j] != i)
 			j++, it++;
 		if (vecignore[j] == false &&
-			((!vecnew[j]) || (!vectissuenames[j].empty())))
+				((!vecnew[j]) || (!vectissuenames[j].empty())))
 		{
 			if (vecnew[j])
 			{
-				TissueInfoStruct tissueInfo;
+				TissueInfo tissueInfo;
 				tissueInfo.name = vectissuenames[j].c_str();
 				tissueInfo.locked = false;
 				tissueInfo.opac = 0.5f;
@@ -256,7 +256,7 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 				pospoints += (*it)->outlinelength[posoutlines] * 3;
 				posoutlines++;
 				while (posoutlines < (*it)->outlinelength.size() &&
-					   zcoord == (*it)->points[pospoints + 2])
+							 zcoord == (*it)->points[pospoints + 2])
 				{
 					points.push_back(&((*it)->points[pospoints]));
 					pospoints += (*it)->outlinelength[posoutlines] * 3;
@@ -273,19 +273,19 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 					try
 					{
 						fillcontours::fill_contour(mask, pixel_extents, disp,
-												   pixel_size, dc, &(points[0]),
-												   nrpoints, points.size(),
-												   clockwisefill);
+								pixel_size, dc, &(points[0]),
+								nrpoints, points.size(),
+								clockwisefill);
 					}
 					catch (std::exception& e)
 					{
 						QMessageBox::about(this, "An Exception Occurred",
-										   e.what());
+								e.what());
 						error = true;
 						break;
 					}
 					handler3D->add2tissue(tissuenr, mask,
-										  (unsigned short)slicenr, true);
+							(unsigned short)slicenr, true);
 				}
 			}
 		}
@@ -301,10 +301,10 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 void RadiotherapyStructureSetImporter::show_priorityInfo()
 {
 	QMessageBox::information(
-		this, "Priority Information",
-		"1) Tissues have been sorted so that higher priority is given to the "
-		"smallest tissues.<br>"
-		"2) The higher number of priority, higher priority will have.");
+			this, "Priority Information",
+			"1) Tissues have been sorted so that higher priority is given to the "
+			"smallest tissues.<br>"
+			"2) The higher number of priority, higher priority will have.");
 }
 
 void RadiotherapyStructureSetImporter::ignore_changed()

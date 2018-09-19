@@ -798,13 +798,12 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 		return abc;
 	}
 	unsigned char r, g, b;
-	TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
-	tissueInfo->GetColorRGB(r, g, b);
+	TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
+	std::tie(r, g, b) = tissueInfo->color.toUChar();
 	abc.fill(QColor(r, g, b));
 	if (tissueInfo->locked)
 	{
 		QPainter painter(&abc);
-		//		painter.drawText(3,7,QString("L"));
 		float r, g, b;
 		r = (tissueInfo->color[0] + 0.5f);
 		if (r >= 1.0f)
@@ -998,7 +997,7 @@ void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent, const 
 void TissueTreeWidget::remove_items(const std::vector<QTreeWidgetItem*>& items)
 {
 	std::set<QTreeWidgetItem*> deleted;
-	for (auto currItem: items)
+	for (auto currItem : items)
 	{
 		if (deleted.count(currItem) == 0)
 		{
@@ -1889,7 +1888,7 @@ std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeW
 {
 	std::vector<QTreeWidgetItem*> my_children;
 
-	for (auto item: list)
+	for (auto item : list)
 	{
 		if (item != invisibleRootItem())
 		{
@@ -1912,8 +1911,8 @@ std::vector<QTreeWidgetItem*> TissueTreeWidget::get_all_items(bool leaves_only) 
 	if (leaves_only)
 	{
 		std::vector<QTreeWidgetItem*> leaves;
-		std::copy_if(all.begin(), all.end(), std::back_inserter(leaves), 
-			[this](QTreeWidgetItem* item){ return !get_is_folder(item); });
+		std::copy_if(all.begin(), all.end(), std::back_inserter(leaves),
+				[this](QTreeWidgetItem* item) { return !get_is_folder(item); });
 		return leaves;
 	}
 	return all;
@@ -2169,7 +2168,7 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree,
 	{
 		addTissue->setText("Modify Tissue");
 
-		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
+		TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(tissueTreeWidget->get_current_type());
 		nameField->setText(ToQ(tissueInfo->name));
 		r->setValue(int(tissueInfo->color[0] * 255));
 		g->setValue(int(tissueInfo->color[1] * 255));
@@ -2364,7 +2363,7 @@ void TissueAdder::add_pressed()
 		if (!nameField->text().isEmpty())
 		{
 			tissues_size_t type = tissueTreeWidget->get_current_type();
-			TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(type);
+			TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(type);
 			QString oldName = ToQ(tissueInfo->name);
 			if (oldName.compare(nameField->text(), Qt::CaseInsensitive) != 0 &&
 					TissueInfos::GetTissueType(ToStd(nameField->text())) > 0)
@@ -2401,7 +2400,7 @@ void TissueAdder::add_pressed()
 						"A tissue with the same name already exists.");
 				return;
 			}
-			TissueInfoStruct tissueInfo;
+			TissueInfo tissueInfo;
 			tissueInfo.name = ToStd(nameField->text());
 			tissueInfo.locked = false;
 			tissueInfo.opac = 1.0f - transp1;
@@ -4934,7 +4933,7 @@ void CheckBoneConnectivityDialog::CheckBoneExist()
 	tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
-		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(i);
+		TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(i);
 		if (IsBone(tissueInfo->name))
 		{
 			bonesFound++;
@@ -4983,7 +4982,7 @@ void CheckBoneConnectivityDialog::LookForConnections()
 	tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 	for (tissues_size_t i = 0; i <= tissuecount; i++)
 	{
-		TissueInfoStruct* tissueInfo = TissueInfos::GetTissueInfo(i);
+		TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(i);
 		label_names.push_back(tissueInfo->name);
 	}
 
@@ -5169,9 +5168,9 @@ void CheckBoneConnectivityDialog::FillConnectionsTable()
 
 		BoneConnectionInfo newLineInfo = foundConnections.at(i);
 
-		TissueInfoStruct* tissueInfo1 =
+		TissueInfo* tissueInfo1 =
 				TissueInfos::GetTissueInfo(newLineInfo.TissueID1);
-		TissueInfoStruct* tissueInfo2 =
+		TissueInfo* tissueInfo2 =
 				TissueInfos::GetTissueInfo(newLineInfo.TissueID2);
 
 		foundConnectionsTable->setItem(row, BoneConnectionColumn::kTissue1,
@@ -5217,9 +5216,9 @@ void CheckBoneConnectivityDialog::export_pressed()
 
 	for (unsigned int i = 0; i < foundConnections.size(); i++)
 	{
-		TissueInfoStruct* tissueInfo1 =
+		TissueInfo* tissueInfo1 =
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID1);
-		TissueInfoStruct* tissueInfo2 =
+		TissueInfo* tissueInfo2 =
 				TissueInfos::GetTissueInfo(foundConnections[i].TissueID2);
 		output_file << tissueInfo1->name << " "
 								<< tissueInfo2->name << " "

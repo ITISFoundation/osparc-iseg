@@ -16,6 +16,7 @@ FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	addLine.cpp
 	BrushInteraction.cpp
+	Color.cpp
 	ItkProgressObserver.cpp
 	LogApi.cpp
 	SliceHandlerItkWrapper.cpp

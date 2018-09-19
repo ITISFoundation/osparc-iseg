@@ -53,9 +53,9 @@
 
 #include "Data/Transform.h"
 
+#include "Core/HDF5Blosc.h"
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
-#include "Core/HDF5Blosc.h"
 
 #include <boost/filesystem.hpp>
 
@@ -5804,13 +5804,13 @@ void MainWindow::randomize_colors()
 		{
 			tissues_size_t label = tissueTreeWidget->get_type(item);
 
-			std::tie(h,s,l) = Color::rgb2hsl(random);
+			std::tie(h, s, l) = random.toHSL();
 
 			// See http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 			h += golden_ratio_conjugate;
 			h = std::fmod(h, 1.0f);
 
-			random = Color::hsl2rgb(h, s, l);
+			random = Color::fromHSL(h, s, l);
 			TissueInfos::SetTissueColor(label, random.r, random.g, random.b);
 		}
 
@@ -6059,9 +6059,9 @@ void MainWindow::removeselected(const std::vector<QTreeWidgetItem*>& input, bool
 
 	if (TissueInfos::GetTissueCount() == 0)
 	{
-		TissueInfoStruct tissueInfo;
+		TissueInfo tissueInfo;
 		tissueInfo.name = "Tissue1";
-		tissueInfo.SetColor(1.0f, 0.0f, 0.1f);
+		tissueInfo.color = Color(1.0f, 0.0f, 0.1f);
 		TissueInfos::AddTissue(tissueInfo);
 
 		// Insert new tissue in hierarchy
@@ -6574,7 +6574,7 @@ void MainWindow::tissue_selection_changed()
 		updateTabvisibility();
 	}
 
-	tissuesDock->setWindowTitle( QString("Tissues (%1)").arg(list.size()) );
+	tissuesDock->setWindowTitle(QString("Tissues (%1)").arg(list.size()));
 
 	if (list.size() > 0)
 	{

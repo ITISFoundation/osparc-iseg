@@ -42,54 +42,51 @@ std::string str_tolower(std::string s)
 }
 } // namespace
 
-TissueInfoStruct* TissueInfos::GetTissueInfo(tissues_size_t tissuetype)
+TissueInfo* TissueInfos::GetTissueInfo(tissues_size_t tissuetype)
 {
 	return &tissueInfosVector[tissuetype];
 }
 
-const std::array<float,3>& TissueInfos::GetTissueColor(tissues_size_t tissuetype)
+const Color& TissueInfos::GetTissueColor(tissues_size_t tissuetype)
 {
-	return tissueInfosVector[tissuetype].color;
+	return tissueInfosVector.at(tissuetype).color;
 }
 
-void TissueInfos::GetTissueColorRGB(tissues_size_t tissuetype, unsigned char& r, unsigned char& g, unsigned char& b)
+std::tuple<std::uint8_t, std::uint8_t, std::uint8_t> iseg::TissueInfos::GetTissueColorMapped(tissues_size_t tissuetype)
 {
 	if (int(tissuetype) < tissueInfosVector.size())
 	{
-		tissueInfosVector[tissuetype].GetColorRGB(r, g, b);
+		return tissueInfosVector[tissuetype].color.toUChar();
 	}
 	else
 	{
+		using rgb = std::tuple<std::uint8_t, std::uint8_t, std::uint8_t>;
 		if (tissuetype == Mark::RED)
 		{
-			r = 255;
-			g = 0;
-			b = 0;
+			return rgb(255, 0, 0);
 		}
 		else if (tissuetype == Mark::GREEN)
 		{
-			r = 0;
-			g = 255;
-			b = 0;
+			return rgb(0, 255, 0);
 		}
 		else if (tissuetype == Mark::BLUE)
 		{
-			r = 0;
-			g = 0;
-			b = 255;
+			return rgb(0, 0, 255);
 		}
-		else if (tissuetype == Mark::WHITE)
+		else //if (tissuetype == Mark::WHITE)
 		{
-			r = 255;
-			g = 255;
-			b = 255;
+			return rgb(255, 255, 255);
 		}
 	}
 }
 
 void TissueInfos::GetTissueColorBlendedRGB(tissues_size_t tissuetype, unsigned char& r, unsigned char& g, unsigned char& b, unsigned char offset)
 {
-	tissueInfosVector[tissuetype].GetColorBlendedRGB(r, g, b, offset);
+	auto& color = tissueInfosVector.at(tissuetype).color;
+	auto opac = tissueInfosVector.at(tissuetype).opac;
+	r = (unsigned char)(offset + opac * (255.0f * color[0] - offset));
+	g = (unsigned char)(offset + opac * (255.0f * color[1] - offset));
+	b = (unsigned char)(offset + opac * (255.0f * color[2] - offset));
 }
 
 float TissueInfos::GetTissueOpac(tissues_size_t tissuetype)
@@ -120,10 +117,9 @@ tissues_size_t TissueInfos::GetTissueType(std::string tissuename)
 	return 0;
 }
 
-void TissueInfos::SetTissueColor(tissues_size_t tissuetype, float r, float g,
-		float b)
+void TissueInfos::SetTissueColor(tissues_size_t tissuetype, float r, float g, float b)
 {
-	tissueInfosVector[tissuetype].SetColor(r, g, b);
+	tissueInfosVector[tissuetype].color = Color(r, g, b);
 }
 
 void TissueInfos::SetTissueOpac(tissues_size_t tissuetype, float val)
@@ -143,32 +139,9 @@ void TissueInfos::SetTissueLocked(tissues_size_t tissuetype, bool val)
 	tissueInfosVector[tissuetype].locked = val;
 }
 
-void TissueInfos::init_tissues1()
-{
-	tissueInfosVector.clear();
-	tissueInfosVector.resize(6);
-
-	tissueInfosVector[0].SetColor(0.0f, 0.0f, 0.0f);
-	tissueInfosVector[1].SetColor(0.0f, 0.0f, 1.0f);
-	tissueInfosVector[2].SetColor(0.0f, 1.0f, 0.0f);
-	tissueInfosVector[3].SetColor(1.0f, 0.0f, 0.0f);
-	tissueInfosVector[4].SetColor(1.0f, 1.0f, 0.0f);
-	tissueInfosVector[5].SetColor(0.2f, 0.2f, 0.2f);
-
-	tissueInfosVector[1].name = "Heart";
-	tissueInfosVector[2].name = "Lung";
-	tissueInfosVector[3].name = "Muscle";
-	tissueInfosVector[4].name = "Bone";
-	tissueInfosVector[5].name = "Background";
-
-	CreateTissueTypeMap();
-}
-
 void TissueInfos::SetTissuesLocked(bool val)
 {
-	TissueInfosVecType::iterator vecIt;
-	for (vecIt = tissueInfosVector.begin() + 1;
-			 vecIt != tissueInfosVector.end(); ++vecIt)
+	for (auto vecIt = tissueInfosVector.begin() + 1; vecIt != tissueInfosVector.end(); ++vecIt)
 	{
 		vecIt->locked = val;
 	}
@@ -180,169 +153,169 @@ void TissueInfos::InitTissues()
 	tissueInfosVector.resize(83);
 
 	tissueInfosVector[1].name = "Adrenal_gland";
-	tissueInfosVector[1].SetColor(0.338000f, 0.961000f, 0.725000f);
+	tissueInfosVector[1].color = Color(0.338000f, 0.961000f, 0.725000f);
 	tissueInfosVector[2].name = "Air_internal";
-	tissueInfosVector[2].SetColor(0.000000f, 0.000000f, 0.000000f);
+	tissueInfosVector[2].color = Color(0.000000f, 0.000000f, 0.000000f);
 	tissueInfosVector[3].name = "Artery";
-	tissueInfosVector[3].SetColor(0.800000f, 0.000000f, 0.000000f);
+	tissueInfosVector[3].color = Color(0.800000f, 0.000000f, 0.000000f);
 	tissueInfosVector[4].name = "Bladder";
-	tissueInfosVector[4].SetColor(0.529400f, 0.854900f, 0.011800f);
+	tissueInfosVector[4].color = Color(0.529400f, 0.854900f, 0.011800f);
 	tissueInfosVector[5].name = "Blood_vessel";
-	tissueInfosVector[5].SetColor(0.666700f, 0.003900f, 0.003900f);
+	tissueInfosVector[5].color = Color(0.666700f, 0.003900f, 0.003900f);
 	tissueInfosVector[6].name = "Bone";
-	tissueInfosVector[6].SetColor(0.929412f, 0.839216f, 0.584314f);
+	tissueInfosVector[6].color = Color(0.929412f, 0.839216f, 0.584314f);
 	tissueInfosVector[7].name = "Brain_grey_matter";
-	tissueInfosVector[7].SetColor(0.500000f, 0.500000f, 0.500000f);
+	tissueInfosVector[7].color = Color(0.500000f, 0.500000f, 0.500000f);
 	tissueInfosVector[8].name = "Brain_white_matter";
-	tissueInfosVector[8].SetColor(0.900000f, 0.900000f, 0.900000f);
+	tissueInfosVector[8].color = Color(0.900000f, 0.900000f, 0.900000f);
 	tissueInfosVector[9].name = "Breast";
-	tissueInfosVector[9].SetColor(0.996000f, 0.741000f, 1.000000f);
+	tissueInfosVector[9].color = Color(0.996000f, 0.741000f, 1.000000f);
 	tissueInfosVector[10].name = "Bronchi";
-	tissueInfosVector[10].SetColor(0.528000f, 0.592000f, 1.000000f);
+	tissueInfosVector[10].color = Color(0.528000f, 0.592000f, 1.000000f);
 	tissueInfosVector[11].name = "Bronchi_lumen";
-	tissueInfosVector[11].SetColor(0.368600f, 0.474500f, 0.635300f);
+	tissueInfosVector[11].color = Color(0.368600f, 0.474500f, 0.635300f);
 	tissueInfosVector[12].name = "Cartilage";
-	tissueInfosVector[12].SetColor(0.627000f, 0.988000f, 0.969000f);
+	tissueInfosVector[12].color = Color(0.627000f, 0.988000f, 0.969000f);
 	tissueInfosVector[13].name = "Cerebellum";
-	tissueInfosVector[13].SetColor(0.648000f, 0.599000f, 0.838000f);
+	tissueInfosVector[13].color = Color(0.648000f, 0.599000f, 0.838000f);
 	tissueInfosVector[14].name = "Cerebrospinal_fluid";
-	tissueInfosVector[14].SetColor(0.474500f, 0.521600f, 0.854900f);
+	tissueInfosVector[14].color = Color(0.474500f, 0.521600f, 0.854900f);
 	tissueInfosVector[15].name = "Connective_tissue";
-	tissueInfosVector[15].SetColor(1.000000f, 0.705882f, 0.000000f);
+	tissueInfosVector[15].color = Color(1.000000f, 0.705882f, 0.000000f);
 	tissueInfosVector[16].name = "Diaphragm";
-	tissueInfosVector[16].SetColor(0.745000f, 0.188000f, 0.286000f);
+	tissueInfosVector[16].color = Color(0.745000f, 0.188000f, 0.286000f);
 	tissueInfosVector[17].name = "Ear_cartilage";
-	tissueInfosVector[17].SetColor(0.627000f, 0.988000f, 0.969000f);
+	tissueInfosVector[17].color = Color(0.627000f, 0.988000f, 0.969000f);
 	tissueInfosVector[18].name = "Ear_skin";
-	tissueInfosVector[18].SetColor(0.423500f, 0.611800f, 0.603900f);
+	tissueInfosVector[18].color = Color(0.423500f, 0.611800f, 0.603900f);
 	tissueInfosVector[19].name = "Epididymis";
-	tissueInfosVector[19].SetColor(0.000000f, 0.359000f, 1.000000f);
+	tissueInfosVector[19].color = Color(0.000000f, 0.359000f, 1.000000f);
 	tissueInfosVector[20].name = "Esophagus";
-	tissueInfosVector[20].SetColor(1.000000f, 0.585000f, 0.000000f);
+	tissueInfosVector[20].color = Color(1.000000f, 0.585000f, 0.000000f);
 	tissueInfosVector[21].name = "Esophagus_lumen";
-	tissueInfosVector[21].SetColor(1.000000f, 0.789000f, 0.635000f);
+	tissueInfosVector[21].color = Color(1.000000f, 0.789000f, 0.635000f);
 	tissueInfosVector[22].name = "Eye_lens";
-	tissueInfosVector[22].SetColor(0.007800f, 0.658800f, 0.996100f);
+	tissueInfosVector[22].color = Color(0.007800f, 0.658800f, 0.996100f);
 	tissueInfosVector[23].name = "Eye_vitreous_humor";
-	tissueInfosVector[23].SetColor(0.331000f, 0.746000f, 0.937000f);
+	tissueInfosVector[23].color = Color(0.331000f, 0.746000f, 0.937000f);
 	tissueInfosVector[24].name = "Fat";
-	tissueInfosVector[24].SetColor(0.984314f, 0.980392f, 0.215686f);
+	tissueInfosVector[24].color = Color(0.984314f, 0.980392f, 0.215686f);
 	tissueInfosVector[25].name = "Gallbladder";
-	tissueInfosVector[25].SetColor(0.258800f, 0.972500f, 0.274500f);
+	tissueInfosVector[25].color = Color(0.258800f, 0.972500f, 0.274500f);
 	tissueInfosVector[26].name = "Heart_lumen";
-	tissueInfosVector[26].SetColor(1.000000f, 0.000000f, 0.000000f);
+	tissueInfosVector[26].color = Color(1.000000f, 0.000000f, 0.000000f);
 	tissueInfosVector[27].name = "Heart_muscle";
-	tissueInfosVector[27].SetColor(1.000000f, 0.000000f, 0.239000f);
+	tissueInfosVector[27].color = Color(1.000000f, 0.000000f, 0.239000f);
 	tissueInfosVector[28].name = "Hippocampus";
-	tissueInfosVector[28].SetColor(0.915000f, 0.188000f, 1.000000f);
+	tissueInfosVector[28].color = Color(0.915000f, 0.188000f, 1.000000f);
 	tissueInfosVector[29].name = "Hypophysis";
-	tissueInfosVector[29].SetColor(1.000000f, 0.000000f, 0.796000f);
+	tissueInfosVector[29].color = Color(1.000000f, 0.000000f, 0.796000f);
 	tissueInfosVector[30].name = "Hypothalamus";
-	tissueInfosVector[30].SetColor(0.563000f, 0.239000f, 0.754000f);
+	tissueInfosVector[30].color = Color(0.563000f, 0.239000f, 0.754000f);
 	tissueInfosVector[31].name = "Intervertebral_disc";
-	tissueInfosVector[31].SetColor(0.627500f, 0.988200f, 0.968600f);
+	tissueInfosVector[31].color = Color(0.627500f, 0.988200f, 0.968600f);
 	tissueInfosVector[32].name = "Kidney_cortex";
-	tissueInfosVector[32].SetColor(0.000000f, 0.754000f, 0.200000f);
+	tissueInfosVector[32].color = Color(0.000000f, 0.754000f, 0.200000f);
 	tissueInfosVector[33].name = "Kidney_medulla";
-	tissueInfosVector[33].SetColor(0.507000f, 1.000000f, 0.479000f);
+	tissueInfosVector[33].color = Color(0.507000f, 1.000000f, 0.479000f);
 	tissueInfosVector[34].name = "Large_intestine";
-	tissueInfosVector[34].SetColor(1.000000f, 0.303000f, 0.176000f);
+	tissueInfosVector[34].color = Color(1.000000f, 0.303000f, 0.176000f);
 	tissueInfosVector[35].name = "Large_intestine_lumen";
-	tissueInfosVector[35].SetColor(0.817000f, 0.556000f, 0.570000f);
+	tissueInfosVector[35].color = Color(0.817000f, 0.556000f, 0.570000f);
 	tissueInfosVector[36].name = "Larynx";
-	tissueInfosVector[36].SetColor(0.937000f, 0.561000f, 0.950000f);
+	tissueInfosVector[36].color = Color(0.937000f, 0.561000f, 0.950000f);
 	tissueInfosVector[37].name = "Liver";
-	tissueInfosVector[37].SetColor(0.478400f, 0.262700f, 0.141200f);
+	tissueInfosVector[37].color = Color(0.478400f, 0.262700f, 0.141200f);
 	tissueInfosVector[38].name = "Lung";
-	tissueInfosVector[38].SetColor(0.225000f, 0.676000f, 1.000000f);
+	tissueInfosVector[38].color = Color(0.225000f, 0.676000f, 1.000000f);
 	tissueInfosVector[39].name = "Mandible";
-	tissueInfosVector[39].SetColor(0.929412f, 0.839216f, 0.584314f);
+	tissueInfosVector[39].color = Color(0.929412f, 0.839216f, 0.584314f);
 	tissueInfosVector[40].name = "Marrow_red";
-	tissueInfosVector[40].SetColor(0.937300f, 0.639200f, 0.498000f);
+	tissueInfosVector[40].color = Color(0.937300f, 0.639200f, 0.498000f);
 	tissueInfosVector[41].name = "Marrow_white";
-	tissueInfosVector[41].SetColor(0.921600f, 0.788200f, 0.486300f);
+	tissueInfosVector[41].color = Color(0.921600f, 0.788200f, 0.486300f);
 	tissueInfosVector[42].name = "Meniscus";
-	tissueInfosVector[42].SetColor(0.577000f, 0.338000f, 0.754000f);
+	tissueInfosVector[42].color = Color(0.577000f, 0.338000f, 0.754000f);
 	tissueInfosVector[43].name = "Midbrain";
-	tissueInfosVector[43].SetColor(0.490200f, 0.682400f, 0.509800f);
+	tissueInfosVector[43].color = Color(0.490200f, 0.682400f, 0.509800f);
 	tissueInfosVector[44].name = "Muscle";
-	tissueInfosVector[44].SetColor(0.745098f, 0.188235f, 0.286275f);
+	tissueInfosVector[44].color = Color(0.745098f, 0.188235f, 0.286275f);
 	tissueInfosVector[45].name = "Nail";
-	tissueInfosVector[45].SetColor(0.873000f, 0.887000f, 0.880000f);
+	tissueInfosVector[45].color = Color(0.873000f, 0.887000f, 0.880000f);
 	tissueInfosVector[46].name = "Mucosa";
-	tissueInfosVector[46].SetColor(1.000000f, 0.631373f, 0.745098f);
+	tissueInfosVector[46].color = Color(1.000000f, 0.631373f, 0.745098f);
 	tissueInfosVector[47].name = "Nerve";
-	tissueInfosVector[47].SetColor(0.000000f, 0.754000f, 0.479000f);
+	tissueInfosVector[47].color = Color(0.000000f, 0.754000f, 0.479000f);
 	tissueInfosVector[48].name = "Ovary";
-	tissueInfosVector[48].SetColor(0.718000f, 0.000000f, 1.000000f);
+	tissueInfosVector[48].color = Color(0.718000f, 0.000000f, 1.000000f);
 	tissueInfosVector[49].name = "Pancreas";
-	tissueInfosVector[49].SetColor(0.506000f, 0.259000f, 0.808000f);
+	tissueInfosVector[49].color = Color(0.506000f, 0.259000f, 0.808000f);
 	tissueInfosVector[50].name = "Patella";
-	tissueInfosVector[50].SetColor(0.929412f, 0.839216f, 0.584314f);
+	tissueInfosVector[50].color = Color(0.929412f, 0.839216f, 0.584314f);
 	tissueInfosVector[51].name = "Penis";
-	tissueInfosVector[51].SetColor(0.000000f, 0.000000f, 1.000000f);
+	tissueInfosVector[51].color = Color(0.000000f, 0.000000f, 1.000000f);
 	tissueInfosVector[52].name = "Pharynx";
-	tissueInfosVector[52].SetColor(0.368600f, 0.474500f, 0.635300f);
+	tissueInfosVector[52].color = Color(0.368600f, 0.474500f, 0.635300f);
 	tissueInfosVector[53].name = "Prostate";
-	tissueInfosVector[53].SetColor(0.190000f, 0.190000f, 1.000000f);
+	tissueInfosVector[53].color = Color(0.190000f, 0.190000f, 1.000000f);
 	tissueInfosVector[54].name = "Scrotum";
-	tissueInfosVector[54].SetColor(0.366000f, 0.549000f, 1.000000f);
+	tissueInfosVector[54].color = Color(0.366000f, 0.549000f, 1.000000f);
 	tissueInfosVector[55].name = "Skin";
-	tissueInfosVector[55].SetColor(0.746000f, 0.613000f, 0.472000f);
+	tissueInfosVector[55].color = Color(0.746000f, 0.613000f, 0.472000f);
 	tissueInfosVector[56].name = "Skull";
-	tissueInfosVector[56].SetColor(0.929412f, 0.839216f, 0.584314f);
+	tissueInfosVector[56].color = Color(0.929412f, 0.839216f, 0.584314f);
 	tissueInfosVector[57].name = "Small_intestine";
-	tissueInfosVector[57].SetColor(1.000000f, 0.775000f, 0.690000f);
+	tissueInfosVector[57].color = Color(1.000000f, 0.775000f, 0.690000f);
 	tissueInfosVector[58].name = "Small_intestine_lumen";
-	tissueInfosVector[58].SetColor(1.000000f, 0.474500f, 0.635300f);
+	tissueInfosVector[58].color = Color(1.000000f, 0.474500f, 0.635300f);
 	tissueInfosVector[59].name = "Spinal_cord";
-	tissueInfosVector[59].SetColor(0.000000f, 0.732000f, 0.662000f);
+	tissueInfosVector[59].color = Color(0.000000f, 0.732000f, 0.662000f);
 	tissueInfosVector[60].name = "Spleen";
-	tissueInfosVector[60].SetColor(0.682400f, 0.964700f, 0.788200f);
+	tissueInfosVector[60].color = Color(0.682400f, 0.964700f, 0.788200f);
 	tissueInfosVector[61].name = "Stomach";
-	tissueInfosVector[61].SetColor(1.000000f, 0.500000f, 0.000000f);
+	tissueInfosVector[61].color = Color(1.000000f, 0.500000f, 0.000000f);
 	tissueInfosVector[62].name = "Stomach_lumen";
-	tissueInfosVector[62].SetColor(1.000000f, 0.738000f, 0.503000f);
+	tissueInfosVector[62].color = Color(1.000000f, 0.738000f, 0.503000f);
 	tissueInfosVector[63].name = "SAT";
-	tissueInfosVector[63].SetColor(1.000000f, 0.796079f, 0.341176f);
+	tissueInfosVector[63].color = Color(1.000000f, 0.796079f, 0.341176f);
 	tissueInfosVector[64].name = "Teeth";
-	tissueInfosVector[64].SetColor(0.976471f, 0.960784f, 0.905882f);
+	tissueInfosVector[64].color = Color(0.976471f, 0.960784f, 0.905882f);
 	tissueInfosVector[65].name = "Tendon_Ligament";
-	tissueInfosVector[65].SetColor(0.945098f, 0.960784f, 0.972549f);
+	tissueInfosVector[65].color = Color(0.945098f, 0.960784f, 0.972549f);
 	tissueInfosVector[66].name = "Testis";
-	tissueInfosVector[66].SetColor(0.000000f, 0.606000f, 1.000000f);
+	tissueInfosVector[66].color = Color(0.000000f, 0.606000f, 1.000000f);
 	tissueInfosVector[67].name = "Thalamus";
-	tissueInfosVector[67].SetColor(0.000000f, 0.415000f, 0.549000f);
+	tissueInfosVector[67].color = Color(0.000000f, 0.415000f, 0.549000f);
 	tissueInfosVector[68].name = "Thymus";
-	tissueInfosVector[68].SetColor(0.439200f, 0.733300f, 0.549000f);
+	tissueInfosVector[68].color = Color(0.439200f, 0.733300f, 0.549000f);
 	tissueInfosVector[69].name = "Thyroid_gland";
-	tissueInfosVector[69].SetColor(0.321600f, 0.023500f, 0.298000f);
+	tissueInfosVector[69].color = Color(0.321600f, 0.023500f, 0.298000f);
 	tissueInfosVector[70].name = "Tongue";
-	tissueInfosVector[70].SetColor(0.800000f, 0.400000f, 0.400000f);
+	tissueInfosVector[70].color = Color(0.800000f, 0.400000f, 0.400000f);
 	tissueInfosVector[71].name = "Trachea";
-	tissueInfosVector[71].SetColor(0.183000f, 1.000000f, 1.000000f);
+	tissueInfosVector[71].color = Color(0.183000f, 1.000000f, 1.000000f);
 	tissueInfosVector[72].name = "Trachea_lumen";
-	tissueInfosVector[72].SetColor(0.613000f, 1.000000f, 1.000000f);
+	tissueInfosVector[72].color = Color(0.613000f, 1.000000f, 1.000000f);
 	tissueInfosVector[73].name = "Ureter_Urethra";
-	tissueInfosVector[73].SetColor(0.376500f, 0.607800f, 0.007800f);
+	tissueInfosVector[73].color = Color(0.376500f, 0.607800f, 0.007800f);
 	tissueInfosVector[74].name = "Uterus";
-	tissueInfosVector[74].SetColor(0.894000f, 0.529000f, 1.000000f);
+	tissueInfosVector[74].color = Color(0.894000f, 0.529000f, 1.000000f);
 	tissueInfosVector[75].name = "Vagina";
-	tissueInfosVector[75].SetColor(0.608000f, 0.529000f, 1.000000f);
+	tissueInfosVector[75].color = Color(0.608000f, 0.529000f, 1.000000f);
 	tissueInfosVector[76].name = "Vein";
-	tissueInfosVector[76].SetColor(0.000000f, 0.329000f, 1.000000f);
+	tissueInfosVector[76].color = Color(0.000000f, 0.329000f, 1.000000f);
 	tissueInfosVector[77].name = "Vertebrae";
-	tissueInfosVector[77].SetColor(0.929412f, 0.839216f, 0.584314f);
+	tissueInfosVector[77].color = Color(0.929412f, 0.839216f, 0.584314f);
 	tissueInfosVector[78].name = "Pinealbody";
-	tissueInfosVector[78].SetColor(1.000000f, 0.000000f, 0.000000f);
+	tissueInfosVector[78].color = Color(1.000000f, 0.000000f, 0.000000f);
 	tissueInfosVector[79].name = "Pons";
-	tissueInfosVector[79].SetColor(0.000000f, 0.710000f, 0.700000f);
+	tissueInfosVector[79].color = Color(0.000000f, 0.710000f, 0.700000f);
 	tissueInfosVector[80].name = "Medulla_oblongata";
-	tissueInfosVector[80].SetColor(0.370000f, 0.670000f, 0.920000f);
+	tissueInfosVector[80].color = Color(0.370000f, 0.670000f, 0.920000f);
 	tissueInfosVector[81].name = "Cornea";
-	tissueInfosVector[81].SetColor(0.686275f, 0.000000f, 1.000000f);
+	tissueInfosVector[81].color = Color(0.686275f, 0.000000f, 1.000000f);
 	tissueInfosVector[82].name = "Eye_Sclera";
-	tissueInfosVector[82].SetColor(1.000000f, 0.000000f, 0.780392f);
+	tissueInfosVector[82].color = Color(1.000000f, 0.000000f, 0.780392f);
 
 	CreateTissueTypeMap();
 }
@@ -854,7 +827,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 			tissues_size_t dummyIdx = 1;
 			for (tissues_size_t newTypeIdx = 0; newTypeIdx < tc1; ++newTypeIdx)
 			{
-				TissueInfoStruct newTissueInfo;
+				TissueInfo newTissueInfo;
 				newTissueInfo.locked = false;
 				if (currLabel == newTypeIdx + 1)
 				{
@@ -896,7 +869,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		{
 			for (tissues_size_t newTypeIdx = 0; newTypeIdx < tc1; ++newTypeIdx)
 			{
-				TissueInfoStruct newTissueInfo;
+				TissueInfo newTissueInfo;
 				newTissueInfo.locked = false;
 				if (fscanf(fp, "C%f %f %f %s\n", &(newTissueInfo.color[0]),
 								&(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
@@ -923,7 +896,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 		{
 			for (tissues_size_t newTypeIdx = 0; newTypeIdx < tc1; ++newTypeIdx)
 			{
-				TissueInfoStruct newTissueInfo;
+				TissueInfo newTissueInfo;
 				newTissueInfo.locked = false;
 				if (fscanf(fp, "C%f %f %f %f %s\n", &(newTissueInfo.color[0]),
 								&(newTissueInfo.color[1]), &(newTissueInfo.color[2]),
@@ -961,7 +934,7 @@ bool TissueInfos::LoadTissuesReadable(const char* filename,
 			idxMap[oldIdx] = oldIdx;
 		}
 		bool permute = false;
-		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size();  ++newIdx)
+		for (tissues_size_t newIdx = 0; newIdx < newTissueInfosVec.size(); ++newIdx)
 		{
 			tissues_size_t oldIdx = GetTissueType(newTissueInfosVec[newIdx].name);
 			if (oldIdx > 0 && oldIdx != newIdx)
@@ -1016,17 +989,18 @@ bool TissueInfos::LoadDefaultTissueList(const char* filename)
 	}
 	else
 	{
-		float color_r, color_g, color_b, color_o;
+		Color rgb;
+		float alpha;
 		char name1[1000];
 
 		tissueInfosVector.clear();
 		tissueInfosVector.resize(1); // Background
-		while (fscanf(fp, "%s %f %f %f %f", name1, &color_r, &color_g, &color_b,
-							 &color_o) == 5)
+		while (fscanf(fp, "%s %f %f %f %f", name1, &rgb.r, &rgb.g, &rgb.b, &alpha) == 5)
 		{
-			TissueInfoStruct newTissueInfo;
+			TissueInfo newTissueInfo;
 			newTissueInfo.locked = false;
-			newTissueInfo.SetColor(color_r, color_g, color_b, color_o);
+			newTissueInfo.color = rgb;
+			newTissueInfo.opac = alpha;
 			newTissueInfo.name = name1;
 			tissueInfosVector.push_back(newTissueInfo);
 		}
@@ -1042,7 +1016,7 @@ tissues_size_t TissueInfos::GetTissueCount()
 	return static_cast<tissues_size_t>(tissueInfosVector.size()) - 1; // Tissue index 0 is the background
 }
 
-void TissueInfos::AddTissue(TissueInfoStruct& tissue)
+void TissueInfos::AddTissue(TissueInfo& tissue)
 {
 	tissueInfosVector.push_back(tissue);
 	tissueTypeMap.insert(TissueTypeMapEntryType(str_tolower(tissue.name), GetTissueCount()));
@@ -1071,7 +1045,6 @@ void TissueInfos::RemoveAllTissues()
 	tissueTypeMap.clear();
 	tissueInfosVector.clear();
 	tissueInfosVector.resize(1); // Background
-	tissueInfosVector[0].SetColor(0.0f, 0.0f, 0.0f);
 }
 
 void TissueInfos::CreateTissueTypeMap()
@@ -1200,5 +1173,5 @@ void iseg::TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
 	}
 }
 
-TissueInfosVecType TissueInfos::tissueInfosVector;
-TissueTypeMapType TissueInfos::tissueTypeMap;
+TissueInfos::TissueInfosVecType TissueInfos::tissueInfosVector;
+TissueInfos::TissueTypeMapType TissueInfos::tissueTypeMap;

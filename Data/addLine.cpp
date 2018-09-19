@@ -13,17 +13,15 @@
 
 namespace iseg {
 
-using namespace std;
-
-void addLine(vector<Point>* vP, Point p1, Point p2)
+void addLine(std::vector<Point>* vP, Point p1, Point p2)
 {
 	short deltax, deltay, xinc1, xinc2, yinc1, yinc2, den, num, numadd, numpixels;
 	Point p;
 
-	deltax = abs(p2.px - p1.px); // The difference between the x's
-	deltay = abs(p2.py - p1.py); // The difference between the y's
-	p.px = p1.px;								 // Start x off at the first pixel
-	p.py = p1.py;								 // Start y off at the first pixel
+	deltax = std::abs(p2.px - p1.px); // The difference between the x's
+	deltay = std::abs(p2.py - p1.py); // The difference between the y's
+	p.px = p1.px;											// Start x off at the first pixel
+	p.py = p1.py;											// Start y off at the first pixel
 
 	if (p2.px >= p1.px) // The x-values are increasing
 	{

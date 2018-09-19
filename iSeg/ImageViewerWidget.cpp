@@ -177,7 +177,7 @@ void ImageViewerWidget::paintEvent(QPaintEvent* e)
 				unsigned char r, g, b;
 				for (auto& m : *marks)
 				{
-					TissueInfos::GetTissueColorRGB(m.mark, r, g, b);
+					std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
 					QColor qc1(r, g, b);
 					painter.setPen(QPen(qc1));
 
@@ -463,7 +463,7 @@ void ImageViewerWidget::reload_bits()
 
 	for (auto& m : vm)
 	{
-		TissueInfos::GetTissueColorRGB(m.mark, r, g, b);
+		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
 		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
 	}
 
@@ -880,7 +880,7 @@ void ImageViewerWidget::vp_to_image_decorator()
 	unsigned char r, g, b;
 	for (auto& m : vm)
 	{
-		TissueInfos::GetTissueColorRGB(m.mark, r, g, b);
+		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
 		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
 	}
 }
@@ -965,7 +965,7 @@ void ImageViewerWidget::vp1dyn_changed()
 	unsigned char r, g, b;
 	for (auto& m : vm)
 	{
-		TissueInfos::GetTissueColorRGB(m.mark, r, g, b);
+		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
 		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
 	}
 
@@ -1071,7 +1071,7 @@ void ImageViewerWidget::set_vp1_dyn(vector<Point>* vp1_arg,
 void ImageViewerWidget::color_changed(int tissue)
 {
 	unsigned char r, g, b;
-	TissueInfos::GetTissueColorRGB(tissue + 1, r, g, b);
+	std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(tissue + 1);
 	actual_color.setRgb(r, g, b);
 	vp_changed();
 }
