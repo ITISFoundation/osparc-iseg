@@ -5801,7 +5801,7 @@ void MainWindow::randomize_colors()
 
 	if (!tissueTreeWidget->selectedItems().empty())
 	{
-		Color random(0.1f, 0.9f, 0.1f);
+		static Color random = Color(0.1f, 0.9f, 0.1f);
 		float h, s, l;
 		for (auto item : tissueTreeWidget->selectedItems())
 		{

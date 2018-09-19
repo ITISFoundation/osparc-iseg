@@ -1489,6 +1489,7 @@ void TissueTreeWidget::dropEvent(QDropEvent* de)
 
 void TissueTreeWidget::selectAll()
 {
+	bool wasBlocked = blockSignals(true);
 	for (auto item : get_all_items())
 	{
 		if (!get_is_folder(item))
@@ -1496,6 +1497,9 @@ void TissueTreeWidget::selectAll()
 			item->setSelected(!item->isHidden());
 		}
 	}
+	blockSignals(wasBlocked);
+
+	itemSelectionChanged();
 }
 
 void TissueTreeWidget::scrollToItem(QTreeWidgetItem* item)

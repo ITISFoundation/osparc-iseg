@@ -1165,6 +1165,7 @@ std::set<iseg::tissues_size_t> iseg::TissueInfos::GetSelectedTissues()
 
 void iseg::TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
 {
+	ISEG_INFO("Selected tissues " << sel.size());
 	if (std::all_of(sel.begin(), sel.end(), is_valid))
 	{
 		_selection = sel;
