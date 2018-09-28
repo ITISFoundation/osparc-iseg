@@ -12,12 +12,16 @@ IF(PLUGIN_TRACE_TUBES)
 	ADD_SUBDIRECTORY(testsuite)
 
 	USE_BOOST()
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty)
 
-	QT4_WRAP_CPP(MOCSrcsbias TraceTubesWidget.h)
+	QT4_WRAP_CPP(MOCSrcsbias 
+		AutoTubeWidget.h
+		TraceTubesWidget.h)
 	
 	FILE(GLOB PLUGIN_HEADERS *.h)
 
 	ADD_LIBRARY(TraceTubesWidget.ext SHARED 
+		AutoTubeWidget.cpp
 		TraceTubesWidget.cpp 
 		TracingPlugin.cpp 
 		${PLUGIN_HEADERS}
