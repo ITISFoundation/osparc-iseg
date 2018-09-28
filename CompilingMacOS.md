@@ -1,3 +1,7 @@
+### Compiler
+
+- iSEG has been successfully built using clang++ version 9.1.0
+
 ### 3rd Party Libraries compilation instructions
 
 - [Boost](https://www.boost.org/): Boost 1.64, or newer

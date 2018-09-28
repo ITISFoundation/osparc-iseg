@@ -85,4 +85,4 @@ The libraries below are required to be compiled and installed on the system in o
   9. In Visual Studio, build the solution (Debug/Release)
 
 ### Other Platforms
-- For MacOS follow these preliminary [instructions](CompilingMacOS.md)
+- For MacOS/Clang follow these preliminary [instructions](CompilingMacOS.md)
