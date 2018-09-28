@@ -91,31 +91,31 @@ bool Paste(const TInputImage* source, TOutputImage* destination, const typename 
 
 namespace Functor {
 
-	template<class TInput, class TOutput = TInput>
-	class MapLabels
+template<class TInput, class TOutput = TInput>
+class MapLabels
+{
+public:
+	MapLabels(const std::vector<TOutput>& m = std::vector<TOutput>()) : m_Map(m) {}
+
+	bool operator!=(const MapLabels& other) const
 	{
-	public:
-		MapLabels(const std::vector<TOutput>& m = std::vector<TOutput>()) : m_Map(m) {}
+		return !(*this == other);
+	}
 
-		bool operator!=(const MapLabels& other) const
-		{
-			return !(*this == other);
-		}
+	bool operator==(const MapLabels& other) const
+	{
+		return other.m_Map == m_Map;
+	}
 
-		bool operator==(const MapLabels& other) const
-		{
-			return other.m_Map == m_Map;
-		}
+	inline TOutput operator()(const TInput& A) const
+	{
+		return static_cast<TOutput>(m_Map.at(A));
+	}
 
-		inline TOutput operator()(const TInput& A) const
-		{
-			return static_cast<TOutput>(m_Map.at(A));
-		}
+	std::vector<TOutput> m_Map;
+};
 
-		std::vector<TOutput> m_Map;
-	};
-
-}
+} // namespace Functor
 
 template<class T>
 void dump_image(T* img, const std::string& file_name)
@@ -193,15 +193,15 @@ typename itk::Image<T, Dimension>::Pointer MakeBall(const typename itk::ImageBas
 	return img;
 }
 
-#define SAFE_UPDATE(filter, expr)               \
-	try                                           \
-	{                                             \
-		filter->Update();                           \
-	}                                             \
-	catch (itk::ExceptionObject e)                \
-	{                                             \
-		ISEG_ERROR_MSG("" << e.what()); \
-		expr;                                       \
+#define SAFE_UPDATE(filter, expr) \
+	try                             \
+	{                               \
+		filter->Update();             \
+	}                               \
+	catch (itk::ExceptionObject e)  \
+	{                               \
+		ISEG_ERROR_MSG(e.what());     \
+		expr;                         \
 	}
 
 } // namespace iseg

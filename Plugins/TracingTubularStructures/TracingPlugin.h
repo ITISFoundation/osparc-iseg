@@ -16,8 +16,8 @@ namespace iseg { namespace plugin {
 class TracingPlugin : public Plugin
 {
 public:
-	TracingPlugin();
-	~TracingPlugin();
+	TracingPlugin() {}
+	~TracingPlugin() {}
 
 	virtual std::string name() const { return "Tracing Plugin "; }
 
@@ -26,4 +26,19 @@ public:
 	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
 			Qt::WindowFlags wFlags) const;
 };
+
+class AutoTracingPlugin : public Plugin
+{
+public:
+	AutoTracingPlugin() {}
+	~AutoTracingPlugin() {}
+
+	virtual std::string name() const { return "AutoTracing Plugin "; }
+
+	virtual std::string description() const { return "AutoTracing Plugin"; }
+
+	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
+			Qt::WindowFlags wFlags) const;
+};
+
 }} // namespace iseg::plugin
