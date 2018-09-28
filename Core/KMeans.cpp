@@ -11,12 +11,7 @@
 
 #include "KMeans.h"
 
-//#include <cstdlib>
-//#include <float.h>
-//#include <fstream>
-//#include <iostream>
-//#include <sstream>
-//#include <stdio.h>
+#include <cfloat>
 
 namespace iseg {
 

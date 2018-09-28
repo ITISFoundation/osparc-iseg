@@ -40,7 +40,6 @@
 #include "Core/ImageReader.h"
 #include "Core/ImageWriter.h"
 #include "Core/KMeans.h"
-#include "Core/MarchingCubes.h"
 #include "Core/MatlabExport.h"
 #include "Core/MultidimensionalGamma.h"
 #include "Core/Outline.h"

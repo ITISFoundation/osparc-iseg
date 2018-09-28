@@ -35,7 +35,6 @@ SET(SOURCES
 	KMeans.cpp
 	LoadPlugin.cpp
 	Log.cpp
-	MarchingCubes.cpp
 	MatlabExport.cpp
 	MultidimensionalGamma.cpp
 	Outline.cpp
@@ -48,6 +47,7 @@ SET(SOURCES
 	SmoothSteps.cpp
 	UndoElem.cpp
 	UndoQueue.cpp
+	VotingReplaceLabel.cpp
 	VoxelSurface.cpp
 	VTIreader.cpp
 )

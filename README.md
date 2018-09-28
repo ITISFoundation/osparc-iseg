@@ -83,3 +83,6 @@ The libraries below are required to be compiled and installed on the system in o
   7. Define _VTK_DIR_ as the folder where VTK was built (e.g. _VTK_BUILD_DIR_), press _Configure_
   8. Press _Generate_, then _Open Project_
   9. In Visual Studio, build the solution (Debug/Release)
+
+### Other Platforms
+- For MacOS/Clang follow these preliminary [instructions](CompilingMacOS.md)
