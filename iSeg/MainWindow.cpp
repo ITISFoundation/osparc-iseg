@@ -57,6 +57,7 @@
 #include "Core/HDF5Blosc.h"
 #include "Core/LoadPlugin.h"
 #include "Core/ProjectVersion.h"
+#include "Core/VotingReplaceLabel.h"
 
 #include <boost/filesystem.hpp>
 
@@ -1346,23 +1347,21 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	toolmenu = menuBar()->addMenu(tr("T&ools"));
 	toolmenu->insertItem("&Group Tissues...", this, SLOT(execute_grouptissues()));
-	toolmenu->insertItem("Remove Tissues...", this,
-			SLOT(execute_removetissues()));
+	toolmenu->insertItem("Remove Tissues...", this, SLOT(execute_removetissues()));
 	toolmenu->insertItem("Target->Tissue", this, SLOT(do_work2tissue()));
-	toolmenu->insertItem("Target->Tissue grouped...", this,
-			SLOT(do_work2tissue_grouped()));
+	toolmenu->insertItem("Target->Tissue grouped...", this, SLOT(do_work2tissue_grouped()));
 	toolmenu->insertItem("Tissue->Target", this, SLOT(do_tissue2work()));
-	toolmenu->insertItem("In&verse Slice Order", this,
-			SLOT(execute_inversesliceorder()));
+	toolmenu->insertItem("In&verse Slice Order", this, SLOT(execute_inversesliceorder()));
 	toolmenu->insertItem("Clean Up", this, SLOT(execute_cleanup()));
 	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
 	toolmenu->insertItem("Smooth Steps", this, SLOT(execute_smoothsteps()));
-	// toolmenu->insertItem( "Smooth Tissues", this,  SLOT(execute_smoothtissues()));
 	if (!m_editingmode)
-		toolmenu->insertItem("Merge Projects...", this,
-				SLOT(execute_mergeprojects()));
+	{
+		toolmenu->insertItem("Merge Projects...", this, SLOT(execute_mergeprojects()));
+	}
 	toolmenu->insertItem("Check Bone Connectivity", this, SLOT(execute_boneconnectivity()));
 	toolmenu->insertItem("Compute Target Connectivity", this, SLOT(execute_target_connected_components()));
+	toolmenu->insertItem("Replace Tissue via Voting", this, SLOT(execute_voting_replace_labels()));
 
 	atlasmenu = menuBar()->addMenu(tr("Atlas"));
 	// todo: make atlas method generic, i.e. for loop
@@ -7861,6 +7860,29 @@ void MainWindow::execute_savecolorlookup()
 	{
 		QMessageBox::warning(this, "iSeg",
 				"ERROR: occurred while exporting color lookup table\n", QMessageBox::Ok | QMessageBox::Default);
+	}
+}
+
+void MainWindow::execute_voting_replace_labels()
+{
+	auto sel = handler3D->tissue_selection();
+	if (sel.size() == 1)
+	{
+		tissues_size_t FG = sel.front();
+		std::array<unsigned int, 3> radius = { 1,1,1 };
+
+		iseg::DataSelection dataSelection;
+		dataSelection.allSlices = true;
+		dataSelection.tissues = true;
+		emit begin_datachange(dataSelection, this);
+
+		auto remaining_voxels = VotingReplaceLabel(handler3D, FG, 0, radius, 1, 10);
+
+		emit end_datachange(this, iseg::EndUndo);
+	}
+	else
+	{
+		QMessageBox::warning(this, "iSeg", "Please select only one non-locked tissue\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }
 

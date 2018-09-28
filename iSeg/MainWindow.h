@@ -521,6 +521,7 @@ private slots:
 	void execute_redo();
 	void execute_inversesliceorder();
 	void execute_remove_unused_tissues();
+	void execute_voting_replace_labels();
 	void execute_target_connected_components();
 	void execute_cleanup();
 	void execute_smoothsteps();
