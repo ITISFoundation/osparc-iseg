@@ -7,24 +7,25 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
+#include "Precompiled.h"
+
 #include "VotingReplaceLabel.h"
 
 #include "itkLabelVotingBinaryImageFilter.h"
 
-#include "../Data/SliceHandlerItkWrapper.h"
 #include "../Data/ItkUtils.h"
+#include "../Data/SliceHandlerItkWrapper.h"
 
 #include <itkCastImageFilter.h>
 
 namespace iseg {
 
 size_t VotingReplaceLabel(SliceHandlerInterface* handler,
-	tissues_size_t foreground, 
-	tissues_size_t background,
-	std::array<unsigned int, 3> iradius, 
-	unsigned int majority_threshold, 
-	unsigned int max_iterations
-)
+		tissues_size_t foreground,
+		tissues_size_t background,
+		std::array<unsigned int, 3> iradius,
+		unsigned int majority_threshold,
+		unsigned int max_iterations)
 {
 	using image_type = itk::Image<tissues_size_t, 3>;
 	using voting_filter_type = itk::LabelVotingBinaryImageFilter<image_type, image_type>;
@@ -76,7 +77,7 @@ size_t VotingReplaceLabel(SliceHandlerInterface* handler,
 	for (image_it.GoToBegin(); !image_it.IsAtEnd(); ++image_it)
 	{
 		if (image_it.Get() == foreground)
-		{ 
+		{
 			number_remaining += 1;
 		}
 	}
