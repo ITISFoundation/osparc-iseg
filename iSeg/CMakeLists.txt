@@ -23,6 +23,7 @@ USE_BOOST()
 USE_OPENMP()
 
 INCLUDE_DIRECTORIES(
+	${CMAKE_CURRENT_SOURCE_DIR} # hack to enable vtkDiscreteFlyingEdges.cxx to find Precompiled.h
 	${CMAKE_SOURCE_DIR}/Thirdparty/CImg
 	${CMAKE_SOURCE_DIR}/Thirdparty/GeometricPredicates
 	${CMAKE_SOURCE_DIR}/Thirdparty/GDCM
