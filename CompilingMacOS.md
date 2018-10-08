@@ -8,7 +8,7 @@
 
   1. Install using homebrew: `brew install boost`
   
-- [HDF5](https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.18/bin/windows): v1.8.18, or newer
+- [HDF5](https://support.hdfgroup.org/HDF5/): v1.8.18, or newer
 
   1. Install using homebrew: `brew install hdf5`
 
