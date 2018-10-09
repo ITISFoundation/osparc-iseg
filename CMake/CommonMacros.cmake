@@ -54,6 +54,7 @@ MACRO(MSVC_SOURCE_GROUP filter_name)
 		SOURCE_GROUP( ${filter_name} FILES ${ARGN} )
 	ENDIF()
 ENDMACRO()
+
 #
 # Visual studio specific: add files of a project to a specific filter filter_name
 # 
@@ -72,4 +73,34 @@ MACRO(SUBDIR_LIST result curdir)
     ENDIF()
   ENDFOREACH()
   SET(${result} ${dirlist})
+ENDMACRO()
+
+MACRO(INIT_BUNDLE app_name)
+	SET(BUNDLE_APPS)
+	SET(BUNDLE_LIBRARIES)
+	SET(BUNDLE_SEARCH_DIRS ${CMAKE_INSTALL_PREFIX} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+	IF(APPLE)
+    	SET(APP_BUNDLE_NAME "${app_name}.app")
+		SET(BUNDLE_INSTALL_TARGET ${CMAKE_INSTALL_PREFIX})
+		SET(BUNDLE_INSTALL_DIRECTORY ${BUNDLE_INSTALL_TARGET}/${APP_BUNDLE_NAME}/Contents/MacOS)
+    	LIST(APPEND BUNDLE_APPS ${BUNDLE_INSTALL_TARGET}/${APP_BUNDLE_NAME})
+	ELSE()
+    	LIST(APPEND BUNDLE_APPS "${CMAKE_INSTALL_PREFIX}/${app_name}")
+	ENDIF(APPLE)
+ENDMACRO()
+
+#
+# Note about BundleUtilities:
+#
+# the libs passed as the second argument to fixup_bundle MUST already be copied into the app bundle.
+# fixup_bundle only copies dependencies it discovers. Any libs passed as the second argument will
+# also have their dependencies copied in and fixed.
+MACRO(INSTALL_BUNDLE)
+	INSTALL(CODE "
+	include(BundleUtilities)
+	set(BU_CHMOD_BUNDLE_ITEMS 1)
+	message(STATUS \"BUNDLE_APPS ${BUNDLE_APPS}\")
+	fixup_bundle(\"${BUNDLE_APPS}\" \"${BUNDLE_LIBRARIES}\" \"${BUNDLE_SEARCH_DIRS}\")
+	" COMPONENT Runtime)
 ENDMACRO()
