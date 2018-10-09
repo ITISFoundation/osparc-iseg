@@ -35,10 +35,7 @@ ENDMACRO()
 
 MACRO(INSTALL_RUNTIME_LIBRARIES_BLOSC)
 	MESSAGE( STATUS "--> ThirdPartyBlosc: installing BLOSC library ..." )
-	IF(APPLE)
-		#FILE(COPY ${BLOSC_ROOT}/lib/
-		#	DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-		#	FILES_MATCHING PATTERN "lib*.dylib*")
-	ELSE()
+	IF(MSVC)
+		# anything to copy?
 	ENDIF()
 ENDMACRO()
