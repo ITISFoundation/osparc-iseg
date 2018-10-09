@@ -311,12 +311,13 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 	if (!_selected_objects->text().isEmpty())
 	{
 		std::vector<std::string> tokens;
-		boost::algorithm::split(tokens, _selected_objects->text().toStdString(), boost::algorithm::is_any_of(","));
+		std::string selected_objects_text = _selected_objects->text().toStdString();
+		boost::algorithm::split(tokens, selected_objects_text, boost::algorithm::is_any_of(","));
 		std::transform(tokens.begin(), tokens.end(), std::back_inserter(object_ids),
-			[](std::string s) {
-			boost::algorithm::trim(s);
-			return stoi(s);
-		});
+				[](std::string s) {
+					boost::algorithm::trim(s);
+					return stoi(s);
+				});
 	}
 
 	// mask feature image before skeletonization
@@ -337,7 +338,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		auto masker = itk::MaskImageFilter<real_type, mask_type>::New();
 		masker->SetInput(feature_image);
 		masker->SetMaskImage(map_filter->GetOutput());
-		SAFE_UPDATE(masker, return);
+		SAFE_UPDATE(masker, return );
 		feature_image = masker->GetOutput();
 	}
 
@@ -364,7 +365,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 			auto threshold = threshold_filter_type::New();
 			threshold->SetInput(nonmax_filter->GetOutput());
 			threshold->SetLowerThreshold(std::nextafter(std::min(lower, 0.f), 1.f));
-			SAFE_UPDATE(threshold, return);
+			SAFE_UPDATE(threshold, return );
 			skeleton = threshold->GetOutput();
 		}
 		else
@@ -372,7 +373,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 			auto threshold = threshold_filter_type::New();
 			threshold->SetInput(feature_image);
 			threshold->SetLowerThreshold(lower);
-			SAFE_UPDATE(threshold, return);
+			SAFE_UPDATE(threshold, return );
 			skeleton = threshold->GetOutput();
 		}
 
@@ -408,7 +409,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		auto threshold = itk::BinaryThresholdImageFilter<labelfield_type, mask_type>::New();
 		threshold->SetInput(relabel->GetOutput());
 		threshold->SetLowerThreshold(1);
-		SAFE_UPDATE(threshold, return);
+		SAFE_UPDATE(threshold, return );
 		output = threshold->GetOutput();
 	}
 
