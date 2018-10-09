@@ -11533,3 +11533,49 @@ bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
 	}
 	return false;
 }
+
+bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* progress)
+{
+	using input_type = SliceHandlerItkWrapper::tissues_ref_type;
+	using internal_type = itk::Image<unsigned char, 3>;
+	using image_type = itk::Image<unsigned, 3>;
+
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetTissues(true);
+
+	auto observer = ItkProgressObserver::New();
+
+	auto threshold = itk::BinaryThresholdImageFilter<input_type, internal_type>::New();
+	threshold->SetLowerThreshold(tissue);
+	threshold->SetUpperThreshold(tissue);
+	threshold->SetInput(all_slices);
+
+	auto filter = itk::ConnectedComponentImageFilter<internal_type, image_type>::New();
+	filter->SetInput(threshold->GetOutput());
+	filter->SetFullyConnected(true);
+	if (progress)
+	{
+		observer->SetProgressInfo(progress);
+		filter->AddObserver(itk::ProgressEvent(), observer);
+	}
+	try
+	{
+		filter->Update();
+
+		if (!progress || (progress && !progress->wasCanceled()))
+		{
+			// copy result back
+
+			// iterate over connected components, add to tissues
+
+			// add tissue infos
+
+			return true;
+		}
+	}
+	catch (itk::ExceptionObject& e)
+	{
+		ISEG_ERROR("Exception occurred: " << e.what());
+	}
+	return false;
+}
