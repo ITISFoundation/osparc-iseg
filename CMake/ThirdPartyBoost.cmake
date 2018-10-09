@@ -15,7 +15,7 @@ endif(BOOST_ROOT STREQUAL "not defined")
 #set(Boost_DEBUG on)
 #set(Boost_DETAILED_FAILURE_MSG on)
 set(Boost_USE_MULTITHREADED on)
-FIND_PACKAGE(Boost 1.63 REQUIRED COMPONENTS filesystem thread log unit_test_framework program_options date_time random chrono locale ${BOOST_REQUIRED_LIBS})
+FIND_PACKAGE(Boost 1.64 REQUIRED COMPONENTS filesystem thread unit_test_framework date_time random chrono timer ${BOOST_REQUIRED_LIBS})
 if(NOT Boost_FOUND)
 	message(FATAL_ERROR "Boost library not found!")
 endif(NOT Boost_FOUND)
@@ -36,17 +36,7 @@ ENDMACRO()
 
 MACRO(INSTALL_RUNTIME_LIBRARIES_BOOST)
 	MESSAGE( STATUS "--> ThirdPartyBoost: installing boost library ..." )
-	IF(CMAKE_COMPILER_IS_GNUCXX)
-		IF(APPLE)
-			FILE(COPY ${BOOST_LIBRARY_DIR}/
-				DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-				FILES_MATCHING PATTERN "*.dylib")
-		ELSE()
-			FILE(COPY ${BOOST_LIBRARY_DIR}/
-				DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-				FILES_MATCHING PATTERN "*${BOOST_VERSION}.so*" )
-		ENDIF()
-	ELSEIF(MSVC)
+	IF(MSVC)
 		FOREACH(BUILD_TYPE ${CMAKE_CONFIGURATION_TYPES})
 			STRING(TOLOWER ${BUILD_TYPE} build_type)
 				IF(${build_type} MATCHES rel*)
