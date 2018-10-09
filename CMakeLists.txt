@@ -7,7 +7,7 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-CMAKE_MINIMUM_REQUIRED(VERSION 3.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(ISEG C CXX)
 
 SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Which Build Types to support" FORCE)
