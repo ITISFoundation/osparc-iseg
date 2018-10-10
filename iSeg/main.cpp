@@ -11,7 +11,6 @@
 
 #include "config.h"
 
-#include "DicomReader.h"
 #include "MainWindow.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"

@@ -837,7 +837,7 @@ void ThresholdWidget::loadborders_execute()
 		QString loadfilename =
 				QFileDialog::getOpenFileName(QString::null,
 						"Boarders (*.txt)\n"
-						"All(*.*)",
+						"All (*.*)",
 						this);
 
 		if (!loadfilename.isEmpty())
@@ -1026,7 +1026,7 @@ void ThresholdWidget::select_pushed()
 			QString::null,
 			"Images (*.png)\n"
 			"Images (*.mhd)\n"
-			"All(*.*)", //"Images (*.bmp)\n" "All(*.*)", QString::null,
+			"All (*.*)", //"Images (*.bmp)\n" "All (*.*)", QString::null,
 			this);			//, filename);
 	le_filename->setText(loadfilename);
 	filenames[sb_tissuenr->value() - 2] = loadfilename;

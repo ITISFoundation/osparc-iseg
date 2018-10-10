@@ -2376,7 +2376,7 @@ void MainWindow::execute_loadbmp()
 {
 	maybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)",
 			QString::null, this, "open files dialog", "Select one or more files to open");
 
 	if (!files.empty())
@@ -2422,7 +2422,7 @@ void MainWindow::execute_loadpng()
 {
 	maybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.png)\nAll(*.*)",
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.png)\nAll (*.*)",
 			QString::null, this, "open files dialog",
 			"Select one or more files to open");
 
@@ -2461,8 +2461,7 @@ void MainWindow::execute_loadjpg()
 	maybeSafe();
 
 	QStringList files =
-			QFileDialog::getOpenFileNames("Images (*.jpg)\n"
-																		"All(*.*)",
+			QFileDialog::getOpenFileNames("Images (*.jpg)\nAll (*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -2511,8 +2510,7 @@ void MainWindow::execute_loaddicom()
 {
 	maybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\n"
-																										"All(*.*)",
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\nAll (*)",
 			QString::null, this, "open files dialog",
 			"Select one or more files to open");
 
@@ -2623,7 +2621,7 @@ void MainWindow::execute_loadmhd()
 	emit begin_datachange(dataSelection, this, false);
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"Metaheader (*.mhd *.mha)\nAll(*.*)", this);
+			"Metaheader (*.mhd *.mha)\nAll (*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
@@ -2652,7 +2650,7 @@ void MainWindow::execute_loadvtk()
 	bool res = true;
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"VTK (*.vti *.vtk)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2689,7 +2687,7 @@ void MainWindow::execute_loadnifti()
 	QString loadfilename =
 			QFileDialog::getOpenFileName(QString::null,
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All(*.*)",
+					"All (*.*)",
 					this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2718,7 +2716,7 @@ void MainWindow::execute_loadavw()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"AnalzyeAVW (*.avw)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2736,7 +2734,7 @@ void MainWindow::execute_loadavw()
 
 void MainWindow::execute_reloadbmp()
 {
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)",
 			QString::null, this, "open files dialog",
 			"Select one or more files to open");
 
@@ -2827,7 +2825,7 @@ void MainWindow::execute_reloadavw()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"AnalzyeAVW (*.avw)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2849,7 +2847,7 @@ void MainWindow::execute_reloadmhd()
 	QString loadfilename =
 			QFileDialog::getOpenFileName(QString::null,
 					"Metaheader (*.mhd *.mha)\n"
-					"All(*.*)",
+					"All (*.*)",
 					this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2871,7 +2869,7 @@ void MainWindow::execute_reloadvtk()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"VTK (*.vti *.vtk)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2894,7 +2892,7 @@ void MainWindow::execute_reloadnifti()
 	QString loadfilename =
 			QFileDialog::getOpenFileName(QString::null,
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All(*.*)",
+					"All (*.*)",
 					this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2913,7 +2911,7 @@ void MainWindow::execute_loadsurface()
 	bool ok = true;
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"STL (*.stl)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -2955,7 +2953,7 @@ void MainWindow::execute_loadrtstruct()
 #ifndef NORTSTRUCTSUPPORT
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTstruct (*.dcm)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this); //, filename);
 
 	if (loadfilename.isEmpty())
@@ -3006,7 +3004,7 @@ void MainWindow::execute_loadrtdose()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTdose (*.dcm)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -3035,7 +3033,7 @@ void MainWindow::execute_reloadrtdose()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"RTdose (*.dcm)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -3054,7 +3052,7 @@ void MainWindow::execute_loads4llivelink()
 {
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"S4L Link (*.h5)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
 	{
@@ -3072,7 +3070,7 @@ void MainWindow::execute_loadrtss()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTSS (*.dcm)\n" "All(*.*)", this);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTSS (*.dcm)\n" "All (*.*)", this);
 	if(!loadfilename.isEmpty()){
 		//handler3D->ReloadRTdose(loadfilename.ascii(),handler3D->return_startslice()); // TODO: handle failure
 		handler3D->ReadRTSS(loadfilename.ascii());
@@ -3893,7 +3891,7 @@ void MainWindow::execute_loadproj()
 
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"Projects (*.prj)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this); //, filename);
 
 	if (!loadfilename.isEmpty())
@@ -5164,7 +5162,7 @@ void MainWindow::execute_removetissues()
 {
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!filename.isEmpty())
 	{
@@ -5193,7 +5191,7 @@ void MainWindow::execute_grouptissues()
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 	if (!filename.isEmpty())
 	{
@@ -5769,7 +5767,7 @@ void MainWindow::do_work2tissue_grouped()
 
 	QString filename = QFileDialog::getOpenFileName(QString::null,
 			"Text (*.txt)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 
 	if (!filename.isEmpty())

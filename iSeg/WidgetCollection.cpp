@@ -1483,7 +1483,7 @@ void bits_stack::poptissue_pressed() { pop_helper(false, false, true); }
 
 void bits_stack::loaditem_pressed()
 {
-	QStringList selectedFiles = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll(*.*)",
+	QStringList selectedFiles = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll (*.*)",
 			QString::null, this, "open file dialog", "Select on or more files to open");
 	if (selectedFiles.isEmpty())
 	{
@@ -1886,7 +1886,7 @@ void extoverlay_widget::load_dataset_pressed()
 					"VTK (*.vti *.vtk)\n"
 					"Raw files (*.raw)\n"
 					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All(*.*)",
+					"All (*.*)",
 					this); // TODO: Support other file types
 	if (!loadfilename.isEmpty())
 	{
@@ -2100,7 +2100,7 @@ void MultiDataset_widget::AddDatasetPressed()
 		{
 		case SupportedMultiDatasetTypes::supportedTypes::bmp:
 		{
-			loadfilenames = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll(*.*)",
+			loadfilenames = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -2133,7 +2133,7 @@ void MultiDataset_widget::AddDatasetPressed()
 		{
 			loadfilenames = QFileDialog::getOpenFileNames(
 					"Images (*.dcm *.dicom)\n"
-					"All(*.*)",
+					"All (*)",
 					QString::null, this, "open files dialog",
 					"Select one or more files to open");
 
@@ -2178,7 +2178,7 @@ void MultiDataset_widget::AddDatasetPressed()
 					QString::null,
 					"VTK (*.vti *.vtk)\n"
 					"NIFTI (*.nii *.hdr *.img *.nia)\n"
-					"All(*.*)",
+					"All (*.*)",
 					this);
 			if (!loadfilename.isEmpty())
 			{
