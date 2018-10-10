@@ -38,9 +38,9 @@ install:
       brew ls --versions vtk || brew install vtk
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
-      if [ ! -d "${DEPS_DIR}/itk/build" ]; then
+      if [ ! -d "${DEPS_DIR}/itk/lib" ]; then
         ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-        mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON && make -j4 && make install && cd ${DEPS_DIR}
+        mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DBUILD_SHARED_LIBS=ON -DModule_ITKReview=ON && make -j4 && make install && cd ${DEPS_DIR}
       fi
     fi
 
