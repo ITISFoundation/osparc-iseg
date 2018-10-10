@@ -15,6 +15,13 @@ matrix:
       compiler: clang
       env: COMPILER='clang++' BUILD_TYPE='Release'
 
+cache:
+  directories:
+    - '${TRAVIS_BUILD_DIR}/deps/itk'
+
+before_cache:
+  - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/build
+  - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/src
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
