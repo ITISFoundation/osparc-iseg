@@ -11561,14 +11561,31 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 	try
 	{
 		filter->Update();
-
+		auto components = filter->GetOutput();
+		
 		if (!progress || (progress && !progress->wasCanceled()))
 		{
-			// copy result back
-
-			// iterate over connected components, add to tissues
+			tissues_size_t Ninitial = TissueInfos::GetTissueCount();
 
 			// add tissue infos
+			auto N = filter->GetObjectCount();
+			for (tissues_size_t i=0; i!=N; ++i)
+			{
+				TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
+				info.name += (boost::format("_%d") % static_cast<int>(i+1)).str();;
+				TissueInfos::AddTissue(info);
+			}
+
+			// iterate over connected components, add to tissues
+			itk::ImageRegionConstIterator<image_type> it(components, components->GetLargestPossibleRegion());
+			itk::ImageRegionIterator<input_type> ot(all_slices, all_slices->GetLargestPossibleRegion());
+			for (it.GoToBegin(), ot.GoToBegin(); !it.IsAtEnd(); ++it, ++ot)
+			{
+				if (it.Get() != 0)
+				{
+					ot.Set(Ninitial + it.Get());
+				}
+			}
 
 			return true;
 		}

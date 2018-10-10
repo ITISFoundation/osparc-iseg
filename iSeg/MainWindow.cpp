@@ -7916,6 +7916,9 @@ void MainWindow::execute_split_tissue()
 		bool ok = handler3D->compute_split_tissues(sel.front(), &progress);
 
 		emit end_datachange(this, ok ? iseg::EndUndo : iseg::AbortUndo);
+
+		// update tree view after adding new tissues
+		tissueTreeWidget->update_tree_widget();
 	}
 	else
 	{
