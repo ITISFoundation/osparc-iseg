@@ -31,14 +31,16 @@ install:
       brew ls --versions vtk || brew install vtk
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
-      ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-      mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON && make -j4 && make install && cd ${DEPS_DIR}
+      if [ ! -d "${DEPS_DIR}/itk/build" ]; then
+        ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
+        mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON && make -j4 && make install && cd ${DEPS_DIR}
+      fi
     fi
 
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=${DEPS_DIR}/itk -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
   - cd Build
 
 script:
