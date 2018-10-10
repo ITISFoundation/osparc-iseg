@@ -275,7 +275,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 	using nonmax_filter_type = itk::NonMaxSuppressionImageFilter<real_type>;
 	using thinnning_filter_type = BinaryThinningImageFilter<mask_type, mask_type, ImageDimension>;
 
-	real_type::Pointer feature_image;
+	typename real_type::Pointer feature_image;
 	std::vector<double> feature_params;
 	feature_params.push_back(_sigma_low->text().toDouble());
 	feature_params.push_back(_sigma_hi->text().toDouble());
@@ -342,7 +342,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		feature_image = masker->GetOutput();
 	}
 
-	mask_type::Pointer skeleton;
+	typename mask_type::Pointer skeleton;
 	std::vector<double> skeleton_params(object_ids.begin(), object_ids.end());
 	skeleton_params.push_back(lower);
 	skeleton_params.push_back(_non_max_suppression->isChecked());
@@ -395,7 +395,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		_cached_skeleton.store(skeleton, skeleton_params);
 	}
 
-	mask_type::Pointer output;
+	typename mask_type::Pointer output;
 	if (skeleton && _min_object_size->text().toInt() > 1)
 	{
 		auto connectivity = itk::ConnectedComponentImageFilter<mask_type, labelfield_type>::New();
