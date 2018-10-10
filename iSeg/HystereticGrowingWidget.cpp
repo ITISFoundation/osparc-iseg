@@ -552,7 +552,7 @@ void HystereticGrowingWidget::loadborders_execute()
 {
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
 			"Borders (*.txt)\n"
-			"All(*.*)",
+			"All (*.*)",
 			this);
 
 	if (!loadfilename.isEmpty())

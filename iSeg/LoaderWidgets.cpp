@@ -1077,7 +1077,7 @@ void LoaderColorImages::load_quantize()
 	}
 
 	QString filename = QFileDialog::getOpenFileName(initialDir,
-			"iSEG Color Lookup Table (*.lut *.h5)\nAll(*.*)", this);
+			"iSEG Color Lookup Table (*.lut *.h5)\nAll (*.*)", this);
 	if (!filename.isEmpty())
 	{
 		XdmfImageReader reader;
