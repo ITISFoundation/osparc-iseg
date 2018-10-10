@@ -8,7 +8,7 @@
 
   1. Install using homebrew: `brew install boost`
   
-- [HDF5](https://support.hdfgroup.org/HDF5/): v1.8.18, or newer
+- [HDF5](https://support.hdfgroup.org/HDF5/): v1.10.1, or newer
 
   1. Install using homebrew: `brew install hdf5`
 
@@ -23,11 +23,7 @@
 
 - [VTK source code](https://www.vtk.org/files/release/7.1/VTK-7.1.0.tar.gz): v7.1.0, or newer
 
-  1. Download and unzip the VTK folder
-  2. CMake (source VTK folder, build in separate folder), press _Configure_
-  3. Press configure and select the `Unix Makefile` generator
-  4. Press _Generate_
-  5. In build directory type `make`
+  1. Install using homebrew: `brew install vtk`
 
 - [Qt](https://download.qt.io/official_releases/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz): v4.8.7 (min 4.8.6)
 
