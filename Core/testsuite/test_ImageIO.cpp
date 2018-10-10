@@ -44,8 +44,8 @@ public:
 		_start = start;
 		_end = (end == 0) ? nrslices : end;
 
-		_float_data.resize(_dims[0] * _dims[1], 1.3f);
-		_tissue_data.resize(_dims[0] * _dims[1], tissues_size_t(3));
+		_float_data.resize(_dims[0] * _dims[1] * _dims[2], 1.3f);
+		_tissue_data.resize(_dims[0] * _dims[1] * _dims[2], tissues_size_t(3));
 	}
 
 	std::vector<float> _float_data;
@@ -69,32 +69,52 @@ public:
 
 	std::vector<const tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) const override
 	{
-		return std::vector<const tissues_size_t*>(_dims[2], _tissue_data.data());
+		std::vector<const tissues_size_t*> d(_dims[2], nullptr);
+		for (size_t i = 0; i < _dims[2]; ++i)
+		{
+			d[i] = _tissue_data.data() + i * _dims[0] * _dims[1];
+		}
+		return d;
 	}
 
 	std::vector<tissues_size_t*> tissue_slices(tissuelayers_size_t layeridx) override
 	{
-		return std::vector<tissues_size_t*>(_dims[2], _tissue_data.data());
+		std::vector<tissues_size_t*> d(_dims[2], nullptr);
+		for (size_t i = 0; i < _dims[2]; ++i)
+		{
+			d[i] = _tissue_data.data() + i * _dims[0] * _dims[1];
+		}
+		return d;
 	}
 
 	std::vector<const float*> source_slices() const override
 	{
-		return std::vector<const float*>(_dims[2], _float_data.data());
+		std::vector<const float*> d(_dims[2], nullptr);
+		for (size_t i = 0; i < _dims[2]; ++i)
+		{
+			d[i] = _float_data.data() + i * _dims[0] * _dims[1];
+		}
+		return d;
 	}
 
 	std::vector<float*> source_slices() override
 	{
-		return std::vector<float*>(_dims[2], _float_data.data());
+		std::vector<float*> d(_dims[2], nullptr);
+		for (size_t i = 0; i < _dims[2]; ++i)
+		{
+			d[i] = _float_data.data() + i * _dims[0] * _dims[1];
+		}
+		return d;
 	}
 
 	std::vector<const float*> target_slices() const override
 	{
-		return std::vector<const float*>(_dims[2], _float_data.data());
+		return source_slices();
 	}
 
 	std::vector<float*> target_slices() override
 	{
-		return std::vector<float*>(_dims[2], _float_data.data());
+		return source_slices();
 	}
 
 	std::vector<std::string> tissue_names() const override
@@ -339,6 +359,7 @@ private:
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
 BOOST_AUTO_TEST_SUITE(ImageIO_suite);
 
+// --run_test=iSeg_suite/ImageIO_suite/Metaheader --log_level=message
 BOOST_AUTO_TEST_CASE(Metaheader)
 {
 	TestIO test("temp.mhd", true);

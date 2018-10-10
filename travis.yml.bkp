@@ -1,0 +1,74 @@
+language: cpp
+sudo: false
+
+matrix:
+  include:
+
+    # Linux C++14 GCC builds
+    - os: linux
+      compiler: gcc
+      addons: &gcc6
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6']
+      env: COMPILER='g++-6' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: gcc
+      addons: *gcc6
+      env: COMPILER='g++-6' BUILD_TYPE='Debug'
+
+    # Linux C++14 Clang builds
+    - os: linux
+      compiler: clang
+      addons: &clang38
+        apt:
+          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
+          packages: ['clang-3.8']
+      env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: clang
+      addons: *clang38
+      env: COMPILER='clang++-3.8' BUILD_TYPE='Debug'
+
+    # OSX C++14 Clang Builds
+    - os: osx
+      osx_image: xcode10
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Debug'
+
+    - os: osx
+      osx_image: xcode10
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Release'
+
+
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.13/cmake-3.13.0-rc1-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      which cmake || brew install cmake
+      brew ls --versions boost || brew install boost
+      brew ls --versions hdf5 || brew install hdf5
+      brew ls --versions vtk || brew install vtk
+      brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
+      # could not find tap for ITK
+      ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
+      mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON && make -j4 && make install && cd ${DEPS_DIR}
+    fi
+
+before_script:
+  - export CXX=${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR}
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=${DEPS_DIR}/itk -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - cd Build
+
+script:
+  - make -j 2
+  - ctest -V -j 2
