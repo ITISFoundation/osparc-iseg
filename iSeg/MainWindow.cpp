@@ -1346,22 +1346,25 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	viewmenu->insertItem("Methods", hidesubmenu);
 
 	toolmenu = menuBar()->addMenu(tr("T&ools"));
-	toolmenu->insertItem("&Group Tissues...", this, SLOT(execute_grouptissues()));
-	toolmenu->insertItem("Remove Tissues...", this, SLOT(execute_removetissues()));
 	toolmenu->insertItem("Target->Tissue", this, SLOT(do_work2tissue()));
 	toolmenu->insertItem("Target->Tissue grouped...", this, SLOT(do_work2tissue_grouped()));
 	toolmenu->insertItem("Tissue->Target", this, SLOT(do_tissue2work()));
 	toolmenu->insertItem("In&verse Slice Order", this, SLOT(execute_inversesliceorder()));
-	toolmenu->insertItem("Clean Up", this, SLOT(execute_cleanup()));
-	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
-	toolmenu->insertItem("Smooth Steps", this, SLOT(execute_smoothsteps()));
+	toolmenu->addSeparator();
+	toolmenu->insertItem("&Group Tissues...", this, SLOT(execute_grouptissues()));
+	toolmenu->insertItem("Remove Tissues...", this, SLOT(execute_removetissues()));
 	if (!m_editingmode)
 	{
 		toolmenu->insertItem("Merge Projects...", this, SLOT(execute_mergeprojects()));
 	}
-	toolmenu->insertItem("Check Bone Connectivity", this, SLOT(execute_boneconnectivity()));
+	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
+	toolmenu->insertItem("Supplant Selected Tissue", this, SLOT(execute_voting_replace_labels()));
+	toolmenu->insertItem("Split Disconnected Tissue Regions", this, SLOT(execute_split_tissue()));
 	toolmenu->insertItem("Compute Target Connectivity", this, SLOT(execute_target_connected_components()));
-	toolmenu->insertItem("Replace Tissue via Voting", this, SLOT(execute_voting_replace_labels()));
+	toolmenu->addSeparator();
+	toolmenu->insertItem("Clean Up", this, SLOT(execute_cleanup()));
+	toolmenu->insertItem("Smooth Steps", this, SLOT(execute_smoothsteps()));
+	toolmenu->insertItem("Check Bone Connectivity", this, SLOT(execute_boneconnectivity()));
 
 	atlasmenu = menuBar()->addMenu(tr("Atlas"));
 	// todo: make atlas method generic, i.e. for loop
@@ -7864,7 +7867,7 @@ void MainWindow::execute_savecolorlookup()
 void MainWindow::execute_voting_replace_labels()
 {
 	auto sel = handler3D->tissue_selection();
-	if (sel.size() == 1)
+	if (sel.size() == 1 && !handler3D->tissue_locks().at(sel.at(0)))
 	{
 		tissues_size_t FG = sel.front();
 		std::array<unsigned int, 3> radius = { 1,1,1 };
@@ -7896,4 +7899,29 @@ void MainWindow::execute_target_connected_components()
 	bool ok = handler3D->compute_target_connectivity(&progress);
 
 	emit end_datachange(this, ok ? iseg::EndUndo : iseg::AbortUndo);
+}
+
+void MainWindow::execute_split_tissue()
+{
+	auto sel = handler3D->tissue_selection();
+	if (sel.size() == 1 && !handler3D->tissue_locks().at(sel.at(0)))
+	{
+		ProgressDialog progress("Connected component analysis", this);
+
+		iseg::DataSelection dataSelection;
+		dataSelection.allSlices = true;
+		dataSelection.tissues = true;
+		emit begin_datachange(dataSelection, this);
+
+		bool ok = handler3D->compute_split_tissues(sel.front(), &progress);
+
+		emit end_datachange(this, ok ? iseg::EndUndo : iseg::AbortUndo);
+
+		// update tree view after adding new tissues
+		tissueTreeWidget->update_tree_widget();
+	}
+	else
+	{
+		QMessageBox::warning(this, "iSeg", "Please select only one non-locked tissue\n", QMessageBox::Ok | QMessageBox::Default);
+	}
 }

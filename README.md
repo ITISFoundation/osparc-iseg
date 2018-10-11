@@ -1,4 +1,5 @@
 ![iSEG logo](iSeg/images/isegicon.png)
+[![Build Status](https://travis-ci.com/ITISFoundation/osparc-iseg.svg?branch=master)](https://travis-ci.com/ITISFoundation/osparc-iseg)
 
 ## Description
 
@@ -11,10 +12,10 @@ Instructions as to how these libraries must be installed and compiled are provid
 
 ### Required applications
 
-The application below must be installed on the system in order to compile iSEG and its dependencies.
+The applications below are needed in order to compile iSEG and its dependencies.
 
 - [CMake:](https://cmake.org/) 3.6 minimum
-- Visual Studio 2015 with *x64* C++ compiler, Xcode/Clang on MacOS
+- Visual Studio 2015 or Xcode/Clang on MacOS
 - [Git](https://git-scm.com/)
 
 ### Required 3rd party libraries

@@ -11533,3 +11533,66 @@ bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
 	}
 	return false;
 }
+
+bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* progress)
+{
+	using input_type = SliceHandlerItkWrapper::tissues_ref_type;
+	using internal_type = itk::Image<unsigned char, 3>;
+	using image_type = itk::Image<unsigned, 3>;
+
+	SliceHandlerItkWrapper wrapper(this);
+	auto all_slices = wrapper.GetTissues(true);
+
+	auto observer = ItkProgressObserver::New();
+
+	auto threshold = itk::BinaryThresholdImageFilter<input_type, internal_type>::New();
+	threshold->SetLowerThreshold(tissue);
+	threshold->SetUpperThreshold(tissue);
+	threshold->SetInput(all_slices);
+
+	auto filter = itk::ConnectedComponentImageFilter<internal_type, image_type>::New();
+	filter->SetInput(threshold->GetOutput());
+	filter->SetFullyConnected(true);
+	if (progress)
+	{
+		observer->SetProgressInfo(progress);
+		filter->AddObserver(itk::ProgressEvent(), observer);
+	}
+	try
+	{
+		filter->Update();
+		auto components = filter->GetOutput();
+		
+		if (!progress || (progress && !progress->wasCanceled()))
+		{
+			tissues_size_t Ninitial = TissueInfos::GetTissueCount();
+
+			// add tissue infos
+			auto N = filter->GetObjectCount();
+			for (tissues_size_t i=0; i!=N; ++i)
+			{
+				TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
+				info.name += (boost::format("_%d") % static_cast<int>(i+1)).str();;
+				TissueInfos::AddTissue(info);
+			}
+
+			// iterate over connected components, add to tissues
+			itk::ImageRegionConstIterator<image_type> it(components, components->GetLargestPossibleRegion());
+			itk::ImageRegionIterator<input_type> ot(all_slices, all_slices->GetLargestPossibleRegion());
+			for (it.GoToBegin(), ot.GoToBegin(); !it.IsAtEnd(); ++it, ++ot)
+			{
+				if (it.Get() != 0)
+				{
+					ot.Set(Ninitial + it.Get());
+				}
+			}
+
+			return true;
+		}
+	}
+	catch (itk::ExceptionObject& e)
+	{
+		ISEG_ERROR("Exception occurred: " << e.what());
+	}
+	return false;
+}

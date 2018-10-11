@@ -362,6 +362,7 @@ public:
 	void interpolate(unsigned short slice1, unsigned short slice2, float* bmp1, float* bmp2);
 
 	bool compute_target_connectivity(ProgressInfo* progress = nullptr);
+	bool compute_split_tissues(tissues_size_t tissue, ProgressInfo* progress = nullptr);
 
 	void set_slicethickness(float t);
 	float get_slicethickness();

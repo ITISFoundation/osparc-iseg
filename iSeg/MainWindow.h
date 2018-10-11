@@ -523,6 +523,7 @@ private slots:
 	void execute_remove_unused_tissues();
 	void execute_voting_replace_labels();
 	void execute_target_connected_components();
+	void execute_split_tissue();
 	void execute_cleanup();
 	void execute_smoothsteps();
 	void execute_smoothtissues();
