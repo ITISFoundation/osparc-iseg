@@ -436,7 +436,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_workpicturevisible->setChecked(true);
 
 	bmp_show = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	lb_source = new QLabel("             Source", this);
+	lb_source = new QLabel("Source", this);
 	lb_target = new QLabel("Target", this);
 	bmp_scroller = new Q3ScrollView(this);
 	sl_contrastbmp = new QSlider(Qt::Horizontal, this);
@@ -1283,12 +1283,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hidecopyswap->addTo(hidemenu);
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
-		//showtab_action[i]=new Q3Action((std::string("Show ")+tabwidgets[i]->GetName()).c_str(),0,this);
 		showtab_action[i] = new Q3Action(tabwidgets[i]->GetName().c_str(), 0, this);
 		showtab_action[i]->setToggleAction(true);
 		showtab_action[i]->setOn(showpb_tab[i]);
-		connect(showtab_action[i], SIGNAL(toggled(bool)), this,
-				SLOT(execute_showtabtoggled(bool)));
+		connect(showtab_action[i], SIGNAL(toggled(bool)), this, SLOT(execute_showtabtoggled(bool)));
 		showtab_action[i]->addTo(hidesubmenu);
 	}
 	hideparameters = new Q3Action("Simplified", 0, this);
@@ -3292,25 +3290,28 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	hidecopyswap->setOn(!flag);
 	execute_hidecopyswap(!flag);
 
+	// turn visibility on for all
 	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	for (int i = 0; i < nrtabbuttons; i++)
 	{
 		showtab_action[i]->setOn(true);
 	}
+
+	// load visibility settings from file
 	for (unsigned short i = 0; i < 14; i++)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action.at(i)->setOn(flag);
+		if (i < nrtabbuttons) showtab_action.at(i)->setOn(flag);
 	}
 	if (loadProjVersion >= 6)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action.at(14)->setOn(flag);
+		if (14 < nrtabbuttons) showtab_action.at(14)->setOn(flag);
 	}
 	if (loadProjVersion >= 9)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action.at(15)->setOn(flag);
+		if (15 < nrtabbuttons) showtab_action.at(15)->setOn(flag);
 	}
 	execute_showtabtoggled(flag);
 
