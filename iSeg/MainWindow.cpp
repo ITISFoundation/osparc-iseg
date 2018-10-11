@@ -641,9 +641,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	measurement_widget = new MeasurementWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(measurement_widget);
 	vesselextr_widget = new VesselWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-//#ifdef PLUGIN_VESSEL_WIDGET
+#ifdef PLUGIN_VESSEL_WIDGET
 	tabwidgets.push_back(vesselextr_widget);
-//#endif
+#endif
 	picker_widget = new PickerWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(picker_widget);
 	transform_widget = new TransformWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -3287,32 +3287,31 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	fread(&flag, sizeof(bool), 1, fp);
 	hidecontrastbright->setOn(!flag);
 	execute_hidecontrastbright(!flag);
+
 	fread(&flag, sizeof(bool), 1, fp);
 	hidecopyswap->setOn(!flag);
 	execute_hidecopyswap(!flag);
+
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
+	for (int i = 0; i < nrtabbuttons; i++)
+	{
+		showtab_action[i]->setOn(true);
+	}
 	for (unsigned short i = 0; i < 14; i++)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action[i]->setOn(flag);
+		showtab_action.at(i)->setOn(flag);
 	}
 	if (loadProjVersion >= 6)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action[14]->setOn(flag);
+		showtab_action.at(14)->setOn(flag);
 	}
 	if (loadProjVersion >= 9)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		showtab_action[15]->setOn(flag);
+		showtab_action.at(15)->setOn(flag);
 	}
-
-	//New added. Show all loaded widgets
-	auto nrtabbuttons = (unsigned short)tabwidgets.size();
-	for (int i = 16; i < nrtabbuttons; i++)
-	{
-		showtab_action[i]->setOn(flag);
-	}
-
 	execute_showtabtoggled(flag);
 
 	fp = TissueInfos::LoadTissues(fp, tissuesVersion);
