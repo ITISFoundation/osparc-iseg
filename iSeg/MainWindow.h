@@ -310,7 +310,6 @@ private:
 	Q3Accel* m_acc_slicedown;
 	Q3Accel* m_acc_sliceup;
 	QTextEdit* m_notes;
-	unsigned short nrtabbuttons;
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;
 	std::vector<bool> showpb_tab;

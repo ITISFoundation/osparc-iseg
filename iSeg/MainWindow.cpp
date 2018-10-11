@@ -614,58 +614,42 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
 	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 
-	threshold_widget = new ThresholdWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	threshold_widget = new ThresholdWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
-	hyst_widget = new HystereticGrowingWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	hyst_widget = new HystereticGrowingWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
-	livewire_widget = new LivewireWidget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	livewire_widget = new LivewireWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(livewire_widget);
-	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(
-			handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	iftrg_widget = new ImageForestingTransformRegionGrowingWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(iftrg_widget);
-	fastmarching_widget = new FastmarchingFuzzyWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	fastmarching_widget = new FastmarchingFuzzyWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(fastmarching_widget);
-	watershed_widget = new WatershedWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	watershed_widget = new WatershedWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(watershed_widget);
-	olc_widget = new OutlineCorrectionWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	olc_widget = new OutlineCorrectionWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(olc_widget);
-	interpolation_widget = new InterpolationWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	interpolation_widget = new InterpolationWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(interpolation_widget);
-	smoothing_widget = new SmoothingWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	smoothing_widget = new SmoothingWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(smoothing_widget);
-	morphology_widget = new MorphologyWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	morphology_widget = new MorphologyWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(morphology_widget);
-	edge_widget = new EdgeWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	edge_widget = new EdgeWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(edge_widget);
-	feature_widget = new FeatureWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	feature_widget = new FeatureWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(feature_widget);
-	measurement_widget = new MeasurementWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	measurement_widget = new MeasurementWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(measurement_widget);
-	vesselextr_widget = new VesselWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
-#ifndef PLUGIN_VESSEL_WIDGET
-	vesselextr_widget->hide();
-#endif
+	vesselextr_widget = new VesselWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+//#ifdef PLUGIN_VESSEL_WIDGET
 	tabwidgets.push_back(vesselextr_widget);
-	picker_widget = new PickerWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+//#endif
+	picker_widget = new PickerWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(picker_widget);
-	transform_widget = new TransformWidget(handler3D, this, "new window",
-			Qt::WDestructiveClose | Qt::WResizeNoErase);
+	transform_widget = new TransformWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(transform_widget);
 
 	boost::filesystem::path this_exe(argv[0]);
-
 	bool ok = iseg::plugin::LoadPlugins(this_exe.parent_path().string());
 	assert(ok == true);
 
@@ -673,11 +657,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	for (auto a : addons)
 	{
 		a->install_slice_handler(handler3D);
-		tabwidgets.push_back(a->create_widget(
-				this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase));
+		tabwidgets.push_back(a->create_widget(nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase));
 	}
 
-	nrtabbuttons = (unsigned short)tabwidgets.size();
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	pb_tab.resize(nrtabbuttons);
 	showpb_tab.resize(nrtabbuttons);
 	showtab_action.resize(nrtabbuttons);
@@ -3324,6 +3307,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	}
 
 	//New added. Show all loaded widgets
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	for (int i = 16; i < nrtabbuttons; i++)
 	{
 		showtab_action[i]->setOn(flag);
@@ -4957,6 +4941,7 @@ void MainWindow::execute_hidenotes(bool checked)
 
 void MainWindow::execute_showtabtoggled(bool)
 {
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
 		showpb_tab[i] = showtab_action[i]->isOn();
@@ -7024,6 +7009,7 @@ void MainWindow::tab_changed(int idx)
 
 void MainWindow::updateTabvisibility()
 {
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	unsigned short counter = 0;
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
@@ -7063,7 +7049,7 @@ void MainWindow::updateTabvisibility()
 
 void MainWindow::updateMethodButtonsPressed(WidgetInterface* qw)
 {
-	//	QWidget *qw=methodTab->visibleWidget();
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	unsigned short counter = 0;
 	unsigned short pos = nrtabbuttons;
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
@@ -7267,6 +7253,7 @@ void MainWindow::SaveLoadProj(const QString& latestprojpath)
 
 void MainWindow::pb_tab_pressed(int nr)
 {
+	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	unsigned short tabnr = nr + 1;
 	for (unsigned short tabnr1 = 0; tabnr1 < pb_tab.size(); tabnr1++)
 	{
