@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef VESSELWIDGET_19DEZ07
-#define VESSELWIDGET_19DEZ07
+#pragma once
 
 #include "SlicesHandler.h"
 #include "World.h"
@@ -85,4 +84,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

@@ -45,9 +45,7 @@
 #include "WatershedWidget.h"
 #include "XdmfImageWriter.h"
 
-#ifndef NORTSTRUCTSUPPORT
-#	include "RadiotherapyStructureSetImporter.h"
-#endif
+#include "RadiotherapyStructureSetImporter.h"
 
 #include "Interface/Plugin.h"
 #include "Interface/ProgressDialog.h"
@@ -438,7 +436,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_workpicturevisible->setChecked(true);
 
 	bmp_show = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	lb_source = new QLabel("Source", this);
+	lb_source = new QLabel("             Source", this);
 	lb_target = new QLabel("Target", this);
 	bmp_scroller = new Q3ScrollView(this);
 	sl_contrastbmp = new QSlider(Qt::Horizontal, this);
@@ -655,6 +653,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	tabwidgets.push_back(measurement_widget);
 	vesselextr_widget = new VesselWidget(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
+#ifndef PLUGIN_VESSEL_WIDGET
+	vesselextr_widget->hide();
+#endif
 	tabwidgets.push_back(vesselextr_widget);
 	picker_widget = new PickerWidget(handler3D, this, "new window",
 			Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -730,7 +731,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	int height_max1 = height_max;
 
-	m_lb_notes = new QLabel("Notes:", this);
 	m_notes = new QTextEdit(this);
 	m_notes->clear();
 
@@ -1116,27 +1116,19 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		loadmenu->insertItem("Open .avw...", this, SLOT(execute_loadavw()));
 		loadmenu->insertItem("Open .vti/.vtk...", this, SLOT(execute_loadvtk()));
 		loadmenu->insertItem("Open NIfTI...", this, SLOT(execute_loadnifti()));
-#ifndef NORTDOSESUPPORT
 		loadmenu->insertItem("Open RTdose...", this, SLOT(execute_loadrtdose()));
-#endif
 		file->insertItem("&Open", loadmenu);
 	}
-	reloadmenu = new Q3PopupMenu(
-			this, "reloadmenu"); //xxxa add reload function for s4llink data later
+	reloadmenu = new Q3PopupMenu(this, "reloadmenu");
 	reloadmenu->insertItem("Reopen .dc&m...", this, SLOT(execute_reloaddicom()));
 	reloadmenu->insertItem("Reopen .&bmp...", this, SLOT(execute_reloadbmp()));
 	reloadmenu->insertItem("Reopen .raw...", this, SLOT(execute_reloadraw()));
 	reloadmenu->insertItem("Reopen .mhd...", this, SLOT(execute_reloadmhd()));
 	reloadmenu->insertItem("Reopen .avw...", this, SLOT(execute_reloadavw()));
-	reloadmenu->insertItem("Reopen .vti/.vtk...", this,
-			SLOT(execute_reloadvtk()));
+	reloadmenu->insertItem("Reopen .vti/.vtk...", this, SLOT(execute_reloadvtk()));
 	reloadmenu->insertItem("Reopen NIfTI...", this, SLOT(execute_reloadnifti()));
-#ifndef NORTDOSESUPPORT
-	reloadmenu->insertItem("Reopen RTdose...", this,
-			SLOT(execute_reloadrtdose()));
-#endif
+	reloadmenu->insertItem("Reopen RTdose...", this, SLOT(execute_reloadrtdose()));
 	file->insertItem("&Reopen", reloadmenu);
-#ifndef NORTSTRUCTSUPPORT
 
 	if (!m_editingmode)
 	{
@@ -1151,40 +1143,30 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	importSurfacePos = file->actions().size();
 	QAction* importSurface = file->addAction("Import Surface...");
-	connect(importSurface, SIGNAL(triggered()), this,
-			SLOT(execute_loadsurface()));
+	connect(importSurface, SIGNAL(triggered()), this, SLOT(execute_loadsurface()));
 	importSurface->setToolTip("Some data must be opened first to load the "
 														"surface on top of the existing project.");
 	importSurface->setEnabled(true);
 
 	importRTstructPos = file->actions().size();
 	QAction* importRTAction = file->addAction("Import RTstruct...");
-	connect(importRTAction, SIGNAL(triggered()), this,
-			SLOT(execute_loadrtstruct()));
-	importRTAction->setToolTip(
-			"Some data must be opened first to import its RTStruct file");
+	connect(importRTAction, SIGNAL(triggered()), this, SLOT(execute_loadrtstruct()));
+	importRTAction->setToolTip("Some data must be opened first to import its RTStruct file");
 	importRTAction->setEnabled(false);
-#endif
+
 	file->insertItem("&Export Image(s)...", this, SLOT(execute_saveimg()));
 	file->insertItem("Export &Contour...", this, SLOT(execute_saveContours()));
+
 	exportmenu = new Q3PopupMenu(this, "exportmenu");
-	exportmenu->insertItem("Export &Labelfield...(am)", this,
-			SLOT(execute_exportlabelfield()));
-	exportmenu->insertItem("Export vtk-ascii...(vti/vtk)", this,
-			SLOT(execute_exportvtkascii()));
-	exportmenu->insertItem("Export vtk-binary...(vti/vtk)", this,
-			SLOT(execute_exportvtkbinary()));
-	exportmenu->insertItem("Export vtk-compressed-ascii...(vti)", this,
-			SLOT(execute_exportvtkcompressedascii()));
-	exportmenu->insertItem("Export vtk-compressed-binary...(vti)", this,
-			SLOT(execute_exportvtkcompressedbinary()));
-	exportmenu->insertItem("Export Matlab...(mat)", this,
-			SLOT(execute_exportmat()));
+	exportmenu->insertItem("Export &Labelfield...(am)", this, SLOT(execute_exportlabelfield()));
+	exportmenu->insertItem("Export vtk-ascii...(vti/vtk)", this, SLOT(execute_exportvtkascii()));
+	exportmenu->insertItem("Export vtk-binary...(vti/vtk)", this, SLOT(execute_exportvtkbinary()));
+	exportmenu->insertItem("Export vtk-compressed-ascii...(vti)", this, SLOT(execute_exportvtkcompressedascii()));
+	exportmenu->insertItem("Export vtk-compressed-binary...(vti)", this, SLOT(execute_exportvtkcompressedbinary()));
+	exportmenu->insertItem("Export Matlab...(mat)", this, SLOT(execute_exportmat()));
 	exportmenu->insertItem("Export hdf...(h5)", this, SLOT(execute_exporthdf()));
-	exportmenu->insertItem("Export xml-extent index...(xml)", this,
-			SLOT(execute_exportxmlregionextent()));
-	exportmenu->insertItem("Export tissue index...(txt)", this,
-			SLOT(execute_exporttissueindex()));
+	exportmenu->insertItem("Export xml-extent index...(xml)", this, SLOT(execute_exportxmlregionextent()));
+	exportmenu->insertItem("Export tissue index...(txt)", this, SLOT(execute_exporttissueindex()));
 	file->insertItem("Export Tissue Distr.", exportmenu);
 	file->insertItem("Export Color Lookup...", this, SLOT(execute_savecolorlookup()));
 	file->insertSeparator();
@@ -1192,28 +1174,18 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	if (!m_editingmode)
 		file->insertItem("Save &Project as...", this, SLOT(execute_saveprojas()));
 	else
-		file->insertItem("Save &Project-Copy as...", this,
-				SLOT(execute_savecopyas()));
-	file->insertItem(
-			QIcon(m_picpath.absFilePath(QString("filesave.png")).ascii()),
-			"Save Pro&ject", this, SLOT(execute_saveproj()), QKeySequence("Ctrl+S"));
-	file->insertItem("Save Active Slices...", this,
-			SLOT(execute_saveactiveslicesas()));
+		file->insertItem("Save &Project-Copy as...", this, SLOT(execute_savecopyas()));
+	file->insertItem(QIcon(m_picpath.absFilePath(QString("filesave.png"))), "Save Pro&ject", this, SLOT(execute_saveproj()), QKeySequence("Ctrl+S"));
+	file->insertItem("Save Active Slices...", this, SLOT(execute_saveactiveslicesas()));
 	if (!m_editingmode)
-		file->insertItem(
-				QIcon(m_picpath.absFilePath(QString("fileopen.png")).ascii()),
-				"Open P&roject...", this, SLOT(execute_loadproj()));
+	{
+		file->insertItem(QIcon(m_picpath.absFilePath(QString("fileopen.png"))), "Open P&roject...", this, SLOT(execute_loadproj()));
+	}
 	file->insertSeparator();
 	file->insertItem("Save &Tissuelist...", this, SLOT(execute_savetissues()));
 	file->insertItem("Open T&issuelist...", this, SLOT(execute_loadtissues()));
-	file->insertItem("Set Tissuelist as Default", this,
-			SLOT(execute_settissuesasdef()));
-	file->insertItem("Remove Default Tissuelist", this,
-			SLOT(execute_removedeftissues()));
-#ifndef NOSURFACEGENERATIONTOOLSUPPORT
-	file->insertItem("Export Surface Generation Tool XML...", this,
-			SLOT(execute_exportsurfacegenerationtoolxml()));
-#endif
+	file->insertItem("Set Tissuelist as Default", this, SLOT(execute_settissuesasdef()));
+	file->insertItem("Remove Default Tissuelist", this, SLOT(execute_removedeftissues()));
 	file->insertSeparator();
 	if (!m_editingmode)
 	{
@@ -2991,8 +2963,6 @@ void MainWindow::execute_loadrtstruct()
 
 void MainWindow::execute_loadrtdose()
 {
-#ifndef NORTDOSESUPPORT
-
 	maybeSafe();
 
 	iseg::DataSelection dataSelection;
@@ -3002,10 +2972,7 @@ void MainWindow::execute_loadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"RTdose (*.dcm)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTdose (*.dcm)\nAll (*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadRTdose(loadfilename.ascii());
@@ -3018,12 +2985,10 @@ void MainWindow::execute_loadrtdose()
 	reset_brightnesscontrast();
 
 	EnableActionsAfterPrjLoaded(true);
-#endif
 }
 
 void MainWindow::execute_reloadrtdose()
 {
-#ifndef NORTDOSESUPPORT
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -3031,21 +2996,13 @@ void MainWindow::execute_reloadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"RTdose (*.dcm)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTdose (*.dcm)\nAll (*.*)", this);
 	if (!loadfilename.isEmpty())
 	{
-		handler3D->ReloadRTdose(
-				loadfilename.ascii(),
-				handler3D->start_slice()); // TODO: handle failure
+		handler3D->ReloadRTdose(loadfilename.ascii(), handler3D->start_slice()); // TODO: handle failure
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
-
-	return;
-#endif
 }
 
 void MainWindow::execute_loads4llivelink()
@@ -3059,28 +3016,6 @@ void MainWindow::execute_loads4llivelink()
 		loadS4Llink(loadfilename);
 	}
 }
-
-/*
-void MainWindow::execute_loadrtss()
-{
-	common::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.bmp = true;
-	dataSelection.work = true;
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this, false);
-
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTSS (*.dcm)\n" "All (*.*)", this);
-	if(!loadfilename.isEmpty()){
-		//handler3D->ReloadRTdose(loadfilename.ascii(),handler3D->return_startslice()); // TODO: handle failure
-		handler3D->ReadRTSS(loadfilename.ascii());
-		reset_brightnesscontrast();
-	}
-	emit end_datachange(this, common::ClearUndo);
-
-	return;
-}
-*/
 
 void MainWindow::execute_saveimg()
 {
@@ -4109,16 +4044,6 @@ void MainWindow::execute_savetissues()
 	}
 }
 
-void MainWindow::execute_exportsurfacegenerationtoolxml()
-{
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, QString::null, this);
-
-	if (!savefilename.isEmpty())
-	{
-		TissueInfos::ExportSurfaceGenerationToolXML(savefilename.ascii());
-	}
-}
-
 void MainWindow::execute_exportlabelfield()
 {
 	iseg::DataSelection dataSelection;
@@ -5023,12 +4948,10 @@ void MainWindow::execute_hidenotes(bool checked)
 	if (!checked)
 	{
 		m_notes->hide();
-		m_lb_notes->hide();
 	}
 	else
 	{
 		m_notes->show();
-		m_lb_notes->show();
 	}
 }
 

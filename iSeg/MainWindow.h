@@ -310,7 +310,6 @@ private:
 	Q3Accel* m_acc_slicedown;
 	Q3Accel* m_acc_sliceup;
 	QTextEdit* m_notes;
-	QLabel* m_lb_notes;
 	unsigned short nrtabbuttons;
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;
@@ -398,7 +397,6 @@ private slots:
 	void execute_createatlas();
 	void execute_reloadatlases();
 	void execute_savetissues();
-	void execute_exportsurfacegenerationtoolxml();
 	void execute_exportlabelfield();
 	void execute_exportmat();
 	void execute_exporthdf();

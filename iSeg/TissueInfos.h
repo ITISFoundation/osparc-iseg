@@ -80,8 +80,6 @@ public:
 	static bool SaveDefaultTissueList(const char* filename);
 	static bool LoadDefaultTissueList(const char* filename);
 
-	static bool ExportSurfaceGenerationToolXML(const char* filename);
-
 protected:
 	static void CreateTissueTypeMap();
 
