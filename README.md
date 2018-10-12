@@ -31,5 +31,5 @@ The libraries below are required to be compiled and installed on the system in o
 
 ### Compiling iSEG
 
-- Windows/Visual Studio [instructions](Documentation/CompilingWindows.md)
-- MacOS/Clang++ [instructions](Documentation/CompilingMacOS.md)
+- Windows/Visual Studio [instructions](Build/CompilingWindows.md)
+- MacOS/Clang++ [instructions](Build/CompilingMacOS.md)
