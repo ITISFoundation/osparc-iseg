@@ -4,32 +4,11 @@ sudo: false
 matrix:
   include:
 
-    # Linux C++14 GCC builds
-    - os: linux
-      compiler: gcc
-      addons: &gcc6
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-6']
-      env: COMPILER='g++-6' BUILD_TYPE='Release'
-
-    # Linux C++14 Clang builds
-    - os: linux
-      compiler: clang
-      addons: &clang38
-        apt:
-          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.8']
-      env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
-
     # OSX C++14 Clang builds
     - os: osx
       osx_image: xcode10
       compiler: clang
       env: COMPILER='clang++' BUILD_TYPE='Release'
-  
-  allow_failures:
-    - os: linux
 
 cache:
   directories:
@@ -47,15 +26,6 @@ install:
       CMAKE_URL="https://cmake.org/files/v3.13/cmake-3.13.0-rc1-Linux-x86_64.tar.gz"
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-      sudo apt-get install libboost-dev
-      sudo apt-get install libhdf5-dev
-      sudo apt-get install qt4-dev-tools
-      # trusty does not have recent versions of VTK
-      VTK_URL="https://www.vtk.org/files/release/8.1/VTK-8.1.1.tar.gz"
-      test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
-      # trusty does not have recent versions of ITK
-      ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-      test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
       brew ls --versions boost || brew install boost
@@ -70,17 +40,7 @@ install:
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      # set variables used by cmake
-      export BOOST_ROOT=/usr/local
-      export HDF5_ROOT=/usr/local
-      export VTK_DIR=${DEPS_DIR}/vtk/lib/cmake/vtk-8.1
-      export ITK_DIR=${DEPS_DIR}/itk/lib/cmake/ITK-4.13
-
-      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=${BOOST_ROOT} -DHDF5_ROOT=${HDF5_ROOT} -Wdev
-    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
-    fi
+  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
   - cd CIBuild
 
 script:
