@@ -92,7 +92,7 @@ public:
 	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath,
 			const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr,
 			const char* name = nullptr, Qt::WindowFlags wFlags = 0,
-			char** argv = nullptr);
+			const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
 	~MainWindow() {}
 
 	friend class Settings;

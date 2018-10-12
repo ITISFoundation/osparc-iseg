@@ -30,7 +30,9 @@
 #include <qmessagebox.h>
 
 #include <boost/date_time.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/program_options.hpp>
 
 #include <cerrno>
 #include <cmath>
@@ -62,6 +64,18 @@ std::string timestamped(const std::string prefix, const std::string& suffix)
 	return prefix + "-" + tod + suffix;
 }
 
+std::pair<std::string, std::string> custom_parser(const std::string& s)
+{
+	if (s.find("S4Llink") == 0)
+	{
+		return std::make_pair(std::string("s4l"), std::string());
+	} 
+	else 
+	{
+		return std::make_pair(std::string(), std::string());
+	}
+}
+
 // \brief Redirect VTK errors/warnings to file
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
@@ -82,10 +96,40 @@ private:
 };
 
 vtkStandardNewMacro(vtkCustomOutputWindow);
+
 } // namespace
 
 int main(int argc, char **argv)
 {
+	// parse program arguments
+	namespace po = boost::program_options;
+	namespace fs = boost::filesystem;
+
+	po::options_description desc("Allowed options");
+	desc.add_options()
+    	("help", "produce help message")
+    	("input-file,I", po::value< std::string >(), "open iSEG project (*.prj) file")
+    	("s4l", po::value< std::string >(), "start iSEG in S4L link mode")
+    	("plugin-dirs,D", po::value< std::vector<std::string> >(), "additional directories to search for plugins")
+	;
+	po::variables_map vm;
+	po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(custom_parser).run(), vm);
+	po::notify(vm);
+
+	if (vm.count("help"))
+	{
+		cout << desc << "\n";
+		return 1;
+	}
+	std::vector<std::string> plugin_dirs;
+	plugin_dirs.push_back(fs::path(argv[0]).parent_path().string());
+	if (vm.count("plugin-dirs"))
+	{
+		auto extra_dirs = vm["plugin-dirs"].as<std::vector<std::string>>();
+		plugin_dirs.insert(plugin_dirs.end(), extra_dirs.begin(), extra_dirs.end());
+	}
+
+	// install vtk error handler to avoid stupid popup windows 
 	auto eow = vtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
 	eow->Delete();
@@ -178,25 +222,10 @@ int main(int argc, char **argv)
 #endif
 	app.processEvents();
 
-	MainWindow *mainWindow = nullptr;
-	if (argc > 1)
-	{
-		QString qstr(argv[1]);
-		if (qstr.compare(QString("S4Llink")) == 0)
-		{
-			mainWindow = new MainWindow(
-					&slice_handler, locationpath, picpath, tmpdir,
-					true, nullptr, "MainWindow",
-					Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
-		}
-	}
-	if (mainWindow == nullptr)
-	{
-		mainWindow = new MainWindow(
-				&slice_handler, locationpath, picpath, tmpdir,
-				false, nullptr, "MainWindow",
-				Qt::WDestructiveClose | Qt::WResizeNoErase, argv);
-	}
+	MainWindow *mainWindow = new MainWindow(
+		&slice_handler, locationpath, picpath, tmpdir,
+		vm.count("s4l"), nullptr, "MainWindow",
+		Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	// needed on MacOS, but not WIN32?
 	mainWindow->setStyleSheet("QWidget { color: white; }");
@@ -204,17 +233,13 @@ int main(int argc, char **argv)
 	mainWindow->LoadLoadProj(latestprojpath);
 	mainWindow->LoadAtlas(atlasdir);
 	mainWindow->LoadSettings(settingspath.toAscii().data());
-	if (argc > 1)
+	if (vm.count("s4l"))
 	{
-		QString qstr(argv[1]);
-		if (qstr.compare(QString("S4Llink")) != 0)
-		{
-			mainWindow->loadproj(qstr);
-		}
-		else if (argc > 2)
-		{
-			mainWindow->loadS4Llink(QString(argv[2]));
-		}
+		mainWindow->loadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
+	}
+	else if (vm.count("input-file"))
+	{
+		mainWindow->loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
 	}
 
 #ifdef SHOWSPLASH

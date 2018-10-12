@@ -71,7 +71,6 @@
 #include <qprogressdialog.h>
 #include <qsettings.h>
 #include <qtooltip.h>
-//#include <q3widgetstack.h>
 #include <qtextedit.h>
 
 #define str_macro(s) #s
@@ -365,7 +364,7 @@ bool MenuWTT::event(QEvent* e)
 MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		const QDir& picpath, const QDir& tmppath, bool editingmode,
 		QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags, char** argv)
+		Qt::WindowFlags wFlags, const std::vector<std::string>& plugin_search_dirs)
 		: QMainWindow(parent, name, wFlags)
 {
 	setObjectName("MainWindow");
@@ -649,9 +648,14 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	transform_widget = new TransformWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(transform_widget);
 
-	boost::filesystem::path this_exe(argv[0]);
-	bool ok = iseg::plugin::LoadPlugins(this_exe.parent_path().string());
-	assert(ok == true);
+	for (auto dir: plugin_search_dirs)
+	{
+		bool ok = iseg::plugin::LoadPlugins(dir);
+		if (!ok)
+		{
+			ISEG_WARNING("Could not load plugins from " << dir);
+		}
+	}
 
 	auto addons = iseg::plugin::PluginRegistry::registered_plugins();
 	for (auto a : addons)
@@ -3676,7 +3680,10 @@ void MainWindow::loadproj(const QString& loadfilename)
 
 void MainWindow::loadS4Llink(const QString& loadfilename)
 {
-	bool stillopen = false;
+	if (loadfilename.isEmpty() || !boost::filesystem::exists(loadfilename.toStdString()))
+	{
+		return;
+	}
 
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
@@ -3685,14 +3692,10 @@ void MainWindow::loadS4Llink(const QString& loadfilename)
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	if (!loadfilename.isEmpty())
-	{
-		m_S4Lcommunicationfilename = loadfilename;
-		int tissuesVersion = 0;
-		handler3D->LoadS4Llink(loadfilename.ascii(), tissuesVersion);
-		TissueInfos::LoadTissuesHDF(loadfilename.ascii(), tissuesVersion);
-		stillopen = true;
-	}
+	m_S4Lcommunicationfilename = loadfilename;
+	int tissuesVersion = 0;
+	handler3D->LoadS4Llink(loadfilename.ascii(), tissuesVersion);
+	TissueInfos::LoadTissuesHDF(loadfilename.ascii(), tissuesVersion);
 
 	emit end_datachange(this, iseg::ClearUndo);
 	tissues_size_t m;
@@ -3704,11 +3707,8 @@ void MainWindow::loadS4Llink(const QString& loadfilename)
 	pixelsize_changed();
 	slicethickness_changed();
 
-	if (stillopen)
-	{
-		tissueTreeWidget->update_tissue_icons();
-		tissueTreeWidget->update_folder_icons();
-	}
+	tissueTreeWidget->update_tissue_icons();
+	tissueTreeWidget->update_folder_icons();
 
 	reset_brightnesscontrast();
 }
@@ -7829,6 +7829,8 @@ void MainWindow::execute_split_tissue()
 
 		// update tree view after adding new tissues
 		tissueTreeWidget->update_tree_widget();
+		tissueTreeWidget->update_tissue_icons();
+		tissueTreeWidget->update_folder_icons();
 	}
 	else
 	{
