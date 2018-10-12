@@ -31,6 +31,11 @@ install:
       CMAKE_URL="https://cmake.org/files/v3.13/cmake-3.13.0-rc1-Linux-x86_64.tar.gz"
       mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+      sudo apt-get install libboost-dev
+      sudo apt-get install libhdf5-dev
+      sudo apt-get install libinsighttoolkit4-dev
+      sudo apt-get install libvtk7-dev
+      sudo apt-get install qt4-dev-tools
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
       brew ls --versions boost || brew install boost
@@ -45,8 +50,8 @@ install:
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
-  - cd Build
+  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - cd CIBuild
 
 script:
   - make -j 2

@@ -92,7 +92,7 @@ public:
 	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath,
 			const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr,
 			const char* name = nullptr, Qt::WindowFlags wFlags = 0,
-			char** argv = nullptr);
+			const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
 	~MainWindow() {}
 
 	friend class Settings;
@@ -310,8 +310,6 @@ private:
 	Q3Accel* m_acc_slicedown;
 	Q3Accel* m_acc_sliceup;
 	QTextEdit* m_notes;
-	QLabel* m_lb_notes;
-	unsigned short nrtabbuttons;
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;
 	std::vector<bool> showpb_tab;
@@ -398,7 +396,6 @@ private slots:
 	void execute_createatlas();
 	void execute_reloadatlases();
 	void execute_savetissues();
-	void execute_exportsurfacegenerationtoolxml();
 	void execute_exportlabelfield();
 	void execute_exportmat();
 	void execute_exporthdf();

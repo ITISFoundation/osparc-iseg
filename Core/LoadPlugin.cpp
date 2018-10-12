@@ -181,7 +181,7 @@ bool LoadPlugin(const std::string& plugin_file_path)
 
 bool LoadPlugins(const std::string& directory_path)
 {
-	ISEG_INFO("LoadPlugins: " << directory_path);
+	ISEG_INFO("Loading plugins directory " << directory_path);
 
 	bool ok = true;
 	try

@@ -2597,38 +2597,28 @@ ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent,
 {
 	zoom = zoom1;
 	vbox1 = new Q3VBoxLayout(this);
-	pushzoomin = new QPushButton(
-			QIcon(picpath.absFilePath(QString("zoomin.png")).ascii()), "Zoom in",
-			this);
-	pushzoomout = new QPushButton(
-			QIcon(picpath.absFilePath(QString("zoomout.png")).ascii()), "Zoom out",
-			this);
-	pushunzoom = new QPushButton(
-			QIcon(picpath.absFilePath(QString("unzoom.png")).ascii()), "Unzoom",
-			this);
-	zoom_f =
-			new QLabel(QString("x"), this); //+QString::number(zoom,'g',4),this);
+	pushzoomin = new QPushButton(QIcon(picpath.absFilePath(QString("zoomin.png"))), "Zoom in", this);
+	pushzoomout = new QPushButton(QIcon(picpath.absFilePath(QString("zoomout.png"))), "Zoom out", this);
+	pushunzoom = new QPushButton(QIcon(picpath.absFilePath(QString("unzoom.png"))), "Unzoom", this);
+
+	zoom_f = new QLabel(QString("x"), this);
 	le_zoom_f = new QLineEdit(QString::number(zoom, 'g', 4), this);
 	le_zoom_f->setFixedWidth(80);
+	
 	vbox1->addWidget(pushzoomin);
 	vbox1->addWidget(pushzoomout);
 	vbox1->addWidget(pushunzoom);
-	hbox1 = new Q3HBoxLayout(this);
+
+	hbox1 = new Q3HBoxLayout(vbox1);
 	hbox1->addWidget(zoom_f);
 	hbox1->addWidget(le_zoom_f);
-	vbox1->addLayout(hbox1);
-	//	vbox1->addWidget(zoom_f);
-	//	vbox1->addWidget(le_zoom_f);
+
 	setFixedHeight(vbox1->sizeHint().height());
 
-	QObject::connect(pushzoomin, SIGNAL(clicked()), this,
-			SLOT(zoomin_pushed()));
-	QObject::connect(pushzoomout, SIGNAL(clicked()), this,
-			SLOT(zoomout_pushed()));
-	QObject::connect(pushunzoom, SIGNAL(clicked()), this,
-			SLOT(unzoom_pushed()));
-	QObject::connect(le_zoom_f, SIGNAL(editingFinished()), this,
-			SLOT(le_zoom_changed()));
+	QObject::connect(pushzoomin, SIGNAL(clicked()), this, SLOT(zoomin_pushed()));
+	QObject::connect(pushzoomout, SIGNAL(clicked()), this, SLOT(zoomout_pushed()));
+	QObject::connect(pushunzoom, SIGNAL(clicked()), this, SLOT(unzoom_pushed()));
+	QObject::connect(le_zoom_f, SIGNAL(editingFinished()), this, SLOT(le_zoom_changed()));
 }
 
 ZoomWidget::~ZoomWidget()
