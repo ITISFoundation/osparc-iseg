@@ -11562,28 +11562,48 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 	{
 		filter->Update();
 		auto components = filter->GetOutput();
-		
+
 		if (!progress || (progress && !progress->wasCanceled()))
 		{
 			tissues_size_t Ninitial = TissueInfos::GetTissueCount();
 
 			// add tissue infos
 			auto N = filter->GetObjectCount();
-			for (tissues_size_t i=0; i!=N; ++i)
+			if (N > 1)
 			{
-				TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
-				info.name += (boost::format("_%d") % static_cast<int>(i+1)).str();;
-				TissueInfos::AddTissue(info);
-			}
-
-			// iterate over connected components, add to tissues
-			itk::ImageRegionConstIterator<image_type> it(components, components->GetLargestPossibleRegion());
-			itk::ImageRegionIterator<input_type> ot(all_slices, all_slices->GetLargestPossibleRegion());
-			for (it.GoToBegin(), ot.GoToBegin(); !it.IsAtEnd(); ++it, ++ot)
-			{
-				if (it.Get() != 0)
+				// find which object is largest -> this one will keep its original name & color
+				std::vector<size_t> hist(N + 1, 0);
+				itk::ImageRegionConstIterator<image_type> it(components, components->GetLargestPossibleRegion());
+				for (it.GoToBegin(); !it.IsAtEnd(); ++it)
 				{
-					ot.Set(Ninitial + it.Get());
+					hist[it.Get()]++;
+				}
+				hist[0] = 0;
+				const size_t max_label = std::distance(hist.begin(), std::max_element(hist.begin(), hist.end()));
+
+				// mapping from object number to new tissue index
+				std::vector<tissues_size_t> object2index(N + 1, 0);
+				object2index[max_label] = tissue;
+				tissues_size_t idx = 1;
+				for (tissues_size_t i = 1; i <= N; ++i)
+				{
+					if (i != max_label)
+					{
+						TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
+						info.name += (boost::format("_%d") % static_cast<int>(idx)).str();
+						TissueInfos::AddTissue(info);
+						object2index.at(i) = Ninitial + idx++;
+					}
+				}
+
+				// iterate over connected components, add to tissues
+				itk::ImageRegionIterator<input_type> ot(all_slices, all_slices->GetLargestPossibleRegion());
+				for (it.GoToBegin(), ot.GoToBegin(); !it.IsAtEnd(); ++it, ++ot)
+				{
+					if (it.Get() != 0)
+					{
+						ot.Set(object2index.at(it.Get()));
+					}
 				}
 			}
 
