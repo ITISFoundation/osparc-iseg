@@ -143,6 +143,7 @@ private:
 	Q3Action* selecttissue;
 	Q3Action* addtoselection;
 	Q3Action* viewtissue;
+	Q3Action* nexttargetslice;
 	std::vector<Point> vp;
 	std::vector<Point> vp_old;
 	std::vector<Point> vp1;
@@ -184,6 +185,7 @@ private slots:
 	void add_tissuelarger();
 	void select_tissue();
 	void view_tissue_surface();
+	void next_target_slice();
 	void add_to_selected_tissues();
 	void mark_changed();
 	void bmp_changed();

@@ -45,6 +45,7 @@ MSVC_ONLY_EDIT_PROJECT( ProjectFiles
 	config.h.in
 	LICENSE
 	README.md
+	.travis.yml
 )
 
 
