@@ -66,6 +66,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	selecttissue = new Q3Action("Select Tissue", 0, this);
 	addtoselection = new Q3Action("Select Tissue", 0, this);
 	viewtissue = new Q3Action("View Tissue Surface", 0, this);
+	nexttargetslice = new Q3Action("Next Target Slice", 0, this);
 	addmark = new Q3Action("&Add Mark", 0, this);
 	addlabel = new Q3Action("Add &Label", 0, this);
 	removemark = new Q3Action("&Remove Mark", 0, this);
@@ -87,6 +88,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
 	connect(addtoselection, SIGNAL(activated()), this, SLOT(add_to_selected_tissues()));
 	connect(viewtissue, SIGNAL(activated()), this, SLOT(view_tissue_surface()));
+	connect(nexttargetslice, SIGNAL(activated()), this, SLOT(next_target_slice()));
 }
 
 ImageViewerWidget::~ImageViewerWidget()
@@ -653,6 +655,48 @@ void ImageViewerWidget::view_tissue_surface()
 	emit viewtissue_sign(p);
 }
 
+void ImageViewerWidget::next_target_slice()
+{
+	auto target_slices = handler3D->target_slices();
+	size_t slice_size = handler3D->width() * handler3D->height();
+
+	// find next slice
+	int slice = -1;
+	auto non_zero = [](float v) { return v != 0.f; };
+
+	for (int s = handler3D->active_slice() + 1; s < handler3D->num_slices(); ++s)
+	{
+		auto data = target_slices.at(s);
+		if (std::any_of(data, data + slice_size, non_zero))
+		{
+			slice = s;
+			break;
+		}
+	}
+
+	if (slice == -1)
+	{
+		for (int s = 0; s <= handler3D->active_slice(); ++s)
+		{
+			auto data = target_slices.at(s);
+			if (std::any_of(data, data + slice_size, non_zero))
+			{
+				slice = s;
+				break;
+			}
+		}
+	}
+
+	if (slice < 0)
+	{
+		QMessageBox::information(this, "iSeg", "The target contains no foreground pixels");
+	}
+	else
+	{
+		handler3D->set_active_slice(slice, true);
+	}
+}
+
 void ImageViewerWidget::add_to_selected_tissues()
 {
 	Point p;
@@ -675,6 +719,10 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	eventy = (int)max(min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
 
 	Q3PopupMenu contextMenu(this);
+	if (!bmporwork)
+	{
+		nexttargetslice->addTo(&contextMenu);
+	}
 	addmark->addTo(&contextMenu);
 	addlabel->addTo(&contextMenu);
 	removemark->addTo(&contextMenu);
