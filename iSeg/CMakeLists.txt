@@ -123,7 +123,7 @@ SET(MyMocHeaders
 	WidgetCollection.h
 )
 
-IF(${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION} VERSION_LESS "8.1.2")
+IF(${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION} VERSION_LESS "8.2.0")
 	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty/VTK/FlyingEdges)
 	LIST(APPEND ViewerSrcs ${CMAKE_SOURCE_DIR}/Thirdparty/VTK/FlyingEdges/vtkDiscreteFlyingEdges3D.cxx)
 	LIST(APPEND ViewerHeaders ${CMAKE_SOURCE_DIR}/Thirdparty/VTK/FlyingEdges/vtkDiscreteFlyingEdges3D.h)
