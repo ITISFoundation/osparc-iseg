@@ -27,6 +27,10 @@ The libraries below are required to be compiled and installed on the system in o
 - ITK, [Apache 2.0 license](https://itk.org/ITK/project/licenseversion1.html)
 - VTK, [BSD license](https://www.vtk.org/licensing/)
 - Qt 4.8, [GPL3 and LGPL2.1 license](https://www1.qt.io/licensing/)
+- EIGEN [MPL2 license](https://www.mozilla.org/en-US/MPL/2.0/)
+
+#### Note
+For installing EIGEN just download and extract the [source code](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download)
 
 
 ### Compiling iSEG

@@ -70,8 +70,8 @@
 #include <qmenubar.h>
 #include <qprogressdialog.h>
 #include <qsettings.h>
-#include <qtextedit.h>
 #include <qtooltip.h>
+#include <qtextedit.h>
 
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
@@ -648,7 +648,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	transform_widget = new TransformWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(transform_widget);
 
-	for (auto dir : plugin_search_dirs)
+	for (auto dir: plugin_search_dirs)
 	{
 		bool ok = iseg::plugin::LoadPlugins(dir);
 		if (!ok)
@@ -3305,20 +3305,17 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	for (unsigned short i = 0; i < 14; i++)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (i < nrtabbuttons)
-			showtab_action.at(i)->setOn(flag);
+		if (i < nrtabbuttons) showtab_action.at(i)->setOn(flag);
 	}
 	if (loadProjVersion >= 6)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (14 < nrtabbuttons)
-			showtab_action.at(14)->setOn(flag);
+		if (14 < nrtabbuttons) showtab_action.at(14)->setOn(flag);
 	}
 	if (loadProjVersion >= 9)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (15 < nrtabbuttons)
-			showtab_action.at(15)->setOn(flag);
+		if (15 < nrtabbuttons) showtab_action.at(15)->setOn(flag);
 	}
 	execute_showtabtoggled(flag);
 
@@ -6370,6 +6367,15 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 	if (ysliceshower != nullptr)
 		ysliceshower->zpos_changed();
 
+	if (VV3D != nullptr)
+		VV3D->reload();
+
+	if (VV3Dbmp != nullptr)
+		VV3Dbmp->reload();
+
+	if (surface_viewer != nullptr)
+		surface_viewer->reload();
+
 	qw->init();
 }
 
@@ -7774,7 +7780,7 @@ void MainWindow::execute_voting_replace_labels()
 	if (sel.size() == 1 && !handler3D->tissue_locks().at(sel.at(0)))
 	{
 		tissues_size_t FG = sel.front();
-		std::array<unsigned int, 3> radius = {1, 1, 1};
+		std::array<unsigned int, 3> radius = { 1,1,1 };
 
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = true;
