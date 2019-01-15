@@ -31,6 +31,7 @@ LIST( APPEND ISEG_CMAKE_FILES_INCLUDES
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyITK.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyQT4.cmake
 	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyVTK.cmake
+	${CMAKE_SOURCE_DIR}/CMake/ThirdPartyEIGEN.cmake
 )
 FOREACH( include_file ${ISEG_CMAKE_FILES_INCLUDES} )
 	INCLUDE( ${include_file} )
