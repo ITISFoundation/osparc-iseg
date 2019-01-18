@@ -105,9 +105,9 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
                                const char* name, Qt::WindowFlags wFlags)
 : WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
 {
-
+    
     setToolTip(Format("Sandbox Tool"));
-
+    
     _execute_button = new QPushButton("Execute");
     _execute_button->setMaximumSize(_execute_button->minimumSizeHint());
     _remove_button = new QPushButton("Remove Object");
@@ -2164,7 +2164,7 @@ void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vec
     label2image->SetInput(labelMap);
     SAFE_UPDATE(label2image, return);
     
-    
+    using tissue_type = SliceHandlerInterface::tissue_type;
     iseg::DataSelection dataSelection;
     dataSelection.allSlices = false; // all_slices->isChecked();
     dataSelection.sliceNr = _handler3D->active_slice();
@@ -2187,18 +2187,18 @@ void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vec
         {
             if( std::find((*pixels).begin(), (*pixels).end(), pixel_index) != (*pixels).end())
             {
-                out.Set(255);
+                out.Set(std::numeric_limits<tissue_type>::max());
             }
             else
             {
                 if (out.Get() != 0)
-                    out.Set(150);
+                    out.Set(std::numeric_limits<tissue_type>::max()/2);
             }
         }
         else
         {
             if (in.Get() != 0)
-                out.Set(255);
+                out.Set(std::numeric_limits<tissue_type>::max());
             else
                 out.Set(in.Get());
         }
