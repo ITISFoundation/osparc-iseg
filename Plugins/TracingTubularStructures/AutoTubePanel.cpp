@@ -1132,10 +1132,9 @@ void AutoTubePanel::k_filter_double_clicked(QListWidgetItem *item )
     
     QMessageBox mBox;
     std::stringstream buffer;
-    auto split= split_string(item->text().toStdString());
+    //auto split= split_string(item->text().toStdString());
     
-    std::string label = split.back();
-    
+    std::string label = item->text().toStdString();
     const std::vector<std::string>::iterator it = std::find(labels.begin(), labels.end(), label);
     int index = std::distance(labels.begin() , it);
     buffer << k_filters[index] << std::endl;
@@ -1189,35 +1188,29 @@ void AutoTubePanel::update_kalman_filters()
     {
         // get cached data
         _cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities , max_active_slice_reached);
-        
         // get Kalman filter laels
         std::vector<std::string> labels;
         for (auto filter:k_filters)
             labels.push_back(filter.get_label());
-        
         bool not_in_k_filter_list(false);
         std::vector<std::string> objects_not_in_list;
         // for each slice
         for (int i(0) ; i <= _handler3D->active_slice() ; i ++)
         {
-            
             auto labelMap = label_maps[i];
             
             typedef std::map<LabelType, std::vector<double>> LabelToParams;
             LabelToParams label_to_params = get_label_map_params(labelMap);
-            
             // for each object in slice object list
             for (unsigned int row(0) ; row < objects[i].size(); row ++)
             {
                 std::string label = objects[i][row];
-
                 auto labelObject = labelMap->GetNthLabelObject(row);
-   
+                
                 std::vector<std::string>::iterator it = std::find(labels.begin(), labels.end(), label);
                 if (it != labels.end())
                 {
                     int index = std::distance(labels.begin(), it);
-                    
                     if (k_filters[index].get_slice() <= i+1 and k_filters[index].get_last_slice() < i + 1)
                     {
                         std::vector<double> params = label_to_params[labelObject->GetLabel()];
@@ -2017,7 +2010,7 @@ void AutoTubePanel::refresh_k_filter_list()
     
     for (auto filter: k_filters)
     {
-        k_filters_list->addItem(QString::fromStdString("Kalman Filter: " + filter.get_label()));
+        k_filters_list->addItem(QString::fromStdString(filter.get_label()));
     }
     k_filters_list->show();
 }
