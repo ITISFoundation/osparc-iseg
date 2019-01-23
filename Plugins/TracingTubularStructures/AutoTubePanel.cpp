@@ -48,6 +48,7 @@
 #include <itkSigmoidImageFilter.h>
 #include <itkSliceBySliceImageFilter.h>
 #include <itkThresholdImageFilter.h>
+#include <itkLabelImageToShapeLabelMapFilter.h>
 
 
 
@@ -125,6 +126,7 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
     _load = new QPushButton("Load Parameters");
     _remove_non_selected = new QPushButton("Remove Non Selected");
     _add_to_tissues = new QPushButton("Add To Tissues");
+    _k_filter_predict = new QPushButton("Predict Root Positions");
     
     
     int width(80);
@@ -148,6 +150,7 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
     QLabel* _r_k_filter = new QLabel("Restart Kalman Filter");
     QLabel* _connect_d = new QLabel("Connect Dots");
     QLabel* _extra_only = new QLabel("Keep Only Matches");
+    QLabel* _addPix = new QLabel("Add Pixel");
 
     
     _sigma_low = new QLineEdit(QString::number(0.3));
@@ -220,6 +223,9 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
     _extrapolate_only_matches = new QCheckBox;
     _extrapolate_only_matches->setChecked(true);
     
+    _add_pixel = new QCheckBox;
+    _add_pixel->setChecked(false);
+    
     object_list = new QListWidget();
     object_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     
@@ -229,96 +235,107 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
     k_filters_list = new QListWidget();
     k_filters_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     
+    
     QVBoxLayout* vbox1 = new QVBoxLayout;
-    //vbox1->addWidget(_kalman_test);
-    vbox1->addWidget(_save);
-    vbox1->addWidget(_load);
-    vbox1->addWidget(_add_to_tissues);
-    vbox1->addWidget(_update_kfilter_button);
-    vbox1->addWidget(_visualize_button);
+    vbox1->addWidget(_slice_l);
+    vbox1->addWidget(object_list);
     
     QVBoxLayout* vbox2 = new QVBoxLayout;
-    vbox2->addWidget(_min);
-    vbox2->addWidget(_sigma_low);
-    vbox2->addWidget(_max);
-    vbox2->addWidget(_sigma_hi);
-    vbox2->addWidget(_num);
-    vbox2->addWidget(_number_sigma_levels);
+    vbox2->addWidget(_limit_s);
+    vbox2->addWidget(_limit_slice);
+    vbox2->addWidget(_select_objects_button);
+    vbox2->addWidget(_selected_objects);
+    vbox2->addWidget(_add_l);
+    vbox2->addWidget(_add);
+    vbox2->addWidget(_r_k_filter);
+    vbox2->addWidget(_restart_k_filter);
+    vbox2->addWidget(_extra_only);
+    vbox2->addWidget(_extrapolate_only_matches);
+    vbox2->addWidget(_addPix);
+    vbox2->addWidget(_add_pixel);
     
     QVBoxLayout* vbox3 = new QVBoxLayout;
-    vbox3->addWidget(_feature_th);
-    vbox3->addWidget(_threshold);
-    vbox3->addWidget(_non_max);
-    vbox3->addWidget(_non_max_suppression);
-    vbox3->addWidget(_centerlines);
-    vbox3->addWidget(_skeletonize);
-    vbox3->addWidget(_min_obj_size);
-    vbox3->addWidget(_min_object_size);
-    vbox3->addWidget(_connect_d);
-    vbox3->addWidget(_connect_dots);
+    vbox3->addWidget(_k_filters_list);
+    vbox3->addWidget(k_filters_list);
     
-    
-    QHBoxLayout* hbox1 = new QHBoxLayout;
-    hbox1->addLayout(vbox2);
-    hbox1->addLayout(vbox3);
-    hbox1->addLayout(vbox1);
-
     
     
     QVBoxLayout* vbox4 = new QVBoxLayout;
-    vbox4->addWidget(_select_objects_button);
-    vbox4->addWidget(_selected_objects);
-    vbox4->addWidget(_add_l);
-    vbox4->addWidget(_add);
-    vbox4->addWidget(_r_k_filter);
-    vbox4->addWidget(_restart_k_filter);
-    vbox4->addWidget(_extra_only);
-    vbox4->addWidget(_extrapolate_only_matches);
     vbox4->addWidget(_remove_non_selected);
+    vbox4->addWidget(_update_kfilter_button);
+    vbox4->addWidget(_visualize_button);
+    vbox4->addWidget(_save);
+    vbox4->addWidget(_load);
+    vbox4->addWidget(_add_to_tissues);
+    
+    
+    
+    QHBoxLayout* hbox1 = new QHBoxLayout;
+    hbox1->addLayout(vbox4);
+    hbox1->addLayout(vbox1);
+    hbox1->addLayout(vbox2);
+    hbox1->addLayout(vbox3);
+
     
     QVBoxLayout* vbox5 = new QVBoxLayout;
-    vbox5->addWidget(_min_p);
-    vbox5->addWidget(_min_probability);
-    vbox5->addWidget(_w_d);
-    vbox5->addWidget(_w_distance);
-    vbox5->addWidget(_w_pa);
-    vbox5->addWidget(_w_params);
-    vbox5->addWidget(_w_pr);
-    vbox5->addWidget(_w_pred);
-    vbox5->addWidget(_limit_s);
-    vbox5->addWidget(_limit_slice);
+    vbox5->addWidget(_min);
+    vbox5->addWidget(_sigma_low);
+    vbox5->addWidget(_max);
+    vbox5->addWidget(_sigma_hi);
+    vbox5->addWidget(_num);
+    vbox5->addWidget(_number_sigma_levels);
     
     QVBoxLayout* vbox6 = new QVBoxLayout;
-    vbox6->addWidget(_slice_l);
-    vbox6->addWidget(object_list);
+    vbox6->addWidget(_feature_th);
+    vbox6->addWidget(_threshold);
+    vbox6->addWidget(_non_max);
+    vbox6->addWidget(_non_max_suppression);
+    vbox6->addWidget(_centerlines);
+    vbox6->addWidget(_skeletonize);
+    vbox6->addWidget(_min_obj_size);
+    vbox6->addWidget(_min_object_size);
+    vbox6->addWidget(_connect_d);
+    vbox6->addWidget(_connect_dots);
     
-    QVBoxLayout* vbox7 = new QVBoxLayout;
-    vbox7->addWidget(_obj_prob_l);
-    vbox7->addWidget(object_probability_list);
+    //QVBoxLayout* vbox7 = new QVBoxLayout;
+
     
     QVBoxLayout* vbox8 = new QVBoxLayout;
-    vbox8->addWidget(_k_filters_list);
-    vbox8->addWidget(k_filters_list);
+    vbox8->addWidget(_min_p);
+    vbox8->addWidget(_min_probability);
+    vbox8->addWidget(_w_d);
+    vbox8->addWidget(_w_distance);
+    vbox8->addWidget(_w_pa);
+    vbox8->addWidget(_w_params);
+    vbox8->addWidget(_w_pr);
+    vbox8->addWidget(_w_pred);
+    
+    QVBoxLayout* vbox9 = new QVBoxLayout;
+    vbox9->addWidget(_obj_prob_l);
+    vbox9->addWidget(object_probability_list);
     
     QHBoxLayout* hbox2 = new QHBoxLayout;
-    hbox2->addLayout(vbox4);
     hbox2->addLayout(vbox5);
     hbox2->addLayout(vbox6);
-    hbox2->addLayout(vbox7);
+    hbox2->addLayout(vbox9);
     hbox2->addLayout(vbox8);
+    //hbox2->addLayout(vbox7);
+    
     
     QHBoxLayout* hbox3 = new QHBoxLayout;
     hbox3->addWidget(_merge_button);
     hbox3->addWidget(_remove_button);
     hbox3->addWidget(_remove_k_filter);
     hbox3->addWidget(_extrapolate_button);
+    hbox3->addWidget(_k_filter_predict);
     hbox3->addWidget(_execute_button);
     
     
     auto layout = new QFormLayout;
+    layout->addRow(hbox3);
     layout->addRow(hbox1);
     layout->addRow(hbox2);
-    layout->addRow(hbox3);
+    
     
     setLayout(layout);
     
@@ -337,7 +354,96 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
     QObject::connect(_load, SIGNAL(clicked()), this, SLOT(load()));
     QObject::connect(_remove_non_selected, SIGNAL(clicked()), this, SLOT(remove_non_selected()));
     QObject::connect(_add_to_tissues, SIGNAL(clicked()), this, SLOT(add_to_tissues()));
+    QObject::connect(_k_filter_predict, SIGNAL(clicked()), this, SLOT(predict_k_filter()));
 }
+
+void AutoTubePanel::predict_k_filter()
+{
+    
+     _cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities , max_active_slice_reached);
+    typedef float PixelType;
+    using ImageType = itk::Image<PixelType, 2>;
+    
+    
+    for (auto filter:k_filters)
+    {
+       
+        if (!label_maps[_handler3D->active_slice()])
+        {
+            typedef float PixelType;
+            using ImageType = itk::Image<PixelType, 2>;
+            ImageType::SizeType size {{384, 384}};
+            LabelMapType::Pointer map = LabelMapType::New();
+            itk::Index<2> index {{0, 0}};
+            
+            ImageType::RegionType region;
+            region.SetSize(size);
+            region.SetIndex(index);
+            
+            map->SetRegions(region);
+            map->Allocate(true);
+            map ->Update();
+            label_maps[_handler3D->active_slice()] = map;
+            
+            std::vector<std::string> list;
+            objects[_handler3D->active_slice()] = list;
+        }
+        
+        auto labelMap = label_maps[_handler3D->active_slice()];
+        
+        typedef itk::LabelMapToLabelImageFilter< LabelMapType, ImageType> Label2ImageType;
+        auto label2image = Label2ImageType::New();
+        label2image->SetInput(labelMap);
+        label2image->Update();
+        auto image = label2image->GetOutput();
+        
+        KalmanFilter copy = filter;
+        copy.measurement_prediction();
+        std::vector<double> prediction = copy.get_prediction();
+    
+        itk::Index<2> index;
+        index[0] = prediction[0];
+        index[1] = prediction[1];
+        
+        
+        LabelType last_label = 0;
+        if (!labelMap->GetLabels().empty())
+            last_label = labelMap->GetLabels().back();
+
+        if (image->GetBufferedRegion().IsInside(index))
+        {
+            LabelType found_label = labelMap->GetPixel(index);
+            
+            if(found_label == 0)
+            {
+                image->SetPixel(index, last_label+1);
+                
+                image->Update();
+               
+                typedef itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType> Image2LabelType;
+                auto image2label = Image2LabelType::New();
+                image2label->SetInput(image);
+                image2label->Update();
+                
+                label_maps[_handler3D->active_slice()] = image2label->GetOutput();
+                
+                objects[_handler3D->active_slice()].push_back(filter.get_label());
+            }
+        }
+    }
+    
+    auto labelObjects = label_maps[_handler3D->active_slice()]->GetLabelObjects();
+    label_maps[_handler3D->active_slice()]->ClearLabels();
+    for (auto &object: labelObjects)
+        label_maps[_handler3D->active_slice()]->PushLabelObject(object);
+    
+    refresh_object_list();
+    visualize_label_map(label_maps[_handler3D->active_slice()]);
+    _cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+    
+    
+}
+
 
 void AutoTubePanel::add_to_tissues()
 {
@@ -366,8 +472,11 @@ void AutoTubePanel::add_to_tissues()
             using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
             using IteratorType = itk::ImageRegionIterator<itk::Image<tissue_type, 2>>;
             
+            std::ofstream myfile;
             for (auto label: labels)
             {
+                std::string filename = label + ".txt";
+                myfile.open(filename);
                 std::vector<std::string>::iterator it = std::find(tissue_names.begin(), tissue_names.end(), label);
                 if (it == labels.end())
                 {
@@ -375,6 +484,7 @@ void AutoTubePanel::add_to_tissues()
                     mBox.setWindowTitle("Error");
                     mBox.setText("Roots have no tissues! First create a tissue in the tissue list!");
                     mBox.exec();
+                    myfile.close();
                     break;
                 }
                 
@@ -383,6 +493,8 @@ void AutoTubePanel::add_to_tissues()
                 {
                     itk::Image<tissue_type, 2>::Pointer tissue = itk_handler.GetTissuesSlice(i);
                     auto labelMap = label_maps[i];
+                    
+                    labelMap= calculate_label_map_params(labelMap);
                     
                     it = std::find(objects[i].begin(), objects[i].end(), label);
                     if (it != objects[i].end())
@@ -395,19 +507,38 @@ void AutoTubePanel::add_to_tissues()
                         label2image->SetInput(labelMap);
                         label2image->Update();
                         
+                        
                         ConstIteratorType in( label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion() );
                         IteratorType out(tissue, label2image->GetOutput()->GetRequestedRegion());
-                        
+                        double x(0);
+                        double y(0);
+                        int size(0);
                         for (in.GoToBegin(), out.GoToBegin(); !in.IsAtEnd(); ++in, ++out)
                         {
                             if (labelMap->GetPixel(in.GetIndex()) == labelObject->GetLabel())
+                            {
                                 out.Set(tissue_number);
+                                x += in.GetIndex()[0];
+                                y += in.GetIndex()[1];
+                                size += 1;
+                            }
                         }
                         
+                        // calculate centroid
+                        double x_centroid = x/size;
+                        double y_centroid = y/size;
+                        
+                        itk::Point<double, 2> point;
+                        itk::Index<2> ind;
+                        ind[0] = x_centroid;
+                        ind[1] = y_centroid;
+                        
+                        label2image->GetOutput()->TransformIndexToPhysicalPoint(ind, point);
+                        myfile << point[1] << "\t" << point[0] << "\t" << i+1 << "\n";
                     }
                     
                 }
-                
+                 myfile.close();
             }
             
             iseg::DataSelection dataSelection;
@@ -1184,7 +1315,7 @@ void AutoTubePanel::remove_k_filter()
 void AutoTubePanel::update_kalman_filters()
 {
         
-    if (k_filters.size() > 0)
+    if (k_filters.size() > 0 and label_maps[_handler3D->active_slice()])
     {
         // get cached data
         _cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities , max_active_slice_reached);
@@ -1249,7 +1380,7 @@ void AutoTubePanel::update_kalman_filters()
         
         QMessageBox mBox;
         mBox.setWindowTitle("Error");
-        mBox.setText("No Kalman Filters Found!");
+        mBox.setText("No Kalman Filters Found! or No label map exists for the current slice");
         mBox.exec();
     }
 }
@@ -1269,13 +1400,53 @@ LabelMapType::Pointer AutoTubePanel::calculate_label_map_params(LabelMapType::Po
 std::map<LabelType, std::vector<double>> AutoTubePanel::get_label_map_params(LabelMapType::Pointer labelMap)
 {
     std::map<LabelType, std::vector<double>> label_to_params;
+    typedef float PixelType;
+    using ImageType = itk::Image<PixelType, 2>;
+    using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
+    
+    std::map<LabelType, double > label_2_x;
+    std::map<LabelType, double > label_2_y;
+    std::map<LabelType, double > label_2_nb_pixels;
+    
+    
+    typedef itk::LabelMapToLabelImageFilter< LabelMapType, ImageType> Label2ImageType;
+    auto label2image = Label2ImageType::New();
+    label2image->SetInput(labelMap);
+    label2image->Update();
+    
+    //centroid calculation
+    for (auto label: labelMap->GetLabels())
+    {
+        label_2_x[label] = 0;
+        label_2_y[label] = 0;
+        label_2_nb_pixels[label] = 0;
+    }
+    
+    ConstIteratorType in( label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion() );
+    
+    for (in.GoToBegin(); !in.IsAtEnd(); ++in)
+    {
+        if (labelMap->GetPixel(in.GetIndex()) != 0)
+        {
+            label_2_x[labelMap->GetPixel(in.GetIndex())] += in.GetIndex()[0];
+            label_2_y[labelMap->GetPixel(in.GetIndex())] += in.GetIndex()[1];
+            label_2_nb_pixels[labelMap->GetPixel(in.GetIndex())] += 1;
+        }
+    }
+    
+    for (auto label: labelMap->GetLabels())
+    {
+        label_2_x[label] = label_2_x[label]/label_2_nb_pixels[label];
+        label_2_y[label] = label_2_y[label]/label_2_nb_pixels[label];
+    }
+    
     for(unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); i++)
     {
         auto labelObject = labelMap->GetNthLabelObject(i);
         std::vector<double> params;
         
-        params.push_back(labelObject->GetCentroid()[0]);
-        params.push_back(labelObject->GetCentroid()[1]);
+        params.push_back(label_2_x[labelObject->GetLabel()]);
+        params.push_back(label_2_y[labelObject->GetLabel()]);
         params.push_back(labelObject->GetEquivalentSphericalPerimeter());
         params.push_back(labelObject->GetEquivalentSphericalRadius());
         params.push_back(labelObject->GetFeretDiameter());
@@ -1431,16 +1602,19 @@ void AutoTubePanel::merge_selected_items()
         
        auto labelMap = label_maps[_handler3D->active_slice()];
         
+        std::vector<int> rows;
+        
+        for (auto item: items)
+            rows.push_back(object_list->row(item));
+        
+        std::sort(rows.begin(), rows.end());
+        
         std::vector<std::string>text_of_labels;
 
-        for (unsigned int i(1); i < items.size() ; i++)
-        {
-            text_of_labels.push_back(items[i]->text().toStdString());
-        }
         
-        int row = object_list->row(items[0]);
+        std::string target_name = items[0]->text().toStdString();
         
-        LabelType target_label (labelMap->GetNthLabelObject(row)->GetLabel());
+        LabelType target_label (labelMap->GetNthLabelObject(rows[0])->GetLabel());
         
         std::vector<unsigned int> pixelIds;
         
@@ -1453,7 +1627,7 @@ void AutoTubePanel::merge_selected_items()
             auto labelObject = labelMap->GetNthLabelObject(i);
            
             std::pair<LabelType,LabelType> label_pair;
-            if( std::find(text_of_labels.begin(), text_of_labels.end(), label_to_text[_handler3D->active_slice()][(labelObject->GetLabel())]) != text_of_labels.end())
+            if( std::find(rows.begin(), rows.end(), labelObject->GetLabel()-1) != rows.end())
             {
                 // map label to a different label in new label map
                 label_pair = std::make_pair(labelObject->GetLabel(),target_label);
@@ -1491,7 +1665,7 @@ void AutoTubePanel::merge_selected_items()
             }
             else
             {
-                objects_list.push_back("_merged");
+                objects_list.push_back(target_name);
             }
         }
         
@@ -1515,29 +1689,94 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
     // if point click is a label object it adds it to the current slice's selected objects
     
      _cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities,  max_active_slice_reached);
-    
-    auto labelMap = label_maps[_handler3D->active_slice()];
-
-    itk::Index<2> index;
-    index[0] = p.px;
-    index[1] = p.py;
-    
-    
-    LabelType label = labelMap->GetPixel(index);
-    
-    // 0 is background
-    if (label != 0)
+    if (label_maps[_handler3D->active_slice()])
     {
-            auto item = object_list->item(label - 1); // rows start from 0 and labels in label map from 1
-            object_list->setCurrentItem(item);
+        typedef float PixelType;
+        using ImageType = itk::Image<PixelType, 2>;
+        if(!label_maps[_handler3D->active_slice()])
+        {
+            ImageType::SizeType size {{384, 384}};
+            LabelMapType::Pointer map = LabelMapType::New();
+            itk::Index<2> index {{0, 0}};
+            
+            ImageType::RegionType region;
+            region.SetSize(size);
+            region.SetIndex(index);
+            
+            map->SetRegions(region);
+            map->Allocate(true);
+            map ->Update();
+            label_maps[_handler3D->active_slice()] = map;
+            
+            std::vector<std::string> list;
+            objects[_handler3D->active_slice()] = list;
+            
+        }
+        auto labelMap = label_maps[_handler3D->active_slice()];
+
+        itk::Index<2> index;
+        index[0] = p.px;
+        index[1] = p.py;
         
-            int row = object_list->row(item);
         
-            std::vector<int>::iterator it = std::find(selected.begin(), selected.end(), row);
-            if (it == selected.end())
-                selected.push_back(row);
+        LabelType label = labelMap->GetPixel(index);
+        
+        // 0 is background
+        if (label != 0 and !_add_pixel->isChecked())
+        {
+                auto item = object_list->item(label - 1); // rows start from 0 and labels in label map from 1
+                object_list->setCurrentItem(item);
+            
+                int row = object_list->row(item);
+            
+                std::vector<int>::iterator it = std::find(selected.begin(), selected.end(), row);
+                if (it == selected.end())
+                    selected.push_back(row);
+        }
+        
+        else if (_add_pixel->isChecked() and label == 0)
+        {
+           
+            typedef itk::LabelMapToLabelImageFilter< LabelMapType, ImageType> Label2ImageType;
+            auto label2image = Label2ImageType::New();
+            label2image->SetInput(labelMap);
+            label2image->Update();
+            auto image = label2image->GetOutput();
+            
+            if (labelMap->GetPixel(index) == 0)
+            {
+                LabelType last_label = 0;
+                if (!labelMap->GetLabels().empty())
+                    last_label = labelMap->GetLabels().back();
+            
+                if (image->GetBufferedRegion().IsInside(index))
+                {
+                    
+                    image->SetPixel(index, last_label+1);
+                    
+                    image->Update();
+                    
+                    typedef itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType> Image2LabelType;
+                    auto image2label = Image2LabelType::New();
+                    image2label->SetInput(image);
+                    image2label->Update();
+                    
+                    label_maps[_handler3D->active_slice()] = image2label->GetOutput();
+                    
+                    objects[_handler3D->active_slice()].push_back(std::to_string(last_label+1));
+                }
+            
+                auto labelObjects = label_maps[_handler3D->active_slice()]->GetLabelObjects();
+                label_maps[_handler3D->active_slice()]->ClearLabels();
+                for (auto &object: labelObjects)
+                    label_maps[_handler3D->active_slice()]->PushLabelObject(object);
+            }
+        
+            refresh_object_list();
+            visualize_label_map(label_maps[_handler3D->active_slice()]);
+            _cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+        }
     }
-    
 }
 double AutoTubePanel::calculate_distance(std::vector<double> params_1, std::vector<double> params_2)
 {
@@ -2381,10 +2620,8 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
             LabelType last_label = old_map->GetLabels().back();
             for (unsigned int i(0); i < map->GetNumberOfLabelObjects(); i ++ )
             {
-               
                 map->GetNthLabelObject(i)->SetLabel(map->GetNthLabelObject(i)->GetLabel() + last_label);
                 SAFE_UPDATE(map, return);
-                
                 objects[_handler3D->active_slice()].push_back(std::to_string(map->GetNthLabelObject(i)->GetLabel()));
                 
             }

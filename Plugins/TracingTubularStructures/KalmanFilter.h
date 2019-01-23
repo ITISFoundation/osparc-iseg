@@ -49,6 +49,7 @@ class KalmanFilter
     void set_iteration(int i);
     
     std::vector<double> get_measurement();
+    std::vector<double> get_prediction() const;
     
     double diff_btw_predicated_object(std::vector<double> object_params);
     

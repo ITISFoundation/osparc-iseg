@@ -159,6 +159,7 @@ class AutoTubePanel : public iseg::WidgetInterface
         QPushButton* _load;
         QPushButton* _remove_non_selected;
         QPushButton* _add_to_tissues;
+        QPushButton* _k_filter_predict;
 
         QLineEdit* _selected_objects;
         QLineEdit* _sigma_low;
@@ -179,6 +180,7 @@ class AutoTubePanel : public iseg::WidgetInterface
         QCheckBox* _restart_k_filter;
         QCheckBox* _connect_dots;
         QCheckBox* _extrapolate_only_matches;
+        QCheckBox* _add_pixel;
 
     
         int max_active_slice_reached = 0;
@@ -221,6 +223,8 @@ class AutoTubePanel : public iseg::WidgetInterface
         void load();
         void remove_non_selected();
         void add_to_tissues();
+        void predict_k_filter();
+    
 
 
 };

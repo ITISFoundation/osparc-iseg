@@ -193,3 +193,13 @@ double KalmanFilter::diff_btw_predicated_object(std::vector<double> object_param
     }
     return  _v.sum();
 }
+
+std::vector<double> KalmanFilter::get_prediction() const
+{
+    std::vector<double> measurement(N);
+    for (unsigned int i(0) ; i < N ; i ++)
+    {
+        measurement[i] = z_hat(i);
+    }
+    return measurement;
+}
