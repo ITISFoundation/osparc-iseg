@@ -39,7 +39,7 @@
   3. Open a VisualStudio 2015 x64 prompt
   4. Go to downloaded Qt folder (cd _%QTFOLDER%_)
   5. Input _set Path=%PATH%;%QTFOLDER%\bin_
-  6. Input _configure -debug-and-release -opensource -confirm-license opengl desktop -nomake examples -nomake tests_ in the command window
+  6. Input _configure -debug-and-release -opensource -confirm-license -opengl desktop -nomake examples -nomake tests_ in the command window
   7. Compile Qt by inputing _nmake_
 
 ### Compiling iSEG
