@@ -2159,7 +2159,7 @@ void AutoTubePanel::item_edited(QListWidgetItem *Item)
     
     old_name = objects[_handler3D->active_slice()][object_list->currentRow()];
     
-    if (new_name != old_name)
+    if (new_name != "" and new_name != " " and ! is_number(new_name))
     {
         
         bool in_k_filters(true);
