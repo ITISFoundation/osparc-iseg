@@ -1669,7 +1669,24 @@ void AutoTubePanel::merge_selected_items()
             }
         }
         
+        if (_handler3D->active_slice() != 0)
+        {
+            for (unsigned int i(1) ; i < rows.size(); i++)
+            {
+                _probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(rows[i] + 1), true, false);
+            }
+        }
+        
         auto labelObjects = labelMap->GetLabelObjects();
+        
+        if (_handler3D->active_slice() != 0)
+        {
+            for (unsigned int i(0) ; i <  labelMap->GetNumberOfLabelObjects() ; i ++ )
+            {
+                _probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(labelMap->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i+1));
+            }
+        }
+        
         // clear labels from label map and re-initialize to have from 1 up to number of label objects
         labelMap->ClearLabels();
         for (auto &object: labelObjects)
@@ -1678,6 +1695,7 @@ void AutoTubePanel::merge_selected_items()
         label_maps[_handler3D->active_slice()] = labelMap;
         objects[_handler3D->active_slice()] = objects_list;
         refresh_object_list();
+        refresh_probability_list();
 
         _cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities,  max_active_slice_reached);
     }
