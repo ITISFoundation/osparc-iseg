@@ -12,19 +12,25 @@ IF(PLUGIN_TRACE_TUBES)
 	ADD_SUBDIRECTORY(testsuite)
 
 	USE_BOOST()
+	USE_VTK()
+	USE_ITK() # for gdcm
 	USE_EIGEN()
-	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty)
 
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty)
+  
 	QT4_WRAP_CPP(MOCSrcsbias 
 		AutoTubeWidget.h
-		TraceTubesWidget.h)
+		TraceTubesWidget.h
+	  AutoTubePanel.h)
 	
 	FILE(GLOB PLUGIN_HEADERS *.h)
 
 	ADD_LIBRARY(TraceTubesWidget.ext SHARED 
 		AutoTubeWidget.cpp
 		TraceTubesWidget.cpp 
-		TracingPlugin.cpp 
+		TracingPlugin.cpp
+		AutoTubePanel.cpp
+		KalmanFilter.cpp
 		${PLUGIN_HEADERS}
 		${MOCSrcsbias}
 	)
@@ -33,6 +39,7 @@ IF(PLUGIN_TRACE_TUBES)
 		iSegData
 		iSegInterface 
 		${MY_EXTERNAL_LINK_LIBRARIES}
+        Eigen3::Eigen
 	)
 	VS_SET_PROPERTY(TraceTubesWidget.ext "Plugins")
 
