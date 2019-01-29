@@ -151,6 +151,7 @@ private:
 	QLineEdit* _w_params;
 	QLineEdit* _w_pred;
 	QLineEdit* _limit_slice;
+	QLineEdit* _line_radius;
 
 	QCheckBox* _non_max_suppression;
 	QCheckBox* _skeletonize;

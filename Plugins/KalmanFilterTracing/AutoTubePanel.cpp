@@ -11,6 +11,8 @@
 #include "Data/Logger.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
+#include "Core/Morpho.h"
+
 #include <QFileDialog>
 #include <QFormLayout>
 #include <QLabel>
@@ -35,6 +37,8 @@
 #include <itkChangeLabelLabelMapFilter.h>
 #include <itkLabelMapToBinaryImageFilter.h>
 #include <itkMergeLabelMapFilter.h>
+#include <itkNeighborhoodAlgorithm.h>
+#include <itkShapedNeighborhoodIterator.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -69,7 +73,7 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
 {
-	setToolTip(Format("Sandbox Tool"));
+	setToolTip(Format("Kalman filter based root tracer"));
 
 	_execute_button = new QPushButton("Execute");
 	_execute_button->setMaximumSize(_execute_button->minimumSizeHint());
@@ -112,6 +116,7 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	QLabel* _connect_d = new QLabel("Connect Dots");
 	QLabel* _extra_only = new QLabel("Keep Only Matches");
 	QLabel* _addPix = new QLabel("Add Pixel");
+	QLabel* _line_radius_l = new QLabel("Line Radius");
 
 	_sigma_low = new QLineEdit(QString::number(0.3));
 	_sigma_low->setValidator(new QDoubleValidator);
@@ -160,6 +165,10 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	_limit_slice = new QLineEdit();
 	_limit_slice->setValidator(new QIntValidator);
 	_limit_slice->setFixedWidth(width);
+
+	_line_radius = new QLineEdit();
+	_line_radius->setValidator(new QDoubleValidator);
+	_line_radius->setFixedWidth(width);
 
 	_skeletonize = new QCheckBox;
 	_skeletonize->setChecked(true);
@@ -237,10 +246,10 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	vbox5->addWidget(_sigma_hi);
 	vbox5->addWidget(_num);
 	vbox5->addWidget(_number_sigma_levels);
+	vbox5->addWidget(_feature_th);
+	vbox5->addWidget(_threshold);
 
 	QVBoxLayout* vbox6 = new QVBoxLayout;
-	vbox6->addWidget(_feature_th);
-	vbox6->addWidget(_threshold);
 	vbox6->addWidget(_non_max);
 	vbox6->addWidget(_non_max_suppression);
 	vbox6->addWidget(_centerlines);
@@ -249,6 +258,8 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	vbox6->addWidget(_min_object_size);
 	vbox6->addWidget(_connect_d);
 	vbox6->addWidget(_connect_dots);
+	vbox6->addWidget(_line_radius_l);
+	vbox6->addWidget(_line_radius);
 
 	//QVBoxLayout* vbox7 = new QVBoxLayout;
 
@@ -435,6 +446,11 @@ void AutoTubePanel::add_to_tissues()
 					break;
 				}
 
+				bool draw_circle;
+				double circle_radius = _line_radius->text().toDouble(&draw_circle);
+				auto spacing = itk_handler.GetTissuesSlice(0)->GetSpacing();
+				auto ball = morpho::MakeBall<2>(spacing, draw_circle ? circle_radius : 1.0);
+
 				tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
 				for (int i(0); i < _handler3D->num_slices(); i++)
 				{
@@ -449,7 +465,7 @@ void AutoTubePanel::add_to_tissues()
 						int row = std::distance(objects[i].begin(), it);
 						auto labelObject = labelMap->GetLabelObject(row + 1);
 
-						typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+						using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 						auto label2image = Label2ImageType::New();
 						label2image->SetInput(labelMap);
 						label2image->Update();
@@ -463,7 +479,9 @@ void AutoTubePanel::add_to_tissues()
 						{
 							if (labelMap->GetPixel(in.GetIndex()) == labelObject->GetLabel())
 							{
-								out.Set(tissue_number);
+								if (!draw_circle) // copy to tissues
+									out.Set(tissue_number);
+
 								x += in.GetIndex()[0];
 								y += in.GetIndex()[1];
 								size += 1;
@@ -480,8 +498,36 @@ void AutoTubePanel::add_to_tissues()
 						ind[1] = y_centroid;
 						ind[2] = i;
 
+						if (draw_circle) // draw perfect circle
+						{
+							using ShapedNeighborhoodIterator = itk::ShapedNeighborhoodIterator<itk::Image<tissue_type, 2>>;
+							ShapedNeighborhoodIterator siterator(ball.GetRadius(),
+									tissue, tissue->GetLargestPossibleRegion());
+
+							//siterator.CreateActiveListFromNeighborhood(ball); // does not work because ball has incorrect neighborhood type
+							size_t idx = 0;
+							for (auto nit = ball.Begin(); nit != ball.End(); ++nit, ++idx)
+							{
+								if (*nit)
+									siterator.ActivateOffset(siterator.GetOffset(idx));
+								else
+									siterator.DeactivateOffset(siterator.GetOffset(idx));
+							}
+
+							siterator.NeedToUseBoundaryConditionOn();
+
+							ShapedNeighborhoodIterator::IndexType location;
+							location[0] = x_centroid;
+							location[1] = y_centroid;
+							siterator.SetLocation(location);
+							for (auto i = siterator.Begin(); !i.IsAtEnd(); ++i)
+							{
+								i.Set(tissue_number);
+							}
+						}
+
 						image_3d->TransformIndexToPhysicalPoint(ind, point);
-						myfile << point[0] << "\t" << point[1] << "\t" << i << "\n";
+						myfile << point[0] << "\t" << point[1] << "\t" << point[2] << "\n";
 					}
 				}
 				myfile.close();
