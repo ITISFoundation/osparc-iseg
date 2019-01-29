@@ -45,6 +45,7 @@ SET(SOURCES
 	RTDoseWriter.cpp
 	SliceProvider.cpp
 	SmoothSteps.cpp
+	SmoothTissues.cpp
 	UndoElem.cpp
 	UndoQueue.cpp
 	VotingReplaceLabel.cpp
