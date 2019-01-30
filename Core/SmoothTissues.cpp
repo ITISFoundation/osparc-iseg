@@ -14,8 +14,8 @@
 #include "../Data/ItkUtils.h"
 #include "../Data/SliceHandlerItkWrapper.h"
 
-#include <itkSignedMaurerDistanceMapImageFilter.h>
 #include <itkDiscreteGaussianImageFilter.h>
+#include <itkSignedMaurerDistanceMapImageFilter.h>
 
 namespace iseg {
 
@@ -37,10 +37,10 @@ typename TOutput::Pointer _ComputeSDF(const TInput* img, int foreground, double 
 		return sdf->GetOutput();
 	}
 
-	using gaussian_type = itk::DiscreteGaussianImageFilter<TOutput,TOutput>;
+	using gaussian_type = itk::DiscreteGaussianImageFilter<TOutput, TOutput>;
 	auto gaussian = gaussian_type::New();
 	gaussian->SetInput(sdf->GetOutput());
-	gaussian->SetVariance(sigma*sigma);
+	gaussian->SetVariance(sigma * sigma);
 	gaussian->Update();
 	return gaussian->GetOutput();
 }
@@ -48,9 +48,9 @@ typename TOutput::Pointer _ComputeSDF(const TInput* img, int foreground, double 
 template<class TInput>
 bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigma)
 {
-    itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
+	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using label_image_type = TInput;
-	using real_image_type = itk::Image<float,ImageDimension>;
+	using real_image_type = itk::Image<float, ImageDimension>;
 
 	bool ok = false;
 
@@ -66,7 +66,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 
 				// compute sdf to tissue @ current location
 				sdf_images[it.Get()] = _ComputeSDF<label_image_type, real_image_type>(
-					tissues, it.Get(), sigma);
+						tissues, it.Get(), sigma);
 			}
 		}
 	}
@@ -80,11 +80,11 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 			if (!locks.at(it.Get()))
 			{
 				auto idx = it.GetIndex();
-				
+
 				// find most negative sdf ("most inside")
 				auto min_sdf = std::numeric_limits<float>::max();
 				auto min_label = it.Get();
-				for (tissues_size_t i=0; i!=sdf_images.size(); ++i)
+				for (tissues_size_t i = 0; i != sdf_images.size(); ++i)
 				{
 					if (sdf_images[i])
 					{
@@ -104,7 +104,6 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 	return ok;
 }
 
-
 bool SmoothTissues(SliceHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d)
 {
 	SliceHandlerItkWrapper itkhandler(handler);
@@ -114,13 +113,13 @@ bool SmoothTissues(SliceHandlerInterface* handler, size_t start_slice, size_t en
 	{
 		using label_image_type = SliceHandlerItkWrapper::tissues_ref_type;
 
-		auto tissues = itkhandler.GetTissues(false);
-		
+		auto tissues = itkhandler.GetTissues(start_slice, end_slice);
+
 		return _SmoothTissues<label_image_type>(tissues, locks, sigma);
 	}
 	else
 	{
-		using label_image_type = itk::Image<unsigned short,2>;
+		using label_image_type = itk::Image<unsigned short, 2>;
 
 		for (size_t slice = start_slice; slice < end_slice; ++slice)
 		{
@@ -133,7 +132,7 @@ bool SmoothTissues(SliceHandlerInterface* handler, size_t start_slice, size_t en
 			}
 		}
 	}
-	
+
 	return true;
 }
 

@@ -9,10 +9,10 @@
  */
 #pragma once
 
-#include "iSegData.h"
-#include "Vec3.h"
-#include "Transform.h"
 #include "SlicesHandlerInterface.h"
+#include "Transform.h"
+#include "Vec3.h"
+#include "iSegData.h"
 
 #include <itkImage.h>
 #include <itkSliceContiguousImage.h>
@@ -31,11 +31,14 @@ public:
 	SliceHandlerItkWrapper(SliceHandlerInterface* sh) : _handler(sh) {}
 
 	template<typename T>
-	static typename itk::SliceContiguousImage<T>::Pointer GetITKView(const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
+	static typename itk::SliceContiguousImage<T>::Pointer GetITKView(const std::vector<T*>& all_slices, size_t start_slice, size_t end_slice, const SliceHandlerInterface* handler);
 
 	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(bool active_slices);
+	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(size_t start_slice, size_t end_slice);
 	itk::SliceContiguousImage<pixel_type>::Pointer GetTarget(bool active_slices);
+	itk::SliceContiguousImage<pixel_type>::Pointer GetTarget(size_t start_slice, size_t end_slice);
 	itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(bool active_slices);
+	itk::SliceContiguousImage<tissue_type>::Pointer GetTissues(size_t start_slice, size_t end_slice);
 
 	enum { kActiveSlice = -1 };
 	itk::Image<pixel_type, 2>::Pointer GetSourceSlice(int slice = kActiveSlice);
@@ -59,7 +62,7 @@ private:
 
 template<typename T>
 typename itk::SliceContiguousImage<T>::Pointer
-SliceHandlerItkWrapper::GetITKView(const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler)
+		SliceHandlerItkWrapper::GetITKView(const std::vector<T*>& all_slices, size_t start_slice, size_t end_slice, const SliceHandlerInterface* handler)
 {
 	using SliceContiguousImageType = itk::SliceContiguousImage<T>;
 
@@ -76,15 +79,16 @@ SliceHandlerItkWrapper::GetITKView(const std::vector<T*>& all_slices, bool activ
 	auto spacing = handler->spacing();
 	auto transform = handler->transform();
 
-	if (active_slices)
+	assert(end_slice > start_slice);
+	if (end_slice > start_slice)
 	{
 		// \note deactivated, because instead I set the extent above to start-end
 		//	// correct transform if we are exporting active slices
 		//	int cropping[] = { 0,0,handler->start_slice() };
 		//	transform.paddingUpdateTransform(cropping, spacing.v);
 
-		start[2] = handler->start_slice();
-		size[2] = handler->end_slice() - handler->start_slice();
+		start[2] = start_slice;
+		size[2] = end_slice - start_slice;
 	}
 
 	itk::Point<itk::SpacePrecisionType, 3> origin;
@@ -108,6 +112,5 @@ SliceHandlerItkWrapper::GetITKView(const std::vector<T*>& all_slices, bool activ
 
 	return image;
 }
-
 
 } // namespace iseg
