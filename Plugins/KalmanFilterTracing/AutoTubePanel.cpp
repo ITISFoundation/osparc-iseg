@@ -319,6 +319,14 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 
 void AutoTubePanel::predict_k_filter()
 {
+	if (k_filters.empty())
+	{
+		QMessageBox mBox;
+		mBox.setWindowTitle("Error");
+		mBox.setText("Cannot predict without any Kalman filters!");
+		mBox.exec();
+		return;
+	}
 
 	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
 	typedef float PixelType;
@@ -574,14 +582,13 @@ void AutoTubePanel::remove_non_selected()
 				rows_to_delete.push_back(i);
 		}
 
-		int offset(0);
-
 		// delete rows to delete from current slice's object list
+		// delete in descending order, i.e. from back of vector
+		std::sort(rows_to_delete.begin(), rows_to_delete.end(), std::greater<int>());
 		for (auto row : rows_to_delete)
 		{
 			label_maps[_handler3D->active_slice()]->RemoveLabel(row + 1);
-			objects[_handler3D->active_slice()].erase(objects[_handler3D->active_slice()].begin() + row - offset);
-			offset += 1;
+			objects[_handler3D->active_slice()].erase(objects[_handler3D->active_slice()].begin() + row);
 		}
 
 		// delete rows to delete from current slice's probabilities list
@@ -1273,13 +1280,11 @@ void AutoTubePanel::remove_k_filter()
 		rows.push_back(row);
 	}
 
-	int offset(0);
-	// sort rows ascendingly so that the offset will always be correct
-	std::sort(rows.begin(), rows.end());
+	// delete in descending order, i.e. from back of vector
+	std::sort(rows.begin(), rows.end(), std::greater<int>());
 	for (auto row : rows)
 	{
-		k_filters.erase(k_filters.begin() + row - offset);
-		offset += 1;
+		k_filters.erase(k_filters.begin() + row);
 	}
 
 	refresh_k_filter_list();
@@ -1300,9 +1305,17 @@ void AutoTubePanel::update_kalman_filters()
 		bool not_in_k_filter_list(false);
 		std::vector<std::string> objects_not_in_list;
 		// for each slice
-		for (int i(0); i <= _handler3D->active_slice(); i++)
+		for (int i(0); i <= _handler3D->active_slice(); i++) // \bug this always starts at slice 0 => it should store start slice, i.e. where user pressed execute first time
 		{
 			auto labelMap = label_maps[i];
+			if (!labelMap)
+			{
+				QMessageBox mBox;
+				mBox.setWindowTitle("Error");
+				mBox.setText(QString::fromStdString("No label map for slice " + boost::lexical_cast<std::string>(i) + ". Tool expects you to start at slice 0."));
+				mBox.exec();
+				return;
+			}
 
 			typedef std::map<LabelType, std::vector<double>> LabelToParams;
 			LabelToParams label_to_params = get_label_map_params(labelMap);
@@ -1504,7 +1517,9 @@ void AutoTubePanel::remove_object()
 
 	for (auto row : rows)
 	{
-		objects[_handler3D->active_slice()].erase(objects[_handler3D->active_slice()].begin() + row - offset);
+		auto it = objects[_handler3D->active_slice()].begin();
+		std::advance(it, row - offset);
+		objects[_handler3D->active_slice()].erase(it);
 		offset += 1;
 	}
 
