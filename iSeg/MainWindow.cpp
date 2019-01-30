@@ -1705,6 +1705,12 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	m_Modified = false;
 	m_NewDataAfterSwap = false;
+
+	// make checked state more visible
+	pb_add->setStyleSheet(QString("QPushButton:checked { background-color: rgb(150,150,150); font: bold }"));
+	pb_addhold->setStyleSheet(QString("QPushButton:checked { background-color: rgb(150,150,150); font: bold }"));
+	pb_sub->setStyleSheet(QString("QPushButton:checked { background-color: rgb(150,150,150); font: bold }"));
+	pb_subhold->setStyleSheet(QString("QPushButton:checked { background-color: rgb(150,150,150); font: bold }"));
 }
 
 void MainWindow::closeEvent(QCloseEvent* qce)
