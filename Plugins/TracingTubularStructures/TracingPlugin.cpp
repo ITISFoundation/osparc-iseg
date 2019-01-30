@@ -11,14 +11,12 @@
 
 #include "AutoTubeWidget.h"
 #include "TraceTubesWidget.h"
-#include "AutoTubePanel.h"
 
 namespace iseg { namespace plugin {
 
 namespace {
 TracingPlugin _register_addon;
 AutoTracingPlugin _register_addon2;
-PanelAutoTracingPlugin _register_addon3;
 } // namespace
 
 iseg::WidgetInterface* TracingPlugin::create_widget(QWidget* parent, const char* name,
@@ -32,8 +30,4 @@ iseg::WidgetInterface* AutoTracingPlugin::create_widget(QWidget* parent, const c
 	return new AutoTubeWidget(slice_handler(), parent, name, wFlags);
 }
 
-iseg::WidgetInterface* PanelAutoTracingPlugin::create_widget(QWidget *parent, const char *name, Qt::WindowFlags wFlags) const
-{
-    return new AutoTubePanel(slice_handler(), parent, name, wFlags);
-}
 }} // namespace iseg::plugin
