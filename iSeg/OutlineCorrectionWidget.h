@@ -39,7 +39,6 @@ public:
 	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~OutlineCorrectionWidget();
-	QSize sizeHint() const override;
 	void cleanup() override;
 
 	void init() override;
@@ -75,33 +74,6 @@ private:
 	Vec3 spacing;
 	Point last_pt;
 
-	//QWidget* hboxoverall;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3VBox* vbox1;
-
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox2a;
-	Q3HBox* hbox3a;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5o;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3HBox* hboxpixormm;
-
-#if 0
-	QButtonGroup* method;
-	QRadioButton* olcorr;
-	QRadioButton* brush;
-	QRadioButton* holefill;
-	QRadioButton* removeislands;
-	QRadioButton* gapfill;
-	QRadioButton* addskin;
-	QRadioButton* fillskin;
-	QRadioButton* allfill;
-	QRadioButton* adapt;
-#else
 	QListWidget* method_list;
 	QListWidgetItem* olcorr;
 	QListWidgetItem* brush;
@@ -112,7 +84,18 @@ private:
 	QListWidgetItem* fillskin;
 	QListWidgetItem* allfill;
 	QListWidgetItem* adapt;
-#endif
+
+	QWidget* vbox1;
+	Q3HBox* hbox1;
+	Q3HBox* hbox2;
+	Q3HBox* hbox2a;
+	Q3HBox* hbox3a;
+	Q3HBox* hbox4;
+	Q3HBox* hbox5o;
+	Q3HBox* hbox5;
+	Q3HBox* hbox6;
+	Q3HBox* hboxpixormm;
+
 	QRadioButton* tissue;
 	QRadioButton* work;
 	QButtonGroup* target;

@@ -44,58 +44,21 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
-	hboxoverall = new Q3HBox(this);
-	vboxmethods = new Q3VBox(hboxoverall);
+	auto top_layout = new QHBoxLayout;
 
-	vbox1 = new Q3VBox(hboxoverall);
-	hbox1 = new Q3HBox(vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	hbox2a = new Q3HBox(vbox1);
-
-	tissuesListBackground = new Q3HBox(vbox1);
-	tissuesListBackground->setFixedHeight(18);
-	tissuesListSkin = new Q3HBox(vbox1);
-	tissuesListSkin->setFixedHeight(18);
-
-	allslices = new QCheckBox(QString("Apply to all slices"), vbox1);
-	pb_execute = new QPushButton("Fill Islands", vbox1);
-
-	hbox3a = new Q3HBox(vbox1);
-	hbox4 = new Q3HBox(vbox1);
-	hbox5o = new Q3HBox(vbox1);
-	hbox6 = new Q3HBox(vbox1);
-	hbox5 = new Q3HBox(vbox1);
-	hboxpixormm = new Q3HBox(vbox1);
-	hbox_prev_slice = new Q3HBox(vbox1);
-
-	txt_radius = new QLabel("Thickness: ", hbox1);
-	sb_radius = new QSpinBox(0, 99, 2, hbox1);
-	sb_radius->setValue(1);
-	sb_radius->show();
-	mm_radius = new QLineEdit(QString::number(1), hbox1);
-	mm_radius->hide();
-	txt_unit = new QLabel(" pixels", hbox1);
-
-	txt_holesize = new QLabel("Island Size: ", hbox2);
-	sb_holesize = new QSpinBox(1, 10000, 1, hbox2);
-	sb_holesize->setValue(100);
-	sb_holesize->show();
-
-	txt_gapsize = new QLabel("Gap Size: ", hbox2a);
-	sb_gapsize = new QSpinBox(1, 10, 1, hbox2a);
-	sb_gapsize->setValue(2);
-	sb_gapsize->show();
-
-	method_list = new QListWidget(vboxmethods);
+	// methods
+	method_list = new QListWidget(this);
 	method_list->setSelectionMode(QAbstractItemView::SingleSelection);
-	method_list->setFixedWidth(200);
+	method_list->setFixedWidth(150);
+	method_list->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	method_list->setLineWidth(1);
+	method_list->setStyleSheet("QListWidget::item:selected { background: rgb(150,150,150); }");
 
 	olcorr = new QListWidgetItem(tr("Outline Corr"), method_list);
 	olcorr->setToolTip(Format(
 			"Draw an alternative boundary segment for a region.This segment "
 			"will be connected to the region using the shortest possible lines "
 			"and will replace the boundary segment between the connection points."));
-
 	brush = new QListWidgetItem(tr("Brush"), method_list);
 	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
 
@@ -129,57 +92,56 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	adapt = new QListWidgetItem(tr("Adapt"), method_list);
 
-#if 0
-	method = new QButtonGroup(this);
+	// parameters
+	vbox1 = new QWidget(this);
 
-	Q3HBox* hboxmethods1 = new Q3HBox(vboxmethods);
-	Q3HBox* hboxmethods2 = new Q3HBox(vboxmethods);
-	Q3HBox* hboxmethods3 = new Q3HBox(vboxmethods);
-	//Q3HBox* hboxmethods4 = new Q3HBox(vboxmethods);
+	auto param_vlayout = new QVBoxLayout;
+	param_vlayout->setMargin(4);
 
-	olcorr = new QRadioButton(QString("Outline Corr"), hboxmethods1);
-	olcorr->setToolTip(Format(
-			"Draw an alternative boundary segment for a region.This segment "
-			"will be connected to the region using the shortest possible lines "
-			"and will replace the boundary segment between the connection points."));
-	brush = new QRadioButton(QString("Brush"), hboxmethods1);
-	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
-	holefill = new QRadioButton(QString("Fill Holes"), hboxmethods1);
-	holefill->setToolTip(Format(
-			"Close all holes in the selected region or tissue that have a "
-			"size smaller than the number of pixels specified by the Hole Size option."));
-	removeislands = new QRadioButton(QString("Remove Islands"), hboxmethods2);
-	removeislands->setToolTip(Format(
-			"Remove all islands (speckles and outliers) with the selected "
-			"gray value or tissue assignment."));
-	gapfill = new QRadioButton(QString("Fill Gaps"), hboxmethods2);
-	gapfill->setToolTip(Format(
-			"Close gaps between multiple disconnected regions having the same "
-			"gray value or belonging to the same tissue."));
-	addskin = new QRadioButton(QString("Add Skin"), hboxmethods2);
-	addskin->setToolTip(Format(
-			"Add a skin layer to a segmentation with a "
-			"specified Thickness (in pixels)."));
-	fillskin = new QRadioButton(QString("Fill Skin"), hboxmethods3);
-	fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
-	allfill = new QRadioButton(QString("Fill All"), hboxmethods3);
-	allfill->setToolTip(Format(
-			"Make sure that there are no unassigned regions "
-			"inside the segmented model."));
-	adapt = new QRadioButton(QString("Adapt"), hboxmethods3);
+	param_vlayout->addWidget(hbox1 = new Q3HBox);
+	param_vlayout->addWidget(hbox2 = new Q3HBox);
+	param_vlayout->addWidget(hbox2a = new Q3HBox);
 
-	method->insert(olcorr);
-	method->insert(brush);
-	method->insert(holefill);
-	method->insert(removeislands);
-	method->insert(gapfill);
-	method->insert(addskin);
-	method->insert(fillskin);
-	method->insert(allfill);
-	method->insert(adapt);
+	tissuesListBackground = new Q3HBox();
+	tissuesListBackground->setFixedHeight(18);
+	tissuesListSkin = new Q3HBox();
+	tissuesListSkin->setFixedHeight(18);
 
-	brush->setChecked(true);
-#endif
+	param_vlayout->addWidget(tissuesListBackground);
+	param_vlayout->addWidget(tissuesListSkin);
+
+	allslices = new QCheckBox(QString("Apply to all slices"), nullptr);
+	pb_execute = new QPushButton("Fill Islands", nullptr);
+	param_vlayout->addWidget(allslices);
+	param_vlayout->addWidget(pb_execute);
+
+	param_vlayout->addWidget(hbox3a = new Q3HBox());
+	param_vlayout->addWidget(hbox4 = new Q3HBox());
+	param_vlayout->addWidget(hbox5o = new Q3HBox());
+	param_vlayout->addWidget(hbox6 = new Q3HBox());
+	param_vlayout->addWidget(hbox5 = new Q3HBox());
+	param_vlayout->addWidget(hboxpixormm = new Q3HBox());
+	param_vlayout->addWidget(hbox_prev_slice = new Q3HBox());
+
+	vbox1->setLayout(param_vlayout);
+
+	txt_radius = new QLabel("Thickness: ", hbox1);
+	sb_radius = new QSpinBox(0, 99, 2, hbox1);
+	sb_radius->setValue(1);
+	sb_radius->show();
+	mm_radius = new QLineEdit(QString::number(1), hbox1);
+	mm_radius->hide();
+	txt_unit = new QLabel(" pixels", hbox1);
+
+	txt_holesize = new QLabel("Island Size: ", hbox2);
+	sb_holesize = new QSpinBox(1, 10000, 1, hbox2);
+	sb_holesize->setValue(100);
+	sb_holesize->show();
+
+	txt_gapsize = new QLabel("Gap Size: ", hbox2a);
+	sb_gapsize = new QSpinBox(1, 10, 1, hbox2a);
+	sb_gapsize->setValue(2);
+	sb_gapsize->show();
 
 	QLabel* tissuesListBackgroundLabel = new QLabel(tissuesListBackground);
 	tissuesListBackgroundLabel->setText("Background");
@@ -263,12 +225,11 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	pb_copy_guide = new QPushButton(QString("Copy"), hbox_prev_slice);
 	pb_copy_pick_guide = new QPushButton(QString("Copy Picked"), hbox_prev_slice);
 
-	vboxmethods->setMargin(5);
-	vbox1->setMargin(4);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
-	vboxmethods->setMargin(4);
+	top_layout->addWidget(method_list);
+	top_layout->addWidget(vbox1);
+	setLayout(top_layout);
 
+	brush->setSelected(true);
 	method_changed();
 
 	connect(method_list, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
@@ -299,9 +260,6 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 OutlineCorrectionWidget::~OutlineCorrectionWidget()
 {
-	delete vbox1;
-	delete target;
-	delete brushtype;
 }
 
 void OutlineCorrectionWidget::on_select_background()
@@ -357,8 +315,6 @@ void OutlineCorrectionWidget::select_skin(QString tissueName, tissues_size_t nr)
 	else
 		pb_execute->setEnabled(false);
 }
-
-QSize OutlineCorrectionWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void OutlineCorrectionWidget::draw_circle(Point p)
 {
