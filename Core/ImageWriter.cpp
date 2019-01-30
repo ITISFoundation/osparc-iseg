@@ -12,13 +12,13 @@
 #include "ImageWriter.h"
 #include "VtkGlue/itkImageToVTKImageFilter.h"
 
+#include "Data/Logger.h"
 #include "Data/SliceHandlerItkWrapper.h"
 #include "Data/Transform.h"
-#include "Data/Logger.h"
 
+#include <itkCastImageFilter.h>
 #include <itkImage.h>
 #include <itkImageFileWriter.h>
-#include <itkCastImageFilter.h>
 
 #include <vtkNew.h>
 #include <vtkStructuredPointsWriter.h>
@@ -32,7 +32,7 @@ using namespace iseg;
 template<typename T>
 bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler)
 {
-	auto image = SliceHandlerItkWrapper::GetITKView(all_slices, active_slices, handler);
+	auto image = SliceHandlerItkWrapper::GetITKView(all_slices, handler->start_slice(), handler->end_slice(), handler);
 	if (image)
 	{
 		boost::filesystem::path path(filename);

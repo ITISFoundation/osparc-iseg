@@ -20,17 +20,20 @@
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
-#include <qdialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qlistwidget.h>
 #include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
-#include <qwidget.h>
+
+class QStackedLayout;
 
 namespace iseg {
+
+class SmoothTissuesParamView;
 
 class OutlineCorrectionWidget : public WidgetInterface
 {
@@ -39,7 +42,6 @@ public:
 	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~OutlineCorrectionWidget();
-	QSize sizeHint() const override;
 	void cleanup() override;
 
 	void init() override;
@@ -74,41 +76,49 @@ private:
 	unsigned short activeslice;
 	Vec3 spacing;
 	Point last_pt;
-	Q3VBox* vbox1;
+
+	QListWidget* methods;
+	QListWidgetItem* olcorr;
+	QListWidgetItem* brush;
+	QListWidgetItem* holefill;
+	QListWidgetItem* removeislands;
+	QListWidgetItem* gapfill;
+	QListWidgetItem* addskin;
+	QListWidgetItem* fillskin;
+	QListWidgetItem* allfill;
+	QListWidgetItem* adapt;
+	QListWidgetItem* smooth_tissues;
+
+	QStackedLayout* stacked_param_layout;
+	SmoothTissuesParamView* smooth_tissues_params;
+
+	QWidget* parameter_area;
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
 	Q3HBox* hbox2a;
 	Q3HBox* hbox3a;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
 	Q3HBox* hbox4;
 	Q3HBox* hbox5o;
 	Q3HBox* hbox5;
 	Q3HBox* hbox6;
 	Q3HBox* hboxpixormm;
-	QRadioButton* brush;
-	QRadioButton* olcorr;
-	QRadioButton* holefill;
-	QRadioButton* removeislands;
-	QRadioButton* gapfill;
-	QRadioButton* allfill;
-	QRadioButton* addskin;
-	QRadioButton* fillskin;
-	QButtonGroup* method;
+
 	QRadioButton* tissue;
 	QRadioButton* work;
 	QButtonGroup* target;
-	QRadioButton* erasebrush;
-	QRadioButton* drawbrush;
-	QRadioButton* modifybrush;
-	QRadioButton* adapt;
+
 	QButtonGroup* brushtype;
+	QRadioButton* modifybrush;
+	QRadioButton* drawbrush;
+	QRadioButton* erasebrush;
+
+	QButtonGroup* in_or_out;
 	QRadioButton* inside;
 	QRadioButton* outside;
-	QButtonGroup* in_or_out;
+
+	QButtonGroup* pixelormm;
 	QRadioButton* pixel;
 	QRadioButton* mm;
-	QButtonGroup* pixelormm;
 	QLabel* txt_unit;
 	QLabel* txt_radius;
 	QSpinBox* sb_radius;
@@ -158,6 +168,7 @@ private slots:
 	void draw_guide();
 	void copy_guide(Point* p = nullptr);
 	void copy_pick_pushed();
+	void smooth_tissues_pushed();
 };
 
 } // namespace iseg
