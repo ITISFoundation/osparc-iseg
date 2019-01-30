@@ -28,7 +28,7 @@
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
-#include <qwidget.h>
+#include <qlistwidget.h>
 
 namespace iseg {
 
@@ -74,41 +74,61 @@ private:
 	unsigned short activeslice;
 	Vec3 spacing;
 	Point last_pt;
+
+	//QWidget* hboxoverall;
+	Q3HBox* hboxoverall;
+	Q3VBox* vboxmethods;
 	Q3VBox* vbox1;
+
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
 	Q3HBox* hbox2a;
 	Q3HBox* hbox3a;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
 	Q3HBox* hbox4;
 	Q3HBox* hbox5o;
 	Q3HBox* hbox5;
 	Q3HBox* hbox6;
 	Q3HBox* hboxpixormm;
-	QRadioButton* brush;
+
+#if 0
+	QButtonGroup* method;
 	QRadioButton* olcorr;
+	QRadioButton* brush;
 	QRadioButton* holefill;
 	QRadioButton* removeislands;
 	QRadioButton* gapfill;
-	QRadioButton* allfill;
 	QRadioButton* addskin;
 	QRadioButton* fillskin;
-	QButtonGroup* method;
+	QRadioButton* allfill;
+	QRadioButton* adapt;
+#else
+	QListWidget* method_list;
+	QListWidgetItem* olcorr;
+	QListWidgetItem* brush;
+	QListWidgetItem* holefill;
+	QListWidgetItem* removeislands;
+	QListWidgetItem* gapfill;
+	QListWidgetItem* addskin;
+	QListWidgetItem* fillskin;
+	QListWidgetItem* allfill;
+	QListWidgetItem* adapt;
+#endif
 	QRadioButton* tissue;
 	QRadioButton* work;
 	QButtonGroup* target;
-	QRadioButton* erasebrush;
-	QRadioButton* drawbrush;
-	QRadioButton* modifybrush;
-	QRadioButton* adapt;
+
 	QButtonGroup* brushtype;
+	QRadioButton* modifybrush;
+	QRadioButton* drawbrush;
+	QRadioButton* erasebrush;
+
+	QButtonGroup* in_or_out;
 	QRadioButton* inside;
 	QRadioButton* outside;
-	QButtonGroup* in_or_out;
+
+	QButtonGroup* pixelormm;
 	QRadioButton* pixel;
 	QRadioButton* mm;
-	QButtonGroup* pixelormm;
 	QLabel* txt_unit;
 	QLabel* txt_radius;
 	QSpinBox* sb_radius;
@@ -153,6 +173,7 @@ public slots:
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void method_changed();
+	void method_changed(QListWidgetItem* sel);
 	void execute_pushed();
 	void selectobj_pushed();
 	void draw_guide();
