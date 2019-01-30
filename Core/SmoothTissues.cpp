@@ -26,9 +26,9 @@ typename TOutput::Pointer _ComputeSDF(const TInput* img, int foreground, double 
 
 	auto sdf = sdf_type::New();
 	sdf->SetInput(img);
-	sdf->SetBackgroundValue(foreground);
-	sdf->SetInsideIsPositive(false);
-	sdf->SetSquaredDistance(false); // test with squared
+	sdf->SetBackgroundValue(foreground); // background is inside
+	sdf->SetInsideIsPositive(true);			 // background is inside and is negative
+	sdf->SetSquaredDistance(false);			 // \todo test with squared
 	sdf->SetUseImageSpacing(true);
 
 	if (sigma <= 0.0)
@@ -60,6 +60,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 		itk::ImageRegionIterator<label_image_type> it(tissues, tissues->GetBufferedRegion());
 		for (it.GoToBegin(); !it.IsAtEnd(); ++it)
 		{
+			// if not locked and no sdf computed yet
 			if (!locks.at(it.Get()) && !sdf_images[it.Get()])
 			{
 				ok = true; // at least one unlocked tissue found
@@ -121,15 +122,13 @@ bool SmoothTissues(SliceHandlerInterface* handler, size_t start_slice, size_t en
 	{
 		using label_image_type = itk::Image<unsigned short, 2>;
 
-		for (size_t slice = start_slice; slice < end_slice; ++slice)
+#pragma omp parallel for
+		for (std::int64_t slice = start_slice; slice < end_slice; ++slice)
 		{
 			// get labelfield at current slice
 			auto tissues = itkhandler.GetTissuesSlice(slice);
 
-			if (!_SmoothTissues<label_image_type>(tissues, locks, sigma))
-			{
-				return false;
-			}
+			_SmoothTissues<label_image_type>(tissues, locks, sigma);
 		}
 	}
 
