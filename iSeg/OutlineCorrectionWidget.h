@@ -20,17 +20,20 @@
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
-#include <qdialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qlistwidget.h>
 #include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
-#include <qlistwidget.h>
+
+class QStackedLayout;
 
 namespace iseg {
+
+class SmoothTissuesParamView;
 
 class OutlineCorrectionWidget : public WidgetInterface
 {
@@ -74,7 +77,7 @@ private:
 	Vec3 spacing;
 	Point last_pt;
 
-	QListWidget* method_list;
+	QListWidget* methods;
 	QListWidgetItem* olcorr;
 	QListWidgetItem* brush;
 	QListWidgetItem* holefill;
@@ -84,8 +87,12 @@ private:
 	QListWidgetItem* fillskin;
 	QListWidgetItem* allfill;
 	QListWidgetItem* adapt;
+	QListWidgetItem* smooth_tissues;
 
-	QWidget* vbox1;
+	QStackedLayout* stacked_param_layout;
+	SmoothTissuesParamView* smooth_tissues_params;
+
+	QWidget* parameter_area;
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
 	Q3HBox* hbox2a;
@@ -156,12 +163,12 @@ public slots:
 private slots:
 	void bmphand_changed(bmphandler* bmph);
 	void method_changed();
-	void method_changed(QListWidgetItem* sel);
 	void execute_pushed();
 	void selectobj_pushed();
 	void draw_guide();
 	void copy_guide(Point* p = nullptr);
 	void copy_pick_pushed();
+	void smooth_tissues_pushed();
 };
 
 } // namespace iseg
