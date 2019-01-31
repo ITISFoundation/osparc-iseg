@@ -33,6 +33,7 @@ class QStackedLayout;
 
 namespace iseg {
 
+class BrushParamView;
 class SmoothTissuesParamView;
 
 class OutlineCorrectionWidget : public WidgetInterface
