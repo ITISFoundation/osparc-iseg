@@ -18,6 +18,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 #include "itkBinaryThinningImageFilter3D.h"
@@ -261,8 +262,6 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	vbox6->addWidget(_line_radius_l);
 	vbox6->addWidget(_line_radius);
 
-	//QVBoxLayout* vbox7 = new QVBoxLayout;
-
 	QVBoxLayout* vbox8 = new QVBoxLayout;
 	vbox8->addWidget(_min_p);
 	vbox8->addWidget(_min_probability);
@@ -282,7 +281,6 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	hbox2->addLayout(vbox6);
 	hbox2->addLayout(vbox9);
 	hbox2->addLayout(vbox8);
-	//hbox2->addLayout(vbox7);
 
 	QHBoxLayout* hbox3 = new QHBoxLayout;
 	hbox3->addWidget(_merge_button);
@@ -297,7 +295,15 @@ AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* paren
 	layout->addRow(hbox1);
 	layout->addRow(hbox2);
 
-	setLayout(layout);
+	auto big_view = new QWidget;
+	big_view->setLayout(layout);
+
+	auto scroll_area = new QScrollArea(this);
+	scroll_area->setWidget(big_view);
+
+	auto top_layout = new QGridLayout(1, 1);
+	top_layout->addWidget(scroll_area, 0, 0);
+	setLayout(top_layout);
 
 	QObject::connect(_select_objects_button, SIGNAL(clicked()), this, SLOT(select_objects()));
 	QObject::connect(_execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
