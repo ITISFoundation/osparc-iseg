@@ -33,7 +33,13 @@ class QStackedLayout;
 
 namespace iseg {
 
+class OLCorrParamView;
 class BrushParamView;
+class FillHolesParamView;
+class AddSkinParamView;
+class FillSkinParamView;
+class FillAllParamView;
+class AdaptParamView;
 class SmoothTissuesParamView;
 
 class OutlineCorrectionWidget : public WidgetInterface
@@ -91,6 +97,15 @@ private:
 	QListWidgetItem* smooth_tissues;
 
 	QStackedLayout* stacked_param_layout;
+	OLCorrParamView* olc_params;
+	BrushParamView* brush_params;
+	FillHolesParamView* fill_holes_params;
+	FillHolesParamView* remove_islands_params;
+	FillHolesParamView* fill_gaps_params;
+	AddSkinParamView* add_skin_params;
+	FillSkinParamView* fill_skin_params;
+	FillAllParamView* fill_all_params;
+	AdaptParamView* adapt_params;
 	SmoothTissuesParamView* smooth_tissues_params;
 
 	QWidget* parameter_area;

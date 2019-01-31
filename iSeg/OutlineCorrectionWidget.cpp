@@ -28,27 +28,60 @@
 #include <QMessageBox>
 #include <QStackedLayout>
 
+#include <initializer_list>
+
 namespace iseg {
 
 std::map<QListWidgetItem*, int> _widget_page;
+
+QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
+{
+	auto hbox = new QHBoxLayout;
+	for (auto w : list)
+	{
+		hbox->addWidget(w);
+	}
+	return hbox;
+}
+
+QButtonGroup* make_button_group(QWidget* parent, std::initializer_list<QRadioButton*> list)
+{
+	auto group = new QButtonGroup(parent);
+	for (auto w : list)
+	{
+		group->addButton(w);
+	}
+	return group;
+}
 
 class OLCorrParamView : public QWidget
 {
 public:
 	OLCorrParamView(QWidget* parent = 0) : QWidget(parent)
 	{
-		auto hbox = new QHBoxLayout;
-		hbox->addWidget(_target = new QRadioButton(QString("Target")));
-		hbox->addWidget(_tissues = new QRadioButton(QString("Tissues")));
+		_target = new QRadioButton(QString("Target"));
+		_tissues = new QRadioButton(QString("Tissues"));
+		_target->setOn(true);
+		auto input_group = make_button_group(this, {_target, _tissues});
+
+		_select_object = new QPushButton(tr("Select"));
+		_object_value = new QLineEdit(QString::number(255));
+
+		auto input_hbox = make_hbox({_target, _tissues});
+		auto object_hbox = make_hbox({_select_object, _object_value});
 
 		auto layout = new QFormLayout;
-		layout->addRow(QString("Input image"), hbox);
+		layout->addRow(tr("Input image"), input_hbox);
+		layout->addRow(tr("Object value"), object_hbox);
 		setLayout(layout);
 	}
 
 	// params
 	QRadioButton* _target;
 	QRadioButton* _tissues;
+
+	QPushButton* _select_object;
+	QLineEdit* _object_value;
 };
 
 class BrushParamView : public QWidget
@@ -57,50 +90,46 @@ public:
 	BrushParamView(QWidget* parent = 0) : QWidget(parent)
 	{
 		// parameter fields
-		auto input_group = new QButtonGroup(this);
-		input_group->addButton(_target = new QRadioButton(QString("Target")));
-		input_group->addButton(_tissues = new QRadioButton(QString("Tissues")));
+		_target = new QRadioButton(QString("Target"));
+		_tissues = new QRadioButton(QString("Tissues"));
+		auto input_group = make_button_group(this, {_target, _tissues});
 		_target->setOn(true);
 
 		_select_object = new QPushButton(tr("Select"));
 		_object_value = new QLineEdit(QString::number(255));
 
-		auto mode_group = new QButtonGroup(this);
-		mode_group->addButton(_modify = new QRadioButton(QString("Modify")));
-		mode_group->addButton(_draw = new QRadioButton(QString("Draw")));
-		mode_group->addButton(_erase = new QRadioButton(QString("Erase")));
+		_modify = new QRadioButton(QString("Modify"));
+		_draw = new QRadioButton(QString("Draw"));
+		_erase = new QRadioButton(QString("Erase"));
+		auto mode_group = make_button_group(this, {_modify, _draw, _erase});
 		_modify->setOn(true);
 
 		_radius = new QLineEdit(QString::number(1));
-		auto unit_group = new QButtonGroup(this);
-		unit_group->addButton(_unit_pixel = new QRadioButton(tr("Pixel")));
-		unit_group->addButton(_unit_mm = new QRadioButton(tr("Use spacing")));
+		_unit_pixel = new QRadioButton(tr("Pixel"));
+		_unit_mm = new QRadioButton(tr("Use spacing"));
+		auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
 		_unit_pixel->setOn(true);
 
+		_show_guide = new QCheckBox;
+		_show_guide->setChecked(false);
+		_guide_offset = new QSpinBox(-100, 100, 1, nullptr);
+		_guide_offset->setValue(1);
+		_copy_guide = new QPushButton(QString("Copy"), nullptr);
+		_copy_pick_guide = new QPushButton(QString("Copy Picked"), nullptr);
+
 		// layout
-		auto input_hbox = new QHBoxLayout;
-		input_hbox->addWidget(_target);
-		input_hbox->addWidget(_tissues);
-
-		auto object_hbox = new QHBoxLayout;
-		object_hbox->addWidget(_select_object);
-		object_hbox->addWidget(_object_value);
-
-		auto mode_hbox = new QHBoxLayout;
-		mode_hbox->addWidget(_modify);
-		mode_hbox->addWidget(_draw);
-		mode_hbox->addWidget(_erase);
-
-		auto unit_hbox = new QHBoxLayout;
-		unit_hbox->addWidget(_radius);
-		unit_hbox->addWidget(_unit_pixel);
-		unit_hbox->addWidget(_unit_mm);
+		auto input_hbox = make_hbox({_target, _tissues});
+		auto object_hbox = make_hbox({_select_object, _object_value});
+		auto mode_hbox = make_hbox({_modify, _draw, _erase});
+		auto unit_hbox = make_hbox({_radius, _unit_pixel, _unit_mm});
+		auto guide_hbox = make_hbox({_show_guide, _guide_offset, _copy_guide, _copy_pick_guide});
 
 		auto layout = new QFormLayout;
 		layout->addRow(tr("Input image"), input_hbox);
 		layout->addRow(tr("Object value"), object_hbox);
 		layout->addRow(tr("Brush Mode"), mode_hbox);
 		layout->addRow(tr("Brush Radius"), unit_hbox);
+		layout->addRow(tr("Show guide at offset"), guide_hbox);
 		setLayout(layout);
 	}
 
@@ -110,14 +139,14 @@ public:
 
 	QPushButton* _select_object;
 	QLineEdit* _object_value;
-	
+
 	QRadioButton* _modify;
 	QRadioButton* _draw;
 	QRadioButton* _erase;
 
+	QLineEdit* _radius;
 	QRadioButton* _unit_mm;
 	QRadioButton* _unit_pixel;
-	QLineEdit* _radius;
 
 	QCheckBox* _show_guide;
 	QSpinBox* _guide_offset;
@@ -134,31 +163,27 @@ public:
 		_all_slices = new QCheckBox;
 		_all_slices->setChecked(false);
 
-		auto input_group = new QButtonGroup;
-		input_group->addButton(_target = new QRadioButton(QString("Target")));
-		input_group->addButton(_tissues = new QRadioButton(QString("Tissues")));
+		_target = new QRadioButton(QString("Target"));
+		_tissues = new QRadioButton(QString("Tissues"));
+		auto input_group = make_button_group(this, {_target, _tissues});
+		_target->setOn(true);
 
 		_select_object = new QPushButton(tr("Select"));
 		_object_value = new QLineEdit(QString::number(255));
 
-		_hole_size = new QSpinBox(1, std::numeric_limits<int>::max(), 1, nullptr);
-		_hole_size_label = new QLabel(tr("Hole size"));
+		_object_size = new QSpinBox(1, std::numeric_limits<int>::max(), 1, nullptr);
+		_object_size_label = new QLabel(tr("Hole size"));
 
 		_execute = new QPushButton(tr("Execute"));
 
-		auto input_hbox = new QHBoxLayout;
-		input_hbox->addWidget(_target);
-		input_hbox->addWidget(_tissues);
-
-		auto object_hbox = new QHBoxLayout;
-		object_hbox->addWidget(_select_object);
-		object_hbox->addWidget(_object_value);
+		auto input_hbox = make_hbox({_target, _tissues});
+		auto object_hbox = make_hbox({_select_object, _object_value});
 
 		auto layout = new QFormLayout;
-		layout->addRow(tr("All slices"), _all_slices);
+		layout->addRow(tr("Apply to all slices"), _all_slices);
 		layout->addRow(tr("Input image"), input_hbox);
 		layout->addRow(tr("Object value"), object_hbox);
-		layout->addRow(_hole_size_label, _hole_size);
+		layout->addRow(_object_size_label, _object_size);
 		layout->addRow(_execute);
 		setLayout(layout);
 	}
@@ -172,12 +197,183 @@ public:
 	QPushButton* _select_object;
 	QLineEdit* _object_value;
 
-	QSpinBox* _hole_size;
-	QLabel* _hole_size_label;
+	QSpinBox* _object_size;
+	QLabel* _object_size_label;
 
 	QPushButton* _execute;
 };
 
+class AddSkinParamView : public QWidget
+{
+public:
+	AddSkinParamView(QWidget* parent = 0) : QWidget(parent)
+	{
+		_all_slices = new QCheckBox;
+		_all_slices->setChecked(false);
+
+		_target = new QRadioButton(QString("Target"));
+		_tissues = new QRadioButton(QString("Tissues"));
+		auto input_group = make_button_group(this, {_target, _tissues});
+		_target->setOn(true);
+
+		_thickness = new QLineEdit(QString::number(1));
+		_unit_pixel = new QRadioButton(tr("Pixel"));
+		_unit_mm = new QRadioButton(tr("Use spacing"));
+		auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
+		_unit_pixel->setOn(true);
+
+		_inside = new QRadioButton(tr("Inside"));
+		_outside = new QRadioButton(tr("Outside"));
+		auto mode_group = make_button_group(this, {_inside, _outside});
+		_inside->setOn(true);
+
+		_execute = new QPushButton(tr("Execute"));
+
+		auto input_hbox = make_hbox({_target, _tissues});
+		auto thickness_hbox = make_hbox({_thickness, _unit_pixel, _unit_mm});
+		auto mode_hbox = make_hbox({_inside, _outside});
+
+		auto layout = new QFormLayout;
+		layout->addRow(tr("Apply to all slices"), _all_slices);
+		layout->addRow(tr("Input image"), input_hbox);
+		layout->addRow(tr("Thickness"), thickness_hbox);
+		layout->addRow(tr("Where"), mode_hbox);
+		layout->addRow(_execute);
+		setLayout(layout);
+	}
+
+	// params
+	QCheckBox* _all_slices;
+
+	QRadioButton* _target;
+	QRadioButton* _tissues;
+
+	QRadioButton* _inside;
+	QRadioButton* _outside;
+
+	QLineEdit* _thickness;
+	QRadioButton* _unit_mm;
+	QRadioButton* _unit_pixel;
+
+	QPushButton* _execute;
+};
+
+class FillSkinParamView : public QWidget
+{
+public:
+	FillSkinParamView(QWidget* parent = 0) : QWidget(parent)
+	{
+		// parameter fields
+		_all_slices = new QCheckBox;
+		_all_slices->setChecked(false);
+
+		_thickness = new QLineEdit(QString::number(1));
+		_unit_pixel = new QRadioButton(tr("Pixel"));
+		_unit_mm = new QRadioButton(tr("Use spacing"));
+		auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
+		_unit_pixel->setOn(true);
+
+		_select_background = new QPushButton(tr("Get Selected"));
+		_background_value = new QLineEdit;
+
+		_select_skin = new QPushButton(tr("Get Selected"));
+		_skin_value = new QLineEdit;
+
+		_execute = new QPushButton(tr("Execute"));
+
+		// layout
+		auto thickness_hbox = make_hbox({_thickness, _unit_pixel, _unit_mm});
+		auto bg_hbox = make_hbox({_select_background, _background_value});
+		auto fg_hbox = make_hbox({_select_skin, _skin_value});
+
+		auto layout = new QFormLayout;
+		layout->addRow(tr("Apply to all slices"), _all_slices);
+		layout->addRow(tr("Thickness"), thickness_hbox);
+		layout->addRow(tr("Background"), bg_hbox);
+		layout->addRow(tr("Skin"), fg_hbox);
+		layout->addRow(_execute);
+		setLayout(layout);
+	}
+
+	// params
+	QCheckBox* _all_slices;
+
+	QLineEdit* _thickness;
+	QRadioButton* _unit_mm;
+	QRadioButton* _unit_pixel;
+
+	QPushButton* _select_background;
+	QLineEdit* _background_value;
+
+	QPushButton* _select_skin;
+	QLineEdit* _skin_value;
+
+	QPushButton* _execute;
+};
+
+class FillAllParamView : public QWidget
+{
+public:
+	FillAllParamView(QWidget* parent = 0) : QWidget(parent)
+	{
+		_all_slices = new QCheckBox;
+		_all_slices->setChecked(false);
+
+		_target = new QRadioButton(QString("Target"));
+		_tissues = new QRadioButton(QString("Tissues"));
+		auto input_group = make_button_group(this, {_target, _tissues});
+		_target->setOn(true);
+
+		_execute = new QPushButton(tr("Execute"));
+
+		auto input_hbox = make_hbox({_target, _tissues});
+
+		auto layout = new QFormLayout;
+		layout->addRow(tr("Apply to all slices"), _all_slices);
+		layout->addRow(tr("Input image"), input_hbox);
+		layout->addRow(_execute);
+		setLayout(layout);
+	}
+
+	// params
+	QCheckBox* _all_slices;
+
+	QRadioButton* _target;
+	QRadioButton* _tissues;
+
+	QPushButton* _execute;
+};
+
+class AdaptParamView : public QWidget
+{
+public:
+	AdaptParamView(QWidget* parent = 0) : QWidget(parent)
+	{
+		_all_slices = new QCheckBox;
+		_all_slices->setChecked(false);
+
+		_select_object = new QPushButton(tr("Select"));
+		_object_value = new QLineEdit(QString::number(255));
+
+		_execute = new QPushButton(tr("Execute"));
+
+		auto object_hbox = make_hbox({_select_object, _object_value});
+
+		auto layout = new QFormLayout;
+		layout->addRow(tr("Apply to all slices"), _all_slices);
+		layout->addRow(tr("Object value"), object_hbox);
+		layout->addRow(_execute);
+		setLayout(layout);
+	}
+
+	// params
+	QCheckBox* _all_slices;
+
+	QPushButton* _select_object;
+	QLineEdit* _object_value;
+
+	QPushButton* _execute;
+};
 
 class SmoothTissuesParamView : public QWidget
 {
@@ -192,6 +388,12 @@ public:
 		auto label = new QLabel("Smooth Tissue");
 		label->setFixedHeight(80);
 
+		_active_slice = new QRadioButton(tr("Current slice"));
+		_all_slices = new QRadioButton(tr("All slices (2D)"));
+		_3D = new QRadioButton(tr("Fully 3D"));
+		auto where_group = make_button_group(this, {_active_slice, _all_slices, _3D});
+		_active_slice->setOn(true);
+
 		_sigma = new QLineEdit(QString::number(0.3));
 		_sigma->setValidator(new QDoubleValidator);
 		_sigma->setToolTip(Format(
@@ -201,16 +403,12 @@ public:
 
 		_execute = new QPushButton(QString("Execute"));
 
-		auto hbox = new QHBoxLayout;
-		hbox->addWidget(_active_slice = new QRadioButton(QString("Current slice")));
-		hbox->addWidget(_all_slices = new QRadioButton(QString("All slices")));
-		hbox->addWidget(_3D = new QRadioButton(QString("All slices (3D)")));
-		_active_slice->setOn(true);
+		auto hbox = make_hbox({_active_slice, _all_slices, _3D});
 
 		auto layout = new QFormLayout;
 		layout->addRow(label);
-		layout->addRow(QString("Apply to"), hbox);
-		layout->addRow(QString("Sigma"), _sigma);
+		layout->addRow(tr("Apply to"), hbox);
+		layout->addRow(tr("Sigma"), _sigma);
 		layout->addRow(_execute);
 		setLayout(layout);
 	}
@@ -420,7 +618,17 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	// other parameter views
 	smooth_tissues_params = new SmoothTissuesParamView;
 
-	auto brush_params = new BrushParamView;
+	// todo
+	olc_params = new OLCorrParamView;
+	brush_params = new BrushParamView;
+	fill_holes_params = new FillHolesParamView;
+	remove_islands_params = new FillHolesParamView;
+	fill_gaps_params = new FillHolesParamView;
+	add_skin_params = new AddSkinParamView;
+	fill_skin_params = new FillSkinParamView;
+	fill_all_params = new FillAllParamView;
+	adapt_params = new AdaptParamView;
+	// todo
 
 	// layouts
 	parameter_area = new QWidget(this);
