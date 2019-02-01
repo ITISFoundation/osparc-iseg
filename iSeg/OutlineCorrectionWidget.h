@@ -96,6 +96,7 @@ private:
 	QListWidgetItem* adapt;
 	QListWidgetItem* smooth_tissues;
 
+	QWidget* parameter_area;
 	QStackedLayout* stacked_param_layout;
 	OLCorrParamView* olc_params;
 	BrushParamView* brush_params;
@@ -108,7 +109,7 @@ private:
 	AdaptParamView* adapt_params;
 	SmoothTissuesParamView* smooth_tissues_params;
 
-	QWidget* parameter_area;
+#if 0
 	Q3HBox* hbox1;
 	Q3HBox* hbox2;
 	Q3HBox* hbox2a;
@@ -146,19 +147,16 @@ private:
 	QPushButton* pb_execute;
 	QPushButton* pb_selectobj;
 	QCheckBox* allslices;
+#endif
 	std::vector<Point> vpdyn;
 	bool dontundo;
-
+#if 0
 	Q3HBox* tissuesListBackground;
 	Q3HBox* tissuesListSkin;
 	QPushButton* getCurrentTissueBackground;
 	QPushButton* getCurrentTissueSkin;
 	QLineEdit* backgroundText;
 	QLineEdit* skinText;
-	tissues_size_t selectedBackgroundID;
-	tissues_size_t selectedSkinID;
-	bool backgroundSelected;
-	bool skinSelected;
 
 	QLineEdit* object_value;
 
@@ -167,6 +165,7 @@ private:
 	QSpinBox* sb_guide_offset;
 	QPushButton* pb_copy_guide;
 	QPushButton* pb_copy_pick_guide;
+#endif
 	bool copy_mode = false;
 
 public slots:
