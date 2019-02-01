@@ -56,6 +56,7 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget*
 	upper_limit = p.high;
 
 	vbox1 = new Q3VBox(this);
+	vbox1->setMargin(8);
 	hbox1 = new Q3HBox(vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox2a = new Q3HBox(vbox1);

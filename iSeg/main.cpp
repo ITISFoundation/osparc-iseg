@@ -228,7 +228,11 @@ int main(int argc, char **argv)
 		Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	// needed on MacOS, but not WIN32?
-	mainWindow->setStyleSheet("QWidget { color: white; }");
+	mainWindow->setStyleSheet(
+		"QWidget { color: white; }"
+		"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
+		//":disabled { color: rgb(128,128,128) }"
+		);
 
 	mainWindow->LoadLoadProj(latestprojpath);
 	mainWindow->LoadAtlas(atlasdir);

@@ -50,6 +50,7 @@ WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 	usp = nullptr;
 
 	vbox1 = new Q3VBox(this);
+	vbox1->setMargin(8);
 	hbox1 = new Q3HBox(vbox1);
 	btn_exec = new QPushButton("Execute", vbox1);
 	hbox2 = new Q3HBox(vbox1);

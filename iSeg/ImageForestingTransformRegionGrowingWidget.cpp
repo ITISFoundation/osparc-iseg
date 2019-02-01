@@ -56,6 +56,7 @@ ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowing
 	area = 0;
 
 	vbox1 = new Q3VBox(this);
+	vbox1->setMargin(8);
 
 	pushclear = new QPushButton("Clear Lines", vbox1);
 	pushremove = new QPushButton("Remove Line", vbox1);

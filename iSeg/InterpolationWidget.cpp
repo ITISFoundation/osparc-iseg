@@ -41,6 +41,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	nrslices = handler3D->num_slices();
 
 	hboxoverall = new Q3HBox(this);
+	hboxoverall->setMargin(8);
 	vboxmethods = new Q3VBox(hboxoverall);
 	vboxdataselect = new Q3VBox(hboxoverall);
 	vboxparams = new Q3VBox(hboxoverall);
