@@ -54,6 +54,7 @@ ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
 	lower = 0;
 	upper = 255;
 	hboxoverall = new Q3HBox(this);
+	hboxoverall->setMargin(8);
 	vboxmethods = new Q3VBox(hboxoverall);
 	vbox1 = new Q3VBox(hboxoverall);
 	hbox1 = new Q3HBox(vbox1);
