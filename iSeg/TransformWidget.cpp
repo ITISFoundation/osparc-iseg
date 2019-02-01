@@ -42,6 +42,7 @@ TransformWidget::TransformWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	// Boxes
 	hBoxOverall = new Q3HBox(this);
+	hBoxOverall->setMargin(8);
 	vBoxTransforms = new Q3VBox(hBoxOverall);
 	vBoxParams = new Q3VBox(hBoxOverall);
 	hBoxSelectData = new Q3HBox(vBoxParams);

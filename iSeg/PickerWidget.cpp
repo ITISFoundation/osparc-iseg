@@ -39,6 +39,7 @@ PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 	shiftpressed = false;
 
 	vbox1 = new Q3VBox(this);
+	vbox1->setMargin(8);
 	hbox1 = new Q3HBox(vbox1);
 	hbox2 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);

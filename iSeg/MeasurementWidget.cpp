@@ -37,6 +37,7 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 	bmphand = handler3D->get_activebmphandler();
 
 	hboxoverall = new Q3HBox(this);
+	hboxoverall->setMargin(8);
 	vboxmethods = new Q3VBox(hboxoverall);
 	vbox1 = new Q3VBox(hboxoverall);
 	hbox2 = new Q3HBox(vbox1);

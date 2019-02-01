@@ -53,6 +53,7 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 	hbox1 = new Q3HBox(this);
+	hbox1->setMargin(8);
 	vbox1 = new Q3VBox(hbox1);
 	vbox2 = new Q3VBox(hbox1);
 	vbox3 = new Q3VBox(hbox1);
@@ -93,9 +94,6 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	lb_map_value->setText("Source:");
 	lb_work_map_value->setText("Target:");
-	//	setFixedSize(vbox1->size());
-
-	return;
 }
 
 QSize FeatureWidget::sizeHint() const { return hbox1->sizeHint(); }

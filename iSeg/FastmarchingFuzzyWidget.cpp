@@ -50,6 +50,7 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 	area = 0;
 
 	hboxoverall = new Q3HBox(this);
+	hboxoverall->setMargin(8);
 	vboxmethods = new Q3VBox(hboxoverall);
 	vbox1 = new Q3VBox(hboxoverall);
 	vboxfast = new Q3VBox(vbox1);
