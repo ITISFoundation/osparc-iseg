@@ -23,6 +23,7 @@
 
 #include <QDialog>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -32,7 +33,7 @@
 
 namespace iseg {
 
-std::map<QListWidgetItem*, int> _widget_page;
+std::map<QAbstractButton*, int> _widget_page;
 
 QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
 {
@@ -76,9 +77,9 @@ public:
 		setLayout(layout);
 	}
 
-	bool work() const override { return _target->isOn(); } 
+	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
-	float object_value() const override { return _object_value->text().toFloat(); } 
+	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
 
 	// params
@@ -138,9 +139,9 @@ public:
 		setLayout(layout);
 	}
 
-	bool work() const override { return _target->isOn(); } 
+	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
-	float object_value() const override { return _object_value->text().toFloat(); } 
+	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
 
 	std::vector<Point> draw_circle(Point p, float spacing_x, float spacing_y, int width, int height)
@@ -251,9 +252,9 @@ public:
 		setLayout(layout);
 	}
 
-	bool work() const override { return _target->isOn(); } 
+	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
-	float object_value() const override { return _object_value->text().toFloat(); } 
+	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
 
 	// params
@@ -311,7 +312,7 @@ public:
 		setLayout(layout);
 	}
 
-	bool work() const override { return _target->isOn(); } 
+	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
 
 	// params
@@ -366,7 +367,7 @@ public:
 		layout->addRow(_execute);
 		setLayout(layout);
 	}
-	
+
 	void select_background(QString tissueName, tissues_size_t nr)
 	{
 		_background_value->setText(tissueName);
@@ -469,7 +470,7 @@ public:
 		setLayout(layout);
 	}
 
-	bool work() const override { return _target->isOn(); } 
+	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
 
 	// params
@@ -503,7 +504,7 @@ public:
 		setLayout(layout);
 	}
 
-	float object_value() const override { return _object_value->text().toFloat(); } 
+	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
 
 	// params
@@ -576,188 +577,70 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	auto top_layout = new QHBoxLayout;
 
 	// methods
-	methods = new QListWidget(this);
-	methods->setSelectionMode(QAbstractItemView::SingleSelection);
-	methods->setFixedWidth(150);
-	methods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	methods->setLineWidth(1);
-	methods->setStyleSheet("QListWidget::item:selected { background: rgb(150,150,150); }");
-
-	olcorr = new QListWidgetItem(tr("Outline Corr"), methods);
+	olcorr = new QRadioButton(tr("Outline Corr"));
 	olcorr->setToolTip(Format(
 			"Draw an alternative boundary segment for a region.This segment "
 			"will be connected to the region using the shortest possible lines "
 			"and will replace the boundary segment between the connection points."));
-	brush = new QListWidgetItem(tr("Brush"), methods);
+	brush = new QRadioButton(tr("Brush"));
 	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
 
-	holefill = new QListWidgetItem(tr("Fill Holes"), methods);
+	holefill = new QRadioButton(tr("Fill Holes"));
 	holefill->setToolTip(Format(
 			"Close all holes in the selected region or tissue that have a "
 			"size smaller than the number of pixels specified by the Hole Size option."));
 
-	removeislands = new QListWidgetItem(tr("Remove Islands"), methods);
+	removeislands = new QRadioButton(tr("Remove Islands"));
 	removeislands->setToolTip(Format(
 			"Remove all islands (speckles and outliers) with the selected "
 			"gray value or tissue assignment."));
 
-	gapfill = new QListWidgetItem(tr("Fill Gaps"), methods);
+	gapfill = new QRadioButton(tr("Fill Gaps"));
 	gapfill->setToolTip(Format(
 			"Close gaps between multiple disconnected regions having the same "
 			"gray value or belonging to the same tissue."));
 
-	addskin = new QListWidgetItem(tr("Add Skin"), methods);
+	addskin = new QRadioButton(tr("Add Skin"));
 	addskin->setToolTip(Format(
 			"Add a skin layer to a segmentation with a "
 			"specified Thickness (in pixels)."));
 
-	fillskin = new QListWidgetItem(tr("Fill Skin"), methods);
+	fillskin = new QRadioButton(tr("Fill Skin"));
 	fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
 
-	allfill = new QListWidgetItem(tr("Fill All"), methods);
+	allfill = new QRadioButton(tr("Fill All"));
 	allfill->setToolTip(Format(
 			"Make sure that there are no unassigned regions "
 			"inside the segmented model."));
 
-	adapt = new QListWidgetItem(tr("Adapt"), methods);
+	adapt = new QRadioButton(tr("Adapt"));
 
-	smooth_tissues = new QListWidgetItem(tr("Smooth Tissues"), methods);
+	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
 
-#if 0
-	// shared parameters
-	auto param_vlayout = new QVBoxLayout;
-	param_vlayout->setMargin(4);
+	methods = make_button_group(this, {olcorr, brush, holefill, removeislands, gapfill, addskin, fillskin, allfill, adapt, smooth_tissues});
 
-	param_vlayout->addWidget(hbox1 = new Q3HBox);
-	param_vlayout->addWidget(hbox2 = new Q3HBox);
-	param_vlayout->addWidget(hbox2a = new Q3HBox);
+	//methods = new QListWidget(this);
+	//methods->setSelectionMode(QAbstractItemView::SingleSelection);
+	//methods->setFixedWidth(150);
+	//methods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	//methods->setLineWidth(1);
+	//methods->setStyleSheet("QListWidget::item:selected { background: rgb(150,150,150); }");
+	auto method_vbox = new QVBoxLayout;
+	method_vbox->addWidget(olcorr);
+	method_vbox->addWidget(brush);
+	method_vbox->addWidget(holefill);
+	method_vbox->addWidget(removeislands);
+	method_vbox->addWidget(gapfill);
+	method_vbox->addWidget(addskin);
+	method_vbox->addWidget(fillskin);
+	method_vbox->addWidget(allfill);
+	method_vbox->addWidget(adapt);
+	method_vbox->addWidget(smooth_tissues);
 
-	tissuesListBackground = new Q3HBox();
-	tissuesListBackground->setFixedHeight(18);
-	tissuesListSkin = new Q3HBox();
-	tissuesListSkin->setFixedHeight(18);
+	auto method_area = new QGroupBox(this);
+	method_area->setLayout(method_vbox);
 
-	param_vlayout->addWidget(tissuesListBackground);
-	param_vlayout->addWidget(tissuesListSkin);
-
-	allslices = new QCheckBox(QString("Apply to all slices"), nullptr);
-	pb_execute = new QPushButton("Fill Islands", nullptr);
-	param_vlayout->addWidget(allslices);
-	param_vlayout->addWidget(pb_execute);
-
-	param_vlayout->addWidget(hbox3a = new Q3HBox());
-	param_vlayout->addWidget(hbox4 = new Q3HBox());
-	param_vlayout->addWidget(hbox5o = new Q3HBox());
-	param_vlayout->addWidget(hbox6 = new Q3HBox());
-	param_vlayout->addWidget(hbox5 = new Q3HBox());
-	param_vlayout->addWidget(hboxpixormm = new Q3HBox());
-	param_vlayout->addWidget(hbox_prev_slice = new Q3HBox());
-
-	auto shared_method_params = new QWidget;
-	shared_method_params->setLayout(param_vlayout);
-
-	txt_radius = new QLabel("Thickness: ", hbox1);
-	sb_radius = new QSpinBox(0, 99, 2, hbox1);
-	sb_radius->setValue(1);
-	sb_radius->show();
-	mm_radius = new QLineEdit(QString::number(1), hbox1);
-	mm_radius->hide();
-	txt_unit = new QLabel(" pixels", hbox1);
-
-	txt_holesize = new QLabel("Island Size: ", hbox2);
-	sb_holesize = new QSpinBox(1, 10000, 1, hbox2);
-	sb_holesize->setValue(100);
-	sb_holesize->show();
-
-	txt_gapsize = new QLabel("Gap Size: ", hbox2a);
-	sb_gapsize = new QSpinBox(1, 10, 1, hbox2a);
-	sb_gapsize->setValue(2);
-	sb_gapsize->show();
-
-	QLabel* tissuesListBackgroundLabel = new QLabel(tissuesListBackground);
-	tissuesListBackgroundLabel->setText("Background");
-	getCurrentTissueBackground = new QPushButton(tissuesListBackground);
-	getCurrentTissueBackground->setText("Get Selected");
-	backgroundText = new QLineEdit(tissuesListBackground);
-	backgroundText->setText("Select Background");
-	backgroundText->setEnabled(false);
-
-	QLabel* tissuesListSkinLabel = new QLabel(tissuesListSkin);
-	tissuesListSkinLabel->setText("Skin");
-	getCurrentTissueSkin = new QPushButton(tissuesListSkin);
-	getCurrentTissueSkin->setText("Get Selected");
-	skinText = new QLineEdit(tissuesListSkin);
-	skinText->setText("Select Skin");
-	skinText->setEnabled(false);
-
-	brushtype = new QButtonGroup(this);
-
-	modifybrush = new QRadioButton(QString("Modify"), hbox3a);
-	modifybrush->setToolTip(Format(
-			"The Modify mode depends on where the mouse is initially pressed down. "
-			"If it is pressed down within the selected region or tissue, it acts "
-			"as a drawing brush. In contrast, when it is pressed down outside, it "
-			"will overwrite the selected region or tissue with the gray value or "
-			"tissue assignment of the point where the mouse has initially been pressed down."));
-	drawbrush = new QRadioButton(QString("Draw"), hbox3a);
-	drawbrush->setToolTip(Format(
-			"Use the brush to draw with the currently selected gray "
-			"value(TargetPict) or tissue assignment (Tissue)."));
-	erasebrush = new QRadioButton(QString("Erase"), hbox3a);
-	erasebrush->setToolTip(Format("Erase a region leaving black or no tissue assignment behind."));
-
-	brushtype->insert(modifybrush);
-	brushtype->insert(drawbrush);
-	brushtype->insert(erasebrush);
-	modifybrush->show();
-	modifybrush->setChecked(TRUE);
-	drawbrush->show();
-	erasebrush->show();
-
-	target = new QButtonGroup(this);
-	//	target->hide();
-	work = new QRadioButton(QString("TargetPict"), hbox4);
-	tissue = new QRadioButton(QString("Tissue"), hbox4);
-	target->insert(work);
-	target->insert(tissue);
-	work->show();
-	work->setChecked(TRUE);
-	tissue->show();
-
-	pb_selectobj = new QPushButton("Select Object", hbox5o);
-	pb_selectobj->setToolTip(Format(
-			"Press this button and select the object in the target image. This "
-			"object will be considered as foreground by the current operation."));
-	auto obj_label = new QLabel(QString("Object value"), hbox6);
-	object_value = new QLineEdit(QString::number(255.f), hbox6);
-	object_value->setValidator(new QDoubleValidator);
-
-	in_or_out = new QButtonGroup(this);
-	inside = new QRadioButton(QString("Inside"), hbox5);
-	outside = new QRadioButton(QString("Outside"), hbox5);
-	in_or_out->insert(inside);
-	in_or_out->insert(outside);
-	inside->show();
-	inside->setChecked(TRUE);
-	outside->show();
-
-	pixelormm = new QButtonGroup(this);
-	pixel = new QRadioButton(QString("pixel"), hboxpixormm);
-	mm = new QRadioButton(QString("mm"), hboxpixormm);
-	pixelormm->insert(pixel);
-	pixelormm->insert(mm);
-	pixel->setChecked(TRUE);
-
-	cb_show_guide = new QCheckBox(QString("Show guide"), hbox_prev_slice);
-	cb_show_guide->setChecked(false);
-	auto prev_offset_label = new QLabel(QString("Offset: "), hbox_prev_slice);
-	sb_guide_offset = new QSpinBox(-100, 100, 1, hbox_prev_slice);
-	sb_guide_offset->setValue(1);
-	pb_copy_guide = new QPushButton(QString("Copy"), hbox_prev_slice);
-	pb_copy_pick_guide = new QPushButton(QString("Copy Picked"), hbox_prev_slice);
-#endif
-	// other parameter views
-	// todo
+	// parameter views
 	olc_params = new OLCorrParamView;
 	brush_params = new BrushParamView;
 	fill_holes_params = new FillHolesParamView;
@@ -786,18 +669,18 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	stacked_param_layout->addWidget(smooth_tissues_params);
 	parameter_area->setLayout(stacked_param_layout);
 
-	top_layout->addWidget(methods);
+	top_layout->addWidget(method_area);
 	top_layout->addWidget(parameter_area);
 	setLayout(top_layout);
 
 	// remember QStackedLayout page where parameters of method are added
-	for (int i = 0; i < methods->count(); ++i)
+	for (int i = 0; i < methods->buttons().size(); ++i)
 	{
-		_widget_page[methods->item(i)] = i;
+		_widget_page[methods->button(i)] = i;
 	}
 
 	// start with brush tool
-	brush->setSelected(true);
+	brush->setChecked(true);
 	stacked_param_layout->setCurrentWidget(brush_params);
 
 	// create connections
@@ -847,7 +730,7 @@ void OutlineCorrectionWidget::draw_circle(Point p)
 
 void OutlineCorrectionWidget::draw_guide()
 {
-	if (brush->isSelected() && brush_params->_show_guide->isChecked())
+	if (brush->isChecked() && brush_params->_show_guide->isChecked())
 	{
 		int slice = static_cast<int>(handler3D->active_slice()) + brush_params->_guide_offset->value();
 		unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
@@ -955,7 +838,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		return;
 	}
 
-	if (olcorr->isSelected())
+	if (olcorr->isChecked())
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
@@ -967,7 +850,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		vpdyn.push_back(p);
 		emit begin_datachange(dataSelection, this);
 	}
-	else if (brush->isSelected())
+	else if (brush->isChecked())
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
@@ -1040,14 +923,14 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 	{
 		float const f = get_object_value();
 
-		if (olcorr->isSelected())
+		if (olcorr->isChecked())
 		{
 			vpdyn.pop_back();
 			addLine(&vpdyn, last_pt, p);
 			last_pt = p;
 			emit vpdyn_changed(&vpdyn);
 		}
-		else if (brush->isSelected())
+		else if (brush->isChecked())
 		{
 			draw_circle(p);
 
@@ -1093,7 +976,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 	{
 		float const f = get_object_value();
 
-		if (olcorr->isSelected())
+		if (olcorr->isChecked())
 		{
 			vpdyn.pop_back();
 			addLine(&vpdyn, last_pt, p);
@@ -1106,7 +989,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 			vpdyn.clear();
 			emit vpdyn_changed(&vpdyn);
 		}
-		else if (brush->isSelected())
+		else if (brush->isChecked())
 		{
 			vpdyn.clear();
 			addLine(&vpdyn, last_pt, p);
@@ -1142,7 +1025,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 					}
 				}
 			}
-			
+
 			emit end_datachange(this);
 
 			vpdyn.clear();
@@ -1153,9 +1036,9 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 
 void OutlineCorrectionWidget::method_changed()
 {
-	if (_widget_page.count(methods->currentItem()))
+	if (_widget_page.count(methods->checkedButton()))
 	{
-		stacked_param_layout->setCurrentIndex(_widget_page[methods->currentItem()]);
+		stacked_param_layout->setCurrentIndex(_widget_page[methods->checkedButton()]);
 	}
 
 	// keep selected object definition across tools
@@ -1172,218 +1055,6 @@ void OutlineCorrectionWidget::method_changed()
 	// ensure this is reset
 	copy_mode = false;
 
-#if 0
-	tissuesListBackground->hide();
-	tissuesListSkin->hide();
-	pb_execute->setEnabled(true);
-
-	if (olcorr->isSelected())
-	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->hide();
-		pb_execute->hide();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-		if (work->isOn())
-		{
-			hbox5o->show();
-		}
-		else
-		{
-			hbox5o->hide();
-		}
-	}
-	else if (brush->isSelected())
-	{
-		hbox1->show();
-		txt_radius->setText("Radius: ");
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->show();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->show();
-		hbox_prev_slice->show();
-		allslices->hide();
-		pb_execute->hide();
-		if (work->isOn())
-		{
-			hbox5o->show();
-			hbox6->show();
-		}
-		else
-		{
-			hbox5o->hide();
-			hbox6->hide();
-		}
-	}
-	else if (holefill->isSelected())
-	{
-		hbox1->hide();
-		txt_holesize->setText("Hole Size: ");
-		if (hideparams)
-			hbox2->hide();
-		else
-			hbox2->show();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->show();
-		pb_execute->setText("Fill Holes");
-		pb_execute->show();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-		if (work->isOn())
-		{
-			hbox5o->show();
-		}
-		else
-		{
-			hbox5o->hide();
-		}
-	}
-	else if (removeislands->isSelected())
-	{
-		hbox1->hide();
-		txt_holesize->setText("Island Size: ");
-		if (hideparams)
-			hbox2->hide();
-		else
-			hbox2->show();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->show();
-		pb_execute->setText("Remove Islands");
-		pb_execute->show();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-		if (work->isOn())
-		{
-			hbox5o->show();
-		}
-		else
-		{
-			hbox5o->hide();
-		}
-	}
-	else if (gapfill->isSelected())
-	{
-		hbox1->hide();
-		hbox2->hide();
-		if (hideparams)
-			hbox2a->hide();
-		else
-			hbox2a->show();
-		hbox3a->hide();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->show();
-		pb_execute->setText("Fill Gaps");
-		pb_execute->show();
-		hbox5o->hide();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-	}
-	else if (addskin->isSelected())
-	{
-		if (hideparams)
-			hbox1->hide();
-		else
-			hbox1->show();
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->show();
-		if (hideparams)
-			hbox5->hide();
-		else
-			hbox5->show();
-		if (allslices->isChecked())
-			hboxpixormm->show();
-		else
-			hboxpixormm->hide();
-		txt_radius->setText("Thickness: ");
-		allslices->show();
-		pb_execute->setText("Add Skin");
-		pb_execute->show();
-		hbox5o->hide();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-	}
-	else if (fillskin->isSelected())
-	{
-		tissuesListBackground->show();
-		tissuesListSkin->show();
-		if (hideparams)
-			hbox1->hide();
-		else
-			hbox1->show();
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->hide();
-		hbox5->hide();
-		if (allslices->isChecked())
-			hboxpixormm->show();
-		else
-			hboxpixormm->hide();
-		txt_radius->setText("Thickness: ");
-		allslices->show();
-		pb_execute->setText("Fill Skin");
-		pb_execute->show();
-		if (backgroundSelected && skinSelected)
-			pb_execute->setEnabled(true);
-		else
-			pb_execute->setEnabled(false);
-		hbox5o->hide();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-	}
-	else if (allfill->isSelected())
-	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->show();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->show();
-		pb_execute->setText("Fill All");
-		pb_execute->show();
-		hbox5o->hide();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-	}
-	else if (adapt->isSelected())
-	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox2a->hide();
-		hbox3a->hide();
-		hbox4->hide();
-		hbox5->hide();
-		hboxpixormm->hide();
-		allslices->show();
-		pb_execute->setText("Adapt");
-		pb_execute->show();
-		hbox5o->show();
-		hbox6->hide();
-		hbox_prev_slice->hide();
-	}
-#endif
 	draw_guide();
 }
 
@@ -1394,7 +1065,7 @@ void OutlineCorrectionWidget::execute_pushed()
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->active_slice();
 
-	if (holefill->isSelected())
+	if (holefill->isChecked())
 	{
 		dataSelection.allSlices = fill_holes_params->_all_slices->isChecked();
 		dataSelection.work = fill_holes_params->_target->isChecked();
@@ -1417,7 +1088,7 @@ void OutlineCorrectionWidget::execute_pushed()
 				bmphand->fill_holestissue(handler3D->active_tissuelayer(), tissuenr, hole_size);
 		}
 	}
-	else if (removeislands->isSelected())
+	else if (removeislands->isChecked())
 	{
 		dataSelection.allSlices = remove_islands_params->_all_slices->isChecked();
 		dataSelection.work = remove_islands_params->_target->isChecked();
@@ -1440,7 +1111,7 @@ void OutlineCorrectionWidget::execute_pushed()
 				bmphand->remove_islandstissue(handler3D->active_tissuelayer(), tissuenr, island_size);
 		}
 	}
-	else if (gapfill->isSelected())
+	else if (gapfill->isChecked())
 	{
 		dataSelection.allSlices = fill_gaps_params->_all_slices->isChecked();
 		dataSelection.work = fill_gaps_params->_target->isChecked();
@@ -1463,7 +1134,7 @@ void OutlineCorrectionWidget::execute_pushed()
 				bmphand->fill_gapstissue(handler3D->active_tissuelayer(), gap_size, false);
 		}
 	}
-	else if (addskin->isSelected())
+	else if (addskin->isChecked())
 	{
 		dataSelection.allSlices = add_skin_params->_all_slices->isChecked();
 		dataSelection.work = add_skin_params->_target->isChecked();
@@ -1594,7 +1265,7 @@ void OutlineCorrectionWidget::execute_pushed()
 					"or\nintersects with the boundary.");
 		}
 	}
-	else if (fillskin->isSelected())
+	else if (fillskin->isChecked())
 	{
 		float mm_rad = fill_skin_params->_thickness->text().toFloat();
 		bool mm_unit = fill_skin_params->_unit_mm->isOn();
@@ -1609,7 +1280,7 @@ void OutlineCorrectionWidget::execute_pushed()
 		else
 			bmphand->fill_skin(xThick, yThick, selectedBackgroundID, selectedSkinID);
 	}
-	else if (allfill->isSelected())
+	else if (allfill->isChecked())
 	{
 		dataSelection.allSlices = fill_all_params->_all_slices->isChecked();
 		dataSelection.work = fill_all_params->_target->isChecked();
@@ -1631,7 +1302,7 @@ void OutlineCorrectionWidget::execute_pushed()
 				bmphand->fill_unassignedtissue(handler3D->active_tissuelayer(), tissuenr);
 		}
 	}
-	else if (adapt->isSelected())
+	else if (adapt->isChecked())
 	{
 		dataSelection.allSlices = adapt_params->_all_slices->isChecked();
 		dataSelection.work = false;
@@ -1745,38 +1416,38 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = fill_gaps_params->_object_size->text().toInt();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush->isSelected());
+		dummy = (int)(brush->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(olcorr->isSelected());
+		dummy = (int)(olcorr->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(holefill->isSelected() || removeislands->isSelected());
+		dummy = (int)(holefill->isChecked() || removeislands->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(gapfill->isSelected());
+		dummy = (int)(gapfill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allfill->isSelected());
+		dummy = (int)(allfill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(addskin->isSelected());
+		dummy = (int)(addskin->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(fillskin->isSelected());
+		dummy = (int)(fillskin->isChecked());
 		//fwrite(&(dummy), 1,sizeof(int), fp);
 		bool w = current_params->work();
 		dummy = (int)(!w);
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(w);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_erase->isOn());
+		dummy = (int)(brush_params->_erase->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_draw->isOn());
+		dummy = (int)(brush_params->_draw->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_modify->isOn());
+		dummy = (int)(brush_params->_modify->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(adapt->isSelected());
+		dummy = (int)(adapt->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(add_skin_params->_inside->isOn());
+		dummy = (int)(add_skin_params->_inside->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(add_skin_params->_outside->isOn());
+		dummy = (int)(add_skin_params->_outside->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(fill_holes_params->_all_slices->isOn());
+		dummy = (int)(fill_holes_params->_all_slices->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -1797,20 +1468,20 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		fread(&dummy, sizeof(int), 1, fp);
 		fill_gaps_params->_object_size->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush->setSelected(dummy != 0);
+		brush->setChecked(dummy != 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		olcorr->setSelected(dummy > 0);
+		olcorr->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		holefill->setSelected(dummy > 0);
+		holefill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		gapfill->setSelected(dummy > 0);
+		gapfill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		allfill->setSelected(dummy > 0);
+		allfill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		addskin->setSelected(dummy > 0);
+		addskin->setChecked(dummy > 0);
 
 		//fread(&dummy,sizeof(int), 1, fp);
-		fillskin->setSelected(false);
+		fillskin->setChecked(false);
 
 		fread(&dummy, sizeof(int), 1, fp);
 		// tissue & work is exclusive;
@@ -1823,7 +1494,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		fread(&dummy, sizeof(int), 1, fp);
 		brush_params->_modify->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		adapt->setSelected(dummy > 0);
+		adapt->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
 		add_skin_params->_inside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);

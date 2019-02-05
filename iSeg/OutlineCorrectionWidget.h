@@ -47,8 +47,8 @@ class ParamViewBase : public QWidget
 public:
 	ParamViewBase(QWidget* parent = nullptr) : QWidget(parent) {}
 
-	virtual bool work() const { return _work; } 
-	virtual void set_work(bool v) { _work = v;}
+	virtual bool work() const { return _work; }
+	virtual void set_work(bool v) { _work = v; }
 
 	virtual float object_value() const { return _object_value; }
 	virtual void set_object_value(float v) { _object_value = v; }
@@ -94,27 +94,18 @@ private:
 
 	float get_object_value() const;
 
-	tissues_size_t tissuenr;
-	tissues_size_t tissuenrnew;
-	bool draw;
-	bool selectobj;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	Vec3 spacing;
-	Point last_pt;
-
-	QListWidget* methods;
-	QListWidgetItem* olcorr;
-	QListWidgetItem* brush;
-	QListWidgetItem* holefill;
-	QListWidgetItem* removeislands;
-	QListWidgetItem* gapfill;
-	QListWidgetItem* addskin;
-	QListWidgetItem* fillskin;
-	QListWidgetItem* allfill;
-	QListWidgetItem* adapt;
-	QListWidgetItem* smooth_tissues;
+	// parameter view
+	QButtonGroup* methods;
+	QRadioButton* olcorr;
+	QRadioButton* brush;
+	QRadioButton* holefill;
+	QRadioButton* removeislands;
+	QRadioButton* gapfill;
+	QRadioButton* addskin;
+	QRadioButton* fillskin;
+	QRadioButton* allfill;
+	QRadioButton* adapt;
+	QRadioButton* smooth_tissues;
 
 	QWidget* parameter_area;
 	ParamViewBase* current_params = nullptr;
@@ -130,63 +121,19 @@ private:
 	AdaptParamView* adapt_params;
 	SmoothTissuesParamView* smooth_tissues_params;
 
-#if 0
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox2a;
-	Q3HBox* hbox3a;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5o;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3HBox* hboxpixormm;
+	// member/state variables
+	tissues_size_t tissuenr;
+	tissues_size_t tissuenrnew;
+	bool draw;
+	bool selectobj;
+	bmphandler* bmphand;
+	SlicesHandler* handler3D;
+	unsigned short activeslice;
+	Vec3 spacing;
+	Point last_pt;
 
-	QRadioButton* tissue;
-	QRadioButton* work;
-	QButtonGroup* target;
-
-	QButtonGroup* brushtype;
-	QRadioButton* modifybrush;
-	QRadioButton* drawbrush;
-	QRadioButton* erasebrush;
-
-	QButtonGroup* in_or_out;
-	QRadioButton* inside;
-	QRadioButton* outside;
-
-	QButtonGroup* pixelormm;
-	QRadioButton* pixel;
-	QRadioButton* mm;
-	QLabel* txt_unit;
-	QLabel* txt_radius;
-	QSpinBox* sb_radius;
-	QLineEdit* mm_radius;
-	QLabel* txt_holesize;
-	QLabel* txt_gapsize;
-	QSpinBox* sb_holesize;
-	QSpinBox* sb_gapsize;
-	QPushButton* pb_execute;
-	QPushButton* pb_selectobj;
-	QCheckBox* allslices;
-#endif
 	std::vector<Point> vpdyn;
 	bool dontundo;
-#if 0
-	Q3HBox* tissuesListBackground;
-	Q3HBox* tissuesListSkin;
-	QPushButton* getCurrentTissueBackground;
-	QPushButton* getCurrentTissueSkin;
-	QLineEdit* backgroundText;
-	QLineEdit* skinText;
-
-	QLineEdit* object_value;
-
-	Q3HBox* hbox_prev_slice;
-	QCheckBox* cb_show_guide;
-	QSpinBox* sb_guide_offset;
-	QPushButton* pb_copy_guide;
-	QPushButton* pb_copy_pick_guide;
-#endif
 	bool copy_mode = false;
 
 public slots:
