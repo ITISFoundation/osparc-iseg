@@ -42,6 +42,25 @@ class FillAllParamView;
 class AdaptParamView;
 class SmoothTissuesParamView;
 
+class ParamViewBase : public QWidget
+{
+public:
+	ParamViewBase(QWidget* parent = nullptr) : QWidget(parent) {}
+
+	virtual bool work() const { return _work; } 
+	virtual void set_work(bool v) { _work = v;}
+
+	virtual float object_value() const { return _object_value; }
+	virtual void set_object_value(float v) { _object_value = v; }
+
+private:
+	// cache setting
+	bool _work = true;
+	float _object_value = 0.f;
+};
+
+/** \brief Class which contains different methods to modify/correct target or tissues
+*/
 class OutlineCorrectionWidget : public WidgetInterface
 {
 	Q_OBJECT
@@ -59,9 +78,6 @@ public:
 	std::string GetName() override { return std::string("OLC"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("olc.png"))); }
 
-	void select_background(QString tissueName, tissues_size_t nr);
-	void select_skin(QString tissueName, tissues_size_t nr);
-
 private:
 	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
@@ -71,6 +87,10 @@ private:
 	void on_mouse_moved(Point p) override;
 
 	void draw_circle(Point p);
+
+	// \todo move to method class?
+	void select_background(QString tissueName, tissues_size_t nr);
+	void select_skin(QString tissueName, tissues_size_t nr);
 
 	float get_object_value() const;
 
@@ -97,6 +117,7 @@ private:
 	QListWidgetItem* smooth_tissues;
 
 	QWidget* parameter_area;
+	ParamViewBase* current_params = nullptr;
 	QStackedLayout* stacked_param_layout;
 	OLCorrParamView* olc_params;
 	BrushParamView* brush_params;
@@ -169,11 +190,7 @@ private:
 	bool copy_mode = false;
 
 public slots:
-	void pixmm_changed();
 	void workbits_changed();
-
-	void on_select_background();
-	void on_select_skin();
 
 private slots:
 	void bmphand_changed(bmphandler* bmph);

@@ -54,10 +54,10 @@ QButtonGroup* make_button_group(QWidget* parent, std::initializer_list<QRadioBut
 	return group;
 }
 
-class OLCorrParamView : public QWidget
+class OLCorrParamView : public ParamViewBase
 {
 public:
-	OLCorrParamView(QWidget* parent = 0) : QWidget(parent)
+	OLCorrParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		_target = new QRadioButton(QString("Target"));
 		_tissues = new QRadioButton(QString("Tissues"));
@@ -76,6 +76,11 @@ public:
 		setLayout(layout);
 	}
 
+	bool work() const override { return _target->isOn(); } 
+	void set_work(bool v) override { _target->setOn(v); }
+	float object_value() const override { return _object_value->text().toFloat(); } 
+	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+
 	// params
 	QRadioButton* _target;
 	QRadioButton* _tissues;
@@ -84,10 +89,10 @@ public:
 	QLineEdit* _object_value;
 };
 
-class BrushParamView : public QWidget
+class BrushParamView : public ParamViewBase
 {
 public:
-	BrushParamView(QWidget* parent = 0) : QWidget(parent)
+	BrushParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		// parameter fields
 		_target = new QRadioButton(QString("Target"));
@@ -132,6 +137,11 @@ public:
 		layout->addRow(tr("Show guide at offset"), guide_hbox);
 		setLayout(layout);
 	}
+
+	bool work() const override { return _target->isOn(); } 
+	void set_work(bool v) override { _target->setOn(v); }
+	float object_value() const override { return _object_value->text().toFloat(); } 
+	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
 
 	std::vector<Point> draw_circle(Point p, float spacing_x, float spacing_y, int width, int height)
 	{
@@ -208,10 +218,10 @@ public:
 };
 
 // used for fill holes, remove islands, and fill gaps
-class FillHolesParamView : public QWidget
+class FillHolesParamView : public ParamViewBase
 {
 public:
-	FillHolesParamView(QWidget* parent = 0) : QWidget(parent)
+	FillHolesParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		_all_slices = new QCheckBox;
 		_all_slices->setChecked(false);
@@ -241,6 +251,11 @@ public:
 		setLayout(layout);
 	}
 
+	bool work() const override { return _target->isOn(); } 
+	void set_work(bool v) override { _target->setOn(v); }
+	float object_value() const override { return _object_value->text().toFloat(); } 
+	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+
 	// params
 	QCheckBox* _all_slices;
 
@@ -256,10 +271,11 @@ public:
 	QPushButton* _execute;
 };
 
-class AddSkinParamView : public QWidget
+// \todo BL why does this tool not allow to choose object value?
+class AddSkinParamView : public ParamViewBase
 {
 public:
-	AddSkinParamView(QWidget* parent = 0) : QWidget(parent)
+	AddSkinParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		_all_slices = new QCheckBox;
 		_all_slices->setChecked(false);
@@ -295,6 +311,9 @@ public:
 		setLayout(layout);
 	}
 
+	bool work() const override { return _target->isOn(); } 
+	void set_work(bool v) override { _target->setOn(v); }
+
 	// params
 	QCheckBox* _all_slices;
 
@@ -311,10 +330,10 @@ public:
 	QPushButton* _execute;
 };
 
-class FillSkinParamView : public QWidget
+class FillSkinParamView : public ParamViewBase
 {
 public:
-	FillSkinParamView(QWidget* parent = 0) : QWidget(parent)
+	FillSkinParamView(SliceHandlerInterface* h, QWidget* parent = 0) : ParamViewBase(parent), _handler(h)
 	{
 		// parameter fields
 		_all_slices = new QCheckBox;
@@ -389,6 +408,36 @@ public:
 
 	QPushButton* _execute;
 
+private slots:
+	void on_select_background()
+	{
+		auto sel = _handler->tissue_selection();
+		if (sel.size() == 1)
+		{
+			select_background(_handler->tissue_names().at(sel[0]).c_str(), sel[0]);
+		}
+		else
+		{
+			ISEG_WARNING("Please select only one tissue");
+		}
+	}
+
+	void on_select_skin()
+	{
+		auto sel = _handler->tissue_selection();
+		if (sel.size() == 1)
+		{
+			select_skin(_handler->tissue_names().at(sel[0]).c_str(), sel[0]);
+		}
+		else
+		{
+			ISEG_WARNING("Please select only one tissue");
+		}
+	}
+
+	// data
+	SliceHandlerInterface* _handler;
+
 private:
 	tissues_size_t selectedBackgroundID;
 	tissues_size_t selectedSkinID;
@@ -396,10 +445,10 @@ private:
 	bool skinSelected = false;
 };
 
-class FillAllParamView : public QWidget
+class FillAllParamView : public ParamViewBase
 {
 public:
-	FillAllParamView(QWidget* parent = 0) : QWidget(parent)
+	FillAllParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		_all_slices = new QCheckBox;
 		_all_slices->setChecked(false);
@@ -420,6 +469,9 @@ public:
 		setLayout(layout);
 	}
 
+	bool work() const override { return _target->isOn(); } 
+	void set_work(bool v) override { _target->setOn(v); }
+
 	// params
 	QCheckBox* _all_slices;
 
@@ -429,10 +481,10 @@ public:
 	QPushButton* _execute;
 };
 
-class AdaptParamView : public QWidget
+class AdaptParamView : public ParamViewBase
 {
 public:
-	AdaptParamView(QWidget* parent = 0) : QWidget(parent)
+	AdaptParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		_all_slices = new QCheckBox;
 		_all_slices->setChecked(false);
@@ -451,6 +503,9 @@ public:
 		setLayout(layout);
 	}
 
+	float object_value() const override { return _object_value->text().toFloat(); } 
+	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+
 	// params
 	QCheckBox* _all_slices;
 
@@ -460,10 +515,10 @@ public:
 	QPushButton* _execute;
 };
 
-class SmoothTissuesParamView : public QWidget
+class SmoothTissuesParamView : public ParamViewBase
 {
 public:
-	SmoothTissuesParamView(QWidget* parent = 0) : QWidget(parent)
+	SmoothTissuesParamView(QWidget* parent = 0) : ParamViewBase(parent)
 	{
 		setToolTip(Format(
 				"This tool smooths all non-locked tissues by computing a smoothed signed distance "
@@ -707,18 +762,18 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	brush_params = new BrushParamView;
 	fill_holes_params = new FillHolesParamView;
 	remove_islands_params = new FillHolesParamView;
+	remove_islands_params->_object_size_label->setText("Island size");
 	fill_gaps_params = new FillHolesParamView;
+	fill_gaps_params->_object_size_label->setText("Gap size");
 	add_skin_params = new AddSkinParamView;
-	fill_skin_params = new FillSkinParamView;
+	fill_skin_params = new FillSkinParamView(handler3D);
 	fill_all_params = new FillAllParamView;
 	adapt_params = new AdaptParamView;
-	// todo
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
 	parameter_area = new QWidget(this);
 	stacked_param_layout = new QStackedLayout;
-//	stacked_param_layout->addWidget(shared_method_params);
 	stacked_param_layout->addWidget(olc_params);
 	stacked_param_layout->addWidget(brush_params);
 	stacked_param_layout->addWidget(fill_holes_params);
@@ -740,10 +795,10 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	{
 		_widget_page[methods->item(i)] = i;
 	}
-	//_widget_page[smooth_tissues] = 1;
 
 	// start with brush tool
 	brush->setSelected(true);
+	stacked_param_layout->setCurrentWidget(brush_params);
 
 	// create connections
 	connect(methods, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
@@ -776,38 +831,10 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	method_changed();
 	workbits_changed();
-
-	stacked_param_layout->setCurrentIndex(2);
 }
 
 OutlineCorrectionWidget::~OutlineCorrectionWidget()
 {
-}
-
-void OutlineCorrectionWidget::on_select_background()
-{
-	auto sel = handler3D->tissue_selection();
-	if (sel.size() == 1)
-	{
-		fill_skin_params->select_background(handler3D->tissue_names().at(sel[0]).c_str(), sel[0]);
-	}
-	else
-	{
-		ISEG_WARNING("Please select only one tissue");
-	}
-}
-
-void OutlineCorrectionWidget::on_select_skin()
-{
-	auto sel = handler3D->tissue_selection();
-	if (sel.size() == 1)
-	{
-		fill_skin_params->select_skin(handler3D->tissue_names().at(sel[0]).c_str(), sel[0]);
-	}
-	else
-	{
-		ISEG_WARNING("Please select only one tissue");
-	}
 }
 
 void OutlineCorrectionWidget::draw_circle(Point p)
@@ -918,26 +945,23 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		{
 			copy_mode = false;
 			copy_guide(&p);
-			pb_copy_pick_guide->setDown(false);
+			brush_params->_copy_pick_guide->setDown(false);
 		}
-		else
+		else if (current_params)
 		{
 			auto v = bmphand->work_pt(p);
-			object_value->setText(QString::number(v));
-			pb_selectobj->setDown(false);
+			current_params->set_object_value(v);
 		}
 		return;
 	}
 
-	float const f = get_object_value();
-
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = work->isOn();
-	dataSelection.tissues = !work->isOn();
-
 	if (olcorr->isSelected())
 	{
+		iseg::DataSelection dataSelection;
+		dataSelection.sliceNr = handler3D->active_slice();
+		dataSelection.work = olc_params->_target->isOn();
+		dataSelection.tissues = !dataSelection.work;
+
 		vpdyn.clear();
 		last_pt = p;
 		vpdyn.push_back(p);
@@ -945,11 +969,17 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 	}
 	else if (brush->isSelected())
 	{
+		iseg::DataSelection dataSelection;
+		dataSelection.sliceNr = handler3D->active_slice();
+		dataSelection.work = brush_params->_target->isOn();
+		dataSelection.tissues = !dataSelection.work;
+
+		float const f = get_object_value();
 		last_pt = p;
 
-		if (modifybrush->isOn())
+		if (brush_params->_modify->isOn())
 		{
-			if (work->isOn())
+			if (brush_params->_target->isOn())
 			{
 				if (bmphand->work_pt(p) == f)
 					draw = true;
@@ -969,7 +999,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 				}
 			}
 		}
-		else if (drawbrush->isOn())
+		else if (brush_params->_draw->isOn())
 		{
 			draw = true;
 		}
@@ -983,20 +1013,20 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		}
 
 		emit begin_datachange(dataSelection, this);
-		if (work->isOn())
+		if (brush_params->_target->isOn())
 		{
-			if (mm->isOn())
-				bmphand->brush(f, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw);
+			if (brush_params->_unit_mm->isOn())
+				bmphand->brush(f, p, brush_params->_radius->text().toFloat(), spacing[0], spacing[1], draw);
 			else
-				bmphand->brush(f, p, sb_radius->value(), draw);
+				bmphand->brush(f, p, brush_params->_radius->text().toInt(), draw);
 		}
 		else
 		{
 			auto idx = handler3D->active_tissuelayer();
-			if (mm->isOn())
-				bmphand->brushtissue(idx, tissuenr, p, mm_radius->text().toFloat(), spacing[0], spacing[1], draw, tissuenrnew);
+			if (brush_params->_unit_mm->isOn())
+				bmphand->brushtissue(idx, tissuenr, p, brush_params->_radius->text().toFloat(), spacing[0], spacing[1], draw, tissuenrnew);
 			else
-				bmphand->brushtissue(idx, tissuenr, p, sb_radius->value(), draw, tissuenrnew);
+				bmphand->brushtissue(idx, tissuenr, p, brush_params->_radius->text().toInt(), draw, tissuenrnew);
 		}
 		emit end_datachange(this, iseg::NoUndo);
 
@@ -1026,55 +1056,27 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 			addLine(&vps, last_pt, p);
 			for (auto it = ++(vps.begin()); it != vps.end(); it++)
 			{
-				if (work->isOn())
+				if (brush_params->_target->isOn())
 				{
-					if (mm->isOn())
-						bmphand->brush(f, *it, mm_radius->text().toFloat(),
+					if (brush_params->_unit_mm->isOn())
+						bmphand->brush(f, *it, brush_params->_radius->text().toFloat(),
 								spacing[0], spacing[1], draw);
 					else
-						bmphand->brush(f, *it, sb_radius->value(), draw);
+						bmphand->brush(f, *it, brush_params->_radius->text().toInt(), draw);
 				}
 				else
 				{
 					auto idx = handler3D->active_tissuelayer();
-					if (mm->isOn())
+					if (brush_params->_unit_mm->isOn())
 						bmphand->brushtissue(
-								idx, tissuenr, *it, mm_radius->text().toFloat(),
+								idx, tissuenr, *it, brush_params->_radius->text().toFloat(),
 								spacing[0], spacing[1], draw, tissuenrnew);
 					else
 						bmphand->brushtissue(idx, tissuenr, *it,
-								sb_radius->value(), draw,
+								brush_params->_radius->text().toInt(), draw,
 								tissuenrnew);
 				}
 			}
-			int dummy1, dummy2;
-			QRect rect;
-			if (p.px < last_pt.px)
-			{
-				dummy1 = (int)p.px;
-				dummy2 = (int)last_pt.px;
-			}
-			else
-			{
-				dummy1 = (int)last_pt.px;
-				dummy2 = (int)p.px;
-			}
-			rect.setLeft(std::max(0, dummy1 - sb_radius->value()));
-			rect.setRight(std::min((int)bmphand->return_width() - 1,
-					dummy2 + sb_radius->value()));
-			if (p.py < last_pt.py)
-			{
-				dummy1 = (int)p.py;
-				dummy2 = (int)last_pt.py;
-			}
-			else
-			{
-				dummy1 = (int)last_pt.py;
-				dummy2 = (int)p.py;
-			}
-			rect.setTop(std::max(0, dummy1 - sb_radius->value()));
-			rect.setBottom(std::min((int)bmphand->return_height() - 1,
-					dummy2 + sb_radius->value()));
 			emit end_datachange(this, iseg::NoUndo);
 			last_pt = p;
 		}
@@ -1095,7 +1097,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 		{
 			vpdyn.pop_back();
 			addLine(&vpdyn, last_pt, p);
-			if (work->isOn())
+			if (olc_params->_target->isOn())
 				bmphand->correct_outline(f, &vpdyn);
 			else
 				bmphand->correct_outlinetissue(handler3D->active_tissuelayer(), tissuenr, &vpdyn);
@@ -1108,29 +1110,39 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 		{
 			vpdyn.clear();
 			addLine(&vpdyn, last_pt, p);
-			for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
+			if (brush_params->_unit_mm->isOn())
 			{
-				if (work->isOn())
+				auto mm_radius = brush_params->_radius->text().toFloat();
+				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
 				{
-					if (mm->isOn())
-						bmphand->brush(f, *it, mm_radius->text().toFloat(),
-								spacing[0], spacing[1], draw);
+					if (brush_params->_target->isOn())
+					{
+						bmphand->brush(f, *it, mm_radius, spacing[0], spacing[1], draw);
+					}
 					else
-						bmphand->brush(f, *it, sb_radius->value(), draw);
-				}
-				else
-				{
-					auto idx = handler3D->active_tissuelayer();
-					if (mm->isOn())
-						bmphand->brushtissue(
-								idx, tissuenr, *it, mm_radius->text().toFloat(),
-								spacing[0], spacing[1], draw, tissuenrnew);
-					else
-						bmphand->brushtissue(idx, tissuenr, *it,
-								sb_radius->value(), draw,
-								tissuenrnew);
+					{
+						auto layer = handler3D->active_tissuelayer();
+						bmphand->brushtissue(layer, tissuenr, *it, mm_radius, spacing[0], spacing[1], draw, tissuenrnew);
+					}
 				}
 			}
+			else
+			{
+				auto pixel_radius = brush_params->_radius->text().toFloat();
+				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
+				{
+					if (brush_params->_target->isOn())
+					{
+						bmphand->brush(f, *it, pixel_radius, draw);
+					}
+					else
+					{
+						auto layer = handler3D->active_tissuelayer();
+						bmphand->brushtissue(layer, tissuenr, *it, pixel_radius, draw, tissuenrnew);
+					}
+				}
+			}
+			
 			emit end_datachange(this);
 
 			vpdyn.clear();
@@ -1146,8 +1158,19 @@ void OutlineCorrectionWidget::method_changed()
 		stacked_param_layout->setCurrentIndex(_widget_page[methods->currentItem()]);
 	}
 
-	selectobj = false; // make sure we are not expecting a mouse click
-	copy_mode = false; // ensure this is reset
+	// keep selected object definition across tools
+	auto new_widget = dynamic_cast<ParamViewBase*>(stacked_param_layout->currentWidget());
+	if (current_params)
+	{
+		new_widget->set_work(current_params->work());
+		new_widget->set_object_value(current_params->object_value());
+	}
+	current_params = new_widget;
+
+	// make sure we are not expecting a mouse click
+	selectobj = false;
+	// ensure this is reset
+	copy_mode = false;
 
 #if 0
 	tissuesListBackground->hide();
@@ -1361,8 +1384,6 @@ void OutlineCorrectionWidget::method_changed()
 		hbox_prev_slice->hide();
 	}
 #endif
-	// BL UI refactoring: pixmm_changed should be handled by parameter view
-	pixmm_changed();
 	draw_guide();
 }
 
@@ -1581,6 +1602,8 @@ void OutlineCorrectionWidget::execute_pushed()
 		int const yThick = mm_unit ? static_cast<int>(mm_rad / spacing[1] + 0.1f) : mm_rad;
 		int const zThick = mm_unit ? static_cast<int>(mm_rad / spacing[2] + 0.1f) : mm_rad;
 
+		auto selectedBackgroundID = fill_skin_params->_background_value->text().toInt();
+		auto selectedSkinID = fill_skin_params->_skin_value->text().toInt();
 		if (fill_skin_params->_all_slices->isChecked())
 			handler3D->fill_skin_3d(xThick, yThick, zThick, selectedBackgroundID, selectedSkinID);
 		else
@@ -1631,14 +1654,13 @@ void OutlineCorrectionWidget::execute_pushed()
 void OutlineCorrectionWidget::selectobj_pushed()
 {
 	selectobj = true;
-	pb_selectobj->setDown(true);
 }
 
 void OutlineCorrectionWidget::copy_pick_pushed()
 {
 	selectobj = true;
 	copy_mode = true;
-	pb_copy_pick_guide->setDown(true);
+	brush_params->_copy_pick_guide->setDown(true);
 }
 
 void OutlineCorrectionWidget::workbits_changed()
@@ -1657,7 +1679,7 @@ void OutlineCorrectionWidget::workbits_changed()
 		bmphand->get_range(&p);
 		if (p.high > p.low)
 		{
-			object_value->setText(QString::number(p.high));
+			current_params->set_object_value(p.high);
 		}
 	}
 }
@@ -1717,11 +1739,11 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = sb_radius->value();
+		dummy = brush_params->_radius->text().toInt();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_holesize->value();
+		dummy = fill_holes_params->_object_size->text().toInt();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_gapsize->value();
+		dummy = fill_gaps_params->_object_size->text().toInt();
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(brush->isSelected());
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -1737,23 +1759,24 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(fillskin->isSelected());
 		//fwrite(&(dummy), 1,sizeof(int), fp);
-		dummy = (int)(tissue->isOn());
+		bool w = current_params->work();
+		dummy = (int)(!w);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(work->isOn());
+		dummy = (int)(w);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(erasebrush->isOn());
+		dummy = (int)(brush_params->_erase->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(drawbrush->isOn());
+		dummy = (int)(brush_params->_draw->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(modifybrush->isOn());
+		dummy = (int)(brush_params->_modify->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(adapt->isSelected());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(inside->isOn());
+		dummy = (int)(add_skin_params->_inside->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(outside->isOn());
+		dummy = (int)(add_skin_params->_outside->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allslices->isOn());
+		dummy = (int)(fill_holes_params->_all_slices->isOn());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -1765,18 +1788,16 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		disconnect(methods, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
-		disconnect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_radius->setValue(dummy);
-		mm_radius->setText(QString(dummy));
+		brush_params->_radius->setText(QString(dummy));
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_holesize->setValue(dummy);
+		fill_holes_params->_object_size->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_gapsize->setValue(dummy);
+		fill_gaps_params->_object_size->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush->setSelected(dummy > 0);
+		brush->setSelected(dummy != 0);
 		fread(&dummy, sizeof(int), 1, fp);
 		olcorr->setSelected(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
@@ -1792,61 +1813,41 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		fillskin->setSelected(false);
 
 		fread(&dummy, sizeof(int), 1, fp);
-		tissue->setChecked(dummy > 0);
+		// tissue & work is exclusive;
 		fread(&dummy, sizeof(int), 1, fp);
-		work->setChecked(dummy > 0);
+		current_params->set_work(dummy != 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		erasebrush->setChecked(dummy > 0);
+		brush_params->_erase->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		drawbrush->setChecked(dummy > 0);
+		brush_params->_draw->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		modifybrush->setChecked(dummy > 0);
+		brush_params->_modify->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
 		adapt->setSelected(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		inside->setChecked(dummy > 0);
+		add_skin_params->_inside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		outside->setChecked(dummy > 0);
+		add_skin_params->_outside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		allslices->setChecked(dummy > 0);
+		fill_holes_params->_all_slices->setChecked(dummy > 0);
 
 		method_changed();
 
 		connect(methods, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
-		connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+		//connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 	}
 	return fp;
 }
 
 void OutlineCorrectionWidget::hideparams_changed() { method_changed(); }
 
-void OutlineCorrectionWidget::pixmm_changed()
-{
-	bool add_skin_mm = mm->isOn() && addskin->isSelected() && allslices->isChecked();
-	bool brush_mm = mm->isOn() && brush->isSelected();
-	if (add_skin_mm || brush_mm)
-	{
-		mm_radius->show();
-		sb_radius->hide();
-		txt_unit->setText(" mm");
-	}
-	else
-	{
-		sb_radius->show();
-		mm_radius->hide();
-		txt_unit->setText(" pixel");
-	}
-}
-
 float OutlineCorrectionWidget::get_object_value() const
 {
-	bool ok = false;
-	float f = object_value->text().toFloat(&ok);
-	if (!ok)
+	if (current_params)
 	{
-		f = 255.f;
+		return current_params->object_value();
 	}
-	return f;
+	return 0.f;
 }
 
 void OutlineCorrectionWidget::smooth_tissues_pushed()
