@@ -33,6 +33,7 @@ class QStackedLayout;
 
 namespace iseg {
 
+class ParamViewBase;
 class OLCorrParamView;
 class BrushParamView;
 class FillHolesParamView;
@@ -41,23 +42,6 @@ class FillSkinParamView;
 class FillAllParamView;
 class AdaptParamView;
 class SmoothTissuesParamView;
-
-class ParamViewBase : public QWidget
-{
-public:
-	ParamViewBase(QWidget* parent = nullptr) : QWidget(parent) {}
-
-	virtual bool work() const { return _work; }
-	virtual void set_work(bool v) { _work = v; }
-
-	virtual float object_value() const { return _object_value; }
-	virtual void set_object_value(float v) { _object_value = v; }
-
-private:
-	// cache setting
-	bool _work = true;
-	float _object_value = 0.f;
-};
 
 /** \brief Class which contains different methods to modify/correct target or tissues
 */

@@ -54,6 +54,7 @@ SET(ViewerSrcs
 	MainWindow.cpp
 	MeasurementWidget.cpp
 	MorphologyWidget.cpp
+	OutlineCorrectionParameterViews.cpp
 	OutlineCorrectionWidget.cpp
 	PickerWidget.cpp
 	Precompiled.cpp
@@ -105,6 +106,7 @@ SET(MyMocHeaders
 	MainWindow.h
 	MeasurementWidget.h
 	MorphologyWidget.h
+	OutlineCorrectionParameterViews.h
 	OutlineCorrectionWidget.h
 	PickerWidget.h
 	RadiotherapyStructureSetImporter.h
