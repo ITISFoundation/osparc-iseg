@@ -7,8 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef OLC_4APRIL05
-#define OLC_4APRIL05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
@@ -72,10 +71,6 @@ private:
 
 	void draw_circle(Point p);
 
-	// \todo move to method class?
-	void select_background(QString tissueName, tissues_size_t nr);
-	void select_skin(QString tissueName, tissues_size_t nr);
-
 	float get_object_value() const;
 
 	// parameter view
@@ -135,5 +130,3 @@ private slots:
 };
 
 } // namespace iseg
-
-#endif

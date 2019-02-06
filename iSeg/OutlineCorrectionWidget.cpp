@@ -90,19 +90,18 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
 
-	methods = make_button_group(this, {olcorr, brush, holefill, removeislands, gapfill, addskin, fillskin, allfill, adapt, smooth_tissues});
+	auto method_radio_buttons = {olcorr, brush, holefill, removeislands, gapfill, addskin, fillskin, allfill, adapt, smooth_tissues};
+	methods = new QButtonGroup(parent);
+	for (auto w : method_radio_buttons)
+	{
+		methods->addButton(w);
+	}
 
 	auto method_vbox = new QVBoxLayout;
-	method_vbox->addWidget(olcorr);
-	method_vbox->addWidget(brush);
-	method_vbox->addWidget(holefill);
-	method_vbox->addWidget(removeislands);
-	method_vbox->addWidget(gapfill);
-	method_vbox->addWidget(addskin);
-	method_vbox->addWidget(fillskin);
-	method_vbox->addWidget(allfill);
-	method_vbox->addWidget(adapt);
-	method_vbox->addWidget(smooth_tissues);
+	for (auto w : method_radio_buttons)
+	{
+		method_vbox->addWidget(w);
+	}
 	method_vbox->setMargin(5);
 
 	auto method_area = new QFrame;
@@ -160,6 +159,13 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	// create connections
 	connect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+	connect(olc_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(brush_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(fill_holes_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(remove_islands_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(fill_gaps_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(adapt_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+
 #if 0
 	connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 	connect(allslices, SIGNAL(clicked()), this, SLOT(method_changed()));
