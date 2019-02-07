@@ -11,9 +11,9 @@
 
 #include "itkWeightedDijkstraImageFilter.h"
 
-#include "Data/LogApi.h"
 #include "Data/BrushInteraction.h"
 #include "Data/ItkUtils.h"
+#include "Data/LogApi.h"
 #include "Data/SliceHandlerItkWrapper.h"
 
 #include <itkBinaryThresholdImageFilter.h>
@@ -36,6 +36,7 @@
 #include <QLineEdit>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QScrollArea>
 #include <QStackedWidget>
 
 #include <boost/format.hpp>
@@ -186,8 +187,11 @@ TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
 	_options_stack->addWidget(_vesselness_options);
 	_options_stack->addWidget(_target_options);
 
+	auto scroll_area = new QScrollArea(this);
+	scroll_area->setWidget(_main_options);
+
 	auto top_level_layout = new QHBoxLayout;
-	top_level_layout->addWidget(_main_options);
+	top_level_layout->addWidget(scroll_area);
 	top_level_layout->addWidget(_options_stack);
 
 	setLayout(top_level_layout);
