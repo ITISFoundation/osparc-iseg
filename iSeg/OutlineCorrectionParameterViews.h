@@ -15,8 +15,8 @@
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QRadioButton>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QSpinBox>
 #include <QWidget>
 
@@ -27,6 +27,8 @@ class ParamViewBase : public QWidget
 	Q_OBJECT
 public:
 	ParamViewBase(QWidget* parent = nullptr) : QWidget(parent) {}
+
+	virtual void init() {}
 
 	virtual bool work() const { return _work; }
 	virtual void set_work(bool v) { _work = v; }
@@ -49,7 +51,7 @@ public:
 	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
 	float object_value() const override { return _object_value->text().toFloat(); }
-	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+	void set_object_value(float v) override;
 
 	// params
 	QRadioButton* _target;
@@ -68,7 +70,7 @@ public:
 	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
 	float object_value() const override { return _object_value->text().toFloat(); }
-	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+	void set_object_value(float v) override;
 
 	std::vector<Point> draw_circle(Point p, float spacing_x, float spacing_y, int width, int height);
 
@@ -103,7 +105,7 @@ public:
 	bool work() const override { return _target->isOn(); }
 	void set_work(bool v) override { _target->setOn(v); }
 	float object_value() const override { return _object_value->text().toFloat(); }
-	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+	void set_object_value(float v) override;
 
 	// params
 	QCheckBox* _all_slices;
@@ -151,6 +153,8 @@ class FillSkinParamView : public ParamViewBase
 	Q_OBJECT
 public:
 	FillSkinParamView(SliceHandlerInterface* h, QWidget* parent = 0);
+
+	void init() override;
 
 	void select_background(QString tissueName, tissues_size_t nr);
 
@@ -210,7 +214,7 @@ public:
 	AdaptParamView(QWidget* parent = 0);
 
 	float object_value() const override { return _object_value->text().toFloat(); }
-	void set_object_value(float v) override { _object_value->setText(QString::number(v)); }
+	void set_object_value(float v) override;
 
 	// params
 	QCheckBox* _all_slices;
@@ -235,4 +239,4 @@ public:
 	QPushButton* _execute;
 };
 
-}
+} // namespace iseg

@@ -530,6 +530,7 @@ void OutlineCorrectionWidget::method_changed()
 		new_widget->set_object_value(current_params->object_value());
 	}
 	current_params = new_widget;
+	current_params->init();
 
 	// make sure we are not expecting a mouse click
 	selectobj = false;
