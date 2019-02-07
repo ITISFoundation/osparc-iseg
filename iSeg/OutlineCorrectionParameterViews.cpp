@@ -281,6 +281,9 @@ FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /
 	layout->addRow(tr("Skin"), fg_hbox);
 	layout->addRow(_execute);
 	setLayout(layout);
+
+	connect(_select_background, SIGNAL(clicked()), this, SLOT(on_select_background()));
+	connect(_select_skin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
 }
 
 void FillSkinParamView::select_background(QString tissueName, tissues_size_t nr)

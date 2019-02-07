@@ -7589,8 +7589,7 @@ void MainWindow::end_undo_helper(iseg::EndUndoAction undoAction)
 	}
 }
 
-void MainWindow::handle_end_datachange(QWidget* sender,
-		iseg::EndUndoAction undoAction)
+void MainWindow::handle_end_datachange(QWidget* sender, iseg::EndUndoAction undoAction)
 {
 	// End undo
 	end_undo_helper(undoAction);
@@ -7607,14 +7606,10 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	// Block changed data signals for visible widget
 	if (sender == methodTab->currentWidget())
 	{
-		QObject::disconnect(this, SIGNAL(bmp_changed()), sender,
-				SLOT(bmp_changed()));
-		QObject::disconnect(this, SIGNAL(work_changed()), sender,
-				SLOT(work_changed()));
-		QObject::disconnect(this, SIGNAL(tissues_changed()), sender,
-				SLOT(tissues_changed()));
-		QObject::disconnect(this, SIGNAL(marks_changed()), sender,
-				SLOT(marks_changed()));
+		QObject::disconnect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
+		QObject::disconnect(this, SIGNAL(work_changed()), sender, SLOT(work_changed()));
+		QObject::disconnect(this, SIGNAL(tissues_changed()), sender, SLOT(tissues_changed()));
+		QObject::disconnect(this, SIGNAL(marks_changed()), sender, SLOT(marks_changed()));
 	}
 
 	// Signal changed data
@@ -7653,12 +7648,9 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	if (sender == methodTab->currentWidget())
 	{
 		QObject::connect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
-		QObject::connect(this, SIGNAL(work_changed()), sender,
-				SLOT(work_changed()));
-		QObject::connect(this, SIGNAL(tissues_changed()), sender,
-				SLOT(tissues_changed()));
-		QObject::connect(this, SIGNAL(marks_changed()), sender,
-				SLOT(marks_changed()));
+		QObject::connect(this, SIGNAL(work_changed()), sender, SLOT(work_changed()));
+		QObject::connect(this, SIGNAL(tissues_changed()), sender, SLOT(tissues_changed()));
+		QObject::connect(this, SIGNAL(marks_changed()), sender, SLOT(marks_changed()));
 	}
 }
 

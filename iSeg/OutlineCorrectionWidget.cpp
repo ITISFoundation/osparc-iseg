@@ -166,6 +166,11 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(fill_gaps_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 	connect(adapt_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
+	connect(brush_params->_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
+	connect(brush_params->_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
+	connect(brush_params->_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
+	connect(brush_params->_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
+
 #if 0
 	connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 	connect(allslices, SIGNAL(clicked()), this, SLOT(method_changed()));
