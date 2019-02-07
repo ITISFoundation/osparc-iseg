@@ -5060,8 +5060,6 @@ void SlicesHandler::add2tissueall_connected(tissues_size_t tissuetype, Point p,
 					work[i1] = f;
 		}
 	}
-
-	return;
 }
 
 void SlicesHandler::subtract_tissueall_connected(tissues_size_t tissuetype,

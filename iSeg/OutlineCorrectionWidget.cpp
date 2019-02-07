@@ -192,7 +192,7 @@ void OutlineCorrectionWidget::draw_guide()
 			std::vector<Mark> marks;
 			auto w = handler3D->width();
 			auto h = handler3D->height();
-			if (brush_params->_target->isOn())
+			if (brush_params->_target->isChecked())
 			{
 				Mark m(Mark::WHITE);
 				marks = extract_boundary<Mark, float>(handler3D->target_slices().at(slice_clamped), w, h, m);
@@ -225,7 +225,7 @@ void OutlineCorrectionWidget::copy_guide(Point* p)
 
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = brush_params->_target->isOn();
+		dataSelection.work = brush_params->_target->isChecked();
 		dataSelection.tissues = !dataSelection.work;
 		emit begin_datachange(dataSelection, this);
 
@@ -280,6 +280,9 @@ void OutlineCorrectionWidget::copy_guide(Point* p)
 
 void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 {
+	// update spacing when we start interaction
+	spacing = handler3D->spacing();
+
 	if (copy_mode)
 	{
 		copy_mode = false;
@@ -301,7 +304,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = olc_params->_target->isOn();
+		dataSelection.work = olc_params->_target->isChecked();
 		dataSelection.tissues = !dataSelection.work;
 
 		vpdyn.clear();
@@ -313,15 +316,16 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = brush_params->_target->isOn();
+		dataSelection.work = brush_params->_target->isChecked();
 		dataSelection.tissues = !dataSelection.work;
 
 		float const f = get_object_value();
+		float const radius = brush_params->_radius->text().toFloat();
 		last_pt = p;
 
-		if (brush_params->_modify->isOn())
+		if (brush_params->_modify->isChecked())
 		{
-			if (brush_params->_target->isOn())
+			if (brush_params->_target->isChecked())
 			{
 				if (bmphand->work_pt(p) == f)
 					draw = true;
@@ -341,7 +345,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 				}
 			}
 		}
-		else if (brush_params->_draw->isOn())
+		else if (brush_params->_draw->isChecked())
 		{
 			draw = true;
 		}
@@ -355,20 +359,20 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 		}
 
 		emit begin_datachange(dataSelection, this);
-		if (brush_params->_target->isOn())
+		if (brush_params->_target->isChecked())
 		{
-			if (brush_params->_unit_mm->isOn())
-				bmphand->brush(f, p, brush_params->_radius->text().toFloat(), spacing[0], spacing[1], draw);
+			if (brush_params->_unit_mm->isChecked())
+				bmphand->brush(f, p, radius, spacing[0], spacing[1], draw);
 			else
-				bmphand->brush(f, p, brush_params->_radius->text().toInt(), draw);
+				bmphand->brush(f, p, static_cast<int>(radius), draw);
 		}
 		else
 		{
 			auto idx = handler3D->active_tissuelayer();
-			if (brush_params->_unit_mm->isOn())
-				bmphand->brushtissue(idx, tissuenr, p, brush_params->_radius->text().toFloat(), spacing[0], spacing[1], draw, tissuenrnew);
+			if (brush_params->_unit_mm->isChecked())
+				bmphand->brushtissue(idx, tissuenr, p, radius, spacing[0], spacing[1], draw, tissuenrnew);
 			else
-				bmphand->brushtissue(idx, tissuenr, p, brush_params->_radius->text().toInt(), draw, tissuenrnew);
+				bmphand->brushtissue(idx, tissuenr, p, static_cast<int>(radius), draw, tissuenrnew);
 		}
 		emit end_datachange(this, iseg::NoUndo);
 
@@ -381,6 +385,7 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 	if (!selectobj && !copy_mode)
 	{
 		float const f = get_object_value();
+		float const radius = brush_params->_radius->text().toFloat();
 
 		if (olcorr->isChecked())
 		{
@@ -398,25 +403,21 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 			addLine(&vps, last_pt, p);
 			for (auto it = ++(vps.begin()); it != vps.end(); it++)
 			{
-				if (brush_params->_target->isOn())
+				if (brush_params->_target->isChecked())
 				{
-					if (brush_params->_unit_mm->isOn())
-						bmphand->brush(f, *it, brush_params->_radius->text().toFloat(),
-								spacing[0], spacing[1], draw);
+					if (brush_params->_unit_mm->isChecked())
+						bmphand->brush(f, *it, radius, spacing[0], spacing[1], draw);
 					else
-						bmphand->brush(f, *it, brush_params->_radius->text().toInt(), draw);
+						bmphand->brush(f, *it, static_cast<int>(radius), draw);
 				}
 				else
 				{
 					auto idx = handler3D->active_tissuelayer();
-					if (brush_params->_unit_mm->isOn())
+					if (brush_params->_unit_mm->isChecked())
 						bmphand->brushtissue(
-								idx, tissuenr, *it, brush_params->_radius->text().toFloat(),
-								spacing[0], spacing[1], draw, tissuenrnew);
+								idx, tissuenr, *it, radius, spacing[0], spacing[1], draw, tissuenrnew);
 					else
-						bmphand->brushtissue(idx, tissuenr, *it,
-								brush_params->_radius->text().toInt(), draw,
-								tissuenrnew);
+						bmphand->brushtissue(idx, tissuenr, *it, static_cast<int>(radius), draw, tissuenrnew);
 				}
 			}
 			emit end_datachange(this, iseg::NoUndo);
@@ -439,7 +440,7 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 		{
 			vpdyn.pop_back();
 			addLine(&vpdyn, last_pt, p);
-			if (olc_params->_target->isOn())
+			if (olc_params->_target->isChecked())
 				bmphand->correct_outline(f, &vpdyn);
 			else
 				bmphand->correct_outlinetissue(handler3D->active_tissuelayer(), tissuenr, &vpdyn);
@@ -450,30 +451,31 @@ void OutlineCorrectionWidget::on_mouse_released(Point p)
 		}
 		else if (brush->isChecked())
 		{
+			float const radius = brush_params->_radius->text().toFloat();
+
 			vpdyn.clear();
 			addLine(&vpdyn, last_pt, p);
-			if (brush_params->_unit_mm->isOn())
+			if (brush_params->_unit_mm->isChecked())
 			{
-				auto mm_radius = brush_params->_radius->text().toFloat();
 				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
 				{
-					if (brush_params->_target->isOn())
+					if (brush_params->_target->isChecked())
 					{
-						bmphand->brush(f, *it, mm_radius, spacing[0], spacing[1], draw);
+						bmphand->brush(f, *it, radius, spacing[0], spacing[1], draw);
 					}
 					else
 					{
 						auto layer = handler3D->active_tissuelayer();
-						bmphand->brushtissue(layer, tissuenr, *it, mm_radius, spacing[0], spacing[1], draw, tissuenrnew);
+						bmphand->brushtissue(layer, tissuenr, *it, radius, spacing[0], spacing[1], draw, tissuenrnew);
 					}
 				}
 			}
 			else
 			{
-				auto pixel_radius = brush_params->_radius->text().toFloat();
+				auto pixel_radius = static_cast<int>(radius);
 				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
 				{
-					if (brush_params->_target->isOn())
+					if (brush_params->_target->isChecked())
 					{
 						bmphand->brush(f, *it, pixel_radius, draw);
 					}
@@ -602,8 +604,8 @@ void OutlineCorrectionWidget::execute_pushed()
 		emit begin_datachange(dataSelection, this);
 
 		auto radius = add_skin_params->_thickness->text().toFloat();
-		auto mm_unit = add_skin_params->_unit_mm->isOn();
-		auto outside = add_skin_params->_outside->isOn();
+		auto mm_unit = add_skin_params->_unit_mm->isChecked();
+		auto outside = add_skin_params->_outside->isChecked();
 
 		int const rx = mm_unit ? static_cast<int>(radius / spacing[0] + 0.1f) : radius;
 		int const ry = mm_unit ? static_cast<int>(radius / spacing[1] + 0.1f) : radius;
@@ -728,7 +730,7 @@ void OutlineCorrectionWidget::execute_pushed()
 	else if (fillskin->isChecked())
 	{
 		float mm_rad = fill_skin_params->_thickness->text().toFloat();
-		bool mm_unit = fill_skin_params->_unit_mm->isOn();
+		bool mm_unit = fill_skin_params->_unit_mm->isChecked();
 		int const xThick = mm_unit ? static_cast<int>(mm_rad / spacing[0] + 0.1f) : mm_rad;
 		int const yThick = mm_unit ? static_cast<int>(mm_rad / spacing[1] + 0.1f) : mm_rad;
 		int const zThick = mm_unit ? static_cast<int>(mm_rad / spacing[2] + 0.1f) : mm_rad;
@@ -816,7 +818,6 @@ void OutlineCorrectionWidget::on_slicenr_changed()
 void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
-	spacing = handler3D->spacing();
 	workbits_changed();
 }
 
@@ -971,7 +972,7 @@ void OutlineCorrectionWidget::smooth_tissues_pushed()
 	size_t start_slice = handler3D->start_slice();
 	size_t end_slice = handler3D->end_slice();
 
-	if (smooth_tissues_params->_active_slice->isOn())
+	if (smooth_tissues_params->_active_slice->isChecked())
 	{
 		start_slice = handler3D->active_slice();
 		end_slice = start_slice + 1;
@@ -979,13 +980,13 @@ void OutlineCorrectionWidget::smooth_tissues_pushed()
 
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.allSlices = !smooth_tissues_params->_active_slice->isOn();
+	dataSelection.allSlices = !smooth_tissues_params->_active_slice->isChecked();
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
 	SmoothTissues(handler3D, start_slice, end_slice,
 			smooth_tissues_params->_sigma->text().toDouble(),
-			smooth_tissues_params->_3D->isOn());
+			smooth_tissues_params->_3D->isChecked());
 
 	emit end_datachange(this);
 }

@@ -60,6 +60,8 @@ public:
 	std::string GetName() override { return std::string("OLC"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("olc.png"))); }
 
+	void bmphand_changed(bmphandler* bmph);
+
 private:
 	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
@@ -115,7 +117,6 @@ public slots:
 	void workbits_changed();
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
 	void method_changed();
 	void execute_pushed();
 	void selectobj_pushed();

@@ -145,7 +145,7 @@ std::vector<iseg::Point> BrushParamView::draw_circle(Point p, float spacing_x, f
 {
 	Point p1;
 	std::vector<Point> vpdyn;
-	if (_unit_mm->isOn())
+	if (_unit_mm->isChecked())
 	{
 		float const radius = _radius->text().toFloat();
 		float const radius_corrected =
