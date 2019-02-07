@@ -897,11 +897,11 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = brush_params->_radius->text().toInt();
+		dummy = static_cast<int>(brush_params->_radius->text().toFloat());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = fill_holes_params->_object_size->text().toInt();
+		dummy = fill_holes_params->_object_size->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = fill_gaps_params->_object_size->text().toInt();
+		dummy = fill_gaps_params->_object_size->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(brush->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -949,7 +949,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		brush_params->_radius->setText(QString(dummy));
+		brush_params->_radius->setText(QString::number(dummy));
 		fread(&dummy, sizeof(int), 1, fp);
 		fill_holes_params->_object_size->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);

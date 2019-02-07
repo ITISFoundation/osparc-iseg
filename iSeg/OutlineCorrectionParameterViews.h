@@ -93,6 +93,9 @@ public:
 	QSpinBox* _guide_offset;
 	QPushButton* _copy_guide;
 	QPushButton* _copy_pick_guide;
+
+private slots:
+	void unit_changed();
 };
 
 // used for fill holes, remove islands, and fill gaps
@@ -146,6 +149,9 @@ public:
 	QRadioButton* _unit_pixel;
 
 	QPushButton* _execute;
+
+private slots:
+	void unit_changed();
 };
 
 class FillSkinParamView : public ParamViewBase
@@ -176,8 +182,8 @@ public:
 	QPushButton* _execute;
 
 private slots:
+	void unit_changed();
 	void on_select_background();
-
 	void on_select_skin();
 
 private:

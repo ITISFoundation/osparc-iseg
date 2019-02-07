@@ -54,6 +54,7 @@ OLCorrParamView::OLCorrParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
 	_object_value = new QLineEdit(QString::number(255));
+	_object_value->setValidator(new QDoubleValidator);
 
 	auto input_hbox = make_hbox({_target, _tissues});
 	auto object_hbox = make_hbox({_select_object, _object_value});
@@ -81,6 +82,7 @@ BrushParamView::BrushParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
 	_object_value = new QLineEdit(QString::number(255));
+	_object_value->setValidator(new QDoubleValidator);
 
 	_modify = new QRadioButton(QString("Modify"));
 	_draw = new QRadioButton(QString("Draw"));
@@ -115,6 +117,21 @@ BrushParamView::BrushParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	layout->addRow(tr("Brush Radius"), unit_hbox);
 	layout->addRow(tr("Show guide at offset"), guide_hbox);
 	setLayout(layout);
+
+	connect(unit_group, SIGNAL(buttonClicked(int)), this, SLOT(unit_changed()));
+}
+
+void BrushParamView::unit_changed()
+{
+	if (_unit_mm->isChecked())
+	{
+		_radius->setValidator(new QDoubleValidator);
+	}
+	else
+	{
+		_radius->setText(QString::number(static_cast<int>(_radius->text().toFloat())));
+		_radius->setValidator(new QIntValidator);
+	}
 }
 
 void BrushParamView::set_object_value(float v)
@@ -189,6 +206,7 @@ FillHolesParamView::FillHolesParamView(QWidget* parent /*= 0*/) : ParamViewBase(
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
 	_object_value = new QLineEdit(QString::number(255));
+	_object_value->setValidator(new QDoubleValidator);
 
 	_object_size = new QSpinBox(1, std::numeric_limits<int>::max(), 1, nullptr);
 	_object_size_label = new QLabel(tr("Hole size"));
@@ -224,6 +242,7 @@ AddSkinParamView::AddSkinParamView(QWidget* parent /*= 0*/) : ParamViewBase(pare
 	_target->setOn(true);
 
 	_thickness = new QLineEdit(QString::number(1));
+	_thickness->setValidator(new QIntValidator);
 	_unit_pixel = new QRadioButton(tr("Pixel"));
 	_unit_mm = new QRadioButton(tr("Use spacing"));
 	auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
@@ -247,6 +266,21 @@ AddSkinParamView::AddSkinParamView(QWidget* parent /*= 0*/) : ParamViewBase(pare
 	layout->addRow(tr("Where"), mode_hbox);
 	layout->addRow(_execute);
 	setLayout(layout);
+
+	connect(unit_group, SIGNAL(buttonClicked(int)), this, SLOT(unit_changed()));
+}
+
+void AddSkinParamView::unit_changed()
+{
+	if (_unit_mm->isChecked())
+	{
+		_thickness->setValidator(new QDoubleValidator);
+	}
+	else
+	{
+		_thickness->setText(QString::number(static_cast<int>(_thickness->text().toFloat())));
+		_thickness->setValidator(new QIntValidator);
+	}
 }
 
 FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /*= 0*/) : ParamViewBase(parent), _handler(h)
@@ -284,6 +318,7 @@ FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /
 
 	connect(_select_background, SIGNAL(clicked()), this, SLOT(on_select_background()));
 	connect(_select_skin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
+	connect(unit_group, SIGNAL(buttonClicked(int)), this, SLOT(unit_changed()));
 }
 
 void FillSkinParamView::select_background(QString tissueName, tissues_size_t nr)
@@ -309,6 +344,19 @@ void FillSkinParamView::select_skin(QString tissueName, tissues_size_t nr)
 void FillSkinParamView::init()
 {
 	_execute->setEnabled(backgroundSelected && skinSelected);
+}
+
+void FillSkinParamView::unit_changed()
+{
+	if (_unit_mm->isChecked())
+	{
+		_thickness->setValidator(new QDoubleValidator);
+	}
+	else
+	{
+		_thickness->setText(QString::number(static_cast<int>(_thickness->text().toFloat())));
+		_thickness->setValidator(new QIntValidator);
+	}
 }
 
 void FillSkinParamView::on_select_background()
@@ -366,6 +414,7 @@ AdaptParamView::AdaptParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
 	_object_value = new QLineEdit(QString::number(255));
+	_object_value->setValidator(new QDoubleValidator);
 
 	_execute = new QPushButton(tr("Execute"));
 
