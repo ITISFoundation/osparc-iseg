@@ -423,7 +423,6 @@ public:
 	void fill_holes(float f, int minsize);
 	void remove_islands(float f, int minsize);
 	void fill_gaps(int minsize, bool connectivity);
-	void adaptwork2bmp(float f);
 	void fill_holestissue(tissues_size_t f, int minsize);
 	void remove_islandstissue(tissues_size_t f, int minsize);
 	void fill_gapstissue(int minsize, bool connectivity);

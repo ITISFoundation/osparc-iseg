@@ -391,7 +391,6 @@ public:
 	bool print_amascii_slice(tissuelayers_size_t idx, std::ofstream& streamname);
 	bool print_vtkascii_slice(tissuelayers_size_t idx, std::ofstream& streamname);
 	bool print_vtkbinary_slice(tissuelayers_size_t idx, std::ofstream& streamname);
-	void adaptwork2bmp(float f);
 	void shifttissue();
 	void shiftbmp();
 	unsigned long return_workpixelcount(float f);

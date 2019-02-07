@@ -3621,17 +3621,6 @@ void SlicesHandler::fill_gaps(int minsize, bool connectivity)
 	}
 }
 
-void SlicesHandler::adaptwork2bmp(float f)
-{
-	int const iN = _endslice;
-
-#pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
-	{
-		_image_slices[i].adaptwork2bmp(f);
-	}
-}
-
 void SlicesHandler::fill_gapstissue(int minsize, bool connectivity)
 {
 	int const iN = _endslice;
