@@ -39,7 +39,6 @@ class FillHolesParamView;
 class AddSkinParamView;
 class FillSkinParamView;
 class FillAllParamView;
-class AdaptParamView;
 class SmoothTissuesParamView;
 
 /** \brief Class which contains different methods to modify/correct target or tissues
@@ -50,7 +49,7 @@ class OutlineCorrectionWidget : public WidgetInterface
 public:
 	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~OutlineCorrectionWidget();
+	~OutlineCorrectionWidget() {}
 	void cleanup() override;
 
 	void init() override;
@@ -83,10 +82,8 @@ private:
 	QRadioButton* addskin;
 	QRadioButton* fillskin;
 	QRadioButton* allfill;
-	QRadioButton* adapt;
 	QRadioButton* smooth_tissues;
 
-	QWidget* parameter_area;
 	ParamViewBase* current_params = nullptr;
 	QStackedLayout* stacked_param_layout;
 	OLCorrParamView* olc_params;
@@ -97,7 +94,6 @@ private:
 	AddSkinParamView* add_skin_params;
 	FillSkinParamView* fill_skin_params;
 	FillAllParamView* fill_all_params;
-	AdaptParamView* adapt_params;
 	SmoothTissuesParamView* smooth_tissues_params;
 
 	// member/state variables

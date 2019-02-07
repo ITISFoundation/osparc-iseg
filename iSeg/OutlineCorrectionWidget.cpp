@@ -42,21 +42,18 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 			"OutLine Correction routines that can be used to modify "
 			"the result of a segmentation operation and to correct frequently "
 			"occurring segmentation deficiencies."));
-	setObjectName("OLC");
 
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
-	auto top_layout = new QHBoxLayout;
-
 	// methods
-	olcorr = new QRadioButton(tr("Outline Corr"));
+	olcorr = new QRadioButton(tr("Outline Correction"));
 	olcorr->setToolTip(Format(
 			"Draw an alternative boundary segment for a region.This segment "
 			"will be connected to the region using the shortest possible lines "
 			"and will replace the boundary segment between the connection points."));
 	brush = new QRadioButton(tr("Brush"));
-	brush->setToolTip(Format("Manual correction and segmentation tool: a brush."));
+	brush->setToolTip(Format("Manual correction and segmentation with brush tools."));
 
 	holefill = new QRadioButton(tr("Fill Holes"));
 	holefill->setToolTip(Format(
@@ -86,12 +83,12 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 			"Make sure that there are no unassigned regions "
 			"inside the segmented model."));
 
-	adapt = new QRadioButton(tr("Adapt"));
-
 	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
+	smooth_tissues->setToolTip(Format(
+			"This tool smooths all non-locked tissues but does not modify locked tissues."));
 
-	auto method_radio_buttons = {olcorr, brush, holefill, removeislands, gapfill, addskin, fillskin, allfill, adapt, smooth_tissues};
-	methods = new QButtonGroup(parent);
+	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, smooth_tissues};
+	methods = new QButtonGroup(this);
 	for (auto w : method_radio_buttons)
 	{
 		methods->addButton(w);
@@ -104,15 +101,10 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	}
 	method_vbox->setMargin(5);
 
-	auto method_area = new QFrame;
+	auto method_area = new QFrame(this);
 	method_area->setLayout(method_vbox);
 	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 	method_area->setLineWidth(1);
-
-	auto scroll_area = new QScrollArea(this);
-	scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	scroll_area->setWidget(method_area);
-	scroll_area->setFrameStyle(QFrame::NoFrame | QFrame::Plain);
 
 	// parameter views
 	olc_params = new OLCorrParamView;
@@ -125,26 +117,23 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	add_skin_params = new AddSkinParamView;
 	fill_skin_params = new FillSkinParamView(handler3D);
 	fill_all_params = new FillAllParamView;
-	adapt_params = new AdaptParamView;
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
-	parameter_area = new QWidget(this);
 	stacked_param_layout = new QStackedLayout;
-	stacked_param_layout->addWidget(olc_params);
 	stacked_param_layout->addWidget(brush_params);
+	stacked_param_layout->addWidget(olc_params);
 	stacked_param_layout->addWidget(fill_holes_params);
 	stacked_param_layout->addWidget(remove_islands_params);
 	stacked_param_layout->addWidget(fill_gaps_params);
 	stacked_param_layout->addWidget(add_skin_params);
 	stacked_param_layout->addWidget(fill_skin_params);
 	stacked_param_layout->addWidget(fill_all_params);
-	stacked_param_layout->addWidget(adapt_params);
 	stacked_param_layout->addWidget(smooth_tissues_params);
-	parameter_area->setLayout(stacked_param_layout);
 
-	top_layout->addWidget(scroll_area);
-	top_layout->addWidget(parameter_area);
+	auto top_layout = new QHBoxLayout;
+	top_layout->addWidget(method_area);
+	top_layout->addLayout(stacked_param_layout);
 	setLayout(top_layout);
 
 	// remember QStackedLayout page where parameters of method are added
@@ -164,28 +153,11 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(fill_holes_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 	connect(remove_islands_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 	connect(fill_gaps_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(adapt_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
 	connect(brush_params->_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
 	connect(brush_params->_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
 	connect(brush_params->_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
 	connect(brush_params->_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
-
-#if 0
-	connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
-	connect(allslices, SIGNAL(clicked()), this, SLOT(method_changed()));
-	connect(pixelormm, SIGNAL(buttonClicked(int)), this, SLOT(pixmm_changed()));
-	connect(pb_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(pb_selectobj, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-
-	connect(cb_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
-	connect(sb_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
-	connect(pb_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
-	connect(pb_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
-
-	connect(getCurrentTissueBackground, SIGNAL(clicked()), this, SLOT(on_select_background()));
-	connect(getCurrentTissueSkin, SIGNAL(clicked()), this, SLOT(on_select_skin()));
-#endif
 
 	connect(fill_holes_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(remove_islands_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
@@ -193,17 +165,12 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(add_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_all_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(adapt_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(smooth_tissues_params->_execute, SIGNAL(clicked()), this, SLOT(smooth_tissues_pushed()));
 
 	selectobj = false;
 
 	method_changed();
 	workbits_changed();
-}
-
-OutlineCorrectionWidget::~OutlineCorrectionWidget()
-{
 }
 
 void OutlineCorrectionWidget::draw_circle(Point p)
@@ -290,12 +257,17 @@ void OutlineCorrectionWidget::copy_guide(Point* p)
 				std::vector<tissues_size_t> temp(w * h, 0);
 				add_connected_2d(ref, temp.data(), w, h, pos, tissuenr,
 						[&](unsigned idx) { return ref[idx] == tissuenr; });
-				ref = temp.data();
-			}
 
-			std::transform(ref, ref + w * h, current, current, [this](tissues_size_t r, tissues_size_t c) {
-				return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
-			});
+				std::transform(temp.begin(), temp.end(), current, current, [this](tissues_size_t r, tissues_size_t c) {
+					return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
+				});
+			}
+			else
+			{
+				std::transform(ref, ref + w * h, current, current, [this](tissues_size_t r, tissues_size_t c) {
+					return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
+				});
+			}
 		}
 
 		emit end_datachange(this);
@@ -308,15 +280,16 @@ void OutlineCorrectionWidget::copy_guide(Point* p)
 
 void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 {
+	if (copy_mode)
+	{
+		copy_mode = false;
+		copy_guide(&p);
+		brush_params->_copy_pick_guide->setChecked(false);
+		return;
+	}
 	if (selectobj)
 	{
-		if (copy_mode)
-		{
-			copy_mode = false;
-			copy_guide(&p);
-			brush_params->_copy_pick_guide->setDown(false);
-		}
-		else if (current_params)
+		if (current_params)
 		{
 			auto v = bmphand->work_pt(p);
 			current_params->set_object_value(v);
@@ -405,7 +378,7 @@ void OutlineCorrectionWidget::on_mouse_clicked(Point p)
 
 void OutlineCorrectionWidget::on_mouse_moved(Point p)
 {
-	if (!selectobj)
+	if (!selectobj && !copy_mode)
 	{
 		float const f = get_object_value();
 
@@ -454,9 +427,9 @@ void OutlineCorrectionWidget::on_mouse_moved(Point p)
 
 void OutlineCorrectionWidget::on_mouse_released(Point p)
 {
-	if (selectobj)
+	if (selectobj || copy_mode)
 	{
-		selectobj = false;
+		selectobj = copy_mode = false;
 	}
 	else
 	{
@@ -789,22 +762,6 @@ void OutlineCorrectionWidget::execute_pushed()
 				bmphand->fill_unassignedtissue(handler3D->active_tissuelayer(), tissuenr);
 		}
 	}
-	else if (adapt->isChecked())
-	{
-		dataSelection.allSlices = adapt_params->_all_slices->isChecked();
-		dataSelection.work = false;
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
-
-		if (dataSelection.allSlices)
-		{
-			handler3D->adaptwork2bmp(f);
-		}
-		else
-		{
-			bmphand->adaptwork2bmp(f);
-		}
-	}
 
 	emit end_datachange(this);
 }
@@ -818,7 +775,7 @@ void OutlineCorrectionWidget::copy_pick_pushed()
 {
 	selectobj = true;
 	copy_mode = true;
-	brush_params->_copy_pick_guide->setDown(true);
+	brush_params->_copy_pick_guide->setChecked(true);
 }
 
 void OutlineCorrectionWidget::workbits_changed()
@@ -928,7 +885,7 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(brush_params->_modify->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(adapt->isChecked());
+		dummy = (int)(smooth_tissues->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(add_skin_params->_inside->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -981,7 +938,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 		fread(&dummy, sizeof(int), 1, fp);
 		brush_params->_modify->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		adapt->setChecked(dummy > 0);
+		smooth_tissues->setChecked(dummy > 0); //BL used to be 'adapt'
 		fread(&dummy, sizeof(int), 1, fp);
 		add_skin_params->_inside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
@@ -1008,6 +965,7 @@ float OutlineCorrectionWidget::get_object_value() const
 	return 0.f;
 }
 
+// \note this is maybe a model of how execute callbacks could be implemented in the future, instead of all via code in bmphandler/slicehandler...
 void OutlineCorrectionWidget::smooth_tissues_pushed()
 {
 	size_t start_slice = handler3D->start_slice();

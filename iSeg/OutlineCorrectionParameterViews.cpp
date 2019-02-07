@@ -102,6 +102,7 @@ BrushParamView::BrushParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	_guide_offset->setValue(1);
 	_copy_guide = new QPushButton(QString("Copy"), nullptr);
 	_copy_pick_guide = new QPushButton(QString("Copy Picked"), nullptr);
+	_copy_pick_guide->setCheckable(true);
 
 	// layout
 	auto input_hbox = make_hbox({_target, _tissues});
@@ -404,33 +405,6 @@ FillAllParamView::FillAllParamView(QWidget* parent /*= 0*/) : ParamViewBase(pare
 	layout->addRow(tr("Input image"), input_hbox);
 	layout->addRow(_execute);
 	setLayout(layout);
-}
-
-AdaptParamView::AdaptParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
-{
-	_all_slices = new QCheckBox;
-	_all_slices->setChecked(false);
-
-	_select_object = new QPushButton(tr("Select"));
-	_select_object->setCheckable(true);
-	_object_value = new QLineEdit(QString::number(255));
-	_object_value->setValidator(new QDoubleValidator);
-
-	_execute = new QPushButton(tr("Execute"));
-
-	auto object_hbox = make_hbox({_select_object, _object_value});
-
-	auto layout = new QFormLayout;
-	layout->addRow(tr("Apply to all slices"), _all_slices);
-	layout->addRow(tr("Object value"), object_hbox);
-	layout->addRow(_execute);
-	setLayout(layout);
-}
-
-void AdaptParamView::set_object_value(float v)
-{
-	_object_value->setText(QString::number(v));
-	_select_object->setChecked(false);
 }
 
 SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)

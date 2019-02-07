@@ -213,24 +213,6 @@ public:
 	QPushButton* _execute;
 };
 
-class AdaptParamView : public ParamViewBase
-{
-	Q_OBJECT
-public:
-	AdaptParamView(QWidget* parent = 0);
-
-	float object_value() const override { return _object_value->text().toFloat(); }
-	void set_object_value(float v) override;
-
-	// params
-	QCheckBox* _all_slices;
-
-	QPushButton* _select_object;
-	QLineEdit* _object_value;
-
-	QPushButton* _execute;
-};
-
 class SmoothTissuesParamView : public ParamViewBase
 {
 	Q_OBJECT
