@@ -304,7 +304,6 @@ public:
 	void extract_contours2_xmirrored(int minsize,
 			std::vector<tissues_size_t>& tissuevec,
 			float epsilon);
-	void extract_contours(float f, int minsize, tissues_size_t tissuetype);
 	void extractinterpolatesave_contours(int minsize,
 			std::vector<tissues_size_t>& tissuevec,
 			unsigned short between, bool dp,

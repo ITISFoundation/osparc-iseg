@@ -8417,8 +8417,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line,
 		int minsize)
 {
-	//int w=(int)width;
-	//int h=(int)height;
 	int movpos[4];
 	movpos[0] = 1;
 	movpos[1] = width + 2;
@@ -8428,13 +8426,10 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	int pos = width + 3;
 	int pos1 = 0;
 	int pos2;
-	//int possecond;
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
-	unsigned* tmp_bits =
-			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
-	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-																									(width + 2) * (height + 2));
+	unsigned* tmp_bits = (unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) * (width + 2) * (height + 2));
 
 	unsigned f1 = (unsigned)f;
 
@@ -8455,21 +8450,14 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = unsigned(width + 2) * (height + 1);
-			 i < unsigned(width + 2) * (height + 2); i++)
+	for (unsigned i = unsigned(width + 2) * (height + 1); i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	tmp_bits[1] = tmp_bits[width] =
-			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
-	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-			tmp_bits[unsigned(width + 2) * (height)] =
-					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+	tmp_bits[1] = tmp_bits[width] = tmp_bits[unsigned(width + 2) * (height + 1) + 1] = tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+	tmp_bits[width + 2] = tmp_bits[2 * width + 3] = tmp_bits[unsigned(width + 2) * (height)] = tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -8479,18 +8467,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	{
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
-			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + 1]) && (tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) && (tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + width + 2] == f1 ||
-							tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + width + 2] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -8930,8 +8913,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		std::vector<std::vector<Point>>* inner_line,
 		int minsize, float disttol)
 {
-	//int w=(int)width;
-	//int h=(int)height;
 	int movpos[4];
 	movpos[0] = 1;
 	movpos[1] = width + 2;
@@ -8941,17 +8922,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	int pos = width + 3;
 	int pos1 = 0;
 	int pos2;
-	//int possecond;
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
-	unsigned* tmp_bits =
-			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+	unsigned* tmp_bits = (unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
 	unsigned f1 = (unsigned)f;
-	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-																									(width + 2) * (height + 2));
+	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) * (width + 2) * (height + 2));
 
 	std::vector<Point> vec_pt;
-	//abcd std::vector<unsigned short> vec_meetings;
 	std::vector<unsigned> vec_meetings;
 	float vol;
 
@@ -8969,21 +8946,14 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = unsigned(width + 2) * (height + 1);
-			 i < unsigned(width + 2) * (height + 2); i++)
+	for (unsigned i = unsigned(width + 2) * (height + 1); i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	tmp_bits[1] = tmp_bits[width] =
-			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
-	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-			tmp_bits[unsigned(width + 2) * (height)] =
-					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+	tmp_bits[1] = tmp_bits[width] = tmp_bits[unsigned(width + 2) * (height + 1) + 1] = tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+	tmp_bits[width + 2] = tmp_bits[2 * width + 3] = tmp_bits[unsigned(width + 2) * (height)] = tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -8993,18 +8963,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	{
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
-			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + 1]) && (tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) && (tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + width + 2] == f1 ||
-							tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + width + 2] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -9019,8 +8984,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	Point p2;
 	bool inner;
 	unsigned char casenr;
-
-	//bool firsttime=true;
 
 	while (pos < int(width + 2) * (height + 2))
 	{
