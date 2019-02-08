@@ -8417,8 +8417,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line,
 		int minsize)
 {
-	//int w=(int)width;
-	//int h=(int)height;
 	int movpos[4];
 	movpos[0] = 1;
 	movpos[1] = width + 2;
@@ -8428,13 +8426,10 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	int pos = width + 3;
 	int pos1 = 0;
 	int pos2;
-	//int possecond;
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
-	unsigned* tmp_bits =
-			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
-	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-																									(width + 2) * (height + 2));
+	unsigned* tmp_bits = (unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) * (width + 2) * (height + 2));
 
 	unsigned f1 = (unsigned)f;
 
@@ -8455,21 +8450,14 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = unsigned(width + 2) * (height + 1);
-			 i < unsigned(width + 2) * (height + 2); i++)
+	for (unsigned i = unsigned(width + 2) * (height + 1); i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	tmp_bits[1] = tmp_bits[width] =
-			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
-	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-			tmp_bits[unsigned(width + 2) * (height)] =
-					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+	tmp_bits[1] = tmp_bits[width] = tmp_bits[unsigned(width + 2) * (height + 1) + 1] = tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+	tmp_bits[width + 2] = tmp_bits[2 * width + 3] = tmp_bits[unsigned(width + 2) * (height)] = tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -8479,18 +8467,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	{
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
-			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + 1]) && (tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) && (tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + width + 2] == f1 ||
-							tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + width + 2] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -8930,8 +8913,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 		std::vector<std::vector<Point>>* inner_line,
 		int minsize, float disttol)
 {
-	//int w=(int)width;
-	//int h=(int)height;
 	int movpos[4];
 	movpos[0] = 1;
 	movpos[1] = width + 2;
@@ -8941,17 +8922,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	int pos = width + 3;
 	int pos1 = 0;
 	int pos2;
-	//int possecond;
 
 	unsigned setto = TISSUES_SIZE_MAX + 1;
-	unsigned* tmp_bits =
-			(unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
+	unsigned* tmp_bits = (unsigned*)malloc(sizeof(unsigned) * (width + 2) * (height + 2));
 	unsigned f1 = (unsigned)f;
-	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) *
-																									(width + 2) * (height + 2));
+	unsigned char* nrlines = (unsigned char*)malloc(sizeof(unsigned char) * (width + 2) * (height + 2));
 
 	std::vector<Point> vec_pt;
-	//abcd std::vector<unsigned short> vec_meetings;
 	std::vector<unsigned> vec_meetings;
 	float vol;
 
@@ -8969,21 +8946,14 @@ void bmphandler::get_tissuecontours2_xmirrored(
 
 	for (unsigned i = 0; i < unsigned(width + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = unsigned(width + 2) * (height + 1);
-			 i < unsigned(width + 2) * (height + 2); i++)
+	for (unsigned i = unsigned(width + 2) * (height + 1); i < unsigned(width + 2) * (height + 2); i++)
 		tmp_bits[i] = setto;
-	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2);
-			 i += (width + 2))
+	for (unsigned i = width + 1; i < unsigned(width + 2) * (height + 2); i += (width + 2))
 		tmp_bits[i] = setto;
-	tmp_bits[1] = tmp_bits[width] =
-			tmp_bits[unsigned(width + 2) * (height + 1) + 1] =
-					tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
-	tmp_bits[width + 2] = tmp_bits[2 * width + 3] =
-			tmp_bits[unsigned(width + 2) * (height)] =
-					tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
+	tmp_bits[1] = tmp_bits[width] = tmp_bits[unsigned(width + 2) * (height + 1) + 1] = tmp_bits[unsigned(width + 2) * (height + 2) - 2] = setto + 1;
+	tmp_bits[width + 2] = tmp_bits[2 * width + 3] = tmp_bits[unsigned(width + 2) * (height)] = tmp_bits[unsigned(width + 2) * (height + 1) - 1] = setto + 2;
 
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		nrlines[i] = 0;
@@ -8993,18 +8963,13 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	{
 		for (unsigned short j = 0; j < width + 1; j++)
 		{
-			if ((tmp_bits[pos] != tmp_bits[pos + 1]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + 1]) && (tmp_bits[pos] == f1 || tmp_bits[pos + 1] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) &&
-					(tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
+			if ((tmp_bits[pos] != tmp_bits[pos + width + 2]) && (tmp_bits[pos] == f1 || tmp_bits[pos + width + 2] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + width + 2] == f1 ||
-							tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + width + 2] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + width + 2] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
-			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) &&
-					(tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
+			if ((tmp_bits[pos + 1] != tmp_bits[pos + width + 3]) && (tmp_bits[pos + 1] == f1 || tmp_bits[pos + width + 3] == f1))
 				nrlines[pos]++;
 			pos++;
 		}
@@ -9019,8 +8984,6 @@ void bmphandler::get_tissuecontours2_xmirrored(
 	Point p2;
 	bool inner;
 	unsigned char casenr;
-
-	//bool firsttime=true;
 
 	while (pos < int(width + 2) * (height + 2))
 	{
@@ -15675,293 +15638,6 @@ bool bmphandler::print_vtkbinary_slice(tissuelayers_size_t idx,
 		streamname.write((char*)(tissues), sizeof(tissues_size_t) * area);
 	}
 	return true;
-}
-
-void bmphandler::adaptwork2bmp(float f)
-{
-	std::vector<std::vector<Point>> outerline, innerline;
-	std::vector<std::vector<unsigned>> outerlinenew, innerlinenew;
-	get_contours(f, &outerline, &innerline, 0);
-
-	bool* counterarray = (bool*)malloc(sizeof(bool) * area);
-
-	int n;
-
-	for (unsigned int i = 0; i < area; i++)
-	{
-		work_bits[i] = 0;
-		counterarray[i] = false;
-	}
-
-	ImageForestingTransformLivewire* lw = nullptr;
-	if (!outerline.empty())
-	{
-		lw = livewireinit(outerline[0][0]);
-
-		for (size_t i = 0; i < outerline.size(); i++)
-		{
-			n = (int)outerline[i].size() / 100;
-			if (n < 6)
-				n = 6;
-			if (n % 2 == 1)
-				n++;
-			std::vector<unsigned> newline, newline1, newlinex;
-			if ((int)outerline[i].size() <= n)
-			{
-				newline.resize(outerline[i].size());
-				for (size_t j = 0; j < outerline[i].size(); j++)
-				{
-					newline[j] = outerline[i][j].px +
-											 unsigned(width) * outerline[i][j].py;
-				}
-				outerlinenew.push_back(newline);
-			}
-			else
-			{
-				std::vector<unsigned> pts(2);
-				for (int ni = 0; ni < n; ni += 2)
-				{
-					unsigned p1 =
-							outerline[i][(ni * outerline[i].size()) / n].px +
-							unsigned(width) *
-									outerline[i][(ni * outerline[i].size()) / n].py;
-					if (ni == 0)
-						pts[0] =
-								outerline[i][((n - 1) * outerline[i].size()) / n]
-										.px +
-								outerline[i][((n - 1) * outerline[i].size()) / n]
-												.py *
-										width;
-					else
-						pts[0] =
-								outerline[i][((ni - 1) * outerline[i].size()) / n]
-										.px +
-								outerline[i][((ni - 1) * outerline[i].size()) / n]
-												.py *
-										width;
-					pts[1] =
-							outerline[i][((ni + 1) * outerline[i].size()) / n].px +
-							outerline[i][((ni + 1) * outerline[i].size()) / n].py *
-									width;
-					lw->change_pt(p1, pts);
-					lw->append_path(pts[0], &newline);
-					lw->return_path(pts[1], &newline1);
-					if (newline1.size() > 2)
-						for (size_t j = newline1.size() - 2; j > 0; j--)
-							newline.push_back(newline1[j]);
-				}
-				outerlinenew.push_back(newline);
-			}
-
-			if (newline.size() > 2)
-			{
-				newlinex.resize(newline.size());
-				for (size_t j = 0; j < newline.size(); j++)
-					newlinex[j] = newline[j] % width;
-				bool forward = true;
-
-				if (newlinex[0] != newlinex[newlinex.size() - 1])
-				{
-					forward = newlinex[0] > newlinex[newlinex.size() - 1];
-				}
-				else
-				{
-					bool found = false;
-					size_t j = newline.size() - 1;
-					while (j > 0 && !found)
-					{
-						j--;
-						if (newlinex[j] != newlinex[j + 1])
-						{
-							forward = (newlinex[j + 1] > newlinex[j]);
-							found = true;
-						}
-					}
-				}
-				bool forwardnew = forward;
-
-				for (size_t j = 0; j + 1 < newline.size(); j++)
-				{
-					if (newlinex[j] != newlinex[j + 1])
-					{
-						counterarray[newline[j + 1]] =
-								!counterarray[newline[j + 1]];
-						if ((newlinex[j + 1] > newlinex[j]) != forwardnew)
-						{
-							forwardnew = !forwardnew;
-							counterarray[newline[j]] =
-									!counterarray[newline[j]];
-						}
-					}
-				}
-				if (newlinex[newline.size() - 1] != newlinex[0])
-				{
-					counterarray[newline[0]] = !counterarray[newline[0]];
-					if ((newlinex[0] > newlinex[newline.size() - 1]) !=
-							forwardnew)
-					{
-						forwardnew = !forwardnew;
-						counterarray[newline[newline.size() - 1]] =
-								!counterarray[newline[newline.size() - 1]];
-					}
-				}
-			}
-		}
-	}
-
-	if (!innerline.empty())
-	{
-		if (lw == nullptr)
-			lw = livewireinit(innerline[0][0]);
-
-		for (size_t i = 0; i < innerline.size(); i++)
-		{
-			n = (int)innerline[i].size() / 100;
-			if (n < 6)
-				n = 6;
-			if (n % 2 == 1)
-				n++;
-
-			std::vector<unsigned> newline, newline1, newlinex;
-			if ((int)innerline[i].size() <= n)
-			{
-				newline.resize(innerline[i].size());
-				for (size_t j = 0; j < innerline[i].size(); j++)
-				{
-					newline[j] = innerline[i][j].px +
-											 unsigned(width) * innerline[i][j].py;
-				}
-				innerlinenew.push_back(newline);
-			}
-			else
-			{
-				std::vector<unsigned> pts(2);
-				for (int ni = 0; ni < n; ni += 2)
-				{
-					unsigned p1 =
-							innerline[i][(ni * innerline[i].size()) / n].px +
-							unsigned(width) *
-									innerline[i][(ni * innerline[i].size()) / n].py;
-					if (ni == 0)
-						pts[0] =
-								innerline[i][((n - 1) * innerline[i].size()) / n]
-										.px +
-								innerline[i][((n - 1) * innerline[i].size()) / n]
-												.py *
-										width;
-					else
-						pts[0] =
-								innerline[i][((ni - 1) * innerline[i].size()) / n]
-										.px +
-								innerline[i][((ni - 1) * innerline[i].size()) / n]
-												.py *
-										width;
-					pts[1] =
-							innerline[i][((ni + 1) * innerline[i].size()) / n].px +
-							innerline[i][((ni + 1) * innerline[i].size()) / n].py *
-									width;
-					lw->change_pt(p1, pts);
-					lw->append_path(pts[0], &newline);
-					lw->return_path(pts[1], &newline1);
-					if (newline1.size() > 2)
-						for (size_t j = newline1.size() - 2; j > 0; j--)
-							newline.push_back(newline1[j]);
-				}
-				innerlinenew.push_back(newline);
-			}
-
-			if (newline.size() > 2)
-			{
-				newlinex.resize(newline.size());
-				for (size_t j = 0; j < newline.size(); j++)
-					newlinex[j] = newline[j] % width;
-				bool forward = true;
-				if (newlinex[0] != newlinex[newlinex.size() - 1])
-				{
-					forward = newlinex[0] > newlinex[newlinex.size() - 1];
-				}
-				else
-				{
-					bool found = false;
-					size_t j = newline.size() - 1;
-					for (; j > 0 && !found; --j) // BL: fixed unsequenced modification and access to 'j' [-Wunsequenced]
-					{
-						if (newlinex[j] != newlinex[j - 1])
-						{
-							forward = newlinex[j] > newlinex[j - 1];
-							found = true;
-						}
-					}
-				}
-				bool forwardnew = forward;
-
-				for (size_t j = 0; j + 1 < newline.size(); j++)
-				{
-					if (newlinex[j] != newlinex[j + 1])
-					{
-						counterarray[newline[j + 1]] =
-								!counterarray[newline[j + 1]];
-						if ((newlinex[j + 1] > newlinex[j]) != forwardnew)
-						{
-							forwardnew = !forwardnew;
-							counterarray[newline[j]] =
-									!counterarray[newline[j]];
-						}
-					}
-				}
-				if (newlinex[newline.size() - 1] != newlinex[0])
-				{
-					counterarray[newline[0]] = !counterarray[newline[0]];
-					if ((newlinex[0] > newlinex[newline.size() - 1]) !=
-							forwardnew)
-					{
-						forwardnew = !forwardnew;
-						counterarray[newline[newline.size() - 1]] =
-								!counterarray[newline[newline.size() - 1]];
-					}
-				}
-			}
-		}
-	}
-
-	for (size_t i = 0; i < outerlinenew.size(); i++)
-	{
-		for (size_t j = 0; j < outerlinenew[i].size(); j++)
-		{
-			work_bits[outerlinenew[i][j]] = 255;
-		}
-	}
-
-	for (size_t i = 0; i < innerlinenew.size(); i++)
-	{
-		for (size_t j = 0; j < innerlinenew[i].size(); j++)
-		{
-			work_bits[innerlinenew[i][j]] = 255;
-		}
-	}
-
-	for (unsigned short i = 0; i < width; i++)
-	{
-		bool draw = false;
-		unsigned pos = (unsigned)i;
-		for (unsigned short j = 0; j < width; j++)
-		{
-			if (counterarray[pos])
-				draw = !draw;
-			if (draw)
-				work_bits[pos] = 255;
-			pos += width;
-		}
-	}
-
-	mode2 = 2;
-
-	if (lw != nullptr)
-		delete lw;
-
-	free(counterarray);
-
-	return;
 }
 
 void bmphandler::shifttissue()

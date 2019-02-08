@@ -70,8 +70,8 @@
 #include <qmenubar.h>
 #include <qprogressdialog.h>
 #include <qsettings.h>
-#include <qtooltip.h>
 #include <qtextedit.h>
+#include <qtooltip.h>
 
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
@@ -610,8 +610,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	sb_stride->setValue(1);
 
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
-	lb_inactivewarning->setPaletteForegroundColor(QColor(255, 0, 0));
-	lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
+	lb_inactivewarning->setStyleSheet("QLabel  { color: red; }");
 
 	threshold_widget = new ThresholdWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
@@ -648,7 +647,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	transform_widget = new TransformWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(transform_widget);
 
-	for (auto dir: plugin_search_dirs)
+	for (auto dir : plugin_search_dirs)
 	{
 		bool ok = iseg::plugin::LoadPlugins(dir);
 		if (!ok)
@@ -729,12 +728,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
-		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 	}
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(this->paletteBackgroundColor());
 	}
 
 	QWidget* hbox2w = new QWidget;
@@ -3305,17 +3302,20 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	for (unsigned short i = 0; i < 14; i++)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (i < nrtabbuttons) showtab_action.at(i)->setOn(flag);
+		if (i < nrtabbuttons)
+			showtab_action.at(i)->setOn(flag);
 	}
 	if (loadProjVersion >= 6)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (14 < nrtabbuttons) showtab_action.at(14)->setOn(flag);
+		if (14 < nrtabbuttons)
+			showtab_action.at(14)->setOn(flag);
 	}
 	if (loadProjVersion >= 9)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
-		if (15 < nrtabbuttons) showtab_action.at(15)->setOn(flag);
+		if (15 < nrtabbuttons)
+			showtab_action.at(15)->setOn(flag);
 	}
 	execute_showtabtoggled(flag);
 
@@ -4776,16 +4776,11 @@ void MainWindow::execute_activeslicesconf()
 			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
-		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 	}
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(
-				this->paletteBackgroundColor());
 	}
-
-	return;
 }
 
 void MainWindow::execute_hideparameters(bool checked)
@@ -6286,12 +6281,10 @@ void MainWindow::slice_changed()
 	if (handler3D->start_slice() >= slicenr || handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
-		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 	}
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(this->paletteBackgroundColor());
 	}
 
 	if (xsliceshower != nullptr)
@@ -6353,28 +6346,16 @@ void MainWindow::slices3d_changed(bool new_bitstack)
 			handler3D->end_slice() + 1 <= slicenr)
 	{
 		lb_inactivewarning->setText(QString("   3D Inactive Slice!   "));
-		lb_inactivewarning->setPaletteBackgroundColor(QColor(0, 255, 0));
 	}
 	else
 	{
 		lb_inactivewarning->setText(QString(" "));
-		lb_inactivewarning->setPaletteBackgroundColor(
-				this->paletteBackgroundColor());
 	}
 
 	if (xsliceshower != nullptr)
 		xsliceshower->zpos_changed();
 	if (ysliceshower != nullptr)
 		ysliceshower->zpos_changed();
-
-	if (VV3D != nullptr)
-		VV3D->reload();
-
-	if (VV3Dbmp != nullptr)
-		VV3Dbmp->reload();
-
-	if (surface_viewer != nullptr)
-		surface_viewer->reload();
 
 	qw->init();
 }
@@ -7589,8 +7570,7 @@ void MainWindow::end_undo_helper(iseg::EndUndoAction undoAction)
 	}
 }
 
-void MainWindow::handle_end_datachange(QWidget* sender,
-		iseg::EndUndoAction undoAction)
+void MainWindow::handle_end_datachange(QWidget* sender, iseg::EndUndoAction undoAction)
 {
 	// End undo
 	end_undo_helper(undoAction);
@@ -7607,14 +7587,10 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	// Block changed data signals for visible widget
 	if (sender == methodTab->currentWidget())
 	{
-		QObject::disconnect(this, SIGNAL(bmp_changed()), sender,
-				SLOT(bmp_changed()));
-		QObject::disconnect(this, SIGNAL(work_changed()), sender,
-				SLOT(work_changed()));
-		QObject::disconnect(this, SIGNAL(tissues_changed()), sender,
-				SLOT(tissues_changed()));
-		QObject::disconnect(this, SIGNAL(marks_changed()), sender,
-				SLOT(marks_changed()));
+		QObject::disconnect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
+		QObject::disconnect(this, SIGNAL(work_changed()), sender, SLOT(work_changed()));
+		QObject::disconnect(this, SIGNAL(tissues_changed()), sender, SLOT(tissues_changed()));
+		QObject::disconnect(this, SIGNAL(marks_changed()), sender, SLOT(marks_changed()));
 	}
 
 	// Signal changed data
@@ -7653,12 +7629,9 @@ void MainWindow::handle_end_datachange(QWidget* sender,
 	if (sender == methodTab->currentWidget())
 	{
 		QObject::connect(this, SIGNAL(bmp_changed()), sender, SLOT(bmp_changed()));
-		QObject::connect(this, SIGNAL(work_changed()), sender,
-				SLOT(work_changed()));
-		QObject::connect(this, SIGNAL(tissues_changed()), sender,
-				SLOT(tissues_changed()));
-		QObject::connect(this, SIGNAL(marks_changed()), sender,
-				SLOT(marks_changed()));
+		QObject::connect(this, SIGNAL(work_changed()), sender, SLOT(work_changed()));
+		QObject::connect(this, SIGNAL(tissues_changed()), sender, SLOT(tissues_changed()));
+		QObject::connect(this, SIGNAL(marks_changed()), sender, SLOT(marks_changed()));
 	}
 }
 
@@ -7780,7 +7753,7 @@ void MainWindow::execute_voting_replace_labels()
 	if (sel.size() == 1 && !handler3D->tissue_locks().at(sel.at(0)))
 	{
 		tissues_size_t FG = sel.front();
-		std::array<unsigned int, 3> radius = { 1,1,1 };
+		std::array<unsigned int, 3> radius = {1, 1, 1};
 
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = true;

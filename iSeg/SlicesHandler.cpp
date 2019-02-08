@@ -3621,17 +3621,6 @@ void SlicesHandler::fill_gaps(int minsize, bool connectivity)
 	}
 }
 
-void SlicesHandler::adaptwork2bmp(float f)
-{
-	int const iN = _endslice;
-
-#pragma omp parallel for
-	for (int i = _startslice; i < iN; i++)
-	{
-		_image_slices[i].adaptwork2bmp(f);
-	}
-}
-
 void SlicesHandler::fill_gapstissue(int minsize, bool connectivity)
 {
 	int const iN = _endslice;
@@ -4240,8 +4229,7 @@ void SlicesHandler::extractinterpolatesave_contours2_xmirrored(
 	fclose(fp);
 }
 
-void SlicesHandler::extract_contours(int minsize,
-		std::vector<tissues_size_t>& tissuevec)
+void SlicesHandler::extract_contours(int minsize, std::vector<tissues_size_t>& tissuevec)
 {
 	_os.clear();
 	std::vector<std::vector<Point>> v1, v2;
@@ -4275,96 +4263,50 @@ void SlicesHandler::extract_contours(int minsize,
 	}
 }
 
-void SlicesHandler::extract_contours2_xmirrored(
-		int minsize, std::vector<tissues_size_t>& tissuevec)
+void SlicesHandler::extract_contours2_xmirrored(int minsize, std::vector<tissues_size_t>& tissuevec)
 {
 	_os.clear();
 	std::vector<std::vector<Point>> v1, v2;
-	std::vector<Point_type> vP;
 
-	for (std::vector<tissues_size_t>::iterator it1 = tissuevec.begin();
-			 it1 != tissuevec.end(); it1++)
+	for (auto tissue_label : tissuevec)
 	{
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
 			v1.clear();
 			v2.clear();
-			_image_slices[i]
-					.get_tissuecontours2_xmirrored(_active_tissuelayer, *it1, &v1,
-							&v2, minsize);
-			for (std::vector<std::vector<Point>>::iterator it = v1.begin();
-					 it != v1.end(); it++)
+			_image_slices[i].get_tissuecontours2_xmirrored(_active_tissuelayer, tissue_label, &v1, &v2, minsize);
+			for (auto& line : v1)
 			{
-				//			Pointconvert(*it,vP);
-				//			os.add_line(i,tissuetype,&vP,true);
-				_os.add_line(i, *it1, &(*it), true);
+				_os.add_line(i, tissue_label, &line, true);
 			}
-			for (std::vector<std::vector<Point>>::iterator it = v2.begin();
-					 it != v2.end(); it++)
+			for (auto& line : v2)
 			{
-				//			Pointconvert(*it,vP);
-				//			os.add_line(i,tissuetype,&vP,false);
-				_os.add_line(i, *it1, &(*it), false);
+				_os.add_line(i, tissue_label, &line, false);
 			}
 		}
 	}
 }
 
-void SlicesHandler::extract_contours2_xmirrored(
-		int minsize, std::vector<tissues_size_t>& tissuevec, float epsilon)
+void SlicesHandler::extract_contours2_xmirrored(int minsize, std::vector<tissues_size_t>& tissuevec, float epsilon)
 {
 	_os.clear();
 	std::vector<std::vector<Point>> v1, v2;
-	std::vector<Point_type> vP;
 
-	for (std::vector<tissues_size_t>::iterator it1 = tissuevec.begin();
-			 it1 != tissuevec.end(); it1++)
+	for (auto tissue_label : tissuevec)
 	{
 		for (unsigned short i = 0; i < _nrslices; i++)
 		{
 			v1.clear();
 			v2.clear();
-			_image_slices[i]
-					.get_tissuecontours2_xmirrored(_active_tissuelayer, *it1, &v1,
-							&v2, minsize, epsilon);
-			for (std::vector<std::vector<Point>>::iterator it = v1.begin();
-					 it != v1.end(); it++)
+			_image_slices[i].get_tissuecontours2_xmirrored(_active_tissuelayer, tissue_label, &v1, &v2, minsize, epsilon);
+			for (auto& line : v1)
 			{
-				//			Pointconvert(*it,vP);
-				//			os.add_line(i,tissuetype,&vP,true);
-				_os.add_line(i, *it1, &(*it), true);
+				_os.add_line(i, tissue_label, &line, true);
 			}
-			for (std::vector<std::vector<Point>>::iterator it = v2.begin();
-					 it != v2.end(); it++)
+			for (auto& line : v2)
 			{
-				//			Pointconvert(*it,vP);
-				//			os.add_line(i,tissuetype,&vP,false);
-				_os.add_line(i, *it1, &(*it), false);
+				_os.add_line(i, tissue_label, &line, false);
 			}
-		}
-	}
-}
-
-void SlicesHandler::extract_contours(float f, int minsize,
-		tissues_size_t tissuetype)
-{
-	std::vector<std::vector<Point>> v1, v2;
-	std::vector<Point_type> vP;
-
-	for (unsigned short i = 0; i < _nrslices; i++)
-	{
-		v1.clear();
-		v2.clear();
-		_image_slices[i].get_contours(f, &v1, &v2, minsize);
-		for (std::vector<std::vector<Point>>::iterator it = v1.begin();
-				 it != v1.end(); it++)
-		{
-			_os.add_line(i, tissuetype, &(*it), true);
-		}
-		for (std::vector<std::vector<Point>>::iterator it = v2.begin();
-				 it != v2.end(); it++)
-		{
-			_os.add_line(i, tissuetype, &(*it), false);
 		}
 	}
 }
@@ -5060,8 +5002,6 @@ void SlicesHandler::add2tissueall_connected(tissues_size_t tissuetype, Point p,
 					work[i1] = f;
 		}
 	}
-
-	return;
 }
 
 void SlicesHandler::subtract_tissueall_connected(tissues_size_t tissuetype,

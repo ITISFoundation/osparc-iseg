@@ -69,8 +69,8 @@ std::pair<std::string, std::string> custom_parser(const std::string& s)
 	if (s.find("S4Llink") == 0)
 	{
 		return std::make_pair(std::string("s4l"), std::string());
-	} 
-	else 
+	}
+	else
 	{
 		return std::make_pair(std::string(), std::string());
 	}
@@ -80,38 +80,33 @@ std::pair<std::string, std::string> custom_parser(const std::string& s)
 class vtkCustomOutputWindow : public vtkOutputWindow
 {
 public:
-	static vtkCustomOutputWindow *New();
+	static vtkCustomOutputWindow* New();
 	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream &os, vtkIndent indent) override {}
+	virtual void PrintSelf(ostream& os, vtkIndent indent) override {}
 
 	// Put the text into the output stream.
-	virtual void DisplayText(const char *msg) override { std::cerr << msg << std::endl; }
+	virtual void DisplayText(const char* msg) override { std::cerr << msg << std::endl; }
 
 protected:
 	vtkCustomOutputWindow() {}
 
 private:
-	vtkCustomOutputWindow(const vtkCustomOutputWindow &); // Not implemented.
-	void operator=(const vtkCustomOutputWindow &);				// Not implemented.
+	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
+	void operator=(const vtkCustomOutputWindow&);				 // Not implemented.
 };
 
 vtkStandardNewMacro(vtkCustomOutputWindow);
 
 } // namespace
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	// parse program arguments
 	namespace po = boost::program_options;
 	namespace fs = boost::filesystem;
 
 	po::options_description desc("Allowed options");
-	desc.add_options()
-    	("help", "produce help message")
-    	("input-file,I", po::value< std::string >(), "open iSEG project (*.prj) file")
-    	("s4l", po::value< std::string >(), "start iSEG in S4L link mode")
-    	("plugin-dirs,D", po::value< std::vector<std::string> >(), "additional directories to search for plugins")
-	;
+	desc.add_options()("help", "produce help message")("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")("s4l", po::value<std::string>(), "start iSEG in S4L link mode")("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(custom_parser).run(), vm);
 	po::notify(vm);
@@ -129,7 +124,7 @@ int main(int argc, char **argv)
 		plugin_dirs.insert(plugin_dirs.end(), extra_dirs.begin(), extra_dirs.end());
 	}
 
-	// install vtk error handler to avoid stupid popup windows 
+	// install vtk error handler to avoid stupid popup windows
 	auto eow = vtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
 	eow->Delete();
@@ -222,17 +217,16 @@ int main(int argc, char **argv)
 #endif
 	app.processEvents();
 
-	MainWindow *mainWindow = new MainWindow(
-		&slice_handler, locationpath, picpath, tmpdir,
-		vm.count("s4l"), nullptr, "MainWindow",
-		Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
+	MainWindow* mainWindow = new MainWindow(
+			&slice_handler, locationpath, picpath, tmpdir,
+			vm.count("s4l"), nullptr, "MainWindow",
+			Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	// needed on MacOS, but not WIN32?
 	mainWindow->setStyleSheet(
-		"QWidget { color: white; }"
-		"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
-		//":disabled { color: rgb(128,128,128) }"
-		);
+			"QWidget { color: white; }"
+			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
+			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
 
 	mainWindow->LoadLoadProj(latestprojpath);
 	mainWindow->LoadAtlas(atlasdir);
