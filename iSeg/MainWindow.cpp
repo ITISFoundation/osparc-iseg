@@ -1259,35 +1259,35 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	hidecontrastbright = new QAction("Contr./Bright.", this);
 	hidecontrastbright->setToggleAction(true);
-	hidecontrastbright->setOn(true);
+	hidecontrastbright->setChecked(true);
 	connect(hidecontrastbright, SIGNAL(toggled(bool)), this, SLOT(execute_hidecontrastbright(bool)));
 	hidecontrastbright->addTo(hidemenu);
 	hidesource = new QAction("Source", this);
 	hidesource->setToggleAction(true);
-	hidesource->setOn(true);
+	hidesource->setChecked(true);
 	connect(hidesource, SIGNAL(toggled(bool)), this, SLOT(execute_hidesource(bool)));
 	hidesource->addTo(hidemenu);
 	hidetarget = new QAction("Target", this);
 	hidetarget->setToggleAction(true);
-	hidetarget->setOn(true);
+	hidetarget->setChecked(true);
 	connect(hidetarget, SIGNAL(toggled(bool)), this, SLOT(execute_hidetarget(bool)));
 	hidetarget->addTo(hidemenu);
 	hidecopyswap = new QAction("Copy/Swap", this);
 	hidecopyswap->setToggleAction(true);
-	hidecopyswap->setOn(true);
+	hidecopyswap->setChecked(true);
 	connect(hidecopyswap, SIGNAL(toggled(bool)), this, SLOT(execute_hidecopyswap(bool)));
 	hidecopyswap->addTo(hidemenu);
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
 		showtab_action[i] = new QAction(tabwidgets[i]->GetName().c_str(), this);
 		showtab_action[i]->setToggleAction(true);
-		showtab_action[i]->setOn(showpb_tab[i]);
+		showtab_action[i]->setChecked(showpb_tab[i]);
 		connect(showtab_action[i], SIGNAL(toggled(bool)), this, SLOT(execute_showtabtoggled(bool)));
 		showtab_action[i]->addTo(hidesubmenu);
 	}
 	hideparameters = new QAction("Simplified", this);
 	hideparameters->setToggleAction(true);
-	hideparameters->setOn(WidgetInterface::get_hideparams());
+	hideparameters->setChecked(WidgetInterface::get_hideparams());
 	connect(hideparameters, SIGNAL(toggled(bool)), this, SLOT(execute_hideparameters(bool)));
 	hidesubmenu->insertSeparator();
 	hideparameters->addTo(hidesubmenu);
@@ -3176,22 +3176,22 @@ void MainWindow::SaveSettings()
 	bool flag;
 	flag = WidgetInterface::get_hideparams();
 	fwrite(&flag, 1, sizeof(bool), fp);
-	//	flag=!hidestack->isOn();
+	//	flag=!hidestack->isChecked();
 	flag = false;
 	fwrite(&flag, 1, sizeof(bool), fp);
-	//	flag=!hidenotes->isOn();
+	//	flag=!hidenotes->isChecked();
 	flag = false;
 	fwrite(&flag, 1, sizeof(bool), fp);
-	//	flag=!hidezoom->isOn();
+	//	flag=!hidezoom->isChecked();
 	flag = false;
 	fwrite(&flag, 1, sizeof(bool), fp);
-	flag = !hidecontrastbright->isOn();
+	flag = !hidecontrastbright->isChecked();
 	fwrite(&flag, 1, sizeof(bool), fp);
-	flag = !hidecopyswap->isOn();
+	flag = !hidecopyswap->isChecked();
 	fwrite(&flag, 1, sizeof(bool), fp);
 	for (unsigned short i = 0; i < 16; i++)
 	{
-		flag = (i < showtab_action.size()) ? showtab_action[i]->isOn() : true;
+		flag = (i < showtab_action.size()) ? showtab_action[i]->isChecked() : true;
 		fwrite(&flag, 1, sizeof(bool), fp);
 	}
 	fp = TissueInfos::SaveTissues(fp, saveProjVersion);
@@ -3258,7 +3258,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	bool flag;
 	fread(&flag, sizeof(bool), 1, fp);
 	execute_hideparameters(flag);
-	hideparameters->setOn(flag);
+	hideparameters->setChecked(flag);
 	fread(&flag, sizeof(bool), 1, fp);
 
 	if (loadProjVersion >= 7)
@@ -3272,18 +3272,18 @@ void MainWindow::LoadSettings(const char* loadfilename)
 
 	fread(&flag, sizeof(bool), 1, fp);
 	fread(&flag, sizeof(bool), 1, fp);
-	hidecontrastbright->setOn(!flag);
+	hidecontrastbright->setChecked(!flag);
 	execute_hidecontrastbright(!flag);
 
 	fread(&flag, sizeof(bool), 1, fp);
-	hidecopyswap->setOn(!flag);
+	hidecopyswap->setChecked(!flag);
 	execute_hidecopyswap(!flag);
 
 	// turn visibility on for all
 	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	for (int i = 0; i < nrtabbuttons; i++)
 	{
-		showtab_action[i]->setOn(true);
+		showtab_action[i]->setChecked(true);
 	}
 
 	// load visibility settings from file
@@ -3291,19 +3291,19 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
 		if (i < nrtabbuttons)
-			showtab_action.at(i)->setOn(flag);
+			showtab_action.at(i)->setChecked(flag);
 	}
 	if (loadProjVersion >= 6)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
 		if (14 < nrtabbuttons)
-			showtab_action.at(14)->setOn(flag);
+			showtab_action.at(14)->setChecked(flag);
 	}
 	if (loadProjVersion >= 9)
 	{
 		fread(&flag, sizeof(bool), 1, fp);
 		if (15 < nrtabbuttons)
-			showtab_action.at(15)->setOn(flag);
+			showtab_action.at(15)->setChecked(flag);
 	}
 	execute_showtabtoggled(flag);
 
@@ -4927,7 +4927,7 @@ void MainWindow::execute_showtabtoggled(bool)
 	auto nrtabbuttons = (unsigned short)tabwidgets.size();
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
-		showpb_tab[i] = showtab_action[i]->isOn();
+		showpb_tab[i] = showtab_action[i]->isChecked();
 	}
 
 	WidgetInterface* currentwidget = static_cast<WidgetInterface*>(methodTab->currentWidget());
@@ -4973,8 +4973,8 @@ void MainWindow::execute_xslice()
 			xsliceshower->xyexists_changed(true);
 			ysliceshower->xyexists_changed(true);
 		}
-		bmp_show->set_crosshairyvisible(cb_bmpcrosshairvisible->isOn());
-		work_show->set_crosshairyvisible(cb_workcrosshairvisible->isOn());
+		bmp_show->set_crosshairyvisible(cb_bmpcrosshairvisible->isChecked());
+		work_show->set_crosshairyvisible(cb_workcrosshairvisible->isChecked());
 		xshower_slicechanged();
 		float offset1, factor1;
 		bmp_show->get_scaleoffsetfactor(offset1, factor1);
@@ -5021,8 +5021,8 @@ void MainWindow::execute_yslice()
 			ysliceshower->xyexists_changed(true);
 			xsliceshower->xyexists_changed(true);
 		}
-		bmp_show->set_crosshairxvisible(cb_bmpcrosshairvisible->isOn());
-		work_show->set_crosshairxvisible(cb_workcrosshairvisible->isOn());
+		bmp_show->set_crosshairxvisible(cb_bmpcrosshairvisible->isChecked());
+		work_show->set_crosshairxvisible(cb_workcrosshairvisible->isChecked());
 		yshower_slicechanged();
 		float offset1, factor1;
 		bmp_show->get_scaleoffsetfactor(offset1, factor1);
@@ -5300,7 +5300,7 @@ void MainWindow::add_tissue_clicked(Point p)
 {
 	QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 			SLOT(add_tissue_clicked(Point)));
-	pb_add->setOn(false);
+	pb_add->setChecked(false);
 	QObject::connect(work_show, SIGNAL(mousereleased_sign(Point)), this,
 			SLOT(reconnectmouse_afterrelease(Point)));
 	addhold_tissue_clicked(p);
@@ -5342,7 +5342,7 @@ void MainWindow::subtract_tissue_clicked(Point p)
 {
 	QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 			SLOT(subtract_tissue_clicked(Point)));
-	pb_sub->setOn(false);
+	pb_sub->setChecked(false);
 	QObject::connect(work_show, SIGNAL(mousereleased_sign(Point)), this,
 			SLOT(reconnectmouse_afterrelease(Point)));
 	subtracthold_tissue_clicked(p);
@@ -5377,26 +5377,26 @@ void MainWindow::subtracthold_tissue_clicked(Point p)
 
 void MainWindow::add_tissue_pushed()
 {
-	if (pb_sub->isOn())
+	if (pb_sub->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtract_tissue_clicked(Point)));
-		pb_sub->setOn(false);
+		pb_sub->setChecked(false);
 	}
-	if (pb_subhold->isOn())
+	if (pb_subhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
-		pb_subhold->setOn(false);
+		pb_subhold->setChecked(false);
 	}
-	if (pb_addhold->isOn())
+	if (pb_addhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
-		pb_addhold->setOn(false);
+		pb_addhold->setChecked(false);
 	}
 
-	if (pb_add->isOn())
+	if (pb_add->isChecked())
 	{
 		QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(add_tissue_clicked(Point)));
@@ -5428,26 +5428,26 @@ void MainWindow::addhold_tissue_pushed()
 	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
 	pb_addconn->setDown(false);
 	}*/
-	if (pb_sub->isOn())
+	if (pb_sub->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtract_tissue_clicked(Point)));
-		pb_sub->setOn(false);
+		pb_sub->setChecked(false);
 	}
-	if (pb_subhold->isOn())
+	if (pb_subhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
-		pb_subhold->setOn(false);
+		pb_subhold->setChecked(false);
 	}
-	if (pb_add->isOn())
+	if (pb_add->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(add_tissue_clicked(Point)));
-		pb_add->setOn(false);
+		pb_add->setChecked(false);
 	}
 
-	if (pb_addhold->isOn())
+	if (pb_addhold->isChecked())
 	{
 		QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
@@ -5488,13 +5488,13 @@ void MainWindow::addhold_tissue_pushed()
 
 void MainWindow::subtract_tissue_pushed()
 {
-	if (pb_add->isOn())
+	if (pb_add->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(add_tissue_clicked(Point)));
-		pb_add->setOn(false);
+		pb_add->setChecked(false);
 	}
-	if (pb_sub->isOn())
+	if (pb_sub->isChecked())
 	{
 		QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtract_tissue_clicked(Point)));
@@ -5506,19 +5506,19 @@ void MainWindow::subtract_tissue_pushed()
 				SLOT(subtract_tissue_clicked(Point)));
 		connect_mouseclick();
 	}
-	if (pb_subhold->isOn())
+	if (pb_subhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
 		//		pb_subhold->setDown(false);
-		pb_subhold->setOn(false);
+		pb_subhold->setChecked(false);
 	}
-	if (pb_addhold->isOn())
+	if (pb_addhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
-		//		pb_addhold->setOn(false);
-		pb_addhold->setOn(false);
+		//		pb_addhold->setChecked(false);
+		pb_addhold->setChecked(false);
 	}
 	//	pb_sub->setDown(!pb_sub->isDown());
 	/*	if(pb_addconn->isDown()){
@@ -5533,13 +5533,13 @@ void MainWindow::subtract_tissue_pushed()
 
 void MainWindow::subtracthold_tissue_pushed()
 {
-	if (pb_add->isOn())
+	if (pb_add->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(add_tissue_clicked(Point)));
-		pb_add->setOn(false);
+		pb_add->setChecked(false);
 	}
-	if (pb_subhold->isOn())
+	if (pb_subhold->isChecked())
 	{
 		QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
@@ -5551,17 +5551,17 @@ void MainWindow::subtracthold_tissue_pushed()
 				SLOT(subtracthold_tissue_clicked(Point)));
 		connect_mouseclick();
 	}
-	if (pb_sub->isOn())
+	if (pb_sub->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtract_tissue_clicked(Point)));
-		pb_sub->setOn(false);
+		pb_sub->setChecked(false);
 	}
-	if (pb_addhold->isOn())
+	if (pb_addhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
-		pb_addhold->setOn(false);
+		pb_addhold->setChecked(false);
 	}
 	//	pb_subhold->setDown(!pb_subhold->isDown());
 	/*	if(pb_addconn->isDown()){
@@ -5582,11 +5582,11 @@ void MainWindow::stophold_tissue_pushed()
 				SLOT(add_tissue_clicked(Point)));
 		pb_add->setDown(false);
 	}
-	if (pb_subhold->isOn())
+	if (pb_subhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
-		pb_subhold->setOn(false);
+		pb_subhold->setChecked(false);
 	}
 	if (pb_sub->isDown())
 	{
@@ -5594,11 +5594,11 @@ void MainWindow::stophold_tissue_pushed()
 				SLOT(subtract_tissue_clicked(Point)));
 		pb_sub->setDown(false);
 	}
-	if (pb_addhold->isOn())
+	if (pb_addhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
-		pb_addhold->setOn(false);
+		pb_addhold->setChecked(false);
 	}
 }
 
@@ -5772,7 +5772,7 @@ void MainWindow::newFolderPressed()
 
 void MainWindow::lockAllTissues()
 {
-	bool lockstate = lockTissues->isOn();
+	bool lockstate = lockTissues->isChecked();
 	cb_tissuelock->setChecked(lockstate);
 	TissueInfos::SetTissuesLocked(lockstate);
 	tissueTreeWidget->update_folder_icons();
@@ -6570,7 +6570,7 @@ void MainWindow::tissuelock_toggled()
 	tissueTreeWidget->update_folder_icons();
 
 	if (!cb_tissuelock->isChecked())
-		lockTissues->setOn(false);
+		lockTissues->setChecked(false);
 }
 
 void MainWindow::execute_undo()
@@ -7035,18 +7035,18 @@ void MainWindow::updateMethodButtonsPressed(WidgetInterface* qw)
 	for (unsigned short i = 0; i < (counter + 1) / 2; i++, counter1++)
 	{
 		if (counter1 == pos)
-			pb_tab[i]->setOn(true);
+			pb_tab[i]->setChecked(true);
 		else
-			pb_tab[i]->setOn(false);
+			pb_tab[i]->setChecked(false);
 	}
 
 	for (unsigned short i = (nrtabbuttons + 1) / 2; counter1 < counter;
 			 i++, counter1++)
 	{
 		if (counter1 == pos)
-			pb_tab[i]->setOn(true);
+			pb_tab[i]->setChecked(true);
 		else
-			pb_tab[i]->setOn(false);
+			pb_tab[i]->setChecked(false);
 	}
 }
 
@@ -7226,7 +7226,7 @@ void MainWindow::pb_tab_pressed(int nr)
 	unsigned short tabnr = nr + 1;
 	for (unsigned short tabnr1 = 0; tabnr1 < pb_tab.size(); tabnr1++)
 	{
-		pb_tab[tabnr1]->setOn(tabnr == tabnr1 + 1);
+		pb_tab[tabnr1]->setChecked(tabnr == tabnr1 + 1);
 	}
 	unsigned short pos1 = 0;
 	for (unsigned short i = 0; i < nrtabbuttons; i++)

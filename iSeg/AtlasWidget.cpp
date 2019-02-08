@@ -291,17 +291,17 @@ void AtlasWidget::sl_transp_changed()
 void AtlasWidget::xyz_changed()
 {
 	scb_slicenr->setValue(0);
-	if (rb_x->isOn())
+	if (rb_x->isChecked())
 	{
 		scb_slicenr->setMaxValue(dimx - 1);
 		atlasViewer->orient_changed(0);
 	}
-	else if (rb_y->isOn())
+	else if (rb_y->isChecked())
 	{
 		scb_slicenr->setMaxValue(dimy - 1);
 		atlasViewer->orient_changed(1);
 	}
-	else if (rb_z->isOn())
+	else if (rb_z->isChecked())
 	{
 		scb_slicenr->setMaxValue(dimz - 1);
 		atlasViewer->orient_changed(2);

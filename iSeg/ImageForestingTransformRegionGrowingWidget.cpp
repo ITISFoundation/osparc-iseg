@@ -189,7 +189,7 @@ void ImageForestingTransformRegionGrowingWidget::on_tissuenr_changed(int i)
 void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
 {
 	last_pt = p;
-	if (pushremove->isOn())
+	if (pushremove->isChecked())
 	{
 		removemarks(p);
 	}
@@ -197,7 +197,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_clicked(Point p)
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 {
-	if (!pushremove->isOn())
+	if (!pushremove->isChecked())
 	{
 		addLine(&vmdyn, last_pt, p);
 		last_pt = p;
@@ -207,7 +207,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_moved(Point p)
 
 void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 {
-	if (!pushremove->isOn())
+	if (!pushremove->isChecked())
 	{
 		addLine(&vmdyn, last_pt, p);
 		Mark m;
@@ -241,7 +241,7 @@ void ImageForestingTransformRegionGrowingWidget::on_mouse_released(Point p)
 	}
 	else
 	{
-		pushremove->setOn(false);
+		pushremove->setChecked(false);
 	}
 }
 

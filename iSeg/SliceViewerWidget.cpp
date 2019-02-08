@@ -558,7 +558,7 @@ int SliceViewerWidget::get_slicenr() { return qsb_slicenr->value() - 1; }
 
 void SliceViewerWidget::bmp_changed()
 {
-	if (rb_bmp->isOn())
+	if (rb_bmp->isChecked())
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
@@ -583,7 +583,7 @@ void SliceViewerWidget::bmp_changed()
 
 void SliceViewerWidget::work_changed()
 {
-	if (rb_work->isOn())
+	if (rb_work->isChecked())
 	{
 		unsigned short nrslicesnew;
 		if (directionx)
@@ -615,7 +615,7 @@ void SliceViewerWidget::tissuevisible_changed()
 
 void SliceViewerWidget::workorbmp_changed()
 {
-	if (rb_bmp->isOn())
+	if (rb_bmp->isChecked())
 	{
 		shower->set_bmporwork(true);
 	}

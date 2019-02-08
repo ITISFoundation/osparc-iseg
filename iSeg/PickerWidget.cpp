@@ -153,13 +153,13 @@ FILE* PickerWidget::SaveParams(FILE* fp, int version)
 	if (version >= 6)
 	{
 		int dummy;
-		dummy = (int)(rb_work->isOn());
+		dummy = (int)(rb_work->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_tissue->isOn());
+		dummy = (int)(rb_tissue->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_erase->isOn());
+		dummy = (int)(rb_erase->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fill->isOn());
+		dummy = (int)(rb_fill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -202,7 +202,7 @@ void PickerWidget::on_mouse_clicked(Point p)
 		}
 	}
 	bool addorsub = !(currentselection[p.px + (unsigned long)(p.py) * width]);
-	if (rb_work->isOn())
+	if (rb_work->isChecked())
 		bmphand->change2mask_connectedwork(currentselection, p, addorsub);
 	else
 		bmphand->change2mask_connectedtissue(
@@ -292,7 +292,7 @@ void PickerWidget::cleanup()
 
 void PickerWidget::update_active()
 {
-	if (hasclipboard && (rb_work->isOn() == clipboardworkortissue))
+	if (hasclipboard && (rb_work->isChecked() == clipboardworkortissue))
 	{
 		pb_paste->show();
 	}
@@ -309,7 +309,7 @@ void PickerWidget::copy_pressed()
 	{
 		mask[i] = currentselection[i];
 	}
-	clipboardworkortissue = rb_work->isOn();
+	clipboardworkortissue = rb_work->isChecked();
 	if (clipboardworkortissue)
 	{
 		bmphand->copy_work(valuedistrib);
@@ -336,7 +336,7 @@ void PickerWidget::cut_pressed()
 
 void PickerWidget::paste_pressed()
 {
-	if (clipboardworkortissue != rb_work->isOn())
+	if (clipboardworkortissue != rb_work->isChecked())
 		return;
 	unsigned int area = bmphand->return_area();
 
@@ -369,20 +369,20 @@ void PickerWidget::delete_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = rb_work->isOn();
-	dataSelection.tissues = !rb_work->isOn();
+	dataSelection.work = rb_work->isChecked();
+	dataSelection.tissues = !rb_work->isChecked();
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_work->isOn())
+	if (rb_work->isChecked())
 	{
-		if (rb_erase->isOn())
+		if (rb_erase->isChecked())
 			bmphand->erasework(currentselection);
 		else
 			bmphand->floodwork(currentselection);
 	}
 	else
 	{
-		if (rb_erase->isOn())
+		if (rb_erase->isChecked())
 			bmphand->erasetissue(handler3D->active_tissuelayer(),
 					currentselection);
 		else

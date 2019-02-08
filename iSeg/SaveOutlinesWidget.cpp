@@ -144,7 +144,7 @@ SaveOutlinesWidget::~SaveOutlinesWidget()
 
 void SaveOutlinesWidget::mode_changed()
 {
-	if (rb_line->isOn())
+	if (rb_line->isChecked())
 	{
 		rb_dougpeuck->setText("Doug-Peucker");
 		lb_f1->setText("Max. Dist.: 0 ");
@@ -197,17 +197,17 @@ void SaveOutlinesWidget::mode_changed()
 
 void SaveOutlinesWidget::simplif_changed()
 {
-	if (rb_none->isOn())
+	if (rb_none->isChecked())
 	{
 		hbox4->hide();
 		hbox7->hide();
 	}
-	else if (rb_dougpeuck->isOn())
+	else if (rb_dougpeuck->isChecked())
 	{
 		hbox4->hide();
 		hbox7->show();
 	}
-	else if (rb_dist->isOn())
+	else if (rb_dist->isChecked())
 	{
 		hbox4->show();
 		hbox7->hide();
@@ -217,7 +217,7 @@ void SaveOutlinesWidget::simplif_changed()
 void SaveOutlinesWidget::file_pushed()
 {
 	QString loadfilename;
-	if (rb_triang->isOn())
+	if (rb_triang->isChecked())
 		loadfilename = QFileDialog::getSaveFileName(
 			QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
 	else
@@ -250,7 +250,7 @@ void SaveOutlinesWidget::save_pushed()
 	if (!(le_file->text()).isEmpty())
 	{
 		QString loadfilename = le_file->text();
-		if (rb_triang->isOn())
+		if (rb_triang->isChecked())
 		{
 			ISEG_INFO_MSG("triangulating...");
 			// If no extension given, add a default one
@@ -304,18 +304,18 @@ void SaveOutlinesWidget::save_pushed()
 				Pair pair1 = handler3D->get_pixelsize();
 				handler3D->set_pixelsize(pair1.high / 2, pair1.low / 2);
 				//				handler3D->extract_contours2(sb_minsize->value(), vtissues);
-				if (rb_dougpeuck->isOn())
+				if (rb_dougpeuck->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(
 						sb_minsize->value(), vtissues, sl_f->value() * 0.05f);
 					//					handler3D->dougpeuck_line(sl_f->value()*0.05f*2);
 				}
-				else if (rb_dist->isOn())
+				else if (rb_dist->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
 														   vtissues);
 				}
-				else if (rb_none->isOn())
+				else if (rb_none->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
 														   vtissues);
@@ -365,7 +365,7 @@ void SaveOutlinesWidget::save_pushed()
 			{
 				handler3D->extractinterpolatesave_contours2_xmirrored(
 					sb_minsize->value(), vtissues, sb_between->value(),
-					rb_dougpeuck->isOn(), sl_f->value() * 0.05f,
+					rb_dougpeuck->isChecked(), sl_f->value() * 0.05f,
 					loadfilename.ascii());
 			}
 		}

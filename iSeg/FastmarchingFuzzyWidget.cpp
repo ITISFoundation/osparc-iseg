@@ -295,7 +295,7 @@ void FastmarchingFuzzyWidget::getrange()
 
 void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 {
-	if (rb_fastmarch->isOn())
+	if (rb_fastmarch->isChecked())
 	{
 		if (IFTmarch != nullptr)
 			delete IFTmarch;
@@ -324,7 +324,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 		map = IFTfuzzy->return_pf();
 	}
 
-	if (rb_slider->isOn())
+	if (rb_slider->isChecked())
 	{
 		getrange();
 		if (extend > extendmax)
@@ -346,7 +346,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 
 void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
 		vpdyn_arg.clear();
 		emit vpdyn_changed(&vpdyn_arg);
@@ -368,7 +368,7 @@ void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 
 void FastmarchingFuzzyWidget::on_mouse_moved(Point p)
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
 		vpdyn_arg.clear();
 		unsigned short width = bmphand->return_width();
@@ -497,7 +497,7 @@ void FastmarchingFuzzyWidget::execute()
 void FastmarchingFuzzyWidget::slextend_changed(int val)
 {
 	extend = val * 0.005f * extendmax;
-	if (rb_slider->isOn())
+	if (rb_slider->isChecked())
 		execute();
 
 	return;
@@ -512,7 +512,7 @@ void FastmarchingFuzzyWidget::bmp_changed()
 
 void FastmarchingFuzzyWidget::method_changed()
 {
-	if (rb_fastmarch->isOn())
+	if (rb_fastmarch->isChecked())
 	{
 		if (hideparams)
 		{
@@ -539,7 +539,7 @@ void FastmarchingFuzzyWidget::method_changed()
 
 void FastmarchingFuzzyWidget::interact_changed()
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
 		if (hideparams)
 			hbox7->hide();
@@ -616,7 +616,7 @@ void FastmarchingFuzzyWidget::slider_changed()
 	s1 = sl_s1->value() * 0.01f * sb_s1->value();
 	s2 = sl_s2->value() * 0.01f * sb_s2->value();
 
-	if (rb_fastmarch->isOn() && IFTmarch != nullptr)
+	if (rb_fastmarch->isChecked() && IFTmarch != nullptr)
 	{
 		delete IFTmarch;
 		IFTmarch = nullptr;
@@ -662,13 +662,13 @@ FILE* FastmarchingFuzzyWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sb_s2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fastmarch->isOn());
+		dummy = (int)(rb_fastmarch->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fuzzy->isOn());
+		dummy = (int)(rb_fuzzy->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_drag->isOn());
+		dummy = (int)(rb_drag->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_slider->isOn());
+		dummy = (int)(rb_slider->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
 		fwrite(&sigma, 1, sizeof(float), fp);

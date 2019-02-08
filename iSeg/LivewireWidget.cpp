@@ -141,7 +141,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 {
 	if (!drawing)
 	{
-		if (autotrace->isOn())
+		if (autotrace->isChecked())
 		{
 			if (lw == nullptr)
 			{
@@ -170,7 +170,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 	}
 	else
 	{
-		if (straight->isOn())
+		if (straight->isChecked())
 		{
 			addLine(&established, p1, p);
 			dynamic.clear();
@@ -203,15 +203,15 @@ void LivewireWidget::on_mouse_clicked(Point p)
 
 void LivewireWidget::pt_doubleclicked(Point p)
 {
-	if (drawing && !freedraw->isOn())
+	if (drawing && !freedraw->isChecked())
 	{
 		clicks.push_back(p);
-		if (straight->isOn())
+		if (straight->isChecked())
 		{
 			addLine(&established, p1, p);
 			addLine(&established, p2, p);
 		}
-		else if (autotrace->isOn())
+		else if (autotrace->isChecked())
 		{
 			lw->return_path(p, &dynamic);
 			established.insert(established.end(), dynamic.begin(),
@@ -257,7 +257,7 @@ void LivewireWidget::pt_midclicked(Point p)
 		}
 		else
 		{
-			if (straight->isOn())
+			if (straight->isChecked())
 			{
 				established.clear();
 				dynamic.clear();
@@ -278,7 +278,7 @@ void LivewireWidget::pt_midclicked(Point p)
 					addLine(&dynamic, p2, p);
 				emit vp1dyn_changed(&established, &dynamic);
 			}
-			else if (autotrace->isOn())
+			else if (autotrace->isChecked())
 			{
 				dynamic.clear();
 				clicks.pop_back();
@@ -335,7 +335,7 @@ void LivewireWidget::pt_doubleclickedmid(Point p)
 
 void LivewireWidget::on_mouse_released(Point p)
 {
-	if (freedraw->isOn() && drawing)
+	if (freedraw->isChecked() && drawing)
 	{
 		clicks.push_back(p);
 		addLine(&dynamic, p1, p);
@@ -366,7 +366,7 @@ void LivewireWidget::on_mouse_moved(Point p)
 {
 	if (drawing)
 	{
-		if (freedraw->isOn())
+		if (freedraw->isChecked())
 		{
 			dynamic1.clear();
 			addLine(&dynamic, p1, p);
@@ -376,7 +376,7 @@ void LivewireWidget::on_mouse_moved(Point p)
 			p1 = p;
 			clicks.push_back(p);
 		}
-		else if (straight->isOn())
+		else if (straight->isChecked())
 		{
 			dynamic.clear();
 			addLine(&dynamic, p1, p);
@@ -612,7 +612,7 @@ void LivewireWidget::bmphand_changed(bmphandler* bmph)
 
 void LivewireWidget::mode_changed()
 {
-	if (autotrace->isOn())
+	if (autotrace->isChecked())
 	{
 		hbox2->show();
 	}
@@ -621,7 +621,7 @@ void LivewireWidget::mode_changed()
 		hbox2->hide();
 	}
 
-	if (freedraw->isOn())
+	if (freedraw->isChecked())
 	{
 		hbox3->hide();
 	}
@@ -662,15 +662,15 @@ FILE* LivewireWidget::SaveParams(FILE* fp, int version)
 		int dummy;
 		dummy = sb_freezing->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)autotrace->isOn();
+		dummy = (int)autotrace->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)straight->isOn();
+		dummy = (int)straight->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)freedraw->isOn();
+		dummy = (int)freedraw->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_freezing->isOn());
+		dummy = (int)(cb_freezing->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_closing->isOn());
+		dummy = (int)(cb_closing->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 

@@ -155,19 +155,19 @@ FILE* MeasurementWidget::SaveParams(FILE* fp, int version)
 	if (version >= 4)
 	{
 		int dummy;
-		dummy = (int)(rb_vector->isOn());
+		dummy = (int)(rb_vector->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_dist->isOn());
+		dummy = (int)(rb_dist->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_angle->isOn());
+		dummy = (int)(rb_angle->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_4ptangle->isOn());
+		dummy = (int)(rb_4ptangle->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_vol->isOn());
+		dummy = (int)(rb_vol->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_pts->isOn());
+		dummy = (int)(rb_pts->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_lbls->isOn());
+		dummy = (int)(rb_lbls->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -215,9 +215,9 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 
 void MeasurementWidget::on_mouse_clicked(Point p)
 {
-	if (rb_pts->isOn())
+	if (rb_pts->isChecked())
 	{
-		if (rb_vector->isOn())
+		if (rb_vector->isChecked())
 		{
 			if (state == 0)
 			{
@@ -245,7 +245,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 						QString(") mm (Mark new start point.)"));
 			}
 		}
-		else if (rb_dist->isOn())
+		else if (rb_dist->isChecked())
 		{
 			if (state == 0)
 			{
@@ -270,7 +270,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 															 QString(" mm (Mark new start point.)"));
 			}
 		}
-		else if (rb_thick->isOn())
+		else if (rb_thick->isChecked())
 		{
 			if (state == 0)
 			{
@@ -295,7 +295,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 															 QString(" mm Mark new start point.)"));
 			}
 		}
-		else if (rb_angle->isOn())
+		else if (rb_angle->isChecked())
 		{
 			if (state == 0)
 			{
@@ -330,7 +330,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 															 QString(" deg (Mark new first point.)"));
 			}
 		}
-		else if (rb_4ptangle->isOn())
+		else if (rb_4ptangle->isChecked())
 		{
 			if (state == 0)
 			{
@@ -377,7 +377,7 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 															 QString(" deg (Mark new first point.)"));
 			}
 		}
-		else if (rb_vol->isOn())
+		else if (rb_vol->isChecked())
 		{
 			state = 0;
 			established.clear();
@@ -407,9 +407,9 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
 	}
-	else if (rb_lbls->isOn())
+	else if (rb_lbls->isChecked())
 	{
-		if (rb_vol->isOn())
+		if (rb_vol->isChecked())
 		{
 			state = 0;
 			established.clear();
@@ -461,13 +461,13 @@ void MeasurementWidget::set_coord(unsigned short posit, Point p,
 
 void MeasurementWidget::cbb_changed(int)
 {
-	if (rb_lbls->isOn() && !rb_vol->isOn())
+	if (rb_lbls->isChecked() && !rb_vol->isChecked())
 	{
 		state = 0;
 		drawing = false;
 		dynamic.clear();
 		established.clear();
-		if (rb_dist->isOn())
+		if (rb_dist->isChecked())
 		{
 			Point pc;
 			pc.px = (short)handler3D->width() / 2;
@@ -485,7 +485,7 @@ void MeasurementWidget::cbb_changed(int)
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
 														 QString(" mm"));
 		}
-		else if (rb_thick->isOn())
+		else if (rb_thick->isChecked())
 		{
 			Point pc;
 			pc.px = (short)handler3D->width() / 2;
@@ -503,7 +503,7 @@ void MeasurementWidget::cbb_changed(int)
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
 														 QString(" mm"));
 		}
-		else if (rb_vector->isOn())
+		else if (rb_vector->isChecked())
 		{
 			Point pc;
 			pc.px = (short)handler3D->width() / 2;
@@ -524,7 +524,7 @@ void MeasurementWidget::cbb_changed(int)
 					QString(",") + QString::number(calculatevec(2), 'g', 3) +
 					QString(") mm (Mark new start point.)"));
 		}
-		else if (rb_angle->isOn())
+		else if (rb_angle->isChecked())
 		{
 			Point pc;
 			pc.px = (short)handler3D->width() / 2;
@@ -547,7 +547,7 @@ void MeasurementWidget::cbb_changed(int)
 			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
 														 QString(" deg"));
 		}
-		else if (rb_4ptangle->isOn())
+		else if (rb_4ptangle->isChecked())
 		{
 			Point pc;
 			pc.px = (short)handler3D->width() / 2;
@@ -600,7 +600,7 @@ void MeasurementWidget::update_visualization()
 		hbox2->show();
 	}
 
-	if (rb_pts->isOn())
+	if (rb_pts->isChecked())
 	{
 		state = 0;
 		drawing = false;
@@ -610,33 +610,33 @@ void MeasurementWidget::update_visualization()
 		emit vp1dyn_changed(&established, &dynamic);
 		hbox3->hide();
 		hbox4->hide();
-		if (rb_dist->isOn() || rb_thick->isOn() || rb_vector->isOn())
+		if (rb_dist->isChecked() || rb_thick->isChecked() || rb_vector->isChecked())
 		{
 			txt_displayer->setText("Mark start point.");
 		}
-		else if (rb_angle->isOn())
+		else if (rb_angle->isChecked())
 		{
 			txt_displayer->setText("Mark first point.");
 		}
-		else if (rb_4ptangle->isOn())
+		else if (rb_4ptangle->isChecked())
 		{
 			txt_displayer->setText("Mark first point.");
 		}
-		else if (rb_vol->isOn())
+		else if (rb_vol->isChecked())
 		{
 			hbox2->hide();
 			txt_displayer->setText("Select object.");
 		}
 	}
-	else if (rb_lbls->isOn())
+	else if (rb_lbls->isChecked())
 	{
-		if (rb_dist->isOn() || rb_thick->isOn() || rb_vector->isOn())
+		if (rb_dist->isChecked() || rb_thick->isChecked() || rb_vector->isChecked())
 		{
 			hbox3->show();
 			hbox4->hide();
 			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" mm"));
 		}
-		else if (rb_angle->isOn())
+		else if (rb_angle->isChecked())
 		{
 			hbox3->show();
 			hbox4->show();
@@ -645,7 +645,7 @@ void MeasurementWidget::update_visualization()
 			txt_ccb4->hide();
 			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" deg"));
 		}
-		else if (rb_4ptangle->isOn())
+		else if (rb_4ptangle->isChecked())
 		{
 			hbox3->show();
 			hbox4->show();
@@ -654,7 +654,7 @@ void MeasurementWidget::update_visualization()
 			txt_ccb4->show();
 			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" deg"));
 		}
-		else if (rb_vol->isOn())
+		else if (rb_vol->isChecked())
 		{
 			hbox2->hide();
 			hbox3->hide();
@@ -715,7 +715,7 @@ float MeasurementWidget::calculate()
 	Pair p1 = handler3D->get_pixelsize();
 
 	float value = 0;
-	if (rb_lbls->isOn())
+	if (rb_lbls->isChecked())
 	{
 		//float thick=handler3D->get_slicethickness();
 		//Pair p1=handler3D->get_pixelsize();
@@ -769,14 +769,14 @@ float MeasurementWidget::calculate()
 		}
 	}
 
-	if (rb_dist->isOn())
+	if (rb_dist->isChecked())
 	{
 		value = sqrt(
 				(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
 				(pt[0][1] - pt[1][1]) * (pt[0][1] - pt[1][1]) * p1.low * p1.low +
 				(pt[0][2] - pt[1][2]) * (pt[0][2] - pt[1][2]) * thick * thick);
 	}
-	else if (rb_thick->isOn())
+	else if (rb_thick->isChecked())
 	{
 		int xDist = abs(pt[0][0] - pt[1][0]);
 		if (xDist != 0)
@@ -793,7 +793,7 @@ float MeasurementWidget::calculate()
 								 (yDist) * (yDist)*p1.low * p1.low +
 								 (zDist) * (zDist)*thick * thick);
 	}
-	else if (rb_angle->isOn())
+	else if (rb_angle->isChecked())
 	{
 		float l1square =
 				(pt[0][0] - pt[1][0]) * (pt[0][0] - pt[1][0]) * p1.high * p1.high +
@@ -813,7 +813,7 @@ float MeasurementWidget::calculate()
 									 sqrt(l1square * l2square)) *
 							180 / 3.141592f;
 	}
-	else if (rb_4ptangle->isOn())
+	else if (rb_4ptangle->isChecked())
 	{
 		float d1[3];
 		float d2[3];
@@ -850,7 +850,7 @@ float MeasurementWidget::calculatevec(unsigned short orient)
 	Pair p1 = handler3D->get_pixelsize();
 
 	float value = 0;
-	if (rb_lbls->isOn())
+	if (rb_lbls->isChecked())
 	{
 		//float thick=handler3D->get_slicethickness();
 		//Pair p1=handler3D->get_pixelsize();
