@@ -9,29 +9,18 @@
  */
 #pragma once
 
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
+#include "Data/Vec3.h"
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3hbox.h>
-#include <q3mimefactory.h>
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlistwidget.h>
-#include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
-
+class QButtonGroup;
+class QRadioButton;
 class QStackedLayout;
 
 namespace iseg {
 
+class SlicesHandler;
+class bmphandler;
 class ParamViewBase;
 class OLCorrParamView;
 class BrushParamView;

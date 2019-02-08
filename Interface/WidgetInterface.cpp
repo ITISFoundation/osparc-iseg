@@ -9,6 +9,8 @@
  */
 #include "WidgetInterface.h"
 
+#include <QCursor>
+
 namespace iseg {
 
 bool WidgetInterface::hideparams = false;

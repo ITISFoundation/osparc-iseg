@@ -16,10 +16,11 @@
 #include "Data/DataSelection.h"
 #include "Data/Mark.h"
 
-#include <qcursor.h>
-#include <qdir.h>
-#include <qicon.h>
-#include <qwidget.h>
+#include <QDir>
+#include <QIcon>
+#include <QWidget>
+
+class QCursor;
 
 namespace iseg {
 
