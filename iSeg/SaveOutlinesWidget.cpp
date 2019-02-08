@@ -16,7 +16,7 @@
 
 #include <qfiledialog.h>
 #include <q3hbox.h>
-#include <q3listbox.h>
+#include <qlistwidget.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>
@@ -37,12 +37,12 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
-	lbo_tissues = new Q3ListBox(vbox1);
+	lbo_tissues = new QListWidget(vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)
 	{
-		lbo_tissues->insertItem(ToQ(TissueInfos::GetTissueName(i)));
+		lbo_tissues->addItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
-	lbo_tissues->setMultiSelection(true);
+	lbo_tissues->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	hbox2 = new Q3HBox(vbox1);
 	hbox1 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
@@ -128,16 +128,11 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	QObject::connect(pb_file, SIGNAL(clicked()), this, SLOT(file_pushed()));
 	QObject::connect(pb_exec, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this,
-					 SLOT(mode_changed()));
-	QObject::connect(cb_extrusion, SIGNAL(clicked()), this,
-					 SLOT(mode_changed()));
-	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this,
-					 SLOT(simplif_changed()));
+	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
+	QObject::connect(cb_extrusion, SIGNAL(clicked()), this, SLOT(mode_changed()));
+	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this, SLOT(simplif_changed()));
 
 	mode_changed();
-
-	return;
 }
 
 SaveOutlinesWidget::~SaveOutlinesWidget()
@@ -238,7 +233,7 @@ void SaveOutlinesWidget::save_pushed()
 	vector<tissues_size_t> vtissues;
 	for (tissues_size_t i = 0; i < TissueInfos::GetTissueCount(); i++)
 	{
-		if (lbo_tissues->isSelected((int)i))
+		if (lbo_tissues->item((int)i)->isSelected())
 		{
 			vtissues.push_back((tissues_size_t)i + 1);
 		}

@@ -29,7 +29,7 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-class Q3ListBox;
+class QListWidget;
 
 namespace iseg {
 
@@ -55,7 +55,7 @@ private:
 	Q3HBox* hbox9;
 	Q3HBox* hboxslicesbetween;
 	Q3VBox* vbox1;
-	Q3ListBox* lbo_tissues;
+	QListWidget* lbo_tissues;
 	QPushButton* pb_file;
 	QPushButton* pb_exec;
 	QPushButton* pb_close;
