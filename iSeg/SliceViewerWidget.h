@@ -18,7 +18,6 @@
 #include <Q3VBoxLayout>
 #include <QCloseEvent>
 #include <QPaintEvent>
-#include <q3action.h>
 #include <q3hbox.h>
 #include <q3scrollview.h>
 #include <qbuttongroup.h>

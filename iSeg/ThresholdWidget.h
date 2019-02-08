@@ -14,8 +14,6 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3listbox.h>
-#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>

@@ -17,8 +17,6 @@
 #include <Q3VBoxLayout>
 #include <QCloseEvent>
 #include <QPaintEvent>
-#include <q3action.h>
-#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>
 #include <qcolor.h>

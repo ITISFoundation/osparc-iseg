@@ -14,7 +14,6 @@
 #include "bmp_read_1.h"
 
 #include <q3hbox.h>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -29,6 +28,8 @@
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
+
+class Q3ListBox;
 
 namespace iseg {
 

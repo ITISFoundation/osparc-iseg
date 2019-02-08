@@ -18,7 +18,6 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QtGui>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>

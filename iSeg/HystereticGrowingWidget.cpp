@@ -18,7 +18,6 @@
 #include "Core/Pair.h"
 
 #include <qfiledialog.h>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>

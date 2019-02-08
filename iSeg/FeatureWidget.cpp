@@ -20,7 +20,6 @@
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>

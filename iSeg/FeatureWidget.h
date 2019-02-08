@@ -16,7 +16,6 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -33,7 +32,6 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 //Added by qt3to4:
-#include <q3mimefactory.h>
 #include <qpixmap.h>
 
 namespace iseg {

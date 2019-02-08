@@ -12,7 +12,6 @@
 #include "Interface/WidgetInterface.h"
 
 #include <q3hbox.h>
-#include <q3mimefactory.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>

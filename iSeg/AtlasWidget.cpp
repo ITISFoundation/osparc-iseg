@@ -18,6 +18,7 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
+#include <QScrollBar>
 #include <algorithm>
 #include <q3popupmenu.h>
 #include <qapplication.h>
