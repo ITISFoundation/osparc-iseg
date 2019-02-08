@@ -20,7 +20,6 @@
 #include <QWheelEvent>
 #include <QScrollBar>
 #include <algorithm>
-#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>

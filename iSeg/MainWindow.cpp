@@ -64,7 +64,6 @@
 #include <QSignalMapper.h>
 #include <QStackedWidget>
 #include <QShortcut>
-#include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qdockwidget.h>
 #include <qmenubar.h>
@@ -1090,7 +1089,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		file->insertItem(
 				QIcon(m_picpath.absFilePath(QString("filenew.png")).ascii()), "&New...",
 				this, SLOT(execute_new()));
-		loadmenu = new Q3PopupMenu(this, "loadmenu");
+		loadmenu = new QMenu("loadmenu", this);
 		loadmenu->insertItem("Open .dcm...", this, SLOT(execute_loaddicom()));
 		loadmenu->insertItem("Open .bmp...", this, SLOT(execute_loadbmp()));
 		loadmenu->insertItem("Open .png...", this, SLOT(execute_loadpng()));
@@ -1103,7 +1102,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		loadmenu->insertItem("Open RTdose...", this, SLOT(execute_loadrtdose()));
 		file->insertItem("&Open", loadmenu);
 	}
-	reloadmenu = new Q3PopupMenu(this, "reloadmenu");
+	reloadmenu = new QMenu("reloadmenu", this);
 	reloadmenu->insertItem("Reopen .dc&m...", this, SLOT(execute_reloaddicom()));
 	reloadmenu->insertItem("Reopen .&bmp...", this, SLOT(execute_reloadbmp()));
 	reloadmenu->insertItem("Reopen .raw...", this, SLOT(execute_reloadraw()));
@@ -1141,7 +1140,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	file->insertItem("&Export Image(s)...", this, SLOT(execute_saveimg()));
 	file->insertItem("Export &Contour...", this, SLOT(execute_saveContours()));
 
-	exportmenu = new Q3PopupMenu(this, "exportmenu");
+	exportmenu = new QMenu("exportmenu", this);
 	exportmenu->insertItem("Export &Labelfield...(am)", this, SLOT(execute_exportlabelfield()));
 	exportmenu->insertItem("Export vtk-ascii...(vti/vtk)", this, SLOT(execute_exportvtkascii()));
 	exportmenu->insertItem("Export vtk-binary...(vti/vtk)", this, SLOT(execute_exportvtkbinary()));
@@ -1245,8 +1244,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	editmenu->insertItem("&Settings...", this, SLOT(execute_settings()));
 
 	viewmenu = menuBar()->addMenu(tr("&View"));
-	hidemenu = new Q3PopupMenu(this, "hidemenu");
-	hidesubmenu = new Q3PopupMenu(this, "hidesubmenu");
+	hidemenu = new QMenu("hidemenu", this);
+	hidesubmenu = new QMenu("hidesubmenu", this);
 	hidemenu->addAction(tabswdock->toggleViewAction());
 	hidemenu->addAction(methodTabdock->toggleViewAction());
 	hidemenu->addAction(notesdock->toggleViewAction());
@@ -6490,7 +6489,7 @@ void MainWindow::tree_widget_contextmenu(const QPoint& pos)
 {
 	QList<QTreeWidgetItem*> list = tissueTreeWidget->selectedItems();
 
-	Q3PopupMenu contextMenu(tissueTreeWidget, "tissuetreemenu");
+	QMenu contextMenu("tissuetreemenu", tissueTreeWidget);
 	if (list.size() <= 1) // single selection
 	{
 		if (tissueTreeWidget->get_current_is_folder())

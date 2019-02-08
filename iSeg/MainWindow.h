@@ -38,7 +38,6 @@ class QDockWidget;
 class QStackedWidget;
 class QScrollBar;
 class Q3ScrollView;
-class Q3PopupMenu;
 class QAction;
 
 namespace iseg {
@@ -186,14 +185,14 @@ private:
 	QMenu* atlasmenu;
 	QMenu* helpmenu;
 	QMenu* editmenu;
-	Q3PopupMenu* loadmenu;
-	Q3PopupMenu* reloadmenu;
-	Q3PopupMenu* exportmenu;
-	Q3PopupMenu* saveprojasmenu;
-	Q3PopupMenu* saveprojmenu;
-	Q3PopupMenu* saveactiveslicesmenu;
-	Q3PopupMenu* hidemenu;
-	Q3PopupMenu* hidesubmenu;
+	QMenu* loadmenu;
+	QMenu* reloadmenu;
+	QMenu* exportmenu;
+	QMenu* saveprojasmenu;
+	QMenu* saveprojmenu;
+	QMenu* saveactiveslicesmenu;
+	QMenu* hidemenu;
+	QMenu* hidesubmenu;
 	QDockWidget* tissuesDock;
 	TissueTreeWidget* tissueTreeWidget; // Widget visualizing the tissue hierarchy
 	QLineEdit* tissueFilter;

@@ -25,7 +25,7 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <q3popupmenu.h>
+#include <QMenu>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>
@@ -718,32 +718,32 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	eventx = (int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
 	eventy = (int)max(min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
 
-	Q3PopupMenu contextMenu(this);
+	QMenu contextMenu(this);
 	if (!bmporwork)
 	{
-		nexttargetslice->addTo(&contextMenu);
+		contextMenu.addAction(nexttargetslice);
 	}
-	addmark->addTo(&contextMenu);
-	addlabel->addTo(&contextMenu);
-	removemark->addTo(&contextMenu);
-	clearmarks->addTo(&contextMenu);
+	contextMenu.addAction(addmark);
+	contextMenu.addAction(addlabel);
+	contextMenu.addAction(removemark);
+	contextMenu.addAction(clearmarks);
 	if (event->modifiers() == Qt::ControlModifier)
 	{
-		addtoselection->addTo(&contextMenu);
+		contextMenu.addAction(addtoselection);
 	}
 	else
 	{
-		selecttissue->addTo(&contextMenu);
+		contextMenu.addAction(selecttissue);
 	}
-	viewtissue->addTo(&contextMenu);
+	contextMenu.addAction(viewtissue);
 	if (!bmporwork)
 	{
 		contextMenu.insertSeparator();
-		addtissue->addTo(&contextMenu);
-		subtissue->addTo(&contextMenu);
-		addtissue3D->addTo(&contextMenu);
-		addtissueconnected->addTo(&contextMenu);
-		addtissuelarger->addTo(&contextMenu);
+		contextMenu.addAction(addtissue);
+		contextMenu.addAction(subtissue);
+		contextMenu.addAction(addtissue3D);
+		contextMenu.addAction(addtissueconnected);
+		contextMenu.addAction(addtissuelarger);
 	}
 	contextMenu.exec(event->globalPos());
 }
