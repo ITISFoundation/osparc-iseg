@@ -39,8 +39,7 @@ class QStackedWidget;
 class QScrollBar;
 class Q3ScrollView;
 class Q3PopupMenu;
-class Q3Action;
-class Q3Accel;
+class QAction;
 
 namespace iseg {
 
@@ -211,15 +210,15 @@ private:
 	QPushButton* clearTissue;
 	QPushButton* clearTissues;
 	QWidget* menubarspacer;
-	Q3Action* hideparameters;
-	Q3Action* hidezoom;
-	Q3Action* hidecontrastbright;
-	Q3Action* hidecopyswap;
-	Q3Action* hidestack;
-	Q3Action* hidenotes;
-	Q3Action* hidesource;
-	Q3Action* hidetarget;
-	std::vector<Q3Action*> showtab_action;
+	QAction* hideparameters;
+	QAction* hidezoom;
+	QAction* hidecontrastbright;
+	QAction* hidecopyswap;
+	QAction* hidestack;
+	QAction* hidenotes;
+	QAction* hidesource;
+	QAction* hidetarget;
+	std::vector<QAction*> showtab_action;
 	QCheckBox* tissue3Dopt;
 	QStackedWidget* methodTab;
 	ThresholdWidget* threshold_widget;
@@ -298,17 +297,7 @@ private:
 	QSlider* sl_contrastwork;
 	QSlider* sl_brightnessbmp;
 	QSlider* sl_brightnesswork;
-	Q3Accel* m_acc_undo;
-	Q3Accel* m_acc_undo2;
-	Q3Accel* m_acc_redo;
-	Q3Accel* m_acc_sub;
-	Q3Accel* m_acc_add;
-	Q3Accel* m_acc_zoomout;
-	Q3Accel* m_acc_zoomin;
-	Q3Accel* m_acc_slicedown1;
-	Q3Accel* m_acc_sliceup1;
-	Q3Accel* m_acc_slicedown;
-	Q3Accel* m_acc_sliceup;
+
 	QTextEdit* m_notes;
 	std::vector<QPushButton*> pb_tab;
 	QSignalMapper* m_widget_signal_mapper;

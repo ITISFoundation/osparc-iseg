@@ -19,13 +19,12 @@
 
 #include "Core/ColorLookupTable.h"
 
-#include <Q3Action>
+#include <QAction>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <algorithm>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qcolor.h>
@@ -37,6 +36,7 @@
 #include <qpainter.h>
 #include <qpen.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <sstream>
@@ -63,19 +63,19 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	overlayalpha = 0.0f;
 	//	vp=new vector<Point>;
 	//	vp_old=new vector<Point>;
-	selecttissue = new Q3Action("Select Tissue", 0, this);
-	addtoselection = new Q3Action("Select Tissue", 0, this);
-	viewtissue = new Q3Action("View Tissue Surface", 0, this);
-	nexttargetslice = new Q3Action("Next Target Slice", 0, this);
-	addmark = new Q3Action("&Add Mark", 0, this);
-	addlabel = new Q3Action("Add &Label", 0, this);
-	removemark = new Q3Action("&Remove Mark", 0, this);
-	clearmarks = new Q3Action("&Clear Marks", 0, this);
-	addtissue = new Q3Action("Add &Tissue", 0, this);
-	addtissueconnected = new Q3Action("Add Tissue &Conn", 0, this);
-	addtissue3D = new Q3Action("Add Tissue 3&D", 0, this);
-	subtissue = new Q3Action("&Subtract Tissue", 0, this);
-	addtissuelarger = new Q3Action("Add Tissue &Larger", 0, this);
+	selecttissue = new QAction("Select Tissue", this);
+	addtoselection = new QAction("Select Tissue", this);
+	viewtissue = new QAction("View Tissue Surface", this);
+	nexttargetslice = new QAction("Next Target Slice", this);
+	addmark = new QAction("&Add Mark", this);
+	addlabel = new QAction("Add &Label", this);
+	removemark = new QAction("&Remove Mark", this);
+	clearmarks = new QAction("&Clear Marks", this);
+	addtissue = new QAction("Add &Tissue", this);
+	addtissueconnected = new QAction("Add Tissue &Conn", this);
+	addtissue3D = new QAction("Add Tissue 3&D", this);
+	subtissue = new QAction("&Subtract Tissue", this);
+	addtissuelarger = new QAction("Add Tissue &Larger", this);
 	connect(addmark, SIGNAL(activated()), this, SLOT(add_mark()));
 	connect(addlabel, SIGNAL(activated()), this, SLOT(add_label()));
 	connect(clearmarks, SIGNAL(activated()), this, SLOT(clear_marks()));

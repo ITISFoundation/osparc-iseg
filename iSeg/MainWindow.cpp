@@ -63,7 +63,7 @@
 #include <QFileDialog>
 #include <QSignalMapper.h>
 #include <QStackedWidget>
-#include <q3accel.h>
+#include <QShortcut>
 #include <q3popupmenu.h>
 #include <qapplication.h>
 #include <qdockwidget.h>
@@ -1231,10 +1231,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	editmenu = menuBar()->addMenu(tr("E&dit"));
 	undonr = editmenu->insertItem(
-			QIcon(m_picpath.absFilePath(QString("undo.png")).ascii()), "&Undo", this,
+			QIcon(m_picpath.absFilePath(QString("undo.png"))), "&Undo", this,
 			SLOT(execute_undo()));
 	redonr = editmenu->insertItem(
-			QIcon(m_picpath.absFilePath(QString("redo.png")).ascii()), "Redo", this,
+			QIcon(m_picpath.absFilePath(QString("redo.png"))), "Redo", this,
 			SLOT(execute_redo()));
 	editmenu->insertSeparator();
 	editmenu->insertItem("&Configure Undo...", this, SLOT(execute_undoconf()));
@@ -1258,39 +1258,35 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hidemenu->addAction(overlaydock->toggleViewAction());
 	hidemenu->addAction(multiDatasetDock->toggleViewAction());
 
-	hidecontrastbright = new Q3Action("Contr./Bright.", 0, this);
+	hidecontrastbright = new QAction("Contr./Bright.", this);
 	hidecontrastbright->setToggleAction(true);
 	hidecontrastbright->setOn(true);
-	connect(hidecontrastbright, SIGNAL(toggled(bool)), this,
-			SLOT(execute_hidecontrastbright(bool)));
+	connect(hidecontrastbright, SIGNAL(toggled(bool)), this, SLOT(execute_hidecontrastbright(bool)));
 	hidecontrastbright->addTo(hidemenu);
-	hidesource = new Q3Action("Source", 0, this);
+	hidesource = new QAction("Source", this);
 	hidesource->setToggleAction(true);
 	hidesource->setOn(true);
-	connect(hidesource, SIGNAL(toggled(bool)), this,
-			SLOT(execute_hidesource(bool)));
+	connect(hidesource, SIGNAL(toggled(bool)), this, SLOT(execute_hidesource(bool)));
 	hidesource->addTo(hidemenu);
-	hidetarget = new Q3Action("Target", 0, this);
+	hidetarget = new QAction("Target", this);
 	hidetarget->setToggleAction(true);
 	hidetarget->setOn(true);
-	connect(hidetarget, SIGNAL(toggled(bool)), this,
-			SLOT(execute_hidetarget(bool)));
+	connect(hidetarget, SIGNAL(toggled(bool)), this, SLOT(execute_hidetarget(bool)));
 	hidetarget->addTo(hidemenu);
-	hidecopyswap = new Q3Action("Copy/Swap", 0, this);
+	hidecopyswap = new QAction("Copy/Swap", this);
 	hidecopyswap->setToggleAction(true);
 	hidecopyswap->setOn(true);
-	connect(hidecopyswap, SIGNAL(toggled(bool)), this,
-			SLOT(execute_hidecopyswap(bool)));
+	connect(hidecopyswap, SIGNAL(toggled(bool)), this, SLOT(execute_hidecopyswap(bool)));
 	hidecopyswap->addTo(hidemenu);
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
-		showtab_action[i] = new Q3Action(tabwidgets[i]->GetName().c_str(), 0, this);
+		showtab_action[i] = new QAction(tabwidgets[i]->GetName().c_str(), this);
 		showtab_action[i]->setToggleAction(true);
 		showtab_action[i]->setOn(showpb_tab[i]);
 		connect(showtab_action[i], SIGNAL(toggled(bool)), this, SLOT(execute_showtabtoggled(bool)));
 		showtab_action[i]->addTo(hidesubmenu);
 	}
-	hideparameters = new Q3Action("Simplified", 0, this);
+	hideparameters = new QAction("Simplified", this);
 	hideparameters->setToggleAction(true);
 	hideparameters->setOn(WidgetInterface::get_hideparams());
 	connect(hideparameters, SIGNAL(toggled(bool)), this, SLOT(execute_hideparameters(bool)));
@@ -1659,39 +1655,32 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	//	QObject::connect(pb_work2tissue,SIGNAL(clicked()),this,SLOT(do_work2tissue()));
 
-	m_acc_sliceup = new Q3Accel(this);
-	m_acc_sliceup->connectItem(m_acc_sliceup->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Right)), this,
-			SLOT(slicenr_up()));
-	m_acc_slicedown = new Q3Accel(this);
-	m_acc_slicedown->connectItem(m_acc_slicedown->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Left)), this,
-			SLOT(slicenr_down()));
-	m_acc_sliceup1 = new Q3Accel(this);
-	m_acc_sliceup->connectItem(m_acc_sliceup->insertItem(QKeySequence(Qt::Key_Next)), this,
-			SLOT(slicenr_up()));
-	m_acc_slicedown1 = new Q3Accel(this);
-	m_acc_slicedown->connectItem(m_acc_slicedown->insertItem(QKeySequence(Qt::Key_Prior)), this,
-			SLOT(slicenr_down()));
-	m_acc_zoomin = new Q3Accel(this);
-	m_acc_zoomin->connectItem(m_acc_zoomin->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Up)), this,
-			SLOT(zoom_in()));
-	m_acc_zoomout = new Q3Accel(this);
-	m_acc_zoomout->connectItem(m_acc_zoomout->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Down)), this,
-			SLOT(zoom_out()));
-	m_acc_add = new Q3Accel(this);
-	m_acc_add->connectItem(m_acc_add->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Plus)), this,
-			SLOT(add_tissue_shortkey()));
-	m_acc_sub = new Q3Accel(this);
-	m_acc_sub->connectItem(m_acc_sub->insertItem(QKeySequence(Qt::CTRL + Qt::Key_Minus)), this,
-			SLOT(subtract_tissue_shortkey()));
-	m_acc_undo = new Q3Accel(this);
-	m_acc_undo->connectItem(m_acc_undo->insertItem(QKeySequence(Qt::Key_Escape)),
-			this, SLOT(execute_undo()));
-	m_acc_undo2 = new Q3Accel(this);
-	m_acc_undo2->connectItem(m_acc_undo2->insertItem(QKeySequence("Ctrl+Z")),
-			this, SLOT(execute_undo()));
-	m_acc_redo = new Q3Accel(this);
-	m_acc_redo->connectItem(m_acc_redo->insertItem(QKeySequence("Ctrl+Y")), this,
-			SLOT(execute_redo()));
+	// shortcuts -> TODO: replace those which have a button/menu action so user can learn about shortcut
+	auto shortcut_sliceup = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
+	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
+	auto shortcut_slicedown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
+	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
+	auto shortcut_sliceup1 = new QShortcut(QKeySequence(Qt::Key_Next), this);
+	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
+	auto shortcut_slicedown1 = new QShortcut(QKeySequence(Qt::Key_Prior), this);
+	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
+	
+	auto shortcut_zoomin = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Up), this);
+	connect(shortcut_zoomin, SIGNAL(activated()), this, SLOT(zoom_in()));
+	auto shortcut_zoomout = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Down), this);
+	connect(shortcut_zoomout, SIGNAL(activated()), this, SLOT(zoom_out()));
+	
+	auto shortcut_add = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this);
+	connect(shortcut_add, SIGNAL(activated()), this, SLOT(add_tissue_shortkey()));
+	auto shortcut_sub = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
+	connect(shortcut_sub, SIGNAL(activated()), this, SLOT(subtract_tissue_shortkey()));
+	
+	auto shortcut_undo = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+	connect(shortcut_undo, SIGNAL(activated()), this, SLOT(execute_undo()));
+	auto shortcut_undo2 = new QShortcut(QKeySequence("Ctrl+Z"), this);
+	connect(shortcut_undo2, SIGNAL(activated()), this, SLOT(execute_undo()));
+	auto shortcut_redo = new QShortcut(QKeySequence("Ctrl+Y"), this);
+	connect(shortcut_redo, SIGNAL(activated()), this, SLOT(execute_redo()));
 
 	update_brightnesscontrast(true);
 	update_brightnesscontrast(false);

@@ -21,7 +21,6 @@
 #include <QPaintEvent>
 #include <QScrollArea>
 #include <QWheelEvent>
-#include <q3action.h>
 #include <q3vbox.h>
 #include <qcheckbox.h>
 #include <qevent.h>
