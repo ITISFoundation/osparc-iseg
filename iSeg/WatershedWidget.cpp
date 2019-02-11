@@ -13,20 +13,8 @@
 #include "WatershedWidget.h"
 #include "bmp_read_1.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
-
-#include <algorithm>
-#include <sstream>
+#include <QFormLayout>
+#include <QHBoxLayout>
 
 using namespace iseg;
 
@@ -34,49 +22,48 @@ WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(
-			Format("Segment a tissue (2D) by selecting points in the current slice "
-						 "based on the Watershed method."
-						 "<br>"
-						 "The method: the gradient of the slightly smoothed image is "
-						 "calculated. High values are interpreted as mountains and "
-						 "low values as valleys. Subsequently, a flooding with water is "
-						 "simulated resulting in thousands of basins. "
-						 "Higher water causes adjacent basins to merge. "));
+	setToolTip(Format(
+			"Segment a tissue (2D) by selecting points in the current slice "
+			"based on the Watershed method."
+			"<br>"
+			"The method: the gradient of the slightly smoothed image is "
+			"calculated. High values are interpreted as mountains and "
+			"low values as valleys. Subsequently, a flooding with water is "
+			"simulated resulting in thousands of basins. "
+			"Higher water causes adjacent basins to merge. "));
 
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	usp = nullptr;
 
-	vbox1 = new Q3VBox(this);
-	vbox1->setMargin(8);
-	hbox1 = new Q3HBox(vbox1);
-	btn_exec = new QPushButton("Execute", vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-	txt_h = new QLabel("Flooding height (h): ", hbox1);
-	sl_h = new QSlider(Qt::Horizontal, hbox1);
+	sl_h = new QSlider(Qt::Horizontal, nullptr);
 	sl_h->setRange(0, 200);
 	sl_h->setValue(160);
-	sb_h = new QSpinBox(10, 100, 10, hbox1);
+
+	sb_h = new QSpinBox(10, 100, 10, nullptr);
 	sb_h->setValue(40);
-
-	sl_h->setFixedWidth(300);
-	hbox1->setFixedSize(hbox1->sizeHint());
-	vbox1->setFixedSize(vbox1->sizeHint());
-
 	sbh_old = sb_h->value();
 
-	QObject::connect(sl_h, SIGNAL(valueChanged(int)), this,
-			SLOT(hsl_changed()));
-	QObject::connect(sl_h, SIGNAL(sliderPressed()), this,
-			SLOT(slider_pressed()));
-	QObject::connect(sl_h, SIGNAL(sliderReleased()), this,
-			SLOT(slider_released()));
-	QObject::connect(sb_h, SIGNAL(valueChanged(int)), this,
-			SLOT(hsb_changed(int)));
-	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
+	btn_exec = new QPushButton("Execute");
+
+	// layout
+	auto height_hbox = new QHBoxLayout;
+	height_hbox->addWidget(sl_h);
+	height_hbox->addWidget(sb_h);
+
+	auto layout = new QFormLayout;
+	layout->addRow(tr("Flooding height (h)"), height_hbox);
+	layout->addRow(btn_exec);
+
+	setLayout(layout);
+
+	// connections
+	connect(sl_h, SIGNAL(valueChanged(int)), this, SLOT(hsl_changed()));
+	connect(sl_h, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+	connect(sl_h, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	connect(sb_h, SIGNAL(valueChanged(int)), this, SLOT(hsb_changed(int)));
+	connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
 }
 
 void WatershedWidget::hsl_changed()
@@ -98,8 +85,6 @@ void WatershedWidget::hsb_changed(int value)
 		recalc();
 	}
 	sbh_old = sbh_new;
-
-	return;
 }
 
 void WatershedWidget::execute()
@@ -128,14 +113,10 @@ void WatershedWidget::recalc()
 
 		emit end_datachange(this);
 	}
-
-	return;
 }
 
 void WatershedWidget::marks_changed()
 {
-	//	recalc();
-
 	if (usp != nullptr)
 	{
 		iseg::DataSelection dataSelection;
@@ -147,8 +128,6 @@ void WatershedWidget::marks_changed()
 
 		emit end_datachange(this, iseg::MergeUndo);
 	}
-
-	return;
 }
 
 void WatershedWidget::recalc1()
@@ -158,16 +137,10 @@ void WatershedWidget::recalc1()
 		bmphand->construct_regions(
 				(unsigned int)(sb_h->value() * sl_h->value() * 0.005f), usp);
 	}
-
-	return;
 }
-
-QSize WatershedWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 WatershedWidget::~WatershedWidget()
 {
-	delete vbox1;
-
 	free(usp);
 }
 
@@ -186,7 +159,6 @@ void WatershedWidget::bmphand_changed(bmphandler* bmph)
 	}
 
 	bmphand = bmph;
-	return;
 }
 
 void WatershedWidget::init()
@@ -237,10 +209,8 @@ FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(sl_h, SIGNAL(valueChanged(int)), this,
-				SLOT(hsl_changed()));
-		QObject::disconnect(sb_h, SIGNAL(valueChanged(int)), this,
-				SLOT(hsb_changed(int)));
+		disconnect(sl_h, SIGNAL(valueChanged(int)), this, SLOT(hsl_changed()));
+		disconnect(sb_h, SIGNAL(valueChanged(int)), this, SLOT(hsb_changed(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -250,22 +220,8 @@ FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 
 		fread(&sbh_old, sizeof(float), 1, fp);
 
-		QObject::connect(sl_h, SIGNAL(valueChanged(int)), this,
-				SLOT(hsl_changed()));
-		QObject::connect(sb_h, SIGNAL(valueChanged(int)), this,
-				SLOT(hsb_changed(int)));
+		connect(sl_h, SIGNAL(valueChanged(int)), this, SLOT(hsl_changed()));
+		connect(sb_h, SIGNAL(valueChanged(int)), this, SLOT(hsb_changed(int)));
 	}
 	return fp;
-}
-
-void WatershedWidget::hideparams_changed()
-{
-	if (hideparams)
-	{
-		hbox1->hide();
-	}
-	else
-	{
-		hbox1->show();
-	}
 }
