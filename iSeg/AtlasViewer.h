@@ -15,20 +15,7 @@
 
 #include "Core/Pair.h"
 
-#include <QCloseEvent>
-#include <QContextMenuEvent>
-#include <QMouseEvent>
-#include <QPaintEvent>
-#include <QScrollArea>
-#include <QWheelEvent>
-#include <q3vbox.h>
-#include <qcheckbox.h>
-#include <qevent.h>
 #include <qimage.h>
-#include <qlabel.h>
-#include <qpoint.h>
-#include <qpushbutton.h>
-#include <qslider.h>
 #include <qwidget.h>
 
 #include <vector>
