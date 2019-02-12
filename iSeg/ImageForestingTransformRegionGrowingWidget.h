@@ -14,17 +14,9 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3hbox.h>
-#include <q3vbox.h>
-#include <qdialog.h>
 #include <qlabel.h>
-#include <qlayout.h>
-#include <qpixmap.h>
 #include <qpushbutton.h>
 #include <qslider.h>
-#include <qwidget.h>
-
-#include <algorithm>
 
 namespace iseg {
 
@@ -38,7 +30,6 @@ public:
 	void init() override;
 	void newloaded() override;
 	void cleanup() override;
-	QSize sizeHint() const override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	void hideparams_changed() override;
@@ -64,14 +55,12 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	Q3HBox* hbox1;
-	Q3VBox* vbox1;
-	QLabel* txt_lower;
-	QLabel* txt_upper;
+
 	QSlider* sl_thresh;
 	QPushButton* pushexec;
 	QPushButton* pushclear;
 	QPushButton* pushremove;
+
 	unsigned tissuenr;
 	float thresh;
 	float maxthresh;
