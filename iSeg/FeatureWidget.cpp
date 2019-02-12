@@ -20,22 +20,8 @@
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qstring.h>
-#include <qwidget.h>
+#include <QGridLayout>
+#include <QSpacerItem>
 
 using namespace iseg;
 
@@ -51,51 +37,39 @@ FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
-	hbox1 = new Q3HBox(this);
-	hbox1->setMargin(8);
-	vbox1 = new Q3VBox(hbox1);
-	vbox2 = new Q3VBox(hbox1);
-	vbox3 = new Q3VBox(hbox1);
 
 	selecting = false;
 
-	lb_map = new QLabel("", vbox1);
-	lb_av = new QLabel("Average: ", vbox1);
-	lb_stddev = new QLabel("Std Dev.: ", vbox1);
-	lb_min = new QLabel("Minimum: ", vbox1);
-	lb_max = new QLabel("Maximum: ", vbox1);
-	lb_grey = new QLabel("Grey val.:", vbox1);
-	lb_pt = new QLabel("Coord.: ", vbox1);
-	lb_tissue = new QLabel("Tissue: ", vbox1);
-	lb_map_value = new QLabel("abcdefghijk", vbox2);
-	lb_av_value = new QLabel("", vbox2);
-	lb_stddev_value = new QLabel("", vbox2);
-	lb_min_value = new QLabel("", vbox2);
-	lb_max_value = new QLabel("", vbox2);
-	lb_grey_value = new QLabel("", vbox2);
-	lb_pt_value = new QLabel("", vbox2);
-	lb_dummy = new QLabel("", vbox2);
-	lb_work_map_value = new QLabel("xxxxxxxxxxxxxxxxxxxxxxx", vbox3);
-	lb_work_av_value = new QLabel("", vbox3);
-	lb_work_stddev_value = new QLabel("", vbox3);
-	lb_work_min_value = new QLabel("", vbox3);
-	lb_work_max_value = new QLabel("", vbox3);
-	lb_work_grey_value = new QLabel("", vbox3);
-	lb_work_pt_value = new QLabel("", vbox3);
-	lb_tissuename = new QLabel("", vbox3);
+	auto layout = new QGridLayout;
+	layout->addWidget(lb_map 	= new QLabel(""), 0, 0);
+	layout->addWidget(lb_av 	= new QLabel("Average: "), 1, 0);
+	layout->addWidget(lb_stddev = new QLabel("Std Dev.: "), 2, 0);
+	layout->addWidget(lb_min 	= new QLabel("Minimum: "), 3, 0);
+	layout->addWidget(lb_max 	= new QLabel("Maximum: "), 4, 0);
+	layout->addWidget(lb_grey 	= new QLabel("Grey val.:"), 5, 0);
+	layout->addWidget(lb_pt 	= new QLabel("Coord.: "), 6, 0);
+	layout->addWidget(lb_tissue = new QLabel("Tissue: "), 7, 0);
 
-	vbox1->setFixedSize(vbox1->sizeHint());
-	vbox2->setFixedSize(vbox2->sizeHint());
-	// BL: hack to make layout wide enought to show very long tissue names
-	vbox3->setFixedSize(3 * vbox3->sizeHint().width(),
-			vbox3->sizeHint().height());
-	hbox1->setFixedSize(hbox1->sizeHint());
+	layout->addWidget(lb_map_value 	= new QLabel("Source"), 0, 1);
+	layout->addWidget(lb_av_value  	= new QLabel(""), 1, 1);
+	layout->addWidget(lb_stddev_value = new QLabel(""), 2, 1);
+	layout->addWidget(lb_min_value 	= new QLabel(""), 3, 1);
+	layout->addWidget(lb_max_value 	= new QLabel(""), 4, 1);
+	layout->addWidget(lb_grey_value = new QLabel(""), 5, 1);
+	layout->addWidget(lb_pt_value 	= new QLabel(""), 6, 1);
+	layout->addWidget(lb_dummy 		= new QLabel(""), 7, 1);
 
-	lb_map_value->setText("Source:");
-	lb_work_map_value->setText("Target:");
+	layout->addWidget(lb_work_map_value = new QLabel("Target"), 0, 2);
+	layout->addWidget(lb_work_av_value 	= new QLabel(""), 1, 2);
+	layout->addWidget(lb_work_stddev_value = new QLabel(""), 2, 2);
+	layout->addWidget(lb_work_min_value = new QLabel(""), 3, 2);
+	layout->addWidget(lb_work_max_value = new QLabel(""), 4, 2);
+	layout->addWidget(lb_work_grey_value = new QLabel(""), 5, 2);
+	layout->addWidget(lb_work_pt_value 	= new QLabel(""), 6, 2);
+	layout->addWidget(lb_tissuename 	= new QLabel(""), 7, 2);
+
+	setLayout(layout);
 }
-
-QSize FeatureWidget::sizeHint() const { return hbox1->sizeHint(); }
 
 void FeatureWidget::on_mouse_clicked(Point p)
 {

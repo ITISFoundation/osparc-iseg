@@ -16,23 +16,7 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
 #include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
-//Added by qt3to4:
-#include <qpixmap.h>
 
 namespace iseg {
 
@@ -44,7 +28,6 @@ public:
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	void init() override;
 	void newloaded() override;
-	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Feature"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
 
@@ -59,10 +42,7 @@ private:
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	unsigned short activeslice;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	Q3HBox* hbox1;
+
 	QLabel* lb_map;
 	QLabel* lb_av;
 	QLabel* lb_stddev;
@@ -87,6 +67,7 @@ private:
 	QLabel* lb_work_grey_value;
 	QLabel* lb_tissuename;
 	QLabel* lb_dummy;
+
 	Point pstart;
 };
 
