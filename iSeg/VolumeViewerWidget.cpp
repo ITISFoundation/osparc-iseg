@@ -16,6 +16,7 @@
 #include "QVTKWidget.h"
 
 #include <QResizeEvent>
+#include <Q3VBox>
 
 #include <vtkActor.h>
 #include <vtkColorTransferFunction.h>
