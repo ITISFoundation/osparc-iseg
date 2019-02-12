@@ -15,7 +15,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Point.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/ScopedTimer.h"
 
 #include "Core/BinaryThinningImageFilter.h"
@@ -153,7 +153,7 @@ void EdgeWidget::export_centerlines()
 	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
 	if (!savefilename.isEmpty())
 	{
-		SliceHandlerItkWrapper wrapper(handler3D);
+		SlicesHandlerITKInterface wrapper(handler3D);
 		auto target = wrapper.GetTarget(true);
 
 		using input_type = itk::SliceContiguousImage<float>;
@@ -236,7 +236,7 @@ void EdgeWidget::execute()
 				using input_type = itk::SliceContiguousImage<float>;
 				using output_type = itk::Image<unsigned char, 3>;
 
-				SliceHandlerItkWrapper wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(handler3D);
 				auto target = wrapper.GetTarget(true);
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
@@ -254,7 +254,7 @@ void EdgeWidget::execute()
 				using input_type = itk::Image<float, 2>;
 				using output_type = itk::Image<unsigned char, 2>;
 
-				SliceHandlerItkWrapper wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(handler3D);
 				auto target = wrapper.GetTargetSlice();
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 

@@ -1,10 +1,10 @@
-#include "SliceHandlerItkWrapper.h"
+#include "SlicesHandlerITKInterface.h"
 
 #include <itkCastImageFilter.h>
 
 namespace iseg {
 
-itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(bool active_slices)
+itk::SliceContiguousImage<float>::Pointer SlicesHandlerITKInterface::GetSource(bool active_slices)
 {
 	if (active_slices)
 		return GetSource(_handler->start_slice(), _handler->end_slice());
@@ -12,12 +12,12 @@ itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(bool
 		return GetSource(0, _handler->num_slices());
 }
 
-itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(size_t start_slice, size_t end_slice)
+itk::SliceContiguousImage<float>::Pointer SlicesHandlerITKInterface::GetSource(size_t start_slice, size_t end_slice)
 {
 	return GetITKView(_handler->source_slices(), start_slice, end_slice, _handler);
 }
 
-itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool active_slices)
+itk::SliceContiguousImage<float>::Pointer SlicesHandlerITKInterface::GetTarget(bool active_slices)
 {
 	if (active_slices)
 		return GetTarget(_handler->start_slice(), _handler->end_slice());
@@ -25,12 +25,12 @@ itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool
 		return GetTarget(0, _handler->num_slices());
 }
 
-itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(size_t start_slice, size_t end_slice)
+itk::SliceContiguousImage<float>::Pointer SlicesHandlerITKInterface::GetTarget(size_t start_slice, size_t end_slice)
 {
 	return GetITKView(_handler->target_slices(), start_slice, end_slice, _handler);
 }
 
-itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTissues(bool active_slices)
+itk::SliceContiguousImage<tissues_size_t>::Pointer SlicesHandlerITKInterface::GetTissues(bool active_slices)
 {
 	if (active_slices)
 		return GetTissues(_handler->start_slice(), _handler->end_slice());
@@ -38,7 +38,7 @@ itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTi
 		return GetTissues(0, _handler->num_slices());
 }
 
-itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTissues(size_t start_slice, size_t end_slice)
+itk::SliceContiguousImage<tissues_size_t>::Pointer SlicesHandlerITKInterface::GetTissues(size_t start_slice, size_t end_slice)
 {
 	auto all_slices = _handler->tissue_slices(_handler->active_tissuelayer());
 	return GetITKView(all_slices, start_slice, end_slice, _handler);
@@ -68,7 +68,7 @@ typename itk::Image<T>::Pointer _GetITKView2D(T* slice, size_t dims[2], double s
 	return image;
 }
 
-itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetSourceSlice(int slice)
+itk::Image<float, 2>::Pointer SlicesHandlerITKInterface::GetSourceSlice(int slice)
 {
 	size_t dims[2] = {
 			_handler->width(),
@@ -81,7 +81,7 @@ itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetSourceSlice(int slice)
 	return _GetITKView2D(all_slices.at(slice), dims, spacing);
 }
 
-itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetTargetSlice(int slice)
+itk::Image<float, 2>::Pointer SlicesHandlerITKInterface::GetTargetSlice(int slice)
 {
 	size_t dims[2] = {
 			_handler->width(),
@@ -94,7 +94,7 @@ itk::Image<float, 2>::Pointer SliceHandlerItkWrapper::GetTargetSlice(int slice)
 	return _GetITKView2D(all_slices.at(slice), dims, spacing);
 }
 
-itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice(int slice)
+itk::Image<tissues_size_t, 2>::Pointer SlicesHandlerITKInterface::GetTissuesSlice(int slice)
 {
 	size_t dims[2] = {
 			_handler->width(),
@@ -107,14 +107,14 @@ itk::Image<tissues_size_t, 2>::Pointer SliceHandlerItkWrapper::GetTissuesSlice(i
 	return _GetITKView2D(all_slices.at(slice), dims, spacing);
 }
 
-itk::ImageRegion<3> SliceHandlerItkWrapper::GetActiveRegion() const
+itk::ImageRegion<3> SlicesHandlerITKInterface::GetActiveRegion() const
 {
 	itk::Index<3> start = {0, 0, _handler->start_slice()};
 	itk::Size<3> size = {_handler->width(), _handler->height(), static_cast<size_t>(_handler->end_slice() - _handler->start_slice())};
 	return itk::ImageRegion<3>(start, size);
 }
 
-itk::Image<float, 3>::Pointer SliceHandlerItkWrapper::GetImageDeprecated(eImageType type, bool active_slices)
+itk::Image<float, 3>::Pointer SlicesHandlerITKInterface::GetImageDeprecated(eImageType type, bool active_slices)
 {
 	using input_image = itk::SliceContiguousImage<float>;
 	using output_image = itk::Image<float, 3>;
@@ -125,7 +125,7 @@ itk::Image<float, 3>::Pointer SliceHandlerItkWrapper::GetImageDeprecated(eImageT
 	return cast->GetOutput();
 }
 
-itk::Image<tissues_size_t, 3>::Pointer SliceHandlerItkWrapper::GetTissuesDeprecated(bool active_slices)
+itk::Image<tissues_size_t, 3>::Pointer SlicesHandlerITKInterface::GetTissuesDeprecated(bool active_slices)
 {
 	using input_image = itk::SliceContiguousImage<tissues_size_t>;
 	using output_image = itk::Image<tissues_size_t, 3>;

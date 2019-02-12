@@ -31,7 +31,7 @@ INCLUDE_DIRECTORIES(
 FILE(GLOB ViewerHeaders *.h)
 
 SET(ViewerSrcs
-	ActiveslicesConfigWidget.cpp
+	ActiveSlicesConfigDialog.cpp
 	Atlas.cpp
 	AtlasViewer.cpp
 	AtlasWidget.cpp
@@ -90,7 +90,7 @@ SET(ViewerSrcs
 )
 
 SET(MyMocHeaders
-	ActiveslicesConfigWidget.h
+	ActiveSlicesConfigDialog.h
 	AtlasViewer.h
 	AtlasWidget.h
 	EdgeWidget.h

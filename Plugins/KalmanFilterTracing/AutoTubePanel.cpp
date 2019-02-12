@@ -9,7 +9,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Logger.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include "Core/Morpho.h"
 
@@ -70,7 +70,7 @@ typedef unsigned long LabelType;
 typedef itk::ShapeLabelObject<LabelType, 2> LabelObjectType;
 typedef itk::LabelMap<LabelObjectType> LabelMapType;
 
-AutoTubePanel::AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
+AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
 {
@@ -432,14 +432,14 @@ void AutoTubePanel::add_to_tissues()
 			for (auto filter : k_filters)
 				labels.push_back(filter.get_label());
 
-			iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+			iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 			auto tissue_names = _handler3D->tissue_names();
 
 			// shallow copy - used to transform index to world coordinates
 			auto image_3d = itk_handler.GetSource(false);
 
 			typedef float PixelType;
-			using tissue_type = SliceHandlerInterface::tissue_type;
+			using tissue_type = SlicesHandlerInterface::tissue_type;
 			using ImageType = itk::Image<PixelType, 2>;
 			using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
 			using IteratorType = itk::ImageRegionIterator<itk::Image<tissue_type, 2>>;
@@ -1849,7 +1849,7 @@ void AutoTubePanel::extrapolate_results()
 				max_active_slice_reached = _handler3D->active_slice();
 
 			// preparing data for do_work_nd -> function of Execute button which will save a new label map in label_maps[_handler3D->active_slice()]
-			iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+			iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 
 			using input_type = itk::Image<float, 2>;
 			using tissues_type = itk::Image<iseg::tissues_size_t, 2>;
@@ -2340,7 +2340,7 @@ void AutoTubePanel::do_work()
 {
 	// function for Execute Button
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 	using input_type = itk::Image<float, 2>;
 	using tissues_type = itk::Image<iseg::tissues_size_t, 2>;
 	auto source = itk_handler.GetSourceSlice();
@@ -2386,7 +2386,7 @@ void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vec
 	typedef float PixelType;
 	using ImageType = itk::Image<PixelType, 2>;
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 	auto target = itk_handler.GetTargetSlice();
 
 	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
@@ -2394,7 +2394,7 @@ void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vec
 	label2image->SetInput(labelMap);
 	SAFE_UPDATE(label2image, return );
 
-	using tissue_type = SliceHandlerInterface::tissue_type;
+	using tissue_type = SlicesHandlerInterface::tissue_type;
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = false; // all_slices->isChecked();
 	dataSelection.sliceNr = _handler3D->active_slice();
@@ -2571,7 +2571,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 			binaryImageToLabelMapFilter->SetFullyConnected(false);
 		SAFE_UPDATE(binaryImageToLabelMapFilter, return );
 
-		iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+		iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 		std::vector<std::string> label_object_list;
 
 		auto labelMap = binaryImageToLabelMapFilter->GetOutput();

@@ -9,7 +9,7 @@
  */
 #include "BiasCorrection.h"
 
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/ItkUtils.h"
 
 #include <itkBSplineControlPointImageFilter.h>
@@ -105,7 +105,7 @@ typename ImageType::Pointer AllocImage(
 
 } // namespace
 
-BiasCorrectionWidget::BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D,
+BiasCorrectionWidget::BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D),
@@ -149,8 +149,8 @@ void BiasCorrectionWidget::do_work()
 {
 	typedef itk::Image<float, 3> InputImageType;
 
-	iseg::SliceHandlerItkWrapper wrapper(handler3D);
-	InputImageType::Pointer input = wrapper.GetImageDeprecated(iseg::SliceHandlerItkWrapper::kSource, true);
+	iseg::SlicesHandlerITKInterface wrapper(handler3D);
+	InputImageType::Pointer input = wrapper.GetImageDeprecated(iseg::SlicesHandlerITKInterface::kSource, true);
 
 	//Ensure that it is a 3D image for the 3D image filter ! Else it does nothing
 	if (input->GetLargestPossibleRegion().GetSize(2) > 1)
@@ -176,7 +176,7 @@ void BiasCorrectionWidget::do_work()
 				dataSelection.bmp = true;
 				emit begin_datachange(dataSelection, this);
 
-				iseg::Paste<InputImageType, iseg::SliceHandlerItkWrapper::image_ref_type>(output, source);
+				iseg::Paste<InputImageType, iseg::SlicesHandlerITKInterface::image_ref_type>(output, source);
 
 				emit end_datachange(this);
 			}

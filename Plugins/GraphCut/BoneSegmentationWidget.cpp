@@ -12,7 +12,7 @@
 #include "ImageGraphCut3DFilter.h"
 
 #include "Data/ItkUtils.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkConnectedComponentImageFilter.h>
 #include <itkFlatStructuringElement.h>
@@ -68,7 +68,7 @@ private:
 } // namespace
 
 BoneSegmentationWidget::BoneSegmentationWidget(
-		iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
+		iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
 			m_CurrentFilter(nullptr)
@@ -155,8 +155,8 @@ void BoneSegmentationWidget::do_work()
 	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput> GraphCutFilterType;
 
 	// get input image
-	iseg::SliceHandlerItkWrapper itk_wrapper(m_Handler3D);
-	auto input = itk_wrapper.GetImageDeprecated(iseg::SliceHandlerItkWrapper::kSource, m_UseSliceRange->isChecked());
+	iseg::SlicesHandlerITKInterface itk_wrapper(m_Handler3D);
+	auto input = itk_wrapper.GetImageDeprecated(iseg::SlicesHandlerITKInterface::kSource, m_UseSliceRange->isChecked());
 
 	assert(m_MaxFlowAlgorithm->currentItem() > 0);
 
@@ -196,7 +196,7 @@ void BoneSegmentationWidget::do_work()
 			dataSelection.work = true;
 			emit begin_datachange(dataSelection, this);
 
-			iseg::Paste<TOutput, iseg::SliceHandlerItkWrapper::image_ref_type>(output, target);
+			iseg::Paste<TOutput, iseg::SlicesHandlerITKInterface::image_ref_type>(output, target);
 
 			emit end_datachange(this);
 		}

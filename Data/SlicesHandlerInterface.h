@@ -17,7 +17,7 @@
 
 namespace iseg {
 
-class SliceHandlerInterface
+class SlicesHandlerInterface
 {
 public:
 	typedef tissues_size_t tissue_type;

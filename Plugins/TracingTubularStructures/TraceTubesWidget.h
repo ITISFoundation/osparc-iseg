@@ -45,7 +45,7 @@ class TraceTubesWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	TraceTubesWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~TraceTubesWidget() {}
 
@@ -78,7 +78,7 @@ private:
 	template<class TSpeedImage>
 	void do_work_template(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
 
-	iseg::SliceHandlerInterface* _handler;
+	iseg::SlicesHandlerInterface* _handler;
 	std::vector<iseg::Point3D> _points;
 
 	QWidget* _main_options;

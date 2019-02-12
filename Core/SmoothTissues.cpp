@@ -12,7 +12,7 @@
 #include "SmoothTissues.h"
 
 #include "../Data/ItkUtils.h"
-#include "../Data/SliceHandlerItkWrapper.h"
+#include "../Data/SlicesHandlerITKInterface.h"
 
 #include <itkDiscreteGaussianImageFilter.h>
 #include <itkSignedMaurerDistanceMapImageFilter.h>
@@ -105,14 +105,14 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 	return ok;
 }
 
-bool SmoothTissues(SliceHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d)
+bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d)
 {
-	SliceHandlerItkWrapper itkhandler(handler);
+	SlicesHandlerITKInterface itkhandler(handler);
 	auto locks = handler->tissue_locks();
 
 	if (smooth3d)
 	{
-		using label_image_type = SliceHandlerItkWrapper::tissues_ref_type;
+		using label_image_type = SlicesHandlerITKInterface::tissues_ref_type;
 
 		auto tissues = itkhandler.GetTissues(start_slice, end_slice);
 

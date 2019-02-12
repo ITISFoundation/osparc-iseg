@@ -25,7 +25,7 @@ class LevelsetWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	LevelsetWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~LevelsetWidget() {}
 	void init() override;
@@ -47,7 +47,7 @@ private:
 	template<class TInput>
 	void guess_thresholds_nd(TInput* source);
 
-	iseg::SliceHandlerInterface* handler3D;
+	iseg::SlicesHandlerInterface* handler3D;
 	unsigned short activeslice;
 
 	QCheckBox* all_slices;

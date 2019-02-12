@@ -14,13 +14,13 @@
 #include "itkLabelVotingBinaryImageFilter.h"
 
 #include "../Data/ItkUtils.h"
-#include "../Data/SliceHandlerItkWrapper.h"
+#include "../Data/SlicesHandlerITKInterface.h"
 
 #include <itkCastImageFilter.h>
 
 namespace iseg {
 
-size_t VotingReplaceLabel(SliceHandlerInterface* handler,
+size_t VotingReplaceLabel(SlicesHandlerInterface* handler,
 		tissues_size_t foreground,
 		tissues_size_t background,
 		std::array<unsigned int, 3> iradius,
@@ -30,10 +30,10 @@ size_t VotingReplaceLabel(SliceHandlerInterface* handler,
 	using image_type = itk::Image<tissues_size_t, 3>;
 	using voting_filter_type = itk::LabelVotingBinaryImageFilter<image_type, image_type>;
 
-	SliceHandlerItkWrapper itkhandler(handler);
+	SlicesHandlerITKInterface itkhandler(handler);
 	auto tissues = itkhandler.GetTissues(true);
 
-	auto cast = itk::CastImageFilter<SliceHandlerItkWrapper::tissues_ref_type, image_type>::New();
+	auto cast = itk::CastImageFilter<SlicesHandlerITKInterface::tissues_ref_type, image_type>::New();
 	cast->SetInput(tissues);
 	cast->Update();
 	auto input = cast->GetOutput();
@@ -83,7 +83,7 @@ size_t VotingReplaceLabel(SliceHandlerInterface* handler,
 	}
 
 	// paste into output
-	iseg::Paste<image_type, SliceHandlerItkWrapper::tissues_ref_type>(output, tissues);
+	iseg::Paste<image_type, SlicesHandlerITKInterface::tissues_ref_type>(output, tissues);
 
 	return number_remaining;
 }

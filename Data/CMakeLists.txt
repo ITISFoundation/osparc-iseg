@@ -19,7 +19,7 @@ SET(SOURCES
 	Color.cpp
 	ItkProgressObserver.cpp
 	LogApi.cpp
-	SliceHandlerItkWrapper.cpp
+	SlicesHandlerITKInterface.cpp
 	Transform.cpp
 )
 

@@ -29,7 +29,7 @@ class BiasCorrectionWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~BiasCorrectionWidget();
 
@@ -47,7 +47,7 @@ private:
 			const std::vector<unsigned int>& numIters,
 			int shrinkFactor, double convergenceThreshold);
 
-	iseg::SliceHandlerInterface* handler3D;
+	iseg::SlicesHandlerInterface* handler3D;
 	unsigned short activeslice;
 	Q3VBox* vbox1;
 	QLabel* bias_header;

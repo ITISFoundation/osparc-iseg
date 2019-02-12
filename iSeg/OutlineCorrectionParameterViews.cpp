@@ -284,7 +284,7 @@ void AddSkinParamView::unit_changed()
 	}
 }
 
-FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /*= 0*/) : ParamViewBase(parent), _handler(h)
+FillSkinParamView::FillSkinParamView(SlicesHandlerInterface* h, QWidget* parent /*= 0*/) : ParamViewBase(parent), _handler(h)
 {
 	// parameter fields
 	_all_slices = new QCheckBox;

@@ -11,7 +11,7 @@
 
 #include "../config.h"
 
-#include "ActiveslicesConfigWidget.h"
+#include "ActiveSlicesConfigDialog.h"
 #include "AtlasWidget.h"
 #include "EdgeWidget.h"
 #include "FastmarchingFuzzyWidget.h"
@@ -4755,7 +4755,7 @@ void MainWindow::execute_undoconf()
 
 void MainWindow::execute_activeslicesconf()
 {
-	ActiveSlicesConfigWidget AC(handler3D, this);
+	ActiveSlicesConfigDialog AC(handler3D, this);
 	AC.move(QCursor::pos());
 	AC.exec();
 
