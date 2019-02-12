@@ -9,17 +9,14 @@
  */
 #pragma once
 
-#include <vector>
-
 #include "Data/SlicesHandlerInterface.h"
+
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
 #include <qpushbutton.h>
 #include <qspinbox.h>
+
+#include <vector>
 
 namespace itk {
 class ProcessObject;
@@ -33,7 +30,6 @@ public:
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~BiasCorrectionWidget();
 
-	QSize sizeHint() const override;
 	void init() override;
 	void newloaded() override;
 	std::string GetName() override;
@@ -49,18 +45,11 @@ private:
 
 	iseg::SlicesHandlerInterface* handler3D;
 	unsigned short activeslice;
-	Q3VBox* vbox1;
-	QLabel* bias_header;
-	QPushButton* bias_exec;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	QLabel* txt_h2;
-	QLabel* txt_h3;
-	QLabel* txt_h4;
-	QSpinBox* edit_num_levels;
-	QSpinBox* edit_shrink_factor;
-	QSpinBox* edit_num_iterations;
+
+	QSpinBox* number_levels;
+	QSpinBox* shrink_factor;
+	QSpinBox* number_iterations;
+	QPushButton* execute;
 
 	itk::ProcessObject* m_CurrentFilter;
 
