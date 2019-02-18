@@ -875,10 +875,9 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(fillskin->isChecked());
 		//fwrite(&(dummy), 1,sizeof(int), fp);
-		bool w = current_params->work();
-		dummy = (int)(!w);
+		dummy = (current_params->work() ? 0 : 1);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(w);
+		dummy = (current_params->work() ? 1 : 0);
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = (int)(brush_params->_erase->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);

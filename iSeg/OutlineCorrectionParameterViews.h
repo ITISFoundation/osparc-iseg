@@ -48,8 +48,12 @@ class OLCorrParamView : public ParamViewBase
 public:
 	OLCorrParamView(QWidget* parent = 0);
 
-	bool work() const override { return _target->isChecked(); }
-	void set_work(bool v) override { _target->setChecked(v); }
+	bool work() const override { return _target->isOn(); }
+	void set_work(bool v) override
+	{
+		_target->setOn(v);
+		_tissues->setOn(!v);
+	}
 	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override;
 
@@ -67,8 +71,12 @@ class BrushParamView : public ParamViewBase
 public:
 	BrushParamView(QWidget* parent = 0);
 
-	bool work() const override { return _target->isChecked(); }
-	void set_work(bool v) override { _target->setChecked(v); }
+	bool work() const override { return _target->isOn(); }
+	void set_work(bool v) override
+	{
+		_target->setOn(v);
+		_tissues->setOn(!v);
+	}
 	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override;
 
@@ -105,8 +113,12 @@ class FillHolesParamView : public ParamViewBase
 public:
 	FillHolesParamView(QWidget* parent = 0);
 
-	bool work() const override { return _target->isChecked(); }
-	void set_work(bool v) override { _target->setChecked(v); }
+	bool work() const override { return _target->isOn(); }
+	void set_work(bool v) override
+	{
+		_target->setOn(v);
+		_tissues->setOn(!v);
+	}
 	float object_value() const override { return _object_value->text().toFloat(); }
 	void set_object_value(float v) override;
 
@@ -132,8 +144,12 @@ class AddSkinParamView : public ParamViewBase
 public:
 	AddSkinParamView(QWidget* parent = 0);
 
-	bool work() const override { return _target->isChecked(); }
-	void set_work(bool v) override { _target->setChecked(v); }
+	bool work() const override { return _target->isOn(); }
+	void set_work(bool v) override
+	{
+		_target->setOn(v);
+		_tissues->setOn(!v);
+	}
 
 	// params
 	QCheckBox* _all_slices;
@@ -201,8 +217,12 @@ class FillAllParamView : public ParamViewBase
 public:
 	FillAllParamView(QWidget* parent = 0);
 
-	bool work() const override { return _target->isChecked(); }
-	void set_work(bool v) override { _target->setChecked(v); }
+	bool work() const override { return _target->isOn(); }
+	void set_work(bool v) override
+	{
+		_target->setOn(v);
+		_tissues->setOn(!v);
+	}
 
 	// params
 	QCheckBox* _all_slices;
