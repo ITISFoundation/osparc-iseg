@@ -18,7 +18,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QScrollArea>
-#include <QStackedLayout>
 
 #include <initializer_list>
 

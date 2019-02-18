@@ -21,10 +21,35 @@
 #include "Core/Pair.h"
 
 #include <QLabel>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QStackedWidget>
 
 #include <fstream>
+#include <initializer_list>
 
 using namespace iseg;
+
+namespace {
+QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
+{
+	auto box = new QHBoxLayout;
+	for (auto w : list)
+	{
+		box->addWidget(w);
+	}
+	return box;
+}
+QVBoxLayout* make_vbox(std::initializer_list<QWidget*> list)
+{
+	auto box = new QVBoxLayout;
+	for (auto w : list)
+	{
+		box->addWidget(w);
+	}
+	return box;
+}
+}
 
 MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -35,62 +60,76 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
-
-	hboxoverall = new Q3HBox(this);
-	hboxoverall->setMargin(8);
-	vboxmethods = new Q3VBox(hboxoverall);
-	vbox1 = new Q3VBox(hboxoverall);
-	hbox2 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-	hbox4 = new Q3HBox(vbox1);
-	txt_displayer = new QLabel(" ", vbox1);
-
 	state = 0;
 
-	rb_vector = new QRadioButton(QString("Vect."), vboxmethods);
-	rb_dist = new QRadioButton(QString("Dist."), vboxmethods);
-	rb_thick = new QRadioButton(QString("Thick."), vboxmethods);
-	rb_angle = new QRadioButton(QString("Angle"), vboxmethods);
-	rb_4ptangle = new QRadioButton(QString("4pt-Angle"), vboxmethods);
-	rb_vol = new QRadioButton(QString("Volume"), vboxmethods);
-	modegroup = new QButtonGroup(this);
-	//	modegroup->hide();
+	// properties
+	txt_displayer = new QLabel(" ");
+	//txt_displayer->setWordWrap(true);
+
+	rb_vector = new QRadioButton("Vector");
+	rb_dist = new QRadioButton("Distance");
+	rb_thick = new QRadioButton("Thickness");
+	rb_angle = new QRadioButton("Angle");
+	rb_4ptangle = new QRadioButton("4pt-Angle");
+	rb_vol = new QRadioButton("Volume");
+	auto modegroup = new QButtonGroup(this);
 	modegroup->insert(rb_vector);
 	modegroup->insert(rb_dist);
 	modegroup->insert(rb_thick);
 	modegroup->insert(rb_angle);
 	modegroup->insert(rb_4ptangle);
 	modegroup->insert(rb_vol);
-	rb_dist->setChecked(TRUE);
+	rb_dist->setChecked(true);
 
-	rb_pts = new QRadioButton(QString("Clicks"), hbox2);
-	rb_lbls = new QRadioButton(QString("Labels"), hbox2);
-	inputgroup = new QButtonGroup(this);
-	//	inputgroup->hide();
+	rb_pts = new QRadioButton("Clicks");
+	rb_lbls = new QRadioButton("Labels");
+	auto inputgroup = new QButtonGroup(this);
 	inputgroup->insert(rb_pts);
 	inputgroup->insert(rb_lbls);
-	rb_pts->setChecked(TRUE);
+	rb_pts->setChecked(true);
 
-	txt_ccb1 = new QLabel("Pt. 1:", hbox3);
-	cbb_lb1 = new QComboBox(hbox3);
-	txt_ccb2 = new QLabel(" Pt. 2:", hbox3);
-	cbb_lb2 = new QComboBox(hbox3);
-	txt_ccb3 = new QLabel("Pt. 3:", hbox4);
-	cbb_lb3 = new QComboBox(hbox4);
-	txt_ccb4 = new QLabel(" Pt. 4:", hbox4);
-	cbb_lb4 = new QComboBox(hbox4);
+	cbb_lb1 = new QComboBox;
+	cbb_lb2 = new QComboBox;
+	cbb_lb3 = new QComboBox;
+	cbb_lb4 = new QComboBox;
 
-	vboxmethods->setMargin(5);
-	vbox1->setMargin(5);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
+	// layout
+	auto method_layout = make_vbox({rb_vector, rb_dist, rb_thick, rb_angle, rb_4ptangle, rb_vol});
+	auto method_area = new QFrame;
+	method_area->setLayout(method_layout);
+	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	method_area->setLineWidth(1);
 
-	hbox2->setFixedSize(hbox2->sizeHint());
-	hbox3->setFixedSize(hbox3->sizeHint());
-	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
-	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());//
-	vbox1->setFixedSize(vbox1->sizeHint());
+	input_area = new QWidget;
+	input_area->setLayout(make_hbox({rb_pts, rb_lbls}));
+	input_area->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
+	auto labels_layout = new QFormLayout;
+	labels_layout->addRow("Point 1", cbb_lb1);
+	labels_layout->addRow("Point 2", cbb_lb2);
+	labels_layout->addRow("Point 3", cbb_lb3);
+	labels_layout->addRow("Point 4", cbb_lb4);
+
+	labels_area = new QWidget;
+	labels_area->setLayout(labels_layout);
+
+	auto params_layout = new QVBoxLayout;
+	params_layout->addWidget(input_area);
+	params_layout->addWidget(txt_displayer);
+	params_layout->setAlignment(txt_displayer, Qt::AlignHCenter | Qt::AlignCenter);
+
+	stacked_widget = new QStackedWidget;
+	stacked_widget->addWidget(new QLabel(" "));
+	stacked_widget->addWidget(labels_area);
+
+	auto top_layout = new QHBoxLayout;
+	top_layout->addWidget(method_area);
+	top_layout->addLayout(params_layout);
+	top_layout->addWidget(stacked_widget);
+
+	setLayout(top_layout);
+
+	// initialize
 	marks_changed();
 	method_changed(0);
 	inputtype_changed(0);
@@ -101,36 +140,20 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	emit vp1dyn_changed(&established, &dynamic);
 
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed(int)));
-	QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(inputtype_changed(int)));
-	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb3, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb4, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
+	// connections
+	connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
+	connect(inputgroup, SIGNAL(buttonClicked(int)), this, SLOT(inputtype_changed(int)));
+	connect(cbb_lb1, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb2, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb3, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb4, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
 }
-
-MeasurementWidget::~MeasurementWidget()
-{
-	delete vbox1;
-	delete modegroup;
-	delete inputgroup;
-}
-
-QSize MeasurementWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void MeasurementWidget::bmphand_changed(bmphandler* bmph)
 {
 	bmphand = bmph;
 
 	getlabels();
-
-	return;
 }
 
 void MeasurementWidget::init()
@@ -141,7 +164,29 @@ void MeasurementWidget::init()
 		bmphand_changed(handler3D->get_activebmphandler());
 	}
 	else
+	{
 		getlabels();
+	}
+}
+
+void MeasurementWidget::setActiveLabels(eActiveLabels act)
+{
+	bool b1=false, b2=false, b3=false, b4=false;
+	switch(act)
+	{
+	case kP4:
+		b4 = true;
+	case kP3:
+		b3 = true;
+	case kP2:
+		b2 = true;
+	case kP1:
+		b1 = true;
+	}
+	cbb_lb1->setEnabled(b1);
+	cbb_lb2->setEnabled(b2);
+	cbb_lb3->setEnabled(b3);
+	cbb_lb4->setEnabled(b4);
 }
 
 void MeasurementWidget::newloaded()
@@ -178,11 +223,6 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 3)
 	{
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed(int)));
-		QObject::disconnect(inputgroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(inputtype_changed(int)));
-
 		int dummy;
 		if (version >= 4)
 		{
@@ -204,11 +244,6 @@ FILE* MeasurementWidget::LoadParams(FILE* fp, int version)
 
 		method_changed(0);
 		inputtype_changed(0);
-
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed(int)));
-		QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(inputtype_changed(int)));
 	}
 	return fp;
 }
@@ -422,20 +457,15 @@ void MeasurementWidget::on_mouse_clicked(Point p)
 			else
 				tissuename1 = ToQ(TissueInfos::GetTissueName(tnr));
 			QString note = QString("");
-			if (!(handler3D->start_slice() == 0 &&
-							handler3D->end_slice() == handler3D->num_slices()))
+			if (!(handler3D->start_slice() == 0 && handler3D->end_slice() == handler3D->num_slices()))
 			{
 				note = QString("\nCalculated for active slices only.");
 			}
 			txt_displayer->setText(
 					QString("Tissue '") + tissuename1 + QString("': ") +
-					QString::number(handler3D->calculate_tissuevolume(
-															p, handler3D->active_slice()),
-							'g', 3) +
+					QString::number(handler3D->calculate_tissuevolume(p, handler3D->active_slice()), 'g', 3) +
 					QString(" mm^3\n") + QString("'Target': ") +
-					QString::number(handler3D->calculate_volume(
-															p, handler3D->active_slice()),
-							'g', 3) +
+					QString::number(handler3D->calculate_volume(p, handler3D->active_slice()), 'g', 3) +
 					QString(" mm^3") + note + QString("\n(Select new object.)"));
 		}
 	}
@@ -451,8 +481,7 @@ void MeasurementWidget::on_mouse_moved(Point p)
 	}
 }
 
-void MeasurementWidget::set_coord(unsigned short posit, Point p,
-		unsigned short slicenr)
+void MeasurementWidget::set_coord(unsigned short posit, Point p, unsigned short slicenr)
 {
 	pt[posit][0] = (int)p.px;
 	pt[posit][1] = (int)p.py;
@@ -482,8 +511,7 @@ void MeasurementWidget::cbb_changed(int)
 			else
 				p2 = labels[cbb_lb2->currentItem() - 1].p;
 			addLine(&established, p1, p2);
-			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-														 QString(" mm"));
+			txt_displayer->setText(QString::number(calculate(), 'g', 3) + QString(" mm"));
 		}
 		else if (rb_thick->isChecked())
 		{
@@ -500,8 +528,7 @@ void MeasurementWidget::cbb_changed(int)
 			else
 				p2 = labels[cbb_lb2->currentItem() - 1].p;
 			addLine(&established, p1, p2);
-			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-														 QString(" mm"));
+			txt_displayer->setText(QString::number(calculate(), 'g', 3) + QString(" mm"));
 		}
 		else if (rb_vector->isChecked())
 		{
@@ -544,8 +571,7 @@ void MeasurementWidget::cbb_changed(int)
 				p3 = labels[cbb_lb3->currentItem() - 1].p;
 			addLine(&established, p1, p2);
 			addLine(&established, p2, p3);
-			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-														 QString(" deg"));
+			txt_displayer->setText(QString::number(calculate(), 'g', 3) + QString(" deg"));
 		}
 		else if (rb_4ptangle->isChecked())
 		{
@@ -572,8 +598,7 @@ void MeasurementWidget::cbb_changed(int)
 			addLine(&established, p1, p2);
 			addLine(&established, p2, p3);
 			addLine(&established, p3, p4);
-			txt_displayer->setText(QString::number(calculate(), 'g', 3) +
-														 QString(" deg"));
+			txt_displayer->setText(QString::number(calculate(), 'g', 3) + QString(" deg"));
 		}
 		emit vp1dyn_changed(&established, &dynamic);
 	}
@@ -581,26 +606,27 @@ void MeasurementWidget::cbb_changed(int)
 
 void MeasurementWidget::method_changed(int) { update_visualization(); }
 
-void MeasurementWidget::inputtype_changed(int) { update_visualization(); }
+void MeasurementWidget::inputtype_changed(int)
+{ 
+	update_visualization();
+}
 
 void MeasurementWidget::update_visualization()
 {
 	if (labels.empty())
 	{
-		QObject::disconnect(inputgroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(inputtype_changed(int)));
-		hbox2->hide();
+		//BLdisconnect(inputgroup, SIGNAL(buttonClicked(int)), this, SLOT(inputtype_changed(int)));
+		input_area->hide();
 		rb_pts->setChecked(true);
 		rb_lbls->setChecked(false);
-		QObject::connect(inputgroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(inputtype_changed(int)));
+		//BLconnect(inputgroup, SIGNAL(buttonClicked(int)), this, SLOT(inputtype_changed(int)));
 	}
 	else
 	{
-		hbox2->show();
+		input_area->show();
 	}
 
-	if (rb_pts->isChecked())
+	if (rb_pts->isChecked() || rb_vol->isChecked())
 	{
 		state = 0;
 		drawing = false;
@@ -608,8 +634,7 @@ void MeasurementWidget::update_visualization()
 		established.clear();
 		dynamic.clear();
 		emit vp1dyn_changed(&established, &dynamic);
-		hbox3->hide();
-		hbox4->hide();
+		stacked_widget->setCurrentIndex(0);
 		if (rb_dist->isChecked() || rb_thick->isChecked() || rb_vector->isChecked())
 		{
 			txt_displayer->setText("Mark start point.");
@@ -624,42 +649,23 @@ void MeasurementWidget::update_visualization()
 		}
 		else if (rb_vol->isChecked())
 		{
-			hbox2->hide();
 			txt_displayer->setText("Select object.");
 		}
 	}
 	else if (rb_lbls->isChecked())
 	{
+		stacked_widget->setCurrentIndex(1);
 		if (rb_dist->isChecked() || rb_thick->isChecked() || rb_vector->isChecked())
 		{
-			hbox3->show();
-			hbox4->hide();
-			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" mm"));
+			setActiveLabels(kP2);
 		}
 		else if (rb_angle->isChecked())
 		{
-			hbox3->show();
-			hbox4->show();
-			cbb_lb3->show();
-			cbb_lb4->hide();
-			txt_ccb4->hide();
-			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" deg"));
+			setActiveLabels(kP3);
 		}
 		else if (rb_4ptangle->isChecked())
 		{
-			hbox3->show();
-			hbox4->show();
-			cbb_lb3->show();
-			cbb_lb4->show();
-			txt_ccb4->show();
-			//			txt_displayer->setText(QString::number(calculate(),'g',3)+QString(" deg"));
-		}
-		else if (rb_vol->isChecked())
-		{
-			hbox2->hide();
-			hbox3->hide();
-			hbox4->hide();
-			txt_displayer->setText("Select object.");
+			setActiveLabels(kP4);
 		}
 		cbb_changed(0);
 	}
@@ -673,14 +679,10 @@ void MeasurementWidget::getlabels()
 	cbb_lb3->clear();
 	cbb_lb4->clear();
 
-	QObject::disconnect(cbb_lb1, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::disconnect(cbb_lb2, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::disconnect(cbb_lb3, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::disconnect(cbb_lb4, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
+	disconnect(cbb_lb1, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	disconnect(cbb_lb2, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	disconnect(cbb_lb3, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	disconnect(cbb_lb4, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
 
 	cbb_lb1->insertItem(QString("Center"));
 	cbb_lb2->insertItem(QString("Center"));
@@ -695,14 +697,10 @@ void MeasurementWidget::getlabels()
 		cbb_lb4->insertItem(QString(labels[i].name.c_str()));
 	}
 
-	QObject::connect(cbb_lb1, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb2, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb3, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
-	QObject::connect(cbb_lb4, SIGNAL(activated(int)), this,
-			SLOT(cbb_changed(int)));
+	connect(cbb_lb1, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb2, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb3, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
+	connect(cbb_lb4, SIGNAL(activated(int)), this, SLOT(cbb_changed(int)));
 
 	update_visualization();
 }
@@ -717,8 +715,6 @@ float MeasurementWidget::calculate()
 	float value = 0;
 	if (rb_lbls->isChecked())
 	{
-		//float thick=handler3D->get_slicethickness();
-		//Pair p1=handler3D->get_pixelsize();
 		if (cbb_lb1->currentItem() == 0)
 		{
 			pt[0][0] = (int)handler3D->width() / 2;
@@ -852,8 +848,6 @@ float MeasurementWidget::calculatevec(unsigned short orient)
 	float value = 0;
 	if (rb_lbls->isChecked())
 	{
-		//float thick=handler3D->get_slicethickness();
-		//Pair p1=handler3D->get_pixelsize();
 		if (cbb_lb1->currentItem() == 0)
 		{
 			pt[0][0] = (int)handler3D->width() / 2;
