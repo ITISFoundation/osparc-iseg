@@ -18,6 +18,8 @@
 #include "Data/Point.h"
 #include "Data/addLine.h"
 
+#include "Interface/LayoutTools.h"
+
 #include "Core/Pair.h"
 
 #include <QLabel>
@@ -29,27 +31,6 @@
 #include <initializer_list>
 
 using namespace iseg;
-
-namespace {
-QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
-{
-	auto box = new QHBoxLayout;
-	for (auto w : list)
-	{
-		box->addWidget(w);
-	}
-	return box;
-}
-QVBoxLayout* make_vbox(std::initializer_list<QWidget*> list)
-{
-	auto box = new QVBoxLayout;
-	for (auto w : list)
-	{
-		box->addWidget(w);
-	}
-	return box;
-}
-}
 
 MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)

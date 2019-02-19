@@ -13,27 +13,16 @@
 
 #include "Data/addLine.h"
 
+#include "Interface/LayoutTools.h"
+
 #include "Core/Pair.h"
 
 #include <QFormLayout>
 #include <QKeyEvent>
 
 #include <fstream>
-#include <initializer_list>
 
 using namespace iseg;
-
-namespace {
-QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
-{
-	auto hbox = new QHBoxLayout;
-	for (auto w : list)
-	{
-		hbox->addWidget(w);
-	}
-	return hbox;
-}
-}
 
 PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)

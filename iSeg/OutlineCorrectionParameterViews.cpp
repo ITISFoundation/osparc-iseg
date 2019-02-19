@@ -12,6 +12,7 @@
 #include "OutlineCorrectionParameterViews.h"
 
 #include "Interface/FormatTooltip.h"
+#include "Interface/LayoutTools.h"
 
 #include <QFormLayout>
 #include <QGroupBox>
@@ -19,29 +20,7 @@
 #include <QMessageBox>
 #include <QScrollArea>
 
-#include <initializer_list>
-
 namespace iseg {
-
-QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
-{
-	auto hbox = new QHBoxLayout;
-	for (auto w : list)
-	{
-		hbox->addWidget(w);
-	}
-	return hbox;
-}
-
-QButtonGroup* make_button_group(QWidget* parent, std::initializer_list<QRadioButton*> list)
-{
-	auto group = new QButtonGroup(parent);
-	for (auto w : list)
-	{
-		group->addButton(w);
-	}
-	return group;
-}
 
 OLCorrParamView::OLCorrParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 {

@@ -79,15 +79,16 @@ private:
 	QSpinBox* sb_iter;
 	QSpinBox* sb_kmax;
 	//	QSpinBox *sb_restrainmax;
-	QPushButton* pushexec;
-	QPushButton* contdiff;
+	QCheckBox* allslices;
 	QRadioButton* rb_gaussian;
 	QRadioButton* rb_average;
 	QRadioButton* rb_median;
 	QRadioButton* rb_sigmafilter;
 	QRadioButton* rb_anisodiff;
 	QButtonGroup* modegroup;
-	QCheckBox* allslices;
+	QPushButton* pushexec;
+	QPushButton* contdiff;
+	
 	bool dontundo;
 
 private slots:

@@ -15,8 +15,8 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <qbuttongroup.h>
-#include <QHBoxLayout>
+#include "Interface/LayoutTools.h"
+
 #include <QFormLayout>
 #include <QStackedLayout>
 #include <qpushbutton.h>
@@ -24,28 +24,15 @@
 #include <qslider.h>
 #include <qspinbox.h>
 
-#include <algorithm>
-#include <initializer_list>
-
 using namespace iseg;
 
 namespace {
-QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
-{
-	auto hbox = new QHBoxLayout;
-	for (auto w : list)
-	{
-		hbox->addWidget(w);
-	}
-	return hbox;
-}
 QWidget* add_to_widget(QLayout* layout)
 {
 	auto widget = new QWidget;
 	widget->setLayout(layout);
 	return widget;
 }
-
 }
 
 FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
@@ -105,9 +92,7 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 			"The boundary is continuously expanding. The Sigma parameter "
 			"(Gaussian smoothing) controls the impact of noise."));
 
-	auto bg_method = new QButtonGroup(this);
-	bg_method->insert(rb_fastmarch);
-	bg_method->insert(rb_fuzzy);
+	auto bg_method = make_button_group(this, {rb_fastmarch, rb_fuzzy});
 	rb_fastmarch->setChecked(true);
 
 	rb_drag = new QRadioButton(tr("Drag"));
