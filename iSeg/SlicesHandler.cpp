@@ -63,6 +63,8 @@
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
+#include <vtkSTLReader.h>
+#include <vtkPolyDataReader.h>
 #include <vtkStringArray.h>
 #include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
@@ -823,10 +825,8 @@ int SlicesHandler::ReadRTdose(const char* filename)
 	return res;
 }
 
-bool SlicesHandler::LoadSurface(const char* filename,
-		bool overwrite_working, bool intersect)
+bool SlicesHandler::LoadSurface(const std::string& filename_in, bool overwrite_working, bool intersect)
 {
-	float spacing[3] = {_dx, _dy, _thickness};
 	unsigned dims[3] = {_width, _height, _nrslices};
 	auto slices = target_slices();
 
@@ -835,17 +835,35 @@ bool SlicesHandler::LoadSurface(const char* filename,
 		clear_work();
 	}
 
+	std::string filename = filename_in;
+	std::transform(filename_in.begin(), filename_in.end(), filename.begin(), ::tolower);
+
+	vtkSmartPointer<vtkAlgorithm> reader;
+	if (filename.substr(filename.find_last_of(".") + 1) == "stl")
+	{
+		auto stl_reader = vtkSmartPointer<vtkSTLReader>::New();
+		stl_reader->SetFileName(filename.c_str());
+		reader = stl_reader;
+	}
+	else if (filename.substr(filename.find_last_of(".") + 1) == "vtk")
+	{
+		auto vtk_reader = vtkSmartPointer<vtkPolyDataReader>::New();
+		vtk_reader->SetFileName(filename.c_str());
+		reader = vtk_reader;
+	}
+	
+	reader->Update();
+	auto surface = vtkPolyData::SafeDownCast(reader->GetOutputDataObject(0));
+
 	VoxelSurface voxeler;
 	VoxelSurface::eSurfaceImageOverlap ret;
 	if (intersect)
 	{
-		ret = voxeler.Intersect(filename, dims, spacing, _transform, slices.data(),
-				_startslice, _endslice);
+		ret = voxeler.Intersect(surface, slices, dims, spacing(), _transform, _startslice, _endslice);
 	}
 	else
 	{
-		ret = voxeler.Run(filename, dims, spacing, _transform, slices.data(),
-				_startslice, _endslice);
+		ret = voxeler.Voxelize(surface, slices, dims, spacing(), _transform, _startslice, _endslice);
 	}
 	return (ret != VoxelSurface::kNone);
 }

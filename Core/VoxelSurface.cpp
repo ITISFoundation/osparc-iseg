@@ -12,6 +12,7 @@
 #include "VoxelSurface.h"
 
 #include "Data/Transform.h"
+#include "Data/ImageToITK.h"
 
 #include <vtkBoundingBox.h>
 #include <vtkCutter.h>
@@ -29,6 +30,10 @@
 #include <vtkTransform.h>
 #include <vtkTriangle.h>
 #include <vtkUnsignedCharArray.h>
+
+#include <itkPolyLineParametricPath.h>
+#include <itkPathIterator.h>
+#include <itkImage.h>
 
 using namespace iseg;
 
@@ -56,30 +61,81 @@ float round_me_dn(float n, const float to_what)
 	return n;
 }
 
-} // namespace
-
-VoxelSurface::eSurfaceImageOverlap
-		VoxelSurface::Run(const char* filename, const unsigned dims[3],
-				const float spacing[3], const Transform& transform,
-				float** slices, unsigned startslice,
-				unsigned endslice) const
+template<typename TImage>
+VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<double, 3>>& polyline, 
+		TImage* label_field, float label, int startslice, int endslice)
 {
-	vtkNew<vtkSTLReader> reader;
-	reader->SetFileName(filename);
-	reader->Update();
-	if (reader->GetOutput())
+	using label_field_type = TImage;
+	using path_type = itk::PolyLineParametricPath<3>;
+
+	VoxelSurface::eSurfaceImageOverlap ret = VoxelSurface::kNone;
+	for (size_t i = 1; i < polyline.size(); ++i)
 	{
-		return Run(reader->GetOutput(), dims, spacing, transform, slices,
-				startslice, endslice);
+		auto p0 = polyline[i - 1];
+		auto p1 = polyline[i];
+
+		itk::Index<3> idx0, idx1;
+		auto p0in = label_field->TransformPhysicalPointToIndex(p0, idx0);
+		auto p1in = label_field->TransformPhysicalPointToIndex(p1, idx1);
+
+		auto path = path_type::New();
+		path->Initialize();
+		if (p0in && p1in)
+		{
+			if (ret == VoxelSurface::kNone)
+				ret = VoxelSurface::kContained;
+
+			path->AddVertex(idx0);
+			path->AddVertex(idx1);
+		}
+		else if (p0in || p1in)
+		{
+		ret = VoxelSurface::kPartial;
+
+			if (p1in) // reduce to one case
+			{
+				std::swap(p0, p1);
+				std::swap(idx0, idx1);
+			}
+
+			path->AddVertex(idx0);
+
+			// do iterative bisection to find point close (and inside) to boundary
+			itk::Point<double, 3> pnew;
+			for (int iter=0; iter<10; iter++)
+			{
+				if (p0 != p1)
+				{
+					pnew.SetToMidPoint(p0, p1);
+					auto pnewin = label_field->TransformPhysicalPointToIndex(pnew, idx1);
+					if (pnewin)
+						p0 = pnew;
+					else
+						p1 = pnew;
+				}
+			}
+			label_field->TransformPhysicalPointToIndex(p0, idx1);
+			path->AddVertex(idx1);
+		}
+
+		if (path->GetVertexList()->Size())
+		{
+			itk::PathIterator<label_field_type, path_type> it(label_field, path);
+			for (it.GoToBegin(); !it.IsAtEnd(); ++it)
+			{
+				if (it.GetIndex()[2] >= startslice && it.GetIndex()[2] < endslice)
+				{
+					it.Set(label);
+				}
+			}
+		}
 	}
-	return eSurfaceImageOverlap::kNone;
+	return ret;
 }
 
-VoxelSurface::eSurfaceImageOverlap
-		VoxelSurface::Run(vtkPolyData* surface, const unsigned dims[3],
-				const float spacing[3], const Transform& transform,
-				float** slices, unsigned startslice,
-				unsigned endslice) const
+VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** slices, const unsigned dims[3],
+		const float spacing[3], const Transform& transform,
+		float label, unsigned startslice, unsigned endslice)
 {
 	// instead of applying the transform to the image, we inverse transform the surface
 	auto m = to_double(transform);
@@ -97,18 +153,18 @@ VoxelSurface::eSurfaceImageOverlap
 			(dims[1] - 1) * spacing[1], 0,
 			(dims[2] - 1) * spacing[2]);
 
-	eSurfaceImageOverlap result = kNone;
+	VoxelSurface::eSurfaceImageOverlap result = VoxelSurface::kNone;
 	if (image_bb.Contains(surface_bb))
 	{
-		result = eSurfaceImageOverlap::kContained;
+		result = VoxelSurface::eSurfaceImageOverlap::kContained;
 	}
 	else if (image_bb.Intersects(surface_bb))
 	{
-		result = eSurfaceImageOverlap::kPartial;
+		result = VoxelSurface::eSurfaceImageOverlap::kPartial;
 	}
 	else
 	{
-		return eSurfaceImageOverlap::kNone;
+		return VoxelSurface::eSurfaceImageOverlap::kNone;
 	}
 
 	vtkNew<vtkPolyData> surface_inverse_transformed;
@@ -232,7 +288,7 @@ VoxelSurface::eSurfaceImageOverlap
 							int ds_y = offset_y + ct_y;
 
 							int index = ds_x + ds_y * (dims[0]);
-							workBits[index] = m_ForeGroundValue;
+							workBits[index] = label;
 						}
 					}
 				}
@@ -243,13 +299,43 @@ VoxelSurface::eSurfaceImageOverlap
 	return result;
 }
 
-VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(const char* filename, const unsigned dims[3], const float spacing[3], const Transform& transform, float** slices, unsigned startslice, unsigned endslice, double rel_tolerance)
-{
-	vtkNew<vtkSTLReader> reader;
-	reader->SetFileName(filename);
-	reader->Update();
-	auto surface = reader->GetOutput();
+} // namespace
 
+VoxelSurface::eSurfaceImageOverlap VoxelSurface::Voxelize(vtkPolyData* polydata, 
+		std::vector<float*>& all_slices, const unsigned dims[3],
+		const Vec3& spacing, const Transform& transform,
+		unsigned startslice, unsigned endslice) const
+{
+	eSurfaceImageOverlap res = kNone;
+	if (polydata->GetNumberOfPolys() != 0)
+	{
+		return voxelSurface(polydata, all_slices.data(), dims, spacing.v, transform, m_ForeGroundValue, startslice, endslice);
+	}
+	else if (polydata->GetNumberOfLines() != 0)
+	{
+		using image_type = itk::SliceContiguousImage<float>;
+		auto image = wrapToITK(all_slices, dims, 0, dims[2], spacing, transform);
+
+		vtkIdType npts, *pts;
+		vtkCellArray* lines = polydata->GetLines();
+		for (lines->InitTraversal(); lines->GetNextCell(npts, pts); )
+		{
+			std::vector<itk::Point<double,3>> line(npts);
+			for (vtkIdType i=0; i<npts; ++i)
+			{
+				polydata->GetPoint(pts[i], line[i].GetDataPointer());
+			}
+			res = std::max(res, voxelPolyline<image_type>(line, image, m_ForeGroundValue, startslice, endslice));
+		}
+	}	
+	return res;
+}
+
+VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface, 
+		std::vector<float*>& all_slices, const unsigned dims[3], 
+		const Vec3& spacing, const Transform& transform, 
+		unsigned startslice, unsigned endslice, double rel_tolerance)
+{
 	// instead of applying the transform to the image, we inverse transform the surface
 	auto m = to_double(transform);
 	vtkNew<vtkTransform> inverse_transform;
@@ -284,7 +370,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(const char* filename,
 	surface->BuildCells();
 	auto num_cells = surface->GetNumberOfCells();
 
-	double tol = (*std::min_element(spacing, spacing + 3)) * rel_tolerance;
+	double tol = (*std::min_element(spacing.v, spacing.v + 3)) * rel_tolerance;
 	vtkIdType *pts, npts;
 	double bb[6];
 	int bbi[6];
@@ -332,7 +418,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(const char* filename,
 									ijk[1] < dims[1] &&
 									ijk[2] < dims[2])
 							{
-								float* slice = slices[ijk[2]];
+								float* slice = all_slices[ijk[2]];
 								slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
 							}
 
@@ -344,7 +430,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(const char* filename,
 										ijk[1] < dims[1] &&
 										ijk[2] < dims[2])
 								{
-									float* slice = slices[ijk[2]];
+									float* slice = all_slices[ijk[2]];
 									slice[ijk[0] + dims[0] * ijk[1]] = m_ForeGroundValue;
 								}
 							}
