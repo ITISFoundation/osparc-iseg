@@ -279,6 +279,7 @@ public:
 	std::array<unsigned int, 2> getDimensions() const;
 	std::array<unsigned int, 3> getSubregionStart() const;
 	std::array<unsigned int, 3> getSubregionSize() const;
+	int getBits() const;
 
 private:
 	SlicesHandler* handler3D;

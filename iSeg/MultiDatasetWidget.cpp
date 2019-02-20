@@ -147,11 +147,6 @@ void MultiDatasetWidget::NewLoaded()
 
 void MultiDatasetWidget::AddDatasetPressed()
 {
-	// BL todo:
-	// a) detect if correct info without loading full data, abort if incorrect and user does not want to resample
-	// b) load via itk instead of SliceHandler,
-	// c) resample to current shape/position if requested
-
 	SupportedMultiDatasetTypes dlg;
 	dlg.exec();
 
@@ -190,8 +185,9 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 				image = reader->GetOutput();
 			}
-			catch (itk::ExceptionObject&)
+			catch (itk::ExceptionObject& e)
 			{
+				ISEG_ERROR("Failed to load file series: " << e.what());
 			}
 		}
 		break;
@@ -208,6 +204,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 			auto dims = LR.getDimensions();
 			auto start = LR.getSubregionStart();
 			auto size = LR.getSubregionSize();
+			int bits = LR.getBits();
 
 			loadfilenames.append(loadfilename);
 
@@ -215,7 +212,19 @@ void MultiDatasetWidget::AddDatasetPressed()
 			region.SetIndex(std::vector<itk::IndexValueType>(start.begin(), start.end()));
 			region.SetSize(std::vector<itk::SizeValueType>(size.begin(), size.end()));
 
-			auto rawio = itk::RawImageIO<float, 3>::New();
+			itk::ImageIOBase::Pointer rawio;
+			if (bits == 8)
+			{
+				auto uchar_rawio = itk::RawImageIO<unsigned char, 3>::New();
+				uchar_rawio->SetHeaderSize(0);
+				rawio = uchar_rawio;
+			}
+			else //if (bits == 16)
+			{
+				auto ushort_rawio = itk::RawImageIO<unsigned short, 3>::New();
+				ushort_rawio->SetHeaderSize(0);
+				rawio = ushort_rawio;
+			}
 			rawio->SetDimensions(0, dims[0]);
 			rawio->SetDimensions(1, dims[1]);
 			rawio->SetDimensions(2, start[2] + size[2]); // may be more, but at least this many
@@ -232,9 +241,9 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 				loadfilenames.append(loadfilename);
 			}
-			catch (itk::ExceptionObject&)
+			catch (itk::ExceptionObject& e)
 			{
-				// todo
+				ISEG_ERROR("Failed to load raw file: " << e.what());
 			}
 		}
 		break;
@@ -257,9 +266,9 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 					loadfilenames.append(loadfilename);
 				}
-				catch (itk::ExceptionObject&)
+				catch (itk::ExceptionObject& e)
 				{
-					// todo
+					ISEG_ERROR("Failed to load file " << loadfilename.toStdString() << " :" << e.what());
 				}
 			}
 		}

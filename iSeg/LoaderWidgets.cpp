@@ -395,27 +395,32 @@ LoaderRaw::~LoaderRaw()
 
 QString LoaderRaw::GetFileName() const { return nameEdit->text(); }
 
-std::array<unsigned int,2> LoaderRaw::getDimensions() const
+std::array<unsigned int, 2> LoaderRaw::getDimensions() const
 {
 	return {
-		static_cast<unsigned>(xlength1->value()), 
-		static_cast<unsigned>(ylength1->value())};
+			static_cast<unsigned>(xlength1->value()),
+			static_cast<unsigned>(ylength1->value())};
 }
 
-std::array<unsigned int,3> LoaderRaw::getSubregionStart() const
+std::array<unsigned int, 3> LoaderRaw::getSubregionStart() const
 {
 	return {
-		static_cast<unsigned>(xoffset->value()), 
-		static_cast<unsigned>(yoffset->value()), 
-		static_cast<unsigned>(slicenrbox->value())};
+			static_cast<unsigned>(xoffset->value()),
+			static_cast<unsigned>(yoffset->value()),
+			static_cast<unsigned>(slicenrbox->value())};
 }
 
-std::array<unsigned int,3> LoaderRaw::getSubregionSize() const
+std::array<unsigned int, 3> LoaderRaw::getSubregionSize() const
 {
 	return {
-		static_cast<unsigned>(xlength->value()), 
-		static_cast<unsigned>(ylength->value()), 
-		static_cast<unsigned>(sb_nrslices->value())};
+			static_cast<unsigned>(subsect->isChecked() ? xlength->value() : xlength1->value()),
+			static_cast<unsigned>(subsect->isChecked() ? ylength->value() : ylength1->value()),
+			static_cast<unsigned>(sb_nrslices->value())};
+}
+
+int LoaderRaw::getBits() const
+{
+	return (bit8->isChecked() ? 8 : 16);
 }
 
 void LoaderRaw::subsect_toggled()
