@@ -26,6 +26,7 @@
 #include "MainWindow.h"
 #include "MeasurementWidget.h"
 #include "MorphologyWidget.h"
+#include "MultiDatasetWidget.h"
 #include "OutlineCorrectionWidget.h"
 #include "PickerWidget.h"
 #include "SaveOutlinesWidget.h"
@@ -713,7 +714,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	bitstack_widget = new bits_stack(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	overlay_widget = new extoverlay_widget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	multidataset_widget = new MultiDatasetWidget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
 	int height_max1 = height_max;
 

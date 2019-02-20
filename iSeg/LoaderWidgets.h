@@ -270,10 +270,17 @@ public:
 			  Qt::WindowFlags wFlags = 0);
 	~LoaderRaw();
 
-	QString GetFileName();
+	QString GetFileName() const;
+
+	void setSkipReading(bool skip) { skip_reading = skip; }
+
+	std::array<unsigned int,2> getDimensions() const;
+	std::array<unsigned int,3> getSubregionStart() const;
+	std::array<unsigned int,3> getSubregionSize() const;
 
 private:
 	SlicesHandler* handler3D;
+	bool skip_reading = true;
 	char* filename;
 	short unsigned w;
 	short unsigned h;
