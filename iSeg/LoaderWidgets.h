@@ -31,6 +31,8 @@
 #include <qstringlist.h>
 #include <qwidget.h>
 
+#include <array>
+
 namespace iseg {
 
 class LoaderDicom : public QDialog
@@ -38,8 +40,8 @@ class LoaderDicom : public QDialog
 	Q_OBJECT
 public:
 	LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload,
-				QWidget* parent = 0, const char* name = 0,
-				Qt::WindowFlags wFlags = 0);
+			QWidget* parent = 0, const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~LoaderDicom();
 
 private:
@@ -99,8 +101,8 @@ public:
 	};
 
 	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames,
-		QWidget* parent = 0, const char* name = 0,
-		Qt::WindowFlags wFlags = 0);
+			QWidget* parent = 0, const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~LoaderColorImages();
 
 	eImageType type = kPNG;
@@ -133,7 +135,7 @@ class ClickableLabel : public QLabel
 public:
 	ClickableLabel(QWidget* parent = 0, Qt::WindowFlags f = 0);
 	ClickableLabel(const QString& text, QWidget* parent = 0,
-				   Qt::WindowFlags f = 0);
+			Qt::WindowFlags f = 0);
 
 	void SetSquareWidth(int width);
 	void SetSquareHeight(int height);
@@ -158,7 +160,7 @@ class ChannelMixer : public QDialog
 	Q_OBJECT
 public:
 	ChannelMixer(std::vector<const char*> filenames, QWidget* parent = 0,
-				 const char* name = 0, Qt::WindowFlags wFlags = 0);
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ChannelMixer();
 
 	int GetRedFactor();
@@ -267,13 +269,21 @@ class LoaderRaw : public QDialog
 	Q_OBJECT
 public:
 	LoaderRaw(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
-			  Qt::WindowFlags wFlags = 0);
+			Qt::WindowFlags wFlags = 0);
 	~LoaderRaw();
 
-	QString GetFileName();
+	QString GetFileName() const;
+
+	void setSkipReading(bool skip) { skip_reading = skip; }
+
+	std::array<unsigned int, 2> getDimensions() const;
+	std::array<unsigned int, 3> getSubregionStart() const;
+	std::array<unsigned int, 3> getSubregionSize() const;
+	int getBits() const;
 
 private:
 	SlicesHandler* handler3D;
+	bool skip_reading = true;
 	char* filename;
 	short unsigned w;
 	short unsigned h;
@@ -329,7 +339,7 @@ class SaverImg : public QDialog
 	Q_OBJECT
 public:
 	SaverImg(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
-			 Qt::WindowFlags wFlags = 0);
+			Qt::WindowFlags wFlags = 0);
 	~SaverImg();
 	//	void update();
 	//protected:
@@ -377,8 +387,8 @@ class ReloaderBmp2 : public QDialog
 	Q_OBJECT
 public:
 	ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames,
-				 QWidget* parent = 0, const char* name = 0,
-				 Qt::WindowFlags wFlags = 0);
+			QWidget* parent = 0, const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
 	~ReloaderBmp2();
 	//	void update();
 	//protected:
@@ -410,7 +420,7 @@ class ReloaderRaw : public QDialog
 	Q_OBJECT
 public:
 	ReloaderRaw(SlicesHandler* hand3D, QWidget* parent = 0,
-				const char* name = 0, Qt::WindowFlags wFlags = 0);
+			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ReloaderRaw();
 	//	void update();
 	//protected:
@@ -460,7 +470,7 @@ class NewImg : public QDialog
 	Q_OBJECT
 public:
 	NewImg(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
-		   Qt::WindowFlags wFlags = 0);
+			Qt::WindowFlags wFlags = 0);
 	~NewImg();
 
 	bool new_pressed() const;
@@ -496,7 +506,7 @@ public:
 	QString get_editable_text();
 
 	EditText(QWidget* parent = 0, const char* name = 0,
-			 Qt::WindowFlags wFlags = 0);
+			Qt::WindowFlags wFlags = 0);
 	~EditText();
 
 private:
@@ -514,7 +524,12 @@ class SupportedMultiDatasetTypes : public QDialog
 {
 	Q_OBJECT
 public:
-	enum supportedTypes { bmp, dcm, nifti, raw, vtk, nrSupportedTypes };
+	enum supportedTypes { bmp,
+		dcm,
+		nifti,
+		raw,
+		vtk,
+		nrSupportedTypes };
 
 	inline QString ToQString(supportedTypes v)
 	{
@@ -532,7 +547,7 @@ public:
 	int GetSelectedType();
 
 	SupportedMultiDatasetTypes(QWidget* parent = 0, const char* name = 0,
-							   Qt::WindowFlags wFlags = 0);
+			Qt::WindowFlags wFlags = 0);
 	~SupportedMultiDatasetTypes();
 
 private:
