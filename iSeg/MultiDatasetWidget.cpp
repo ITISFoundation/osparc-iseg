@@ -9,9 +9,9 @@
  */
 #include "Precompiled.h"
 
+#include "LoaderWidgets.h"
 #include "MultiDatasetWidget.h"
 #include "SlicesHandler.h"
-#include "LoaderWidgets.h"
 
 #include <itkImageFileReader.h>
 #include <itkImageSeriesReader.h>
@@ -19,8 +19,8 @@
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
-#include <QGroupBox>
 #include <QFileDialog>
+#include <QGroupBox>
 
 using namespace iseg;
 
@@ -73,29 +73,9 @@ MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent,
 			SLOT(DatasetSelectionChanged()));
 
 	Initialize();
-	InitializeMap();
 }
 
 MultiDatasetWidget::~MultiDatasetWidget() { m_RadioButtons.clear(); }
-
-void MultiDatasetWidget::InitializeMap()
-{
-	m_MapDatasetValues["DCM"] = DatasetTypeEnum::DCM;
-	m_MapDatasetValues["DICOM"] = DatasetTypeEnum::DCM;
-	m_MapDatasetValues["BMP"] = DatasetTypeEnum::BMP;
-	m_MapDatasetValues["PNG"] = DatasetTypeEnum::PNG;
-	m_MapDatasetValues["RAW"] = DatasetTypeEnum::RAW;
-	m_MapDatasetValues["MHD"] = DatasetTypeEnum::MHD;
-	m_MapDatasetValues["AVW"] = DatasetTypeEnum::AVW;
-	m_MapDatasetValues["VTI"] = DatasetTypeEnum::VTK;
-	m_MapDatasetValues["VTK"] = DatasetTypeEnum::VTK;
-	m_MapDatasetValues["XMF"] = DatasetTypeEnum::XDMF;
-	m_MapDatasetValues["NII"] = DatasetTypeEnum::NIFTI;
-	m_MapDatasetValues["HDR"] = DatasetTypeEnum::NIFTI;
-	m_MapDatasetValues["IMG"] = DatasetTypeEnum::NIFTI;
-	m_MapDatasetValues["NIA"] = DatasetTypeEnum::NIFTI;
-	m_MapDatasetValues["RTDOSE"] = DatasetTypeEnum::RTDOSE;
-}
 
 void MultiDatasetWidget::Initialize()
 {
@@ -166,9 +146,9 @@ void MultiDatasetWidget::NewLoaded()
 
 void MultiDatasetWidget::AddDatasetPressed()
 {
-	// BL todo: 
+	// BL todo:
 	// a) detect if correct info without loading full data, abort if incorrect and user does not want to resample
-	// b) load via itk instead of SliceHandler, 
+	// b) load via itk instead of SliceHandler,
 	// c) resample to current shape/position if requested
 
 	SupportedMultiDatasetTypes dlg;
@@ -241,8 +221,8 @@ void MultiDatasetWidget::AddDatasetPressed()
 			//width = handler3D->width();
 			//height = handler3D->height();
 			//nrofslices = handler3D->num_slices();
-			std::vector< std::string > files;
-			for (const auto& f: loadfilenames)
+			std::vector<std::string> files;
+			for (const auto& f : loadfilenames)
 			{
 				files.push_back(f.toStdString());
 			}
@@ -262,7 +242,8 @@ void MultiDatasetWidget::AddDatasetPressed()
 				success = CheckInfoAndAddToList(dataInfo, loadfilenames, width, height, nrofslices);
 			}
 			catch (itk::ExceptionObject&)
-			{}
+			{
+			}
 		}
 		break;
 
@@ -297,7 +278,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 			try
 			{
 				reader->Update();
-				
+
 				image = reader->GetOutput();
 
 				loadfilenames.append(loadfilename);
@@ -309,7 +290,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 				success = CheckInfoAndAddToList(dataInfo, loadfilenames, width, height, nrofslices);
 			}
-			catch(itk::ExceptionObject& e)
+			catch (itk::ExceptionObject&)
 			{
 				// todo
 			}
@@ -341,7 +322,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 					success = CheckInfoAndAddToList(dataInfo, loadfilenames, width, height, nrofslices);
 				}
-				catch(itk::ExceptionObject& e)
+				catch (itk::ExceptionObject&)
 				{
 					// todo
 				}

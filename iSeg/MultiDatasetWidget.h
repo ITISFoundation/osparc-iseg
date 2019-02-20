@@ -13,8 +13,8 @@
 
 #include <QWidget>
 
-#include <vector>
 #include <map>
+#include <vector>
 
 class QGroupBox;
 class QRadioButton;
@@ -43,19 +43,6 @@ public:
 		bool m_IsActive;
 	};
 
-	enum DatasetTypeEnum {
-		DCM,
-		BMP,
-		PNG,
-		RAW,
-		MHD,
-		AVW,
-		VTK,
-		XDMF,
-		NIFTI,
-		RTDOSE
-	};
-
 	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~MultiDatasetWidget();
@@ -73,12 +60,11 @@ public:
 
 protected:
 	void Initialize();
-	void InitializeMap();
 	void ClearRadioButtons();
 
 	bool CheckInfoAndAddToList(SDatasetInfo& newRadioButton,
-					QStringList loadfilenames, unsigned short width,
-					unsigned short height, unsigned short nrofslices);
+			QStringList loadfilenames, unsigned short width,
+			unsigned short height, unsigned short nrofslices);
 	bool AddDatasetToList(SDatasetInfo& newRadioButton,
 			QStringList loadfilenames);
 	void CopyImagesSlices(SlicesHandler* handler3D,
@@ -114,7 +100,6 @@ private:
 	QPushButton* m_RemoveDatasetButton;
 
 	bool m_ItIsBeingLoaded;
-	std::map<std::string, DatasetTypeEnum> m_MapDatasetValues;
 };
 
-}
+} // namespace iseg
