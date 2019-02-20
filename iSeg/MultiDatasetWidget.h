@@ -81,9 +81,11 @@ protected:
 					unsigned short height, unsigned short nrofslices);
 	bool AddDatasetToList(SDatasetInfo& newRadioButton,
 			QStringList loadfilenames);
-	void CopyImagesSlices(SlicesHandler* handler3D,
-			SDatasetInfo& newRadioButton,
-			const bool saveOnlyWorkingBits = false);
+	void CopyImagesSlices(
+			const std::vector<const float*>& bmp_slices, 
+			const std::vector<const float*>& work_slices,
+			const std::array<size_t,3>& dims, 
+			SDatasetInfo& newRadioButton);
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,

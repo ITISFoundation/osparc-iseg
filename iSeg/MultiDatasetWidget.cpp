@@ -181,7 +181,6 @@ void MultiDatasetWidget::AddDatasetPressed()
 		using image_type = itk::Image<float, 3>;
 		image_type::Pointer image;
 
-		//SlicesHandler* handler3D = new SlicesHandler();
 		QStringList loadfilenames;
 		unsigned short width, height, nrofslices;
 		MultiDatasetWidget::SDatasetInfo dataInfo;
@@ -190,38 +189,6 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 		switch (SupportedMultiDatasetTypes::supportedTypes(selectedType))
 		{
-		/*
-		case SupportedMultiDatasetTypes::supportedTypes::bmp:
-		{
-			loadfilenames = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
-
-			if (!loadfilenames.empty())
-			{
-				std::sort(loadfilenames.begin(), loadfilenames.end());
-				short nrelem = loadfilenames.size();
-
-				std::vector<const char*> vfilenames;
-				for (short i = 0; i < nrelem; i++)
-				{
-					vfilenames.push_back(loadfilenames[i].ascii());
-				}
-
-				LoaderColorImages LB(handler3D, LoaderColorImages::kBMP, vfilenames, this);
-				LB.move(QCursor::pos());
-				LB.exec();
-
-				width = handler3D->width();
-				height = handler3D->height();
-				nrofslices = handler3D->num_slices();
-
-				success = CheckInfoAndAddToList(dataInfo, loadfilenames, width,
-						height, nrofslices);
-			}
-		}
-		break;
-		*/
 		case SupportedMultiDatasetTypes::supportedTypes::bmp:
 		case SupportedMultiDatasetTypes::supportedTypes::dcm:
 		{
@@ -230,17 +197,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 					"All (*)",
 					QString::null, this, "Open Files",
 					"Select one or more files to open");
-
-			//if (!loadfilenames.empty())
-			//{
-			//	LoaderDicom LD(handler3D, &loadfilenames, false, this);
-			//	LD.move(QCursor::pos());
-			//	LD.exec();
-			//}
-
-			//width = handler3D->width();
-			//height = handler3D->height();
-			//nrofslices = handler3D->num_slices();
+			
 			std::vector< std::string > files;
 			for (const auto& f: loadfilenames)
 			{
@@ -356,13 +313,25 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 		if (success && false)
 		{
+			std::array<size_t,3> dims = {width, height, nrofslices};
+
 			// Create the copy of the main dataset only when adding a second dataset
 			if (m_RadioButtons.size() == 1)
 			{
-				CopyImagesSlices(m_Handler3D, m_RadioButtons.at(0));
+				const SlicesHandler* chandler = m_Handler3D;
+				CopyImagesSlices(chandler->source_slices(), chandler->target_slices(), 
+					dims, m_RadioButtons.at(0));
 			}
 
-			//BLTODO CopyImagesSlices(handler3D, dataInfo);
+			auto buffer = image->GetBufferPointer();
+			auto slice_size = static_cast<size_t>(width*height);
+			std::vector<const float*> bmp_slices(nrofslices, nullptr);
+			for (unsigned i=0; i<nrofslices; ++i)
+			{
+				bmp_slices[i] = buffer + i * slice_size;
+			}
+
+			CopyImagesSlices(bmp_slices, bmp_slices, dims, dataInfo);
 			m_RadioButtons.push_back(dataInfo);
 		}
 	}
@@ -412,33 +381,33 @@ bool MultiDatasetWidget::AddDatasetToList(
 }
 
 void MultiDatasetWidget::CopyImagesSlices(
-		SlicesHandler* handler3D, MultiDatasetWidget::SDatasetInfo& newRadioButton,
-		const bool saveOnlyWorkingBits /*= false*/)
+		const std::vector<const float*>& bmp_slices, 
+		const std::vector<const float*>& work_slices,
+		const std::array<size_t,3>& dims, 
+		MultiDatasetWidget::SDatasetInfo& newRadioButton)
 {
-	const int nrslices = handler3D->num_slices();
-	const int width = handler3D->width();
-	const int height = handler3D->height();
-	const int size = width * height;
+	const size_t nrslices = dims[2];
+	const size_t width  = dims[0];
+	const size_t height = dims[1];
+	const size_t size = width * height;
 
 	newRadioButton.m_Width = width;
 	newRadioButton.m_Height = height;
 
-	if (!saveOnlyWorkingBits)
+	newRadioButton.m_BmpSlices.clear();
+	for (int i = 0; i < nrslices; i++)
 	{
-		newRadioButton.m_BmpSlices.clear();
-		for (int i = 0; i < nrslices; i++)
-		{
-			float* bmp_data = (float*)malloc(sizeof(float) * size);
-			memcpy(bmp_data, handler3D->return_bmp(i), sizeof(float) * size);
-			newRadioButton.m_BmpSlices.push_back(bmp_data);
-		}
+		float* bmp_data = (float*)malloc(sizeof(float) * size);
+		memcpy(bmp_data, bmp_slices.at(i), sizeof(float) * size);
+		newRadioButton.m_BmpSlices.push_back(bmp_data);
 	}
 
+	// BL TODO why do we need to store work slices?
 	newRadioButton.m_WorkSlices.clear();
 	for (int i = 0; i < nrslices; i++)
 	{
 		float* work_data = (float*)malloc(sizeof(float) * size);
-		memcpy(work_data, handler3D->return_work(i), sizeof(float) * size);
+		memcpy(work_data, work_slices.at(i), sizeof(float) * size);
 		newRadioButton.m_WorkSlices.push_back(work_data);
 	}
 }
