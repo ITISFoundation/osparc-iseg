@@ -26,6 +26,7 @@
 #include "MainWindow.h"
 #include "MeasurementWidget.h"
 #include "MorphologyWidget.h"
+#include "MultiDatasetWidget.h"
 #include "OutlineCorrectionWidget.h"
 #include "PickerWidget.h"
 #include "SaveOutlinesWidget.h"
@@ -712,7 +713,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	bitstack_widget = new bits_stack(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	overlay_widget = new extoverlay_widget(handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	multidataset_widget = new MultiDataset_widget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	multidataset_widget = new MultiDatasetWidget(handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 
 	int height_max1 = height_max;
 
@@ -1856,41 +1857,17 @@ void MainWindow::execute_swapxy()
 			// Swap all but the active one
 			if (!multidataset_widget->IsActive(i))
 			{
-				std::string tempFileName =
-						"bmp_float_eds_" + std::to_string(i) + ".raw";
+				std::string tempFileName = "bmp_float_eds_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_xy_swapped(
-								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
-								nrslices) != 0)
+				if (SlicesHandler::SaveRaw_xy_swapped(str1.ascii(), multidataset_widget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
-
-				tempFileName = "work_float_eds_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_xy_swapped(
-								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
-								nrslices) != 0)
-					ok = false;
-
-				if (ok)
-				{
-					tempFileName = "work_float_eds_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					str1 = QDir::temp().absFilePath(QString("work_float.raw"));
-					multidataset_widget->SetWorkingData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
-				}
 
 				if (ok)
 				{
 					tempFileName = "bmp_float_eds_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
 					str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
-					multidataset_widget->SetBmpData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
+					multidataset_widget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), handler3D->start_slice(), handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}
@@ -1935,36 +1912,14 @@ void MainWindow::execute_swapxz()
 			{
 				std::string tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_xz_swapped(
-								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
-								nrslices) != 0)
+				if (SlicesHandler::SaveRaw_xz_swapped(str1.ascii(), multidataset_widget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
-
-				tempFileName = "work_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_xz_swapped(
-								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
-								nrslices) != 0)
-					ok = false;
-
-				if (ok)
-				{
-					tempFileName = "work_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					multidataset_widget->SetWorkingData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
-				}
 
 				if (ok)
 				{
 					tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					multidataset_widget->SetBmpData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
+					multidataset_widget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), handler3D->start_slice(), handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}
@@ -2013,36 +1968,14 @@ void MainWindow::execute_swapyz()
 			{
 				std::string tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_yz_swapped(
-								str1.ascii(), multidataset_widget->GetBmpData(i), w, h,
-								nrslices) != 0)
+				if (SlicesHandler::SaveRaw_yz_swapped(str1.ascii(), multidataset_widget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
-
-				tempFileName = "work_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-				if (SlicesHandler::SaveRaw_yz_swapped(
-								str1.ascii(), multidataset_widget->GetWorkingData(i), w, h,
-								nrslices) != 0)
-					ok = false;
-
-				if (ok)
-				{
-					tempFileName = "work_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					multidataset_widget->SetWorkingData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
-				}
 
 				if (ok)
 				{
 					tempFileName = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absFilePath(QString(tempFileName.c_str()));
-					multidataset_widget->SetBmpData(
-							i, SlicesHandler::LoadRawFloat(
-										 str1.ascii(), handler3D->start_slice(),
-										 handler3D->end_slice(), 0, w * h));
+					multidataset_widget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), handler3D->start_slice(), handler3D->end_slice(), 0, w * h));
 				}
 			}
 		}

@@ -54,6 +54,7 @@ SET(ViewerSrcs
 	MainWindow.cpp
 	MeasurementWidget.cpp
 	MorphologyWidget.cpp
+	MultiDatasetWidget.cpp
 	OutlineCorrectionParameterViews.cpp
 	OutlineCorrectionWidget.cpp
 	PickerWidget.cpp
@@ -106,6 +107,7 @@ SET(MyMocHeaders
 	MainWindow.h
 	MeasurementWidget.h
 	MorphologyWidget.h
+	MultiDatasetWidget.h
 	OutlineCorrectionParameterViews.h
 	OutlineCorrectionWidget.h
 	PickerWidget.h

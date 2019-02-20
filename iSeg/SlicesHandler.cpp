@@ -723,8 +723,7 @@ int SlicesHandler::ReadImage(const char* filename)
 		{
 			slices[i] = _image_slices[i].return_bmp();
 		}
-		ImageReader::getVolume(filename, slices.data(), _nrslices, _width,
-				_height);
+		ImageReader::getVolume(filename, slices.data(), _nrslices, _width, _height);
 		_thickness = spacing1[2];
 		_dx = spacing1[0];
 		_dy = spacing1[1];

@@ -48,7 +48,7 @@ class TissueTreeWidget;
 class TissueHierarchyWidget;
 class bits_stack;
 class extoverlay_widget;
-class MultiDataset_widget;
+class MultiDatasetWidget;
 class ScaleWork;
 class ImageMath;
 class ImageOverlay;
@@ -242,7 +242,7 @@ private:
 	ImageOverlay* imageoverlay_dialog;
 	bits_stack* bitstack_widget;
 	extoverlay_widget* overlay_widget;
-	MultiDataset_widget* multidataset_widget;
+	MultiDatasetWidget* multidataset_widget;
 	QCheckBox* cb_bmptissuevisible;
 	QCheckBox* cb_bmpcrosshairvisible;
 	QCheckBox* cb_bmpoutlinevisible;
