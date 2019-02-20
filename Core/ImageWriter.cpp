@@ -32,7 +32,9 @@ using namespace iseg;
 template<typename T>
 bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler)
 {
-	auto image = SliceHandlerItkWrapper::GetITKView(all_slices, handler->start_slice(), handler->end_slice(), handler);
+	unsigned dims[3] = {handler->width(), handler->height(), handler->num_slices()};
+	auto image = wrapToITK(all_slices, dims, handler->start_slice(), handler->end_slice(), handler->spacing(), handler->transform());
+
 	if (image)
 	{
 		boost::filesystem::path path(filename);

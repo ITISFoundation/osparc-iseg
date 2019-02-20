@@ -14,7 +14,8 @@ itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(bool
 
 itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetSource(size_t start_slice, size_t end_slice)
 {
-	return GetITKView(_handler->source_slices(), start_slice, end_slice, _handler);
+	unsigned dims[3] = {_handler->width(), _handler->height(), _handler->num_slices()};
+	return wrapToITK(_handler->source_slices(), dims, start_slice, end_slice, _handler->spacing(), _handler->transform());
 }
 
 itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool active_slices)
@@ -27,7 +28,8 @@ itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(bool
 
 itk::SliceContiguousImage<float>::Pointer SliceHandlerItkWrapper::GetTarget(size_t start_slice, size_t end_slice)
 {
-	return GetITKView(_handler->target_slices(), start_slice, end_slice, _handler);
+	unsigned dims[3] = {_handler->width(), _handler->height(), _handler->num_slices()};
+	return wrapToITK(_handler->target_slices(), dims, start_slice, end_slice, _handler->spacing(), _handler->transform());
 }
 
 itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTissues(bool active_slices)
@@ -40,8 +42,9 @@ itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTi
 
 itk::SliceContiguousImage<tissues_size_t>::Pointer SliceHandlerItkWrapper::GetTissues(size_t start_slice, size_t end_slice)
 {
+	unsigned dims[3] = {_handler->width(), _handler->height(), _handler->num_slices()};
 	auto all_slices = _handler->tissue_slices(_handler->active_tissuelayer());
-	return GetITKView(all_slices, start_slice, end_slice, _handler);
+	return wrapToITK(all_slices, dims, start_slice, end_slice, _handler->spacing(), _handler->transform());
 }
 
 template<typename T>
