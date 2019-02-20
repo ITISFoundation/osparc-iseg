@@ -39,7 +39,6 @@ public:
 		unsigned m_Width;
 		unsigned m_Height;
 		std::vector<float*> m_BmpSlices;
-		std::vector<float*> m_WorkSlices;
 		bool m_IsActive;
 	};
 
@@ -54,10 +53,6 @@ public:
 	std::vector<float*> GetBmpData(const int multiDS_index);
 	void SetBmpData(const int multiDS_index, std::vector<float*> bmp_bits_vc);
 
-	std::vector<float*> GetWorkingData(const int multiDS_index);
-	void SetWorkingData(const int multiDS_index,
-			std::vector<float*> work_bits_vc);
-
 protected:
 	void Initialize();
 	void ClearRadioButtons();
@@ -67,9 +62,10 @@ protected:
 			unsigned short height, unsigned short nrofslices);
 	bool AddDatasetToList(SDatasetInfo& newRadioButton,
 			QStringList loadfilenames);
-	void CopyImagesSlices(SlicesHandler* handler3D,
-			SDatasetInfo& newRadioButton,
-			const bool saveOnlyWorkingBits = false);
+	void CopyImagesSlices(
+			const std::vector<const float*>& bmp_slices,
+			const std::array<size_t, 3>& dims,
+			SDatasetInfo& newRadioButton);
 
 signals:
 	void begin_datachange(iseg::DataSelection& dataSelection,
