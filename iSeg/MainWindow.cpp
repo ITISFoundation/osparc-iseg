@@ -35,6 +35,7 @@
 #include "StdStringToQString.h"
 #include "SurfaceViewerWidget.h"
 #include "ThresholdWidget.h"
+#include "ThresholdWidgetQt4.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
 #include "TissueTreeWidget.h"
@@ -614,6 +615,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	threshold_widget = new ThresholdWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
+	threshold_widget_qt4 = new ThresholdWidgetQt4(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	tabwidgets.push_back(threshold_widget_qt4);
 	hyst_widget = new HystereticGrowingWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
 	livewire_widget = new LivewireWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);

@@ -68,6 +68,7 @@ SET(ViewerSrcs
 	SmoothingWidget.cpp
 	SurfaceViewerWidget.cpp
 	ThresholdWidget.cpp
+	ThresholdWidgetQt4.cpp
 	TissueCleaner.cpp
 	TissueHierarchy.cpp
 	TissueInfos.cpp
@@ -117,6 +118,7 @@ SET(MyMocHeaders
 	SurfaceViewerWidget.h
 	TissueTreeWidget.h
 	ThresholdWidget.h
+	ThresholdWidgetQt4.h
 	TransformWidget.h
 	UndoConfigurationDialog.h
 	VesselWidget.h
@@ -133,6 +135,7 @@ ENDIF()
 
 SET(UIS
 	Settings.ui
+	ThresholdWidgetQt4.ui
 )
 
 SET(RCCS images.qrc)
