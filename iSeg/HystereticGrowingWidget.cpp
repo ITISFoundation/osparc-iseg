@@ -18,7 +18,6 @@
 #include "Core/Pair.h"
 
 #include <qfiledialog.h>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>
@@ -63,7 +62,7 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget*
 	vbox2 = new Q3VBox(hbox1);
 	vbox3 = new Q3VBox(hbox1);
 	autoseed = new QCheckBox("AutoSeed: ", hbox2);
-	if (autoseed->isOn())
+	if (autoseed->isChecked())
 		autoseed->toggle();
 	vbox4 = new Q3VBox(hbox2);
 	vbox5 = new Q3VBox(hbox2);
@@ -188,7 +187,7 @@ void HystereticGrowingWidget::on_mouse_clicked(Point p)
 	}
 	else
 	{
-		if (!autoseed->isOn())
+		if (!autoseed->isChecked())
 		{
 			p1 = p;
 			execute();
@@ -198,7 +197,7 @@ void HystereticGrowingWidget::on_mouse_clicked(Point p)
 
 void HystereticGrowingWidget::update_visible()
 {
-	if (autoseed->isOn())
+	if (autoseed->isChecked())
 	{
 		vbox4->show();
 		vbox5->show();
@@ -222,7 +221,7 @@ void HystereticGrowingWidget::auto_toggled()
 {
 	update_visible();
 
-	if (autoseed->isOn())
+	if (autoseed->isChecked())
 	{
 		execute();
 	}
@@ -245,7 +244,7 @@ void HystereticGrowingWidget::execute()
 
 void HystereticGrowingWidget::execute1()
 {
-	if (autoseed->isOn())
+	if (autoseed->isChecked())
 	{
 		float ll = lower_limit +
 							 (upper_limit - lower_limit) * 0.005f * sl_lower->value();
@@ -766,9 +765,9 @@ FILE* HystereticGrowingWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sl_upperhyster->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(autoseed->isOn());
+		dummy = (int)(autoseed->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allslices->isOn());
+		dummy = (int)(allslices->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
 		fwrite(&upper_limit, 1, sizeof(float), fp);

@@ -22,7 +22,7 @@ Plugin::Plugin() { _addons.push_back(this); }
 
 Plugin::~Plugin() {}
 
-void Plugin::install_slice_handler(SliceHandlerInterface* slice_handler)
+void Plugin::install_slice_handler(SlicesHandlerInterface* slice_handler)
 {
 	_slice_handler = slice_handler;
 }

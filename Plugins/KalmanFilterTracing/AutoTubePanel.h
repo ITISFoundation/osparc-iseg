@@ -67,7 +67,7 @@ class AutoTubePanel : public iseg::WidgetInterface
 
 	Q_OBJECT
 public:
-	AutoTubePanel(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AutoTubePanel() {}
 
@@ -119,7 +119,7 @@ private:
 	void on_slicenr_changed() override;
 	void on_mouse_clicked(iseg::Point p) override;
 
-	iseg::SliceHandlerInterface* _handler3D;
+	iseg::SlicesHandlerInterface* _handler3D;
 
 	QListWidget* object_list;
 	QListWidget* object_probability_list;

@@ -10,7 +10,7 @@
 #include "ConfidenceWidget.h"
 
 #include "Data/ItkUtils.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkConfidenceConnectedImageFilter.h>
 #include <itkCurvatureFlowImageFilter.h>
@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <sstream>
 
-ConfidenceWidget::ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
+ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
@@ -133,7 +133,7 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 
 void ConfidenceWidget::do_work()
 {
-	iseg::SliceHandlerItkWrapper itk_handler(handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(handler3D);
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;

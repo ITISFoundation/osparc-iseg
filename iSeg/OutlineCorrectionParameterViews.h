@@ -174,7 +174,7 @@ class FillSkinParamView : public ParamViewBase
 {
 	Q_OBJECT
 public:
-	FillSkinParamView(SliceHandlerInterface* h, QWidget* parent = 0);
+	FillSkinParamView(SlicesHandlerInterface* h, QWidget* parent = 0);
 
 	void init() override;
 
@@ -204,7 +204,7 @@ private slots:
 
 private:
 	// data
-	SliceHandlerInterface* _handler;
+	SlicesHandlerInterface* _handler;
 	tissues_size_t selectedBackgroundID;
 	tissues_size_t selectedSkinID;
 	bool backgroundSelected = false;

@@ -182,19 +182,19 @@ void SmoothingWidget::execute()
 
 	if (allslices->isChecked())
 	{
-		if (rb_gaussian->isOn())
+		if (rb_gaussian->isChecked())
 		{
 			handler3D->gaussian(sl_sigma->value() * 0.05f);
 		}
-		else if (rb_average->isOn())
+		else if (rb_average->isChecked())
 		{
 			handler3D->average((short unsigned)sb_n->value());
 		}
-		else if (rb_median->isOn())
+		else if (rb_median->isChecked())
 		{
 			handler3D->median_interquartile(true);
 		}
-		else if (rb_sigmafilter->isOn())
+		else if (rb_sigmafilter->isChecked())
 		{
 			handler3D->sigmafilter(
 					(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
@@ -209,19 +209,19 @@ void SmoothingWidget::execute()
 	}
 	else
 	{
-		if (rb_gaussian->isOn())
+		if (rb_gaussian->isChecked())
 		{
 			bmphand->gaussian(sl_sigma->value() * 0.05f);
 		}
-		else if (rb_average->isOn())
+		else if (rb_average->isChecked())
 		{
 			bmphand->average((short unsigned)sb_n->value());
 		}
-		else if (rb_median->isOn())
+		else if (rb_median->isChecked())
 		{
 			bmphand->median_interquartile(true);
 		}
-		else if (rb_sigmafilter->isOn())
+		else if (rb_sigmafilter->isChecked())
 		{
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
 					(short unsigned)sb_n->value(),
@@ -239,7 +239,7 @@ void SmoothingWidget::execute()
 
 void SmoothingWidget::method_changed(int)
 {
-	if (rb_gaussian->isOn())
+	if (rb_gaussian->isChecked())
 	{
 		if (hideparams)
 			hbox2->hide();
@@ -250,7 +250,7 @@ void SmoothingWidget::method_changed(int)
 		vbox2->hide();
 		contdiff->hide();
 	}
-	else if (rb_average->isOn())
+	else if (rb_average->isChecked())
 	{
 		if (hideparams)
 			hbox1->hide();
@@ -261,7 +261,7 @@ void SmoothingWidget::method_changed(int)
 		vbox2->hide();
 		contdiff->hide();
 	}
-	else if (rb_median->isOn())
+	else if (rb_median->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -269,7 +269,7 @@ void SmoothingWidget::method_changed(int)
 		vbox2->hide();
 		contdiff->hide();
 	}
-	else if (rb_sigmafilter->isOn())
+	else if (rb_sigmafilter->isChecked())
 	{
 		if (hideparams)
 			hbox1->hide();
@@ -307,7 +307,7 @@ void SmoothingWidget::method_changed(int)
 
 void SmoothingWidget::continue_diff()
 {
-	if (!rb_anisodiff->isOn())
+	if (!rb_anisodiff->isChecked())
 	{
 		return;
 	}
@@ -337,7 +337,7 @@ void SmoothingWidget::continue_diff()
 void SmoothingWidget::sigmaslider_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
-	if (rb_gaussian->isOn())
+	if (rb_gaussian->isChecked())
 	{
 		if (allslices->isChecked())
 			handler3D->gaussian(sl_sigma->value() * 0.05f);
@@ -352,7 +352,7 @@ void SmoothingWidget::sigmaslider_changed(int newval)
 void SmoothingWidget::kslider_changed(int newval)
 {
 	UNREFERENCED_PARAMETER(newval);
-	if (rb_sigmafilter->isOn())
+	if (rb_sigmafilter->isChecked())
 	{
 		if (allslices->isChecked())
 			handler3D->sigmafilter(
@@ -378,7 +378,7 @@ void SmoothingWidget::n_changed(int newval)
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_sigmafilter->isOn())
+	if (rb_sigmafilter->isChecked())
 	{
 		if (allslices->isChecked())
 		{
@@ -417,7 +417,7 @@ void SmoothingWidget::kmax_changed(int newval)
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_sigmafilter->isOn())
+	if (rb_sigmafilter->isChecked())
 	{
 		if (allslices->isChecked())
 		{
@@ -462,7 +462,7 @@ void SmoothingWidget::newloaded()
 
 void SmoothingWidget::slider_pressed()
 {
-	if ((rb_gaussian->isOn() || rb_sigmafilter->isOn()))
+	if ((rb_gaussian->isChecked() || rb_sigmafilter->isChecked()))
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
@@ -474,7 +474,7 @@ void SmoothingWidget::slider_pressed()
 
 void SmoothingWidget::slider_released()
 {
-	if (rb_gaussian->isOn() || rb_sigmafilter->isOn())
+	if (rb_gaussian->isChecked() || rb_sigmafilter->isChecked())
 	{
 		emit end_datachange(this);
 	}
@@ -497,17 +497,17 @@ FILE* SmoothingWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sb_kmax->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_gaussian->isOn());
+		dummy = (int)(rb_gaussian->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_average->isOn());
+		dummy = (int)(rb_average->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_median->isOn());
+		dummy = (int)(rb_median->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_sigmafilter->isOn());
+		dummy = (int)(rb_sigmafilter->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_anisodiff->isOn());
+		dummy = (int)(rb_anisodiff->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allslices->isOn());
+		dummy = (int)(allslices->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 

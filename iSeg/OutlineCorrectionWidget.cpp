@@ -29,7 +29,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QScrollArea>
-#include <QStackedLayout>
+#include <QStackedWidget>
 
 namespace iseg {
 
@@ -120,20 +120,20 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
-	stacked_param_layout = new QStackedLayout;
-	stacked_param_layout->addWidget(brush_params);
-	stacked_param_layout->addWidget(olc_params);
-	stacked_param_layout->addWidget(fill_holes_params);
-	stacked_param_layout->addWidget(remove_islands_params);
-	stacked_param_layout->addWidget(fill_gaps_params);
-	stacked_param_layout->addWidget(add_skin_params);
-	stacked_param_layout->addWidget(fill_skin_params);
-	stacked_param_layout->addWidget(fill_all_params);
-	stacked_param_layout->addWidget(smooth_tissues_params);
+	stacked_params = new QStackedWidget;
+	stacked_params->addWidget(brush_params);
+	stacked_params->addWidget(olc_params);
+	stacked_params->addWidget(fill_holes_params);
+	stacked_params->addWidget(remove_islands_params);
+	stacked_params->addWidget(fill_gaps_params);
+	stacked_params->addWidget(add_skin_params);
+	stacked_params->addWidget(fill_skin_params);
+	stacked_params->addWidget(fill_all_params);
+	stacked_params->addWidget(smooth_tissues_params);
 
 	auto top_layout = new QHBoxLayout;
 	top_layout->addWidget(method_area);
-	top_layout->addLayout(stacked_param_layout);
+	top_layout->addWidget(stacked_params);
 	setLayout(top_layout);
 
 	// remember QStackedLayout page where parameters of method are added
@@ -144,7 +144,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 
 	// start with brush tool
 	brush->setChecked(true);
-	stacked_param_layout->setCurrentWidget(brush_params);
+	stacked_params->setCurrentWidget(brush_params);
 
 	// create connections
 	connect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
@@ -499,11 +499,11 @@ void OutlineCorrectionWidget::method_changed()
 {
 	if (_widget_page.count(methods->checkedButton()))
 	{
-		stacked_param_layout->setCurrentIndex(_widget_page[methods->checkedButton()]);
+		stacked_params->setCurrentIndex(_widget_page[methods->checkedButton()]);
 	}
 
 	// keep selected object definition across tools
-	auto new_widget = dynamic_cast<ParamViewBase*>(stacked_param_layout->currentWidget());
+	auto new_widget = dynamic_cast<ParamViewBase*>(stacked_params->currentWidget());
 	if (current_params)
 	{
 		new_widget->set_work(current_params->work());

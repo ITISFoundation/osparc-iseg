@@ -11,7 +11,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Logger.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include "itkBinaryThinningImageFilter3D.h"
 #include "itkNonMaxSuppressionImageFilter.h"
@@ -66,7 +66,7 @@ class BinaryThinningImageFilter<TInputImage, TOutputImage, 3> : public itk::Bina
 {
 };
 
-AutoTubeWidget::AutoTubeWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
+AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
 {
@@ -170,7 +170,7 @@ void AutoTubeWidget::select_objects()
 
 void AutoTubeWidget::do_work()
 {
-	iseg::SliceHandlerItkWrapper itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 	try
 	{
 		if (true) //(all_slices->isChecked())

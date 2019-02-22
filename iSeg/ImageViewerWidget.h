@@ -18,7 +18,7 @@
 
 #include <vector>
 
-class Q3Action;
+class QAction;
 
 namespace iseg {
 
@@ -131,19 +131,19 @@ private:
 	QPoint mousePosZoom;
 	std::vector<Mark>* marks;
 	int eventx, eventy;
-	Q3Action* addmark;
-	Q3Action* addlabel;
-	Q3Action* clearmarks;
-	Q3Action* removemark;
-	Q3Action* addtissue;
-	Q3Action* addtissueconnected;
-	Q3Action* subtissue;
-	Q3Action* addtissue3D;
-	Q3Action* addtissuelarger;
-	Q3Action* selecttissue;
-	Q3Action* addtoselection;
-	Q3Action* viewtissue;
-	Q3Action* nexttargetslice;
+	QAction* addmark;
+	QAction* addlabel;
+	QAction* clearmarks;
+	QAction* removemark;
+	QAction* addtissue;
+	QAction* addtissueconnected;
+	QAction* subtissue;
+	QAction* addtissue3D;
+	QAction* addtissuelarger;
+	QAction* selecttissue;
+	QAction* addtoselection;
+	QAction* viewtissue;
+	QAction* nexttargetslice;
 	std::vector<Point> vp;
 	std::vector<Point> vp_old;
 	std::vector<Point> vp1;

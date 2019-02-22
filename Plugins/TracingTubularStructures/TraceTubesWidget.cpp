@@ -14,7 +14,7 @@
 #include "Data/BrushInteraction.h"
 #include "Data/ItkUtils.h"
 #include "Data/LogApi.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkDanielssonDistanceMapImageFilter.h>
@@ -76,7 +76,7 @@ void add_completer(QLineEdit* file_path, QWidget* parent)
 }
 } // namespace
 
-TraceTubesWidget::TraceTubesWidget(iseg::SliceHandlerInterface* hand3D,
+TraceTubesWidget::TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), _handler(hand3D)
@@ -313,7 +313,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_vesselness(const itk::Im
 	double beta = _beta->text().toDouble();
 	double gamma = _gamma->text().toDouble();
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler);
 	auto source = itk_handler.GetSource(true);
 
 	auto hessian_filter = hessian_filter_type::New();
@@ -352,7 +352,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_blobiness(const itk::Ima
 	double beta = _beta->text().toDouble();
 	double gamma = _gamma->text().toDouble();
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler);
 	auto source = itk_handler.GetSource(true);
 
 	auto hessian_filter = hessian_filter_type::New();
@@ -379,7 +379,7 @@ itk::Image<float, 3>::Pointer TraceTubesWidget::compute_blobiness(const itk::Ima
 
 itk::Image<float, 3>::Pointer TraceTubesWidget::compute_object_sdf(const itk::ImageBase<3>::RegionType& requested_region) const
 {
-	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler);
 	auto target = itk_handler.GetTarget(true);
 
 	using input_type = itk::SliceContiguousImage<float>;
@@ -428,7 +428,7 @@ void TraceTubesWidget::estimate_intensity()
 	{
 		using image_type = itk::Image<float, 3>;
 
-		iseg::SliceHandlerItkWrapper itk_handler(_handler);
+		iseg::SlicesHandlerITKInterface itk_handler(_handler);
 		auto source = itk_handler.GetSource(true);
 
 		double intensity = 0.0;
@@ -482,7 +482,7 @@ void TraceTubesWidget::do_work()
 	int pad = get_padding();
 	auto export_file_path = _debug_metric_file_path->text().toStdString();
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler);
 	auto source = itk_handler.GetSource(true);
 
 	input_type::IndexType idx_lo = {_points.front().px, _points.front().py, _points.front().pz};
@@ -544,7 +544,7 @@ void TraceTubesWidget::do_work_template(TSpeedImage* speed_image, const itk::Ima
 	using path_filter_type = itk::WeightedDijkstraImageFilter<speed_image_type>;
 	using metric_type = itk::MyMetric<speed_image_type>;
 
-	iseg::SliceHandlerItkWrapper itk_handler(_handler);
+	iseg::SlicesHandlerITKInterface itk_handler(_handler);
 	auto target = itk_handler.GetTarget(true);
 
 	int pad = get_padding();

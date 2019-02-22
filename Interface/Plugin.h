@@ -19,7 +19,7 @@
 #include <vector>
 
 namespace iseg {
-class SliceHandlerInterface;
+class SlicesHandlerInterface;
 }
 
 namespace iseg { namespace plugin {
@@ -30,8 +30,8 @@ public:
 	Plugin();
 	~Plugin();
 
-	void install_slice_handler(SliceHandlerInterface* slice_handler);
-	SliceHandlerInterface* slice_handler() const { return _slice_handler; }
+	void install_slice_handler(SlicesHandlerInterface* slice_handler);
+	SlicesHandlerInterface* slice_handler() const { return _slice_handler; }
 
 	virtual std::string name() const = 0;
 
@@ -41,7 +41,7 @@ public:
 			const char* name, Qt::WindowFlags wFlags) const = 0;
 
 private:
-	SliceHandlerInterface* _slice_handler;
+	SlicesHandlerInterface* _slice_handler;
 };
 
 class ISEG_INTERFACE_API PluginRegistry

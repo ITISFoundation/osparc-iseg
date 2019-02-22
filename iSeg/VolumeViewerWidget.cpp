@@ -16,6 +16,7 @@
 #include "QVTKWidget.h"
 
 #include <QResizeEvent>
+#include <Q3VBox>
 
 #include <vtkActor.h>
 #include <vtkColorTransferFunction.h>
@@ -403,7 +404,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	planeWidgetY->SetPlaceFactor(1.0);
 	planeWidgetY->PlaceWidget();
 	planeWidgetY->SetOrigin(center);
-	planeWidgetY->SetEnabled(cb_showslice1->isOn());
+	planeWidgetY->SetEnabled(cb_showslice1->isChecked());
 	planeWidgetY->PlaceWidget(bounds);
 
 	my_sliceDataZ = vtkSmartPointer<vtkMySliceCallbackZ>::New();
@@ -417,7 +418,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	planeWidgetZ->SetPlaceFactor(1.0);
 	planeWidgetZ->PlaceWidget();
 	planeWidgetZ->SetOrigin(center);
-	planeWidgetZ->SetEnabled(cb_showslice2->isOn());
+	planeWidgetZ->SetEnabled(cb_showslice2->isChecked());
 	planeWidgetZ->PlaceWidget(bounds);
 
 	//
@@ -451,7 +452,7 @@ VolumeViewerWidget::~VolumeViewerWidget() { delete vbox1; }
 
 void VolumeViewerWidget::shade_changed()
 {
-	if (cb_shade->isOn())
+	if (cb_shade->isChecked())
 	{
 		volumeProperty->ShadeOn();
 	}
@@ -465,7 +466,7 @@ void VolumeViewerWidget::shade_changed()
 
 void VolumeViewerWidget::raytraceortexturemap_changed()
 {
-	if (cb_raytraceortexturemap->isOn())
+	if (cb_raytraceortexturemap->isChecked())
 	{
 		volumeMapper->SetRequestedRenderModeToDefault();
 	}
@@ -481,20 +482,20 @@ void VolumeViewerWidget::raytraceortexturemap_changed()
 void VolumeViewerWidget::showslices_changed()
 {
 	bool changed = false;
-	if ((cb_showslices->isOn() ? 1 : 0) != sliceActorY->GetVisibility())
+	if ((cb_showslices->isChecked() ? 1 : 0) != sliceActorY->GetVisibility())
 	{
-		sliceActorY->SetVisibility(cb_showslices->isOn());
-		sliceActorZ->SetVisibility(cb_showslices->isOn());
+		sliceActorY->SetVisibility(cb_showslices->isChecked());
+		sliceActorZ->SetVisibility(cb_showslices->isChecked());
 		changed = true;
 	}
-	if ((cb_showslice1->isOn() ? 1 : 0) != planeWidgetY->GetEnabled())
+	if ((cb_showslice1->isChecked() ? 1 : 0) != planeWidgetY->GetEnabled())
 	{
-		planeWidgetY->SetEnabled(cb_showslice1->isOn());
+		planeWidgetY->SetEnabled(cb_showslice1->isChecked());
 		changed = true;
 	}
-	if ((cb_showslice2->isOn() ? 1 : 0) != planeWidgetZ->GetEnabled())
+	if ((cb_showslice2->isChecked() ? 1 : 0) != planeWidgetZ->GetEnabled())
 	{
-		planeWidgetZ->SetEnabled(cb_showslice2->isOn());
+		planeWidgetZ->SetEnabled(cb_showslice2->isChecked());
 		changed = true;
 	}
 
@@ -506,7 +507,7 @@ void VolumeViewerWidget::showslices_changed()
 
 void VolumeViewerWidget::showvolume_changed()
 {
-	if (cb_showvolume->isOn())
+	if (cb_showvolume->isChecked())
 	{
 		volume->SetVisibility(true);
 		cb_shade->show();

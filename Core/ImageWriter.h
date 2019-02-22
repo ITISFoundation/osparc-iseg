@@ -19,7 +19,7 @@
 
 namespace iseg {
 
-class SliceHandlerInterface;
+class SlicesHandlerInterface;
 
 /** \brief Image writer based on ITK image writer factory
 	*/
@@ -29,16 +29,16 @@ public:
 	ImageWriter(bool binary = true) : m_Binary(binary) {}
 
 	template<typename T>
-	bool writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
+	bool writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SlicesHandlerInterface* handler);
 
 private:
 	bool m_Binary;
 };
 
 iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<float>(
-	const std::string& filename, const std::vector<float*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
+	const std::string& filename, const std::vector<float*>& all_slices, bool active_slices, const SlicesHandlerInterface* handler);
 
 iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<tissues_size_t>(
-	const std::string& filename, const std::vector<tissues_size_t*>& all_slices, bool active_slices, const SliceHandlerInterface* handler);
+	const std::string& filename, const std::vector<tissues_size_t*>& all_slices, bool active_slices, const SlicesHandlerInterface* handler);
 
 } // namespace iseg

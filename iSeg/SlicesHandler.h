@@ -40,7 +40,7 @@ class ColorLookupTable;
 class bmphandler;
 class ProgressInfo;
 
-class SlicesHandler : public SliceHandlerInterface
+class SlicesHandler : public SlicesHandlerInterface
 {
 public:
 	SlicesHandler();

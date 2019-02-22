@@ -25,7 +25,7 @@ class TissueSeparatorWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	TissueSeparatorWidget(iseg::SliceHandlerInterface* hand3D,
+	TissueSeparatorWidget(iseg::SlicesHandlerInterface* hand3D,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
 	~TissueSeparatorWidget() {}
@@ -55,7 +55,7 @@ private:
 	typename itk::Image<unsigned char, Dim>::Pointer do_work(TInput* source, TInput* target,
 			const typename itk::Image<unsigned char, Dim>::RegionType& requested_region);
 
-	iseg::SliceHandlerInterface* slice_handler;
+	iseg::SlicesHandlerInterface* slice_handler;
 	unsigned current_slice;
 	unsigned tissuenr;
 	iseg::Point last_pt;
