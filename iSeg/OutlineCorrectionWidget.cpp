@@ -120,7 +120,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
-	stacked_params = new QStackedWidget;
+	stacked_params = new QStackedWidget(this);
 	stacked_params->addWidget(brush_params);
 	stacked_params->addWidget(olc_params);
 	stacked_params->addWidget(fill_holes_params);
