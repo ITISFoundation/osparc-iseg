@@ -1118,26 +1118,23 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	if (!m_editingmode)
 	{
 		openS4LLinkPos = file->actions().size();
-		QAction* importS4LLink = file->addAction("Import S4L link (h5)...");
+		QAction* importS4LLink = file->addAction("Import S4L-link (h5)...");
 		connect(importS4LLink, SIGNAL(triggered()), this,
 				SLOT(execute_loads4llivelink()));
-		importS4LLink->setToolTip("Loads a Sim4Life live link file (the h5 file, "
-															"which is part of an iSEG project).");
+		importS4LLink->setToolTip("Loads a Sim4Life live link file (iSEG project .h5 file).");
 		importS4LLink->setEnabled(true);
 	}
 
 	importSurfacePos = file->actions().size();
-	QAction* importSurface = file->addAction("Import Surface...");
+	QAction* importSurface = file->addAction("Import Surface/Lines...");
 	connect(importSurface, SIGNAL(triggered()), this, SLOT(execute_loadsurface()));
-	importSurface->setToolTip("Some data must be opened first to load the "
-														"surface on top of the existing project.");
+	importSurface->setToolTip("Voxelize a surface or polyline mesh in the Target image.");
 	importSurface->setEnabled(true);
 
 	importRTstructPos = file->actions().size();
 	QAction* importRTAction = file->addAction("Import RTstruct...");
 	connect(importRTAction, SIGNAL(triggered()), this, SLOT(execute_loadrtstruct()));
 	importRTAction->setToolTip("Some data must be opened first to import its RTStruct file");
-	importRTAction->setEnabled(false);
 
 	file->insertItem("&Export Image(s)...", this, SLOT(execute_saveimg()));
 	file->insertItem("Export &Contour...", this, SLOT(execute_saveContours()));
@@ -2797,7 +2794,7 @@ void MainWindow::execute_loadsurface()
 
 	bool ok = true;
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"STL (*.stl)\n"
+			"Surfaces & Polylines (*.stl *.vtk)\n"
 			"All (*.*)",
 			this);
 	if (!loadfilename.isEmpty())
@@ -2820,7 +2817,7 @@ void MainWindow::execute_loadsurface()
 		if (overwrite == 2)
 			return;
 
-		ok = handler3D->LoadSurface(loadfilename.ascii(), overwrite == 0, intersect);
+		ok = handler3D->LoadSurface(loadfilename.toStdString(), overwrite == 0, intersect);
 	}
 
 	if (ok)
