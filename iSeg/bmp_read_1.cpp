@@ -13822,7 +13822,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 		counter1 = 0;
 		while (!found && it != vvPit->end())
 		{
-			//			if(it->px==(limit1.begin())->px&&it->py==(limit1.begin())->py){
 			if (p1.px == it->px && p1.py == it->py)
 			{
 				found = true;
@@ -13843,7 +13842,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 		counter2 = 0;
 		while (!found && it != vvPit->end())
 		{
-			//			if(it->px==(limit2.begin())->px&&it->py==(limit2.begin())->py){
 			if (p2.px == it->px && p2.py == it->py)
 			{
 				endP = it;
@@ -13870,8 +13868,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 			}
 
 			std::vector<Point> oldline, oldline1;
-			if (counter2 - counter1 + 1 <
-					(int)vvPit->size() - counter2 + counter1)
+			if (counter2 - counter1 + 1 < (int)vvPit->size() - counter2 + counter1)
 			{
 				oldline.insert(oldline.begin(), startP, ++endP);
 				oldline1.insert(oldline1.begin(), startP, endP);
@@ -13898,8 +13895,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 			itold = it;
 			it++;
 
-			//			FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-
 			while (it != newline->end())
 			{
 				if ((work_bits[unsigned(width) * it->py + it->px] == f) != in)
@@ -13907,22 +13902,11 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 					if (in)
 					{
 						changePts.push_back(*itold);
-						//						fprintf(fp3,"*%i %i\n",(int)itold->px,(int)itold->py);
 					}
 					else
 					{
 						changePts.push_back(*it);
-						//						fprintf(fp3,"*%i %i\n",(int)it->px,(int)it->py);
 					}
-
-					/*					if(work_bits[unsigned(width)*itold->py+it->px]==f){
-						p.px=it->px;
-						p.py=itold->py;
-					} else {
-						p.px=itold->px;
-						p.py=it->py;
-					}
-					changePts.push_back(p);*/
 
 					p.px = it->px;
 					p.py = itold->py;
@@ -13961,8 +13945,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 			for (it = newline->begin(); it != newline->end(); it++)
 				bkp[unsigned(width) * it->py + it->px] = f;
 
-			//			it=newline->begin();
-			//			in=(work_bits[unsigned(width)*it->py+it->px]!=f);
 			Point p1, p2, p3;
 			it = changePts.begin();
 			p1 = *it;
@@ -13979,7 +13961,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
-						//						fprintf(fp3,"a%i %i\n",(int)it1->px,(int)it1->py);
 						in1 = !in1;
 						p1 = *it;
 						it++;
@@ -13997,7 +13978,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						if (it1 == oldline1.end() || it1->px != p1.px ||
 								it1->py != p1.py)
 						{
-							//							fprintf(fp3,"b%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
 							p1 = *it;
 							it++;
@@ -14013,7 +13993,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
-						//						fprintf(fp3,"c%i %i\n",(int)it1->px,(int)it1->py);
 						in1 = false;
 						p1 = *it;
 						it++;
@@ -14036,7 +14015,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 				{
 					if (it1->px == p1.px && it1->py == p1.py)
 					{
-						//						fprintf(fp3,"d%i %i\n",(int)it1->px,(int)it1->py);
 						in1 = !in1;
 						p1 = *it;
 						it++;
@@ -14054,7 +14032,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						if (it1 == oldline1.rend() || it1->px != p1.px ||
 								it1->py != p1.py)
 						{
-							//							fprintf(fp3,"e%i %i\n",(int)it1->px,(int)it1->py);
 							in1 = true;
 							p1 = *it;
 							it++;
@@ -14070,7 +14047,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 															(it1->px == p3.px && it1->py == p3.py)))
 					{
 						bkp[unsigned(width) * it1->py + it1->px] = f;
-						//						fprintf(fp3,"f%i %i\n",(int)it1->px,(int)it1->py);
 						in1 = false;
 						p1 = *it;
 						it++;
@@ -14086,8 +14062,6 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 						bkp[unsigned(width) * it1->py + it1->px] = f;
 				}
 			}
-
-			//			fclose(fp3);
 
 			sliceprovide->take_back(work_bits);
 			work_bits = bkp;

@@ -339,21 +339,11 @@ void style_dockwidget(QDockWidget* dockwidg)
 
 bool MenuWTT::event(QEvent* e)
 {
+	// not needed from Qt 5.1 -> see QMenu::setToolTipVisible
 	const QHelpEvent* helpEvent = static_cast<QHelpEvent*>(e);
-	if (helpEvent->type() == QEvent::ToolTip)
+	if (helpEvent->type() == QEvent::ToolTip && activeAction() != 0)
 	{
-		// call QToolTip::showText on that QAction's tooltip.
-		QPoint gpos = helpEvent->globalPos();
-		QPoint pos = helpEvent->pos();
-		if (pos.x() > 0 && pos.y() > 0 && pos.x() < 400 && pos.y() < 600)
-		{
-			QString textActive = activeAction()->text();
-			QString justShow("Import RTstruct...");
-			if (textActive == justShow)
-				QToolTip::showText(gpos, activeAction()->toolTip());
-			else
-				QToolTip::hideText();
-		}
+		QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
 	}
 	else
 		QToolTip::hideText();
@@ -1304,8 +1294,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	{
 		toolmenu->insertItem("Merge Projects...", this, SLOT(execute_mergeprojects()));
 	}
-	toolmenu->insertItem("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
-	toolmenu->insertItem("Supplant Selected Tissue", this, SLOT(execute_voting_replace_labels()));
+	toolmenu->addAction("Remove Unused Tissues", this, SLOT(execute_remove_unused_tissues()));
+	auto action = toolmenu->addAction("Supplant Selected Tissue", this, SLOT(execute_voting_replace_labels()));
+	action->setToolTip("Remove selected tissue by iteratively assigning it to adjacent tissues.");
 	toolmenu->insertItem("Split Disconnected Tissue Regions", this, SLOT(execute_split_tissue()));
 	toolmenu->insertItem("Compute Target Connectivity", this, SLOT(execute_target_connected_components()));
 	toolmenu->addSeparator();
@@ -7679,6 +7670,10 @@ void MainWindow::execute_voting_replace_labels()
 		emit begin_datachange(dataSelection, this);
 
 		auto remaining_voxels = VotingReplaceLabel(handler3D, FG, 0, radius, 1, 10);
+		if (remaining_voxels != 0)
+		{
+			VotingReplaceLabel(handler3D, FG, 0, radius, 0, 1);
+		}
 
 		emit end_datachange(this, iseg::EndUndo);
 	}

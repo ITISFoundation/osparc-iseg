@@ -76,6 +76,7 @@ MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	// layout
 	auto method_layout = make_vbox({rb_vector, rb_dist, rb_thick, rb_angle, rb_4ptangle, rb_vol});
+	method_layout->addSpacerItem(new QSpacerItem(1,1,QSizePolicy::Minimum, QSizePolicy::Expanding));
 	auto method_area = new QFrame;
 	method_area->setLayout(method_layout);
 	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);

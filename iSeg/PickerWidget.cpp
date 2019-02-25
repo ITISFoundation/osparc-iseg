@@ -192,8 +192,7 @@ void PickerWidget::on_mouse_clicked(Point p)
 	if (rb_work->isChecked())
 		bmphand->change2mask_connectedwork(currentselection, p, addorsub);
 	else
-		bmphand->change2mask_connectedtissue(
-				handler3D->active_tissuelayer(), currentselection, p, addorsub);
+		bmphand->change2mask_connectedtissue(handler3D->active_tissuelayer(), currentselection, p, addorsub);
 
 	showborder();
 }
@@ -304,8 +303,7 @@ void PickerWidget::copy_pressed()
 	}
 	else
 	{
-		tissues_size_t* tissues =
-				bmphand->return_tissues(handler3D->active_tissuelayer());
+		auto tissues = bmphand->return_tissues(handler3D->active_tissuelayer());
 		for (unsigned int i = 0; i < area; i++)
 		{
 			valuedistrib[i] = (float)tissues[i];
