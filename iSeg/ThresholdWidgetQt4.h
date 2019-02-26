@@ -77,17 +77,20 @@ private slots:
 	void on_mAllSlicesCheckBox_toggled(bool newValue);
 	void on_mExecutePushButton_clicked();
 
+	// override
+	void bmp_changed();
+
 private:
 	void on_tissuenr_changed(int i) override;
 	void on_slicenr_changed() override;
 	void initUi();
 	void updateUi();
+	void resetThresholds();
+	void RGBA_changed();
 
 	std::pair<float, float> get_range() const;
 
-	bmphandler *bmphand = nullptr;
 	SlicesHandler *handler3D = nullptr;
-	unsigned short activeslice = std::numeric_limits<short>::max();
 	float threshs[21]; // ugly
 	float weights[20]; // ugly
 	float *bits[20]; // ugly
