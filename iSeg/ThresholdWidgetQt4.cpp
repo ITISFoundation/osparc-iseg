@@ -9,41 +9,116 @@
  */
 
 #include "ThresholdWidgetQt4.h"
+
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
-#include <QSignalMapper>
-#include <QFileDialog>
-#include <QDoubleValidator>
 
+#include <QDoubleValidator>
+#include <QFileDialog>
+#include <QSignalMapper>
 
 using namespace iseg;
 
-
-ThresholdWidgetQt4::ThresholdWidgetQt4(SlicesHandler* hand3D, 
-										QWidget *parent, 
-										const char* name, 
-										Qt::WindowFlags wFlags):
-WidgetInterface(parent, name, wFlags), 
-handler3D(hand3D)
+ThresholdWidgetQt4::ThresholdWidgetQt4(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	initUi();	
+	initUi();
 	updateUi();
 }
 
 ThresholdWidgetQt4::~ThresholdWidgetQt4()
 {
+}
 
+void ThresholdWidgetQt4::initUi()
+{
+	ui.setupUi(this);
+
+	threshs[0] = float(ui.mManualNrTissuesSpinBox->value() - 1);
+	for (unsigned i = 0; i < 20; ++i)
+	{
+		bits1[i] = 0;
+		threshs[i + 1] = 255;
+		weights[i] = 1.0f;
+	}
+
+	auto mode_signal_mapping = new QSignalMapper(this);
+	mode_signal_mapping->setMapping(ui.mManualModeRadioButton, ui.mManualWidget);
+	mode_signal_mapping->setMapping(ui.mHistoModeRadioButton, ui.mHistoWidget);
+	mode_signal_mapping->setMapping(ui.mKMeansRadioButton, ui.mKmeansEMWidget);
+	mode_signal_mapping->setMapping(ui.mEMModeRadioButton, ui.mKmeansEMWidget);
+	QObject::connect(ui.mManualModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
+	QObject::connect(ui.mHistoModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
+	QObject::connect(ui.mKMeansRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
+	QObject::connect(ui.mEMModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
+	QObject::connect(mode_signal_mapping, SIGNAL(mapped(QWidget*)), ui.mModeStackedWidget, SLOT(setCurrentWidget(QWidget*)));
+
+	// init with manual mode
+	ui.mManualModeRadioButton->setChecked(true);
+	ui.mModeStackedWidget->setCurrentWidget(ui.mManualWidget);
+}
+
+void ThresholdWidgetQt4::updateUi()
+{
+	auto range = get_range();
+	// manual
+	ui.mLoadBordersPushButton->setDisabled(hideparams);
+	ui.mSaveBordersPushButton->setDisabled(hideparams);
+	ui.mThresholdLowerLabel->setText(QString::number(range.first, 'g', 3));
+	ui.mThresholdUpperLabel->setText(QString::number(range.second, 'g', 3));
+	if (range.second != range.first)
+	{
+		const int slider_value = static_cast<int>((threshs[ui.mManualLimitNrSpinBox->value()] - range.first) * 200 / (range.second - range.first) + .5f);
+		ui.mThresholdHorizontalSlider->setValue(slider_value);
+		ui.mThresholdBorderLineEdit->setText(QString::number(threshs[ui.mManualLimitNrSpinBox->value()], 'g', 3));
+	}
+
+	//ui.mWeightBorderLineEdit->setText(QString::number(threshs[sb_tissuenr->value()], 'g', 3));
+	ui.mManualLimitNrLabel->setEnabled(ui.mManualNrTissuesSpinBox->value() != 2);
+	ui.mManualLimitNrSpinBox->setEnabled(ui.mManualNrTissuesSpinBox->value() != 2);
+
+	// histo
+	ui.mSubsectionGroupBox->setDisabled(hideparams);
+	ui.mMinPixelsFrame->setDisabled(hideparams);
+
+	// kmeans
+	ui.mKMeansDimsLabel->setDisabled(hideparams);
+	ui.mKMeansDimsSpinBox->setDisabled(hideparams);
+	ui.mKMeansIterationsFrame->setDisabled(hideparams);
+	ui.mKMeansImageNrLabel->setEnabled(ui.mKMeansDimsSpinBox->value() != 1);
+	ui.mKMeansImageNrSpinBox->setEnabled(ui.mKMeansDimsSpinBox->value() != 1);
+	ui.mKMeansWeightLabel->setEnabled(ui.mKMeansDimsSpinBox->value() != 1);
+	ui.mKMeansWeightHorizontalSlider->setEnabled(ui.mKMeansDimsSpinBox->value() != 1);
+	ui.mKMeansWeightHorizontalSlider->setValue(int(200 * weights[ui.mKMeansImageNrSpinBox->value() - 1]));
+	ui.mKMeansFilenameFrame->setEnabled(ui.mKMeansImageNrSpinBox->value() > 1);
+	ui.mKMeansFilenameLineEdit->setText(ui.mKMeansImageNrSpinBox->value() > 1 ? filenames[ui.mKMeansImageNrSpinBox->value() - 2] : "");
+
+	// general
+	ui.mCenterFilenameLineEdit->setEnabled(ui.mUseCenterFileCheckBox->isChecked());
+	ui.mSelectCenterFilenamePushButton->setEnabled(ui.mUseCenterFileCheckBox->isChecked());
+}
+
+std::pair<float, float> ThresholdWidgetQt4::get_range() const
+{
+	std::pair<float, float> range(0.0f, 0.0f);
+	if (handler3D->get_activebmphandler())
+	{
+		Pair p;
+		handler3D->get_activebmphandler()->get_bmprange(&p);
+		range.first = p.low;
+		range.second = p.high;
+	}
+	return range;
 }
 
 void ThresholdWidgetQt4::init()
 {
 	auto range = get_range();
 	auto range_validator = new QDoubleValidator(range.first, range.second, 1000, ui.mThresholdBorderLineEdit);
-	ui.mThresholdBorderLineEdit->setValidator(range_validator);	
-	
+	ui.mThresholdBorderLineEdit->setValidator(range_validator);
+
 	resetThresholds();
 
-	
 	updateUi();
 }
 
@@ -161,7 +236,12 @@ FILE* ThresholdWidgetQt4::LoadParams(FILE* fp, int version)
 		dummy = ui.mManualNrTissuesSpinBox->value();
 		on_tissuenr_changed(dummy);
 
-		
+		if (ui.mManualModeRadioButton->isChecked())
+			ui.mModeStackedWidget->setCurrentWidget(ui.mManualWidget);
+		else if (ui.mHistoModeRadioButton->isChecked())
+			ui.mModeStackedWidget->setCurrentWidget(ui.mHistoWidget);
+		else
+			ui.mModeStackedWidget->setCurrentWidget(ui.mKmeansEMWidget);
 	}
 	return fp;
 }
@@ -182,11 +262,12 @@ void ThresholdWidgetQt4::on_mManualLimitNrSpinBox_valueChanged(int newValue)
 void ThresholdWidgetQt4::on_mLoadBordersPushButton_clicked()
 {
 	auto loadfilename =
-		QFileDialog::getOpenFileName(this, "Select Boarder file", QString::null,
-			"Boarders (*.txt)\n"
-			"All (*.*)");
+			QFileDialog::getOpenFileName(this, "Select Boarder file", QString::null,
+					"Boarders (*.txt)\n"
+					"All (*.*)");
 
-	if (loadfilename.isEmpty()) {
+	if (loadfilename.isEmpty())
+	{
 		return;
 	}
 
@@ -229,7 +310,7 @@ void ThresholdWidgetQt4::on_mLoadBordersPushButton_clicked()
 void ThresholdWidgetQt4::on_mSaveBordersPushButton_clicked()
 {
 	auto savefilename = QFileDialog::getSaveFileName(this, "Save file",
-		QString::null, "Boarders (*.txt)\n");
+			QString::null, "Boarders (*.txt)\n");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
@@ -247,7 +328,7 @@ void ThresholdWidgetQt4::on_mThresholdHorizontalSlider_valueChanged(int newValue
 {
 	auto range = get_range();
 	threshs[ui.mManualLimitNrSpinBox->value()] =
-		newValue * 0.005f * (range.second - range.first) + range.first;
+			newValue * 0.005f * (range.second - range.first) + range.first;
 
 	if (ui.mAllSlicesCheckBox->isChecked())
 		handler3D->threshold(threshs);
@@ -316,7 +397,7 @@ void ThresholdWidgetQt4::on_mHistoMinPixelsRatioHorizontalSlider_valueChanged(in
 }
 
 void ThresholdWidgetQt4::on_mKMeansNrTissuesSpinBox_valueChanged(int newValue)
-{	
+{
 }
 
 void ThresholdWidgetQt4::on_mKMeansDimsSpinBox_valueChanged(int newValue)
@@ -331,13 +412,13 @@ void ThresholdWidgetQt4::on_mKMeansDimsSpinBox_valueChanged(int newValue)
 
 	ui.mKMeansImageNrSpinBox->setMaxValue(newValue);
 	ui.mKMeansImageNrSpinBox->setValue(1);
-	
+
 	updateUi();
 }
 
 void ThresholdWidgetQt4::on_mKMeansImageNrSpinBox_valueChanged(int newValue)
 {
-	updateUi();	
+	updateUi();
 }
 
 void ThresholdWidgetQt4::on_mKMeansWeightHorizontalSlider_valueChanged(int newValue)
@@ -347,17 +428,16 @@ void ThresholdWidgetQt4::on_mKMeansWeightHorizontalSlider_valueChanged(int newVa
 
 void ThresholdWidgetQt4::on_mKMeansFilenameLineEdit_editingFinished()
 {
-
 }
 
 void ThresholdWidgetQt4::on_mKMeansFilenamePushButton_clicked()
 {
 	QString loadfilename = QFileDialog::getOpenFileName(this, "Select an image",
-		QString(),
-		"Images (*.png)\n"
-		"Images (*.mhd)\n"
-		"All (*.*)" //"Images (*.bmp)\n" "All (*.*)", QString::null,
-		);			//, filename);
+			QString(),
+			"Images (*.png)\n"
+			"Images (*.mhd)\n"
+			"All (*.*)" //"Images (*.bmp)\n" "All (*.*)", QString::null,
+	);							//, filename);
 	ui.mKMeansFilenameLineEdit->setText(loadfilename);
 	filenames[ui.mKMeansImageNrSpinBox->value() - 2] = loadfilename;
 
@@ -405,17 +485,16 @@ void ThresholdWidgetQt4::on_mKMeansARadioButton_clicked()
 
 void ThresholdWidgetQt4::on_mKMeansIterationsSpinBox_valueChanged(int newValue)
 {
-
 }
 
 void ThresholdWidgetQt4::on_mKMeansConvergeSpinBox_valueChanged(int newValue)
 {
-
 }
 
 void ThresholdWidgetQt4::on_mUseCenterFileCheckBox_toggled(bool newValue)
 {
-	if (!newValue) {
+	if (!newValue)
+	{
 		ui.mCenterFilenameLineEdit->setText("");
 	}
 	updateUi();
@@ -429,7 +508,7 @@ void ThresholdWidgetQt4::on_mCenterFilenameLineEdit_editingFinished()
 void ThresholdWidgetQt4::on_mSelectCenterFilenamePushButton_clicked()
 {
 	auto center_file_name = QFileDialog::getOpenFileName(nullptr,
-		"Select center file", QString(), "Text File (*.txt*)");
+			"Select center file", QString(), "Text File (*.txt*)");
 	ui.mCenterFilenameLineEdit->setText(center_file_name);
 }
 
@@ -473,7 +552,7 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 		handler3D->get_activebmphandler()->swap_bmpwork();
 
 		float* thresh1 = handler3D->get_activebmphandler()->find_modal((unsigned)ui.mHistoMinPixelsSpinBox->value(),
-			0.005f * ui.mHistoMinPixelsRatioHorizontalSlider->value());
+				0.005f * ui.mHistoMinPixelsRatioHorizontalSlider->value());
 		if (ui.mAllSlicesCheckBox->isChecked())
 			handler3D->threshold(thresh1);
 		else
@@ -506,14 +585,14 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 				mhdfiles.push_back(std::string(filenames[i].ascii()));
 			if (ui.mAllSlicesCheckBox->isChecked())
 				handler3D->gamma_mhd(handler3D->active_slice(),
-				(short)ui.mKMeansNrTissuesSpinBox->value(),
-					(short)ui.mKMeansDimsSpinBox->value(), mhdfiles, weights,
-					centers, tol_f, tol_d);
+						(short)ui.mKMeansNrTissuesSpinBox->value(),
+						(short)ui.mKMeansDimsSpinBox->value(), mhdfiles, weights,
+						centers, tol_f, tol_d);
 			else
 				handler3D->get_activebmphandler()->gamma_mhd(
-				(short)ui.mKMeansNrTissuesSpinBox->value(), (short)ui.mKMeansDimsSpinBox->value(),
-					mhdfiles, handler3D->active_slice(), weights, centers,
-					tol_f, tol_d, handler3D->get_pixelsize());
+						(short)ui.mKMeansNrTissuesSpinBox->value(), (short)ui.mKMeansDimsSpinBox->value(),
+						mhdfiles, handler3D->active_slice(), weights, centers,
+						tol_f, tol_d, handler3D->get_pixelsize());
 			delete[] tol_d;
 			delete[] tol_f;
 			for (int i = 0; i < ui.mKMeansNrTissuesSpinBox->value(); i++)
@@ -528,7 +607,7 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 			if (kmeansfiles.size() > 0)
 			{
 				if (kmeansfiles[0].substr(kmeansfiles[0].find_last_of(".") +
-					1) == "png")
+																	1) == "png")
 				{
 					std::vector<int> extractChannels;
 					if (ui.mKMeansRRadioButton->isChecked())
@@ -543,54 +622,54 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 						return;
 					if (ui.mAllSlicesCheckBox->isChecked())
 						handler3D->kmeans_png(
-							handler3D->active_slice(),
-							(short)ui.mKMeansNrTissuesSpinBox->value(),
-							(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
-							extractChannels, weights,
-							(unsigned int)ui.mKMeansIterationsSpinBox->value(),
-							(unsigned int)ui.mKMeansConvergeSpinBox->value(),
-							ui.mCenterFilenameLineEdit->text().toStdString());
+								handler3D->active_slice(),
+								(short)ui.mKMeansNrTissuesSpinBox->value(),
+								(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
+								extractChannels, weights,
+								(unsigned int)ui.mKMeansIterationsSpinBox->value(),
+								(unsigned int)ui.mKMeansConvergeSpinBox->value(),
+								ui.mCenterFilenameLineEdit->text().toStdString());
 					else
 						handler3D->get_activebmphandler()->kmeans_png(
-						(short)ui.mKMeansNrTissuesSpinBox->value(),
-							(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
-							extractChannels, handler3D->active_slice(),
-							weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
-							(unsigned int)ui.mKMeansConvergeSpinBox->value(),
-							ui.mCenterFilenameLineEdit->text().toStdString());
+								(short)ui.mKMeansNrTissuesSpinBox->value(),
+								(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
+								extractChannels, handler3D->active_slice(),
+								weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
+								(unsigned int)ui.mKMeansConvergeSpinBox->value(),
+								ui.mCenterFilenameLineEdit->text().toStdString());
 				}
 				else
 				{
 					if (ui.mAllSlicesCheckBox->isChecked())
 						handler3D->kmeans_mhd(
-							handler3D->active_slice(),
-							(short)ui.mKMeansNrTissuesSpinBox->value(),
-							(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles, weights,
-							(unsigned int)ui.mKMeansIterationsSpinBox->value(),
-							(unsigned int)ui.mKMeansConvergeSpinBox->value());
+								handler3D->active_slice(),
+								(short)ui.mKMeansNrTissuesSpinBox->value(),
+								(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles, weights,
+								(unsigned int)ui.mKMeansIterationsSpinBox->value(),
+								(unsigned int)ui.mKMeansConvergeSpinBox->value());
 					else
 						handler3D->get_activebmphandler()->kmeans_mhd((short)ui.mKMeansNrTissuesSpinBox->value(),
-						(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
-							handler3D->active_slice(),
-							weights,
-							(unsigned int)ui.mKMeansIterationsSpinBox->value(),
-							(unsigned int)ui.mKMeansConvergeSpinBox->value());
+								(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
+								handler3D->active_slice(),
+								weights,
+								(unsigned int)ui.mKMeansIterationsSpinBox->value(),
+								(unsigned int)ui.mKMeansConvergeSpinBox->value());
 				}
 			}
 			else
 			{
 				if (ui.mAllSlicesCheckBox->isChecked())
 					handler3D->kmeans_mhd(
-						handler3D->active_slice(),
-						(short)ui.mKMeansNrTissuesSpinBox->value(), (short)ui.mKMeansDimsSpinBox->value(),
-						kmeansfiles, weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
-						(unsigned int)ui.mKMeansConvergeSpinBox->value());
+							handler3D->active_slice(),
+							(short)ui.mKMeansNrTissuesSpinBox->value(), (short)ui.mKMeansDimsSpinBox->value(),
+							kmeansfiles, weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
+							(unsigned int)ui.mKMeansConvergeSpinBox->value());
 				else
 					handler3D->get_activebmphandler()->kmeans_mhd((short)ui.mKMeansNrTissuesSpinBox->value(),
-					(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
-						handler3D->active_slice(), weights,
-						(unsigned int)ui.mKMeansIterationsSpinBox->value(),
-						(unsigned int)ui.mKMeansConvergeSpinBox->value());
+							(short)ui.mKMeansDimsSpinBox->value(), kmeansfiles,
+							handler3D->active_slice(), weights,
+							(unsigned int)ui.mKMeansIterationsSpinBox->value(),
+							(unsigned int)ui.mKMeansConvergeSpinBox->value());
 			}
 		}
 	}
@@ -607,13 +686,13 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 
 		if (ui.mAllSlicesCheckBox->isChecked())
 			handler3D->em(handler3D->active_slice(),
-			(short)ui.mKMeansNrTissuesSpinBox->value(),
-				(unsigned int)ui.mKMeansIterationsSpinBox->value(),
-				(unsigned int)ui.mKMeansConvergeSpinBox->value());
+					(short)ui.mKMeansNrTissuesSpinBox->value(),
+					(unsigned int)ui.mKMeansIterationsSpinBox->value(),
+					(unsigned int)ui.mKMeansConvergeSpinBox->value());
 		else
 			handler3D->get_activebmphandler()->em((short)ui.mKMeansNrTissuesSpinBox->value(), (short)ui.mKMeansDimsSpinBox->value(),
-				bits, weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
-				(unsigned int)ui.mKMeansConvergeSpinBox->value());
+					bits, weights, (unsigned int)ui.mKMeansIterationsSpinBox->value(),
+					(unsigned int)ui.mKMeansConvergeSpinBox->value());
 	}
 
 	emit end_datachange(this);
@@ -634,87 +713,6 @@ void ThresholdWidgetQt4::on_slicenr_changed()
 	init();
 }
 
-void ThresholdWidgetQt4::initUi()
-{
-	ui.setupUi(this);
-
-	threshs[0] = float(ui.mManualNrTissuesSpinBox->value() - 1);
-	for (unsigned i = 0; i < 20; ++i)
-	{
-		bits1[i] = 0;
-		threshs[i + 1] = 255;
-		weights[i] = 1.0f;
-	}
-
-
-	auto mode_signal_mapping = new QSignalMapper(this);
-	mode_signal_mapping->setMapping(ui.mManualModeRadioButton, ui.mManualWidget);
-	mode_signal_mapping->setMapping(ui.mHistoModeRadioButton, ui.mHistoWidget);
-	mode_signal_mapping->setMapping(ui.mKMeansRadioButton, ui.mKmeansEMWidget);
-	mode_signal_mapping->setMapping(ui.mEMModeRadioButton, ui.mKmeansEMWidget);
-	QObject::connect(ui.mManualModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
-	QObject::connect(ui.mHistoModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
-	QObject::connect(ui.mKMeansRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
-	QObject::connect(ui.mEMModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
-	QObject::connect(mode_signal_mapping, SIGNAL(mapped(QWidget*)), ui.mModeStackedWidget, SLOT(setCurrentWidget(QWidget*)));
-
-	// init with manual mode
-	ui.mManualModeRadioButton->setChecked(true);
-	ui.mModeStackedWidget->setCurrentWidget(ui.mManualWidget);
-}
-
-void ThresholdWidgetQt4::updateUi()
-{
-	auto range = get_range();
-	// manual
-	ui.mLoadBordersPushButton->setDisabled(hideparams);
-	ui.mSaveBordersPushButton->setDisabled(hideparams);
-	ui.mThresholdLowerLabel->setText(QString::number(range.first, 'g', 3));
-	ui.mThresholdUpperLabel->setText(QString::number(range.second, 'g', 3));
-	if (range.second != range.first) {
-		const int slider_value = static_cast<int>((threshs[ui.mManualLimitNrSpinBox->value()] - range.first) * 200 /
-			(range.second - range.first) + .5f);
-		ui.mThresholdHorizontalSlider->setValue(slider_value);
-		ui.mThresholdBorderLineEdit->setText(QString::number(threshs[ui.mManualLimitNrSpinBox->value()], 'g', 3));
-	}
-
-	//ui.mWeightBorderLineEdit->setText(QString::number(threshs[sb_tissuenr->value()], 'g', 3));
-	ui.mManualLimitNrLabel->setEnabled(ui.mManualNrTissuesSpinBox->value() != 2);
-	ui.mManualLimitNrSpinBox->setEnabled(ui.mManualNrTissuesSpinBox->value() != 2);
-
-	// histo
-	ui.mSubsectionGroupBox->setDisabled(hideparams);
-	ui.mMinPixelsFrame->setDisabled(hideparams);
-
-	// kmeans
-	ui.mKMeansDimsLabel->setDisabled(hideparams);
-	ui.mKMeansDimsSpinBox->setDisabled(hideparams);
-	ui.mKMeansImageNrLabel->setEnabled(ui.mKMeansDimsSpinBox->value() != 2);
-	ui.mKMeansImageNrSpinBox->setEnabled(ui.mKMeansDimsSpinBox->value() != 2);
-	ui.mKMeansIterationsFrame->setDisabled(hideparams);
-	ui.mKMeansWeightLabel->setEnabled(ui.mKMeansDimsSpinBox->value() != 2);
-	ui.mKMeansWeightHorizontalSlider->setEnabled(ui.mKMeansDimsSpinBox->value() != 2);
-	ui.mKMeansWeightHorizontalSlider->setValue(int(200 * weights[ui.mKMeansImageNrSpinBox->value() - 1]));
-	ui.mKMeansFilenameFrame->setEnabled(ui.mKMeansImageNrSpinBox->value() > 1);	
-	ui.mKMeansFilenameLineEdit->setText(ui.mKMeansImageNrSpinBox->value() > 1 ? filenames[ui.mKMeansImageNrSpinBox->value() - 2] : "");
-
-	// general
-	ui.mCenterFilenameLineEdit->setEnabled(ui.mUseCenterFileCheckBox->isChecked());
-	ui.mSelectCenterFilenamePushButton->setEnabled(ui.mUseCenterFileCheckBox->isChecked());
-}
-
-std::pair<float, float> ThresholdWidgetQt4::get_range() const
-{
-	std::pair<float, float> range(0.0f, 0.0f);
-	if (handler3D->get_activebmphandler()) {
-		Pair p;
-		handler3D->get_activebmphandler()->get_bmprange(&p);
-		range.first = p.low;
-		range.second = p.high;
-	}
-	return range;
-}
-
 void ThresholdWidgetQt4::resetThresholds()
 {
 	auto range = get_range();
@@ -731,7 +729,7 @@ void ThresholdWidgetQt4::RGBA_changed()
 {
 	// amazing code here...
 	int buttonsChecked = ui.mKMeansRRadioButton->isChecked() + ui.mKMeansGRadioButton->isChecked() +
-		ui.mKMeansBRadioButton->isChecked() + ui.mKMeansARadioButton->isChecked();
+											 ui.mKMeansBRadioButton->isChecked() + ui.mKMeansARadioButton->isChecked();
 	ui.mKMeansDimsSpinBox->setValue(buttonsChecked + 1);
 
 	if (buttonsChecked > 0)
