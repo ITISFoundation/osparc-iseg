@@ -70,6 +70,7 @@ class VesselWidget;
 class WatershedWidget;
 class SmoothingWidget;
 class ThresholdWidget;
+class ThresholdWidgetQt4;
 class MeasurementWidget;
 class ImageViewerWidget;
 class SurfaceViewerWidget;
@@ -220,7 +221,7 @@ private:
 	std::vector<QAction*> showtab_action;
 	QCheckBox* tissue3Dopt;
 	QStackedWidget* methodTab;
-	ThresholdWidget* threshold_widget;
+	ThresholdWidgetQt4* threshold_widget;
 	MeasurementWidget* measurement_widget;
 	VesselWidget* vesselextr_widget;
 	SmoothingWidget* smoothing_widget;
