@@ -223,8 +223,7 @@ private:
 	std::vector<Q3Action*> showtab_action;
 	QCheckBox* tissue3Dopt;
 	QStackedWidget* methodTab;
-	ThresholdWidget* threshold_widget;
-	ThresholdWidgetQt4* threshold_widget_qt4;
+	ThresholdWidgetQt4* threshold_widget;
 	MeasurementWidget* measurement_widget;
 	VesselWidget* vesselextr_widget;
 	SmoothingWidget* smoothing_widget;

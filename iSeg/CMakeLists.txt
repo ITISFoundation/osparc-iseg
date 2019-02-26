@@ -66,8 +66,7 @@ SET(ViewerSrcs
 	SliceTransform.cpp
 	SliceViewerWidget.cpp
 	SmoothingWidget.cpp
-	SurfaceViewerWidget.cpp
-	ThresholdWidget.cpp
+	SurfaceViewerWidget.cpp	
 	ThresholdWidgetQt4.cpp
 	TissueCleaner.cpp
 	TissueHierarchy.cpp
@@ -116,8 +115,7 @@ SET(MyMocHeaders
 	SliceViewerWidget.h
 	SmoothingWidget.h
 	SurfaceViewerWidget.h
-	TissueTreeWidget.h
-	ThresholdWidget.h
+	TissueTreeWidget.h	
 	ThresholdWidgetQt4.h
 	TransformWidget.h
 	UndoConfigurationDialog.h
