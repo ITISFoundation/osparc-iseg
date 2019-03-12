@@ -243,6 +243,7 @@ public:
 	QRadioButton* _active_slice;
 	QRadioButton* _all_slices;
 	QRadioButton* _3D;
+	QLineEdit* _split_limit;
 	QLineEdit* _sigma;
 	QPushButton* _execute;
 };

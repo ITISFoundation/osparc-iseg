@@ -983,9 +983,23 @@ void OutlineCorrectionWidget::smooth_tissues_pushed()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
-	SmoothTissues(handler3D, start_slice, end_slice,
-			smooth_tissues_params->_sigma->text().toDouble(),
-			smooth_tissues_params->_3D->isChecked());
+	int const split_limit = smooth_tissues_params->_split_limit->text().toInt();
+	if (end_slice > start_slice + split_limit &&
+			smooth_tissues_params->_3D->isChecked())
+	{
+		for (size_t i = start_slice; i < end_slice; i += split_limit)
+		{
+			SmoothTissues(handler3D, i, std::min(i + split_limit, end_slice),
+					smooth_tissues_params->_sigma->text().toDouble(),
+					smooth_tissues_params->_3D->isChecked());
+		}
+	}
+	else
+	{
+		SmoothTissues(handler3D, start_slice, end_slice,
+				smooth_tissues_params->_sigma->text().toDouble(),
+				smooth_tissues_params->_3D->isChecked());
+	}
 
 	emit end_datachange(this);
 }
