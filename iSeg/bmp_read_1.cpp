@@ -9511,8 +9511,7 @@ void bmphandler::get_contours(float f, std::vector<std::vector<Point>>* outer_li
 	float linelength;
 	short directionchange;
 
-	float* tmp_bits =
-			(float*)malloc(sizeof(float) * (width + 2) * (height + 2));
+	float* tmp_bits = (float*)malloc(sizeof(float) * (width + 2) * (height + 2));
 	bool* visited = (bool*)malloc(sizeof(bool) * (width + 2) * (height + 2));
 	for (unsigned i = 0; i < unsigned(width + 2) * (height + 2); i++)
 		visited[i] = false;
@@ -9659,11 +9658,7 @@ void bmphandler::get_contours(float f, std::vector<std::vector<Point>>* outer_li
 							done = true;
 					}
 				}
-				//				while(pos1!=pos||(inner==1&&pos2!=possecond));
 				while (pos1 != pos || pos2 != possecond);
-				//				while(pos1!=pos||(inner==1&&!visited[pos2]));
-				//				while(pos1!=pos);
-				//				vec_pt.pop_back();
 
 				if (inner == 1)
 				{
@@ -10397,7 +10392,6 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 	}
 
 	std::vector<std::vector<Point>> vo, vi;
-	std::vector<unsigned>::iterator vuit;
 	std::vector<Point>::iterator vpit;
 
 	swap_bmpwork();
@@ -10411,7 +10405,6 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 			work_bits[pt2coord(*vpit)] = 0;
 			P[pt2coord(*vpit)] = pt2coord(*vpit);
 		}
-		//		cout << ";"<<vo[i].size();
 	}
 	for (unsigned i = 0; i < (unsigned)vi.size(); i++)
 	{
@@ -10420,7 +10413,6 @@ unsigned* bmphandler::dead_reckoning_squared(float f)
 			work_bits[pt2coord(*vpit)] = 0;
 			P[pt2coord(*vpit)] = pt2coord(*vpit);
 		}
-		//		cout << "."<<vi[i].size();
 	}
 
 	unsigned j = 0;
@@ -13798,21 +13790,15 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 
 	ImageForestingTransformDistance IFTdist;
 	IFTdist.distance_init(width, height, f, work_bits);
-	IFTdist.return_path(*(newline->begin()), &limit1);
-
-	it = newline->end();
-	it--;
-	IFTdist.return_path(*it, &limit2);
+	// BL here I think we get closest connection from start/end point 
+	// to contour of selected tissue 'f'.
+	IFTdist.return_path(newline->front(), &limit1);
+	IFTdist.return_path(newline->back(), &limit2);
 
 	int counter1, counter2;
 
-	Point p1, p2;
-	it = limit1.end();
-	it--;
-	p1 = *it;
-	it = limit2.end();
-	it--;
-	p2 = *it;
+	Point p1 = limit1.back();
+	Point p2 = limit2.back();
 
 	bool found = false;
 	vvPit = vvPouter.begin();
@@ -14068,6 +14054,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 		}
 	}
 
+	// copy temporary 'work' image to tissues
 	for (unsigned ineu = 0; ineu < area; ineu++)
 		tissues[ineu] = (tissues_size_t)(work_bits[ineu] + 0.1f);
 

@@ -7672,7 +7672,12 @@ void MainWindow::execute_voting_replace_labels()
 		auto remaining_voxels = VotingReplaceLabel(handler3D, FG, 0, radius, 1, 10);
 		if (remaining_voxels != 0)
 		{
-			VotingReplaceLabel(handler3D, FG, 0, radius, 0, 1);
+			remaining_voxels = VotingReplaceLabel(handler3D, FG, 0, radius, 0, 1);
+		}
+
+		if (remaining_voxels != 0)
+		{
+			ISEG_INFO("Remaining voxels after relabeling: " << remaining_voxels);
 		}
 
 		emit end_datachange(this, iseg::EndUndo);
