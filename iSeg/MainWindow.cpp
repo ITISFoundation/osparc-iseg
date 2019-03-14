@@ -35,7 +35,7 @@
 #include "SmoothingWidget.h"
 #include "StdStringToQString.h"
 #include "SurfaceViewerWidget.h"
-#include "ThresholdWidget.h"
+#include "ThresholdWidgetQt4.h"
 #include "TissueCleaner.h"
 #include "TissueInfos.h"
 #include "TissueTreeWidget.h"
@@ -602,7 +602,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	lb_inactivewarning = new QLabel("  3D Inactive Slice!  ", this);
 	lb_inactivewarning->setStyleSheet("QLabel  { color: red; }");
 
-	threshold_widget = new ThresholdWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	threshold_widget = new ThresholdWidgetQt4(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(threshold_widget);
 	hyst_widget = new HystereticGrowingWidget(handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	tabwidgets.push_back(hyst_widget);
