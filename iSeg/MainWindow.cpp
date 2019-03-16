@@ -3133,7 +3133,7 @@ void MainWindow::SaveSettings()
 	fwrite(&flag, 1, sizeof(bool), fp);
 	for (unsigned short i = 0; i < 16; i++)
 	{
-		flag = showtab_action[i]->isOn();
+		flag = (showtab_action[i]) ? showtab_action[i]->isOn() : true;
 		fwrite(&flag, 1, sizeof(bool), fp);
 	}
 	fp = TissueInfos::SaveTissues(fp, saveProjVersion);
