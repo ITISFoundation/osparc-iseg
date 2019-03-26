@@ -93,6 +93,7 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	_load = new QPushButton("Load Parameters");
 	_remove_non_selected = new QPushButton("Remove Non Selected");
 	_add_to_tissues = new QPushButton("Add To Tissues");
+	_export_lines = new QPushButton("Export lines");
 	_k_filter_predict = new QPushButton("Predict Root Positions");
 
 	int width(80);
@@ -233,6 +234,7 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	vbox4->addWidget(_save);
 	vbox4->addWidget(_load);
 	vbox4->addWidget(_add_to_tissues);
+	vbox4->addWidget(_export_lines);
 
 	QHBoxLayout* hbox1 = new QHBoxLayout;
 	hbox1->addLayout(vbox4);
@@ -320,6 +322,7 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	QObject::connect(_load, SIGNAL(clicked()), this, SLOT(load()));
 	QObject::connect(_remove_non_selected, SIGNAL(clicked()), this, SLOT(remove_non_selected()));
 	QObject::connect(_add_to_tissues, SIGNAL(clicked()), this, SLOT(add_to_tissues()));
+	QObject::connect(_export_lines, SIGNAL(clicked()), this, SLOT(export_lines()));
 	QObject::connect(_k_filter_predict, SIGNAL(clicked()), this, SLOT(predict_k_filter()));
 }
 
@@ -566,6 +569,96 @@ void AutoTubePanel::add_to_tissues()
 			mBox.setText("Only Click When All Roots are found in all slices and all have kalman filters in the kalman filter list!");
 			mBox.exec();
 		}
+	}
+}
+
+void AutoTubePanel::export_lines()
+{
+	auto directory = QFileDialog::getExistingDirectory(this, "Open directory");
+	if (directory.isEmpty())
+		return;
+
+	// get Kalman filter labels
+	std::vector<std::string> labels;
+	for (auto filter : k_filters)
+		labels.push_back(filter.get_label());
+
+	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+	auto tissue_names = _handler3D->tissue_names();
+
+	// shallow copy - used to transform index to world coordinates
+	auto image_3d = itk_handler.GetSource(false);
+
+	typedef float PixelType;
+	using tissue_type = SlicesHandlerInterface::tissue_type;
+	using ImageType = itk::Image<PixelType, 2>;
+	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
+
+	std::ofstream myfile;
+	for (auto label : labels)
+	{
+		std::string filename = directory.toStdString() + label + ".txt";
+		myfile.open(filename);
+		auto it = std::find(tissue_names.begin(), tissue_names.end(), label);
+		if (it == labels.end())
+		{
+			QMessageBox mBox;
+			mBox.setWindowTitle("Error");
+			mBox.setText("Roots have no tissues! First create a tissue in the tissue list!");
+			mBox.exec();
+			myfile.close();
+			continue;
+		}
+
+		tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
+		for (int i(0); i < _handler3D->num_slices(); i++)
+		{
+			auto tissue = itk_handler.GetTissuesSlice(i);
+			auto labelMap = label_maps[i];
+
+			labelMap = calculate_label_map_params(labelMap);
+
+			it = std::find(objects[i].begin(), objects[i].end(), label);
+			if (it != objects[i].end())
+			{
+				int row = std::distance(objects[i].begin(), it);
+				auto labelObject = labelMap->GetLabelObject(row + 1);
+
+				using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
+				auto label2image = Label2ImageType::New();
+				label2image->SetInput(labelMap);
+				label2image->Update();
+
+				ConstIteratorType in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
+				double x(0);
+				double y(0);
+				int size(0);
+				for (in.GoToBegin(); !in.IsAtEnd(); ++in)
+				{
+					// why do we go via iterator to labelMap?
+					if (labelMap->GetPixel(in.GetIndex()) == labelObject->GetLabel())
+					{
+						x += in.GetIndex()[0];
+						y += in.GetIndex()[1];
+						size += 1;
+					}
+				}
+
+				// calculate centroid
+				double x_centroid = x / size;
+				double y_centroid = y / size;
+
+				itk::Point<double, 3> point;
+				itk::Index<3> ind;
+				ind[0] = x_centroid;
+				ind[1] = y_centroid;
+				ind[2] = i;
+
+				image_3d->TransformIndexToPhysicalPoint(ind, point);
+				myfile << point[0] << "\t" << point[1] << "\t" << point[2] << "\n";
+			}
+		}
+		myfile.close();
 	}
 }
 

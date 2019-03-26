@@ -3112,7 +3112,9 @@ void MainWindow::SaveSettings()
 	fwrite(&flag, 1, sizeof(bool), fp);
 	for (unsigned short i = 0; i < 16; i++)
 	{
-		flag = (i < showtab_action.size()) ? showtab_action[i]->isChecked() : true;
+		flag = true;
+		if (i < showtab_action.size() && showtab_action[i])
+			flag = showtab_action[i]->isOn();
 		fwrite(&flag, 1, sizeof(bool), fp);
 	}
 	fp = TissueInfos::SaveTissues(fp, saveProjVersion);

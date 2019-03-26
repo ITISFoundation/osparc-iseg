@@ -39,18 +39,13 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
+	// methods
 	auto modegroup = new QButtonGroup(this);
 	modegroup->insert(rb_open = new QRadioButton(QString("Open")));
 	modegroup->insert(rb_close = new QRadioButton(QString("Close")));
 	modegroup->insert(rb_erode = new QRadioButton(QString("Erode")));
 	modegroup->insert(rb_dilate = new QRadioButton(QString("Dilate")));
 	rb_open->setChecked(true);
-
-	auto mode_layout = new QHBoxLayout;
-	for (auto child : modegroup->buttons())
-		mode_layout->addWidget(child);
-	mode_buttons = new QWidget;
-	mode_buttons->setLayout(mode_layout);
 
 	rb_open->setToolTip(Format(
 			"First shrinking before growing is called Open and results in the "
@@ -61,7 +56,19 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 	rb_erode->setToolTip(Format("Erode or shrink the boundaries of regions of foreground pixels."));
 	rb_dilate->setToolTip(Format("Enlarge the boundaries of regions of foreground pixels."));
 
-	pixel_units = new QCheckBox;
+	// method layout
+	auto method_vbox = new QVBoxLayout;
+	for (auto child : modegroup->buttons())
+		method_vbox->addWidget(child);
+	method_vbox->setMargin(5);
+
+	auto method_area = new QFrame(this);
+	method_area->setLayout(method_vbox);
+	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	method_area->setLineWidth(1);
+
+	// params
+	pixel_units = new QCheckBox("Pixel");
 	pixel_units->setChecked(true);
 
 	operation_radius = new QLineEdit(QString::number(1));
@@ -71,20 +78,37 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 	node_connectivity = new QCheckBox;
 	node_connectivity->setToolTip(Format("Use chess-board (8 neighbors) or city-block (4 neighbors) neighborhood."));
 
+	true_3d = new QCheckBox;
+	true_3d->setChecked(true);
+	true_3d->setToolTip(Format("Run morphological operations in 3D or per-slice."));
+
 	all_slices = new QCheckBox;
 	all_slices->setToolTip(Format("Apply to active slices in 3D or to current slice"));
 
 	execute_button = new QPushButton("Execute");
 
-	// setup layout
-	auto top_layout = new QFormLayout;
-	top_layout->addRow(mode_buttons);
-	top_layout->addRow(QString("Radius"), operation_radius);
-	top_layout->addRow(QString("Radius in pixels"), pixel_units);
-	top_layout->addRow(QString("Full connectivity"), node_connectivity);
-	top_layout->addRow(QString("Apply to all slices"), all_slices);
-	top_layout->addRow(execute_button);
+	auto unit_box = new QHBoxLayout;
+	unit_box->addWidget(operation_radius);
+	unit_box->addWidget(pixel_units);
+
+	// params layout
+	auto params_layout = new QFormLayout;
+	params_layout->addRow("Apply to all slices", all_slices);
+	params_layout->addRow("Radius", unit_box);
+	params_layout->addRow("Full connectivity", node_connectivity);
+	params_layout->addRow("True 3d", true_3d);
+	params_layout->addRow(execute_button);
+	auto params_area = new QWidget(this);
+	params_area->setLayout(params_layout);
+
+	// top-level layot
+	auto top_layout = new QHBoxLayout;
+	top_layout->addWidget(method_area);
+	top_layout->addWidget(params_area);
 	setLayout(top_layout);
+
+	// init
+	all_slices_changed();
 
 	// connect signal-slots
 	QObject::connect(pixel_units, SIGNAL(stateChanged(int)), this, SLOT(units_changed()));
@@ -95,6 +119,7 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 void MorphologyWidget::execute()
 {
 	bool connect8 = node_connectivity->isChecked();
+	bool true3d = true_3d->isChecked();
 
 	iseg::DataSelection dataSelection;
 	dataSelection.work = true;
@@ -116,19 +141,19 @@ void MorphologyWidget::execute()
 
 		if (rb_open->isChecked())
 		{
-			handler3D->open(radius, connect8);
+			handler3D->open(radius, true3d);
 		}
 		else if (rb_close->isChecked())
 		{
-			handler3D->closure(radius, connect8);
+			handler3D->closure(radius, true3d);
 		}
 		else if (rb_erode->isChecked())
 		{
-			handler3D->erosion(radius, connect8);
+			handler3D->erosion(radius, true3d);
 		}
 		else
 		{
-			handler3D->dilation(radius, connect8);
+			handler3D->dilation(radius, true3d);
 		}
 	}
 	else
@@ -296,4 +321,5 @@ void iseg::MorphologyWidget::units_changed()
 void iseg::MorphologyWidget::all_slices_changed()
 {
 	node_connectivity->setEnabled(!all_slices->isChecked());
+	true_3d->setEnabled(all_slices->isChecked());
 }

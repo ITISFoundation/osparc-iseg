@@ -49,8 +49,8 @@ private:
 	QRadioButton* rb_close;
 	QRadioButton* rb_erode;
 	QRadioButton* rb_dilate;
-	QWidget* mode_buttons;
 	QCheckBox* node_connectivity;
+	QCheckBox* true_3d;
 	QLineEdit* operation_radius;
 	QCheckBox* pixel_units;
 	QCheckBox* all_slices;

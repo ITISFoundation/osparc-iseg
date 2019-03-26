@@ -263,10 +263,10 @@ public:
 	void thresholded_growing(short unsigned slicenr, Point p, float thresh_low,
 			float thresh_high,
 			float set_to); //bool connectivity,float set_to);
-	void erosion(boost::variant<int, float> radius, bool connectivity);
-	void dilation(boost::variant<int, float> radius, bool connectivity);
-	void closure(boost::variant<int, float> radius, bool connectivity);
-	void open(boost::variant<int, float> radius, bool connectivity);
+	void erosion(boost::variant<int, float> radius, bool true3d);
+	void dilation(boost::variant<int, float> radius, bool true3d);
+	void closure(boost::variant<int, float> radius, bool true3d);
+	void open(boost::variant<int, float> radius, bool true3d);
 	void add_mark(Point p, unsigned label);
 	void add_mark(Point p, unsigned label, std::string str);
 	void clear_marks();

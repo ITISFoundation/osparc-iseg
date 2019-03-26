@@ -35,8 +35,8 @@ typename itk::Image<T, 3>::Pointer allocateImage(const unsigned dimensions[3],
 	typedef itk::Image<T, 3> ImageType;
 
 	typename ImageType::IndexType start;
-	start[0] = 0;					 // first index on X
-	start[1] = 0;					 // first index on Y
+	start[0] = 0;						// first index on X
+	start[1] = 0;						// first index on Y
 	start[2] = start_slice; // first index on Z
 	typename ImageType::SizeType size;
 	size[0] = dimensions[0]; // size along X
@@ -94,6 +94,7 @@ typename itk::SliceContiguousImage<T>::Pointer wrapToITK(const std::vector<T*>& 
 		const Vec3& spacing, const Transform& transform)
 {
 	using SliceContiguousImageType = itk::SliceContiguousImage<T>;
+	using RegionType = typename SliceContiguousImageType::RegionType;
 
 	typename SliceContiguousImageType::IndexType start;
 	start.Fill(0);
@@ -103,7 +104,7 @@ typename itk::SliceContiguousImage<T>::Pointer wrapToITK(const std::vector<T*>& 
 	size[1] = dims[1];
 	size[2] = dims[2];
 
-	typename SliceContiguousImageType::RegionType region(start, size);
+	RegionType total_region(start, size);
 
 	assert(end_slice > start_slice);
 	if (end_slice > start_slice)
@@ -117,6 +118,8 @@ typename itk::SliceContiguousImage<T>::Pointer wrapToITK(const std::vector<T*>& 
 		size[2] = end_slice - start_slice;
 	}
 
+	RegionType buffered_region(start, size);
+
 	itk::Point<itk::SpacePrecisionType, 3> origin;
 	transform.getOffset(origin);
 
@@ -127,11 +130,17 @@ typename itk::SliceContiguousImage<T>::Pointer wrapToITK(const std::vector<T*>& 
 	image->SetSpacing(spacing.v);
 	image->SetOrigin(origin);
 	image->SetDirection(direction);
-	image->SetRegions(region);
+	image->SetLargestPossibleRegion(total_region);
+	image->SetBufferedRegion(buffered_region);
+	image->SetRequestedRegion(buffered_region);
 	image->Allocate();
 
 	// Set slice pointers
-	std::vector<T*> slices = all_slices;
+	std::vector<T*> slices;
+	for (size_t i = 0; i < size[2]; ++i)
+	{
+		slices.push_back(all_slices[i + start[2]]);
+	}
 	auto container = SliceContiguousImageType::PixelContainer::New();
 	container->SetImportPointersForSlices(slices, size[0] * size[1], false);
 	image->SetPixelContainer(container);

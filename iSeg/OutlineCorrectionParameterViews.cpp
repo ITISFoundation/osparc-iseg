@@ -405,6 +405,12 @@ SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamV
 			"of the Gaussian smoothing used to smooth the tissues "
 			"in world coordinates, e.g. mm. Sigma is the sqrt(variance)."));
 
+	_split_limit = new QLineEdit(QString::number(500));
+	_split_limit->setValidator(new QIntValidator);
+	_split_limit->setToolTip(Format(
+			"Splits active slices into batches of # slices to reduce memory requirements."
+			"This option is only used for 3D smoothing."));
+
 	_execute = new QPushButton(QString("Execute"));
 
 	auto hbox = make_hbox({_active_slice, _all_slices, _3D});
@@ -412,6 +418,7 @@ SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamV
 	auto layout = new QFormLayout;
 	layout->addRow(tr("Apply to"), hbox);
 	layout->addRow(tr("Sigma"), _sigma);
+	layout->addRow(tr("Max Slices in 3D"), _split_limit);
 	layout->addRow(_execute);
 	setLayout(layout);
 }
