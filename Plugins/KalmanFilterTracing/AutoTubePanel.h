@@ -137,6 +137,7 @@ private:
 	QPushButton* _load;
 	QPushButton* _remove_non_selected;
 	QPushButton* _add_to_tissues;
+	QPushButton* _export_lines;
 	QPushButton* _k_filter_predict;
 
 	QLineEdit* _selected_objects;
@@ -200,5 +201,6 @@ private slots:
 	void load();
 	void remove_non_selected();
 	void add_to_tissues();
+	void export_lines();
 	void predict_k_filter();
 };
