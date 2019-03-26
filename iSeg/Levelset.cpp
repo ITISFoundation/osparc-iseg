@@ -389,9 +389,6 @@ void Levelset::return_zerolevelset(vector<vector<Point>>* v1,
 								   vector<vector<Point>>* v2, int minsize)
 {
 	image->swap_bmpwork();
-	//	image->swap_workhelp();
-	//	image->set_bmp(levset);
-	//	image->copy2bmp(levset);
 
 	float thresh[2];
 	thresh[0] = 1;
@@ -403,9 +400,6 @@ void Levelset::return_zerolevelset(vector<vector<Point>>* v1,
 
 	image->get_contours(255.0f, v1, v2, minsize);
 	image->swap_bmpwork();
-	//	image->swap_workhelp();
-
-	return;
 }
 
 Levelset::~Levelset()

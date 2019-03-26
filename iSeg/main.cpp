@@ -227,6 +227,7 @@ int main(int argc, char** argv)
 			"QWidget { color: white; }"
 			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
 			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QComboBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
 			"QCheckBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
 
 	mainWindow->LoadLoadProj(latestprojpath);

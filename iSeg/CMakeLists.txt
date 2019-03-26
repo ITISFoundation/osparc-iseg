@@ -31,7 +31,7 @@ INCLUDE_DIRECTORIES(
 FILE(GLOB ViewerHeaders *.h)
 
 SET(ViewerSrcs
-	ActiveslicesConfigWidget.cpp
+	ActiveSlicesConfigDialog.cpp
 	Atlas.cpp
 	AtlasViewer.cpp
 	AtlasWidget.cpp
@@ -67,8 +67,8 @@ SET(ViewerSrcs
 	SliceTransform.cpp
 	SliceViewerWidget.cpp
 	SmoothingWidget.cpp
-	SurfaceViewerWidget.cpp
-	ThresholdWidget.cpp
+	SurfaceViewerWidget.cpp	
+	ThresholdWidgetQt4.cpp
 	TissueCleaner.cpp
 	TissueHierarchy.cpp
 	TissueInfos.cpp
@@ -91,7 +91,7 @@ SET(ViewerSrcs
 )
 
 SET(MyMocHeaders
-	ActiveslicesConfigWidget.h
+	ActiveSlicesConfigDialog.h
 	AtlasViewer.h
 	AtlasWidget.h
 	EdgeWidget.h
@@ -117,8 +117,8 @@ SET(MyMocHeaders
 	SliceViewerWidget.h
 	SmoothingWidget.h
 	SurfaceViewerWidget.h
-	TissueTreeWidget.h
-	ThresholdWidget.h
+	TissueTreeWidget.h	
+	ThresholdWidgetQt4.h
 	TransformWidget.h
 	UndoConfigurationDialog.h
 	VesselWidget.h
@@ -135,6 +135,7 @@ ENDIF()
 
 SET(UIS
 	Settings.ui
+	ThresholdWidgetQt4.ui
 )
 
 SET(RCCS images.qrc)

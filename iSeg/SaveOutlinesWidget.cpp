@@ -16,7 +16,7 @@
 
 #include <qfiledialog.h>
 #include <q3hbox.h>
-#include <q3listbox.h>
+#include <qlistwidget.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qdialog.h>
@@ -37,12 +37,12 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
 	vbox1 = new Q3VBox(this);
-	lbo_tissues = new Q3ListBox(vbox1);
+	lbo_tissues = new QListWidget(vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)
 	{
-		lbo_tissues->insertItem(ToQ(TissueInfos::GetTissueName(i)));
+		lbo_tissues->addItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
-	lbo_tissues->setMultiSelection(true);
+	lbo_tissues->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	hbox2 = new Q3HBox(vbox1);
 	hbox1 = new Q3HBox(vbox1);
 	hbox3 = new Q3HBox(vbox1);
@@ -128,16 +128,11 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 	QObject::connect(pb_file, SIGNAL(clicked()), this, SLOT(file_pushed()));
 	QObject::connect(pb_exec, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this,
-					 SLOT(mode_changed()));
-	QObject::connect(cb_extrusion, SIGNAL(clicked()), this,
-					 SLOT(mode_changed()));
-	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this,
-					 SLOT(simplif_changed()));
+	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
+	QObject::connect(cb_extrusion, SIGNAL(clicked()), this, SLOT(mode_changed()));
+	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this, SLOT(simplif_changed()));
 
 	mode_changed();
-
-	return;
 }
 
 SaveOutlinesWidget::~SaveOutlinesWidget()
@@ -149,7 +144,7 @@ SaveOutlinesWidget::~SaveOutlinesWidget()
 
 void SaveOutlinesWidget::mode_changed()
 {
-	if (rb_line->isOn())
+	if (rb_line->isChecked())
 	{
 		rb_dougpeuck->setText("Doug-Peucker");
 		lb_f1->setText("Max. Dist.: 0 ");
@@ -202,17 +197,17 @@ void SaveOutlinesWidget::mode_changed()
 
 void SaveOutlinesWidget::simplif_changed()
 {
-	if (rb_none->isOn())
+	if (rb_none->isChecked())
 	{
 		hbox4->hide();
 		hbox7->hide();
 	}
-	else if (rb_dougpeuck->isOn())
+	else if (rb_dougpeuck->isChecked())
 	{
 		hbox4->hide();
 		hbox7->show();
 	}
-	else if (rb_dist->isOn())
+	else if (rb_dist->isChecked())
 	{
 		hbox4->show();
 		hbox7->hide();
@@ -222,7 +217,7 @@ void SaveOutlinesWidget::simplif_changed()
 void SaveOutlinesWidget::file_pushed()
 {
 	QString loadfilename;
-	if (rb_triang->isOn())
+	if (rb_triang->isChecked())
 		loadfilename = QFileDialog::getSaveFileName(
 			QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
 	else
@@ -238,7 +233,7 @@ void SaveOutlinesWidget::save_pushed()
 	vector<tissues_size_t> vtissues;
 	for (tissues_size_t i = 0; i < TissueInfos::GetTissueCount(); i++)
 	{
-		if (lbo_tissues->isSelected((int)i))
+		if (lbo_tissues->item((int)i)->isSelected())
 		{
 			vtissues.push_back((tissues_size_t)i + 1);
 		}
@@ -255,7 +250,7 @@ void SaveOutlinesWidget::save_pushed()
 	if (!(le_file->text()).isEmpty())
 	{
 		QString loadfilename = le_file->text();
-		if (rb_triang->isOn())
+		if (rb_triang->isChecked())
 		{
 			ISEG_INFO_MSG("triangulating...");
 			// If no extension given, add a default one
@@ -309,18 +304,18 @@ void SaveOutlinesWidget::save_pushed()
 				Pair pair1 = handler3D->get_pixelsize();
 				handler3D->set_pixelsize(pair1.high / 2, pair1.low / 2);
 				//				handler3D->extract_contours2(sb_minsize->value(), vtissues);
-				if (rb_dougpeuck->isOn())
+				if (rb_dougpeuck->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(
 						sb_minsize->value(), vtissues, sl_f->value() * 0.05f);
 					//					handler3D->dougpeuck_line(sl_f->value()*0.05f*2);
 				}
-				else if (rb_dist->isOn())
+				else if (rb_dist->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
 														   vtissues);
 				}
-				else if (rb_none->isOn())
+				else if (rb_none->isChecked())
 				{
 					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
 														   vtissues);
@@ -370,7 +365,7 @@ void SaveOutlinesWidget::save_pushed()
 			{
 				handler3D->extractinterpolatesave_contours2_xmirrored(
 					sb_minsize->value(), vtissues, sb_between->value(),
-					rb_dougpeuck->isOn(), sl_f->value() * 0.05f,
+					rb_dougpeuck->isChecked(), sl_f->value() * 0.05f,
 					loadfilename.ascii());
 			}
 		}

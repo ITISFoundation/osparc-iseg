@@ -14,7 +14,7 @@
 #include "Data/LogApi.h"
 #include "Data/ItkUtils.h"
 #include "Data/addLine.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 
@@ -29,7 +29,7 @@
 using namespace iseg;
 
 TissueSeparatorWidget::TissueSeparatorWidget(
-		iseg::SliceHandlerInterface* hand3D, QWidget* parent, const char* name,
+		iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), slice_handler(hand3D)
 {
@@ -182,7 +182,7 @@ void TissueSeparatorWidget::do_work_all_slices()
 	using source_type = itk::SliceContiguousImage<float>;
 	using mask_type = itk::Image<unsigned char, 3>;
 
-	SliceHandlerItkWrapper wrapper(slice_handler);
+	SlicesHandlerITKInterface wrapper(slice_handler);
 	auto source = wrapper.GetSource(false);
 	auto target = wrapper.GetTarget(false);
 
@@ -217,7 +217,7 @@ void TissueSeparatorWidget::do_work_current_slice()
 {
 	using source_type = itk::Image<float, 2>;
 
-	SliceHandlerItkWrapper wrapper(slice_handler);
+	SlicesHandlerITKInterface wrapper(slice_handler);
 	auto source = wrapper.GetSourceSlice();
 	auto target = wrapper.GetTargetSlice();
 
@@ -238,7 +238,7 @@ template<unsigned int Dim, typename TInput>
 typename itk::Image<unsigned char, Dim>::Pointer
 		TissueSeparatorWidget::do_work(TInput* source, TInput* target, const typename itk::Image<unsigned char, Dim>::RegionType& requested_region)
 {
-	using tissue_value_type = SliceHandlerInterface::tissue_type;
+	using tissue_value_type = SlicesHandlerInterface::tissue_type;
 	tissue_value_type const OBJECT_1 = 127;
 	tissue_value_type const OBJECT_2 = 255;
 	bool has_sigma;

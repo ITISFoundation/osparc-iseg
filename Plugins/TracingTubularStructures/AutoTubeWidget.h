@@ -25,7 +25,7 @@ class AutoTubeWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	AutoTubeWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AutoTubeWidget() {}
 	void init() override;
@@ -47,7 +47,7 @@ private:
 	template<class TInput, class TImage>
 	typename TImage::Pointer compute_feature_image_2d(TInput* source) const;
 
-	iseg::SliceHandlerInterface* _handler3D;
+	iseg::SlicesHandlerInterface* _handler3D;
 
 	QLineEdit* _sigma_low;
 	QLineEdit* _sigma_hi;

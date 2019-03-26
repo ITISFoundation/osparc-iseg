@@ -13,7 +13,7 @@
 #include "VtkGlue/itkImageToVTKImageFilter.h"
 
 #include "Data/Logger.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/Transform.h"
 
 #include <itkCastImageFilter.h>
@@ -30,7 +30,7 @@
 using namespace iseg;
 
 template<typename T>
-bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SliceHandlerInterface* handler)
+bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SlicesHandlerInterface* handler)
 {
 	unsigned dims[3] = {handler->width(), handler->height(), handler->num_slices()};
 	auto image = wrapToITK(all_slices, dims, handler->start_slice(), handler->end_slice(), handler->spacing(), handler->transform());

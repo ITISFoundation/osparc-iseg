@@ -14,7 +14,6 @@
 #include "bmp_read_1.h"
 
 #include <q3hbox.h>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -29,6 +28,8 @@
 #include <qslider.h>
 #include <qspinbox.h>
 #include <qwidget.h>
+
+class QListWidget;
 
 namespace iseg {
 
@@ -54,7 +55,7 @@ private:
 	Q3HBox* hbox9;
 	Q3HBox* hboxslicesbetween;
 	Q3VBox* vbox1;
-	Q3ListBox* lbo_tissues;
+	QListWidget* lbo_tissues;
 	QPushButton* pb_file;
 	QPushButton* pb_exec;
 	QPushButton* pb_close;

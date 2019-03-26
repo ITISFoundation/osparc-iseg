@@ -236,7 +236,7 @@ void InterpolationWidget::startslice_pressed()
 
 void InterpolationWidget::on_mouse_clicked(Point p)
 {
-	if (rb_work->isOn() || rb_tissue->isOn())
+	if (rb_work->isChecked() || rb_tissue->isChecked())
 	{
 		brush->set_tissue_value(tissuenr);
 		brush->on_mouse_clicked(p);
@@ -249,7 +249,7 @@ void InterpolationWidget::on_mouse_clicked(Point p)
 
 void InterpolationWidget::on_mouse_released(Point p)
 {
-	if (rb_work->isOn() || rb_tissue->isOn())
+	if (rb_work->isChecked() || rb_tissue->isChecked())
 	{
 		brush->on_mouse_released(p);
 	}
@@ -261,7 +261,7 @@ void InterpolationWidget::on_mouse_released(Point p)
 
 void InterpolationWidget::on_mouse_moved(Point p)
 {
-	if (rb_work->isOn() || rb_tissue->isOn())
+	if (rb_work->isChecked() || rb_tissue->isChecked())
 	{
 		brush->on_mouse_moved(p);
 	}
@@ -280,12 +280,12 @@ void InterpolationWidget::execute()
 	if (current != startnr)
 	{
 		iseg::DataSelection dataSelection;
-		if (rb_extra->isOn())
+		if (rb_extra->isChecked())
 		{
 			dataSelection.sliceNr = (unsigned short)sb_slicenr->value() - 1;
 			dataSelection.work = true;
 			emit begin_datachange(dataSelection, this);
-			if (rb_work->isOn())
+			if (rb_work->isChecked())
 			{
 				handler3D->extrapolatework(startnr, current, (unsigned short)sb_slicenr->value() - 1);
 			}
@@ -295,43 +295,43 @@ void InterpolationWidget::execute()
 			}
 			emit end_datachange(this);
 		}
-		else if (rb_inter->isOn())
+		else if (rb_inter->isChecked())
 		{
 			dataSelection.allSlices = true;
 
-			if (rb_work->isOn())
+			if (rb_work->isChecked())
 			{
 				dataSelection.work = true;
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolateworkgrey_medianset(startnr, current, rb_8connectivity->isOn());
+					handler3D->interpolateworkgrey_medianset(startnr, current, rb_8connectivity->isChecked());
 				}
 				else
 				{
 					handler3D->interpolateworkgrey(startnr, current, connected);
 				}
 			}
-			else if (rb_tissue->isOn())
+			else if (rb_tissue->isChecked())
 			{
 				dataSelection.work = true;
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolatetissue_medianset(startnr, current, tissuenr, rb_8connectivity->isOn());
+					handler3D->interpolatetissue_medianset(startnr, current, tissuenr, rb_8connectivity->isChecked());
 				}
 				else
 				{
 					handler3D->interpolatetissue(startnr, current, tissuenr, connected);
 				}
 			}
-			else if (rb_tissueall->isOn())
+			else if (rb_tissueall->isChecked())
 			{
 				dataSelection.tissues = true;
 				emit begin_datachange(dataSelection, this);
 				if (cb_medianset->isChecked())
 				{
-					handler3D->interpolatetissuegrey_medianset(startnr, current, rb_8connectivity->isOn());
+					handler3D->interpolatetissuegrey_medianset(startnr, current, rb_8connectivity->isChecked());
 				}
 				else
 				{
@@ -340,11 +340,11 @@ void InterpolationWidget::execute()
 			}
 			emit end_datachange(this);
 		}
-		else if (rb_batchinter->isOn())
+		else if (rb_batchinter->isChecked())
 		{
 			dataSelection.allSlices = true;
 
-			if (rb_work->isOn())
+			if (rb_work->isChecked())
 			{
 				dataSelection.work = true;
 				emit begin_datachange(dataSelection, this);
@@ -356,12 +356,12 @@ void InterpolationWidget::execute()
 							 batchstart <= current - batchstride;
 							 batchstart += batchstride)
 					{
-						handler3D->interpolateworkgrey_medianset(batchstart, batchstart + batchstride, rb_8connectivity->isOn());
+						handler3D->interpolateworkgrey_medianset(batchstart, batchstart + batchstride, rb_8connectivity->isChecked());
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolateworkgrey_medianset(batchstart - batchstride, current, rb_8connectivity->isOn());
+						handler3D->interpolateworkgrey_medianset(batchstart - batchstride, current, rb_8connectivity->isChecked());
 					}
 				}
 				else
@@ -380,7 +380,7 @@ void InterpolationWidget::execute()
 					}
 				}
 			}
-			else if (rb_tissue->isOn())
+			else if (rb_tissue->isChecked())
 			{
 				dataSelection.work = true;
 				emit begin_datachange(dataSelection, this);
@@ -392,12 +392,12 @@ void InterpolationWidget::execute()
 							 batchstart <= current - batchstride;
 							 batchstart += batchstride)
 					{
-						handler3D->interpolatetissue_medianset(batchstart, batchstart + batchstride, tissuenr, rb_8connectivity->isOn());
+						handler3D->interpolatetissue_medianset(batchstart, batchstart + batchstride, tissuenr, rb_8connectivity->isChecked());
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissue_medianset(batchstart - batchstride, current, tissuenr, rb_8connectivity->isOn());
+						handler3D->interpolatetissue_medianset(batchstart - batchstride, current, tissuenr, rb_8connectivity->isChecked());
 					}
 				}
 				else
@@ -416,7 +416,7 @@ void InterpolationWidget::execute()
 					}
 				}
 			}
-			else if (rb_tissueall->isOn())
+			else if (rb_tissueall->isChecked())
 			{
 				dataSelection.tissues = true;
 				emit begin_datachange(dataSelection, this);
@@ -429,13 +429,13 @@ void InterpolationWidget::execute()
 							 batchstart += batchstride)
 					{
 						handler3D->interpolatetissuegrey_medianset(batchstart, batchstart + batchstride,
-								rb_8connectivity->isOn());
+								rb_8connectivity->isChecked());
 					}
 					// Last batch with smaller stride
 					if (batchstart > current &&
 							current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissuegrey_medianset(batchstart - batchstride, current, rb_8connectivity->isOn());
+						handler3D->interpolatetissuegrey_medianset(batchstart - batchstride, current, rb_8connectivity->isChecked());
 					}
 				}
 				else
@@ -465,14 +465,14 @@ void InterpolationWidget::brush_changed()
 {
 	if (brush)
 	{
-		brush->set_brush_target(rb_work->isOn());
+		brush->set_brush_target(rb_work->isChecked());
 		brush->set_radius(brush_radius->text().toDouble());
 	}
 }
 
 void InterpolationWidget::method_changed()
 {
-	if (rb_extra->isOn())
+	if (rb_extra->isChecked())
 	{
 		hboxextra->show();
 		hboxbatch->hide();
@@ -486,7 +486,7 @@ void InterpolationWidget::method_changed()
 		}
 		rb_tissueall->setEnabled(false);
 	}
-	else if (rb_inter->isOn())
+	else if (rb_inter->isChecked())
 	{
 		hboxextra->hide();
 		hboxbatch->hide();
@@ -500,12 +500,12 @@ void InterpolationWidget::method_changed()
 		}
 		else
 		{
-			cb_connectedshapebased->setVisible(!rb_tissueall->isOn());
+			cb_connectedshapebased->setVisible(!rb_tissueall->isChecked());
 			rb_4connectivity->hide();
 			rb_8connectivity->hide();
 		}
 	}
-	else if (rb_batchinter->isOn())
+	else if (rb_batchinter->isChecked())
 	{
 		hboxextra->hide();
 		hboxbatch->show();
@@ -530,7 +530,7 @@ void InterpolationWidget::source_changed()
 
 	if (brush)
 	{
-		brush->set_brush_target(rb_work->isOn());
+		brush->set_brush_target(rb_work->isChecked());
 	}
 }
 
@@ -541,27 +541,27 @@ FILE* InterpolationWidget::SaveParams(FILE* fp, int version)
 		int dummy;
 		dummy = sb_slicenr->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_tissue->isOn());
+		dummy = (int)(rb_tissue->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_work->isOn());
+		dummy = (int)(rb_work->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_inter->isOn());
+		dummy = (int)(rb_inter->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_extra->isOn());
+		dummy = (int)(rb_extra->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		if (version >= 11)
 		{
-			dummy = (int)(rb_tissueall->isOn());
+			dummy = (int)(rb_tissueall->isChecked());
 			fwrite(&(dummy), 1, sizeof(int), fp);
-			dummy = (int)(rb_batchinter->isOn());
+			dummy = (int)(rb_batchinter->isChecked());
 			fwrite(&(dummy), 1, sizeof(int), fp);
 			if (version >= 12)
 			{
 				dummy = (int)(cb_medianset->isChecked());
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(rb_4connectivity->isOn());
+				dummy = (int)(rb_4connectivity->isChecked());
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(rb_8connectivity->isOn());
+				dummy = (int)(rb_8connectivity->isChecked());
 				fwrite(&(dummy), 1, sizeof(int), fp);
 			}
 		}

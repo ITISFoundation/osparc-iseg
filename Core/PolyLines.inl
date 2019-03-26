@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fstream>
-
 namespace iseg {
 
 namespace detail {
@@ -246,63 +244,6 @@ void RemoveDuplicateEdges(std::vector<Tuple>& edges)
 	}
 
 	std::swap(new_edges, edges);
-}
-
-template<typename TVec3>
-void WritePolylinesToVtk(std::vector<std::vector<TVec3>>& polylines, const std::string& file_name)
-{
-	using bit32 = unsigned int;
-	std::vector<std::vector<bit32>> polylines_idx;
-	std::vector<TVec3> points;
-	bit32 point_count = 0;
-	size_t lines_counts = 0;
-	for (auto pline : polylines)
-	{
-		bool is_closed = (pline.front() == pline.back());
-
-		std::vector<bit32> iline;
-		for (size_t i = 0; i < (is_closed ? pline.size() - 1 : pline.size()); i++)
-		{
-			iline.push_back(point_count++);
-			points.push_back(pline[i]);
-		}
-		if (is_closed)
-		{
-			iline.push_back(iline.front());
-		}
-		polylines_idx.push_back(iline);
-		lines_counts += iline.size();
-	}
-
-	const bit32 num_points = (bit32)points.size();
-	const bit32 num_lines = (bit32)polylines_idx.size();
-
-	std::ofstream ofile;
-	ofile.open(file_name.c_str());
-
-	ofile << "# vtk DataFile Version 3.0\n";
-	ofile << "vtk output\n";
-	ofile << "ASCII\n";
-	ofile << "DATASET POLYDATA\n";
-
-	ofile << "POINTS " << num_points << " float\n";
-	for (bit32 i = 0; i < num_points; i++)
-	{
-		auto p = points[i];
-		ofile << p[0] << " " << p[1] << " " << p[2] << "\n";
-	}
-
-	ofile << "LINES " << num_lines << " " << lines_counts + num_lines << "\n";
-	for (bit32 i = 0; i < num_lines; i++)
-	{
-		auto line = polylines_idx[i];
-		ofile << line.size();
-		for (auto id : line)
-			ofile << " " << id;
-		ofile << "\n";
-	}
-
-	ofile.close();
 }
 
 } // namespace iseg

@@ -22,7 +22,7 @@ namespace iseg {
 	class ISEG_DATA_API BrushInteraction
 	{
 	public:
-		BrushInteraction(SliceHandlerInterface* handler,
+		BrushInteraction(SlicesHandlerInterface* handler,
 			const boost::function<void(DataSelection)>& begin,
 			const boost::function<void(EndUndoAction)>& end,
 			const boost::function<void(std::vector<Point>*)>& vpdynchanged) 
@@ -34,7 +34,7 @@ namespace iseg {
 		}
 
 		/// throws std::runtime_error if handler is invalid
-		void init(SliceHandlerInterface* handler);
+		void init(SlicesHandlerInterface* handler);
 
 		void set_radius(float radius) { _radius = radius; }
 		void set_brush_target(bool on) { _brush_target = on; }
@@ -54,7 +54,7 @@ namespace iseg {
 		boost::function<void(EndUndoAction)> end_datachange;
 		boost::function<void(std::vector<Point>*)> vpdyn_changed;
 
-		SliceHandlerInterface* _slice_handler;
+		SlicesHandlerInterface* _slice_handler;
 		std::vector<bool> _cached_tissue_locks;
 		unsigned _width;
 		unsigned _height;

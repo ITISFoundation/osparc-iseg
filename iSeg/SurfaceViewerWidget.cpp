@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QMenu>
+#include <Q3VBox>
 #include <QResizeEvent>
 
 #include <vtkBitArray.h>

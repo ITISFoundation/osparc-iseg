@@ -9,7 +9,7 @@
  */
 #include "BiasCorrection.h"
 
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/ItkUtils.h"
 
 #include <itkBSplineControlPointImageFilter.h>
@@ -22,7 +22,9 @@
 #include <itkShrinkImageFilter.h>
 #include <itkTimeProbe.h>
 
+#include <qlabel.h>
 #include <qprogressdialog.h>
+#include <QFormLayout>
 
 #include <algorithm>
 #include <functional>
@@ -105,7 +107,7 @@ typename ImageType::Pointer AllocImage(
 
 } // namespace
 
-BiasCorrectionWidget::BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D,
+BiasCorrectionWidget::BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D),
@@ -120,51 +122,53 @@ BiasCorrectionWidget::BiasCorrectionWidget(iseg::SliceHandlerInterface* hand3D,
 
 	activeslice = handler3D->active_slice();
 
-	vbox1 = new Q3VBox(this);
-	bias_header = new QLabel("N4 Bias Correction: ", vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-	hbox4 = new Q3HBox(vbox1);
+	auto bias_header = new QLabel("N4 Bias Correction");
 
-	txt_h2 = new QLabel("Fitting Levels: ", hbox2);
-	edit_num_levels = new QSpinBox(0, 50, 1, hbox2);
-	edit_num_levels->setValue(4);
+	number_levels = new QSpinBox(0, 50, 1, nullptr);
+	number_levels->setValue(4);
 
-	txt_h3 = new QLabel("Shrink Factor", hbox3);
-	edit_shrink_factor = new QSpinBox(1, 16, 1, hbox3);
-	edit_shrink_factor->setValue(4);
+	shrink_factor = new QSpinBox(1, 16, 1, nullptr);
+	shrink_factor->setValue(4);
 
-	txt_h4 = new QLabel("Iterations: ", hbox4);
-	edit_num_iterations = new QSpinBox(1, 200, 5, hbox4);
-	edit_num_iterations->setValue(50);
+	number_iterations = new QSpinBox(1, 200, 5, nullptr);
+	number_iterations->setValue(50);
 
-	bias_exec = new QPushButton("Execute", vbox1);
+	execute = new QPushButton("Execute");
 
-	vbox1->setMinimumWidth(std::max(300, vbox1->sizeHint().width()));
+	// layout
+	auto layout = new QFormLayout;
+	layout->addRow(bias_header);
+	layout->addRow("Fitting Levels", number_levels);
+	layout->addRow("Shrink Factor", shrink_factor);
+	layout->addRow("Iterations", number_iterations);
+	layout->addRow(execute);
 
-	QObject::connect(bias_exec, SIGNAL(clicked()), this, SLOT(do_work()));
+	setLayout(layout);
+
+	// connections
+	connect(execute, SIGNAL(clicked()), this, SLOT(do_work()));
 }
 
 void BiasCorrectionWidget::do_work()
 {
 	typedef itk::Image<float, 3> InputImageType;
 
-	iseg::SliceHandlerItkWrapper wrapper(handler3D);
-	InputImageType::Pointer input = wrapper.GetImageDeprecated(iseg::SliceHandlerItkWrapper::kSource, true);
+	iseg::SlicesHandlerITKInterface wrapper(handler3D);
+	InputImageType::Pointer input = wrapper.GetImageDeprecated(iseg::SlicesHandlerITKInterface::kSource, true);
 
 	//Ensure that it is a 3D image for the 3D image filter ! Else it does nothing
 	if (input->GetLargestPossibleRegion().GetSize(2) > 1)
 	{
-		int num_levels = edit_num_levels->value();
-		int num_iterations = edit_num_iterations->value();
-		int shrink_factor = edit_shrink_factor->value();
+		int num_levels = number_levels->value();
+		int num_iterations = number_iterations->value();
+		int factor = shrink_factor->value();
 		double conv_threshold = 0.0;
 
 		try
 		{
 			auto output = DoBiasCorrection<InputImageType::Pointer>(
 					input, ITK_NULLPTR,
-					std::vector<unsigned int>(num_levels, num_iterations), shrink_factor,
+					std::vector<unsigned int>(num_levels, num_iterations), factor,
 					conv_threshold);
 
 			if (output)
@@ -176,7 +180,7 @@ void BiasCorrectionWidget::do_work()
 				dataSelection.bmp = true;
 				emit begin_datachange(dataSelection, this);
 
-				iseg::Paste<InputImageType, iseg::SliceHandlerItkWrapper::image_ref_type>(output, source);
+				iseg::Paste<InputImageType, iseg::SlicesHandlerITKInterface::image_ref_type>(output, source);
 
 				emit end_datachange(this);
 			}
@@ -200,9 +204,10 @@ void BiasCorrectionWidget::cancel()
 	}
 }
 
-QSize BiasCorrectionWidget::sizeHint() const { return vbox1->sizeHint(); }
+BiasCorrectionWidget::~BiasCorrectionWidget() 
+{
 
-BiasCorrectionWidget::~BiasCorrectionWidget() { delete vbox1; }
+}
 
 void BiasCorrectionWidget::on_slicenr_changed()
 {

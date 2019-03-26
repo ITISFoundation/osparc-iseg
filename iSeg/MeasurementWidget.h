@@ -15,16 +15,11 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3mimefactory.h>
-#include <q3vbox.h>
-#include <qbuttongroup.h>
 #include <qcombobox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpixmap.h>
-#include <qpushbutton.h>
 #include <qradiobutton.h>
-#include <qwidget.h>
+
+class QStackedWidget;
+class QLabel;
 
 namespace iseg {
 
@@ -34,10 +29,9 @@ class MeasurementWidget : public WidgetInterface
 public:
 	MeasurementWidget(SlicesHandler* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~MeasurementWidget();
+	~MeasurementWidget() {}
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	QSize sizeHint() const override;
 	void init() override;
 	void cleanup() override;
 	void newloaded() override;
@@ -53,35 +47,32 @@ private:
 	float calculate();
 	void set_coord(unsigned short posit, Point p, unsigned short slicenr);
 
+	enum eActiveLabels { kP1, kP2, kP3, kP4 };
+	void setActiveLabels(eActiveLabels labels);
+
 	bmphandler* bmphand;
 	SlicesHandler* handler3D;
 	std::vector<augmentedmark> labels;
 	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3VBox* vbox1;
-	QLabel* txt_displayer;
-	QLabel* txt_ccb1;
-	QLabel* txt_ccb2;
-	QLabel* txt_ccb3;
-	QLabel* txt_ccb4;
+
 	QRadioButton* rb_vector;
 	QRadioButton* rb_dist;
 	QRadioButton* rb_thick;
 	QRadioButton* rb_angle;
 	QRadioButton* rb_4ptangle;
 	QRadioButton* rb_vol;
-	QButtonGroup* modegroup;
+	QWidget* input_area;
 	QRadioButton* rb_pts;
 	QRadioButton* rb_lbls;
-	QButtonGroup* inputgroup;
+
+	QStackedWidget* stacked_widget;
+	QLabel* txt_displayer;
+	QWidget* labels_area;
 	QComboBox* cbb_lb1;
 	QComboBox* cbb_lb2;
 	QComboBox* cbb_lb3;
 	QComboBox* cbb_lb4;
+
 	int state;
 	int pt[4][3];
 	bool drawing;

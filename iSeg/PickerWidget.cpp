@@ -10,12 +10,15 @@
 #include "Precompiled.h"
 
 #include "PickerWidget.h"
-#include "SlicesHandler.h"
-#include "bmp_read_1.h"
 
 #include "Data/addLine.h"
 
+#include "Interface/LayoutTools.h"
+
 #include "Core/Pair.h"
+
+#include <QFormLayout>
+#include <QKeyEvent>
 
 #include <fstream>
 
@@ -25,9 +28,10 @@ PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(Format("Copy and erase regions. Copying can be used to transfer "
-										"segmented regions from one slice to another. All the	"
-										"functions are based on the current region selection."));
+	setToolTip(Format(
+			"Copy and erase regions. Copying can be used to transfer "
+			"segmented regions from one slice to another. All the	"
+			"functions are based on the current region selection."));
 
 	bmphand = handler3D->get_activebmphandler();
 
@@ -38,74 +42,63 @@ PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 	hasclipboard = false;
 	shiftpressed = false;
 
-	vbox1 = new Q3VBox(this);
-	vbox1->setMargin(8);
-	hbox1 = new Q3HBox(vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-
-	rb_work = new QRadioButton(QString("Target"), hbox1);
-	rb_tissue = new QRadioButton(QString("Tissue"), hbox1);
-	worktissuegroup = new QButtonGroup(this);
+	rb_work = new QRadioButton(tr("Target"));
+	rb_tissue = new QRadioButton(tr("Tissue"));
+	auto worktissuegroup = new QButtonGroup(this);
 	worktissuegroup->insert(rb_work);
 	worktissuegroup->insert(rb_tissue);
-	rb_tissue->setChecked(TRUE);
+	rb_tissue->setChecked(true);
 
-	rb_erase = new QRadioButton(QString("Erase"), hbox2);
+	rb_erase = new QRadioButton(tr("Erase"));
 	rb_erase->setToolTip(Format("The deleted regions will be left empty."));
-	rb_fill = new QRadioButton(QString("Fill"), hbox2);
-	rb_fill->setToolTip(
-			Format("Fill the resulting hole based on the neighboring regions."));
-	erasefillgroup = new QButtonGroup(this);
+	rb_fill = new QRadioButton(tr("Fill"));
+	rb_fill->setToolTip(Format("Fill the resulting hole based on the neighboring regions."));
+
+	auto erasefillgroup = new QButtonGroup(this);
 	erasefillgroup->insert(rb_erase);
 	erasefillgroup->insert(rb_fill);
-	rb_erase->setChecked(TRUE);
+	rb_erase->setChecked(true);
 
-	pb_copy = new QPushButton("Copy", hbox3);
+	pb_copy = new QPushButton("Copy");
 	pb_copy->setToolTip(Format("Copies an image on the clip-board."));
-	pb_paste = new QPushButton("Paste", hbox3);
+	pb_paste = new QPushButton("Paste");
 	pb_paste->setToolTip(Format("Clip-board is pasted into the current slice"));
-	pb_cut = new QPushButton("Cut", hbox3);
-	pb_cut->setToolTip(
-			Format("Tissues or target image pixels inside the region "
-						 "selection are erased but a copy "
-						 "is placed on the clipboard."));
-	pb_delete = new QPushButton("Delete", hbox3);
-	pb_delete->setToolTip(
-			Format("Tissues (resp. target image pixels) inside the "
-						 "region selection are erased."));
+	pb_cut = new QPushButton("Cut");
+	pb_cut->setToolTip(Format(
+			"Tissues or target image pixels inside the region "
+			"selection are erased but a copy "
+			"is placed on the clipboard."));
+	pb_delete = new QPushButton("Delete");
+	pb_delete->setToolTip(Format(
+			"Tissues (resp. target image pixels) inside the "
+			"region selection are erased."));
 
-	hbox1->setFixedSize(hbox1->sizeHint());
-	hbox2->setFixedSize(hbox2->sizeHint());
-	hbox3->setFixedSize(hbox3->sizeHint());
-	vbox1->setFixedSize(vbox1->sizeHint());
+	// layout
+	auto layout = new QFormLayout;
+	layout->addRow(rb_work, rb_tissue);
+	layout->addRow(rb_erase, rb_fill);
+	layout->addRow(make_hbox({pb_copy, pb_paste, pb_cut, pb_delete}));
+	setLayout(layout);
 
+	// initialize
 	selection.clear();
-
 	update_active();
 	showborder();
 
-	QObject::connect(worktissuegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(worktissue_changed(int)));
-	QObject::connect(pb_copy, SIGNAL(clicked()), this, SLOT(copy_pressed()));
-	QObject::connect(pb_paste, SIGNAL(clicked()), this, SLOT(paste_pressed()));
-	QObject::connect(pb_cut, SIGNAL(clicked()), this, SLOT(cut_pressed()));
-	QObject::connect(pb_delete, SIGNAL(clicked()), this,
-			SLOT(delete_pressed()));
+	// connections
+	connect(worktissuegroup, SIGNAL(buttonClicked(int)), this, SLOT(worktissue_changed(int)));
+	connect(pb_copy, SIGNAL(clicked()), this, SLOT(copy_pressed()));
+	connect(pb_paste, SIGNAL(clicked()), this, SLOT(paste_pressed()));
+	connect(pb_cut, SIGNAL(clicked()), this, SLOT(cut_pressed()));
+	connect(pb_delete, SIGNAL(clicked()), this, SLOT(delete_pressed()));
 }
 
 PickerWidget::~PickerWidget()
 {
-	delete vbox1;
-	delete worktissuegroup;
-	delete erasefillgroup;
-
 	delete[] mask;
 	delete[] currentselection;
 	delete[] valuedistrib;
 }
-
-QSize PickerWidget::sizeHint() const { return vbox1->sizeHint(); }
 
 void PickerWidget::bmphand_changed(bmphandler* bmph)
 {
@@ -153,13 +146,13 @@ FILE* PickerWidget::SaveParams(FILE* fp, int version)
 	if (version >= 6)
 	{
 		int dummy;
-		dummy = (int)(rb_work->isOn());
+		dummy = (int)(rb_work->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_tissue->isOn());
+		dummy = (int)(rb_tissue->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_erase->isOn());
+		dummy = (int)(rb_erase->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fill->isOn());
+		dummy = (int)(rb_fill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -170,9 +163,6 @@ FILE* PickerWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 6)
 	{
-		QObject::disconnect(worktissuegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(worktissue_changed(int)));
-
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
 		rb_work->setChecked(dummy > 0);
@@ -184,9 +174,6 @@ FILE* PickerWidget::LoadParams(FILE* fp, int version)
 		rb_fill->setChecked(dummy > 0);
 
 		worktissue_changed(0);
-
-		QObject::connect(worktissuegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(worktissue_changed(int)));
 	}
 	return fp;
 }
@@ -202,11 +189,10 @@ void PickerWidget::on_mouse_clicked(Point p)
 		}
 	}
 	bool addorsub = !(currentselection[p.px + (unsigned long)(p.py) * width]);
-	if (rb_work->isOn())
+	if (rb_work->isChecked())
 		bmphand->change2mask_connectedwork(currentselection, p, addorsub);
 	else
-		bmphand->change2mask_connectedtissue(
-				handler3D->active_tissuelayer(), currentselection, p, addorsub);
+		bmphand->change2mask_connectedtissue(handler3D->active_tissuelayer(), currentselection, p, addorsub);
 
 	showborder();
 }
@@ -292,7 +278,7 @@ void PickerWidget::cleanup()
 
 void PickerWidget::update_active()
 {
-	if (hasclipboard && (rb_work->isOn() == clipboardworkortissue))
+	if (hasclipboard && (rb_work->isChecked() == clipboardworkortissue))
 	{
 		pb_paste->show();
 	}
@@ -309,7 +295,7 @@ void PickerWidget::copy_pressed()
 	{
 		mask[i] = currentselection[i];
 	}
-	clipboardworkortissue = rb_work->isOn();
+	clipboardworkortissue = rb_work->isChecked();
 	if (clipboardworkortissue)
 	{
 		bmphand->copy_work(valuedistrib);
@@ -317,8 +303,7 @@ void PickerWidget::copy_pressed()
 	}
 	else
 	{
-		tissues_size_t* tissues =
-				bmphand->return_tissues(handler3D->active_tissuelayer());
+		auto tissues = bmphand->return_tissues(handler3D->active_tissuelayer());
 		for (unsigned int i = 0; i < area; i++)
 		{
 			valuedistrib[i] = (float)tissues[i];
@@ -336,7 +321,7 @@ void PickerWidget::cut_pressed()
 
 void PickerWidget::paste_pressed()
 {
-	if (clipboardworkortissue != rb_work->isOn())
+	if (clipboardworkortissue != rb_work->isChecked())
 		return;
 	unsigned int area = bmphand->return_area();
 
@@ -369,20 +354,20 @@ void PickerWidget::delete_pressed()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = rb_work->isOn();
-	dataSelection.tissues = !rb_work->isOn();
+	dataSelection.work = rb_work->isChecked();
+	dataSelection.tissues = !rb_work->isChecked();
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_work->isOn())
+	if (rb_work->isChecked())
 	{
-		if (rb_erase->isOn())
+		if (rb_erase->isChecked())
 			bmphand->erasework(currentselection);
 		else
 			bmphand->floodwork(currentselection);
 	}
 	else
 	{
-		if (rb_erase->isOn())
+		if (rb_erase->isChecked())
 			bmphand->erasetissue(handler3D->active_tissuelayer(),
 					currentselection);
 		else

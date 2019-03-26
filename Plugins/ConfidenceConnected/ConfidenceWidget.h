@@ -26,7 +26,7 @@ class ConfidenceWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	ConfidenceWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent = 0,
+	ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~ConfidenceWidget() {}
 	void init() override;
@@ -46,7 +46,7 @@ protected:
 	void get_seeds(std::vector<itk::Index<3>>&);
 
 private:
-	iseg::SliceHandlerInterface* handler3D;
+	iseg::SlicesHandlerInterface* handler3D;
 	unsigned short activeslice;
 
 	QCheckBox* all_slices;

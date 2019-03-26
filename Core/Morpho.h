@@ -11,7 +11,7 @@
 #pragma once
 
 #include "Data/ItkUtils.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryDilateImageFilter.h>
 #include <itkBinaryErodeImageFilter.h>
@@ -133,13 +133,13 @@ typename TOutputImage::Pointer
 
 /** \brief Do morpological operation on target image
 */
-void MorphologicalOperation(iseg::SliceHandlerInterface* handler,
+void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
 		boost::variant<int, float> radius, eOperation operation, bool true3d)
 {
-	iseg::SliceHandlerItkWrapper itkhandler(handler);
+	iseg::SlicesHandlerITKInterface itkhandler(handler);
 	if (true3d)
 	{
-		using input_type = iseg::SliceHandlerItkWrapper::image_ref_type;
+		using input_type = iseg::SlicesHandlerITKInterface::image_ref_type;
 		using output_type = itk::Image<unsigned char, 3>;
 
 		auto target = itkhandler.GetTarget(true); // get active slices

@@ -5,14 +5,14 @@
 # - preprocessor definitions needed by package
 #
 
-#SET(EigenRootDir "" CACHE PATH "Directory containing Eigen/Cholesky")
-#SET(EIGEN_INCLUDE_DIR ${EigenRootDir})
- 
 MACRO(USE_EIGEN)
-	find_package (Eigen3 3.3 REQUIRED NO_MODULE)
-
-	#INCLUDE_DIRECTORIES( ${EIGEN_INCLUDE_DIR} )
-	LIST( APPEND MY_EXTERNAL_LINK_LIBRARIES Eigen3::Eigen )
+	FIND_PACKAGE (Eigen3 3.3 REQUIRED QUIET NO_MODULE)
+	IF (Eigen3_FOUND)
+		LIST( APPEND MY_EXTERNAL_LINK_LIBRARIES Eigen3::Eigen )
+	ELSE()
+		FIND_PATH(EIGEN_INCLUDE_DIR NAMES Eigen/Dense Eigen/Dense PATHS /usr/local/include/eigen3)
+		INCLUDE_DIRECTORIES( ${EIGEN_INCLUDE_DIR} )
+	ENDIF()
 ENDMACRO()
 
 # tell Eigen to use MKL BLAS, LAPACK and Intel VML (for vector operations)

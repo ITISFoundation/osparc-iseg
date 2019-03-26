@@ -11,7 +11,7 @@
 
 #include "Data/Logger.h"
 #include "Data/ItkUtils.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkImage.h>
 #include <itkBinaryThresholdImageFilter.h>
@@ -35,7 +35,7 @@
 
 namespace acc = boost::accumulators;
 
-LevelsetWidget::LevelsetWidget(iseg::SliceHandlerInterface* hand3D, QWidget* parent,
+LevelsetWidget::LevelsetWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
@@ -159,7 +159,7 @@ void LevelsetWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 
 void LevelsetWidget::guess_thresholds()
 {
-	iseg::SliceHandlerItkWrapper itk_handler(handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(handler3D);
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
@@ -219,7 +219,7 @@ void LevelsetWidget::guess_thresholds_nd(TInput* source)
 
 void LevelsetWidget::do_work()
 {
-	iseg::SliceHandlerItkWrapper itk_handler(handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(handler3D);
 	if (all_slices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;

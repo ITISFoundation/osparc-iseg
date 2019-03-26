@@ -15,83 +15,67 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <q3hbox.h>
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
+#include "Interface/LayoutTools.h"
+
+#include <QFormLayout>
+#include <QStackedLayout>
 #include <qpushbutton.h>
 #include <qradiobutton.h>
 #include <qslider.h>
 #include <qspinbox.h>
-#include <qwidget.h>
-
-#include <algorithm>
 
 using namespace iseg;
+
+namespace {
+QWidget* add_to_widget(QLayout* layout)
+{
+	auto widget = new QWidget;
+	widget->setLayout(layout);
+	return widget;
+}
+}
 
 FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 		QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
 {
-	setToolTip(
-			Format("The Fuzzy tab actually provides access to two different "
-						 "segmentation techniques that have a very different "
-						 "background but a similar user and interaction interface : "
-						 "1) Fuzzy connectedness and 2) a Fast Marching "
-						 "implementation of a levelset technique. Both methods "
-						 "require a seed point to be specified."));
+	setToolTip(Format(
+			"The Fuzzy tab actually provides access to two different "
+			"segmentation techniques that have a very different "
+			"background but a similar user and interaction interface : "
+			"1) Fuzzy connectedness and 2) a Fast Marching "
+			"implementation of a levelset technique. Both methods "
+			"require a seed point to be specified."));
 
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 
 	area = 0;
 
-	hboxoverall = new Q3HBox(this);
-	hboxoverall->setMargin(8);
-	vboxmethods = new Q3VBox(hboxoverall);
-	vbox1 = new Q3VBox(hboxoverall);
-	vboxfast = new Q3VBox(vbox1);
-	vboxfuzzy = new Q3VBox(vbox1);
-
-	hbox1 = new Q3HBox(vboxfast);
-	hbox2 = new Q3HBox(vboxfast);
-	hbox3 = new Q3HBox(vboxfuzzy);
-	hbox4 = new Q3HBox(vboxfuzzy);
-	hbox5 = new Q3HBox(vboxfuzzy);
-	hbox7 = new Q3HBox(vbox1);
-
-	txt_sigma = new QLabel(QString("Sigma: "), hbox1);
-	txt_thresh = new QLabel(QString("Thresh: 0"), hbox2);
-	txt_m1 = new QLabel(QString("m1: 0"), hbox3);
-	txt_s1 = new QLabel(QString("s1: 0"), hbox4);
-	txt_s2 = new QLabel(QString("s2: 0"), hbox5);
-
-	sl_sigma = new QSlider(Qt::Horizontal, hbox1);
+	sl_sigma = new QSlider(Qt::Horizontal, nullptr);
 	sl_sigma->setRange(0, 100);
 	sl_sigma->setValue(int(sigma / sigmamax * 100));
-	sl_thresh = new QSlider(Qt::Horizontal, hbox2);
+	sl_thresh = new QSlider(Qt::Horizontal, nullptr);
 	sl_thresh->setRange(0, 100);
 
-	sl_m1 = new QSlider(Qt::Horizontal, hbox3);
+	sl_m1 = new QSlider(Qt::Horizontal, nullptr);
 	sl_m1->setRange(0, 100);
-	sl_m1->setToolTip(
-			Format("The average gray value of the region to be segmented."));
+	sl_m1->setToolTip(Format("The average gray value of the region to be segmented."));
 
-	sl_s1 = new QSlider(Qt::Horizontal, hbox4);
+	sl_s1 = new QSlider(Qt::Horizontal, nullptr);
 	sl_s1->setRange(0, 100);
-	sl_s1->setToolTip(
-			Format("A measure of how much the gray values are expected "
-						 "to deviate from m1 (standard deviation)."));
+	sl_s1->setToolTip(Format(
+			"A measure of how much the gray values are expected "
+			"to deviate from m1 (standard deviation)."));
 
-	sl_s2 = new QSlider(Qt::Horizontal, hbox5);
+	sl_s2 = new QSlider(Qt::Horizontal, nullptr);
 	sl_s2->setRange(0, 100);
-	sl_s2->setToolTip(Format("Sudden changes larger than s2 are considered to "
-													 "indicate boundaries."));
+	sl_s2->setToolTip(Format(
+			"Sudden changes larger than s2 are considered to "
+			"indicate boundaries."));
 
-	rb_fastmarch = new QRadioButton(QString("Fast Marching"), vboxmethods);
+	rb_fastmarch = new QRadioButton(tr("Fast Marching"));
 	rb_fastmarch->setToolTip(Format(
 			"Fuzzy connectedness computes for each image "
 			"point the likelihood of its belonging to the same region as the "
@@ -101,103 +85,101 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 			"identical to the probability of this path lying entirely in the same "
 			"tissue "
 			"as the start point."));
-	rb_fuzzy = new QRadioButton(QString("Fuzzy Connect."), vboxmethods);
-	rb_fuzzy->setToolTip(
-			Format("This tool simulates the evolution of a line (boundary) on a 2D "
-						 "image in time. "
-						 "The boundary is continuously expanding. The Sigma parameter "
-						 "(Gaussian smoothing) controls the impact of noise."));
+	rb_fuzzy = new QRadioButton(tr("Fuzzy Connect."));
+	rb_fuzzy->setToolTip(Format(
+			"This tool simulates the evolution of a line (boundary) on a 2D "
+			"image in time. "
+			"The boundary is continuously expanding. The Sigma parameter "
+			"(Gaussian smoothing) controls the impact of noise."));
 
-	bg_method = new QButtonGroup(this);
-	bg_method->insert(rb_fastmarch);
-	bg_method->insert(rb_fuzzy);
-	rb_fuzzy->show();
-	rb_fastmarch->setChecked(TRUE);
-	rb_fastmarch->show();
+	auto bg_method = make_button_group(this, {rb_fastmarch, rb_fuzzy});
+	rb_fastmarch->setChecked(true);
 
-	rb_drag = new QRadioButton(QString("Drag"), hbox7);
-	rb_drag->setToolTip(
-			Format("Drag allows the user to drag the mouse (after clicking on "
-						 "the start point and keeping the mouse button pressed down) "
-						 "specifying the "
-						 "extent of the region on the image."));
-	rb_drag->setChecked(TRUE);
+	rb_drag = new QRadioButton(tr("Drag"));
+	rb_drag->setToolTip(Format(
+			"Drag allows the user to drag the mouse (after clicking on "
+			"the start point and keeping the mouse button pressed down) "
+			"specifying the "
+			"extent of the region on the image."));
+	rb_drag->setChecked(true);
 	rb_drag->show();
-	rb_slider = new QRadioButton(QString("Slider"), hbox7);
+	rb_slider = new QRadioButton(tr("Slider"));
 	rb_slider->setToolTip(Format("Increase or decrease the region size."));
-	rb_slider->show();
 
-	bg_interact = new QButtonGroup(this);
+	auto bg_interact = new QButtonGroup(this);
 	bg_interact->insert(rb_drag);
 	bg_interact->insert(rb_slider);
 
-	sl_extend = new QSlider(Qt::Horizontal, vbox1);
+	sl_extend = new QSlider(Qt::Horizontal, nullptr);
 	sl_extend->setRange(0, 200);
 	sl_extend->setValue(0);
-	sl_extend->setEnabled(false);
 
-	sb_thresh = new QSpinBox(10, 100, 10, hbox2);
+	sb_thresh = new QSpinBox(10, 100, 10, nullptr);
 	sb_thresh->setValue(30);
-	sb_m1 = new QSpinBox(50, 1000, 50, hbox3);
+	sb_m1 = new QSpinBox(50, 1000, 50, nullptr);
 	sb_m1->setValue(200);
-	sb_s1 = new QSpinBox(50, 500, 50, hbox4);
+	sb_s1 = new QSpinBox(50, 500, 50, nullptr);
 	sb_s1->setValue(100);
-	sb_s2 = new QSpinBox(10, 200, 10, hbox5);
+	sb_s2 = new QSpinBox(10, 200, 10, nullptr);
 	sb_s2->setValue(100);
 
-	sl_s1->setFixedWidth(300);
-	sl_s2->setFixedWidth(300);
-	sl_m1->setFixedWidth(300);
-	sl_extend->setFixedWidth(400);
-	sl_thresh->setFixedWidth(300);
-	sl_sigma->setFixedWidth(300);
+	// layout
+	auto method_layout = new QVBoxLayout;
+	method_layout->addWidget(rb_fastmarch);
+	method_layout->addWidget(rb_fuzzy);
 
-	vboxmethods->setMargin(5);
-	vbox1->setMargin(5);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
+	auto method_area = new QFrame;
+	method_area->setLayout(method_layout);
+	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	method_area->setLineWidth(1);
 
-	hbox1->setFixedSize(hbox1->sizeHint());
-	hbox2->setFixedSize(hbox2->sizeHint());
-	hbox3->setFixedSize(hbox3->sizeHint());
-	hbox4->setFixedSize(hbox4->sizeHint());
-	hbox5->setFixedSize(hbox5->sizeHint());
-	vbox1->setFixedSize(vbox1->sizeHint());
+	auto fm_params = new QFormLayout;
+	fm_params->addRow(tr("Sigma"), sl_sigma);
+	fm_params->addRow(tr("Thresh"), make_hbox({sl_thresh, sb_thresh}));
+
+	auto fuzzy_params = new QFormLayout;
+	fuzzy_params->addRow(tr("m1"), make_hbox({sl_m1, sb_m1}));
+	fuzzy_params->addRow(tr("s1"), make_hbox({sl_s1, sb_s1}));
+	fuzzy_params->addRow(tr("s2"), make_hbox({sl_s2, sb_s2}));
+
+	params_stack_layout = new QStackedLayout;
+	params_stack_layout->addWidget(add_to_widget(fm_params));
+	params_stack_layout->addWidget(add_to_widget(fuzzy_params));
+
+	auto interact_layout = new QVBoxLayout;
+	interact_layout->addWidget(rb_drag);
+	interact_layout->addLayout(make_hbox({rb_slider, sl_extend}));
+
+	auto params_layout = new QVBoxLayout;
+	params_layout->addLayout(params_stack_layout);
+	params_layout->addLayout(interact_layout);
+
+	auto top_layout = new QHBoxLayout;
+	top_layout->addWidget(method_area);
+	top_layout->addLayout(params_layout);
+
+	setLayout(top_layout);
+
+	// connections
+	connect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
+	connect(sl_extend, SIGNAL(sliderPressed()), this, SLOT(slextend_pressed()));
+	connect(sl_extend, SIGNAL(sliderReleased()), this, SLOT(slextend_released()));
+	connect(sl_sigma, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+	connect(sl_thresh, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+	connect(sl_m1, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+	connect(sl_s1, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+	connect(sl_s2, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+
+	connect(bg_method, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+	connect(bg_interact, SIGNAL(buttonClicked(int)), this, SLOT(interact_changed()));
+
+	connect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+	connect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+	connect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+	connect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
 
 	IFTmarch = nullptr;
 	IFTfuzzy = nullptr;
-
-	QObject::connect(sl_extend, SIGNAL(valueChanged(int)), this,
-			SLOT(slextend_changed(int)));
-	QObject::connect(sl_extend, SIGNAL(sliderPressed()), this,
-			SLOT(slextend_pressed()));
-	QObject::connect(sl_extend, SIGNAL(sliderReleased()), this,
-			SLOT(slextend_released()));
-	QObject::connect(sl_sigma, SIGNAL(sliderMoved(int)), this,
-			SLOT(slider_changed()));
-	QObject::connect(sl_thresh, SIGNAL(sliderMoved(int)), this,
-			SLOT(slider_changed()));
-	QObject::connect(sl_m1, SIGNAL(sliderMoved(int)), this,
-			SLOT(slider_changed()));
-	QObject::connect(sl_s1, SIGNAL(sliderMoved(int)), this,
-			SLOT(slider_changed()));
-	QObject::connect(sl_s2, SIGNAL(sliderMoved(int)), this,
-			SLOT(slider_changed()));
-
-	QObject::connect(bg_method, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed()));
-	QObject::connect(bg_interact, SIGNAL(buttonClicked(int)), this,
-			SLOT(interact_changed()));
-
-	QObject::connect(sb_thresh, SIGNAL(valueChanged(int)), this,
-			SLOT(spinbox_changed()));
-	QObject::connect(sb_m1, SIGNAL(valueChanged(int)), this,
-			SLOT(spinbox_changed()));
-	QObject::connect(sb_s1, SIGNAL(valueChanged(int)), this,
-			SLOT(spinbox_changed()));
-	QObject::connect(sb_s2, SIGNAL(valueChanged(int)), this,
-			SLOT(spinbox_changed()));
-
 	sigma = 1.0f;
 	sigmamax = 5.0f;
 	thresh = 100.0f;
@@ -213,10 +195,6 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 
 FastmarchingFuzzyWidget::~FastmarchingFuzzyWidget()
 {
-	delete vbox1;
-	delete bg_method;
-	delete bg_interact;
-
 	if (IFTmarch != nullptr)
 		delete IFTmarch;
 	if (IFTfuzzy != nullptr)
@@ -282,20 +260,17 @@ void FastmarchingFuzzyWidget::cleanup()
 	sl_extend->setEnabled(false);
 }
 
-QSize FastmarchingFuzzyWidget::sizeHint() const { return vbox1->sizeHint(); }
-
 void FastmarchingFuzzyWidget::getrange()
 {
 	extendmax = 0;
 	for (unsigned i = 0; i < area; i++)
 		if (extendmax < map[i])
 			extendmax = map[i];
-	return;
 }
 
 void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 {
-	if (rb_fastmarch->isOn())
+	if (rb_fastmarch->isChecked())
 	{
 		if (IFTmarch != nullptr)
 			delete IFTmarch;
@@ -324,7 +299,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 		map = IFTfuzzy->return_pf();
 	}
 
-	if (rb_slider->isOn())
+	if (rb_slider->isChecked())
 	{
 		getrange();
 		if (extend > extendmax)
@@ -346,7 +321,7 @@ void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
 
 void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
 		vpdyn_arg.clear();
 		emit vpdyn_changed(&vpdyn_arg);
@@ -368,7 +343,7 @@ void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 
 void FastmarchingFuzzyWidget::on_mouse_moved(Point p)
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
 		vpdyn_arg.clear();
 		unsigned short width = bmphand->return_width();
@@ -497,7 +472,7 @@ void FastmarchingFuzzyWidget::execute()
 void FastmarchingFuzzyWidget::slextend_changed(int val)
 {
 	extend = val * 0.005f * extendmax;
-	if (rb_slider->isOn())
+	if (rb_slider->isChecked())
 		execute();
 
 	return;
@@ -512,45 +487,25 @@ void FastmarchingFuzzyWidget::bmp_changed()
 
 void FastmarchingFuzzyWidget::method_changed()
 {
-	if (rb_fastmarch->isOn())
+	if (rb_fastmarch->isChecked())
 	{
-		if (hideparams)
-		{
-			vboxmethods->hide();
-			vboxfast->hide();
-		}
-		else
-		{
-			vboxmethods->show();
-			vboxfast->show();
-		}
-		vboxfuzzy->hide();
+		params_stack_layout->setCurrentIndex(0);
 	}
 	else
 	{
-		vboxmethods->show();
-		if (hideparams)
-			vboxfuzzy->hide();
-		else
-			vboxfuzzy->show();
-		vboxfast->hide();
+		params_stack_layout->setCurrentIndex(1);
 	}
 }
 
 void FastmarchingFuzzyWidget::interact_changed()
 {
-	if (rb_drag->isOn())
+	if (rb_drag->isChecked())
 	{
-		if (hideparams)
-			hbox7->hide();
-		else
-			hbox7->show();
-		sl_extend->hide();
+		sl_extend->setVisible(false);
 	}
 	else
 	{
-		hbox7->show();
-		sl_extend->show();
+		sl_extend->setVisible(true);
 	}
 }
 
@@ -616,7 +571,7 @@ void FastmarchingFuzzyWidget::slider_changed()
 	s1 = sl_s1->value() * 0.01f * sb_s1->value();
 	s2 = sl_s2->value() * 0.01f * sb_s2->value();
 
-	if (rb_fastmarch->isOn() && IFTmarch != nullptr)
+	if (rb_fastmarch->isChecked() && IFTmarch != nullptr)
 	{
 		delete IFTmarch;
 		IFTmarch = nullptr;
@@ -662,13 +617,13 @@ FILE* FastmarchingFuzzyWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sb_s2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fastmarch->isOn());
+		dummy = (int)(rb_fastmarch->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fuzzy->isOn());
+		dummy = (int)(rb_fuzzy->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_drag->isOn());
+		dummy = (int)(rb_drag->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_slider->isOn());
+		dummy = (int)(rb_slider->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
 		fwrite(&sigma, 1, sizeof(float), fp);
@@ -688,20 +643,11 @@ FILE* FastmarchingFuzzyWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(sl_extend, SIGNAL(valueChanged(int)), this,
-				SLOT(slextend_changed(int)));
-		QObject::disconnect(bg_method, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
-		QObject::disconnect(bg_interact, SIGNAL(buttonClicked(int)), this,
-				SLOT(interact_changed()));
-		QObject::disconnect(sb_thresh, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::disconnect(sb_m1, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::disconnect(sb_s1, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::disconnect(sb_s2, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
+		disconnect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
+		disconnect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		disconnect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		disconnect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		disconnect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -745,20 +691,11 @@ FILE* FastmarchingFuzzyWidget::LoadParams(FILE* fp, int version)
 		method_changed();
 		interact_changed();
 
-		QObject::connect(sl_extend, SIGNAL(valueChanged(int)), this,
-				SLOT(slextend_changed(int)));
-		QObject::connect(bg_method, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
-		QObject::connect(bg_interact, SIGNAL(buttonClicked(int)), this,
-				SLOT(interact_changed()));
-		QObject::connect(sb_thresh, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::connect(sb_m1, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::connect(sb_s1, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
-		QObject::connect(sb_s2, SIGNAL(valueChanged(int)), this,
-				SLOT(spinbox_changed()));
+		connect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
+		connect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		connect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		connect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		connect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
 	}
 	return fp;
 }

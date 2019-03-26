@@ -322,7 +322,7 @@ void TransformWidget::UpdatePreview()
 	dataSelection.tissues = transformTissuesCheckBox->isChecked();
 	emit begin_datachange(dataSelection, this, false);
 
-	if (translateRadioButton->isOn())
+	if (translateRadioButton->isChecked())
 	{
 		// Translate
 		sliceTransform->Translate(
@@ -331,7 +331,7 @@ void TransformWidget::UpdatePreview()
 		transformParameters.translationOffset[0] = updateParameter1;
 		transformParameters.translationOffset[1] = updateParameter2;
 	}
-	else if (rotateRadioButton->isOn())
+	else if (rotateRadioButton->isChecked())
 	{
 		// Rotate
 		sliceTransform->Rotate(updateParameter1 -
@@ -340,7 +340,7 @@ void TransformWidget::UpdatePreview()
 				transformParameters.transformCenter[1]);
 		transformParameters.rotationAngle = updateParameter1;
 	}
-	else if (scaleRadioButton->isOn())
+	else if (scaleRadioButton->isChecked())
 	{
 		// Scale
 		sliceTransform->Scale(
@@ -351,7 +351,7 @@ void TransformWidget::UpdatePreview()
 		transformParameters.scalingFactor[0] = updateParameter1;
 		transformParameters.scalingFactor[1] = updateParameter2;
 	}
-	else if (shearRadioButton->isOn())
+	else if (shearRadioButton->isChecked())
 	{
 		// Shear
 		if (xAxisRadioButton->isChecked())

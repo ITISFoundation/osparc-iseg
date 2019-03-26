@@ -12,43 +12,21 @@
 #include "OutlineCorrectionParameterViews.h"
 
 #include "Interface/FormatTooltip.h"
+#include "Interface/LayoutTools.h"
 
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QMessageBox>
 #include <QScrollArea>
-#include <QStackedLayout>
-
-#include <initializer_list>
 
 namespace iseg {
-
-QHBoxLayout* make_hbox(std::initializer_list<QWidget*> list)
-{
-	auto hbox = new QHBoxLayout;
-	for (auto w : list)
-	{
-		hbox->addWidget(w);
-	}
-	return hbox;
-}
-
-QButtonGroup* make_button_group(QWidget* parent, std::initializer_list<QRadioButton*> list)
-{
-	auto group = new QButtonGroup(parent);
-	for (auto w : list)
-	{
-		group->addButton(w);
-	}
-	return group;
-}
 
 OLCorrParamView::OLCorrParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 {
 	_target = new QRadioButton(QString("Target"));
 	_tissues = new QRadioButton(QString("Tissues"));
-	_target->setOn(true);
+	_target->setChecked(true);
 	auto input_group = make_button_group(this, {_target, _tissues});
 
 	_select_object = new QPushButton(tr("Select"));
@@ -77,7 +55,7 @@ BrushParamView::BrushParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	_target = new QRadioButton(QString("Target"));
 	_tissues = new QRadioButton(QString("Tissues"));
 	auto input_group = make_button_group(this, {_target, _tissues});
-	_target->setOn(true);
+	_target->setChecked(true);
 
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
@@ -88,13 +66,13 @@ BrushParamView::BrushParamView(QWidget* parent /*= 0*/) : ParamViewBase(parent)
 	_draw = new QRadioButton(QString("Draw"));
 	_erase = new QRadioButton(QString("Erase"));
 	auto mode_group = make_button_group(this, {_modify, _draw, _erase});
-	_modify->setOn(true);
+	_modify->setChecked(true);
 
 	_radius = new QLineEdit(QString::number(1));
 	_unit_pixel = new QRadioButton(tr("Pixel"));
 	_unit_mm = new QRadioButton(tr("Use spacing"));
 	auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
-	_unit_pixel->setOn(true);
+	_unit_pixel->setChecked(true);
 
 	_show_guide = new QCheckBox;
 	_show_guide->setChecked(false);
@@ -202,7 +180,7 @@ FillHolesParamView::FillHolesParamView(QWidget* parent /*= 0*/) : ParamViewBase(
 	_target = new QRadioButton(QString("Target"));
 	_tissues = new QRadioButton(QString("Tissues"));
 	auto input_group = make_button_group(this, {_target, _tissues});
-	_target->setOn(true);
+	_target->setChecked(true);
 
 	_select_object = new QPushButton(tr("Select"));
 	_select_object->setCheckable(true);
@@ -240,19 +218,19 @@ AddSkinParamView::AddSkinParamView(QWidget* parent /*= 0*/) : ParamViewBase(pare
 	_target = new QRadioButton(QString("Target"));
 	_tissues = new QRadioButton(QString("Tissues"));
 	auto input_group = make_button_group(this, {_target, _tissues});
-	_target->setOn(true);
+	_target->setChecked(true);
 
 	_thickness = new QLineEdit(QString::number(1));
 	_thickness->setValidator(new QIntValidator);
 	_unit_pixel = new QRadioButton(tr("Pixel"));
 	_unit_mm = new QRadioButton(tr("Use spacing"));
 	auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
-	_unit_pixel->setOn(true);
+	_unit_pixel->setChecked(true);
 
 	_inside = new QRadioButton(tr("Inside"));
 	_outside = new QRadioButton(tr("Outside"));
 	auto mode_group = make_button_group(this, {_inside, _outside});
-	_inside->setOn(true);
+	_inside->setChecked(true);
 
 	_execute = new QPushButton(tr("Execute"));
 
@@ -284,7 +262,7 @@ void AddSkinParamView::unit_changed()
 	}
 }
 
-FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /*= 0*/) : ParamViewBase(parent), _handler(h)
+FillSkinParamView::FillSkinParamView(SlicesHandlerInterface* h, QWidget* parent /*= 0*/) : ParamViewBase(parent), _handler(h)
 {
 	// parameter fields
 	_all_slices = new QCheckBox;
@@ -294,7 +272,7 @@ FillSkinParamView::FillSkinParamView(SliceHandlerInterface* h, QWidget* parent /
 	_unit_pixel = new QRadioButton(tr("Pixel"));
 	_unit_mm = new QRadioButton(tr("Use spacing"));
 	auto unit_group = make_button_group(this, {_unit_pixel, _unit_mm});
-	_unit_pixel->setOn(true);
+	_unit_pixel->setChecked(true);
 
 	_select_background = new QPushButton(tr("Get Selected"));
 	_background_value = new QLineEdit;
@@ -394,7 +372,7 @@ FillAllParamView::FillAllParamView(QWidget* parent /*= 0*/) : ParamViewBase(pare
 	_target = new QRadioButton(QString("Target"));
 	_tissues = new QRadioButton(QString("Tissues"));
 	auto input_group = make_button_group(this, {_target, _tissues});
-	_target->setOn(true);
+	_target->setChecked(true);
 
 	_execute = new QPushButton(tr("Execute"));
 
@@ -418,7 +396,7 @@ SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamV
 	_all_slices = new QRadioButton(tr("All slices (2D)"));
 	_3D = new QRadioButton(tr("Fully 3D"));
 	auto where_group = make_button_group(this, {_active_slice, _all_slices, _3D});
-	_active_slice->setOn(true);
+	_active_slice->setChecked(true);
 
 	_sigma = new QLineEdit(QString::number(0.3));
 	_sigma->setValidator(new QDoubleValidator);

@@ -18,7 +18,6 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QtGui>
-#include <q3listbox.h>
 #include <q3vbox.h>
 #include <qapplication.h>
 #include <qbuttongroup.h>
@@ -260,18 +259,18 @@ void ThresholdWidget::execute()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		if (allslices->isChecked())
 			handler3D->threshold(threshs);
 		else
 			bmphand->threshold(threshs);
 	}
-	else if (rb_histo->isOn())
+	else if (rb_histo->isChecked())
 	{
 		bmphand->swap_bmpwork();
 
-		if (subsect->isOn())
+		if (subsect->isChecked())
 		{
 			Point p;
 			p.px = (unsigned short)sb_px->value();
@@ -292,7 +291,7 @@ void ThresholdWidget::execute()
 			bmphand->threshold(thresh1);
 		free(thresh1);
 	}
-	else if (rb_kmeans->isOn())
+	else if (rb_kmeans->isChecked())
 	{
 		FILE* fp = fopen("C:\\gamma.txt", "r");
 		if (fp != nullptr)
@@ -435,9 +434,9 @@ void ThresholdWidget::method_changed(int)
 {
 	if (hideparams)
 	{
-		if (!rb_histo->isOn())
+		if (!rb_histo->isChecked())
 			rb_histo->hide();
-		if (!rb_EM->isOn())
+		if (!rb_EM->isChecked())
 			rb_EM->hide();
 	}
 	else
@@ -445,7 +444,7 @@ void ThresholdWidget::method_changed(int)
 		rb_histo->show();
 		rb_EM->show();
 	}
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		pb_saveborders->show();
 		pb_loadborders->show();
@@ -471,7 +470,7 @@ void ThresholdWidget::method_changed(int)
 		//		pushrange->show();
 		//		execute();
 	}
-	else if (rb_histo->isOn())
+	else if (rb_histo->isChecked())
 	{
 		pb_saveborders->hide();
 		pb_loadborders->hide();
@@ -491,7 +490,7 @@ void ThresholdWidget::method_changed(int)
 		hbox5->hide();
 		le_borderval->hide();
 	}
-	else if (rb_kmeans->isOn())
+	else if (rb_kmeans->isChecked())
 	{
 		pb_saveborders->hide();
 		pb_loadborders->hide();
@@ -565,7 +564,7 @@ void ThresholdWidget::getrange()
 			threshs[i + 1] = lower;
 	}
 
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		int i = int((threshs[sb_tissuenr->value()] - lower) * 200 /
 								(upper - lower));
@@ -579,18 +578,18 @@ void ThresholdWidget::getrange()
 
 void ThresholdWidget::on_tissuenr_changed(int newval)
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		slider->setValue(
 				int(200 * (threshs[newval] - lower) / (upper - lower)));
 		le_borderval->setText(QString::number(threshs[newval], 'g', 3));
 	}
-	else if (rb_kmeans->isOn() || rb_EM->isOn())
+	else if (rb_kmeans->isChecked() || rb_EM->isChecked())
 	{
 		slider->setValue(int(200 * weights[newval - 1]));
 	}
 
-	if (newval > 1 && (rb_kmeans->isOn() || rb_EM->isOn()))
+	if (newval > 1 && (rb_kmeans->isChecked() || rb_EM->isChecked()))
 	{
 		hboxfilenames->show();
 		le_filename->setText(filenames[newval - 2]);
@@ -603,7 +602,7 @@ void ThresholdWidget::on_tissuenr_changed(int newval)
 
 void ThresholdWidget::nrtissues_changed(int newval)
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		threshs[0] = float(newval - 1);
 		sb_tissuenr->setMaxValue(newval - 1);
@@ -628,7 +627,7 @@ void ThresholdWidget::nrtissues_changed(int newval)
 
 void ThresholdWidget::dim_changed(int newval)
 {
-	if (rb_kmeans->isOn() || rb_EM->isOn())
+	if (rb_kmeans->isChecked() || rb_EM->isChecked())
 	{
 		size_t cursize = filenames.size();
 		if (newval > cursize + 1)
@@ -670,7 +669,7 @@ void ThresholdWidget::dim_changed(int newval)
 
 void ThresholdWidget::subsect_toggled()
 {
-	if (subsect->isOn())
+	if (subsect->isChecked())
 	{
 		hbox8->show();
 	}
@@ -684,7 +683,7 @@ void ThresholdWidget::subsect_toggled()
 
 void ThresholdWidget::slider_changed(int newval)
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		threshs[sb_tissuenr->value()] =
 				newval * 0.005f * (upper - lower) + lower;
@@ -698,7 +697,7 @@ void ThresholdWidget::slider_changed(int newval)
 
 		emit end_datachange(this, iseg::NoUndo);
 	}
-	else if (rb_kmeans->isOn() || rb_EM->isOn())
+	else if (rb_kmeans->isChecked() || rb_EM->isChecked())
 	{
 		weights[sb_tissuenr->value() - 1] = newval * 0.005f;
 	}
@@ -708,7 +707,7 @@ void ThresholdWidget::slider_changed(int newval)
 
 void ThresholdWidget::slider_pressed()
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = allslices->isChecked();
@@ -720,7 +719,7 @@ void ThresholdWidget::slider_pressed()
 
 void ThresholdWidget::slider_released()
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		emit end_datachange(this);
 	}
@@ -777,7 +776,7 @@ void ThresholdWidget::le_borderval_returnpressed()
 	float val = le_borderval->text().toFloat(&b1);
 	if (b1)
 	{
-		if (rb_manual->isOn())
+		if (rb_manual->isChecked())
 		{
 			if (val > upper)
 				threshs[sb_tissuenr->value()] = upper;
@@ -833,7 +832,7 @@ void ThresholdWidget::saveborders_execute()
 
 void ThresholdWidget::loadborders_execute()
 {
-	if (rb_manual->isOn())
+	if (rb_manual->isChecked())
 	{
 		QString loadfilename =
 				QFileDialog::getOpenFileName(QString::null,
@@ -908,17 +907,17 @@ FILE* ThresholdWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sb_minpix->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(subsect->isOn());
+		dummy = (int)(subsect->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_manual->isOn());
+		dummy = (int)(rb_manual->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_histo->isOn());
+		dummy = (int)(rb_histo->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_kmeans->isOn());
+		dummy = (int)(rb_kmeans->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_EM->isOn());
+		dummy = (int)(rb_EM->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allslices->isOn());
+		dummy = (int)(allslices->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
 		fwrite(&upper, 1, sizeof(float), fp);

@@ -27,7 +27,7 @@ class BoneSegmentationWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	BoneSegmentationWidget(iseg::SliceHandlerInterface* hand3D,
+	BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D,
 			QWidget* parent = 0, const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~BoneSegmentationWidget();
 	QSize sizeHint() const override;
@@ -39,7 +39,7 @@ public:
 private:
 	void on_slicenr_changed() override;
 
-	iseg::SliceHandlerInterface* m_Handler3D;
+	iseg::SlicesHandlerInterface* m_Handler3D;
 	unsigned short m_CurrentSlice;
 	Q3VBox* m_VGrid;
 	Q3HBox* m_HGrid1;

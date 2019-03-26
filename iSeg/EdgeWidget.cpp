@@ -15,7 +15,7 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Point.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/ScopedTimer.h"
 
 #include "Core/BinaryThinningImageFilter.h"
@@ -153,7 +153,7 @@ void EdgeWidget::export_centerlines()
 	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
 	if (!savefilename.isEmpty())
 	{
-		SliceHandlerItkWrapper wrapper(handler3D);
+		SlicesHandlerITKInterface wrapper(handler3D);
 		auto target = wrapper.GetTarget(true);
 
 		using input_type = itk::SliceContiguousImage<float>;
@@ -200,33 +200,33 @@ void EdgeWidget::execute()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (rb_sobel->isOn())
+	if (rb_sobel->isChecked())
 	{
 		bmphand->sobel();
 	}
-	else if (rb_laplacian->isOn())
+	else if (rb_laplacian->isChecked())
 	{
 		bmphand->laplacian1();
 	}
-	else if (rb_interquartile->isOn())
+	else if (rb_interquartile->isChecked())
 	{
 		bmphand->median_interquartile(false);
 	}
-	else if (rb_momentline->isOn())
+	else if (rb_momentline->isChecked())
 	{
 		bmphand->moment_line();
 	}
-	else if (rb_gaussline->isOn())
+	else if (rb_gaussline->isChecked())
 	{
 		bmphand->gauss_line(sl_sigma->value() * 0.05f);
 	}
-	else if (rb_canny->isOn())
+	else if (rb_canny->isChecked())
 	{
 		bmphand->canny_line(sl_sigma->value() * 0.05f,
 				sl_thresh1->value() * 1.5f,
 				sl_thresh2->value() * 1.5f);
 	}
-	else if (rb_centerlines->isOn())
+	else if (rb_centerlines->isChecked())
 	{
 		try
 		{
@@ -236,7 +236,7 @@ void EdgeWidget::execute()
 				using input_type = itk::SliceContiguousImage<float>;
 				using output_type = itk::Image<unsigned char, 3>;
 
-				SliceHandlerItkWrapper wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(handler3D);
 				auto target = wrapper.GetTarget(true);
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
@@ -254,7 +254,7 @@ void EdgeWidget::execute()
 				using input_type = itk::Image<float, 2>;
 				using output_type = itk::Image<unsigned char, 2>;
 
-				SliceHandlerItkWrapper wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(handler3D);
 				auto target = wrapper.GetTargetSlice();
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
@@ -290,23 +290,23 @@ void EdgeWidget::method_changed(int)
 {
 	if (hideparams)
 	{
-		if (!rb_laplacian->isOn())
+		if (!rb_laplacian->isChecked())
 		{
 			rb_laplacian->hide();
 		}
-		if (!rb_interquartile->isOn())
+		if (!rb_interquartile->isChecked())
 		{
 			rb_interquartile->hide();
 		}
-		if (!rb_momentline->isOn())
+		if (!rb_momentline->isChecked())
 		{
 			rb_momentline->hide();
 		}
-		if (!rb_gaussline->isOn())
+		if (!rb_gaussline->isChecked())
 		{
 			rb_gaussline->hide();
 		}
-		if (!rb_gaussline->isOn())
+		if (!rb_gaussline->isChecked())
 		{
 			rb_laplacianzero->hide();
 		}
@@ -320,7 +320,7 @@ void EdgeWidget::method_changed(int)
 		rb_laplacianzero->show();
 	}
 
-	if (rb_sobel->isOn())
+	if (rb_sobel->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -328,7 +328,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_laplacian->isOn())
+	else if (rb_laplacian->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -336,7 +336,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_interquartile->isOn())
+	else if (rb_interquartile->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -344,7 +344,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_momentline->isOn())
+	else if (rb_momentline->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -352,7 +352,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_gaussline->isOn())
+	else if (rb_gaussline->isChecked())
 	{
 		if (hideparams)
 			hbox1->hide();
@@ -363,7 +363,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_canny->isOn())
+	else if (rb_canny->isChecked())
 	{
 		txt_thresh11->setText("Thresh low:  0 ");
 		txt_thresh12->setText(" 150");
@@ -382,7 +382,7 @@ void EdgeWidget::method_changed(int)
 		hbox4->hide();
 		btn_exec->show();
 	}
-	else if (rb_centerlines->isOn())
+	else if (rb_centerlines->isChecked())
 	{
 		hbox1->hide();
 		hbox2->hide();
@@ -438,19 +438,19 @@ FILE* EdgeWidget::SaveParams(FILE* fp, int version)
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = sl_thresh2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_sobel->isOn());
+		dummy = (int)(rb_sobel->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_laplacian->isOn());
+		dummy = (int)(rb_laplacian->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_interquartile->isOn());
+		dummy = (int)(rb_interquartile->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_momentline->isOn());
+		dummy = (int)(rb_momentline->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_gaussline->isOn());
+		dummy = (int)(rb_gaussline->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_canny->isOn());
+		dummy = (int)(rb_canny->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_laplacianzero->isOn());
+		dummy = (int)(rb_laplacianzero->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 

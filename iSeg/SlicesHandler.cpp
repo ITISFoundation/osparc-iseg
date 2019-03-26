@@ -28,7 +28,7 @@
 #include "vtkImageExtractCompatibleMesher.h"
 
 #include "Data/ItkProgressObserver.h"
-#include "Data/SliceHandlerItkWrapper.h"
+#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/Transform.h"
 
 #include "Core/ColorLookupTable.h"
@@ -5280,7 +5280,7 @@ void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short sl
 	}
 	else
 	{
-		SliceHandlerItkWrapper itk_handler(this);
+		SlicesHandlerITKInterface itk_handler(this);
 		auto img1 = itk_handler.GetTargetSlice(slice1);
 		auto img2 = itk_handler.GetTargetSlice(slice2);
 
@@ -5995,7 +5995,7 @@ void SlicesHandler::interpolatetissue(unsigned short slice1, unsigned short slic
 	}
 	else
 	{
-		SliceHandlerItkWrapper itk_handler(this);
+		SlicesHandlerITKInterface itk_handler(this);
 		auto tissues1 = itk_handler.GetTissuesSlice(slice1);
 		auto tissues2 = itk_handler.GetTissuesSlice(slice2);
 
@@ -11397,10 +11397,10 @@ void SlicesHandler::get_color(size_t idx, unsigned char& r, unsigned char& g, un
 
 bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
 {
-	using input_type = SliceHandlerItkWrapper::image_ref_type;
+	using input_type = SlicesHandlerITKInterface::image_ref_type;
 	using image_type = itk::Image<unsigned, 3>;
 
-	SliceHandlerItkWrapper wrapper(this);
+	SlicesHandlerITKInterface wrapper(this);
 	auto all_slices = wrapper.GetTarget(true);
 
 	auto observer = ItkProgressObserver::New();
@@ -11437,11 +11437,11 @@ bool SlicesHandler::compute_target_connectivity(ProgressInfo* progress)
 
 bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* progress)
 {
-	using input_type = SliceHandlerItkWrapper::tissues_ref_type;
+	using input_type = SlicesHandlerITKInterface::tissues_ref_type;
 	using internal_type = itk::Image<unsigned char, 3>;
 	using image_type = itk::Image<unsigned, 3>;
 
-	SliceHandlerItkWrapper wrapper(this);
+	SlicesHandlerITKInterface wrapper(this);
 	auto all_slices = wrapper.GetTissues(true);
 
 	auto observer = ItkProgressObserver::New();

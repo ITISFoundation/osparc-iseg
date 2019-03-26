@@ -11,7 +11,7 @@
 
 #include "UndoConfigurationDialog.h"
 
-#include <q3vbox.h>
+#include <QFormLayout>
 #include <qcheckbox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
@@ -23,39 +23,34 @@ UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget*
 												 Qt::WindowFlags wFlags)
 	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
 {
-	vbox1 = new Q3VBox(this);
+	auto layout = new QFormLayout;
 
-	cb_undo3D = new QCheckBox(QString("Enable 3D undo"), vbox1);
+	cb_undo3D = new QCheckBox;
 	cb_undo3D->setChecked(handler3D->return_undo3D());
 
-	hbox1 = new Q3HBox(vbox1);
-	//	hbox2= new QHBox(vbox1);
-	vbox2 = new Q3VBox(hbox1);
-	vbox3 = new Q3VBox(hbox1);
-
-	lb_nrundo = new QLabel("Maximal nr of undo steps: ", vbox2);
-	sb_nrundo = new QSpinBox(1, 100, 1, vbox3);
+	sb_nrundo = new QSpinBox(1, 100, 1, nullptr);
 	sb_nrundo->setValue(handler3D->GetNumberOfUndoSteps());
-	lb_nrundoarrays = new QLabel("Maximal nr of stored images: ", vbox2);
-	sb_nrundoarrays = new QSpinBox(6, 10000, 1, vbox3);
+	sb_nrundoarrays = new QSpinBox(6, 10000, 1, nullptr);
 	sb_nrundoarrays->setValue(handler3D->GetNumberOfUndoArrays());
 
-	pb_close = new QPushButton("Accept", vbox1);
+	pb_close = new QPushButton("Accept");
 
-	vbox1->show();
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	// layout
+	layout->addRow(tr("Enable 3D Undo"), cb_undo3D);
+	layout->addRow(tr("Maximal nr of undo steps"), sb_nrundo);
+	layout->addRow(tr("Maximal nr of stored images"), sb_nrundoarrays);
+	layout->addRow(pb_close);
 
-	vbox2->setFixedSize(vbox2->sizeHint());
-	vbox3->setFixedSize(vbox3->sizeHint());
-	hbox1->setFixedSize(hbox1->sizeHint());
-	vbox1->setFixedSize(vbox1->sizeHint());
+	setLayout(layout);
 
+	// connections
 	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(ok_pressed()));
-
-	return;
 }
 
-UndoConfigurationDialog::~UndoConfigurationDialog() { delete vbox1; }
+UndoConfigurationDialog::~UndoConfigurationDialog() 
+{
+	
+}
 
 void UndoConfigurationDialog::ok_pressed()
 {
