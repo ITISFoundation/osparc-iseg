@@ -13,11 +13,14 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Data/Point.h"
 #include "Data/Logger.h"
+#include "Data/Point.h"
+
+#include "Core/Morpho.h"
+
+#include "Interface/ProgressDialog.h"
 
 #include <QFormLayout>
-#include <QProgressDialog>
 
 #include <algorithm>
 
@@ -141,19 +144,23 @@ void MorphologyWidget::execute()
 
 		if (rb_open->isChecked())
 		{
-			handler3D->open(radius, true3d);
+			ProgressDialog progress("Morphological opening ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kOpen, true3d, &progress);
 		}
 		else if (rb_close->isChecked())
 		{
-			handler3D->closure(radius, true3d);
+			ProgressDialog progress("Morphological closing ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kClose, true3d, &progress);
 		}
 		else if (rb_erode->isChecked())
 		{
-			handler3D->erosion(radius, true3d);
+			ProgressDialog progress("Morphological erosion ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kErode, true3d, &progress);
 		}
 		else
 		{
-			handler3D->dilation(radius, true3d);
+			ProgressDialog progress("Morphological dilation ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kDilate, true3d, &progress);
 		}
 	}
 	else

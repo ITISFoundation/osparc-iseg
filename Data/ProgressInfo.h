@@ -16,6 +16,10 @@ namespace iseg {
 class ISEG_DATA_API ProgressInfo
 {
 public:
+	virtual void setNumberOfSteps(int N) = 0;
+
+	virtual void increment() = 0;
+
 	virtual void setValue(int percent) = 0;
 
 	virtual bool wasCanceled() const = 0;

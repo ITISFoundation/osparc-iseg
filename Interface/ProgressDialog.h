@@ -15,6 +15,8 @@
 
 #include <qobject.h>
 
+#include <atomic>
+
 class QWidget;
 class QProgressDialog;
 
@@ -28,6 +30,8 @@ class ISEG_INTERFACE_API ProgressDialog
 public:
 	ProgressDialog(const char* msg, QWidget* parent);
 
+	void setNumberOfSteps(int N) override;
+	void increment() override;
 	bool wasCanceled() const override;
 	void setValue(int percent) override;
 
@@ -37,6 +41,7 @@ private slots:
 private:
 	bool canceled = false;
 	QProgressDialog* progress = nullptr;
+	std::atomic<int> count;
 };
 
 } // namespace iseg

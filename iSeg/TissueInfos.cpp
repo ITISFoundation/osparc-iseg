@@ -1062,16 +1062,15 @@ bool is_valid(tissues_size_t i)
 std::set<tissues_size_t> _selection;
 } // namespace
 
-std::set<iseg::tissues_size_t> iseg::TissueInfos::GetSelectedTissues()
+std::set<iseg::tissues_size_t> TissueInfos::GetSelectedTissues()
 {
 	std::set<tissues_size_t> r;
 	std::copy_if(_selection.begin(), _selection.end(), std::inserter(r, r.end()), is_valid);
 	return r;
 }
 
-void iseg::TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
+void TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
 {
-	ISEG_INFO("Selected tissues " << sel.size());
 	if (std::all_of(sel.begin(), sel.end(), is_valid))
 	{
 		_selection = sel;

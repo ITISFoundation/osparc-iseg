@@ -40,7 +40,6 @@
 #include "Core/ImageWriter.h"
 #include "Core/KMeans.h"
 #include "Core/MatlabExport.h"
-#include "Core/Morpho.h"
 #include "Core/MultidimensionalGamma.h"
 #include "Core/Outline.h"
 #include "Core/ProjectVersion.h"
@@ -5193,26 +5192,6 @@ void SlicesHandler::double_hysteretic_allslices(float thresh_low_l,
 	}
 }
 
-void SlicesHandler::erosion(boost::variant<int, float> radius, bool true3d)
-{
-	morpho::MorphologicalOperation(this, radius, morpho::kErode, true3d);
-}
-
-void SlicesHandler::dilation(boost::variant<int, float> radius, bool true3d)
-{
-	morpho::MorphologicalOperation(this, radius, morpho::kDilate, true3d);
-}
-
-void SlicesHandler::closure(boost::variant<int, float> radius, bool true3d)
-{
-	morpho::MorphologicalOperation(this, radius, morpho::kClose, true3d);
-}
-
-void SlicesHandler::open(boost::variant<int, float> radius, bool true3d)
-{
-	morpho::MorphologicalOperation(this, radius, morpho::kOpen, true3d);
-}
-
 void SlicesHandler::interpolateworkgrey(unsigned short slice1, unsigned short slice2, bool connected)
 {
 	if (slice2 < slice1)
@@ -7331,39 +7310,21 @@ void SlicesHandler::end_undo()
 	{
 		if (_uelem->multi)
 		{
-			//unsigned short undotype=uelem->storetype;
-
 			MultiUndoElem* uelem1 = dynamic_cast<MultiUndoElem*>(_uelem);
-
-			//abcd std::vector<unsigned short>::iterator it;
-			std::vector<unsigned>::iterator it;
 
 			uelem1->vbmp_new.clear();
 			uelem1->vmode1_new.clear();
-			//			if(undotype & 1)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vbmp_new.push_back(image_slices[*it].copy_bmp());
+
 			uelem1->vwork_new.clear();
 			uelem1->vmode2_new.clear();
-			//			if(undotype & 2)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vwork_new.push_back(image_slices[*it].copy_work());
+
 			uelem1->vtissue_new.clear();
-			//			if(undotype & 4)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vtissue_new.push_back(image_slices[*it].copy_tissue(active_tissuelayer));
+
 			uelem1->vvvm_new.clear();
-			//			if(undotype & 8)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vvvm_new.push_back(*(image_slices[*it].return_vvm()));
+
 			uelem1->vlimits_new.clear();
-			//			if(undotype & 16)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vlimits_new.push_back(*(image_slices[*it].return_limits()));
+
 			uelem1->marks_new.clear();
-			//			if(undotype & 32)
-			//				for(it=uelem1->vslicenr.begin();it!=uelem1->vslicenr.end();it++)
-			//					uelem1->vmarks_new.push_back(*(image_slices[*it].return_marks()));
 
 			this->_undoQueue.add_undo(uelem1);
 
@@ -7371,31 +7332,19 @@ void SlicesHandler::end_undo()
 		}
 		else
 		{
-			//unsigned short undotype=uelem->storetype;
-			//unsigned short slicenr1=uelem->slicenr;
-
-			//			if(undotype & 1) uelem->bmp_new=image_slices[slicenr1].copy_bmp();
-			//			else
 			_uelem->bmp_new = nullptr;
 			_uelem->mode1_new = 0;
 
-			//			if(undotype & 2) uelem->work_new=image_slices[slicenr1].copy_work();
-			//			else
 			_uelem->work_new = nullptr;
 			_uelem->mode2_new = 0;
 
-			//			if(undotype & 4) uelem->tissue_new=image_slices[slicenr1].copy_tissue(active_tissuelayer);
-			//			else
 			_uelem->tissue_new = nullptr;
 
 			_uelem->vvm_new.clear();
-			//			if(undotype & 8) uelem->vvm_new=*(image_slices[slicenr1].return_vvm());
 
 			_uelem->limits_new.clear();
-			//			if(undotype & 16) uelem->limits_new=*(image_slices[slicenr1].return_limits());
 
 			_uelem->marks_new.clear();
-			//			if(undotype & 32) uelem->marks_new=*(image_slices[slicenr1].return_marks());
 
 			this->_undoQueue.add_undo(_uelem);
 
@@ -7409,25 +7358,6 @@ void SlicesHandler::merge_undo()
 	if (_uelem != nullptr && !_uelem->multi)
 	{
 		iseg::DataSelection dataSelection = _uelem->dataSelection;
-		/*		unsigned short slicenr1=uelem->slicenr;
-
-		if(undotype & 1) uelem->bmp_new=image_slices[slicenr1].copy_bmp();
-		else uelem->bmp_new=nullptr;
-
-		if(undotype & 2) uelem->work_new=image_slices[slicenr1].copy_work();
-		else uelem->work_new=nullptr;
-
-		if(undotype & 4) uelem->tissue_new=image_slices[slicenr1].copy_tissue(active_tissuelayer);
-		else uelem->tissue_new=nullptr;
-
-		uelem->vvm_new.clear();
-		if(undotype & 8) uelem->vvm_new=*(image_slices[slicenr1].return_vvm());
-
-		uelem->limits_new.clear();
-		if(undotype & 16) uelem->limits_new=*(image_slices[slicenr1].return_limits());
-
-		uelem->marks_new.clear();
-		if(undotype & 32) uelem->marks_new=*(image_slices[slicenr1].return_marks());*/
 
 		this->_undoQueue.merge_undo(_uelem);
 
@@ -11444,8 +11374,6 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 	SlicesHandlerITKInterface wrapper(this);
 	auto all_slices = wrapper.GetTissues(true);
 
-	auto observer = ItkProgressObserver::New();
-
 	auto threshold = itk::BinaryThresholdImageFilter<input_type, internal_type>::New();
 	threshold->SetLowerThreshold(tissue);
 	threshold->SetUpperThreshold(tissue);
@@ -11456,6 +11384,7 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 	filter->SetFullyConnected(true);
 	if (progress)
 	{
+		auto observer = ItkProgressObserver::New();
 		observer->SetProgressInfo(progress);
 		filter->AddObserver(itk::ProgressEvent(), observer);
 	}
@@ -11464,14 +11393,14 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 		filter->Update();
 		auto components = filter->GetOutput();
 
-		if (!progress || (progress && !progress->wasCanceled()))
+		if (!progress || !progress->wasCanceled())
 		{
-			tissues_size_t Ninitial = TissueInfos::GetTissueCount();
-
 			// add tissue infos
 			auto N = filter->GetObjectCount();
 			if (N > 1)
 			{
+				ISEG_INFO("Tissue has " << N << " regions");
+
 				// find which object is largest -> this one will keep its original name & color
 				std::vector<size_t> hist(N + 1, 0);
 				itk::ImageRegionConstIterator<image_type> it(components, components->GetLargestPossibleRegion());
@@ -11483,6 +11412,7 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 				const size_t max_label = std::distance(hist.begin(), std::max_element(hist.begin(), hist.end()));
 
 				// mapping from object number to new tissue index
+				tissues_size_t Ninitial = TissueInfos::GetTissueCount();
 				std::vector<tissues_size_t> object2index(N + 1, 0);
 				object2index[max_label] = tissue;
 				tissues_size_t idx = 1;
@@ -11506,9 +11436,13 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 						ot.Set(object2index.at(it.Get()));
 					}
 				}
-			}
 
-			return true;
+				return true;
+			}
+			else
+			{
+				ISEG_INFO("Tissue has only one connected region");
+			}
 		}
 	}
 	catch (itk::ExceptionObject& e)

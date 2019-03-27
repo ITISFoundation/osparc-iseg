@@ -18,7 +18,20 @@ ProgressDialog::ProgressDialog(const char* msg, QWidget* parent /*= 0*/)
 	auto cancel_button = new QPushButton(QString("Cancel"), progress);
 	progress->setCancelButton(cancel_button);
 
+	count.store(0);
+	
 	QObject::connect(cancel_button, SIGNAL(clicked()), this, SLOT(cancel()));
+}
+
+void ProgressDialog::setNumberOfSteps(int N)
+{
+	progress->setMaximum(N);
+}
+
+void ProgressDialog::increment()
+{
+	count++;
+	progress->setValue(count);
 }
 
 bool ProgressDialog::wasCanceled() const

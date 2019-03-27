@@ -466,7 +466,7 @@ void AutoTubePanel::add_to_tissues()
 				bool draw_circle;
 				double circle_radius = _line_radius->text().toDouble(&draw_circle);
 				auto spacing = itk_handler.GetTissuesSlice(0)->GetSpacing();
-				auto ball = morpho::MakeBall<2>(spacing, draw_circle ? circle_radius : 1.0);
+				auto ball = iseg::MakeBall<2>(spacing, draw_circle ? circle_radius : 1.0);
 
 				tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
 				for (int i(0); i < _handler3D->num_slices(); i++)
