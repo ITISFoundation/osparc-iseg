@@ -4260,6 +4260,11 @@ void MainWindow::start_surfaceviewer(int mode)
 		delete surface_viewer;
 	}
 
+	if (!SurfaceViewerWidget::isOpenGLSupported())
+	{
+		return;
+	}
+
 	iseg::DataSelection dataSelection;
 	dataSelection.bmp = true;
 	dataSelection.work = true;

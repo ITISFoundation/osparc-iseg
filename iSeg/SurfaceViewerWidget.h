@@ -58,12 +58,14 @@ public:
 			Qt::WindowFlags wFlags = 0);
 	~SurfaceViewerWidget();
 
+	static bool isOpenGLSupported();
+
 protected:
 	void load();
 	void build_lookuptable();
 	int get_picked_tissue() const;
 	void closeEvent(QCloseEvent*) override;
-	void resizeEvent(QResizeEvent*) override;
+	//void resizeEvent(QResizeEvent*) override;
 
 public slots:
 	void tissue_changed();
@@ -87,9 +89,6 @@ private:
 	SlicesHandler* hand3D;
 
 	QVTKWidget* vtkWidget;
-	Q3VBox* vbox1;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
 	QPushButton* bt_update;
 	QSlider* sl_trans;
 	QLabel* lb_trans;
