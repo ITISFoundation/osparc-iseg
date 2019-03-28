@@ -13,11 +13,14 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Data/Point.h"
 #include "Data/Logger.h"
+#include "Data/Point.h"
+
+#include "Core/Morpho.h"
+
+#include "Interface/ProgressDialog.h"
 
 #include <QFormLayout>
-#include <QProgressDialog>
 
 #include <algorithm>
 
@@ -75,15 +78,15 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 	operation_radius->setValidator(new QIntValidator(0, 100, operation_radius));
 	operation_radius->setToolTip(Format("Radius of operation, either number of pixel layers or radius in length units."));
 
-	node_connectivity = new QCheckBox;
-	node_connectivity->setToolTip(Format("Use chess-board (8 neighbors) or city-block (4 neighbors) neighborhood."));
+	all_slices = new QCheckBox("Apply to all slices");
+	all_slices->setToolTip(Format("Apply to active slices in 3D or to current slice"));
 
-	true_3d = new QCheckBox;
+	true_3d = new QCheckBox("3D");
 	true_3d->setChecked(true);
 	true_3d->setToolTip(Format("Run morphological operations in 3D or per-slice."));
 
-	all_slices = new QCheckBox;
-	all_slices->setToolTip(Format("Apply to active slices in 3D or to current slice"));
+	node_connectivity = new QCheckBox;
+	node_connectivity->setToolTip(Format("Use chess-board (8 neighbors) or city-block (4 neighbors) neighborhood."));
 
 	execute_button = new QPushButton("Execute");
 
@@ -93,10 +96,9 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 
 	// params layout
 	auto params_layout = new QFormLayout;
-	params_layout->addRow("Apply to all slices", all_slices);
+	params_layout->addRow(all_slices, true_3d);
 	params_layout->addRow("Radius", unit_box);
 	params_layout->addRow("Full connectivity", node_connectivity);
-	params_layout->addRow("True 3d", true_3d);
 	params_layout->addRow(execute_button);
 	auto params_area = new QWidget(this);
 	params_area->setLayout(params_layout);
@@ -141,19 +143,23 @@ void MorphologyWidget::execute()
 
 		if (rb_open->isChecked())
 		{
-			handler3D->open(radius, true3d);
+			ProgressDialog progress("Morphological opening ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kOpen, true3d, &progress);
 		}
 		else if (rb_close->isChecked())
 		{
-			handler3D->closure(radius, true3d);
+			ProgressDialog progress("Morphological closing ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kClose, true3d, &progress);
 		}
 		else if (rb_erode->isChecked())
 		{
-			handler3D->erosion(radius, true3d);
+			ProgressDialog progress("Morphological erosion ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kErode, true3d, &progress);
 		}
 		else
 		{
-			handler3D->dilation(radius, true3d);
+			ProgressDialog progress("Morphological dilation ...", this);
+			MorphologicalOperation(handler3D, radius, iseg::kDilate, true3d, &progress);
 		}
 	}
 	else

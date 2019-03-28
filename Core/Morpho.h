@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Data/ItkUtils.h"
+#include "Data/ItkProgressObserver.h"
 #include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryDilateImageFilter.h>
@@ -22,7 +23,7 @@
 
 #include <boost/variant.hpp>
 
-namespace morpho {
+namespace iseg {
 
 template<unsigned int Dimension>
 itk::FlatStructuringElement<Dimension> MakeBall(const typename itk::ImageBase<Dimension>::SpacingType& spacing, double radius)
@@ -49,7 +50,8 @@ template<class TInputImage, class TOutputImage = itk::Image<unsigned char, TInpu
 typename TOutputImage::Pointer
 		MorphologicalOperation(typename TInputImage::Pointer input,
 				boost::variant<int, float> radius, eOperation operation,
-				const typename TInputImage::RegionType& requested_region)
+				const typename TInputImage::RegionType& requested_region, 
+				iseg::ProgressInfo* progress = nullptr)
 {
 	using input_image_type = TInputImage;
 	using image_type = TOutputImage;
@@ -57,22 +59,22 @@ typename TOutputImage::Pointer
 	using kernel_type = itk::FlatStructuringElement<Dimension>;
 	using spacing_type = typename itk::ImageBase<Dimension>::SpacingType;
 
-			class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<Dimension>>
+	class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<Dimension>>
 	{
 	public:
-		MyVisitor(const spacing_type& spacing) : _spacing(spacing) {}
+		explicit MyVisitor(const spacing_type& spacing) : _spacing(spacing) {}
 
 		itk::FlatStructuringElement<Dimension> operator()(int r) const
 		{
 			itk::Size<Dimension> radius;
 			radius.Fill(r);
 
-			return morpho::MakeBall<Dimension>(radius);
+			return iseg::MakeBall<Dimension>(radius);
 		}
 
 		itk::FlatStructuringElement<Dimension> operator()(float r) const
 		{
-			return morpho::MakeBall<Dimension>(_spacing, static_cast<double>(r));
+			return iseg::MakeBall<Dimension>(_spacing, static_cast<double>(r));
 		}
 
 	private:
@@ -126,6 +128,14 @@ typename TOutputImage::Pointer
 		}
 	}
 
+	if (progress)
+	{
+		auto observer = iseg::ItkProgressObserver::New();
+		observer->SetProgressInfo(progress);
+		for (auto filter : filters)
+			filter->AddObserver(itk::ProgressEvent(), observer);
+	}
+
 	filters.back()->GetOutput()->SetRequestedRegion(requested_region);
 	filters.back()->Update();
 	return filters.back()->GetOutput();
@@ -134,7 +144,7 @@ typename TOutputImage::Pointer
 /** \brief Do morpological operation on target image
 */
 void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
-		boost::variant<int, float> radius, eOperation operation, bool true3d)
+		boost::variant<int, float> radius, eOperation operation, bool true3d, iseg::ProgressInfo* progress)
 {
 	iseg::SlicesHandlerITKInterface itkhandler(handler);
 	if (true3d)
@@ -144,7 +154,7 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
 
 		auto target = itkhandler.GetTarget(true); // get active slices
 		auto region = target->GetBufferedRegion();
-		auto output = MorphologicalOperation<input_type>(target, radius, operation, region);
+		auto output = MorphologicalOperation<input_type>(target, radius, operation, region, progress);
 		iseg::Paste<output_type, input_type>(output, target);
 	}
 	else
@@ -155,13 +165,23 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
 		size_t startslice = handler->start_slice();
 		size_t endslice = handler->end_slice();
 
+		if (progress)
+		{
+			progress->setNumberOfSteps(endslice-startslice);
+		}
+
 #pragma omp parallel for
 		for (std::int64_t slice = startslice; slice < endslice; ++slice)
 		{
 			auto target = itkhandler.GetTargetSlice(slice);
 			auto region = target->GetBufferedRegion();
-			auto output = MorphologicalOperation<input_type>(target, radius, operation, region);
+			auto output = MorphologicalOperation<input_type>(target, radius, operation, region, nullptr);
 			iseg::Paste<output_type, input_type>(output, target);
+
+			if (progress)
+			{
+				progress->increment();
+			}
 		}
 	}
 }
