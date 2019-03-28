@@ -7,10 +7,7 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef ATLAS_WIDGET
-#define ATLAS_WIDGET
-
-#include "WidgetCollection.h"
+#pragma once
 
 #include "AtlasViewer.h"
 
@@ -18,28 +15,22 @@
 
 #include "Core/Pair.h"
 
-#include <QCloseEvent>
-#include <QContextMenuEvent>
-#include <QMouseEvent>
-#include <QPaintEvent>
 #include <QScrollArea>
-#include <QWheelEvent>
-#include <q3vbox.h>
-#include <qcheckbox.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qlabel.h>
-#include <qpoint.h>
-#include <qpushbutton.h>
-#include <qslider.h>
-#include <qwidget.h>
+#include <QWidget>
+#include <QDir>
 
 #include <vector>
 
 class QHBoxLayout;
 class QVBoxLayout;
+class QLabel;
+class QButtonGroup;
+class QRadioButton;
+class QSlider;
 
 namespace iseg {
+
+class ZoomWidget;
 
 class AtlasWidget : public QWidget
 {
@@ -49,6 +40,9 @@ public:
 			const char* name = 0, Qt::WindowFlags wFlags = 0);
 	~AtlasWidget();
 	bool isOK;
+
+private:
+	bool loadfile(const char* filename);
 
 private:
 	QLabel* lb_contrast;
@@ -71,8 +65,6 @@ private:
 	QHBoxLayout* hbox3;
 	QVBoxLayout* vbox1;
 
-	bool loadfile(const char* filename);
-
 	float* image;
 	tissues_size_t* tissue;
 	float minval, maxval;
@@ -94,4 +86,3 @@ private slots:
 };
 
 } // namespace iseg
-#endif //ATLAS_WIDGET

@@ -44,6 +44,7 @@
 #include "VesselWidget.h"
 #include "VolumeViewerWidget.h"
 #include "WatershedWidget.h"
+#include "WidgetCollection.h"
 #include "XdmfImageWriter.h"
 
 #include "RadiotherapyStructureSetImporter.h"
