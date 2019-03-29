@@ -34,6 +34,9 @@ public:
 	float& operator[](int pos) { return v[pos]; }
 	const float& operator[](int pos) const { return v[pos]; }
 
+	/// given any current color, return the next color in a sequency of random colors
+	static Color nextRandom(const Color& prev);
+
 	std::tuple<unsigned char, unsigned char, unsigned char> toUChar() const;
 
 	std::tuple<float, float, float> toHSL() const;

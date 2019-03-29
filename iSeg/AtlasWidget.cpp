@@ -10,6 +10,7 @@
 #include "Precompiled.h"
 
 #include "AtlasWidget.h"
+#include "WidgetCollection.h"
 
 #include "Core/ProjectVersion.h"
 
@@ -17,9 +18,9 @@
 #include <QContextMenuEvent>
 #include <QMouseEvent>
 #include <QPaintEvent>
-#include <QWheelEvent>
 #include <QScrollBar>
-#include <algorithm>
+#include <QSlider>
+#include <QWheelEvent>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>

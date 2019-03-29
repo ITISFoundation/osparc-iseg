@@ -22,11 +22,10 @@
 
 class QVTKWidget;
 class QVTKInteractor;
-class Q3VBox;
-class Q3HBox;
 class QSlider;
 class QLabel;
 class QPushButton;
+class QCheckBox;
 
 class vtkActor;
 class vtkInteractorStyleTrackballCamera;
@@ -51,25 +50,27 @@ class SurfaceViewerWidget : public QWidget
 public:
 	enum eInputType { kSource,
 		kTarget,
-		kTissues,
 		kSelectedTissues };
 	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
-	~SurfaceViewerWidget();
+	virtual ~SurfaceViewerWidget();
+
+	static bool isOpenGLSupported();
 
 protected:
 	void load();
 	void build_lookuptable();
 	int get_picked_tissue() const;
 	void closeEvent(QCloseEvent*) override;
-	void resizeEvent(QResizeEvent*) override;
+	//void resizeEvent(QResizeEvent*) override;
 
 public slots:
 	void tissue_changed();
 	void pixelsize_changed(Pair p);
 	void thickness_changed(float thick);
 	void reload();
+	void split_surface();
 
 protected slots:
 	void transp_changed();
@@ -87,14 +88,10 @@ private:
 	SlicesHandler* hand3D;
 
 	QVTKWidget* vtkWidget;
-	Q3VBox* vbox1;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	QPushButton* bt_update;
 	QSlider* sl_trans;
-	QLabel* lb_trans;
 	QSlider* sl_thresh;
-	QLabel* lb_thresh;
+	QPushButton* bt_update;
+	QPushButton* bt_connectivity;
 
 	vtkSmartPointer<QVTKInteractor> iren;
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;

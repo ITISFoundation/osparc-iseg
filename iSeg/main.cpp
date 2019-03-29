@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 			Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	// needed on MacOS, but not WIN32?
-	mainWindow->setStyleSheet(
+	app.setStyleSheet(
 			"QWidget { color: white; }"
 			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
 			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
