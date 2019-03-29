@@ -1,5 +1,7 @@
 #include "Color.h"
 
+#include <cmath>
+
 namespace iseg {
 
 std::tuple<unsigned char, unsigned char, unsigned char> Color::toUChar() const
@@ -90,6 +92,19 @@ float Color::hue2rgb(float p, float q, float t)
 	if (t < 2.0f / 3.0f)
 		return p + (q - p) * (2.0f / 3.0f - t) * 6.0f;
 	return p;
+}
+Color Color::nextRandom(const Color& prev)
+{
+	const float golden_ratio_conjugate = 0.618033988749895f;
+
+	float h, s, l;
+
+	std::tie(h, s, l) = prev.toHSL();
+
+	// See http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+	h += golden_ratio_conjugate;
+	h = std::fmod(h, 1.0f);
+	return Color::fromHSL(h, s, l);
 }
 
 } // namespace iseg

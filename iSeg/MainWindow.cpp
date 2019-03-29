@@ -5617,23 +5617,13 @@ void MainWindow::do_work2tissue_grouped()
 
 void MainWindow::randomize_colors()
 {
-	const float golden_ratio_conjugate = 0.618033988749895f;
-
 	if (!tissueTreeWidget->selectedItems().empty())
 	{
 		static Color random = Color(0.1f, 0.9f, 0.1f);
-		float h, s, l;
 		for (auto item : tissueTreeWidget->selectedItems())
 		{
 			tissues_size_t label = tissueTreeWidget->get_type(item);
-
-			std::tie(h, s, l) = random.toHSL();
-
-			// See http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-			h += golden_ratio_conjugate;
-			h = std::fmod(h, 1.0f);
-
-			random = Color::fromHSL(h, s, l);
+			random = Color::nextRandom(random);
 			TissueInfos::SetTissueColor(label, random.r, random.g, random.b);
 		}
 
