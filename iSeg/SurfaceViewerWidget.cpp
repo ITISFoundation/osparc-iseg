@@ -15,6 +15,8 @@
 
 #include "QVTKWidget.h"
 
+#include "../Data/Color.h"
+
 #include <QAction>
 #include <QMenu>
 #include <QResizeEvent>
@@ -36,6 +38,8 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 
+#include <vtkPolyDataConnectivityFilter.h>
+
 #include <vtkAutoInit.h>
 #ifdef ISEG_VTK_OPENGL2
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
@@ -45,28 +49,6 @@ VTK_MODULE_INIT(vtkRenderingOpenGL); // VTK was built with vtkRenderingOpenGL
 VTK_MODULE_INIT(vtkRenderingVolumeOpenGL);
 #endif
 VTK_MODULE_INIT(vtkInteractionStyle);
-
-class vtkConnectivityRandomColors : public vtkPolyDataAlgorithm
-{
-public:
-	static vtkConnectivityRandomColors* New();
-	vtkTypeMacro(vtkConnectivityRandomColors, vtkPolyDataAlgorithm);
-
-protected:
-	vtkConnectivityRandomColors() {}
-	virtual ~vtkConnectivityRandomColors() {}
-
-	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override
-	{
-		throw 1;
-	}
-
-private:
-	vtkConnectivityRandomColors(const vtkConnectivityRandomColors&); // Not implemented.
-	void operator=(const vtkConnectivityRandomColors&);							 // Not implemented.};
-};
-
-vtkStandardNewMacro(vtkConnectivityRandomColors)
 
 using namespace iseg;
 
@@ -109,11 +91,13 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	sl_trans->setRange(0, 100);
 	sl_trans->setValue(00);
 
-	cb_connectivity = new QCheckBox("Compute connectivity");
-	cb_connectivity->setChecked(false);
-	lb_connectivity = new QLabel;
-
 	bt_update = new QPushButton("Update");
+	bt_update->setToolTip("Re-extract surface from updated image.");
+	bt_update->setMaximumWidth(200);
+
+	bt_connectivity = new QPushButton("Compute connectivity");
+	bt_connectivity->setToolTip("Compute connectivity and show in different colors");
+	bt_connectivity->setMaximumWidth(200);
 
 	// layout
 	auto vbox = new QVBoxLayout;
@@ -123,11 +107,6 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	transparency_hbox->addWidget(lb_trans);
 	transparency_hbox->addWidget(sl_trans);
 	vbox->addLayout(transparency_hbox);
-
-	auto connectivity_hbox = new QHBoxLayout;
-	connectivity_hbox->addWidget(cb_connectivity);
-	connectivity_hbox->addWidget(lb_connectivity);
-	vbox->addLayout(connectivity_hbox);
 
 	if (input_type == kSource)
 	{
@@ -145,13 +124,14 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	}
 
 	vbox->addWidget(bt_update);
+	vbox->addWidget(bt_connectivity);
 
 	setLayout(vbox);
 
 	// connections
-	//TODO QObject::connect(cb_connectivity, SIGNAL(clicked()), this, SLOT(reload()));
 	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this, SLOT(transp_changed()));
 	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
+	QObject::connect(bt_connectivity, SIGNAL(clicked()), this, SLOT(split_surface()));
 
 	// setup vtk scene
 	ren3D = vtkSmartPointer<vtkRenderer>::New();
@@ -231,19 +211,12 @@ void SurfaceViewerWidget::load()
 		input->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
 		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
 
-		//if (input_type == kAllTissues)
-		//{
-		//	transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
-		//}
-		//else // selection only
+		std::vector<tissues_size_t> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
+		for (auto tissue_type : tissue_selection)
 		{
-			std::vector<tissues_size_t> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
-			for (auto tissue_type : tissue_selection)
-			{
-				tissue_index_map[tissue_type] = tissue_type;
-			}
-			transform_slices(slices, slice_size, field, [tissue_index_map](tissues_size_t v) { return tissue_index_map.at(v); });
+			tissue_index_map[tissue_type] = tissue_type;
 		}
+		transform_slices(slices, slice_size, field, [tissue_index_map](tissues_size_t v) { return tissue_index_map.at(v); });
 	}
 	else if (tissue_selection.size() >= 1) // [1, 254]
 	{
@@ -320,6 +293,41 @@ void SurfaceViewerWidget::load()
 
 	actor->SetMapper(mapper);
 	ren3D->AddActor(actor);
+}
+
+void SurfaceViewerWidget::split_surface()
+{
+	auto connectivity = vtkSmartPointer<vtkPolyDataConnectivityFilter>::New();
+	connectivity->SetInputConnection(mapper->GetInputConnection(0, 0));
+	connectivity->SetExtractionModeToAllRegions();
+	connectivity->ScalarConnectivityOff();
+	connectivity->ColorRegionsOn();
+	connectivity->Update();
+
+	auto num_regions = connectivity->GetNumberOfExtractedRegions();
+	ISEG_INFO("Number of disconnected regions: " << num_regions);
+	
+	// attach lookuptable
+	auto lut = vtkSmartPointer<vtkLookupTable>::New();
+	lut->SetNumberOfTableValues(num_regions);
+	lut->SetNumberOfColors(num_regions);
+	Color c(0.1f, 0.9f, 0.1f);
+	for (vtkIdType i = 0; i < num_regions; i++)
+	{
+		lut->SetTableValue(i, c[0], c[1], c[2], 1.0);
+		c = Color::nextRandom(c);
+	}
+
+	auto output = vtkSmartPointer<vtkPolyData>::New();
+	output->ShallowCopy(connectivity->GetOutput());
+	
+	mapper->SetInputData(output);
+	mapper->ScalarVisibilityOn();
+	mapper->SetColorModeToMapScalars();
+	mapper->SetScalarRange(0, num_regions - 1);
+	mapper->SetLookupTable(lut);
+
+	vtkWidget->GetRenderWindow()->Render();
 }
 
 void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)

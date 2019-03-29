@@ -4271,7 +4271,7 @@ void MainWindow::start_surfaceviewer(int mode)
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	surface_viewer = new SurfaceViewerWidget(handler3D, static_cast<SurfaceViewerWidget::eInputType>(mode), 0);
+	surface_viewer = new SurfaceViewerWidget(handler3D, static_cast<SurfaceViewerWidget::eInputType>(mode), nullptr);
 	QObject::connect(surface_viewer, SIGNAL(hasbeenclosed()), this, SLOT(surface_viewer_closed()));
 
 	QObject::connect(surface_viewer,

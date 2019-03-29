@@ -70,6 +70,7 @@ public slots:
 	void pixelsize_changed(Pair p);
 	void thickness_changed(float thick);
 	void reload();
+	void split_surface();
 
 protected slots:
 	void transp_changed();
@@ -87,11 +88,10 @@ private:
 	SlicesHandler* hand3D;
 
 	QVTKWidget* vtkWidget;
-	QPushButton* bt_update;
 	QSlider* sl_trans;
 	QSlider* sl_thresh;
-	QLabel* lb_connectivity;
-	QCheckBox* cb_connectivity;
+	QPushButton* bt_update;
+	QPushButton* bt_connectivity;
 
 	vtkSmartPointer<QVTKInteractor> iren;
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;
