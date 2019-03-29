@@ -17,7 +17,6 @@
 
 #include <QAction>
 #include <QMenu>
-#include <Q3VBox>
 #include <QResizeEvent>
 
 #include <vtkBitArray.h>
@@ -82,7 +81,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	vtkWidget = new QVTKWidget;
 	vtkWidget->setMinimumSize(600, 600);
 
-	lb_trans = new QLabel("Transparency");
+	auto lb_trans = new QLabel("Transparency");
 	sl_trans = new QSlider(Qt::Horizontal);
 	sl_trans->setRange(0, 100);
 	sl_trans->setValue(00);
@@ -100,7 +99,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 
 	if (input_type == kSource)
 	{
-		lb_thresh = new QLabel("Threshold");
+		auto lb_thresh = new QLabel("Contour iso-value");
 		sl_thresh = new QSlider(Qt::Horizontal);
 		sl_thresh->setRange(0, 100);
 		sl_thresh->setValue(50);
@@ -484,18 +483,6 @@ void SurfaceViewerWidget::closeEvent(QCloseEvent* qce)
 	emit hasbeenclosed();
 	QWidget::closeEvent(qce);
 }
-
-//void SurfaceViewerWidget::resizeEvent(QResizeEvent* RE)
-//{
-//	QWidget::resizeEvent(RE);
-//	QSize size1 = RE->size();
-//	vbox1->setFixedSize(size1);
-//	if (size1.height() > 150)
-//		size1.setHeight(size1.height() - 150);
-//	vtkWidget->setFixedSize(size1);
-//	vtkWidget->GetRenderWindow()->SetSize(size1.width(), size1.height());
-//	vtkWidget->GetRenderWindow()->Render();
-//}
 
 void SurfaceViewerWidget::transp_changed()
 {

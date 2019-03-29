@@ -22,8 +22,6 @@
 
 class QVTKWidget;
 class QVTKInteractor;
-class Q3VBox;
-class Q3HBox;
 class QSlider;
 class QLabel;
 class QPushButton;
@@ -56,7 +54,7 @@ public:
 	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
-	~SurfaceViewerWidget();
+	virtual ~SurfaceViewerWidget();
 
 	static bool isOpenGLSupported();
 
@@ -91,9 +89,7 @@ private:
 	QVTKWidget* vtkWidget;
 	QPushButton* bt_update;
 	QSlider* sl_trans;
-	QLabel* lb_trans;
 	QSlider* sl_thresh;
-	QLabel* lb_thresh;
 
 	vtkSmartPointer<QVTKInteractor> iren;
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;
