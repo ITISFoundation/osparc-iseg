@@ -4295,7 +4295,7 @@ void MainWindow::view_tissue(Point p)
 
 void MainWindow::execute_tissue_surfaceviewer()
 {
-	start_surfaceviewer(SurfaceViewerWidget::kTissues);
+	start_surfaceviewer(SurfaceViewerWidget::kSelectedTissues);
 }
 
 void MainWindow::execute_selectedtissue_surfaceviewer()
