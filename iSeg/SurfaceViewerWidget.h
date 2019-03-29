@@ -25,6 +25,7 @@ class QVTKInteractor;
 class QSlider;
 class QLabel;
 class QPushButton;
+class QCheckBox;
 
 class vtkActor;
 class vtkInteractorStyleTrackballCamera;
@@ -49,7 +50,6 @@ class SurfaceViewerWidget : public QWidget
 public:
 	enum eInputType { kSource,
 		kTarget,
-		kTissues,
 		kSelectedTissues };
 	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type,
 			QWidget* parent = 0, const char* name = 0,
@@ -90,6 +90,8 @@ private:
 	QPushButton* bt_update;
 	QSlider* sl_trans;
 	QSlider* sl_thresh;
+	QLabel* lb_connectivity;
+	QCheckBox* cb_connectivity;
 
 	vtkSmartPointer<QVTKInteractor> iren;
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;

@@ -46,9 +46,32 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL);
 #endif
 VTK_MODULE_INIT(vtkInteractionStyle);
 
+class vtkConnectivityRandomColors : public vtkPolyDataAlgorithm
+{
+public:
+	static vtkConnectivityRandomColors* New();
+	vtkTypeMacro(vtkConnectivityRandomColors, vtkPolyDataAlgorithm);
+
+protected:
+	vtkConnectivityRandomColors() {}
+	virtual ~vtkConnectivityRandomColors() {}
+
+	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override
+	{
+		throw 1;
+	}
+
+private:
+	vtkConnectivityRandomColors(const vtkConnectivityRandomColors&); // Not implemented.
+	void operator=(const vtkConnectivityRandomColors&);							 // Not implemented.};
+};
+
+vtkStandardNewMacro(vtkConnectivityRandomColors)
+
 using namespace iseg;
 
 namespace {
+
 template<typename TIn, typename TOut, typename TMap>
 void transform_slices(const std::vector<TIn*>& slices, size_t slice_size, TOut* out, const TMap& map)
 {
@@ -86,6 +109,10 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	sl_trans->setRange(0, 100);
 	sl_trans->setValue(00);
 
+	cb_connectivity = new QCheckBox("Compute connectivity");
+	cb_connectivity->setChecked(false);
+	lb_connectivity = new QLabel;
+
 	bt_update = new QPushButton("Update");
 
 	// layout
@@ -96,6 +123,11 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	transparency_hbox->addWidget(lb_trans);
 	transparency_hbox->addWidget(sl_trans);
 	vbox->addLayout(transparency_hbox);
+
+	auto connectivity_hbox = new QHBoxLayout;
+	connectivity_hbox->addWidget(cb_connectivity);
+	connectivity_hbox->addWidget(lb_connectivity);
+	vbox->addLayout(connectivity_hbox);
 
 	if (input_type == kSource)
 	{
@@ -117,6 +149,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	setLayout(vbox);
 
 	// connections
+	//TODO QObject::connect(cb_connectivity, SIGNAL(clicked()), this, SLOT(reload()));
 	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this, SLOT(transp_changed()));
 	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
 
@@ -192,17 +225,17 @@ void SurfaceViewerWidget::load()
 		auto field = vtkUnsignedCharArray::SafeDownCast(input->GetPointData()->GetScalars());
 		transform_slices_vtk(slices, slice_size, field, [](float v) { return v > 0.f ? 1 : 0; });
 	}
-	else if (input_type == kTissues || tissue_selection.size() > 254) // all tissues
+	else if (tissue_selection.size() > 254) // all tissues
 	{
 		auto slices = hand3D->tissue_slices(0);
 		input->AllocateScalars(VTK_UNSIGNED_SHORT, 1);
 		auto field = static_cast<tissues_size_t*>(input->GetScalarPointer());
 
-		if (input_type == kTissues)
-		{
-			transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
-		}
-		else // selection only
+		//if (input_type == kAllTissues)
+		//{
+		//	transform_slices(slices, slice_size, field, [](tissues_size_t v) { return v; });
+		//}
+		//else // selection only
 		{
 			std::vector<tissues_size_t> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
 			for (auto tissue_type : tissue_selection)
@@ -214,7 +247,6 @@ void SurfaceViewerWidget::load()
 	}
 	else if (tissue_selection.size() >= 1) // [1, 254]
 	{
-
 		unsigned char count = 1;
 		std::vector<unsigned char> tissue_index_map(TissueInfos::GetTissueCount() + 1, 0);
 		for (auto tissue_type : tissue_selection)
@@ -332,7 +364,7 @@ void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data
 		{
 			if (action->text().startsWith(QString("Select tissue")))
 			{
-				action->setVisible(input_type == kTissues || input_type == kSelectedTissues);
+				action->setVisible(input_type == kSelectedTissues);
 				if (action->isVisible())
 				{
 					int tissue_type = get_picked_tissue();
@@ -407,8 +439,9 @@ void SurfaceViewerWidget::select_action(QAction* action)
 
 void SurfaceViewerWidget::tissue_changed()
 {
-	if (input_type == kTissues || input_type == kSelectedTissues)
+	if (input_type == kSelectedTissues)
 	{
+		// only update colors, don't auto update surface
 		build_lookuptable();
 
 		vtkWidget->GetRenderWindow()->Render();
