@@ -69,33 +69,15 @@ bmptissuesliceshower::bmptissuesliceshower(
 	scaleoffsetbmp = 0.0f;
 	scalefactorwork = 1.0f;
 	scaleoffsetwork = 0.0f;
-	//	mode=1;
 
-	//	image.create(int(width),int(height*thickness),32);
 	image.create(int(width), int(height), 32);
-
-	//	image.setNumColors(256) ;
-	/*	for(int i=0;i<256;i++){
-		image.setColor(i, qRgb(i,i,i));
-	}*/
 
 	setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 	show();
 
 	reload_bits();
-
-	return;
 }
-
-/*void bmptissuesliceshower::mode_changed(unsigned char newmode)
-{
-	if(newmode!=0&&mode!=newmode){
-		scaleoffset=0.0f;
-		scalefactor=1.0f;
-		mode=newmode;
-	}
-}*/
 
 void bmptissuesliceshower::paintEvent(QPaintEvent* e)
 {
@@ -121,7 +103,6 @@ void bmptissuesliceshower::bmp_changed()
 {
 	if (bmporwork)
 	{
-		//mode_changed(bmph->return_mode(true));
 		update();
 	}
 }
@@ -130,7 +111,6 @@ void bmptissuesliceshower::work_changed()
 {
 	if (!bmporwork)
 	{
-		//mode_changed(bmph->return_mode(false));
 		update();
 	}
 }
@@ -195,7 +175,6 @@ void bmptissuesliceshower::update()
 		}
 	}
 
-	//mode_changed(bmphand->return_mode(bmporwork));
 	reload_bits();
 	repaint();
 }
@@ -206,7 +185,6 @@ void bmptissuesliceshower::reload_bits()
 	int f;
 	if (tissuevisible)
 	{
-		//		for(int y=height-1;y>=0;y--){
 		float scaleoffset, scalefactor;
 		if (bmporwork)
 			scaleoffset = scaleoffsetbmp;
@@ -221,20 +199,14 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(
-						0.0f,
-						min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
-				//				for(int y1=(int)(y*thickness);y1<int((y+1)*thickness);y1++)
-				//					image.setPixel(x,y1,qRgb(f*(tissuecolor[tissue[pos]][0]),f*tissuecolor[tissue[pos]][1],f*tissuecolor[tissue[pos]][2]));
+				f = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				if (tissue[pos] == 0)
 				{
 					image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
 				}
 				else
 				{
-					//						image.setPixel(x,y,qRgb(int(f/2+127.5f*(tissuecolor[tissue[pos]][0])),int(f/2+127.5f*tissuecolor[tissue[pos]][1]),int(f/2+127.5f*tissuecolor[tissue[pos]][2])));
-					TissueInfos::GetTissueColorBlendedRGB(tissue[pos], r, g, b,
-							f);
+					TissueInfos::GetTissueColorBlendedRGB(tissue[pos], r, g, b, f);
 					image.setPixel(x, y, qRgb(r, g, b));
 				}
 				pos++;
@@ -243,7 +215,6 @@ void bmptissuesliceshower::reload_bits()
 	}
 	else
 	{
-		//		for(int y=height-1;y>=0;y--){
 		float scaleoffset, scalefactor;
 		if (bmporwork)
 			scaleoffset = scaleoffsetbmp;
@@ -257,10 +228,7 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(
-						0.0f,
-						min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
-				//				for(int y1=(int)(y*thickness);y1<int((y+1)*thickness);y1++)
+				f = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				image.setPixel(x, y, qRgb(f, f, f));
 				pos++;
 			}
@@ -282,12 +250,9 @@ void bmptissuesliceshower::reload_bits()
 			image.setPixel(xypos, y, qRgb(0, 255, 0));
 		}
 	}
-
-	return;
 }
 
-void bmptissuesliceshower::set_scale(float offset1, float factor1,
-		bool bmporwork1)
+void bmptissuesliceshower::set_scale(float offset1, float factor1, bool bmporwork1)
 {
 	if (bmporwork1)
 	{
@@ -353,7 +318,6 @@ void bmptissuesliceshower::set_tissuevisible(bool on)
 {
 	tissuevisible = on;
 	update();
-	return;
 }
 
 void bmptissuesliceshower::slicenr_changed(int i)
@@ -392,27 +356,11 @@ void bmptissuesliceshower::pixelsize_changed(Pair pixelsize1)
 
 		if (directionx)
 		{
-			//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-			//fprintf(fp3,"%f %f %f %i %i\n",pixelsize1.high,pixelsize1.low,d,(int)(width*d),(int)(height*thickness));
-			//fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
-			//fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
-			setFixedSize((int)(width * d * zoom),
-					(int)(height * thickness * zoom));
-			/*fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
-			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
-			fclose(fp3);*/
+			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
 		}
 		else
 		{
-			/*FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test101.txt","w");
-			fprintf(fp3,"%f %f %f %i %i\n",pixelsize1.high,pixelsize1.low,d,(int)(width*d),(int)(height*thickness));
-			fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
-			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());*/
-			setFixedSize((int)(width * d * zoom),
-					(int)(height * thickness * zoom));
-			/*fprintf(fp3,"%i %i\n",this->sizeHint().width(),this->sizeHint().height());
-			fprintf(fp3,"%i %i\n",this->minimumSize().width(),this->minimumSize().height());
-			fclose(fp3);*/
+			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
 		}
 	}
 }
@@ -421,7 +369,6 @@ void bmptissuesliceshower::set_zposvisible(bool on)
 	zposvisible = on;
 	reload_bits();
 	repaint();
-	return;
 }
 
 void bmptissuesliceshower::set_xyposvisible(bool on)
@@ -430,15 +377,12 @@ void bmptissuesliceshower::set_xyposvisible(bool on)
 
 	reload_bits();
 	repaint();
-
-	return;
 }
 
 void bmptissuesliceshower::zpos_changed()
 {
 	reload_bits();
 	repaint();
-	return;
 }
 
 void bmptissuesliceshower::xypos_changed(int i)
@@ -447,7 +391,6 @@ void bmptissuesliceshower::xypos_changed(int i)
 		xypos = i;
 	reload_bits();
 	repaint();
-	return;
 }
 
 void bmptissuesliceshower::set_zoom(double z)
@@ -513,17 +456,12 @@ SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
 	qsb_slicenr = new QScrollBar(1, nrslices, 1, 5, 1, Qt::Horizontal, this);
 	vbox->addWidget(qsb_slicenr);
 
-	QObject::connect(qsb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(slicenr_changed(int)));
-	QObject::connect(cb_tissuevisible, SIGNAL(clicked()), this,
-			SLOT(tissuevisible_changed()));
-	QObject::connect(bg_bmporwork, SIGNAL(buttonClicked(int)), this,
-			SLOT(workorbmp_changed()));
+	connect(qsb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(slicenr_changed(int)));
+	connect(cb_tissuevisible, SIGNAL(clicked()), this, SLOT(tissuevisible_changed()));
+	connect(bg_bmporwork, SIGNAL(buttonClicked(int)), this, SLOT(workorbmp_changed()));
 
-	QObject::connect(cb_xyposvisible, SIGNAL(clicked()), this,
-			SLOT(xyposvisible_changed()));
-	QObject::connect(cb_zposvisible, SIGNAL(clicked()), this,
-			SLOT(zposvisible_changed()));
+	connect(cb_xyposvisible, SIGNAL(clicked()), this, SLOT(xyposvisible_changed()));
+	connect(cb_zposvisible, SIGNAL(clicked()), this, SLOT(zposvisible_changed()));
 
 	show();
 }
@@ -577,7 +515,6 @@ void SliceViewerWidget::bmp_changed()
 			shower->bmp_changed();
 
 		qsb_slicenr->setFixedWidth(shower->size().width());
-		//		this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 	}
 }
 
@@ -602,7 +539,6 @@ void SliceViewerWidget::work_changed()
 			shower->bmp_changed();
 
 		qsb_slicenr->setFixedWidth(shower->size().width());
-		//		this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 	}
 }
 
@@ -628,13 +564,11 @@ void SliceViewerWidget::workorbmp_changed()
 void SliceViewerWidget::thickness_changed(float thickness1)
 {
 	shower->thickness_changed(thickness1);
-	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
 void SliceViewerWidget::pixelsize_changed(Pair pixelsize1)
 {
 	shower->pixelsize_changed(pixelsize1);
-	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
 void SliceViewerWidget::xyexists_changed(bool on)
@@ -663,7 +597,6 @@ void SliceViewerWidget::zposvisible_changed()
 void SliceViewerWidget::set_zoom(double z)
 {
 	shower->set_zoom(z);
-	//	this->setFixedSize(shower->minimumSize().width(),shower->minimumSize().height()+50);
 }
 
 void SliceViewerWidget::set_scale(float offset1, float factor1,

@@ -63,6 +63,7 @@ void transform_slices(const std::vector<TIn*>& slices, size_t slice_size, TOut* 
 		std::advance(out, slice_size);
 	}
 }
+
 template<typename TIn, typename TArray, typename TMap>
 void transform_slices_vtk(const std::vector<TIn*>& slices, size_t slice_size, TArray* out, const TMap& map)
 {
@@ -75,6 +76,14 @@ void transform_slices_vtk(const std::vector<TIn*>& slices, size_t slice_size, TA
 		}
 	}
 }
+
+enum eActions
+{
+	kSelectTissue,
+	kGotoSlice,
+	kMarkPoint
+};
+
 } // namespace
 
 SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inputtype, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
@@ -148,9 +157,9 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	iren->SetRenderWindow(vtkWidget->GetRenderWindow());
 
 	QMenu* popup_actions = new QMenu(vtkWidget);
-	popup_actions->addAction("Select tissue");
-	popup_actions->addAction("Go to slice");
-	popup_actions->addAction("Mark Point in target");
+	popup_actions->addAction("Select tissue")->setData(eActions::kSelectTissue);
+	popup_actions->addAction("Go to slice")->setData(eActions::kGotoSlice);
+	popup_actions->addAction("Add mark")->setData(eActions::kMarkPoint);
 	connect(popup_actions, SIGNAL(triggered(QAction*)), this, SLOT(select_action(QAction*)));
 
 	connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
@@ -370,7 +379,7 @@ void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data
 
 		for (auto action : popupMenu->actions())
 		{
-			if (action->text().startsWith(QString("Select tissue")))
+			if (action->data() == eActions::kSelectTissue)
 			{
 				action->setVisible(input_type == kSelectedTissues);
 				if (action->isVisible())
@@ -395,7 +404,7 @@ void SurfaceViewerWidget::select_action(QAction* action)
 {
 	if (picker)
 	{
-		if (action->text().startsWith(QString("Select tissue")))
+		if (action->data() == eActions::kSelectTissue)
 		{
 			int tissue_type = get_picked_tissue();
 			if (tissue_type != -1)
@@ -403,7 +412,7 @@ void SurfaceViewerWidget::select_action(QAction* action)
 				hand3D->set_tissue_selection(std::vector<tissues_size_t>(1, tissue_type));
 			}
 		}
-		else
+		else // eActions::kMarkPoint or kGotoSlice
 		{
 			if (input)
 			{
@@ -417,23 +426,18 @@ void SurfaceViewerWidget::select_action(QAction* action)
 				int slice = static_cast<int>(std::round((worldPosition[2] - origin[2]) / spacing[2]));
 				slice = std::max(0, std::min(slice, dims[2] - 1));
 
-				if (action->text() == "Mark Point in target")
+				if (action->data() == eActions::kMarkPoint)
 				{
-					std::vector<float> work(hand3D->return_area(), 0);
+					Point p;
+					p.px = static_cast<int>(std::round((worldPosition[0] - origin[0]) / spacing[0]));
+					p.py = static_cast<int>(std::round((worldPosition[1] - origin[1]) / spacing[1]));
 
-					auto i = static_cast<int>(std::round((worldPosition[0] - origin[0]) / spacing[0]));
-					auto j = static_cast<int>(std::round((worldPosition[1] - origin[1]) / spacing[1]));
-					auto idx = static_cast<unsigned>(i + j * hand3D->width());
-					if (idx < hand3D->return_area())
-					{
-						work[idx] = 255.f;
-					}
 					iseg::DataSelection dataSelection;
 					dataSelection.sliceNr = slice;
-					dataSelection.work = true;
+					dataSelection.marks = true;
 					emit begin_datachange(dataSelection, this, false);
 
-					hand3D->copy2work(slice, work.data(), 2);
+					hand3D->add_mark(p, Mark::RED, slice);
 
 					emit end_datachange(this, iseg::ClearUndo);
 				}

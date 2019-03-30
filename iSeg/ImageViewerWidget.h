@@ -73,6 +73,7 @@ signals:
 	void addtissue3D_sign(Point p);
 	void selecttissue_sign(Point p, bool clear_selection);
 	void viewtissue_sign(Point p);
+	void viewtarget_sign(Point p);
 	void mousepressed_sign(Point p);
 	void mousereleased_sign(Point p);
 	void mousepressedmid_sign(Point p);
@@ -143,6 +144,7 @@ private:
 	QAction* selecttissue;
 	QAction* addtoselection;
 	QAction* viewtissue;
+	QAction* viewtarget;
 	QAction* nexttargetslice;
 	std::vector<Point> vp;
 	std::vector<Point> vp_old;
@@ -185,6 +187,7 @@ private slots:
 	void add_tissuelarger();
 	void select_tissue();
 	void view_tissue_surface();
+	void view_target_surface();
 	void next_target_slice();
 	void add_to_selected_tissues();
 	void mark_changed();
