@@ -3284,11 +3284,6 @@ void SlicesHandler::swap_bmpworkall()
 		_image_slices[i].swap_bmpwork();
 }
 
-void SlicesHandler::add_mark(Point p, unsigned label)
-{
-	(_image_slices[_activeslice]).add_mark(p, label);
-}
-
 void SlicesHandler::add_mark(Point p, unsigned label, std::string str)
 {
 	(_image_slices[_activeslice]).add_mark(p, label, str);
@@ -3301,21 +3296,13 @@ bool SlicesHandler::remove_mark(Point p, unsigned radius)
 	return (_image_slices[_activeslice]).remove_mark(p, radius);
 }
 
-void SlicesHandler::add_mark(Point p, unsigned label, unsigned short slicenr)
-{
-	if (slicenr < _nrslices && slicenr >= 0)
-		(_image_slices[slicenr]).add_mark(p, label);
-}
-
-void SlicesHandler::add_mark(Point p, unsigned label, std::string str,
-		unsigned short slicenr)
+void SlicesHandler::add_mark(Point p, unsigned label, unsigned short slicenr, std::string str)
 {
 	if (slicenr < _nrslices && slicenr >= 0)
 		(_image_slices[slicenr]).add_mark(p, label, str);
 }
 
-bool SlicesHandler::remove_mark(Point p, unsigned radius,
-		unsigned short slicenr)
+bool SlicesHandler::remove_mark(Point p, unsigned radius, unsigned short slicenr)
 {
 	if (slicenr < _nrslices && slicenr >= 0)
 		return (_image_slices[slicenr]).remove_mark(p, radius);

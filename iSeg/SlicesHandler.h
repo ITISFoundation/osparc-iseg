@@ -263,14 +263,11 @@ public:
 	void thresholded_growing(short unsigned slicenr, Point p, float thresh_low,
 			float thresh_high,
 			float set_to); //bool connectivity,float set_to);
-	void add_mark(Point p, unsigned label);
-	void add_mark(Point p, unsigned label, std::string str);
-	void clear_marks();
+	void add_mark(Point p, unsigned label, std::string str = "");
+	void add_mark(Point p, unsigned label, unsigned short slicenr, std::string str = "");
 	bool remove_mark(Point p, unsigned radius);
-	void add_mark(Point p, unsigned label, unsigned short slicenr);
-	void add_mark(Point p, unsigned label, std::string str,
-			unsigned short slicenr);
 	bool remove_mark(Point p, unsigned radius, unsigned short slicenr);
+	void clear_marks();
 	void get_labels(std::vector<augmentedmark>* labels);
 	void add_vm(std::vector<Mark>* vm1);
 	bool remove_vm(Point p, unsigned radius);

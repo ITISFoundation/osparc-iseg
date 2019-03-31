@@ -61,11 +61,11 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	crosshairypos = 0;
 	marks = nullptr;
 	overlayalpha = 0.0f;
-	//	vp=new vector<Point>;
-	//	vp_old=new vector<Point>;
+	
 	selecttissue = new QAction("Select Tissue", this);
 	addtoselection = new QAction("Select Tissue", this);
 	viewtissue = new QAction("View Tissue Surface", this);
+	viewtarget = new QAction("View Target Surface", this);
 	nexttargetslice = new QAction("Next Target Slice", this);
 	addmark = new QAction("&Add Mark", this);
 	addlabel = new QAction("Add &Label", this);
@@ -88,6 +88,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
 	connect(addtoselection, SIGNAL(activated()), this, SLOT(add_to_selected_tissues()));
 	connect(viewtissue, SIGNAL(activated()), this, SLOT(view_tissue_surface()));
+	connect(viewtarget, SIGNAL(activated()), this, SLOT(view_target_surface()));
 	connect(nexttargetslice, SIGNAL(activated()), this, SLOT(next_target_slice()));
 }
 
@@ -654,6 +655,13 @@ void ImageViewerWidget::view_tissue_surface()
 	p.py = (unsigned short)eventy;
 	emit viewtissue_sign(p);
 }
+void ImageViewerWidget::view_target_surface()
+{
+	Point p;
+	p.px = (unsigned short)eventx;
+	p.py = (unsigned short)eventy;
+	emit viewtarget_sign(p);
+}
 
 void ImageViewerWidget::next_target_slice()
 {
@@ -719,14 +727,7 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	eventy = (int)max(min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
 
 	QMenu contextMenu(this);
-	if (!bmporwork)
-	{
-		contextMenu.addAction(nexttargetslice);
-	}
-	contextMenu.addAction(addmark);
-	contextMenu.addAction(addlabel);
-	contextMenu.addAction(removemark);
-	contextMenu.addAction(clearmarks);
+	// tissue selection
 	if (event->modifiers() == Qt::ControlModifier)
 	{
 		contextMenu.addAction(addtoselection);
@@ -735,9 +736,18 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	{
 		contextMenu.addAction(selecttissue);
 	}
-	contextMenu.addAction(viewtissue);
-	if (!bmporwork)
+
+	// surface view
+	if (bmporwork)
 	{
+		contextMenu.addAction(viewtissue);
+	}
+	else
+	{
+		contextMenu.addAction(viewtarget);
+		contextMenu.addAction(nexttargetslice);
+
+		// add to tissue
 		contextMenu.insertSeparator();
 		contextMenu.addAction(addtissue);
 		contextMenu.addAction(subtissue);
@@ -745,6 +755,14 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 		contextMenu.addAction(addtissueconnected);
 		contextMenu.addAction(addtissuelarger);
 	}
+
+	// marks
+	contextMenu.insertSeparator();
+	contextMenu.addAction(addmark);
+	contextMenu.addAction(addlabel);
+	contextMenu.addAction(removemark);
+	contextMenu.addAction(clearmarks);
+
 	contextMenu.exec(event->globalPos());
 }
 

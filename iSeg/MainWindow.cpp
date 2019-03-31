@@ -1437,8 +1437,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SLOT(add_tissuelarger(Point)));
 	QObject::connect(work_show, SIGNAL(selecttissue_sign(Point, bool)), this,
 			SLOT(select_tissue(Point, bool)));
-	QObject::connect(work_show, SIGNAL(viewtissue_sign(Point)), this,
-			SLOT(view_tissue(Point)));
+	QObject::connect(work_show, SIGNAL(viewtarget_sign(Point)), this,
+			SLOT(execute_target_surfaceviewer()));
 	QObject::connect(tissueFilter, SIGNAL(textChanged(const QString&)), this,
 			SLOT(tissueFilterChanged(const QString&)));
 	QObject::connect(lockTissues, SIGNAL(clicked()), this,
