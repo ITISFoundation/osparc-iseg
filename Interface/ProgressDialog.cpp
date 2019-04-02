@@ -26,6 +26,7 @@ ProgressDialog::ProgressDialog(const char* msg, QWidget* parent /*= 0*/)
 void ProgressDialog::setNumberOfSteps(int N)
 {
 	progress->setMaximum(N);
+	progress->setValue(0);
 }
 
 void ProgressDialog::increment()

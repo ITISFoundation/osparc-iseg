@@ -18,7 +18,8 @@
 namespace iseg {
 
 class SlicesHandlerInterface;
+class ProgressInfo;
 
-ISEG_CORE_API bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d);
+ISEG_CORE_API bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d, ProgressInfo* progress = nullptr);
 
 } // namespace iseg
