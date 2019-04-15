@@ -1576,8 +1576,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 
 	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), bmp_show,
 			SLOT(overlay_changed()));
-	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), work_show,
-			SLOT(overlay_changed()));
 	QObject::connect(multidataset_widget, SIGNAL(dataset_changed()), this,
 			SLOT(DatasetChanged()));
 	QObject::connect(multidataset_widget,
@@ -7527,7 +7525,6 @@ void MainWindow::handle_end_datachange(QWidget* sender, iseg::EndUndoAction undo
 void MainWindow::DatasetChanged()
 {
 	emit bmp_changed();
-	emit work_changed();
 
 	reset_brightnesscontrast();
 }
