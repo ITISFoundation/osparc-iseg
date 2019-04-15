@@ -1645,12 +1645,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	// shortcuts -> TODO: replace those which have a button/menu action so user can learn about shortcut
 	auto shortcut_sliceup = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
 	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
+	auto shortcut_sliceup1 = new QShortcut(QKeySequence(Qt::Key_PageDown), this);
+	connect(shortcut_sliceup1, SIGNAL(activated()), this, SLOT(slicenr_up()));
+
 	auto shortcut_slicedown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
 	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
-	auto shortcut_sliceup1 = new QShortcut(QKeySequence(Qt::Key_Next), this);
-	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
-	auto shortcut_slicedown1 = new QShortcut(QKeySequence(Qt::Key_Prior), this);
-	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
+	auto shortcut_slicedown1 = new QShortcut(QKeySequence(Qt::Key_PageUp), this);
+	connect(shortcut_slicedown1, SIGNAL(activated()), this, SLOT(slicenr_down()));
 
 	auto shortcut_zoomin = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Up), this);
 	connect(shortcut_zoomin, SIGNAL(activated()), this, SLOT(zoom_in()));
