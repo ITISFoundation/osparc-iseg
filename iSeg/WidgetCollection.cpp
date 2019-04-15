@@ -33,8 +33,6 @@
 #include <algorithm>
 #include <fstream>
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 namespace iseg {
 
 ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent,
@@ -238,9 +236,8 @@ void ScaleWork::bmphand_changed(bmphandler* bmph)
 	return;
 }
 
-void ScaleWork::slider_changed(int newval)
+void ScaleWork::slider_changed(int /* newval */)
 {
-	UNREFERENCED_PARAMETER(newval);
 	if (minval1 < maxval1)
 	{
 		bmphand = handler3D->get_activebmphandler();
@@ -441,21 +438,16 @@ void ShowHisto::subsect_toggled()
 		vbox2->hide();
 	}
 	draw_histo();
-
-	return;
 }
 
-void ShowHisto::pict_toggled(bool on)
+void ShowHisto::pict_toggled(bool /* on */)
 {
-	UNREFERENCED_PARAMETER(on);
 	draw_histo();
-	return;
 }
 
 void ShowHisto::subsect_update()
 {
 	draw_histo();
-	return;
 }
 
 void ShowHisto::draw_histo()
@@ -501,7 +493,6 @@ void ShowHisto::draw_histo()
 	}
 
 	histwindow->update();
-	return;
 }
 
 void ShowHisto::slicenr_changed()
@@ -1928,7 +1919,6 @@ void extoverlay_widget::target_toggled()
 	emit workoverlayvisible_changed(isset);
 }
 
-
 bits_stack_pushdialog::bits_stack_pushdialog(QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: QDialog(parent, name, false, wFlags)
@@ -2024,7 +2014,7 @@ ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent,
 	zoom_f = new QLabel(QString("x"), this);
 	le_zoom_f = new QLineEdit(QString::number(zoom, 'g', 4), this);
 	le_zoom_f->setFixedWidth(80);
-	
+
 	vbox1->addWidget(pushzoomin);
 	vbox1->addWidget(pushzoomout);
 	vbox1->addWidget(pushunzoom);

@@ -28,8 +28,6 @@
 
 #include <algorithm>
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 namespace iseg {
 
 SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
@@ -334,9 +332,8 @@ void SmoothingWidget::continue_diff()
 	emit end_datachange(this);
 }
 
-void SmoothingWidget::sigmaslider_changed(int newval)
+void SmoothingWidget::sigmaslider_changed(int /* newval */)
 {
-	UNREFERENCED_PARAMETER(newval);
 	if (rb_gaussian->isChecked())
 	{
 		if (allslices->isChecked())
@@ -349,9 +346,8 @@ void SmoothingWidget::sigmaslider_changed(int newval)
 	return;
 }
 
-void SmoothingWidget::kslider_changed(int newval)
+void SmoothingWidget::kslider_changed(int /* newval */)
 {
-	UNREFERENCED_PARAMETER(newval);
 	if (rb_sigmafilter->isChecked())
 	{
 		if (allslices->isChecked())
@@ -368,10 +364,8 @@ void SmoothingWidget::kslider_changed(int newval)
 	return;
 }
 
-void SmoothingWidget::n_changed(int newval)
+void SmoothingWidget::n_changed(int /* newval */)
 {
-	UNREFERENCED_PARAMETER(newval);
-
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->active_slice();
@@ -407,10 +401,8 @@ void SmoothingWidget::n_changed(int newval)
 	emit end_datachange(this);
 }
 
-void SmoothingWidget::kmax_changed(int newval)
+void SmoothingWidget::kmax_changed(int /* newval */)
 {
-	UNREFERENCED_PARAMETER(newval);
-
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = allslices->isChecked();
 	dataSelection.sliceNr = handler3D->active_slice();

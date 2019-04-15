@@ -51,8 +51,6 @@
 
 namespace iseg {
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 #ifndef M_PI
 #	define M_PI 3.14159
 #endif
@@ -79,7 +77,7 @@ typedef struct /**** BMP file info structure ****/
 	int biHeight;								 /* Height of image */
 	unsigned short biPlanes;		 /* Number of color planes */
 	unsigned short biBitCount;	 /* Number of bits per pixel */
-	unsigned int biCompression;	/* Type of compression to use */
+	unsigned int biCompression;	 /* Type of compression to use */
 	unsigned int biSizeImage;		 /* Size of image data */
 	int biXPelsPerMeter;				 /* X pixels per meter */
 	int biYPelsPerMeter;				 /* Y pixels per meter */
@@ -7581,10 +7579,8 @@ void bmphandler::wshed2work(unsigned* Y)
 	mode2 = 2;
 }
 
-void bmphandler::labels2work(unsigned* Y, unsigned lnr)
+void bmphandler::labels2work(unsigned* Y, unsigned /* lnr */)
 {
-	UNREFERENCED_PARAMETER(lnr);
-
 	unsigned int maxim = 1;
 	for (std::vector<Mark>::iterator it = marks.begin(); it != marks.end(); it++)
 	{
@@ -9656,8 +9652,7 @@ void bmphandler::get_contours(float f, std::vector<std::vector<Point>>* outer_li
 						if (tmp_bits[pos2] == f)
 							done = true;
 					}
-				}
-				while (pos1 != pos || pos2 != possecond);
+				} while (pos1 != pos || pos2 != possecond);
 
 				if (inner == 1)
 				{
@@ -11885,10 +11880,8 @@ void bmphandler::fill_unassignedtissue(tissuelayers_size_t idx,
 	free(results);
 }
 
-void bmphandler::adaptive_fuzzy(Point p, float m1, float s1, float s2,
-		float thresh)
+void bmphandler::adaptive_fuzzy(Point p, float m1, float s1, float s2, float /* thresh */)
 {
-	UNREFERENCED_PARAMETER(thresh);
 	ImageForestingTransformAdaptFuzzy af;
 	af.fuzzy_init(width, height, bmp_bits, p, m1, s1, s2);
 	float* pf = af.return_pf();
@@ -13789,7 +13782,7 @@ void bmphandler::correct_outlinetissue(tissuelayers_size_t idx,
 
 	ImageForestingTransformDistance IFTdist;
 	IFTdist.distance_init(width, height, f, work_bits);
-	// BL here I think we get closest connection from start/end point 
+	// BL here I think we get closest connection from start/end point
 	// to contour of selected tissue 'f'.
 	IFTdist.return_path(newline->front(), &limit1);
 	IFTdist.return_path(newline->back(), &limit2);

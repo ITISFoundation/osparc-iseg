@@ -21,8 +21,6 @@
 
 #include <vector>
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
 namespace iseg {
 
 VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
@@ -95,15 +93,13 @@ void VesselWidget::init()
 	emit vp1_changed(&vp);
 }
 
-FILE* VesselWidget::SaveParams(FILE* fp, int version)
+FILE* VesselWidget::SaveParams(FILE* fp, int /* version */)
 {
-	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
-FILE* VesselWidget::LoadParams(FILE* fp, int version)
+FILE* VesselWidget::LoadParams(FILE* fp, int /* version */)
 {
-	UNREFERENCED_PARAMETER(version);
 	return fp;
 }
 
