@@ -16,7 +16,7 @@
 
 #pragma warning(disable : 4244)
 
-using namespace iseg;
+namespace iseg {
 
 RTDoseReader::RTDoseReader() {}
 
@@ -200,3 +200,5 @@ bool RTDoseReader::ReadPixelData(const char* filename, float** bits)
 	delete imreader;
 	return true;
 }
+
+} // namespace iseg

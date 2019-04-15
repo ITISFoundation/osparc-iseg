@@ -63,9 +63,9 @@
 
 #include <QDesktopWidget>
 #include <QFileDialog>
+#include <QShortcut>
 #include <QSignalMapper.h>
 #include <QStackedWidget>
-#include <QShortcut>
 #include <qapplication.h>
 #include <qdockwidget.h>
 #include <qmenubar.h>
@@ -77,9 +77,7 @@
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
-#define UNREFERENCED_PARAMETER(P) (P)
-
-using namespace iseg;
+namespace iseg {
 
 namespace {
 int openS4LLinkPos = -1;
@@ -1647,23 +1645,24 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	// shortcuts -> TODO: replace those which have a button/menu action so user can learn about shortcut
 	auto shortcut_sliceup = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right), this);
 	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
+	auto shortcut_sliceup1 = new QShortcut(QKeySequence(Qt::Key_PageDown), this);
+	connect(shortcut_sliceup1, SIGNAL(activated()), this, SLOT(slicenr_up()));
+
 	auto shortcut_slicedown = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left), this);
 	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
-	auto shortcut_sliceup1 = new QShortcut(QKeySequence(Qt::Key_Next), this);
-	connect(shortcut_sliceup, SIGNAL(activated()), this, SLOT(slicenr_up()));
-	auto shortcut_slicedown1 = new QShortcut(QKeySequence(Qt::Key_Prior), this);
-	connect(shortcut_slicedown, SIGNAL(activated()), this, SLOT(slicenr_down()));
-	
+	auto shortcut_slicedown1 = new QShortcut(QKeySequence(Qt::Key_PageUp), this);
+	connect(shortcut_slicedown1, SIGNAL(activated()), this, SLOT(slicenr_down()));
+
 	auto shortcut_zoomin = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Up), this);
 	connect(shortcut_zoomin, SIGNAL(activated()), this, SLOT(zoom_in()));
 	auto shortcut_zoomout = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Down), this);
 	connect(shortcut_zoomout, SIGNAL(activated()), this, SLOT(zoom_out()));
-	
+
 	auto shortcut_add = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this);
 	connect(shortcut_add, SIGNAL(activated()), this, SLOT(add_tissue_shortkey()));
 	auto shortcut_sub = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this);
 	connect(shortcut_sub, SIGNAL(activated()), this, SLOT(subtract_tissue_shortkey()));
-	
+
 	auto shortcut_undo = new QShortcut(QKeySequence(Qt::Key_Escape), this);
 	connect(shortcut_undo, SIGNAL(activated()), this, SLOT(execute_undo()));
 	auto shortcut_undo2 = new QShortcut(QKeySequence("Ctrl+Z"), this);
@@ -2066,10 +2065,8 @@ void MainWindow::execute_pad() { execute_resize(1); }
 
 void MainWindow::execute_crop() { execute_resize(2); }
 
-void MainWindow::sl_contrastbmp_moved(int i)
+void MainWindow::sl_contrastbmp_moved(int /* i */)
 {
-	UNREFERENCED_PARAMETER(i);
-
 	// Update line edit
 	float contrast = pow(10, sl_contrastbmp->value() * 4.0f / 100.0f - 2.0f);
 	le_contrastbmp_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
@@ -2078,10 +2075,8 @@ void MainWindow::sl_contrastbmp_moved(int i)
 	update_brightnesscontrast(true);
 }
 
-void MainWindow::sl_contrastwork_moved(int i)
+void MainWindow::sl_contrastwork_moved(int /* i */)
 {
-	UNREFERENCED_PARAMETER(i);
-
 	// Update line edit
 	float contrast = pow(10, sl_contrastwork->value() * 4.0f / 100.0f - 2.0f);
 	le_contrastwork_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
@@ -2090,25 +2085,19 @@ void MainWindow::sl_contrastwork_moved(int i)
 	update_brightnesscontrast(false);
 }
 
-void MainWindow::sl_brightnessbmp_moved(int i)
+void MainWindow::sl_brightnessbmp_moved(int /* i */)
 {
-	UNREFERENCED_PARAMETER(i);
-
 	// Update line edit
-	le_brightnessbmp_val->setText(
-			QString("%1").arg(sl_brightnessbmp->value() - 50, 3));
+	le_brightnessbmp_val->setText(QString("%1").arg(sl_brightnessbmp->value() - 50, 3));
 
 	// Update display
 	update_brightnesscontrast(true);
 }
 
-void MainWindow::sl_brightnesswork_moved(int i)
+void MainWindow::sl_brightnesswork_moved(int /* i */)
 {
-	UNREFERENCED_PARAMETER(i);
-
 	// Update line edit
-	le_brightnesswork_val->setText(
-			QString("%1").arg(sl_brightnesswork->value() - 50, 3));
+	le_brightnesswork_val->setText(QString("%1").arg(sl_brightnesswork->value() - 50, 3));
 
 	// Update display
 	update_brightnesscontrast(false);
@@ -2117,15 +2106,11 @@ void MainWindow::sl_brightnesswork_moved(int i)
 void MainWindow::le_contrastbmp_val_edited()
 {
 	// Clamp to range and round to precision
-	float contrast =
-			std::max(0.01f, std::min(le_contrastbmp_val->text().toFloat(), 100.0f));
+	float contrast = std::max(0.01f, std::min(le_contrastbmp_val->text().toFloat(), 100.0f));
 	le_contrastbmp_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
-	int sliderValue = std::floor(
-			100.0f * (std::log10(le_contrastbmp_val->text().toFloat()) + 2.0f) /
-					4.0f +
-			0.5f);
+	int sliderValue = std::floor(100.0f * (std::log10(le_contrastbmp_val->text().toFloat()) + 2.0f) / 4.0f + 0.5f);
 	sl_contrastbmp->setValue(sliderValue);
 
 	// Update display
@@ -2140,10 +2125,7 @@ void MainWindow::le_contrastwork_val_edited()
 	le_contrastwork_val->setText(QString("%1").arg(contrast, 6, 'f', 2));
 
 	// Update slider
-	int sliderValue = std::floor(
-			100.0f * (std::log10(le_contrastwork_val->text().toFloat()) + 2.0f) /
-					4.0f +
-			0.5f);
+	int sliderValue = std::floor(100.0f * (std::log10(le_contrastwork_val->text().toFloat()) + 2.0f) / 4.0f + 0.5f);
 	sl_contrastwork->setValue(sliderValue);
 
 	// Update display
@@ -7726,3 +7708,5 @@ void MainWindow::execute_split_tissue()
 		QMessageBox::warning(this, "iSeg", "Please select only one non-locked tissue\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }
+
+} // namespace iseg

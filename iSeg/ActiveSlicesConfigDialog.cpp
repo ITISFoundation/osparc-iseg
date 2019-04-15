@@ -15,7 +15,7 @@
 
 #include <QFormLayout>
 
-using namespace iseg;
+namespace iseg {
 
 ActiveSlicesConfigDialog::ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent,
 												   const char* name, Qt::WindowFlags wFlags)
@@ -80,3 +80,5 @@ void ActiveSlicesConfigDialog::endslice_changed(int endslice1)
 		pb_ok->setEnabled(true);
 	}
 }
+
+}// namespace iseg

@@ -29,8 +29,7 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
 									   const char* name, Qt::WindowFlags wFlags)
@@ -230,7 +229,7 @@ void SaveOutlinesWidget::file_pushed()
 
 void SaveOutlinesWidget::save_pushed()
 {
-	vector<tissues_size_t> vtissues;
+	std::vector<tissues_size_t> vtissues;
 	for (tissues_size_t i = 0; i < TissueInfos::GetTissueCount(); i++)
 	{
 		if (lbo_tissues->item((int)i)->isSelected())
@@ -340,7 +339,7 @@ void SaveOutlinesWidget::save_pushed()
 						-(int)handler3D->height(),
 						(int)handler3D->height(), disp[0], disp[1],
 						disp[2]); // TODO: rotation
-				vector<augmentedmark> labels;
+				std::vector<augmentedmark> labels;
 				handler3D->get_labels(&labels);
 				if (!labels.empty())
 					fprintf(fp, "V1\n");
@@ -379,3 +378,5 @@ void SaveOutlinesWidget::save_pushed()
 		return;
 	}
 }
+
+} // namespace iseg

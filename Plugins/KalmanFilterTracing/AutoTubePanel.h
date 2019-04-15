@@ -24,6 +24,7 @@
 #include <iostream>
 #include <vector>
 
+namespace iseg {
 typedef unsigned long LabelType;
 typedef itk::ShapeLabelObject<LabelType, 2> LabelObjectType;
 typedef itk::LabelMap<LabelObjectType> LabelMapType;
@@ -204,3 +205,5 @@ private slots:
 	void export_lines();
 	void predict_k_filter();
 };
+
+}

@@ -26,8 +26,7 @@
 #include <QFormLayout>
 
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 namespace {
 bool orthonormalize(float* vecA, float* vecB)
@@ -450,7 +449,7 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1,
 	{
 		for (int i = 0; i < sourceWidth; i++)
 		{
-			f = (int)max(0.0f, min(255.0f, (data)[pos]));
+			f = (int)std::max(0.0f, std::min(255.0f, (data)[pos]));
 			smallImage.setPixel(i, j, qRgb(f, f, f));
 			pos++;
 		}
@@ -681,3 +680,5 @@ void ImagePVLabel::paintEvent(QPaintEvent* e)
 				   (m_Height - 1 - m_YMax - m_YMin) / m_Scale);
 	painter.drawPath(square);
 }
+
+}// namespace iseg

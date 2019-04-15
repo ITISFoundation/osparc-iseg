@@ -23,7 +23,7 @@
 #include <QFileDialog>
 #include <QGroupBox>
 
-using namespace iseg;
+namespace iseg {
 
 MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -579,3 +579,5 @@ void MultiDatasetWidget::SetBmpData(const int multiDS_index,
 		m_RadioButtons.at(multiDS_index).m_BmpSlices = bmp_bits_vc;
 	}
 }
+
+}// namespace iseg

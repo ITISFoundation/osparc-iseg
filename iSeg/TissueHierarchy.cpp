@@ -18,7 +18,7 @@
 #include <QXmlInputSource>
 #include <QXmlStreamWriter>
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 
@@ -566,3 +566,5 @@ FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
 
 	return fp;
 }
+
+} // namespace iseg

@@ -32,7 +32,7 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace iseg;
+namespace iseg {
 
 XdmfImageWriter::XdmfImageWriter()
 {
@@ -472,3 +472,5 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 
 	return 1;
 }
+
+}// namespace iseg

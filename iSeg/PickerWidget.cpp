@@ -22,7 +22,7 @@
 
 #include <fstream>
 
-using namespace iseg;
+namespace iseg {
 
 PickerWidget::PickerWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -393,3 +393,5 @@ void PickerWidget::keyReleaseEvent(QKeyEvent* event)
 		shiftpressed = false;
 	}
 }
+
+}// namespace iseg

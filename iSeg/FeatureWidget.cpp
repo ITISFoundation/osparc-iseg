@@ -23,7 +23,7 @@
 #include <QGridLayout>
 #include <QSpacerItem>
 
-using namespace iseg;
+namespace iseg {
 
 FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -153,3 +153,5 @@ void FeatureWidget::newloaded()
 	activeslice = handler3D->active_slice();
 	bmphand = handler3D->get_activebmphandler();
 }
+
+}// namespace iseg

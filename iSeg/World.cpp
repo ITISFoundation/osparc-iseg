@@ -16,7 +16,7 @@
 #include <cmath>
 #include <math.h>
 
-using namespace iseg;
+namespace iseg {
 
 World::World()
 {
@@ -1910,3 +1910,5 @@ void World::getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
 		}
 	}
 }
+
+}// namespace iseg

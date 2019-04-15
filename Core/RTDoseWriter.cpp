@@ -18,7 +18,7 @@
 
 #include <sstream>
 
-using namespace iseg;
+namespace iseg {
 
 RTDoseWriter::RTDoseWriter()
 {
@@ -1035,3 +1035,5 @@ void RTDoseWriter::ByteEncodeVector(const T* offsets, unsigned int count,
 std::map<gdcm::VR::VRType, unsigned short> RTDoseWriter::_vrTypeMaxLength;
 std::map<std::string, RTDoseWriter::TagVRTypePair>
 	RTDoseWriter::_attributeTagVRType;
+	
+} // namespace iseg

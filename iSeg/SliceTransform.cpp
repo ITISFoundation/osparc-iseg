@@ -23,7 +23,7 @@
 #	define round(x) (x < 0 ? ceil((x)-0.5) : floor((x) + 0.5))
 #endif
 
-using namespace iseg;
+namespace iseg {
 
 SliceTransform::SliceTransform(SlicesHandler* hand3D)
 		: originalSource(nullptr), originalTarget(nullptr), originalTissues(nullptr)
@@ -601,3 +601,5 @@ void SliceTransform::ApplyTransformAll()
 		}
 	}
 }
+
+}// namespace iseg

@@ -14,7 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-using namespace iseg;
+namespace iseg {
 
 SmoothSteps::SmoothSteps()
 {
@@ -189,3 +189,5 @@ void SmoothSteps::generate_binommask()
 	}
 	mask[masklength / 2] += 0.1;
 }
+
+} // namespace iseg

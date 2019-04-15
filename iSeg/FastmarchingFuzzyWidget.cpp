@@ -24,7 +24,7 @@
 #include <qslider.h>
 #include <qspinbox.h>
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 QWidget* add_to_widget(QLayout* layout)
@@ -705,3 +705,5 @@ void FastmarchingFuzzyWidget::hideparams_changed()
 	method_changed();
 	interact_changed();
 }
+
+} // namespace iseg

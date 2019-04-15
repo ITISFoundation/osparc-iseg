@@ -12,8 +12,7 @@
 #include "bmp_read_1.h"
 #include "Levelset.h"
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 Levelset::Levelset()
 {
@@ -385,8 +384,8 @@ void Levelset::return_levelset(float* output)
 	return;
 }
 
-void Levelset::return_zerolevelset(vector<vector<Point>>* v1,
-								   vector<vector<Point>>* v2, int minsize)
+void Levelset::return_zerolevelset(std::vector<std::vector<Point>>* v1,
+		std::vector<std::vector<Point>>* v2, int minsize)
 {
 	image->swap_bmpwork();
 
@@ -430,3 +429,5 @@ Levelset::~Levelset()
 
 	return;
 }
+
+} // namespace iseg

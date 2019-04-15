@@ -28,7 +28,7 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace iseg;
+namespace iseg {
 
 XdmfImageMerger::XdmfImageMerger()
 {
@@ -641,3 +641,5 @@ int XdmfImageMerger::ReadTissues(
 
 	return 1;
 }
+
+} // namespace iseg

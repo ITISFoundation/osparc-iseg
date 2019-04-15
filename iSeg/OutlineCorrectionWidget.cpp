@@ -22,6 +22,8 @@
 
 #include "Core/SmoothTissues.h"
 
+#include "Interface/ProgressDialog.h"
+
 #include <QDialog>
 #include <QFormLayout>
 #include <QGroupBox>
@@ -983,6 +985,7 @@ void OutlineCorrectionWidget::smooth_tissues_pushed()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this);
 
+	ProgressDialog progress("Smooth tissues", this);
 	int const split_limit = smooth_tissues_params->_split_limit->text().toInt();
 	if (end_slice > start_slice + split_limit &&
 			smooth_tissues_params->_3D->isChecked())
@@ -991,14 +994,14 @@ void OutlineCorrectionWidget::smooth_tissues_pushed()
 		{
 			SmoothTissues(handler3D, i, std::min(i + split_limit, end_slice),
 					smooth_tissues_params->_sigma->text().toDouble(),
-					smooth_tissues_params->_3D->isChecked());
+					smooth_tissues_params->_3D->isChecked(), &progress);
 		}
 	}
 	else
 	{
 		SmoothTissues(handler3D, start_slice, end_slice,
 				smooth_tissues_params->_sigma->text().toDouble(),
-				smooth_tissues_params->_3D->isChecked());
+				smooth_tissues_params->_3D->isChecked(), &progress);
 	}
 
 	emit end_datachange(this);

@@ -13,7 +13,7 @@
 
 #include <QString>
 
-using namespace iseg;
+namespace iseg {
 
 Project::Project()
 {
@@ -23,3 +23,5 @@ Project::Project()
 	m_loadprojfilename4 = QString("");
 	m_filename = QString("");
 }
+
+}// namespace iseg

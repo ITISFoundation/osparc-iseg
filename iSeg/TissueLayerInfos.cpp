@@ -11,7 +11,7 @@
 
 #include "TissueLayerInfos.h"
 
-using namespace iseg;
+namespace iseg {
 
 tissuelayers_size_t TissueLayerInfos::GetTissueLayerCount()
 {
@@ -121,3 +121,5 @@ void TissueLayerInfos::CreateTissueLayerIndexMap()
 
 TissueLayerInfosVecType TissueLayerInfos::tissueLayerInfosVector;
 TissueLayerIndexMapType TissueLayerInfos::tissueLayerIndexMap;
+
+}// namespace iseg

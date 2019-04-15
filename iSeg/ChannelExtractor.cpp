@@ -14,8 +14,7 @@
 #include <QColor>
 #include <QImage>
 
-using namespace iseg;
-using namespace iseg::ChannelExtractor;
+namespace iseg {
 
 bool ChannelExtractor::getSlice(const char* filename, float* slice, int channel,
 								unsigned slicenr, unsigned width,
@@ -58,3 +57,5 @@ bool ChannelExtractor::getSlice(const char* filename, float* slice, int channel,
 
 	return true;
 }
+
+} // namespace iseg

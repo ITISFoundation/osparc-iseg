@@ -37,7 +37,7 @@
 #include <vtkVolumeProperty.h>
 #include <vtkXMLImageDataReader.h>
 
-using namespace iseg;
+namespace iseg {
 
 VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1,
 		bool gpu_or_raycast, bool shade1,
@@ -872,3 +872,5 @@ void iseg::VolumeViewerWidget::vtkMySliceCallbackZ::Execute(vtkObject* caller, u
 	planeWidget->GetPlane(slicePlaneZ1);
 	sliceCutterZ1->SetCutFunction(slicePlaneZ1);
 }
+
+} // namespace iseg

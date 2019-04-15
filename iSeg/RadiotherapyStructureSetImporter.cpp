@@ -20,7 +20,7 @@
 #include <qstring.h>
 #include <qstringlist.h>
 
-using namespace iseg;
+namespace iseg {
 
 RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadfilename, SlicesHandler* hand3D,
 		QWidget* parent, const char* name,
@@ -363,3 +363,5 @@ void RadiotherapyStructureSetImporter::storeparams()
 		vecpriorities[pos] = dummy;
 	}
 }
+
+}// namespace iseg

@@ -34,8 +34,7 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 namespace {
 int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
@@ -94,13 +93,13 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 	{
 		// allocate
 		size_t const N = NumberOfSlices * Width * Height;
-		vector<float> bufferFloat;
+		std::vector<float> bufferFloat;
 		try
 		{
 			ISEG_DEBUG("N = " << N << ", bufferFloat.max_size() = " << bufferFloat.max_size());
 			bufferFloat.resize(N);
 		}
-		catch (length_error& le)
+		catch (std::length_error& le)
 		{
 			std::cerr << "bufferFloat length error: " << le.what();
 			return 0;
@@ -163,8 +162,8 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 		if (reader.exists(tissue_dname))
 		{
 			ScopedTimer timer("Read Tissue");
-			string type;
-			vector<HDF5Reader::size_type> dims;
+			std::string type;
+			std::vector<HDF5Reader::size_type> dims;
 			if (!reader.getDatasetInfo(type, dims, tissue_dname))
 			{
 				ISEG_ERROR_MSG("reading Tissue data type...");
@@ -173,7 +172,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 
 			if (type.compare("unsigned char") == 0)
 			{
-				vector<unsigned char> bufferUChar;
+				std::vector<unsigned char> bufferUChar;
 				try
 				{
 					// vector throws a length_error if resized above max_size
@@ -181,7 +180,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					ISEG_DEBUG("N = " << N << ", bufferUChar.max_size() = " << bufferUChar.max_size());
 					bufferUChar.resize(N);
 				}
-				catch (length_error& le)
+				catch (std::length_error& le)
 				{
 					ISEG_ERROR("bufferUChar length error: " << le.what());
 					return 0;
@@ -209,7 +208,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			}
 			else if (type.compare("unsigned short") == 0)
 			{
-				vector<unsigned short> bufferUShort;
+				std::vector<unsigned short> bufferUShort;
 				try
 				{
 					// vector throws a length_error if resized above max_size
@@ -217,7 +216,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					ISEG_DEBUG("N = " << N << ", bufferUShort.max_size() = " << bufferUShort.max_size());
 					bufferUShort.resize(N);
 				}
-				catch (length_error& le)
+				catch (std::length_error& le)
 				{
 					ISEG_ERROR("bufferUShort length error: " << le.what());
 					return 0;
@@ -245,7 +244,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 			}
 			else if (type.compare("unsigned int") == 0)
 			{
-				vector<unsigned int> bufferUInt;
+				std::vector<unsigned int> bufferUInt;
 				try
 				{
 					// vector throws a length_error if resized above max_size
@@ -253,7 +252,7 @@ int _Read(HDF5Reader& reader, size_t NumberOfSlices, size_t Width,
 					ISEG_DEBUG("N = " << N << ", bufferUInt.max_size() = " << bufferUInt.max_size());
 					bufferUInt.resize(N);
 				}
-				catch (length_error& le)
+				catch (std::length_error& le)
 				{
 					ISEG_ERROR("bufferUInt length error: " << le.what());
 					return 0;
@@ -555,7 +554,7 @@ int HDFImageReader::ParseHDF()
 	}
 
 	bool ok = true;
-	vector<int> dimensions;
+	std::vector<int> dimensions;
 	dimensions.resize(3);
 	ok = ok && (reader.read(dimensions, "/dimensions") != 0) &&
 			 (dimensions.size() == 3);
@@ -563,18 +562,18 @@ int HDFImageReader::ParseHDF()
 	this->Height = dimensions[1];
 	this->NumberOfSlices = dimensions[2];
 
-	vector<float> pixelsize(3);
+	std::vector<float> pixelsize(3);
 	ok = ok && (reader.read(pixelsize, "/pixelsize") != 0) &&
 			 (pixelsize.size() == 3);
 	for (unsigned short i = 0; i < 3; i++)
 		PixelSize[i] = pixelsize[i];
 
-	vector<float> offset(3);
+	std::vector<float> offset(3);
 	ok = ok && (reader.read(offset, "/offset") != 0) && (offset.size() == 3);
 
 	if (reader.exists("/rotation"))
 	{
-		vector<float> rotation(9);
+		std::vector<float> rotation(9);
 		ok = ok && (reader.read(rotation, "/rotation") != 0) &&
 				 (rotation.size() == 9);
 
@@ -590,7 +589,7 @@ int HDFImageReader::ParseHDF()
 	}
 	else
 	{
-		vector<float> dc(6);
+		std::vector<float> dc(6);
 		ok = ok && (reader.read(dc, "/dc") != 0) && (dc.size() == 6);
 
 		ImageTransform.setTransform(offset.data(), dc.data());
@@ -622,8 +621,7 @@ int HDFImageReader::ParseHDF()
 
 int HDFImageReader::Read()
 {
-	const size_t N = (size_t)this->Width * (size_t)this->Height *
-									 (size_t)this->NumberOfSlices;
+	const size_t N = (size_t)this->Width * (size_t)this->Height * (size_t)this->NumberOfSlices;
 	ISEG_INFO("Reading " << this->FileName << ": " << Width << " x " << Height << " x " << NumberOfSlices);
 
 	//	vector<int> dims;
@@ -647,7 +645,7 @@ int HDFImageReader::Read()
 		return 0;
 	}
 
-	int r = _Read(reader, NumberOfSlices, Width, Height, ReadContiguousMemory,
+	_Read(reader, NumberOfSlices, Width, Height, ReadContiguousMemory,
 			this->mapArrayNames["Source"].toAscii().data(), ImageSlices,
 			this->mapArrayNames["Target"].toAscii().data(), WorkSlices,
 			this->mapArrayNames["Tissue"].toAscii().data(), TissueSlices);
@@ -778,3 +776,5 @@ std::shared_ptr<ColorLookupTable> HDFImageReader::ReadColorLookup() const
 
 	return color_lookup_table;
 }
+
+}// namespace iseg

@@ -16,7 +16,7 @@
 
 #include <string>
 
-using namespace iseg;
+namespace iseg {
 
 RTDoseIODModule::RTDoseIODModule()
 {
@@ -92,3 +92,5 @@ double RTDoseIODModule::GetDoseGridScaling()
 		return maxVal / UINT32_MAX;
 	}
 }
+
+} // namespace iseg
