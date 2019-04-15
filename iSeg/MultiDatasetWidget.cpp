@@ -253,7 +253,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 		{
 			bool res = true;
 			auto loadfilename = QFileDialog::getOpenFileName(this, tr("Open File"),
-					QString::null, tr("Images (*.vti *.vtk *.nii *.hdr *.img *.nia)"));
+					QString::null, tr("Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)"));
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();
@@ -432,7 +432,7 @@ void MultiDatasetWidget::SwitchDataset()
 				iseg::DataSelection dataSelection;
 				dataSelection.allSlices = true;
 				dataSelection.bmp = true;
-				dataSelection.work = true;
+				dataSelection.work = false;
 				dataSelection.tissues = false;
 				emit begin_datachange(dataSelection, this, false);
 
@@ -480,7 +480,7 @@ void MultiDatasetWidget::ChangeDatasetName()
 				radioButton.m_RadioButtonText = returning_text;
 				radioButton.m_RadioButton->setText(returning_text);
 			}
-			return;
+			break;
 		}
 	}
 }
@@ -580,4 +580,4 @@ void MultiDatasetWidget::SetBmpData(const int multiDS_index,
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

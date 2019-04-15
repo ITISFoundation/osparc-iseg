@@ -19,7 +19,12 @@ IF(PLUGIN_KALMAN_TRACER)
 	INCLUDE_DIRECTORIES(../TracingTubularStructures)
   
 	QT4_WRAP_CPP(MOCSrcs 
-		AutoTubePanel.h)
+		AutoTubePanel.h
+	)
+	
+	IF(MSVC)
+		SET_SOURCE_FILES_PROPERTIES(AutoTubePanel.cpp PROPERTIES COMPILE_FLAGS /bigobj)
+	ENDIF()
 	
 	FILE(GLOB PLUGIN_HEADERS *.h)
 
