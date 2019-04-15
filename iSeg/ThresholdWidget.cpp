@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <fstream>
 
-using namespace iseg;
+namespace iseg {
 
 ThresholdWidget::ThresholdWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -1094,3 +1094,5 @@ void ThresholdWidget::useCenterFile_changed(int change)
 		pushcenterFilename->setVisible(false);
 	}
 }
+
+} // namespace iseg

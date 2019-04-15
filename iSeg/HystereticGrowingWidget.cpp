@@ -35,8 +35,7 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -419,13 +418,11 @@ void HystereticGrowingWidget::newloaded()
 	bmphand = handler3D->get_activebmphandler();
 	getrange();
 
-	vector<vector<Point>>* vvp = bmphand->return_limits();
+	std::vector<std::vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
-	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
-			 it++)
+	for (auto it = vvp->begin(); it != vvp->end(); it++)
 	{
 		vp1.insert(vp1.end(), it->begin(), it->end());
-		;
 	}
 }
 
@@ -434,13 +431,11 @@ void HystereticGrowingWidget::init1()
 	limitdrawing = false;
 	drawlimit->setDown(false);
 
-	vector<vector<Point>>* vvp = bmphand->return_limits();
+	std::vector<std::vector<Point>>* vvp = bmphand->return_limits();
 	vp1.clear();
-	for (vector<vector<Point>>::iterator it = vvp->begin(); it != vvp->end();
-			 it++)
+	for (auto it = vvp->begin(); it != vvp->end(); it++)
 	{
 		vp1.insert(vp1.end(), it->begin(), it->end());
-		;
 	}
 
 	emit vp1_changed(&vp1);
@@ -840,3 +835,5 @@ void HystereticGrowingWidget::hideparams_changed()
 		pb_loadborders->show();
 	}
 }
+
+} // namespace iseg

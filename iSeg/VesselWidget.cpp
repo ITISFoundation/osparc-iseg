@@ -23,8 +23,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -343,17 +342,15 @@ void VesselWidget::savevessel()
 		std::vector<std::vector<Vec3>> vp;
 		Pair pair1 = handler3D->get_pixelsize();
 		float thick = handler3D->get_slicethickness();
-		float epsilon = max(max(pair1.high, pair1.low), thick);
-		branchTree.getItem()->doug_peuck_inclchildren(epsilon, pair1.high,
-				pair1.low, thick, vp);
+		float epsilon = std::max(std::max(pair1.high, pair1.low), thick);
+		branchTree.getItem()->doug_peuck_inclchildren(epsilon, pair1.high, pair1.low, thick, vp);
 		FILE* fp = fopen(savefilename.ascii(), "w");
 		int version = 2;
 		unsigned short w = handler3D->width();
 		unsigned short h = handler3D->height();
 		fprintf(fp, "V%i\n", version);
 		fprintf(fp, "NS%i\n", (int)handler3D->num_slices());
-		fprintf(fp, "VoxelSize: %f %f %f\n", pair1.high / 2, pair1.low / 2,
-				thick);
+		fprintf(fp, "VoxelSize: %f %f %f\n", pair1.high / 2, pair1.low / 2, thick);
 		fprintf(fp, "N%i\n", (int)vp.size());
 		for (size_t i = 0; i < vp.size(); i++)
 		{
@@ -380,3 +377,5 @@ QIcon iseg::VesselWidget::GetIcon(QDir picdir)
 {
 	return QIcon(picdir.absFilePath(QString("vessel.png")));
 }
+
+} // namespace iseg

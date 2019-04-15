@@ -26,8 +26,7 @@
 #include <qspinbox.h>
 #include <qwidget.h>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 TransformWidget::TransformWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -257,17 +256,15 @@ void TransformWidget::LineEdit1Edited()
 		// Translate: Linear scale: y = x, x in [-width, width]
 		// Rotate: Linear scale: y = x, x in [-180, 180]
 		// Shear: Linear scale: y = x, x in [-45, 45]
-		updateParameter1 = max((double)slider1->minimum(),
-				min(value, (double)slider1->maximum()));
+		updateParameter1 = std::max((double)slider1->minimum(), std::min(value, (double)slider1->maximum()));
 		slider1->setValue(std::floor(updateParameter1 + 0.5));
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
 	}
 	else if (scaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter1 = max(0.1, min(value, 10.0));
-		slider1->setValue(
-				std::floor((std::log10(updateParameter1) + 1) * 50.0 + 0.5));
+		updateParameter1 = std::max(0.1, std::min(value, 10.0));
+		slider1->setValue(std::floor((std::log10(updateParameter1) + 1) * 50.0 + 0.5));
 		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
 	}
 
@@ -287,17 +284,15 @@ void TransformWidget::LineEdit2Edited()
 	if (translateRadioButton->isChecked())
 	{
 		// Translate: Linear scale: y = x, x in [-height, height]
-		updateParameter2 = max((double)slider2->minimum(),
-				min(value, (double)slider2->maximum()));
+		updateParameter2 = std::max((double)slider2->minimum(), std::min(value, (double)slider2->maximum()));
 		slider2->setValue(std::floor(updateParameter2 + 0.5));
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
 	}
 	else if (scaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter2 = max(0.1, min(value, 10.0));
-		slider2->setValue(
-				std::floor((std::log10(updateParameter2) + 1) * 50.0 + 0.5));
+		updateParameter2 = std::max(0.1, std::min(value, 10.0));
+		slider2->setValue(std::floor((std::log10(updateParameter2) + 1) * 50.0 + 0.5));
 		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
 	}
 
@@ -715,3 +710,5 @@ void TransformWidget::CancelPushButtonClicked()
 	// Signal data change
 	emit end_datachange(this, iseg::NoUndo);
 }
+
+} // namespace iseg

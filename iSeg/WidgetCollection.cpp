@@ -35,8 +35,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -323,7 +322,7 @@ void HistoWin::update()
 	//unsigned int maxim1=0;
 	for (int i = 0; i < 256; i++)
 	{
-		maxim = max(maxim, histo[i]);
+		maxim = std::max(maxim, histo[i]);
 	}
 
 	image.fill(0);
@@ -337,15 +336,11 @@ void HistoWin::update()
 	}
 
 	repaint();
-
-	return;
 }
 
 void HistoWin::histo_changed(unsigned int* histo1)
 {
 	histo = histo1;
-
-	return;
 }
 
 void HistoWin::paintEvent(QPaintEvent* e)
@@ -476,10 +471,8 @@ void ShowHisto::draw_histo()
 			p.py = yoffset->value();
 			bmphand->make_histogram(
 					p,
-					min((int)bmphand->return_width() - xoffset->value(),
-							xlength->value()),
-					min((int)bmphand->return_height() - yoffset->value(),
-							ylength->value()),
+					std::min((int)bmphand->return_width() - xoffset->value(), xlength->value()),
+					std::min((int)bmphand->return_height() - yoffset->value(), ylength->value()),
 					true);
 		}
 		else
@@ -497,10 +490,8 @@ void ShowHisto::draw_histo()
 			p.py = yoffset->value();
 			bmphand->make_histogram(
 					p,
-					min((int)bmphand->return_width() - xoffset->value(),
-							xlength->value()),
-					min((int)bmphand->return_height() - yoffset->value(),
-							ylength->value()),
+					std::min((int)bmphand->return_width() - xoffset->value(), xlength->value()),
+					std::min((int)bmphand->return_height() - yoffset->value(), ylength->value()),
 					true);
 		}
 		else
@@ -515,10 +506,8 @@ void ShowHisto::draw_histo()
 
 void ShowHisto::slicenr_changed()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	activeslice = handler3D->active_slice();
 	bmphand_changed(handler3D->get_activebmphandler());
-	//	}
 }
 
 void ShowHisto::bmphand_changed(bmphandler* bmph)
@@ -3137,3 +3126,5 @@ void CheckBoneConnectivityDialog::export_pressed()
 
 	ShowText("Export finished to BoneConnections.txt");
 }
+
+} // namespace iseg

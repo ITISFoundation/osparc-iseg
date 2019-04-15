@@ -26,10 +26,10 @@
 #include <algorithm>
 #include <sstream>
 
-using namespace iseg;
+namespace iseg {
 
 TissueSeparatorWidget::TissueSeparatorWidget(
-		iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
+		SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
 		Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), slice_handler(hand3D)
 {
@@ -318,3 +318,5 @@ typename itk::Image<unsigned char, Dim>::Pointer
 	}
 	return nullptr;
 }
+
+} // namespace iseg

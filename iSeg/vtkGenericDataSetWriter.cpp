@@ -47,8 +47,6 @@
 #include <map>
 #include <string>
 
-using namespace std;
-
 vtkStandardNewMacro(vtkGenericDataSetWriter);
 
 vtkGenericDataSetWriter::vtkGenericDataSetWriter()
@@ -90,7 +88,7 @@ int vtkGenericDataSetWriter::RequestData(
 	vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
 	vtkDataObject *input = inInfo->Get(vtkDataObject::DATA_OBJECT());
 
-	string ibase, iext, iname = this->FileName;
+	std::string ibase, iext, iname = this->FileName;
 	decomposeFileName(ibase, iext, iname);
 
 	if (iext == "stl") {

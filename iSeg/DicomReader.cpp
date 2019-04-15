@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-using namespace iseg;
+namespace iseg {
 
 bool DicomReader::opendicom(const char* filename)
 {
@@ -1037,3 +1037,5 @@ int DicomReader::bin2int()
 
 	return i;
 }
+
+} // namespace iseg

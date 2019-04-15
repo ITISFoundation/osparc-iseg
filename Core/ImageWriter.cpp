@@ -27,7 +27,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-using namespace iseg;
+namespace iseg {
 
 template<typename T>
 bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, bool active_slices, const SlicesHandlerInterface* handler)
@@ -96,3 +96,5 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 	}
 	return false;
 }
+
+}// namespace iseg

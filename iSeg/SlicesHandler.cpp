@@ -82,7 +82,7 @@
 #	include <omp.h>
 #endif
 
-using namespace iseg;
+namespace iseg {
 
 namespace // PROJECT VERSION NUMBERS
 {
@@ -11438,3 +11438,5 @@ bool SlicesHandler::compute_split_tissues(tissues_size_t tissue, ProgressInfo* p
 	}
 	return false;
 }
+
+}// namespace iseg

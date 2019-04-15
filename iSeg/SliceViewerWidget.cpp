@@ -29,8 +29,7 @@
 
 #include <algorithm>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 bmptissuesliceshower::bmptissuesliceshower(
 		SlicesHandler* hand3D, unsigned short slicenr1, float thickness1,
@@ -199,7 +198,7 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
+				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				if (tissue[pos] == 0)
 				{
 					image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
@@ -228,7 +227,7 @@ void bmptissuesliceshower::reload_bits()
 		{
 			for (int x = 0; x < width; x++)
 			{
-				f = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
+				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
 				image.setPixel(x, y, qRgb(f, f, f));
 				pos++;
 			}
@@ -614,3 +613,5 @@ void SliceViewerWidget::set_scalefactor(float factor1, bool bmporwork1)
 {
 	shower->set_scalefactor(factor1, bmporwork1);
 }
+
+}// namespace iseg

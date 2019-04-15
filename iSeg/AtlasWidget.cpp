@@ -31,7 +31,7 @@
 #include <qpen.h>
 #include <qwidget.h>
 
-using namespace iseg;
+namespace iseg {
 
 AtlasWidget::AtlasWidget(const char *filename, QDir picpath, QWidget *parent,
 		const char *name, Qt::WindowFlags wFlags)
@@ -326,3 +326,5 @@ void AtlasWidget::sl_brightcontr_moved()
 			0.01f * (127.5f - minval * factor) * sl_brightness->value();
 	atlasViewer->set_scale(offset, factor);
 }
+
+} // namespace iseg

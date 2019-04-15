@@ -50,7 +50,7 @@ VTK_MODULE_INIT(vtkRenderingVolumeOpenGL);
 #endif
 VTK_MODULE_INIT(vtkInteractionStyle);
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 
@@ -570,3 +570,5 @@ int SurfaceViewerWidget::get_picked_tissue() const
 	}
 	return -1;
 }
+
+}// namespace iseg

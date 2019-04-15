@@ -24,7 +24,7 @@
 
 #include <algorithm>
 
-using namespace iseg;
+namespace iseg {
 
 MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -329,3 +329,5 @@ void iseg::MorphologyWidget::all_slices_changed()
 	node_connectivity->setEnabled(!all_slices->isChecked());
 	true_3d->setEnabled(all_slices->isChecked());
 }
+
+} // namespace iseg

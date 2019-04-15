@@ -17,7 +17,7 @@
 #include <qpushbutton.h>
 #include <qwidget.h>
 
-using namespace iseg;
+namespace iseg {
 
 UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name,
 												 Qt::WindowFlags wFlags)
@@ -60,3 +60,5 @@ void UndoConfigurationDialog::ok_pressed()
 
 	close();
 }
+
+}// namespace iseg

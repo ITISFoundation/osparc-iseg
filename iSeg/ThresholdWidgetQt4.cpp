@@ -17,7 +17,7 @@
 #include <QFileDialog>
 #include <QSignalMapper>
 
-using namespace iseg;
+namespace iseg {
 
 ThresholdWidgetQt4::ThresholdWidgetQt4(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
@@ -735,3 +735,5 @@ void ThresholdWidgetQt4::RGBA_changed()
 	if (buttonsChecked > 0)
 		ui.mKMeansImageNrSpinBox->setValue(2);
 }
+
+}// namespace iseg

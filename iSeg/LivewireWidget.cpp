@@ -23,7 +23,7 @@
 #include <QTime>
 #include <QFormLayout>
 
-using namespace iseg;
+namespace iseg {
 
 LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -668,6 +668,6 @@ FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 void LivewireWidget::hideparams_changed()
 {
 	mode_changed();
-	//if (hideparams && !cb_freezing->isChecked())
-	//	hbox2->hide();
 }
+
+}// namespace iseg

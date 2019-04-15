@@ -42,8 +42,7 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), tissuevisible(true), picturevisible(true),
@@ -407,13 +406,13 @@ void ImageViewerWidget::reload_bits()
 				}
 				else
 				{
-					r = g = b = (int)max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
+					r = g = b = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
 				}
 
 				// overlay only visible if picture is visible
 				if (overlayvisible)
 				{
-					f = max(0.0f, min(255.0f, scaleoffset + scalefactor * (overlaybits)[pos]));
+					f = std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (overlaybits)[pos]));
 
 					r = (1.0f - overlayalpha) * r + overlayalpha * f;
 					g = (1.0f - overlayalpha) * g + overlayalpha * f;
@@ -723,8 +722,8 @@ double ImageViewerWidget::return_zoom() { return zoom; }
 
 void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-	eventx = (int)max(min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
-	eventy = (int)max(min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
+	eventx = (int)std::max(std::min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
+	eventy = (int)std::max(std::min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
 
 	QMenu contextMenu(this);
 	// tissue selection
@@ -812,11 +811,8 @@ void ImageViewerWidget::mousePressEvent(QMouseEvent* e)
 	Point p;
 	//	p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 	//	p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
-	p.px = (unsigned short)max(
-			min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(
-			min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-			0.0);
+	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
@@ -833,8 +829,8 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 	if (e->button() == Qt::LeftButton)
 	{
 		Point p;
-		p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-		p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+		p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 		emit mousereleased_sign(p);
 	}
@@ -843,8 +839,8 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
@@ -859,8 +855,8 @@ void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 void ImageViewerWidget::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)max(min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	emit mousemoved_sign(p);
 }
@@ -1096,29 +1092,29 @@ bool ImageViewerWidget::toggle_workbordervisible()
 
 bool ImageViewerWidget::return_workbordervisible() { return workborder; }
 
-void ImageViewerWidget::set_vp1(vector<Point>* vp1_arg)
+void ImageViewerWidget::set_vp1(std::vector<Point>* vp1_arg)
 {
 	vp1.clear();
 	vp1.insert(vp1.begin(), vp1_arg->begin(), vp1_arg->end());
 	vp_changed();
 }
 
-void ImageViewerWidget::set_vm(vector<Mark>* vm_arg)
+void ImageViewerWidget::set_vm(std::vector<Mark>* vm_arg)
 {
 	vm.clear();
 	vm.insert(vm.begin(), vm_arg->begin(), vm_arg->end());
 	vp_changed();
 }
 
-void ImageViewerWidget::set_vpdyn(vector<Point>* vpdyn_arg)
+void ImageViewerWidget::set_vpdyn(std::vector<Point>* vpdyn_arg)
 {
 	vpdyn.clear();
 	vpdyn.insert(vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
 	vpdyn_changed();
 }
 
-void ImageViewerWidget::set_vp1_dyn(vector<Point>* vp1_arg,
-		vector<Point>* vpdyn_arg,
+void ImageViewerWidget::set_vp1_dyn(std::vector<Point>* vp1_arg,
+		std::vector<Point>* vpdyn_arg,
 		const bool also_points /*= false*/)
 {
 	vp1.clear();
@@ -1189,3 +1185,5 @@ void ImageViewerWidget::set_crosshairyvisible(bool on)
 		repaint();
 	}
 }
+
+}// namespace iseg

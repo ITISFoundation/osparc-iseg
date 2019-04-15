@@ -17,7 +17,7 @@
 
 #include <QFormLayout>
 
-using namespace iseg;
+namespace iseg {
 
 ImageForestingTransformRegionGrowingWidget::ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -432,3 +432,5 @@ void ImageForestingTransformRegionGrowingWidget::hideparams_changed()
 		sl_thresh->show();
 	}
 }
+
+}// namespace iseg

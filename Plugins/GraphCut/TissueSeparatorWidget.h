@@ -21,11 +21,13 @@
 
 #include <map>
 
-class TissueSeparatorWidget : public iseg::WidgetInterface
+namespace iseg {
+
+class TissueSeparatorWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	TissueSeparatorWidget(iseg::SlicesHandlerInterface* hand3D,
+	TissueSeparatorWidget(SlicesHandlerInterface* hand3D,
 			QWidget* parent = 0, const char* name = 0,
 			Qt::WindowFlags wFlags = 0);
 	~TissueSeparatorWidget() {}
@@ -68,3 +70,5 @@ private:
 	QPushButton* clear_lines;
 	QPushButton* execute_button;
 };
+
+}

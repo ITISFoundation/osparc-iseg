@@ -27,7 +27,7 @@
 
 #pragma warning(disable : 4018) // BL quiet compiler
 
-using namespace iseg;
+namespace iseg {
 
 bool VTIreader::getSlice(const char* filename, float* slice, unsigned slicenr,
 						 unsigned width, unsigned height)
@@ -694,3 +694,5 @@ bool VTIwriter::writeVolumeAll(const char* filename, float** slicesbmp,
 
 	return true;
 }
+
+}// namespace iseg

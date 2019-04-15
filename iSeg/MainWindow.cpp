@@ -79,7 +79,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 int openS4LLinkPos = -1;
@@ -7726,3 +7726,5 @@ void MainWindow::execute_split_tissue()
 		QMessageBox::warning(this, "iSeg", "Please select only one non-locked tissue\n", QMessageBox::Ok | QMessageBox::Default);
 	}
 }
+
+}// namespace iseg

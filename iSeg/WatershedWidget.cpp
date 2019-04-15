@@ -16,7 +16,7 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 
-using namespace iseg;
+namespace iseg {
 
 WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -225,3 +225,5 @@ FILE* WatershedWidget::LoadParams(FILE* fp, int version)
 	}
 	return fp;
 }
+
+}// namespace iseg

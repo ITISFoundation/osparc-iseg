@@ -52,9 +52,10 @@
 #include <algorithm>
 #include <fstream>
 
-using namespace iseg;
 using boost::adaptors::transformed;
 using boost::algorithm::join;
+
+namespace iseg {
 
 template<typename TInputImage, typename TOutputImage, unsigned int Dimension>
 class BinaryThinningImageFilter : public itk::BinaryThinningImageFilter<TInputImage, TOutputImage>
@@ -2740,3 +2741,5 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 	visualize_label_map(label_maps[_handler3D->active_slice()]);
 	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
 }
+
+} // namespace iseg

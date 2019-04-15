@@ -35,7 +35,7 @@
 #include <itkPathIterator.h>
 #include <itkImage.h>
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 
@@ -451,3 +451,5 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface,
 	}
 	return result;
 }
+
+} // namespace iseg

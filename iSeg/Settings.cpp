@@ -20,7 +20,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace iseg;
+namespace iseg {
 
 Settings::Settings(QWidget* parent)
 	: QDialog(parent), mainWindow((MainWindow*)parent), ui(new Ui::Settings)
@@ -54,3 +54,5 @@ void Settings::reject()
 {
 	this->hide();
 }
+
+}// namespace iseg

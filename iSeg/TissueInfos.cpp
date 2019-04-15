@@ -30,7 +30,7 @@
 #include <fstream>
 #include <iostream>
 
-using namespace iseg;
+namespace iseg {
 
 namespace {
 std::string str_tolower(std::string s)
@@ -1079,3 +1079,5 @@ void TissueInfos::SetSelectedTissues(const std::set<tissues_size_t>& sel)
 
 TissueInfos::TissueInfosVecType TissueInfos::tissueInfosVector;
 TissueInfos::TissueTypeMapType TissueInfos::tissueTypeMap;
+
+}// namespace iseg

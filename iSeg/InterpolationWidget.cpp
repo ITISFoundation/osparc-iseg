@@ -28,7 +28,7 @@
 
 #include <algorithm>
 
-using namespace iseg;
+namespace iseg {
 
 InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -617,3 +617,5 @@ FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 	}
 	return fp;
 }
+
+}// namespace iseg

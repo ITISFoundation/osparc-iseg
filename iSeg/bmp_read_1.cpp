@@ -49,8 +49,7 @@
 #include <stack>
 #include <vector>
 
-//using namespace std;
-using namespace iseg;
+namespace iseg {
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -15990,3 +15989,5 @@ bool bmphandler::unwrap(float jumpratio, float range, float shift)
 	}
 	return true;
 }
+
+} // namespace iseg

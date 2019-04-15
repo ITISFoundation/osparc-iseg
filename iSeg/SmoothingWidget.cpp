@@ -30,7 +30,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace iseg;
+namespace iseg {
 
 SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -572,3 +572,5 @@ FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 }
 
 void SmoothingWidget::hideparams_changed() { method_changed(0); }
+
+} // namespace iseg

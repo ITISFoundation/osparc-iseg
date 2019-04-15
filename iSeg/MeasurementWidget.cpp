@@ -30,7 +30,7 @@
 #include <fstream>
 #include <initializer_list>
 
-using namespace iseg;
+namespace iseg {
 
 MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -873,3 +873,5 @@ void MeasurementWidget::cleanup()
 	drawing = false;
 	emit vp1dyn_changed(&established, &dynamic);
 }
+
+} // namespace iseg

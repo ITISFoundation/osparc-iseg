@@ -28,8 +28,7 @@
 
 #include <algorithm>
 
-using namespace std;
-using namespace iseg;
+namespace iseg {
 
 AtlasViewer::AtlasViewer(float* bmpbits1, tissues_size_t* tissue1,
 						 unsigned char orient1, unsigned short dimx1,
@@ -265,9 +264,7 @@ void AtlasViewer::reload_bits()
 	{
 		for (int x = 0; x < width; x++)
 		{
-			f = (int)max(0.0f,
-						 min(255.0f, scaleoffset +
-										 scalefactor * (current_bmpbits)[pos]));
+			f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (current_bmpbits)[pos]));
 			if (current_tissue[pos] == 0)
 				image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
 			else
@@ -340,11 +337,8 @@ void AtlasViewer::set_scalefactor(float factor1)
 void AtlasViewer::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)max(
-		min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)max(
-		min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))),
-		0.0);
+	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
 
 	unsigned pos = p.px + p.py * width;
 	emit mousemoved_sign(current_tissue[pos]);
@@ -379,3 +373,5 @@ void AtlasViewer::set_tissueopac(float tissueopac1)
 	tissueopac = tissueopac1;
 	update();
 }
+
+} // namespace iseg

@@ -14,7 +14,7 @@
 
 #include <cstdlib>
 
-using namespace iseg;
+namespace iseg {
 
 int TissueCleaner::base_connection(int c)
 {
@@ -313,3 +313,5 @@ void TissueCleaner::Clean(float ratio, unsigned minsize)
 		}
 	}
 }
+
+}// namespace iseg

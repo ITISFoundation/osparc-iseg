@@ -39,7 +39,7 @@
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 
-using namespace iseg;
+namespace iseg {
 
 EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -507,3 +507,5 @@ FILE* EdgeWidget::LoadParams(FILE* fp, int version)
 }
 
 void EdgeWidget::hideparams_changed() { method_changed(0); }
+
+}// namespace iseg

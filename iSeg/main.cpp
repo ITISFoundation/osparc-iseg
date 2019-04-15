@@ -52,7 +52,6 @@
 
 #define SHOWSPLASH
 
-using namespace std;
 using namespace iseg;
 
 namespace {
