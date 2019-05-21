@@ -7459,6 +7459,8 @@ void MainWindow::end_undo_helper(iseg::EndUndoAction undoAction)
 
 void MainWindow::handle_end_datachange(QWidget* sender, iseg::EndUndoAction undoAction)
 {
+	ISEG_DEBUG("MainWindow::handle_end_datachange (tissues:" << changeData.tissues << ", work:" << changeData.work << ")");
+
 	// End undo
 	end_undo_helper(undoAction);
 

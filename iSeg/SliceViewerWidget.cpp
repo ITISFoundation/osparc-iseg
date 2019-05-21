@@ -116,6 +116,7 @@ void bmptissuesliceshower::work_changed()
 
 void bmptissuesliceshower::update()
 {
+	ISEG_DEBUG("SliceViewerWidget::update (slice:" << handler3D->active_slice() << ")");
 	unsigned short w, h;
 
 	if (directionx)

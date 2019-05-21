@@ -108,6 +108,9 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	bt_connectivity->setToolTip("Compute connectivity and show in different colors");
 	bt_connectivity->setMaximumWidth(200);
 
+	lb_connectivity_count = new QLabel("");
+	lb_connectivity_count->setToolTip("Number of connected regions");
+
 	// layout
 	auto vbox = new QVBoxLayout;
 	vbox->addWidget(vtkWidget);
@@ -133,7 +136,11 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	}
 
 	vbox->addWidget(bt_update);
-	vbox->addWidget(bt_connectivity);
+
+	auto connectivity_hbox = new QHBoxLayout;
+	connectivity_hbox->addWidget(bt_connectivity);
+	connectivity_hbox->addWidget(lb_connectivity_count);
+	vbox->addLayout(connectivity_hbox);
 
 	setLayout(vbox);
 
@@ -337,6 +344,8 @@ void SurfaceViewerWidget::split_surface()
 	mapper->SetLookupTable(lut);
 
 	vtkWidget->GetRenderWindow()->Render();
+
+	lb_connectivity_count->setText(QString("Disconnected Regions = %1").arg(num_regions));
 }
 
 void SurfaceViewerWidget::popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command)

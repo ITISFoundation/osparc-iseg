@@ -98,6 +98,12 @@ vtkStandardNewMacro(vtkCustomOutputWindow);
 
 } // namespace
 
+#ifdef NDEBUG
+bool _print_debug_log = false;
+#else
+bool _print_debug_log = true;
+#endif
+
 int main(int argc, char** argv)
 {
 	// parse program arguments
@@ -105,7 +111,12 @@ int main(int argc, char** argv)
 	namespace fs = boost::filesystem;
 
 	po::options_description desc("Allowed options");
-	desc.add_options()("help", "produce help message")("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")("s4l", po::value<std::string>(), "start iSEG in S4L link mode")("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
+	desc.add_options()
+		("help", "produce help message")
+		("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")
+		("s4l", po::value<std::string>(), "start iSEG in S4L link mode")
+		("debug", po::bool_switch()->default_value(false), "show debug log messages")
+		("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(custom_parser).run(), vm);
 	po::notify(vm);
@@ -161,8 +172,9 @@ int main(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
+	bool debug = vm.count("debug") ? vm["debug"].as<bool>() : false;
 	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
-	init_logging(log_file_name, true);
+	init_logging(log_file_name, true, debug);
 
 	QDir fileDirectory = fileinfo.dir();
 	ISEG_INFO("fileDirectory = " << fileDirectory.absolutePath().toStdString());

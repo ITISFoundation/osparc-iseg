@@ -69,7 +69,6 @@ class HystereticGrowingWidget;
 class VesselWidget;
 class WatershedWidget;
 class SmoothingWidget;
-class ThresholdWidget;
 class ThresholdWidgetQt4;
 class MeasurementWidget;
 class ImageViewerWidget;
