@@ -16,6 +16,7 @@ namespace
 {
 	std::ofstream _log_file;
 	bool _print_to_console = true;
+	bool _print_debug_log = false;
 
 	std::string to_string(const std::string& format, va_list args, va_list copy)
 	{
@@ -148,16 +149,19 @@ std::ostream& Log::log_stream()
 
 void Log::debug(const char* format, ...)
 {
-	va_list args, copy;
-	va_start(args, format);
-	va_start(copy, format);
+	if (_print_debug_log)
+	{
+		va_list args, copy;
+		va_start(args, format);
+		va_start(copy, format);
 
-	std::string msg = to_string(std::string("[DEBUG] ") + format, args, copy);
+		std::string msg = to_string(std::string("[DEBUG] ") + format, args, copy);
 
-	va_end(copy);
-	va_end(args);
+		va_end(copy);
+		va_end(args);
 
-	_note(msg);
+		_note(msg);
+	}
 }
 
 void Log::info(const char* format, ...)
@@ -216,7 +220,7 @@ void Log::note(const std::string& channel, const char* format, ...)
 	_note(msg);
 }
 
-void init_logging(const std::string& log_file_name, bool print_to_console, bool intercept_cerr)
+void init_logging(const std::string& log_file_name, bool print_to_console, bool print_debug_log, bool intercept_cerr)
 {
 	Log::attach_console(print_to_console);
 	Log::attach_log_file(log_file_name);
@@ -224,6 +228,7 @@ void init_logging(const std::string& log_file_name, bool print_to_console, bool 
 	{
 		Log::intercept_cerr();
 	}
+	_print_debug_log = print_debug_log;
 }
 
 } // namespace iseg

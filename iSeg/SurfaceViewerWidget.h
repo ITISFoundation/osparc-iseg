@@ -92,6 +92,7 @@ private:
 	QSlider* sl_thresh;
 	QPushButton* bt_update;
 	QPushButton* bt_connectivity;
+	QLabel* lb_connectivity_count;
 
 	vtkSmartPointer<QVTKInteractor> iren;
 	vtkSmartPointer<vtkEventQtSlotConnect> connections;

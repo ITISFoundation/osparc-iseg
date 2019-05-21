@@ -45,6 +45,5 @@ public:
 	static std::ostream& log_stream();
 };
 
-ISEG_DATA_API void init_logging(const std::string& log_file_name, bool print_to_clog = true, bool intercept_cerr = true);
-
+ISEG_DATA_API void init_logging(const std::string& log_file_name, bool print_to_clog = true, bool print_debug_log = false, bool intercept_cerr = true);
 }
