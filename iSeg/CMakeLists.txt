@@ -62,6 +62,7 @@ SET(ViewerSrcs
 	Project.cpp
 	RadiotherapyStructureSetImporter.cpp
 	SaveOutlinesWidget.cpp
+	SelectColorButton.cpp
 	Settings.cpp
 	SlicesHandler.cpp
 	SliceTransform.cpp
@@ -113,6 +114,7 @@ SET(MyMocHeaders
 	PickerWidget.h
 	RadiotherapyStructureSetImporter.h
 	SaveOutlinesWidget.h
+	SelectColorButton.h
 	Settings.h
 	SliceViewerWidget.h
 	SmoothingWidget.h

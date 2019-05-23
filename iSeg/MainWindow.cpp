@@ -30,6 +30,7 @@
 #include "OutlineCorrectionWidget.h"
 #include "PickerWidget.h"
 #include "SaveOutlinesWidget.h"
+#include "SelectColorButton.h"
 #include "Settings.h"
 #include "SliceViewerWidget.h"
 #include "SmoothingWidget.h"
@@ -416,6 +417,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_bmpcrosshairvisible->setChecked(false);
 	cb_bmpoutlinevisible = new QCheckBox("Show Outlines", this);
 	cb_bmpoutlinevisible->setChecked(true);
+	auto bt_select_outline_color = new SelectColorButton(this);
+	bt_select_outline_color->setMaximumWidth(17);
+	bt_select_outline_color->setMaximumHeight(17);
 	cb_worktissuevisible = new QCheckBox("Show Tissues", this);
 	cb_worktissuevisible->setChecked(false);
 	cb_workcrosshairvisible = new QCheckBox("Show Crosshair", this);
@@ -764,9 +768,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QHBoxLayout* hboxbmp = new QHBoxLayout;
 	hboxbmp->setSpacing(0);
 	hboxbmp->setMargin(0);
-	hboxbmp->addWidget(cb_bmptissuevisible);
-	hboxbmp->addWidget(cb_bmpcrosshairvisible);
+	hboxbmp->addWidget(cb_bmptissuevisible, 1);
+	hboxbmp->addWidget(cb_bmpcrosshairvisible, 1);
 	hboxbmp->addWidget(cb_bmpoutlinevisible);
+	hboxbmp->addWidget(bt_select_outline_color);
 	hboxbmpw->setLayout(hboxbmp);
 
 	QVBoxLayout* vboxbmp = new QVBoxLayout;
@@ -803,8 +808,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QHBoxLayout* hboxwork = new QHBoxLayout;
 	hboxwork->setSpacing(0);
 	hboxwork->setMargin(0);
-	hboxwork->addWidget(cb_worktissuevisible);
-	hboxwork->addWidget(cb_workcrosshairvisible);
+	hboxwork->addWidget(cb_worktissuevisible, 1);
+	hboxwork->addWidget(cb_workcrosshairvisible, 1);
 	hboxwork->addWidget(cb_workpicturevisible);
 	hboxworkw->setLayout(hboxwork);
 
@@ -1483,6 +1488,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			SLOT(bmpcrosshairvisible_changed()));
 	QObject::connect(cb_bmpoutlinevisible, SIGNAL(clicked()), this,
 			SLOT(bmpoutlinevisible_changed()));
+	QObject::connect(bt_select_outline_color, SIGNAL(onColorChanged(QColor)), this,
+			SLOT(set_outline_color(QColor)));
 	QObject::connect(cb_worktissuevisible, SIGNAL(clicked()), this,
 			SLOT(worktissuevisible_changed()));
 	QObject::connect(cb_workcrosshairvisible, SIGNAL(clicked()), this,
@@ -6121,6 +6128,11 @@ void MainWindow::bmpoutlinevisible_changed()
 	{
 		bmp_show->set_workbordervisible(false);
 	}
+}
+
+void MainWindow::set_outline_color(QColor color)
+{
+	bmp_show->set_outline_color(color);
 }
 
 void MainWindow::worktissuevisible_changed()
