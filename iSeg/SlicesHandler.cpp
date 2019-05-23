@@ -3257,8 +3257,6 @@ void SlicesHandler::work2tissueall()
 {
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].work2tissue(_active_tissuelayer);
-
-	return;
 }
 
 void SlicesHandler::mergetissues(tissues_size_t tissuetype)
@@ -3289,7 +3287,11 @@ void SlicesHandler::add_mark(Point p, unsigned label, std::string str)
 	(_image_slices[_activeslice]).add_mark(p, label, str);
 }
 
-void SlicesHandler::clear_marks() { (_image_slices[_activeslice]).clear_marks(); }
+void SlicesHandler::clear_marks() 
+{ 
+	for (unsigned short i = _startslice; i < _endslice; i++)
+		(_image_slices[i]).clear_marks();
+}
 
 bool SlicesHandler::remove_mark(Point p, unsigned radius)
 {
