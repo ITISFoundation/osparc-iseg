@@ -477,6 +477,7 @@ private slots:
 	void tab_changed(int);
 	void bmptissuevisible_changed();
 	void bmpoutlinevisible_changed();
+	void set_outline_color(QColor);
 	void worktissuevisible_changed();
 	void workpicturevisible_changed();
 	void slicenr_up();

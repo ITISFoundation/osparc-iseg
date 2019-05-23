@@ -108,6 +108,7 @@ private:
 	int crosshairypos;
 	Pair pixelsize;
 	QColor actual_color;
+	QColor outline_color;
 
 	QImage image;
 	QImage image_decorated;
@@ -164,6 +165,7 @@ public slots:
 	void set_overlayvisible(bool on);
 	void set_overlayalpha(float alpha);
 	void set_workbordervisible(bool on);
+	void set_outline_color(const QColor&);
 	void slicenr_changed();
 	void tissue_changed();
 	void tissue_changed(QRect rect);

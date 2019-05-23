@@ -56,6 +56,7 @@ ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::Wind
 	pixelsize.high = pixelsize.low = 1.0f;
 	workborderlimit = true;
 	actual_color.setRgb(255, 255, 255);
+	outline_color.setRgb(255, 255, 255);
 	crosshairxpos = 0;
 	crosshairypos = 0;
 	marks = nullptr;
@@ -912,8 +913,8 @@ void ImageViewerWidget::vp_to_image_decorator()
 		}
 	}
 
-	QRgb color_used = actual_color.rgb();
-	QRgb color_dim = (actual_color.light(30)).rgb();
+	QRgb color_used = outline_color.rgb();
+	QRgb color_dim = (outline_color.light(30)).rgb();
 	if ((!workborderlimit) || ((unsigned)vp.size() < unsigned(width) * height / 5))
 	{
 		for (auto& p : vp)
@@ -1063,6 +1064,17 @@ void ImageViewerWidget::set_workbordervisible(bool on)
 			reload_bits();
 			repaint();
 		}
+	}
+}
+
+void ImageViewerWidget::set_outline_color(const QColor& c)
+{
+	if (outline_color != c)
+	{
+		outline_color = c;
+
+		// this will trigger a repaint with the new color
+		vp_changed();
 	}
 }
 

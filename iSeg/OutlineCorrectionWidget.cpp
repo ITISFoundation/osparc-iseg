@@ -904,7 +904,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		disconnect(methods, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
+		disconnect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
@@ -950,8 +950,7 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 
 		method_changed();
 
-		connect(methods, SIGNAL(itemSelectionChanged()), this, SLOT(method_changed()));
-		//connect(target, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+		connect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
 	}
 	return fp;
 }
