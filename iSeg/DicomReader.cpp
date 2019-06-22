@@ -62,7 +62,6 @@ unsigned short DicomReader::get_height()
 bool DicomReader::load_pictureGDCM(const char* filename, float* bits)
 {
 	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, width, height);
-	return true;
 }
 
 bool DicomReader::load_picture(float* bits)

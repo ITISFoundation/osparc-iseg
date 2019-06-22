@@ -51,13 +51,13 @@ public:
 		m_Progress = progress;
 	}
 
-	void Execute(itk::Object* caller, const itk::EventObject& event) ITK_OVERRIDE
+	void Execute(itk::Object* caller, const itk::EventObject& event) override
 	{
 		Execute((const itk::Object*)caller, event);
 	}
 
 	void Execute(const itk::Object* object,
-			const itk::EventObject& event) ITK_OVERRIDE
+			const itk::EventObject& event) override
 	{
 		const TFilter* filter = dynamic_cast<const TFilter*>(object);
 
@@ -167,7 +167,7 @@ void BiasCorrectionWidget::do_work()
 		try
 		{
 			auto output = DoBiasCorrection<InputImageType::Pointer>(
-					input, ITK_NULLPTR,
+					input, nullptr,
 					std::vector<unsigned int>(num_levels, num_iterations), factor,
 					conv_threshold);
 
@@ -340,11 +340,11 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 		{
 			std::cerr << "Exception caught: " << e << std::endl;
 		}
-		m_CurrentFilter = ITK_NULLPTR;
-		return ITK_NULLPTR;
+		m_CurrentFilter = nullptr;
+		return nullptr;
 	}
 
-	m_CurrentFilter = ITK_NULLPTR;
+	m_CurrentFilter = nullptr;
 
 	if (verbose)
 	{

@@ -15,9 +15,9 @@
 #include "VTIreader.h"
 
 #include <itkImage.h>
+#include <itkImageFileReader.h>
 #include <itkRGBPixel.h>
 #include <itkUnaryFunctorImageFilter.h>
-#include <itkImageFileReader.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>

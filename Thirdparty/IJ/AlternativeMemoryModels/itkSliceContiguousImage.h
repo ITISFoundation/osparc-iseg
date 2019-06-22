@@ -155,7 +155,7 @@ public:
 
   /** Restore the data object to its initial state. This means releasing
    * memory. */
-  virtual void Initialize() ITK_OVERRIDE;
+  virtual void Initialize() override;
 
   OffsetValueType ComputeOffset(const IndexType &ind) const
   {
@@ -269,7 +269,7 @@ public:
    * simply calls CopyInformation() and copies the region ivars.
    * The implementation here refers to the superclass' implementation
    * and then copies over the pixel container. */
-  virtual void Graft(const DataObject *data) ITK_OVERRIDE;
+  virtual void Graft(const DataObject *data) override;
   
   /** Return the Pixel Accessor object */
   AccessorType GetPixelAccessor( void ) 
@@ -310,7 +310,7 @@ public:
 
 protected:
   SliceContiguousImage();
-  void PrintSelf( std::ostream& os, Indent indent ) const ITK_OVERRIDE;
+  void PrintSelf( std::ostream& os, Indent indent ) const override;
   virtual ~SliceContiguousImage() {};
   
 private:
@@ -325,18 +325,8 @@ private:
 
 } // end namespace itk
 
-// Define instantiation macro for this template.
-#define ITK_TEMPLATE_SliceContiguousImage(_, EXPORT, x, y) namespace itk { \
-  _(2(class EXPORT SliceContiguousImage< ITK_TEMPLATE_2 x >)) \
-  namespace Templates { typedef SliceContiguousImage< ITK_TEMPLATE_2 x > SliceContiguousImage##y; } \
-  }
-
-#if ITK_TEMPLATE_EXPLICIT
-# include "Templates/itkSliceContiguousImage+-.h"
-#endif
-
-#if ITK_TEMPLATE_TXX
-# include "itkSliceContiguousImage.txx"
+#ifndef ITK_MANUAL_INSTANTIATION
+#	include "itkSliceContiguousImage.txx"
 #endif
 
 #endif
