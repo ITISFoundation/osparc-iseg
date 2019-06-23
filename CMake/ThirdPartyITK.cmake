@@ -6,14 +6,13 @@
 #
 
 FIND_PACKAGE(ITK COMPONENTS 
-		ITKCommon ITKOptimizers ITKOptimizersv4 ITKTransform ITKTransformFactory
-		ITKVNLInstantiation ITKVTK ITKBiasCorrection ITKLabelMap
-		ITKWatersheds ITKStatistics ITKMetaIO ITKIOImageBase ITKIOGDCM ITKIOMesh 
-		ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOTransformBase ITKIOTransformMatlab  
-		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKBinaryMathematicalMorphology
-		ITKGDCM 
-		ITKFastMarching ITKLevelSets ITKRegionGrowing
-		ITKReview
+		ITKCommon
+		ITKBiasCorrection ITKVTK
+		ITKMetaIO ITKIOImageBase ITKIOGDCM
+		ITKIOMeta ITKIONIFTI ITKIONRRD  
+		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKGDCM
+		ITKLevelSets
+		ITKSuperPixel
 			REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
 IF(${_itk_version} VERSION_LESS "4.12.0")
