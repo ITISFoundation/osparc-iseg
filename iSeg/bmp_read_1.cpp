@@ -115,9 +115,9 @@ inline void swap_maps(T const*& Tp1, T const*& Tp2)
 	return;
 }
 
-float iseg::f1(float dI, float k) { return exp(-pow(dI / k, 2)); }
+float f1(float dI, float k) { return exp(-pow(dI / k, 2)); }
 
-float iseg::f2(float dI, float k) { return 1 / (1 + pow(dI / k, 2)); }
+float f2(float dI, float k) { return 1 / (1 + pow(dI / k, 2)); }
 
 std::list<unsigned> bmphandler::stackindex;
 unsigned bmphandler::stackcounter;

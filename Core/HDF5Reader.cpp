@@ -320,8 +320,6 @@ int HDF5Reader::read(std::vector<double>& v, const std::string& name)
 			warning("HDF5Reader::read() : data must be float, returning");
 			return 0;
 		}
-		warning("HDF5Reader::read() : data must be double, returning");
-		return 0;
 	}
 	if (dims.size() != 1)
 	{
