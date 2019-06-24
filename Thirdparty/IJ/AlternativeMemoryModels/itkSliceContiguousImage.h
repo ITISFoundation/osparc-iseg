@@ -143,7 +143,7 @@ public:
     this->SetLargestPossibleRegion(region);
     this->SetBufferedRegion(region);
     this->SetRequestedRegion(region);
-    };
+    }
 
   void SetRegions(SizeType size)
     {
@@ -151,7 +151,7 @@ public:
     this->SetLargestPossibleRegion(region);
     this->SetBufferedRegion(region);
     this->SetRequestedRegion(region);
-    };
+    }
 
   /** Restore the data object to its initial state. This means releasing
    * memory. */

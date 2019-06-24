@@ -132,7 +132,7 @@ protected:
   virtual ~LabelVotingBinaryImageFilter() {}
   void PrintSelf(std::ostream & os, Indent indent) const override;
 
-  /** LabelVotingBinaryImageFilter can be implemented as a multithreaded filter.
+	/** LabelVotingBinaryImageFilter can be implemented as a multithreaded filter.
    * Therefore, this implementation provides a ThreadedGenerateData()
    * routine which is called for each processing thread. The output
    * image data is allocated automatically by the superclass prior to
@@ -140,12 +140,11 @@ protected:
    * write to the portion of the output image specified by the
    * parameter "outputRegionForThread"
    *
-   * \sa ImageToImageFilter::ThreadedGenerateData(),
+   * \sa ImageToImageFilter::DynamicThreadedGenerateData(),
    *     ImageToImageFilter::GenerateData() */
-  void ThreadedGenerateData(const OutputImageRegionType & outputRegionForThread,
-                            ThreadIdType threadId) override;
+	void DynamicThreadedGenerateData(const OutputImageRegionType& outputRegionForThread) override;
 
-  /** Methods to be called before and after the invokation of
+	/** Methods to be called before and after the invokation of
   * ThreadedGenerateData(). */
   void BeforeThreadedGenerateData() override;
 
@@ -165,7 +164,7 @@ private:
   SizeValueType m_NumberOfPixelsChanged = 0;
 
   // Auxiliary array for multi-threading
-  Array< SizeValueType > m_Count;
+	std::atomic<SizeValueType> m_Count;
 };
 } // end namespace itk
 
