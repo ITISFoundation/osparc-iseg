@@ -146,6 +146,7 @@ public:
 			image3d->SetRegions(image_stack_type::RegionType(start, size));
 			image3d->SetSpacing(spacing);
 			image3d->SetOrigin(origin);
+			image3d->Allocate();
 
 			std::vector<float*> slices;
 			slices.push_back(sdf1->GetPixelContainer()->GetImportPointer());
@@ -301,10 +302,11 @@ private:
 		auto resample_filter = itk::ResampleImageFilter<image_stack_type, image3_type>::New();
 		resample_filter->SetTransform(id.GetPointer());
 		resample_filter->SetInput(image3d);
-		resample_filter->SetOutputParametersFromImage(image3d);
+		resample_filter->SetOutputParametersFromImage(image3d); // start index, direction
 		resample_filter->SetOutputOrigin(origin);
 		resample_filter->SetOutputSpacing(spacing);
 		resample_filter->SetSize(size);
+		resample_filter->Update();
 
 		auto threshold_filter = itk::BinaryThresholdImageFilter<image3_type, mask3_type>::New();
 		threshold_filter->SetInput(resample_filter->GetOutput());
