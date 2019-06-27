@@ -127,13 +127,12 @@ typename itk::SliceContiguousImage<T>::Pointer wrapToITK(const std::vector<T*>& 
 	transform.getRotation(direction);
 
 	auto image = SliceContiguousImageType::New();
-	image->SetSpacing(spacing.v);
 	image->SetOrigin(origin);
+	image->SetSpacing(spacing.v);
 	image->SetDirection(direction);
 	image->SetLargestPossibleRegion(total_region);
 	image->SetBufferedRegion(buffered_region);
 	image->SetRequestedRegion(buffered_region);
-	image->Allocate();
 
 	// Set slice pointers
 	std::vector<T*> slices;
