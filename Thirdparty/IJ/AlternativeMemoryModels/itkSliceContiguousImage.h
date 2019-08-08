@@ -133,47 +133,11 @@ public:
 
   /** Allocate the image memory. The size of the image must
    * already be set, e.g. by calling SetRegions(). */
-  void Allocate();
+  void Allocate(bool initialize=false) override;
 
-  /** Convenience methods to set the LargestPossibleRegion,
-   *  BufferedRegion and RequestedRegion. Allocate must still be called.
-   */
-  void SetRegions(RegionType region)
-    {
-    this->SetLargestPossibleRegion(region);
-    this->SetBufferedRegion(region);
-    this->SetRequestedRegion(region);
-    }
-
-  void SetRegions(SizeType size)
-    {
-    RegionType region; region.SetSize(size);
-    this->SetLargestPossibleRegion(region);
-    this->SetBufferedRegion(region);
-    this->SetRequestedRegion(region);
-    }
-
-  /** Restore the data object to its initial state. This means releasing
+	/** Restore the data object to its initial state. This means releasing
    * memory. */
-  virtual void Initialize() override;
-
-  OffsetValueType ComputeOffset(const IndexType &ind) const
-  {
-    // need to add bounds checking for the region/buffer?
-    OffsetValueType offset=0;
-    const IndexType &bufferedRegionIndex = this->GetBufferedRegion().GetIndex();
-    const OffsetValueType *offsetTable = this->GetOffsetTable(); 
-  
-    // data is arranged as [][][][slice][row][col]
-    // with Index[0] = col, Index[1] = row, Index[2] = slice
-    for (int i=ImageDimension-1; i > 0; i--)
-      {
-      offset += (ind[i] - bufferedRegionIndex[i])*offsetTable[i];
-      }
-    offset += (ind[0] - bufferedRegionIndex[0]);
-
-    return offset;
-  }
+  void Initialize() override;
 
   /** Fill the image buffer with a value.  Be sure to call Allocate()
    * first. */
@@ -306,7 +270,6 @@ public:
         this->GetLargestPossibleRegion().GetSize()
        );
     }
-
 
 protected:
   SliceContiguousImage();

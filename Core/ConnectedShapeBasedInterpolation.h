@@ -143,10 +143,9 @@ public:
 			origin[2] = 0.0; // zero
 
 			auto image3d = image_stack_type::New();
-			image3d->SetRegions(image_stack_type::RegionType(start, size));
-			image3d->SetSpacing(spacing);
 			image3d->SetOrigin(origin);
-			image3d->Allocate();
+			image3d->SetSpacing(spacing);
+			image3d->SetRegions(image_stack_type::RegionType(start, size));
 
 			std::vector<float*> slices;
 			slices.push_back(sdf1->GetPixelContainer()->GetImportPointer());
@@ -287,24 +286,29 @@ private:
 	}
 
 	/// interpolate between known slices
-	mask3_type::Pointer resample(image_stack_type* image3d, size_t num_slices) const
+	mask3_type::Pointer resample(const image_stack_type* image3d, size_t num_slices) const
 	{
 		ScopedTimer timer("Resample");
 
 		auto id = itk::IdentityTransform<double, 3>::New();
 		auto origin = image3d->GetOrigin();
-		origin[2] = 1.0 / (num_slices + 1);
+		auto spacing = image3d->GetSpacing();
 		auto size = image3d->GetBufferedRegion().GetSize();
 		size[2] = num_slices;
-		auto spacing = image3d->GetSpacing();
-		spacing[2] = origin[2];
+		spacing[2] = 1.0 / (num_slices + 1);
+		origin[2] = spacing[2];
 
-		auto resample_filter = itk::ResampleImageFilter<image_stack_type, image3_type>::New();
+		auto caster = itk::CastImageFilter<image_stack_type, image3_type>::New();
+		caster->SetInput(image3d);
+		caster->Update();
+
+		auto resample_filter = itk::ResampleImageFilter<image3_type, image3_type>::New();
 		resample_filter->SetTransform(id.GetPointer());
-		resample_filter->SetInput(image3d);
-		resample_filter->SetOutputParametersFromImage(image3d); // start index, direction
+		resample_filter->SetInput(caster->GetOutput());
 		resample_filter->SetOutputOrigin(origin);
 		resample_filter->SetOutputSpacing(spacing);
+		resample_filter->SetOutputDirection(image3d->GetDirection());
+		resample_filter->SetOutputStartIndex(image3d->GetBufferedRegion().GetIndex());
 		resample_filter->SetSize(size);
 		resample_filter->Update();
 

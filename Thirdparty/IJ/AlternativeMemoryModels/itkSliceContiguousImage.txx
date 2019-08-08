@@ -37,11 +37,16 @@ SliceContiguousImage<TPixel>
 template<class TPixel>
 void
 SliceContiguousImage<TPixel>
-::Allocate()
+::Allocate(bool initialize)
 {
   ComputeOffsetTable();
   SizeType size = GetLargestPossibleRegion().GetSize();
   m_Container->Reserve( size[2], size[0]*size[1] );
+
+	if (initialize)
+  {
+		FillBuffer(PixelType(0));
+	}
 }
 
 
