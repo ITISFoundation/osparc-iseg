@@ -69,8 +69,13 @@ void ThresholdWidgetQt4::updateUi()
 	if (range.second != range.first)
 	{
 		const int slider_value = static_cast<int>((threshs[ui.mManualLimitNrSpinBox->value()] - range.first) * 200 / (range.second - range.first) + .5f);
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		ui.mThresholdHorizontalSlider->setValue(slider_value);
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
+
+		auto lineedit_block = ui.mThresholdBorderLineEdit->blockSignals(true);
 		ui.mThresholdBorderLineEdit->setText(QString::number(threshs[ui.mManualLimitNrSpinBox->value()], 'g', 3));
+		ui.mThresholdBorderLineEdit->blockSignals(lineedit_block);
 	}
 
 	//ui.mWeightBorderLineEdit->setText(QString::number(threshs[sb_tissuenr->value()], 'g', 3));
@@ -137,7 +142,9 @@ FILE* ThresholdWidgetQt4::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		dummy = ui.mThresholdHorizontalSlider->value();
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = ui.mHistoMinPixelsRatioHorizontalSlider->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -190,7 +197,9 @@ FILE* ThresholdWidgetQt4::LoadParams(FILE* fp, int version)
 	{
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		ui.mThresholdHorizontalSlider->setValue(dummy);
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
 		fread(&dummy, sizeof(int), 1, fp);
 		ui.mHistoMinPixelsRatioHorizontalSlider->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
