@@ -80,6 +80,7 @@ private:
 	QSpinBox* sb_kmax;
 	//	QSpinBox *sb_restrainmax;
 	QCheckBox* allslices;
+	QCheckBox* target;
 	QRadioButton* rb_gaussian;
 	QRadioButton* rb_average;
 	QRadioButton* rb_median;
@@ -96,6 +97,7 @@ private slots:
 	void execute();
 	void continue_diff();
 	void method_changed(int);
+	void input_changed();
 	void sigmaslider_changed(int newval);
 	void kslider_changed(int newval);
 	void n_changed(int newval);

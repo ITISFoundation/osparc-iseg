@@ -13,6 +13,12 @@
 #include "SmoothingWidget.h"
 #include "bmp_read_1.h"
 
+#include "../Data/SlicesHandlerITKInterface.h"
+
+#include <itkBinaryThresholdImageFilter.h>
+#include <itkMeanImageFilter.h>
+#include <itkSliceBySliceImageFilter.h>
+
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -50,6 +56,7 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 	hbox5 = new Q3HBox(vbox2);
 	hbox4 = new Q3HBox(vbox1);
 	allslices = new QCheckBox(QString("Apply to all slices"), vbox1);
+	target = new QCheckBox(QString("Target"), vbox1);
 	pushexec = new QPushButton("Execute", vbox1);
 	contdiff = new QPushButton("Cont. Diffusion", vbox1);
 
@@ -133,35 +140,21 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 	hbox5->setFixedSize(hbox5->sizeHint());
 	vbox2->setFixedSize(vbox2->sizeHint());
 	vbox1->setFixedSize(vbox1->sizeHint());
-	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
-	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());
-
-	//	setFixedSize(vbox1->size());
 
 	method_changed(0);
 
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed(int)));
-	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
-	QObject::connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
-	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-			SLOT(sigmaslider_changed(int)));
-	QObject::connect(sl_sigma, SIGNAL(sliderPressed()), this,
-			SLOT(slider_pressed()));
-	QObject::connect(sl_sigma, SIGNAL(sliderReleased()), this,
-			SLOT(slider_released()));
-	QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
-			SLOT(kslider_changed(int)));
-	QObject::connect(sl_k, SIGNAL(sliderPressed()), this,
-			SLOT(slider_pressed()));
-	QObject::connect(sl_k, SIGNAL(sliderReleased()), this,
-			SLOT(slider_released()));
-	QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
-			SLOT(n_changed(int)));
-	QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
-			SLOT(kmax_changed(int)));
-
-	return;
+	connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
+	connect(target, SIGNAL(clicked()), this, SLOT(input_changed()));
+	connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
+	connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
+	connect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(sigmaslider_changed(int)));
+	connect(sl_sigma, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+	connect(sl_sigma, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	connect(sl_k, SIGNAL(valueChanged(int)), this, SLOT(kslider_changed(int)));
+	connect(sl_k, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+	connect(sl_k, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	connect(sb_n, SIGNAL(valueChanged(int)), this, SLOT(n_changed(int)));
+	connect(sb_kmax, SIGNAL(valueChanged(int)), this, SLOT(kmax_changed(int)));
 }
 
 SmoothingWidget::~SmoothingWidget()
@@ -178,58 +171,97 @@ void SmoothingWidget::execute()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (allslices->isChecked())
+	if (target->isCheckable())
 	{
-		if (rb_gaussian->isChecked())
+		using slice_image = itk::Image<float, 2>;
+		using threshold_filter = itk::BinaryThresholdImageFilter<slice_image, slice_image>;
+		using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
+
+		auto threshold = threshold_filter::New();
+		threshold->SetLowerThreshold(0.001f);
+		threshold->SetInsideValue(1);
+		threshold->SetOutsideValue(0);
+
+		auto mean_filter = mean_filter_type::New();
+
+		slice_type::SizeType indexRadius;
+		indexRadius[0] = 1; // radius along x
+		indexRadius[1] = 1; // radius along y
+		mean_filter->SetRadius(indexRadius);
+
+		SlicesHandlerITKInterface wrapper(handler3D);
+		if (allslices->isChecked())
 		{
-			handler3D->gaussian(sl_sigma->value() * 0.05f);
-		}
-		else if (rb_average->isChecked())
-		{
-			handler3D->average((short unsigned)sb_n->value());
-		}
-		else if (rb_median->isChecked())
-		{
-			handler3D->median_interquartile(true);
-		}
-		else if (rb_sigmafilter->isChecked())
-		{
-			handler3D->sigmafilter(
-					(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
+			using input_image_type = itk::SliceContiguousImage<float>;
+			using image_type = itk::Image<float, 3>;
+			using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type>;
+
+			auto target = wrapper.GetTarget(true);
+
+			auto slice_executor = slice_filter_type::New();
+			slice_executor->SetInput(target);			slice_executor->SetInputFilter(threshold_filter);
+			slice_executor->SetOutputFilter(mean_filter);
 		}
 		else
 		{
-			handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
-					sl_k->value() * 0.01f * sb_kmax->value(),
-					sl_restrain->value() * 0.01f);
+			auto target = wrapper.GetTargetSlice();
 		}
 	}
 	else
 	{
-		if (rb_gaussian->isChecked())
+		if (allslices->isChecked())
 		{
-			bmphand->gaussian(sl_sigma->value() * 0.05f);
-		}
-		else if (rb_average->isChecked())
-		{
-			bmphand->average((short unsigned)sb_n->value());
-		}
-		else if (rb_median->isChecked())
-		{
-			bmphand->median_interquartile(true);
-		}
-		else if (rb_sigmafilter->isChecked())
-		{
-			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(),
-					(short unsigned)sb_n->value());
+			if (rb_gaussian->isChecked())
+			{
+				handler3D->gaussian(sl_sigma->value() * 0.05f);
+			}
+			else if (rb_average->isChecked())
+			{
+				handler3D->average((short unsigned)sb_n->value());
+			}
+			else if (rb_median->isChecked())
+			{
+				handler3D->median_interquartile(true);
+			}
+			else if (rb_sigmafilter->isChecked())
+			{
+				handler3D->sigmafilter(
+					(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+					(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
+			}
+			else
+			{
+				handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
+					sl_k->value() * 0.01f * sb_kmax->value(),
+					sl_restrain->value() * 0.01f);
+			}
 		}
 		else
 		{
-			bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
+			if (rb_gaussian->isChecked())
+			{
+				bmphand->gaussian(sl_sigma->value() * 0.05f);
+			}
+			else if (rb_average->isChecked())
+			{
+				bmphand->average((short unsigned)sb_n->value());
+			}
+			else if (rb_median->isChecked())
+			{
+				bmphand->median_interquartile(true);
+			}
+			else if (rb_sigmafilter->isChecked())
+			{
+				bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+					(short unsigned)sb_n->value(),
+					(short unsigned)sb_n->value());
+			}
+			else
+			{
+				bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
 					sl_k->value() * 0.01f * sb_kmax->value(),
 					sl_restrain->value() * 0.01f);
+			}
 		}
 	}
 	emit end_datachange(this);
@@ -300,6 +332,18 @@ void SmoothingWidget::method_changed(int)
 			contdiff->hide();
 		else
 			contdiff->show();
+	}
+}
+
+void SmoothingWidget::input_changed()
+{
+	// if target, we only allow median
+	if (target->isChecked())
+	{
+		rb_median->setChecked(true);
+
+		// update params
+		method_changed(0);
 	}
 }
 
@@ -510,15 +554,15 @@ FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
+		disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
 				SLOT(method_changed(int)));
-		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
+		disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
 				SLOT(sigmaslider_changed(int)));
-		QObject::disconnect(sl_k, SIGNAL(valueChanged(int)), this,
+		disconnect(sl_k, SIGNAL(valueChanged(int)), this,
 				SLOT(kslider_changed(int)));
-		QObject::disconnect(sb_n, SIGNAL(valueChanged(int)), this,
+		disconnect(sb_n, SIGNAL(valueChanged(int)), this,
 				SLOT(n_changed(int)));
-		QObject::disconnect(sb_kmax, SIGNAL(valueChanged(int)), this,
+		disconnect(sb_kmax, SIGNAL(valueChanged(int)), this,
 				SLOT(kmax_changed(int)));
 
 		int dummy;
@@ -549,15 +593,15 @@ FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 
 		method_changed(0);
 
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
+		connect(modegroup, SIGNAL(buttonClicked(int)), this,
 				SLOT(method_changed(int)));
-		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
+		connect(sl_sigma, SIGNAL(valueChanged(int)), this,
 				SLOT(sigmaslider_changed(int)));
-		QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
+		connect(sl_k, SIGNAL(valueChanged(int)), this,
 				SLOT(kslider_changed(int)));
-		QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
+		connect(sb_n, SIGNAL(valueChanged(int)), this,
 				SLOT(n_changed(int)));
-		QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
+		connect(sb_kmax, SIGNAL(valueChanged(int)), this,
 				SLOT(kmax_changed(int)));
 	}
 	return fp;

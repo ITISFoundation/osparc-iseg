@@ -2803,10 +2803,7 @@ void MainWindow::execute_loadrtstruct()
 {
 #ifndef NORTSTRUCTSUPPORT
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"RTstruct (*.dcm)\n"
-			"All (*.*)",
-			this); //, filename);
-
+			"RTstruct (*.dcm)\nAll (*.*)", this);
 	if (loadfilename.isEmpty())
 	{
 		return;
@@ -2814,13 +2811,10 @@ void MainWindow::execute_loadrtstruct()
 
 	RadiotherapyStructureSetImporter RI(loadfilename, handler3D, this);
 
-	QObject::connect(
-			&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
-			this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
-			this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+	connect(&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
+			this, SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	connect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
+			this, SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
 	RI.move(QCursor::pos());
 	RI.exec();
@@ -2828,12 +2822,10 @@ void MainWindow::execute_loadrtstruct()
 	tissueTreeWidget->update_tree_widget();
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
-	QObject::disconnect(
-			&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
-			this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::disconnect(
-			&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+	// \todo is this necessary?
+	disconnect(&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
+			this, SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	disconnect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
 	reset_brightnesscontrast();
