@@ -159,8 +159,7 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 
 SmoothingWidget::~SmoothingWidget()
 {
-	delete vbox1;
-	delete modegroup;
+
 }
 
 void SmoothingWidget::execute()
@@ -178,33 +177,49 @@ void SmoothingWidget::execute()
 		using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
 
 		auto threshold = threshold_filter::New();
-		threshold->SetLowerThreshold(0.001f);
+		threshold->SetLowerThreshold(0.001f); // intensity threshold
 		threshold->SetInsideValue(1);
 		threshold->SetOutsideValue(0);
 
-		auto mean_filter = mean_filter_type::New();
+		slice_image::SizeType radius;
+		radius[0] = 1; // radius along x
+		radius[1] = 1; // radius along y
 
-		slice_type::SizeType indexRadius;
-		indexRadius[0] = 1; // radius along x
-		indexRadius[1] = 1; // radius along y
-		mean_filter->SetRadius(indexRadius);
+		auto mean = mean_filter::New();
+		mean->SetInput(threshold->GetOutput());
+		mean->SetRadius(radius);
+
+		auto threshold2 = threshold_filter::New();
+		threshold2->SetInput(mean->GetOutput());
+		threshold2->SetLowerThreshold(0.5f); // 50% above threshold
+		threshold2->SetInsideValue(255);
+		threshold2->SetOutsideValue(0);
 
 		SlicesHandlerITKInterface wrapper(handler3D);
 		if (allslices->isChecked())
 		{
 			using input_image_type = itk::SliceContiguousImage<float>;
 			using image_type = itk::Image<float, 3>;
-			using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type>;
+			using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type, threshold_filter, threshold_filter>;
 
 			auto target = wrapper.GetTarget(true);
 
 			auto slice_executor = slice_filter_type::New();
-			slice_executor->SetInput(target);			slice_executor->SetInputFilter(threshold_filter);
-			slice_executor->SetOutputFilter(mean_filter);
+			slice_executor->SetInput(target);
+			slice_executor->SetInputFilter(threshold);
+			slice_executor->SetOutputFilter(threshold2);
+
+			slice_executor->Update();
+			// copy back to target
 		}
 		else
 		{
 			auto target = wrapper.GetTargetSlice();
+
+			threshold->SetInput(target);
+
+			threshold2->Update();
+			// copy back to target
 		}
 	}
 	else
@@ -236,7 +251,7 @@ void SmoothingWidget::execute()
 					sl_restrain->value() * 0.01f);
 			}
 		}
-		else
+		else // current slice
 		{
 			if (rb_gaussian->isChecked())
 			{
@@ -345,6 +360,8 @@ void SmoothingWidget::input_changed()
 		// update params
 		method_changed(0);
 	}
+
+	// TODO disable modegroup
 }
 
 void SmoothingWidget::continue_diff()
