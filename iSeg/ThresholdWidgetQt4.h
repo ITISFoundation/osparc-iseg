@@ -46,6 +46,12 @@ private slots:
 	void on_mThresholdHorizontalSlider_valueChanged(int newValue);
 	void on_mThresholdBorderLineEdit_editingFinished();
 
+	// manual 'density' threshold
+	void on_mDensityIntensityThresholdLineEdit_editingFinished();
+	void on_mDensityIntensityThresholdSlider_valueChanged(int newValue);
+	void on_mDensityRadiusSpinBox_valueChanged(int newValue);
+	void on_mDensityThresholdSpinBox_valueChanged(int newValue);
+
 	// histo
 	void on_mHistoPxSpinBox_valueChanged(int newValue);
 	void on_mHistoLxSpinBox_valueChanged(int newValue);
@@ -77,6 +83,8 @@ private slots:
 	void on_mAllSlicesCheckBox_toggled(bool newValue);
 	void on_mExecutePushButton_clicked();
 
+	void on_ModeChanged(QWidget* current_widget);
+
 	// override
 	void bmp_changed();
 
@@ -87,6 +95,8 @@ private:
 	void updateUi();
 	void resetThresholds();
 	void RGBA_changed();
+
+	void doDensityThreshold(bool user_update = false);
 
 	std::pair<float, float> get_range() const;
 
