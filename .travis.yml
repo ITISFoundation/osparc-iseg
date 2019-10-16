@@ -13,7 +13,7 @@ matrix:
 cache:
   directories:
     - '${TRAVIS_BUILD_DIR}/deps/itk'
-	- '${TRAVIS_BUILD_DIR}/deps/vtk'
+    - '${TRAVIS_BUILD_DIR}/deps/vtk'
 
 before_cache:
   - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/build
@@ -34,8 +34,8 @@ install:
       brew ls --versions boost || brew install boost
       brew ls --versions hdf5 || brew install hdf5
       #brew ls --versions vtk || brew install vtk
-	  VTK_URL="https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz"
-	  test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
+      VTK_URL="https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz"
+      test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
       brew ls --versions eigen || brew install eigen
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
