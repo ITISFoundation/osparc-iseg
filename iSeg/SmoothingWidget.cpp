@@ -13,12 +13,6 @@
 #include "SmoothingWidget.h"
 #include "bmp_read_1.h"
 
-#include "../Data/SlicesHandlerITKInterface.h"
-
-#include <itkBinaryThresholdImageFilter.h>
-#include <itkMeanImageFilter.h>
-#include <itkSliceBySliceImageFilter.h>
-
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
@@ -56,7 +50,6 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 	hbox5 = new Q3HBox(vbox2);
 	hbox4 = new Q3HBox(vbox1);
 	allslices = new QCheckBox(QString("Apply to all slices"), vbox1);
-	target = new QCheckBox(QString("Target"), vbox1);
 	pushexec = new QPushButton("Execute", vbox1);
 	contdiff = new QPushButton("Cont. Diffusion", vbox1);
 
@@ -144,7 +137,6 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 	method_changed(0);
 
 	connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
-	connect(target, SIGNAL(clicked()), this, SLOT(input_changed()));
 	connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
 	connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
 	connect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(sigmaslider_changed(int)));
@@ -170,115 +162,61 @@ void SmoothingWidget::execute()
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	if (target->isCheckable())
+	if (allslices->isChecked())
 	{
-		using slice_image = itk::Image<float, 2>;
-		using threshold_filter = itk::BinaryThresholdImageFilter<slice_image, slice_image>;
-		using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
-
-		auto threshold = threshold_filter::New();
-		threshold->SetLowerThreshold(0.001f); // intensity threshold
-		threshold->SetInsideValue(1);
-		threshold->SetOutsideValue(0);
-
-		slice_image::SizeType radius;
-		radius[0] = 1; // radius along x
-		radius[1] = 1; // radius along y
-
-		auto mean = mean_filter::New();
-		mean->SetInput(threshold->GetOutput());
-		mean->SetRadius(radius);
-
-		auto threshold2 = threshold_filter::New();
-		threshold2->SetInput(mean->GetOutput());
-		threshold2->SetLowerThreshold(0.5f); // 50% above threshold
-		threshold2->SetInsideValue(255);
-		threshold2->SetOutsideValue(0);
-
-		SlicesHandlerITKInterface wrapper(handler3D);
-		if (allslices->isChecked())
+		if (rb_gaussian->isChecked())
 		{
-			using input_image_type = itk::SliceContiguousImage<float>;
-			using image_type = itk::Image<float, 3>;
-			using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type, threshold_filter, threshold_filter>;
-
-			auto target = wrapper.GetTarget(true);
-
-			auto slice_executor = slice_filter_type::New();
-			slice_executor->SetInput(target);
-			slice_executor->SetInputFilter(threshold);
-			slice_executor->SetOutputFilter(threshold2);
-
-			slice_executor->Update();
-			// copy back to target
+			handler3D->gaussian(sl_sigma->value() * 0.05f);
+		}
+		else if (rb_average->isChecked())
+		{
+			handler3D->average((short unsigned)sb_n->value());
+		}
+		else if (rb_median->isChecked())
+		{
+			handler3D->median_interquartile(true);
+		}
+		else if (rb_sigmafilter->isChecked())
+		{
+			handler3D->sigmafilter(
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		}
 		else
 		{
-			auto target = wrapper.GetTargetSlice();
-
-			threshold->SetInput(target);
-
-			threshold2->Update();
-			// copy back to target
+			handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
+				sl_k->value() * 0.01f * sb_kmax->value(),
+				sl_restrain->value() * 0.01f);
 		}
 	}
-	else
+	else // current slice
 	{
-		if (allslices->isChecked())
+		if (rb_gaussian->isChecked())
 		{
-			if (rb_gaussian->isChecked())
-			{
-				handler3D->gaussian(sl_sigma->value() * 0.05f);
-			}
-			else if (rb_average->isChecked())
-			{
-				handler3D->average((short unsigned)sb_n->value());
-			}
-			else if (rb_median->isChecked())
-			{
-				handler3D->median_interquartile(true);
-			}
-			else if (rb_sigmafilter->isChecked())
-			{
-				handler3D->sigmafilter(
-					(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
-			}
-			else
-			{
-				handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
-					sl_k->value() * 0.01f * sb_kmax->value(),
-					sl_restrain->value() * 0.01f);
-			}
+			bmphand->gaussian(sl_sigma->value() * 0.05f);
 		}
-		else // current slice
+		else if (rb_average->isChecked())
 		{
-			if (rb_gaussian->isChecked())
-			{
-				bmphand->gaussian(sl_sigma->value() * 0.05f);
-			}
-			else if (rb_average->isChecked())
-			{
-				bmphand->average((short unsigned)sb_n->value());
-			}
-			else if (rb_median->isChecked())
-			{
-				bmphand->median_interquartile(true);
-			}
-			else if (rb_sigmafilter->isChecked())
-			{
-				bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(),
-					(short unsigned)sb_n->value());
-			}
-			else
-			{
-				bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
-					sl_k->value() * 0.01f * sb_kmax->value(),
-					sl_restrain->value() * 0.01f);
-			}
+			bmphand->average((short unsigned)sb_n->value());
+		}
+		else if (rb_median->isChecked())
+		{
+			bmphand->median_interquartile(true);
+		}
+		else if (rb_sigmafilter->isChecked())
+		{
+			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(),
+				(short unsigned)sb_n->value());
+		}
+		else
+		{
+			bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
+				sl_k->value() * 0.01f * sb_kmax->value(),
+				sl_restrain->value() * 0.01f);
 		}
 	}
+
 	emit end_datachange(this);
 }
 
@@ -348,20 +286,6 @@ void SmoothingWidget::method_changed(int)
 		else
 			contdiff->show();
 	}
-}
-
-void SmoothingWidget::input_changed()
-{
-	// if target, we only allow median
-	if (target->isChecked())
-	{
-		rb_median->setChecked(true);
-
-		// update params
-		method_changed(0);
-	}
-
-	// TODO disable modegroup
 }
 
 void SmoothingWidget::continue_diff()
