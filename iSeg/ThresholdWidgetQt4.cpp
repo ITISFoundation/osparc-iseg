@@ -21,7 +21,6 @@
 #include <itkMeanImageFilter.h>
 #include <itkSliceBySliceImageFilter.h>
 
-
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QSignalMapper>

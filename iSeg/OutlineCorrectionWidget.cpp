@@ -19,10 +19,18 @@
 #include "Data/ExtractBoundary.h"
 #include "Data/Point.h"
 #include "Data/addLine.h"
+#include "Data/ItkUtils.h"
+#include "Data/ItkProgressObserver.h"
+#include "Data/SlicesHandlerITKInterface.h"
+
 
 #include "Core/SmoothTissues.h"
 
 #include "Interface/ProgressDialog.h"
+
+#include <itkBinaryThresholdImageFilter.h>
+#include <itkMeanImageFilter.h>
+#include <itkSliceBySliceImageFilter.h>
 
 #include <QDialog>
 #include <QFormLayout>
@@ -85,11 +93,16 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 			"Make sure that there are no unassigned regions "
 			"inside the segmented model."));
 
+	density_threshold = new QRadioButton("Density Threshold");
+	density_threshold->setToolTip(Format(
+		"Estimate density of tissue pixels in sliding window. "
+		"Select pixels with a density above a threshold as foreground."));
+
 	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
 	smooth_tissues->setToolTip(Format(
 			"This tool smooths all non-locked tissues but does not modify locked tissues."));
 
-	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, smooth_tissues};
+	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, density_threshold, smooth_tissues};
 	methods = new QButtonGroup(this);
 	for (auto w : method_radio_buttons)
 	{
@@ -119,6 +132,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	add_skin_params = new AddSkinParamView;
 	fill_skin_params = new FillSkinParamView(handler3D);
 	fill_all_params = new FillAllParamView;
+	density_thr_params = new DensityThresholdParamView;
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
@@ -131,6 +145,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	stacked_params->addWidget(add_skin_params);
 	stacked_params->addWidget(fill_skin_params);
 	stacked_params->addWidget(fill_all_params);
+	stacked_params->addWidget(density_thr_params);
 	stacked_params->addWidget(smooth_tissues_params);
 
 	auto top_layout = new QHBoxLayout;
@@ -167,6 +182,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(add_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_all_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
+	connect(density_thr_params->_execute, SIGNAL(clicked()), this, SLOT(density_threshold_pushed()));
 	connect(smooth_tissues_params->_execute, SIGNAL(clicked()), this, SLOT(smooth_tissues_pushed()));
 
 	selectobj = false;
@@ -964,6 +980,88 @@ float OutlineCorrectionWidget::get_object_value() const
 		return current_params->object_value();
 	}
 	return 0.f;
+}
+
+//TODO template<int ImageDimension>
+//TODO void DensityThreshold()
+//TODO {
+//TODO
+//TODO }
+
+void OutlineCorrectionWidget::density_threshold_pushed()
+{
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = !density_thr_params->_active_slice->isChecked();
+	dataSelection.sliceNr = handler3D->active_slice();
+	dataSelection.work = true;
+	emit begin_datachange(dataSelection, this);
+
+	using tissue_image = itk::Image<unsigned short, 2>;
+	using slice_image = itk::Image<float, 2>;
+	using map_functor = iseg::Functor::MapLabels<unsigned short, float>;
+	using map_filter = itk::UnaryFunctorImageFilter<tissue_image, slice_image, map_functor>;
+	using threshold_filter = itk::BinaryThresholdImageFilter<slice_image, slice_image>;
+	using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
+
+	map_functor map;
+	map.m_Map.assign(handler3D->tissue_names().size() + 1, 0);
+	for (auto sel: handler3D->tissue_selection())
+	{
+		map.m_Map.at(sel) = 1;
+	}
+
+	auto mapper = map_filter::New();
+	mapper->SetFunctor(map);
+	//TODO map_filter->SetInput(tissues);
+
+	slice_image::SizeType radius;
+	radius[0] = density_thr_params->_density_radius->value(); // radius along x
+	radius[1] = density_thr_params->_density_radius->value(); // radius along y
+
+	auto mean = mean_filter::New();
+	mean->SetInput(mapper->GetOutput());
+	mean->SetRadius(radius);
+
+	auto threshold2 = threshold_filter::New();
+	threshold2->SetInput(mean->GetOutput());
+	threshold2->SetLowerThreshold(density_thr_params->_density_threshold->value() / 100.f); // % above threshold
+	threshold2->SetInsideValue(255);
+	threshold2->SetOutsideValue(0);
+
+	SlicesHandlerITKInterface wrapper(handler3D);
+	if (density_thr_params->_active_slice->isChecked())
+	{
+		auto tissue = wrapper.GetTissuesSlice();
+		auto target = wrapper.GetTargetSlice();
+
+		mapper->SetInput(tissue);
+
+		threshold2->Update();
+		iseg::Paste<slice_image, slice_image>(threshold2->GetOutput(), target);
+
+		handler3D->get_activebmphandler()->set_mode(eScaleMode::kFixedRange, true);
+	}
+	else //if (user_update)
+	{
+		using input_image_type = itk::SliceContiguousImage<unsigned short>;
+		using output_image_type = itk::SliceContiguousImage<float>;
+		using image_type = itk::Image<float, 3>;
+		using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type, map_filter, threshold_filter>;
+
+		auto tissues = wrapper.GetTissues(true);
+		auto target = wrapper.GetTarget(true);
+
+		auto slice_executor = slice_filter_type::New();
+		slice_executor->SetInput(tissues);
+		slice_executor->SetInputFilter(mapper);
+		slice_executor->SetOutputFilter(threshold2);
+
+		slice_executor->Update();
+		iseg::Paste<image_type, output_image_type>(slice_executor->GetOutput(), target);
+
+		handler3D->set_modeall(eScaleMode::kFixedRange, true);
+	}
+	emit end_datachange(this);
 }
 
 // \note this is maybe a model of how execute callbacks could be implemented in the future, instead of all via code in bmphandler/slicehandler...
