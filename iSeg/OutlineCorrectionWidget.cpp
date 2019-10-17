@@ -1039,7 +1039,7 @@ void OutlineCorrectionWidget::density_threshold_pushed()
 		threshold2->Update();
 		iseg::Paste<slice_image, slice_image>(threshold2->GetOutput(), target);
 
-		handler3D->get_activebmphandler()->set_mode(eScaleMode::kFixedRange, true);
+		handler3D->get_activebmphandler()->set_mode(eScaleMode::kFixedRange, false);
 	}
 	else //if (user_update)
 	{
@@ -1059,7 +1059,7 @@ void OutlineCorrectionWidget::density_threshold_pushed()
 		slice_executor->Update();
 		iseg::Paste<image_type, output_image_type>(slice_executor->GetOutput(), target);
 
-		handler3D->set_modeall(eScaleMode::kFixedRange, true);
+		handler3D->set_modeall(eScaleMode::kFixedRange, false);
 	}
 	emit end_datachange(this);
 }
