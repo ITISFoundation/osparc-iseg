@@ -2381,14 +2381,6 @@ void MainWindow::execute_loaddicom()
 		pixelsize_changed();
 		slicethickness_changed();
 
-		//	handler3D->LoadDICOM();
-
-		//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->workborder_changed();
-
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
-
 		reset_brightnesscontrast();
 
 		EnableActionsAfterPrjLoaded(true);

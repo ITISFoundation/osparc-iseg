@@ -7771,10 +7771,12 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		unsigned short a, b, c;
 		float d, e, thick1;
 		float disp1[3];
-		float dc1[6]; // direction cosines
-		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1))
+		float rot[3][3]; // rotation matrix
+		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, rot[0], rot[1], rot[2]))
 		{
-			Transform tr(disp1, dc1);
+			Transform tr;
+			tr.setRotation(rot[0], rot[1], rot[2]);
+			tr.setOffset(disp1);
 
 			set_pixelsize(d, e);
 			set_slicethickness(thick1);
@@ -7794,6 +7796,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		for (int i = 0; i < lfilename.size(); i++)
 		{
+			float dc1[6]; // not used
 			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e, thick1, disp1, dc1))
 			{
 				if (c >= 1)
@@ -7827,7 +7830,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		_width = _image_slices[0].return_width();
 		_height = _image_slices[0].return_height();
-		_area = _height * (unsigned int)_width;
+		_area = _height * static_cast<unsigned int>(_width);
 
 		new_overlay();
 

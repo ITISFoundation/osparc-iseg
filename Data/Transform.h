@@ -22,6 +22,7 @@ class ISEG_DATA_API Transform
 public:
 	float _m[4][4];
 
+	/// initialized as identity transform
 	Transform();
 	Transform(const float m[4][4]);
 

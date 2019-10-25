@@ -96,6 +96,7 @@ namespace gdcmvtk_rtstruct {
 	vtkGDCM_API bool GetDicomUsingGDCM(const char *filename, float *bits,unsigned short &w, unsigned short &h);
 	vtkGDCM_API bool GetDicomUsingGDCM(const char *filename, float *bits,unsigned short &w, unsigned short &h,  unsigned short &nrslices);
 	vtkGDCM_API bool GetSizeUsingGDCM(const char *filename, unsigned short &w, unsigned short &h,  unsigned short &nrslices,float &dx, float &dy, float &dz, float *disp, float *dc);
+	vtkGDCM_API bool GetSizeUsingGDCM(const char *filename, unsigned short &w, unsigned short &h, unsigned short &nrslices, float &dx, float &dy, float &dz, float *disp, float *c1, float *c2, float *c3);
 	vtkGDCM_API double GetZSPacing( std::string dir );
 }
 
