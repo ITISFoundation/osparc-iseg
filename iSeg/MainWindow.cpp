@@ -2045,18 +2045,16 @@ void MainWindow::execute_resize(int resizetype)
 	if (ok)
 	{
 		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
-		if (handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8,
-						0) != 1)
+		if (handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		{
 			ok = false;
+		}
 	}
 
 	Transform tr = handler3D->transform();
-	Vec3 spacing = handler3D->spacing();
-
-	Transform transform_corrected(tr);
 	int plo[3] = {dxm, dym, dzm};
-	transform_corrected.paddingUpdateTransform(plo, spacing.v);
-	handler3D->set_transform(transform_corrected);
+	tr.paddingUpdateTransform(plo, handler3D->spacing());
+	handler3D->set_transform(tr);
 
 	// add color lookup table again
 	handler3D->UpdateColorLookupTable(lut);
@@ -7206,7 +7204,16 @@ void MainWindow::execute_inversesliceorder()
 
 	handler3D->inversesliceorder();
 
-	//	pixelsize_changed();
+	if (QMessageBox::question(this, "iSeg",
+		"Would you like the first slice to remain in same position in space?",
+		QMessageBox::Yes, QMessageBox::No | QMessageBox::Default) == QMessageBox::Yes)
+	{
+		auto tr = handler3D->transform();
+		int shift[3] = {0, 0, -(handler3D->num_slices() - 1) };
+		tr.paddingUpdateTransform(shift, handler3D->spacing());
+		handler3D->set_transform(tr);
+	}
+
 	emit end_datachange(this, iseg::NoUndo);
 }
 

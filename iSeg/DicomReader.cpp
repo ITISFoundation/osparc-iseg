@@ -366,8 +366,9 @@ float DicomReader::slicepos()
 			vec1[2] = orient[0] * orient[4] - orient[1] * orient[3];
 			float l = vec1[0] * vec1[0] + vec1[1] * vec1[1] + vec1[2] * vec1[2];
 			if (l > 0)
-				f = (vec1[0] * loc[0] + vec1[1] * loc[1] + vec1[2] * loc[2]) /
-					sqrt(l);
+			{
+				f = (vec1[0] * loc[0] + vec1[1] * loc[1] + vec1[2] * loc[2]) / std::sqrt(l);
+			}
 		}
 	}
 
@@ -587,17 +588,11 @@ bool DicomReader::read_field(unsigned a, unsigned b)
 	{
 		while (a1 < a || ((a1 == a) && (b1 < b)) || depth > 0)
 		{
-			//			FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-			//			fprintf(fp3,"a%i %i \n",(int)a1,(int)b1);
-			//			fclose(fp3);
 			if (!next_field())
 				return false;
 			if (!read_fieldnr(a1, b1))
 				return false;
 		}
-		//		FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-		//		fprintf(fp3,"b%i %i \n",(int)a1,(int)b1);
-		//		fclose(fp3);
 		if (a1 == a && b1 == b)
 		{
 			if (read_fieldcontent())
@@ -629,9 +624,6 @@ bool DicomReader::read_fieldnr(unsigned& a, unsigned& b)
 					buffer1[1] == 255 && buffer1[0] == 255)
 				{
 					depth++;
-					//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-					//fprintf(fp3,"+1 %i\n",(int)depth);
-					//fclose(fp3);
 				}
 				return read_fieldnr(a, b);
 			}
@@ -641,25 +633,11 @@ bool DicomReader::read_fieldnr(unsigned& a, unsigned& b)
 		else if (a == 65534 && (b == 57357 || b == 57565))
 		{
 			depth--;
-			//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-			//fprintf(fp3,"-1 %i\n",(int)depth);
-			//fclose(fp3);
 			if (fread(buffer1, 1, 4, fp) == 4)
 				return read_fieldnr(a, b);
 			else
 				return false;
 		}
-
-		/*if((a==65535&&b==65535)||(a==65534&&b==57344)) {
-			return read_fieldnr(a,b);
-		} else if(a==65534&&(b==57357||b==57565)) {
-			if(fread(buffer1, 1, 4, fp)==4) return read_fieldnr(a,b);
-			else return false;
-		}*/
-
-		//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-		//fprintf(fp3,"%i %i\n",(int)a,(int)b);
-		//fclose(fp3);
 
 		return true;
 	}
@@ -677,14 +655,12 @@ bool DicomReader::read_fieldcontent()
 		if (l + 1 < length && unsigned(fread(buffer, 1, l, fp)) == l)
 		{
 			buffer[l] = '\0';
-
-			/*FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test102.txt","w");
-			fprintf(fp3,"%s \n",buffer);
-			fclose(fp3);*/
 			return true;
 		}
 		else
+		{
 			return false;
+		}
 	}
 }
 
