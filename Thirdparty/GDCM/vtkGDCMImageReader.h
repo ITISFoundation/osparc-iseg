@@ -64,9 +64,9 @@
 #ifndef VTKGDCMIMAGEREADER_H
 #define VTKGDCMIMAGEREADER_H
 
-#include "vtkGDCMApi.h"
 #include "vtkMedicalImageReader2.h"
 #include "vtkImageData.h"
+#include "vtkVersion.h"
 
 #if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
 #else
@@ -100,19 +100,19 @@ class vtkPolyData;
 namespace gdcm { class ImageReader; }
 //ETX
 class vtkMatrix4x4;
-class vtkGDCM_API vtkGDCMImageReader : public vtkMedicalImageReader2
+class VTK_EXPORT vtkGDCMImageReader : public vtkMedicalImageReader2
 {
 public:
   static vtkGDCMImageReader *New();
   vtkTypeMacro(vtkGDCMImageReader,vtkMedicalImageReader2);
-  virtual void PrintSelf(ostream& os, vtkIndent indent) override;
+  virtual void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description: is the given file name a DICOM file containing an image ?
-  virtual int CanReadFile(const char* fname) override;
+  virtual int CanReadFile(const char* fname);
 
   // Description:
   // Valid extensions
-  virtual const char* GetFileExtensions() override
+  virtual const char* GetFileExtensions()
     {
     // I would like to get rid of ACR/NEMA/IMA so only allow dcm extension for now
     return ".dcm .DCM";
@@ -120,7 +120,7 @@ public:
 
   // Description:
   // A descriptive name for this format
-  virtual const char* GetDescriptiveName() override
+  virtual const char* GetDescriptiveName()
     {
     return "DICOM";
     }
@@ -250,13 +250,13 @@ protected:
 #if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
   int ProcessRequest(vtkInformation* request,
                                  vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector) override;
+                                 vtkInformationVector* outputVector);
   int RequestInformation(vtkInformation *request,
                          vtkInformationVector **inputVector,
-                         vtkInformationVector *outputVector) override;
+                         vtkInformationVector *outputVector);
   int RequestData(vtkInformation *request,
                   vtkInformationVector **inputVector,
-                  vtkInformationVector *outputVector) override;
+                  vtkInformationVector *outputVector);
 #else /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
   void ExecuteInformation();
   void ExecuteData(vtkDataObject *out);
@@ -305,9 +305,9 @@ protected:
 
 protected:
   // TODO / FIXME
-  void SetFilePrefix(const char *) override {}
+  void SetFilePrefix(const char *) {}
   vtkGetStringMacro(FilePrefix);
-  void SetFilePattern(const char *) override {}
+  void SetFilePattern(const char *) {}
   vtkGetStringMacro(FilePattern);
 
 private:

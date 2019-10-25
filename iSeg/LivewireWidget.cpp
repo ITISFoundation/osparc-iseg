@@ -174,7 +174,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 		}
 		establishedlengths.push_back(established.size());
 		clicks.push_back(p);
-		//		dynamic.clear();
+
 		emit vp1dyn_changed(&established, &dynamic);
 	}
 }
@@ -192,11 +192,9 @@ void LivewireWidget::pt_doubleclicked(Point p)
 		else if (autotrace->isChecked())
 		{
 			lw->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(),
-					dynamic.end());
+			established.insert(established.end(), dynamic.begin(), dynamic.end());
 			lwfirst->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(),
-					dynamic.end());
+			established.insert(established.end(), dynamic.begin(), dynamic.end());
 		}
 
 		iseg::DataSelection dataSelection;
@@ -215,11 +213,9 @@ void LivewireWidget::pt_doubleclicked(Point p)
 			dynamicold.clear();
 			times.clear();
 		}
-		//		clicks.clear();
+
 		drawing = false;
-		//		delete lw;
-		//		delete lwfirst;
-		//		lw=lwfirst=nullptr;
+
 		emit vp1dyn_changed(&established, &dynamic);
 	}
 }
@@ -298,9 +294,7 @@ void LivewireWidget::pt_doubleclickedmid(Point p)
 		establishedlengths.clear();
 		clicks.clear();
 		drawing = false;
-		//		delete lw;
-		//		delete lwfirst;
-		//		lw=lwfirst=nullptr;
+
 		if (cooling)
 		{
 			dynamicold.clear();
@@ -330,11 +324,9 @@ void LivewireWidget::on_mouse_released(Point p)
 		dynamic.clear();
 		dynamic1.clear();
 		established.clear();
-		//		clicks.clear();
+
 		drawing = false;
-		//		delete lw;
-		//		delete lwfirst;
-		//		lw=lwfirst=nullptr;
+
 		emit vp1dyn_changed(&established, &dynamic);
 	}
 }
@@ -393,11 +385,6 @@ void LivewireWidget::on_mouse_moved(Point p)
 				dynamicold.insert(dynamicold.begin(), dynamic.begin(),
 						dynamic.end());
 
-				/*FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-				for(tit=times.begin();tit!=times.end();tit++)
-					fprintf(fp3,"%f\n",(float)(*tit-now)/float(tlimit1)*3);
-				fclose(fp3);*/
-
 				tit = times.begin();
 
 				if (tit->msecsTo(now) >= tlimit2)
@@ -412,29 +399,24 @@ void LivewireWidget::on_mouse_moved(Point p)
 					rit--;
 					lw->change_pt(*rit);
 					rit++;
-					established.insert(established.end(), dynamic.rbegin(),
-							rit);
+					established.insert(established.end(), dynamic.rbegin(), rit);
 					times.erase(times.begin(), tit);
-					//					dynamic.erase(dynamic.rbegin(),rit);
 
 					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(),
-								dynamic1.end());
+						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
 					emit vp1dyn_changed(&established, &dynamic);
 				}
 				else
 				{
 					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(),
-								dynamic1.end());
+						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
 					emit vpdyn_changed(&dynamic);
 				}
 			}
 			else
 			{
 				if (cb_closing->isChecked())
-					dynamic.insert(dynamic.end(), dynamic1.begin(),
-							dynamic1.end());
+					dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
 				emit vpdyn_changed(&dynamic);
 			}
 		}
@@ -512,12 +494,8 @@ void LivewireWidget::init1()
 {
 	Point p;
 	p.px = p.py = 0;
-	/*	lw=bmphand->livewireinit(p);
-	lwfirst=bmphand->livewireinit(p);*/
-	//	lwfirst=new IFT_livewire;
-	//	lw->lw_init(bmphand->return_width(),bmphand->return_height(),lw->return_E(),lw->return_directivity(),p);
+
 	drawing = false;
-	//	isactive=true;
 }
 
 void LivewireWidget::cleanup()
@@ -539,8 +517,8 @@ void LivewireWidget::cleanup()
 	if (lw != nullptr)
 		delete lwfirst;
 	lw = lwfirst = nullptr;
+
 	emit vp1dyn_changed(&established, &dynamic);
-	//	isactive=false;
 }
 
 void LivewireWidget::bmp_changed()

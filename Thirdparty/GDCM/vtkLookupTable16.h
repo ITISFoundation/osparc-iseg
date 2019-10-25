@@ -38,19 +38,18 @@
 #ifndef VTKLOOKUPTABLE16_H
 #define VTKLOOKUPTABLE16_H
 
-#include "vtkGDCMApi.h"
 #include "vtkLookupTable.h"
 #include "vtkUnsignedShortArray.h"
 
-class vtkGDCM_API vtkLookupTable16 : public vtkLookupTable
+class VTK_EXPORT vtkLookupTable16 : public vtkLookupTable
 {
 public:
   static vtkLookupTable16 *New();
 
   vtkTypeMacro(vtkLookupTable16,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent);
 
-  void Build() override;
+  void Build();
 
   void SetNumberOfTableValues(vtkIdType number);
 
@@ -70,7 +69,7 @@ void MapScalarsThroughTable2(void *input,
                                              int inputDataType,
                                              int numberOfValues,
                                              int inputIncrement,
-                                             int outputFormat) override;
+                                             int outputFormat);
 
 private:
   vtkLookupTable16(const vtkLookupTable16&);  // Not implemented.

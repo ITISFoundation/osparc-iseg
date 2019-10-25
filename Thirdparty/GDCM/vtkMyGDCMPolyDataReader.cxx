@@ -181,7 +181,6 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			gdcm::Element<gdcm::VR::DS, gdcm::VM::VM1_n> elww;
 			elww.SetLength(count * vrsize);
 			elww.Read(ss2);
-			//assert( elww.GetLength() == elwc.GetLength() );
 			for (unsigned int i = 0; i < elwc.GetLength(); ++i)
 			{
 				this->MedicalImageProperties->AddWindowLevelPreset(elww.GetValue(i), elwc.GetValue(i));
@@ -202,7 +201,7 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			ss.str("");
 			std::string swe = std::string(bvwe->GetPointer(), bvwe->GetLength());
 			unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
-			(void)count;
+
 			// I found a case with only one W/L but two comments: WINDOW1\WINDOW2
 			// SIEMENS-IncompletePixelData.dcm
 			//assert( count >= (unsigned int)n );
@@ -903,16 +902,10 @@ bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsi
 	h = yp - ym + 1;
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
-	//	if(yp-ym+1!=(int)h) return false;
-	//	if(xp-xm+1!=(int)w) return false;
 
 	vtkImageData* img = reader->GetOutput();
 
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
-
-	/*FILE *fp=fopen("C:\\test.txt","w");
-	fprintf(fp,"%s %i %i %i %i %i %i\n",className.c_str(),xm,xp,ym,yp,zm,zp);;
-	fclose(fp);*/
 
 	unsigned long long pos = 0;
 	if (className == "vtkUnsignedCharArray")
@@ -1049,6 +1042,6 @@ double gdcmvtk_rtstruct::GetZSPacing(std::string dir)
 
 gdcmvtk_rtstruct::tissuevec::~tissuevec()
 {
-	for (tissuevec::iterator it = begin(); it != end(); it++)
+	for (auto it = begin(); it != end(); it++)
 		delete *it;
 }

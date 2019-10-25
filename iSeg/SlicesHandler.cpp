@@ -6347,10 +6347,9 @@ Transform SlicesHandler::transform() const { return _transform; }
 Transform SlicesHandler::get_transform_active_slices() const
 {
 	int plo[3] = {0, 0, -static_cast<int>(_startslice)};
-	float spacing[3] = {_dx, _dy, _thickness};
 
 	Transform tr_corrected(_transform);
-	tr_corrected.paddingUpdateTransform(plo, spacing);
+	tr_corrected.paddingUpdateTransform(plo, spacing());
 	return tr_corrected;
 }
 
@@ -7713,9 +7712,8 @@ void SlicesHandler::clear_undo()
 	this->_undoQueue.clear_undo();
 	if (_uelem != nullptr)
 		delete (_uelem);
-	_uelem = nullptr;
 
-	return;
+	_uelem = nullptr;
 }
 
 void SlicesHandler::reverse_undosliceorder()
@@ -7723,11 +7721,8 @@ void SlicesHandler::reverse_undosliceorder()
 	this->_undoQueue.reverse_undosliceorder(_nrslices);
 	if (_uelem != nullptr)
 	{
-		_uelem->dataSelection.sliceNr =
-				_nrslices - 1 - _uelem->dataSelection.sliceNr;
+		_uelem->dataSelection.sliceNr = _nrslices - 1 - _uelem->dataSelection.sliceNr;
 	}
-
-	return;
 }
 
 unsigned SlicesHandler::return_nrundo()
@@ -7777,8 +7772,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e,
-						thick1, disp1, dc1))
+		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1))
 		{
 			Transform tr(disp1, dc1);
 
@@ -7791,8 +7785,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		{
 			QFileInfo fi(lfilename[0]);
 			QString directoryName = fi.absoluteDir().absolutePath();
-			double newThick =
-					gdcmvtk_rtstruct::GetZSPacing(directoryName.toStdString());
+			double newThick = gdcmvtk_rtstruct::GetZSPacing(directoryName.toStdString());
 			if (newThick)
 			{
 				set_slicethickness(newThick);
@@ -7801,8 +7794,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		for (int i = 0; i < lfilename.size(); i++)
 		{
-			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e,
-							thick1, disp1, dc1))
+			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e, thick1, disp1, dc1))
 			{
 				if (c >= 1)
 				{
@@ -7812,16 +7804,14 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 					if (bits == nullptr)
 						return 0;
 
-					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(
-							lfilename[i], bits, a, b, c);
+					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[i], bits, a, b, c);
 					if (!canload)
 					{
 						free(bits);
 						return 0;
 					}
 
-					_image_slices[i]
-							.LoadArray(&(bits[(unsigned long)(a)*b * 0]), a, b);
+					_image_slices[i].LoadArray(&(bits[(unsigned long)(a)*b * 0]), a, b);
 
 					free(bits);
 				}
@@ -7864,8 +7854,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (c > 1)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
@@ -7977,7 +7966,9 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 		return 1;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
@@ -8020,8 +8011,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (_nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
@@ -8093,8 +8083,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (_nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
