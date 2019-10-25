@@ -123,12 +123,16 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	connectivitygroup->insert(rb_8connectivity);
 	rb_8connectivity->setChecked(TRUE);
 
+	cb_brush = new QCheckBox("Enable brush");
+	cb_brush->setChecked(false);
+
 	brush_radius = new QLineEdit(QString::number(1));
 	brush_radius->setValidator(new QDoubleValidator);
 	brush_radius->setToolTip(Format("Set the radius of the brush in physical units, i.e. typically mm."));
 	
 	auto brush_param = new QWidget(vboxparams);
 	auto brush_layout = new QHBoxLayout;
+	brush_layout->addWidget(cb_brush);
 	brush_layout->addWidget(new QLabel("Brush radius"));
 	brush_layout->addWidget(brush_radius);
 	brush_param->setLayout(brush_layout);
@@ -236,38 +240,38 @@ void InterpolationWidget::startslice_pressed()
 
 void InterpolationWidget::on_mouse_clicked(Point p)
 {
-	if (rb_work->isChecked() || rb_tissue->isChecked())
+	if (!cb_brush->isChecked())
+	{
+		WidgetInterface::on_mouse_clicked(p);
+	}
+	else if (rb_work->isChecked() || rb_tissue->isChecked())
 	{
 		brush->set_tissue_value(tissuenr);
 		brush->on_mouse_clicked(p);
-	}
-	else
-	{
-		WidgetInterface::on_mouse_clicked(p);
 	}
 }
 
 void InterpolationWidget::on_mouse_released(Point p)
 {
-	if (rb_work->isChecked() || rb_tissue->isChecked())
-	{
-		brush->on_mouse_released(p);
-	}
-	else
+	if (!cb_brush->isChecked())
 	{
 		WidgetInterface::on_mouse_released(p);
+	}
+	else if (rb_work->isChecked() || rb_tissue->isChecked())
+	{
+		brush->on_mouse_released(p);
 	}
 }
 
 void InterpolationWidget::on_mouse_moved(Point p)
 {
-	if (rb_work->isChecked() || rb_tissue->isChecked())
-	{
-		brush->on_mouse_moved(p);
-	}
-	else
+	if (!cb_brush->isChecked())
 	{
 		WidgetInterface::on_mouse_moved(p);
+	}
+	else if (rb_work->isChecked() || rb_tissue->isChecked())
+	{
+		brush->on_mouse_moved(p);
 	}
 }
 

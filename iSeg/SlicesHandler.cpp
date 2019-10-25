@@ -7798,22 +7798,19 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 			{
 				if (c >= 1)
 				{
-					unsigned long totsize = (unsigned long)(a)*b * c;
-					float* bits = (float*)malloc(sizeof(float) * totsize);
+					size_t totsize = static_cast<size_t>(a)*b * c;
+					std::vector<float> bits(totsize);
 
-					if (bits == nullptr)
+					if (bits.empty())
 						return 0;
 
-					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[i], bits, a, b, c);
+					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[i], bits.data(), a, b, c);
 					if (!canload)
 					{
-						free(bits);
 						return 0;
 					}
 
-					_image_slices[i].LoadArray(&(bits[(unsigned long)(a)*b * 0]), a, b);
-
-					free(bits);
+					_image_slices[i].LoadArray(&(bits[0]), a, b);
 				}
 			}
 		}
