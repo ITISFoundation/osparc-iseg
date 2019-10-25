@@ -233,6 +233,23 @@ public:
 	QPushButton* _execute;
 };
 
+class DensityThresholdParamView : public ParamViewBase
+{
+	Q_OBJECT
+public:
+	DensityThresholdParamView(QWidget* parent = 0);
+
+	// params
+	QRadioButton* _active_slice;
+	QRadioButton* _all_slices;
+	QRadioButton* _3D;
+
+	QSpinBox *_density_radius;
+	QSpinBox *_density_threshold;
+
+	QPushButton* _execute;
+};
+
 class SmoothTissuesParamView : public ParamViewBase
 {
 	Q_OBJECT

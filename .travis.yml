@@ -13,10 +13,13 @@ matrix:
 cache:
   directories:
     - '${TRAVIS_BUILD_DIR}/deps/itk'
+    - '${TRAVIS_BUILD_DIR}/deps/vtk'
 
 before_cache:
   - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/build
   - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/src
+  - rm -r ${TRAVIS_BUILD_DIR}/deps/vtk/build
+  - rm -r ${TRAVIS_BUILD_DIR}/deps/vtk/src
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
@@ -30,19 +33,21 @@ install:
       which cmake || brew install cmake
       brew ls --versions boost || brew install boost
       brew ls --versions hdf5 || brew install hdf5
-      brew ls --versions vtk || brew install vtk
+      #brew ls --versions vtk || brew install vtk
+      VTK_URL="https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz"
+      test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
       brew ls --versions eigen || brew install eigen
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
-      #ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-      ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
+      ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
+      #ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
       test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
     fi
 
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
   - cd CIBuild
 
 script:
