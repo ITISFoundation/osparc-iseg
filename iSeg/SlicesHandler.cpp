@@ -7778,7 +7778,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		if (lfilename.size() > 1)
 		{
-			double newThick = gdcmvtk_rtstruct::GetZSPacing(std::vector<std::string>(lfilename.begin(), lfilename.end()));
+			double newThick = gdcmvtk_rtstruct::GetZSPacing(files);
 			if (newThick)
 			{
 				ISEG_INFO("Dicom series slice z-spacing: " << newThick)
