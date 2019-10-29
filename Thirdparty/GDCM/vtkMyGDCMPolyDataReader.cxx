@@ -976,11 +976,11 @@ bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const char *filename, unsigned short &w,
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
 	double a[3];
-	double b[3];
 	reader->GetDataSpacing(a);
 	dx = a[0];
 	dy = a[1];
 	dz = a[2];
+	double b[3];
 	reader->GetDataOrigin(b);
 	reader->GetImagePositionPatient(b);
 	disp[0] = b[0];

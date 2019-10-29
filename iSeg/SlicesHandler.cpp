@@ -8125,16 +8125,13 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 	DicomReader dcmread;
 	std::vector<float> vpos;
 
-	for (std::vector<const char*>::iterator it = lfilename->begin();
-			 it != lfilename->end(); it++)
+	for (const auto& fname: *lfilename)
 	{
-		dcmread.opendicom(*it);
+		dcmread.opendicom(fname);
 		vpos.push_back(dcmread.slicepos());
 		dcmread.closedicom();
 	}
 
-	float dummypos;
-	const char* dummyname;
 	short nrelem = (short)lfilename->size();
 
 	for (short i = 0; i < nrelem - 1; i++)
@@ -8143,13 +8140,8 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 		{
 			if (vpos[j] > vpos[j - 1])
 			{
-				dummypos = vpos[j];
-				vpos[j] = vpos[j - 1];
-				vpos[j - 1] = dummypos;
-
-				dummyname = (*lfilename)[j];
-				(*lfilename)[j] = (*lfilename)[j - 1];
-				(*lfilename)[j - 1] = dummyname;
+				std::swap(vpos[j], vpos[j - 1]);
+				std::swap((*lfilename)[j], (*lfilename)[j - 1]);
 			}
 		}
 	}
@@ -8169,16 +8161,15 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	DicomReader dcmread;
 
 	dicomseriesnr->clear();
-	for (auto it = vnames->begin(); it != vnames->end(); it++)
+	for (const auto& fname : *vnames)
 	{
-		dcmread.opendicom(*it);
-		auto it1 = dicomseriesnr->begin();
+		dcmread.opendicom(fname);
 		unsigned u = dcmread.seriesnr();
-		dicomseriesnrlist->push_back(u);
 		dcmread.closedicom();
-		while (it1 != dicomseriesnr->end() && (*it1) != u)
-			it1++;
-		if (it1 == dicomseriesnr->end())
+
+		dicomseriesnrlist->push_back(u);
+
+		if (std::find(dicomseriesnr->begin(), dicomseriesnr->end(), u) == dicomseriesnr->end())
 		{
 			dicomseriesnr->push_back(u);
 		}
