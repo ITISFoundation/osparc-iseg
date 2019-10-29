@@ -1,5 +1,7 @@
 language: cpp
-sudo: false
+
+services:
+  - docker
 
 matrix:
   include:
@@ -9,6 +11,11 @@ matrix:
       osx_image: xcode10
       compiler: clang
       env: COMPILER='clang++' BUILD_TYPE='Release'
+    # Linux 
+    - os: linux
+      compiler: gcc
+	  dist: bionic
+      sudo: required
 
 cache:
   directories:
@@ -26,16 +33,28 @@ install:
   - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="https://cmake.org/files/v3.13/cmake-3.13.0-rc1-Linux-x86_64.tar.gz"
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+      sudo apt-get install cmake
+      sudo apt-get install libboost-all-dev
+	  sudo apt-get install libhdf5-dev
+	  sudo apt-get install libeigen3-dev
+	  sudo apt-get install libqt4-dev
+	  docker pull itisfoundation/iseg-bionic-vtk:latest
+	  docker create --name vtklatest itisfoundation/iseg-bionic-vtk:latest bash
+	  docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
+	  docker pull itisfoundation/iseg-bionic-itk:latest
+	  docker create --name itklatest itisfoundation/iseg-bionic-itk:latest bash
+	  docker cp itklatest:/work ${TRAVIS_BUILD_DIR}/deps/itk
+
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
-      brew ls --versions boost || brew install boost --without-icu4c
+      brew ls --versions boost || brew install boost --without-icu4c --without-single --without-static
       brew ls --versions hdf5 || brew install hdf5
       #brew ls --versions vtk || brew install vtk
       VTK_URL="https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz"
       test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF -DBUILD_TESTING=OFF && make -j2 && make install && cd ${DEPS_DIR})
+      #docker pull itisfoundation/iseg-osx-vtk:latest
+      #docker create --name vtklatest itisfoundation/iseg-osx-vtk:latest bash
+      #docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
       brew ls --versions eigen || brew install eigen
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
