@@ -6,10 +6,10 @@
 #
 if(NOT BOOST_ROOT)
 	set(BOOST_ROOT "not defined" CACHE PATH "path to Boost root folder")	
-	message(FATAL_ERROR "Please define Boost root folder")
+	message(WARNING "Please define Boost root folder")
 endif(NOT BOOST_ROOT)
 if (BOOST_ROOT STREQUAL "not defined")
-	message(FATAL_ERROR "Please define Boost root folder")
+	message(WARNING "Please define Boost root folder")
 endif(BOOST_ROOT STREQUAL "not defined")
 
 #set(Boost_DEBUG on)

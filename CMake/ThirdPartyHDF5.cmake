@@ -7,10 +7,10 @@
 cmake_policy(SET CMP0074 NEW)
 if(NOT HDF5_ROOT)
 	set(HDF5_ROOT "not defined" CACHE PATH "path to HDF5 root folder")	
-	message(FATAL_ERROR "Please define HDF5 root folder")
+	message(WARNING "Please define HDF5 root folder")
 endif(NOT HDF5_ROOT)
 if (HDF5_ROOT STREQUAL "not defined")
-	message(FATAL_ERROR "Please define HDF5 root folder")
+	message(WARNING "Please define HDF5 root folder")
 endif(HDF5_ROOT STREQUAL "not defined")
 
 FIND_PACKAGE(HDF5 COMPONENTS C REQUIRED)

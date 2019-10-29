@@ -13,9 +13,15 @@ matrix:
       env: COMPILER='clang++' BUILD_TYPE='Release'
     # Linux 
     - os: linux
-      compiler: gcc
-      dist: bionic
       sudo: required
+      dist: bionic
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env: COMPILER='g++-9' BUILD_TYPE='Release'
 
 cache:
   directories:
@@ -35,15 +41,17 @@ install:
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       sudo apt-get install cmake
       sudo apt-get install libboost-all-dev
-      sudo apt-get install libhdf5-dev
+      #sudo apt-get install libhdf5-dev provided by itk and vtk
       sudo apt-get install libeigen3-dev
       sudo apt-get install libqt4-dev
-      docker pull itisfoundation/iseg-bionic-vtk:latest
-      docker create --name vtklatest itisfoundation/iseg-bionic-vtk:latest bash
-      docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
-      docker pull itisfoundation/iseg-bionic-itk:latest
-      docker create --name itklatest itisfoundation/iseg-bionic-itk:latest bash
-      docker cp itklatest:/work ${TRAVIS_BUILD_DIR}/deps/itk
+      sudo apt-get install libvtk7-dev
+      #docker pull itisfoundation/iseg-bionic-vtk:latest
+      #docker create --name vtklatest itisfoundation/iseg-bionic-vtk:latest bash
+      #docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
+      sudo apt-get install libinsighttoolkit4.12
+      #docker pull itisfoundation/iseg-bionic-itk:latest
+      #docker create --name itklatest itisfoundation/iseg-bionic-itk:latest bash
+      #docker cp itklatest:/work ${TRAVIS_BUILD_DIR}/deps/itk
 
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
@@ -66,7 +74,12 @@ install:
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+    fi
   - cd CIBuild
 
 script:
