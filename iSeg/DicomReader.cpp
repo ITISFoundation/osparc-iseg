@@ -62,7 +62,6 @@ unsigned short DicomReader::get_height()
 bool DicomReader::load_pictureGDCM(const char* filename, float* bits)
 {
 	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, width, height);
-	return true;
 }
 
 bool DicomReader::load_picture(float* bits)
@@ -708,39 +707,35 @@ unsigned DicomReader::read_length()
 						{
 							i = 0;
 							depth++;
-							/*FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-							fprintf(fp3,"+1 %i\n",(int)depth);
-							fclose(fp3);*/
 						}
 						else
-							i = (unsigned)buffer1[0] +
-								256 * ((unsigned)buffer1[1] +
-									   256 * ((unsigned)buffer1[2] +
-											  256 * (unsigned)buffer1[3]));
+						{
+							i = (unsigned)buffer1[0] + 256 * ((unsigned)buffer1[1] + 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+						}
 					}
 					else
+					{
 						i = 1000000;
+					}
 				}
 				else
+				{
 					i = (unsigned)buffer1[2] + 256 * (unsigned)buffer1[3];
+				}
 			}
 		}
 		else
 		{
-			if (buffer1[3] == 255 && buffer1[2] == 255 && buffer1[1] == 255 &&
-				buffer1[0] == 255)
+			if (buffer1[3] == 255 && buffer1[2] == 255 && 
+				buffer1[1] == 255 && buffer1[0] == 255)
 			{
 				i = 0;
 				depth++;
-				//FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","a");
-				//fprintf(fp3,"+1 %i\n",(int)depth);
-				//fclose(fp3);
 			}
 			else
-				i = (unsigned)buffer1[0] +
-					256 * ((unsigned)buffer1[1] +
-						   256 * ((unsigned)buffer1[2] +
-								  256 * (unsigned)buffer1[3]));
+			{
+				i = (unsigned)buffer1[0] + 256 * ((unsigned)buffer1[1] + 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+			}
 		}
 		l = i;
 	}
