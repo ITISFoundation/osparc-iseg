@@ -15,13 +15,8 @@ matrix:
     - os: linux
       sudo: required
       dist: bionic
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-9
-      env: COMPILER='g++-9' BUILD_TYPE='Release'
+      compiler: gcc
+      env: COMPILER='g++' BUILD_TYPE='Release'
 
 cache:
   directories:
