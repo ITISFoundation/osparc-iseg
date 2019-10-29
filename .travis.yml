@@ -71,7 +71,7 @@ before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4 -Wdev
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
     fi
