@@ -6256,8 +6256,6 @@ void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2)
 	{
 		_image_slices[slice1 + j].set_mode(1, false);
 	}
-
-	return;
 }
 
 void SlicesHandler::extrapolate(unsigned short origin1, unsigned short origin2,
@@ -6282,8 +6280,6 @@ void SlicesHandler::extrapolate(unsigned short origin1, unsigned short origin2,
 	}
 
 	_image_slices[target].set_mode(1, false);
-
-	return;
 }
 
 void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2,
@@ -6309,8 +6305,6 @@ void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2,
 	{
 		_image_slices[slice1 + j].set_mode(1, false);
 	}
-
-	return;
 }
 
 void SlicesHandler::set_slicethickness(float t)
@@ -6320,8 +6314,6 @@ void SlicesHandler::set_slicethickness(float t)
 	{
 		_os.set_thickness(t, i);
 	}
-
-	return;
 }
 
 float SlicesHandler::get_slicethickness() { return _thickness; }
@@ -6331,7 +6323,6 @@ void SlicesHandler::set_pixelsize(float dx1, float dy1)
 	_dx = dx1;
 	_dy = dy1;
 	_os.set_pixelsize(_dx, _dy);
-	return;
 }
 
 Pair SlicesHandler::get_pixelsize()
@@ -7772,8 +7763,10 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		float d, e, thick1;
 		float disp1[3];
 		float rot[3][3]; // rotation matrix
-		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, rot[0], rot[1], rot[2]))
+		std::vector<std::string> files(lfilename.begin(), lfilename.end());
+		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(files, a, b, c, d, e, thick1, disp1, rot[0], rot[1], rot[2]))
 		{
+			ISEG_INFO("Dicom series slice thickness: " << thick1)
 			Transform tr;
 			tr.setRotation(rot[0], rot[1], rot[2]);
 			tr.setOffset(disp1);
@@ -7785,12 +7778,15 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		if (lfilename.size() > 1)
 		{
-			QFileInfo fi(lfilename[0]);
-			QString directoryName = fi.absoluteDir().absolutePath();
-			double newThick = gdcmvtk_rtstruct::GetZSPacing(directoryName.toStdString());
+			double newThick = gdcmvtk_rtstruct::GetZSPacing(std::vector<std::string>(lfilename.begin(), lfilename.end()));
 			if (newThick)
 			{
+				ISEG_INFO("Dicom series slice z-spacing: " << newThick)
 				set_slicethickness(newThick);
+			}
+			else
+			{
+				ISEG_INFO("GetZSPacing failed: " << newThick)
 			}
 		}
 
