@@ -929,11 +929,11 @@ bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const std::vector<std::string>& filename
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
 	double a[3];
-	double b[3];
 	reader->GetOutput()->GetSpacing(a);//GetDataSpacing(a);
 	dx = a[0];
 	dy = a[1];
 	dz = a[2];
+	double b[3];
 	reader->GetDataOrigin(b);
 	//std::cerr << "Dicom origin: " << b[0] << ", " << b[1] << ", " << b[2] << "\n";
 	reader->GetImagePositionPatient(b);
