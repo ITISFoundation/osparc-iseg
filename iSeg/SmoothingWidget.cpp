@@ -30,6 +30,13 @@
 
 namespace iseg {
 
+namespace
+{
+	float f1(float dI, float k) { return std::exp(-std::pow(dI / k, 2)); }
+
+	float f2(float dI, float k) { return 1 / (1 + std::pow(dI / k, 2)); }
+}
+
 SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
