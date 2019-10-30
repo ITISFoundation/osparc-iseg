@@ -30,7 +30,7 @@
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qfiledialog.h>
-#include <qgridLayout.h>
+#include <qgridlayout.h>
 #include <qgroupbox.h>
 #include <qlabel.h>
 #include <qlayout.h>
