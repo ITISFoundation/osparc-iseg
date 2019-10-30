@@ -45,7 +45,7 @@ install:
       sudo apt-get install libboost-timer-dev
       sudo apt-get install libhdf5-dev
       sudo apt-get install libeigen3-dev
-      sudo apt-get install libqt4-dev
+      sudo apt-get install libqt4-opengl-dev
       sudo apt-get install libvtk7-dev
       #docker pull itisfoundation/iseg-bionic-vtk:latest
       #docker create --name vtklatest itisfoundation/iseg-bionic-vtk:latest bash
