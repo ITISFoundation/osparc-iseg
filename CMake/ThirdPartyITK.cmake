@@ -6,15 +6,10 @@
 #
 
 FIND_PACKAGE(ITK COMPONENTS 
-		ITKCommon ITKOptimizers ITKOptimizersv4 ITKTransform ITKTransformFactory
-		ITKVNLInstantiation ITKVTK ITKBiasCorrection ITKLabelMap
-		ITKWatersheds ITKStatistics ITKMetaIO ITKIOImageBase ITKIOGDCM ITKIOMesh 
-		ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOTransformBase ITKIOTransformMatlab  
-		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKBinaryMathematicalMorphology
-		ITKGDCM 
-		ITKFastMarching ITKLevelSets ITKRegionGrowing
-		ITKReview
-			REQUIRED)
+		ITKCommon ITKLabelMap ITKVTK ITKBiasCorrection 
+		ITKIOImageBase ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOGDCM ITKGDCM
+		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK
+		REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
 IF(${_itk_version} VERSION_LESS "4.12.0")
 	MESSAGE(WARNING "ITK version (${_itk_version}) is lower than 4.12. Some parts of iSEG may depend on newer features")

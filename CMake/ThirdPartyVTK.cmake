@@ -18,7 +18,6 @@ IF(ISEG_VTK_OPENGL2)
 ELSE()
 	FIND_PACKAGE(VTK REQUIRED
 		COMPONENTS 
-		COMPONENTS 
 		vtkCommonDataModel
 		vtkFiltersModeling
 		vtkIOLegacy vtkIOGeometry vtkIOImage
