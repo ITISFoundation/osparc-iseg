@@ -35,8 +35,15 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       sudo apt-get install cmake
-      sudo apt-get install libboost-all-dev
-      #sudo apt-get install libhdf5-dev provided by itk and vtk
+      sudo apt-get install libboost-chrono-dev
+      sudo apt-get install libboost-date-time-dev
+      sudo apt-get install libboost-filesystem-dev
+      sudo apt-get install libboost-program-options-dev
+      sudo apt-get install libboost-random-dev
+      sudo apt-get install libboost-test-dev
+      sudo apt-get install libboost-thread-dev
+      sudo apt-get install libboost-timer-dev
+      sudo apt-get install libhdf5-dev
       sudo apt-get install libeigen3-dev
       sudo apt-get install libqt4-dev
       sudo apt-get install libvtk7-dev
