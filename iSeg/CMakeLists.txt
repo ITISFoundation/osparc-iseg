@@ -47,7 +47,7 @@ SET(ViewerSrcs
 	ImageForestingTransformRegionGrowingWidget.cpp
 	ImageInformationDialogs.cpp
 	InterpolationWidget.cpp
-	levelset.cpp
+	Levelset.cpp
 	LivewireWidget.cpp
 	LoaderWidgets.cpp
 	main.cpp
