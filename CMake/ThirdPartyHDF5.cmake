@@ -11,6 +11,7 @@ if(NOT HDF5_ROOT)
 endif(NOT HDF5_ROOT)
 if (HDF5_ROOT STREQUAL "not defined")
 	message(WARNING "Please define HDF5 root folder")
+	set(HDF5_NO_FIND_PACKAGE_CONFIG_FILE ON)
 endif(HDF5_ROOT STREQUAL "not defined")
 
 FIND_PACKAGE(HDF5 COMPONENTS C REQUIRED)
