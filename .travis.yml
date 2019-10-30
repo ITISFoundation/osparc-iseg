@@ -7,10 +7,10 @@ matrix:
   include:
 
     # OSX C++14 Clang builds
-    - os: osx
-      osx_image: xcode10
-      compiler: clang
-      env: COMPILER='clang++' BUILD_TYPE='Release'
+    #- os: osx
+    #  osx_image: xcode10
+    #  compiler: clang
+    #  env: COMPILER='clang++' BUILD_TYPE='Release'
     # Linux 
     - os: linux
       sudo: required
@@ -50,7 +50,7 @@ install:
       #docker pull itisfoundation/iseg-bionic-vtk:latest
       #docker create --name vtklatest itisfoundation/iseg-bionic-vtk:latest bash
       #docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
-      sudo apt-get install libinsighttoolkit4.12
+      sudo apt-get install libinsighttoolkit4-dev
       #docker pull itisfoundation/iseg-bionic-itk:latest
       #docker create --name itklatest itisfoundation/iseg-bionic-itk:latest bash
       #docker cp itklatest:/work ${TRAVIS_BUILD_DIR}/deps/itk
