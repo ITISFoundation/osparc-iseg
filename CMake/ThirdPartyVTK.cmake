@@ -8,25 +8,24 @@ OPTION(ISEG_VTK_OPENGL2 "Expect VTK with OpenGL2 backend (VTK_RENDERING_BACKEND=
 IF(ISEG_VTK_OPENGL2)
 	FIND_PACKAGE(VTK REQUIRED
 		COMPONENTS 
-		vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
-		vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
-		vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
-		vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
-		vtkRenderingCore vtkRenderingOpenGL2 vtkInteractionWidgets
-		vtksys
-		vtkRenderingVolume vtkRenderingVolumeOpenGL2 vtkRenderingAnnotation vtkRenderingLOD
-		vtkInteractionStyle)
+		vtkCommonDataModel
+		vtkFiltersModeling
+		vtkIOLegacy vtkIOGeometry vtkIOImage
+		vtkImagingStencil
+		vtkRenderingVolumeOpenGL2 vtkRenderingLOD
+		vtkInteractionStyle vtkInteractionWidgets
+	)
 ELSE()
 	FIND_PACKAGE(VTK REQUIRED
 		COMPONENTS 
-		vtkCommonCore vtkCommonDataModel vtkCommonSystem vtkCommonMisc vtkCommonExecutionModel vtkCommonTransforms vtkCommonMath
-		vtkFiltersCore vtkFiltersSources vtkFiltersExtraction vtkFiltersGeneral vtkFiltersGeometry vtkFiltersHybrid vtkFiltersModeling
-		vtkIOCore vtkIOLegacy vtkIOXML vtkIOImage vtkIOGeometry
-		vtkImagingCore vtkImagingGeneral vtkImagingMath vtkImagingStatistics vtkImagingStencil vtkImagingHybrid
-		vtkRenderingCore vtkRenderingOpenGL vtkInteractionWidgets
-		vtksys
-		vtkRenderingVolume vtkRenderingVolumeOpenGL vtkRenderingAnnotation vtkRenderingLOD
-		vtkInteractionStyle)
+		COMPONENTS 
+		vtkCommonDataModel
+		vtkFiltersModeling
+		vtkIOLegacy vtkIOGeometry vtkIOImage
+		vtkImagingStencil
+		vtkRenderingVolumeOpenGL vtkRenderingLOD
+		vtkInteractionStyle vtkInteractionWidgets
+	)
 ENDIF()
 
 IF(${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_BUILD} VERSION_LESS "7.1.0")
