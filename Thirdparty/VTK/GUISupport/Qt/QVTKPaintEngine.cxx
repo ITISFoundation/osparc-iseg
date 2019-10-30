@@ -1,13 +1,3 @@
-/*=========================================================================
-
-  Copyright 2004 Sandia Corporation.
-  Under the terms of Contract DE-AC04-94AL85000, there is a non-exclusive
-  license for use of this work by or on behalf of the
-  U.S. Government. Redistribution and use in source and binary forms, with
-  or without modification, are permitted provided that this Notice and any
-  statement of authorship are reproduced on all copies.
-
-=========================================================================*/
 
 
 #include "QVTKPaintEngine.h"
@@ -28,7 +18,7 @@ public:
   QCache<qint64, vtkSmartPointer<vtkImageData> > mImageCache;
 };
 
-QVTKPaintEngine::QVTKPaintEngine() 
+QVTKPaintEngine::QVTKPaintEngine()
     : QPaintEngine(QPaintEngine::PaintOutsidePaintEvent |
                    QPaintEngine::AlphaBlend)
 {
@@ -50,13 +40,13 @@ bool QVTKPaintEngine::begin(QPaintDevice* dev)
 bool QVTKPaintEngine::end()
 {
   //Widget->GetRenderWindow()->Frame();
-  Widget = NULL;
+  Widget = nullptr;
   return true;
 }
 
 QPaintEngine::Type QVTKPaintEngine::type() const
 {
-  return QPaintEngine::User;
+  return QPaintEngine::OpenGL;
 }
 
 void QVTKPaintEngine::updateState(const QPaintEngineState&)
@@ -68,20 +58,20 @@ void QVTKPaintEngine::updateState(const QPaintEngineState&)
 void QVTKPaintEngine::drawPixmap(const QRectF& r, const QPixmap& pm, const QRectF& sr)
 {
   if(!this->Widget)
-    {
+  {
     return;
-    }
+  }
   QRect ri = r.toRect();
   QRect sri = sr.toRect();
 
   QPixmap pix = pm.copy(sri);
   if(sri.size() != ri.size())
-    {
+  {
     pix = pix.scaled(ri.size());
-    }
+  }
 
   QImage img = pix.toImage().mirrored().rgbSwapped();
-  
+
   // blend the pixels from QImage into the vtkRenderWindow's buffer
   vtkRenderWindow* renWin = this->Widget->GetRenderWindow();
   renWin->SetRGBACharPixelData(ri.left(), this->Widget->height() - ri.top() - ri.height(),
