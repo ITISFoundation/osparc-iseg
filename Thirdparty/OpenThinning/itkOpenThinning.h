@@ -14,6 +14,8 @@
 #include <itkImageRegionIterator.h>
 #include <itkImageToImageFilter.h>
 
+#include <deque>
+
 namespace itk {
 
 template<class TInputImage, class TOutputImage>

@@ -28,14 +28,13 @@
 // vtkQtConnection is an internal class.
 
 
-#ifndef VTK_QT_CONNECTION
-#define VTK_QT_CONNECTION
+#ifndef vtkQtConnection_h
+#define vtkQtConnection_h
 
-#include "vtkObject.h"
 #include "vtkCommand.h"  // for event defines
-#include "qobject.h"
+#include <QObject>
 
-class QObject;
+class vtkObject;
 class vtkCallbackCommand;
 class vtkEventQtSlotConnect;
 
@@ -45,27 +44,27 @@ class vtkEventQtSlotConnect;
 class vtkQtConnection : public QObject
 {
   Q_OBJECT
-  
+
   public:
 
     // constructor
     vtkQtConnection(vtkEventQtSlotConnect* owner);
 
     // destructor, disconnect if necessary
-    ~vtkQtConnection();
-   
+    ~vtkQtConnection() override;
+
     // print function
     void PrintSelf(ostream& os, vtkIndent indent);
-    
+
     // callback from VTK to emit signal
     void Execute(vtkObject* caller, unsigned long event, void* client_data);
-    
+
     // set the connection
     void SetConnection(vtkObject* vtk_obj, unsigned long event,
-                       const QObject* qt_obj, const char* slot, 
+                       const QObject* qt_obj, const char* slot,
                        void* client_data, float priority=0.0
                          ,Qt::ConnectionType type = Qt::AutoConnection);
-    
+
     // check if a connection matches input parameters
     bool IsConnection(vtkObject* vtk_obj, unsigned long event,
                       const QObject* qt_obj, const char* slot,
@@ -73,7 +72,7 @@ class vtkQtConnection : public QObject
 
     static void DoCallback(vtkObject* vtk_obj, unsigned long event,
                            void* client_data, void* call_data);
-    
+
   signals:
     // the qt signal for moc to take care of
     void EmitExecute(vtkObject*, unsigned long, void* client_data, void* call_data, vtkCommand*);
@@ -82,7 +81,7 @@ class vtkQtConnection : public QObject
     void deleteConnection();
 
   protected:
-    
+
     // the connection information
     vtkObject* VTKObject;
     vtkCallbackCommand* Callback;
@@ -99,4 +98,3 @@ class vtkQtConnection : public QObject
 };
 
 #endif
-

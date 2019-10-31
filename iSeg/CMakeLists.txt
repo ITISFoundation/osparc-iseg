@@ -47,7 +47,7 @@ SET(ViewerSrcs
 	ImageForestingTransformRegionGrowingWidget.cpp
 	ImageInformationDialogs.cpp
 	InterpolationWidget.cpp
-	levelset.cpp
+	Levelset.cpp
 	LivewireWidget.cpp
 	LoaderWidgets.cpp
 	main.cpp
@@ -184,6 +184,7 @@ TARGET_LINK_LIBRARIES(iSeg
 	QVTK
 	predicates
 	vtkGDCM
+	${CMAKE_DL_LIBS}
 	${MY_EXTERNAL_LINK_LIBRARIES}
 )
 

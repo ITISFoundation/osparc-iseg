@@ -32,7 +32,7 @@
 #include <qmetaobject.h>
 
 // constructor
-vtkQtConnection::vtkQtConnection(vtkEventQtSlotConnect* owner) 
+vtkQtConnection::vtkQtConnection(vtkEventQtSlotConnect* owner)
   : Owner(owner)
 {
   this->Callback = vtkCallbackCommand::New();
@@ -45,13 +45,13 @@ vtkQtConnection::vtkQtConnection(vtkEventQtSlotConnect* owner)
 }
 
 // destructor, disconnect if necessary
-vtkQtConnection::~vtkQtConnection() 
+vtkQtConnection::~vtkQtConnection()
 {
   if(this->VTKObject)
-    {
+  {
     this->VTKObject->RemoveObserver(this->Callback);
     //Qt takes care of disconnecting slots
-    }
+  }
   this->Callback->Delete();
 }
 
@@ -61,23 +61,23 @@ void vtkQtConnection::DoCallback(vtkObject* vtk_obj, unsigned long event,
   vtkQtConnection* conn = static_cast<vtkQtConnection*>(client_data);
   conn->Execute(vtk_obj, event, call_data);
 }
-    
-      
+
+
 // callback from VTK to emit signal
 void vtkQtConnection::Execute(vtkObject* caller, unsigned long e, void* call_data)
 {
-  if(e != vtkCommand::DeleteEvent || 
-     (e == vtkCommand::DeleteEvent && this->VTKEvent == vtkCommand::DeleteEvent))
-    {
+  if(e != vtkCommand::DeleteEvent ||
+     (this->VTKEvent == vtkCommand::DeleteEvent))
+  {
     emit EmitExecute(caller, e, ClientData, call_data, this->Callback);
-    }
-  
+  }
+
   if(e == vtkCommand::DeleteEvent)
-    {
+  {
     this->Owner->Disconnect(this->VTKObject, this->VTKEvent, this->QtObject,
-      this->QtSlot.toAscii().data(),
+      this->QtSlot.toLatin1().data(),
       this->ClientData);
-    }
+  }
 }
 
 bool vtkQtConnection::IsConnection(vtkObject* vtk_obj, unsigned long e,
@@ -100,11 +100,11 @@ bool vtkQtConnection::IsConnection(vtkObject* vtk_obj, unsigned long e,
 
   return true;
 }
-      
+
 // set the connection
 void vtkQtConnection::SetConnection(
   vtkObject* vtk_obj, unsigned long e,
-  const QObject* qt_obj, const char* slot, 
+  const QObject* qt_obj, const char* slot,
   void* client_data, float priority
   , Qt::ConnectionType type)
 {
@@ -119,9 +119,9 @@ void vtkQtConnection::SetConnection(
   vtk_obj->AddObserver(e, this->Callback, priority);
 
   if(e != vtkCommand::DeleteEvent)
-    {
+  {
     vtk_obj->AddObserver(vtkCommand::DeleteEvent, this->Callback);
-    }
+  }
 
   // make a connection between this and the Qt object
   qt_obj->connect(
@@ -140,12 +140,12 @@ void vtkQtConnection::deleteConnection()
 void vtkQtConnection::PrintSelf(ostream& os, vtkIndent indent)
 {
   if(this->VTKObject && this->QtObject)
-    {
-    os << indent << 
+  {
+    os << indent <<
           this->VTKObject->GetClassName() << ":" <<
           vtkCommand::GetStringFromEventId(this->VTKEvent) << "  <---->  " <<
           this->QtObject->metaObject()->className() << "::" <<
-          this->QtSlot.toAscii().data() << "\n";
-    }
+          this->QtSlot.toLatin1().data() << "\n";
+  }
 }
 

@@ -37,7 +37,8 @@
 #define Q_VTK_WIDGET_H
 
 #include "QVTKInteractor.h"
-#include <QtGui/QWidget>
+#include <QWidget>
+#include <QTimer>
 
 class QVTKInteractorAdapter;
 
@@ -54,19 +55,11 @@ class vtkTDxDevice;
 #if defined(Q_WS_MAC)
 # if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
 #  define QVTK_USE_COCOA
-# elif !defined(QT_MAC_USE_COCOA) && defined(VTK_USE_CARBON)
-#  define QVTK_USE_CARBON
 # elif defined(VTK_USE_COCOA)
 #  error "VTK configured to use Cocoa, but Qt configured to use Carbon"
-# elif defined(VTK_USE_CARBON)
-#  error "VTK configured to use Carbon, but Qt configured to use Cocoa"
 # endif
 #endif
 
-
-#if defined(QVTK_USE_CARBON)
-#include <Carbon/Carbon.h>    // Event handling for dirty region
-#endif
 
 #include "QVTKWin32Header.h"
 
@@ -81,25 +74,28 @@ class QVTK_EXPORT QVTKWidget : public QWidget
   Q_PROPERTY(double maxRenderRateForImageCache
              READ maxRenderRateForImageCache
              WRITE setMaxRenderRateForImageCache)
+  Q_PROPERTY(bool deferRenderInPaintEvent
+             READ deferRenderInPaintEvent
+             WRITE setDeferRenderInPaintEvent)
 
 public:
   //! constructor
-  QVTKWidget(QWidget* parent = NULL, Qt::WFlags f = 0);
+  QVTKWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
   //! destructor
-  virtual ~QVTKWidget();
+  ~QVTKWidget() override;
 
   // Description:
   // Set the vtk render window, if you wish to use your own vtkRenderWindow
   virtual void SetRenderWindow(vtkRenderWindow*);
-    
+
   // Description:
   // Get the vtk render window.
   virtual vtkRenderWindow* GetRenderWindow();
-    
+
   // Description:
   // Get the Qt/vtk interactor that was either created by default or set by the user
   virtual QVTKInteractor* GetInteractor();
-    
+
   // Description:
   // Enum for additional event types supported.
   // These events can be picked up by command observers on the interactor
@@ -120,7 +116,7 @@ public:
 
   // Description:
   // If automatic image caching is enabled, then the image will be cached
-  // after every render with a DesiredUpdateRate that is greater than
+  // after every render with a DesiredUpdateRate that is less than
   // this parameter.  By default, the vtkRenderWindowInteractor will
   // change the desired render rate depending on the user's
   // interactions. (See vtkRenderWindow::DesiredUpdateRate,
@@ -133,13 +129,13 @@ public:
   // Returns the current image in the window.  If the image cache is up
   // to date, that is returned to avoid grabbing other windows.
   virtual vtkImageData* cachedImage();
-    
+
   // Description:
   // Handle showing of the Widget
-  virtual void showEvent(QShowEvent*);
+  void showEvent(QShowEvent*) override;
 
-  virtual QPaintEngine* paintEngine() const;
-  
+  QPaintEngine* paintEngine() const override;
+
   // Description:
   // Use a 3DConnexion device. Initial value is false.
   // If VTK is not build with the TDx option, this is no-op.
@@ -149,7 +145,19 @@ public:
   // it is ignored.
   void SetUseTDx(bool useTDx);
   bool GetUseTDx() const;
-  
+
+  // Description:
+  // When set to true (default is false), paintEvent() will never directly trigger
+  // a render on the vtkRenderWindow (via vtkRenderWindowInteractor::Render()).
+  // Instead, it starts a timer that then triggers the render on idle. This, in
+  // general is a good strategy for cases where Render may take a while with
+  // applications wanting to report progress and consequently trigger paint
+  // events on other widgets like progress bars, etc.
+  // There is one caveat: when paintEvent() is called using a redirected paint device,
+  // then this flag is ignored and the paintEvent() will trigger
+  // vtkRenderWindowInteractor::Render(), if needed.
+  void setDeferRenderInPaintEvent(bool val);
+  bool deferRenderInPaintEvent() const;
 
 Q_SIGNALS:
   // Description:
@@ -187,49 +195,65 @@ public Q_SLOTS:
   void setDevice(vtkTDxDevice *device);
 #endif
 
+protected Q_SLOTS:
+  // Description:
+  // Request to defer a render call i.e. start the mDeferedRenderTimer. When the
+  // timer times out, it will call doDeferredRender() to do the actual
+  // rendering.
+  virtual void deferRender();
+
+  // Description:
+  // Called when the mDeferedRenderTimer times out to do the rendering.
+  virtual void doDeferredRender();
+
 protected:
   // overloaded resize handler
-  virtual void resizeEvent(QResizeEvent* event);
+  void resizeEvent(QResizeEvent* event) override;
   // overloaded move handler
-  virtual void moveEvent(QMoveEvent* event);
+  void moveEvent(QMoveEvent* event) override;
   // overloaded paint handler
-  virtual void paintEvent(QPaintEvent* event);
+  void paintEvent(QPaintEvent* event) override;
 
   // overloaded mouse press handler
-  virtual void mousePressEvent(QMouseEvent* event);
+  void mousePressEvent(QMouseEvent* event) override;
   // overloaded mouse move handler
-  virtual void mouseMoveEvent(QMouseEvent* event);
+  void mouseMoveEvent(QMouseEvent* event) override;
   // overloaded mouse release handler
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+  void mouseReleaseEvent(QMouseEvent* event) override;
   // overloaded key press handler
-  virtual void keyPressEvent(QKeyEvent* event);
+  void keyPressEvent(QKeyEvent* event) override;
   // overloaded key release handler
-  virtual void keyReleaseEvent(QKeyEvent* event);
+  void keyReleaseEvent(QKeyEvent* event) override;
   // overloaded enter event
-  virtual void enterEvent(QEvent*);
+  void enterEvent(QEvent*) override;
   // overloaded leave event
-  virtual void leaveEvent(QEvent*);
+  void leaveEvent(QEvent*) override;
 #ifndef QT_NO_WHEELEVENT
   // overload wheel mouse event
-  virtual void wheelEvent(QWheelEvent*);
+  void wheelEvent(QWheelEvent*) override;
 #endif
   // overload focus event
-  virtual void focusInEvent(QFocusEvent*);
+  void focusInEvent(QFocusEvent*) override;
   // overload focus event
-  virtual void focusOutEvent(QFocusEvent*);
+  void focusOutEvent(QFocusEvent*) override;
   // overload Qt's event() to capture more keys
-  bool event( QEvent* e );
-    
+  bool event( QEvent* e ) override;
+
   // overload context menu event
-  virtual void contextMenuEvent(QContextMenuEvent*);
+  void contextMenuEvent(QContextMenuEvent*) override;
   // overload drag enter event
-  virtual void dragEnterEvent(QDragEnterEvent*);
+  void dragEnterEvent(QDragEnterEvent*) override;
   // overload drag move event
-  virtual void dragMoveEvent(QDragMoveEvent*);
+  void dragMoveEvent(QDragMoveEvent*) override;
   // overload drag leave event
-  virtual void dragLeaveEvent(QDragLeaveEvent*);
+  void dragLeaveEvent(QDragLeaveEvent*) override;
   // overload drop event
-  virtual void dropEvent(QDropEvent*);
+  void dropEvent(QDropEvent*) override;
+
+  // method called in paintEvent() to render the image cache on to the device.
+  // return false, if cache couldn;t be used for painting. In that case, the
+  // paintEvent() method will continue with the default painting code.
+  virtual bool paintCachedImage();
 
   // the vtk render window
   vtkRenderWindow* mRenWin;
@@ -237,31 +261,42 @@ protected:
 
   // the paint engine
   QPaintEngine* mPaintEngine;
-    
+
   // set up an X11 window based on a visual and colormap
   // that VTK chooses
   void x11_setup_window();
 
-#if defined(QVTK_USE_CARBON)
-  EventHandlerUPP DirtyRegionHandlerUPP;
-  EventHandlerRef DirtyRegionHandler;
-  static OSStatus DirtyRegionProcessor(EventHandlerCallRef er, EventRef event, void*);
+#if defined(Q_OS_WIN)
+  bool winEvent(MSG* msg, long* result);
+
+#if QT_VERSION >= 0x050000
+  bool nativeEvent(const QByteArray& eventType, void* message, long* result);
+#endif
+
 #endif
 
 protected:
-    
   vtkImageData* mCachedImage;
   bool cachedImageCleanFlag;
   bool automaticImageCache;
   double maxImageCacheRenderRate;
   QVTKInteractorAdapter* mIrenAdapter;
-  
+  bool mDeferRenderInPaintEvent;
+
+
 private:
   //! unimplemented operator=
   QVTKWidget const& operator=(QVTKWidget const&);
   //! unimplemented copy
   QVTKWidget(const QVTKWidget&);
 
+  unsigned long renderEventCallbackObserverId;
+
+  // Description:
+  // Callback called on every vtkCommand::RenderEvent fired by the
+  // vtkRenderWindow.
+  void renderEventCallback();
+  QTimer mDeferedRenderTimer;
 };
 
 #endif

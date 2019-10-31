@@ -42,10 +42,10 @@
 #include <QtCore/QObject>
 
 #include "vtkTDxConfigure.h" // defines VTK_USE_TDX
-#if defined(VTK_USE_TDX) && defined(Q_WS_WIN)
+#if defined(VTK_USE_TDX) && defined(Q_OS_WIN)
 class vtkTDxWinDevice;
 #endif
-#if defined(VTK_USE_TDX) && defined(Q_WS_MAC)
+#if defined(VTK_USE_TDX) && defined(Q_OS_MAC)
 class vtkTDxMacDevice;
 #endif
 #if defined(VTK_USE_TDX) && defined(Q_WS_X11)
@@ -70,25 +70,25 @@ public:
   // Enum for additional event types supported.
   // These events can be picked up by command observers on the interactor
   enum vtkCustomEvents
-    {
+  {
     ContextMenuEvent = vtkCommand::UserEvent + 100,
     DragEnterEvent,
     DragMoveEvent,
     DragLeaveEvent,
     DropEvent
-    };
+  };
 
 
   // Description:
   // Overloaded terminiate app, which does nothing in Qt.
   // Use qApp->exit() instead.
-  virtual void TerminateApp() override;
+  void TerminateApp() override;
 
   // Description:
   // Overloaded start method does nothing.
   // Use qApp->exec() instead.
-  virtual void Start() override;
-  virtual void Initialize() override;
+  void Start() override;
+  void Initialize() override;
 
   // Description:
   // Start listening events on 3DConnexion device.
@@ -110,16 +110,16 @@ protected:
   // constructor
   QVTKInteractor();
   // destructor
-  ~QVTKInteractor();
+  ~QVTKInteractor() override;
 
   // create a Qt Timer
-  virtual int InternalCreateTimer(int timerId, int timerType, unsigned long duration) override;
+  int InternalCreateTimer(int timerId, int timerType, unsigned long duration) override;
   // destroy a Qt Timer
-  virtual int InternalDestroyTimer(int platformTimerId) override;
-#if defined(VTK_USE_TDX) && defined(Q_WS_WIN)
+  int InternalDestroyTimer(int platformTimerId) override;
+#if defined(VTK_USE_TDX) && defined(Q_OS_WIN)
   vtkTDxWinDevice *Device;
 #endif
-#if defined(VTK_USE_TDX) && defined(Q_WS_MAC)
+#if defined(VTK_USE_TDX) && defined(Q_OS_MAC)
   vtkTDxMacDevice *Device;
 #endif
 #if defined(VTK_USE_TDX) && defined(Q_WS_X11)

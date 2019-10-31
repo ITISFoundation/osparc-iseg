@@ -65,7 +65,7 @@
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QShortcut>
-#include <QSignalMapper.h>
+#include <QSignalMapper>
 #include <QStackedWidget>
 #include <qapplication.h>
 #include <qdockwidget.h>

@@ -36,8 +36,8 @@ bool orthonormalize(float* vecA, float* vecB)
 	float precision = 1.0e-07;
 
 	// Input vectors non-zero length
-	float lenA = std::sqrtf(vtkMath::Dot(vecA, vecA));
-	float lenB = std::sqrtf(vtkMath::Dot(vecB, vecB));
+	float lenA = std::sqrt(vtkMath::Dot(vecA, vecA));
+	float lenB = std::sqrt(vtkMath::Dot(vecB, vecB));
 	ok &= lenA >= precision;
 	ok &= lenB >= precision;
 

@@ -462,7 +462,4 @@ private:
 	double blueFactor;
 };
 
-float f1(float dI, float k);
-float f2(float dI, float k);
-
 } // namespace iseg
