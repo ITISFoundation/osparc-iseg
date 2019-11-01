@@ -177,6 +177,8 @@ private:
 	QPushButton* swapBtn;
 	QPushButton* swapAllBtn;
 	QPushButton* pb_work2tissue;
+	QCheckBox* cb_mask_3d;
+	QPushButton* pb_mask;
 	QMenuBar* menubar;
 	MenuWTT* file;
 	QMenu* imagemenu;
@@ -457,6 +459,7 @@ private slots:
 	void subtract_tissue_pushed();
 	void subtract_tissue_shortkey();
 	void subtracthold_tissue_pushed();
+	void mask_source();
 	//	void add_tissue_3D_pushed();
 	void randomize_colors();
 	void tissueFilterChanged(const QString&);

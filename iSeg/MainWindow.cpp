@@ -588,6 +588,12 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	pb_addhold->setFixedWidth(50);
 	pb_subhold->setFixedWidth(50);
 
+	cb_mask_3d = new QCheckBox("3D", this);
+	cb_mask_3d->setToolTip(Format("Mask source image in 3D or current slice only."));
+
+	pb_mask = new QPushButton("Mask Source", this);
+	pb_mask->setToolTip(Format("Mask source image based on target. The source image is set to zero at zero target pixels."));
+
 	unsigned short slicenr = handler3D->active_slice() + 1;
 	pb_first = new QPushButton("|<<", this);
 	scb_slicenr = new QScrollBar(1, (int)handler3D->num_slices(), 1, 5, 1, Qt::Horizontal, this);
@@ -1032,8 +1038,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QDockWidget* tissuewdock = new QDockWidget(tr("Tissues"), this);
 	style_dockwidget(tissuewdock);
 	tissuewdock->setObjectName("Tissues");
-	tissuewdock->setAllowedAreas(Qt::LeftDockWidgetArea |
-															 Qt::RightDockWidgetArea);
+	tissuewdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuewdock->setWidget(vboxtissuew);
 	addDockWidget(Qt::RightDockWidgetArea, tissuewdock);
 	tissuesDock = tissuewdock;
@@ -1045,8 +1050,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 			Format("The tissue hierarchy allows to group and organize complex "
 						 "segmentations into a hierarchy."));
 	tissuehierarchydock->setObjectName("Tissue Hierarchy");
-	tissuehierarchydock->setAllowedAreas(Qt::LeftDockWidgetArea |
-																			 Qt::RightDockWidgetArea);
+	tissuehierarchydock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuehierarchydock->setWidget(tissueHierarchyWidget);
 	addDockWidget(Qt::RightDockWidgetArea, tissuehierarchydock);
 
@@ -1057,10 +1061,26 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 																	 "the Target to/from the selected tissue."
 																	 "Note: Only one tissue can be selected."));
 	tissueadddock->setObjectName("Adder");
-	tissueadddock->setAllowedAreas(Qt::LeftDockWidgetArea |
-																 Qt::RightDockWidgetArea);
+	tissueadddock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissueadddock->setWidget(hboxtissueadderw);
 	addDockWidget(Qt::RightDockWidgetArea, tissueadddock);
+
+	QVBoxLayout* vboxmasking = new QVBoxLayout;
+	vboxmasking->setSpacing(0);
+	vboxmasking->setMargin(0);
+	vboxmasking->addWidget(cb_mask_3d);
+	vboxmasking->addWidget(pb_mask);
+
+	QWidget* vboxmaskingw = new QWidget;
+	vboxmaskingw->setLayout(vboxmasking);
+
+	QDockWidget* maskdock = new QDockWidget(tr("Mask"), this);
+	style_dockwidget(maskdock);
+	maskdock->setObjectName("Mask");
+	maskdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	maskdock->setWidget(vboxmaskingw);
+	maskdock->setVisible(false); // default hide
+	addDockWidget(Qt::RightDockWidgetArea, maskdock);
 
 	hboxslice->addStretch();
 	hboxslice->addStretch();
@@ -1164,14 +1184,10 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	file->insertSeparator();
 	if (!m_editingmode)
 	{
-		m_loadprojfilename.lpf1nr =
-				file->insertItem("", this, SLOT(execute_loadproj1()));
-		m_loadprojfilename.lpf2nr =
-				file->insertItem("", this, SLOT(execute_loadproj2()));
-		m_loadprojfilename.lpf3nr =
-				file->insertItem("", this, SLOT(execute_loadproj3()));
-		m_loadprojfilename.lpf4nr =
-				file->insertItem("", this, SLOT(execute_loadproj4()));
+		m_loadprojfilename.lpf1nr = file->insertItem("", this, SLOT(execute_loadproj1()));
+		m_loadprojfilename.lpf2nr = file->insertItem("", this, SLOT(execute_loadproj2()));
+		m_loadprojfilename.lpf3nr = file->insertItem("", this, SLOT(execute_loadproj3()));
+		m_loadprojfilename.lpf4nr = file->insertItem("", this, SLOT(execute_loadproj4()));
 		m_loadprojfilename.separatornr = file->insertSeparator();
 		file->setItemVisible(m_loadprojfilename.lpf1nr, false);
 		file->setItemVisible(m_loadprojfilename.lpf2nr, false);
@@ -1248,6 +1264,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hidemenu->addAction(tissuehierarchydock->toggleViewAction());
 	hidemenu->addAction(overlaydock->toggleViewAction());
 	hidemenu->addAction(multiDatasetDock->toggleViewAction());
+	hidemenu->addAction(maskdock->toggleViewAction());
 
 	hidecontrastbright = new QAction("Contr./Bright.", this);
 	hidecontrastbright->setToggleAction(true);
@@ -1504,12 +1521,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	QObject::connect(sb_stride, SIGNAL(valueChanged(int)), this, SLOT(sb_stride_changed()));
 
 	QObject::connect(pb_add, SIGNAL(clicked()), this, SLOT(add_tissue_pushed()));
-	QObject::connect(pb_sub, SIGNAL(clicked()), this,
-			SLOT(subtract_tissue_pushed()));
-	QObject::connect(pb_addhold, SIGNAL(clicked()), this,
-			SLOT(addhold_tissue_pushed()));
-	QObject::connect(pb_subhold, SIGNAL(clicked()), this,
-			SLOT(subtracthold_tissue_pushed()));
+	QObject::connect(pb_sub, SIGNAL(clicked()), this, SLOT(subtract_tissue_pushed()));
+	QObject::connect(pb_addhold, SIGNAL(clicked()), this, SLOT(addhold_tissue_pushed()));
+	QObject::connect(pb_subhold, SIGNAL(clicked()), this, SLOT(subtracthold_tissue_pushed()));
+
+	QObject::connect(pb_mask, SIGNAL(clicked()), this, SLOT(mask_source()));
 
 	QObject::connect(bmp_scroller, SIGNAL(contentsMoving(int, int)), this,
 			SLOT(setWorkContentsPos(int, int)));
@@ -5470,6 +5486,12 @@ void MainWindow::subtracthold_tissue_pushed()
 	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
 	pb_add3D->setDown(false);
 	}*/
+}
+
+void MainWindow::mask_source()
+{
+	bool mask3d = cb_mask_3d->isChecked();
+	// todo
 }
 
 void MainWindow::stophold_tissue_pushed()
