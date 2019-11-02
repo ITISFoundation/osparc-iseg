@@ -6,17 +6,15 @@
 #
 
 FIND_PACKAGE(ITK COMPONENTS 
-		ITKCommon
-		ITKBiasCorrection ITKVTK
-		ITKMetaIO ITKIOImageBase ITKIOGDCM
-		ITKIOMeta ITKIONIFTI ITKIONRRD ITKIORAW
-		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKGDCM
-		ITKLevelSets ITKRegionGrowing
-		ITKSuperPixel
-			REQUIRED)
+		ITKCommon ITKSmoothing ITKRegionGrowing ITKBinaryMathematicalMorphology ITKImageGradient ITKDistanceMap
+		ITKLabelMap ITKVTK ITKCurvatureFlow ITKBiasCorrection ITKImageFeature ITKFastMarching
+		ITKIOImageBase ITKIORAW ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOGDCM
+		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKReview
+		# ITKSuperPixel
+		REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
-IF(${_itk_version} VERSION_LESS "4.12.0")
-	MESSAGE(WARNING "ITK version (${_itk_version}) is lower than 4.12. Some parts of iSEG may depend on newer features")
+IF(${_itk_version} VERSION_LESS "5.0")
+	MESSAGE(WARNING "ITK version (${_itk_version}) is lower than 5.0. Some parts of iSEG may depend on newer features")
 ENDIF()
 
 MACRO(USE_ITK)

@@ -23,7 +23,6 @@
 #ifndef VTKGDCMMEDICALIMAGEPROPERTIES_H
 #define VTKGDCMMEDICALIMAGEPROPERTIES_H
 
-#include "vtkGDCMApi.h"
 #include "vtkMedicalImageProperties.h"
 
 class vtkGDCMMedicalImagePropertiesInternals;
@@ -31,16 +30,16 @@ class vtkGDCMMedicalImagePropertiesInternals;
 namespace gdcm { class File; }
 //ETX
 
-class vtkGDCM_API vtkGDCMMedicalImageProperties : public vtkMedicalImageProperties
+class VTK_EXPORT vtkGDCMMedicalImageProperties : public vtkMedicalImageProperties
 {
 public:
   static vtkGDCMMedicalImageProperties *New();
   vtkTypeMacro(vtkGDCMMedicalImageProperties,vtkMedicalImageProperties);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
-  // Convenience method to reset all fields to an emptry string/value
-  virtual void Clear() override;
+  // Convenience method to reset all fields to an empty string/value
+  virtual void Clear();
 
 /*
   // Description:

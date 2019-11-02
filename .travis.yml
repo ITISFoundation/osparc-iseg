@@ -1,48 +1,79 @@
 language: cpp
-sudo: false
+
+services:
+  - docker
 
 matrix:
   include:
 
     # OSX C++14 Clang builds
-    - os: osx
-      osx_image: xcode10
-      compiler: clang
-      env: COMPILER='clang++' BUILD_TYPE='Release'
-
-cache:
-  directories:
-    - '${TRAVIS_BUILD_DIR}/deps/itk'
-
-before_cache:
-  - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/build
-  - rm -r ${TRAVIS_BUILD_DIR}/deps/itk/src
+    #- os: osx
+    #  osx_image: xcode10
+    #  compiler: clang
+    #  env: COMPILER='clang++' BUILD_TYPE='Release'
+    # Linux 
+    - os: linux
+      sudo: required
+      dist: bionic
+      compiler: gcc
+      env: COMPILER='g++' BUILD_TYPE='Release'
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="https://cmake.org/files/v3.13/cmake-3.13.0-rc1-Linux-x86_64.tar.gz"
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+      sudo apt-get install cmake
+      sudo apt-get install libboost-chrono-dev
+      sudo apt-get install libboost-date-time-dev
+      sudo apt-get install libboost-filesystem-dev
+      sudo apt-get install libboost-program-options-dev
+      sudo apt-get install libboost-random-dev
+      sudo apt-get install libboost-test-dev
+      sudo apt-get install libboost-thread-dev
+      sudo apt-get install libboost-timer-dev
+      sudo apt-get install libhdf5-dev
+      sudo apt-get install libeigen3-dev
+      sudo apt-get install libqt4-opengl-dev
+      #sudo apt-get install libvtk7-dev
+      docker pull itisfoundation/iseg-ubuntu-vtk:8.2
+      docker create --name vtkcontainer itisfoundation/iseg-ubuntu-vtk:8.2 bash
+      docker cp vtkcontainer:/work ${TRAVIS_BUILD_DIR}/deps/vtk
+      #sudo apt-get install libinsighttoolkit4-dev
+      docker pull itisfoundation/iseg-ubuntu-itk:4.13
+      docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:4.13 bash
+      docker cp itkcontainer:/work ${TRAVIS_BUILD_DIR}/deps/itk
+      #ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
+      #ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
+      #test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j2 && make install && cd ${DEPS_DIR})
+
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
-      brew ls --versions boost || brew install boost
+      brew ls --versions boost || brew install boost --without-icu4c --without-single --without-static
       brew ls --versions hdf5 || brew install hdf5
-      brew ls --versions vtk || brew install vtk
+      #brew ls --versions vtk || brew install vtk
+      VTK_URL="https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz"
+      test -d ${DEPS_DIR}/vtk/lib || (mkdir -p vtk/src && travis_retry wget --no-check-certificate --quiet -O - ${VTK_URL} | tar --strip-components=1 -xz -C vtk/src && mkdir vtk/build && cd vtk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DCMAKE_RULE_MESSAGES=OFF && make -j2 && make install && cd ${DEPS_DIR})
+      #docker pull itisfoundation/iseg-osx-vtk:latest
+      #docker create --name vtklatest itisfoundation/iseg-osx-vtk:latest bash
+      #docker cp vtklatest:/work ${TRAVIS_BUILD_DIR}/deps/vtk
       brew ls --versions eigen || brew install eigen
       brew tap cartr/qt4 && brew tap-pin cartr/qt4 && brew install qt@4
       # could not find tap for ITK
-      #ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-      ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
-      test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j4 && make install && cd ${DEPS_DIR})
+      ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
+      #ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
+      test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j2 && make install && cd ${DEPS_DIR})
     fi
 
 before_script:
   - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=/usr/local/opt/vtk -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DHDF5_ROOT=/usr -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4 -Wdev
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBOOST_ROOT=/usr/local/opt/boost -DHDF5_ROOT=/usr/local/opt/hdf5 -DVTK_DIR=`ls -d -1 ${DEPS_DIR}/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 ${DEPS_DIR}/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -Wdev
+    fi
   - cd CIBuild
 
 script:

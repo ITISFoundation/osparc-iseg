@@ -18,12 +18,14 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
+#include "vtkStringArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkMedicalImageProperties.h"
 #include "vtkObjectFactory.h"
 #include "vtkPolyData.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkSmartPointer.h"
 
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
@@ -40,8 +42,8 @@
 
 vtkStandardNewMacro(vtkMyGDCMPolyDataReader)
 
-	//----------------------------------------------------------------------------
-	vtkMyGDCMPolyDataReader::vtkMyGDCMPolyDataReader()
+//----------------------------------------------------------------------------
+vtkMyGDCMPolyDataReader::vtkMyGDCMPolyDataReader()
 {
 	this->FileName = NULL;
 	this->SetNumberOfInputPorts(0);
@@ -181,7 +183,6 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			gdcm::Element<gdcm::VR::DS, gdcm::VM::VM1_n> elww;
 			elww.SetLength(count * vrsize);
 			elww.Read(ss2);
-			//assert( elww.GetLength() == elwc.GetLength() );
 			for (unsigned int i = 0; i < elwc.GetLength(); ++i)
 			{
 				this->MedicalImageProperties->AddWindowLevelPreset(elww.GetValue(i), elwc.GetValue(i));
@@ -202,10 +203,9 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			ss.str("");
 			std::string swe = std::string(bvwe->GetPointer(), bvwe->GetLength());
 			unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
-			(void)count;
+
 			// I found a case with only one W/L but two comments: WINDOW1\WINDOW2
 			// SIEMENS-IncompletePixelData.dcm
-			//assert( count >= (unsigned int)n );
 			elwe.SetLength(/*count*/ n * vr.GetSizeof());
 			ss.str(swe);
 			elwe.Read(ss);
@@ -234,8 +234,9 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 	// Add more info:
 }
 
+//----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader const& reader,
-															   vtkInformationVector* outputVector)
+		vtkInformationVector* outputVector)
 {
 	// This is done in RequestInformation
 	//  gdcm::MediaStorage ms;
@@ -254,6 +255,7 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 	{
 		return 0;
 	}
+	
 	gdcm::Tag tssroisq(0x3006, 0x0020);
 	if (!ds.FindDataElement(tssroisq))
 	{
@@ -261,7 +263,6 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 	}
 
 	const gdcm::DataElement& roicsq = ds.GetDataElement(troicsq);
-	//std::cout << roicsq << std::endl;
 	//const gdcm::SequenceOfItems *sqi = roicsq.GetSequenceOfItems();
 	gdcm::SmartPointer<gdcm::SequenceOfItems> sqi = roicsq.GetValueAsSQ();
 	if (!sqi || !sqi->GetNumberOfItems())
@@ -279,17 +280,14 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 	// For each Item in the DataSet create a vtkPolyData
 	for (unsigned int pd = 0; pd < sqi->GetNumberOfItems(); ++pd)
 	{
-		// get the info object
-		vtkInformation* outInfo1 = outputVector->GetInformationObject(pd);
-
 		// get the ouptut
-		vtkPolyData* output = vtkPolyData::SafeDownCast(
-			outInfo1->Get(vtkDataObject::DATA_OBJECT()));
+		auto outInfo1 = outputVector->GetInformationObject(pd);
+		auto output = vtkPolyData::SafeDownCast(outInfo1->Get(vtkDataObject::DATA_OBJECT()));
 
 		const gdcm::Item& item = sqi->GetItem(pd + 1); // Item start at #1
-		//std::cout << item << std::endl;
 		const gdcm::Item& sitem = ssqi->GetItem(pd + 1); // Item start at #1
 		const gdcm::DataSet& snestedds = sitem.GetNestedDataSet();
+
 		// (3006,0026) ?? (LO) [date]                                    # 4,1 ROI Name
 		gdcm::Tag stcsq(0x3006, 0x0026);
 		if (!snestedds.FindDataElement(stcsq))
@@ -297,9 +295,8 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 			return 0;
 		}
 		const gdcm::DataElement& sde = snestedds.GetDataElement(stcsq);
-
 		const gdcm::DataSet& nestedds = item.GetNestedDataSet();
-		//std::cout << nestedds << std::endl;
+
 		//(3006,002a) IS [255\192\96]                              # 10,3 ROI Display Color
 		gdcm::Tag troidc(0x3006, 0x002a);
 		gdcm::Attribute<0x3006, 0x002a> color = {};
@@ -307,96 +304,67 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 		{
 			const gdcm::DataElement& decolor = nestedds.GetDataElement(troidc);
 			color.SetFromDataElement(decolor);
-			//std::cout << "color:" << color[0] << "," << color[1] << "," << color[2] << std::endl;
 		}
+
 		//(3006,0040) SQ (Sequence with explicit length #=8)      # 4326, 1 ContourSequence
 		gdcm::Tag tcsq(0x3006, 0x0040);
 		if (!nestedds.FindDataElement(tcsq))
 		{
-			return 0;
+			continue;
 		}
 		const gdcm::DataElement& csq = nestedds.GetDataElement(tcsq);
-		//std::cout << csq << std::endl;
 
-		//const gdcm::SequenceOfItems *sqi2 = csq.GetSequenceOfItems();
 		gdcm::SmartPointer<gdcm::SequenceOfItems> sqi2 = csq.GetValueAsSQ();
-		if (!sqi2 || !sqi2->GetNumberOfItems())
+		if (!sqi2)// || !sqi2->GetNumberOfItems())
 		{
-			return 0;
+			continue;
 		}
 		unsigned int nitems = static_cast<unsigned>(sqi2->GetNumberOfItems());
-		//std::cout << nitems << std::endl;
-		//this->SetNumberOfOutputPorts(nitems);
-		vtkFloatArray* scalars = vtkFloatArray::New();
-		scalars->SetNumberOfComponents(3);
 
-		vtkPoints* newPts = vtkPoints::New();
-		std::string s(sde.GetByteValue()->GetPointer(), sde.GetByteValue()->GetLength());
-		//std::cout << s << std::endl;
-		//newPts->GetData()->SetName( s.c_str() );
+		auto scalars = vtkSmartPointer<vtkFloatArray>::New();
+		scalars->SetNumberOfComponents(3);
 		// In VTK there is no API to specify the name of a vtkPolyData, you can only specify Name
 		// for the scalars (pointdata or celldata), so let's do that...
+		std::string s(sde.GetByteValue()->GetPointer(), sde.GetByteValue()->GetLength());
 		scalars->SetName(s.c_str());
-		vtkCellArray* polys = vtkCellArray::New();
+		auto newPts = vtkSmartPointer<vtkPoints>::New();
+		auto polys = vtkSmartPointer<vtkCellArray>::New();
 		for (unsigned int i = 0; i < nitems; ++i)
 		{
 			const gdcm::Item& item2 = sqi2->GetItem(i + 1); // Item start at #1
-
 			const gdcm::DataSet& nestedds2 = item2.GetNestedDataSet();
-			//std::cout << nestedds2 << std::endl;
+
 			// (3006,0050) DS [43.57636\65.52504\-10.0\46.043102\62.564945\-10.0\49.126537\60.714... # 398,48 ContourData
 			gdcm::Tag tcontourdata(0x3006, 0x0050);
 			const gdcm::DataElement& contourdata = nestedds2.GetDataElement(tcontourdata);
-			//std::cout << contourdata << std::endl;
 
-			//const gdcm::ByteValue *bv = contourdata.GetByteValue();
 			gdcm::Attribute<0x3006, 0x0050> at;
 			at.SetFromDataElement(contourdata);
 
-			//newPts->SetNumberOfPoints( at.GetNumberOfValues() / 3 );
-			//assert( at.GetNumberOfValues() % 3 == 0); // FIXME
 			const double* pts = at.GetValues();
-			vtkIdType buffer[256];
-			vtkIdType* ptIds;
 			unsigned int npts = at.GetNumberOfValues() / 3;
-			if (npts > 256)
-			{
-				ptIds = new vtkIdType[npts];
-			}
-			else
-			{
-				ptIds = buffer;
-			}
+			std::vector<vtkIdType> ptIds(npts);
+
 			for (unsigned int i = 0; i < npts * 3; i += 3)
 			{
-				float x[3];
-				x[0] = pts[i + 0];
-				x[1] = pts[i + 1];
-				x[2] = pts[i + 2];
-				vtkIdType ptId = newPts->InsertNextPoint(x);
+				auto ptId = newPts->InsertNextPoint(pts[i + 0], pts[i + 1], pts[i + 2]);
 				ptIds[i / 3] = ptId;
 			}
 			// Each Contour Data is in fact a Cell:
-			vtkIdType cellId = polys->InsertNextCell(npts, ptIds);
+			auto cellId = polys->InsertNextCell(npts, ptIds.data());
 			scalars->InsertTuple3(cellId, (double)color[0] / 255.0, (double)color[1] / 255.0, (double)color[2] / 255.0);
-			if (npts > 256)
-			{
-				delete[] ptIds;
-			}
 		}
 		output->SetPoints(newPts);
-		newPts->Delete();
 		output->SetPolys(polys);
-		polys->Delete();
 		output->GetCellData()->SetScalars(scalars);
-		scalars->Delete();
 	}
 
 	return 1;
 }
 
+//----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader const& reader,
-																	vtkInformationVector* outputVector)
+		vtkInformationVector* outputVector)
 {
 	const gdcm::DataSet& ds = reader.GetFile().GetDataSet();
 	// (5400,0100) SQ (Sequence with undefined length #=1)     # u/l, 1 WaveformSequence
@@ -406,8 +374,6 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 		return 0;
 	}
 	const gdcm::DataElement& wsq = ds.GetDataElement(twsq);
-	//std::cout << wsq << std::endl;
-	//const gdcm::SequenceOfItems *sqi = wsq.GetSequenceOfItems();
 	gdcm::SmartPointer<gdcm::SequenceOfItems> sqi = wsq.GetValueAsSQ();
 	if (!sqi || !sqi->GetNumberOfItems())
 	{
@@ -425,7 +391,6 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 	}
 	const gdcm::DataElement& wba = nestedds.GetDataElement(twba);
 
-	//std::cout << wba << std::endl;
 	//  (5400,1006) CS [SS]                                     #   2, 1 WaveformSampleInterpretation
 	// (5400,1010) OW 00ba\0030\ff76\ff8b\00a2\ffd3\ffae\ff50\0062\00c4\011e\00c2\00ba... # 57600, 1 WaveformData
 	gdcm::Tag twd(0x5400, 0x1010);
@@ -438,30 +403,24 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 	size_t len = bv->GetLength();
 	int16_t* p = (int16_t*)bv;
 
-	// get the info object
-	int pd = 0;
-	vtkInformation* outInfo1 = outputVector->GetInformationObject(pd);
-
 	// get the ouptut
-	vtkPolyData* output = vtkPolyData::SafeDownCast(
-		outInfo1->Get(vtkDataObject::DATA_OBJECT()));
+	int pd = 0;
+	auto outInfo1 = outputVector->GetInformationObject(pd);
+	auto output = vtkPolyData::SafeDownCast(outInfo1->Get(vtkDataObject::DATA_OBJECT()));
 
-	vtkPoints* newPts = vtkPoints::New();
+	auto newPts = vtkSmartPointer<vtkPoints>::New();
 	size_t npts = len / 2;
-	//npts = 10; // DEBUG !
 	for (size_t i = 0; i < npts; ++i)
 	{
 		float x[3];
-		x[0] = (float)p[i] / 8800;
-		//std::cout << p[i] << std::endl;
-		x[1] = i;
+		x[0] = (float)p[i] / 8800; // ?
+		x[1] = (float)i;
 		x[2] = 0;
 		vtkIdType ptId = newPts->InsertNextPoint(x);
 	}
 	output->SetPoints(newPts);
-	newPts->Delete();
 
-	vtkCellArray* lines = vtkCellArray::New();
+	auto lines = vtkSmartPointer<vtkCellArray>::New();
 	for (int i = 0; i < newPts->GetNumberOfPoints() - 1; ++i)
 	{
 		vtkIdType topol[2];
@@ -471,10 +430,7 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 	}
 
 	output->SetLines(lines);
-	lines->Delete();
 	output->BuildCells();
-	//output->GetCellData()->SetScalars(scalars);
-	//scalars->Delete();
 
 	return 1;
 }
@@ -485,12 +441,7 @@ int vtkMyGDCMPolyDataReader::RequestData(
 	vtkInformationVector** vtkNotUsed(inputVector),
 	vtkInformationVector* outputVector)
 {
-	vtkInformation* outInfo = outputVector->GetInformationObject(0);
-	//vtkPoints *newPts, *mergedPts;
-	//vtkCellArray *newPolys, *mergedPolys;
-	//vtkFloatArray *newScalars=0, *mergedScalars=0;
-
-	// All of the data in the first piece.
+	auto outInfo = outputVector->GetInformationObject(0);
 	if (outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER()) > 0)
 	{
 		return 0;
@@ -530,6 +481,7 @@ int vtkMyGDCMPolyDataReader::RequestData(
 	return ret;
 }
 
+//----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestInformation_RTStructureSetStorage(gdcm::Reader const& reader)
 {
 	const gdcm::DataSet& ds = reader.GetFile().GetDataSet();
@@ -555,13 +507,13 @@ int vtkMyGDCMPolyDataReader::RequestInformation_RTStructureSetStorage(gdcm::Read
 	// Allocate
 	for (unsigned int i = 1; i < npds; ++i) // first output is allocated for us
 	{
-		vtkPolyData* output2 = vtkPolyData::New();
+		auto output2 = vtkSmartPointer<vtkPolyData>::New();
 		this->GetExecutive()->SetOutputData(i, output2);
-		output2->Delete();
 	}
 	return 1;
 }
 
+//----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestInformation_HemodynamicWaveformStorage(gdcm::Reader const& reader)
 {
 	return 1;
@@ -573,11 +525,6 @@ int vtkMyGDCMPolyDataReader::RequestInformation(
 	vtkInformationVector** vtkNotUsed(inputVector),
 	vtkInformationVector* outputVector)
 {
-	// get the info object
-	//  vtkInformation *outInfo = outputVector->GetInformationObject(0);
-	//
-	//  outInfo->Set(vtkStreamingDemandDrivenPipeline::MAXIMUM_NUMBER_OF_PIECES(),
-	//               -1);
 	gdcm::Reader reader;
 	reader.SetFileName(this->FileName);
 	if (!reader.Read())
@@ -633,7 +580,6 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 
 	gdcm::MediaStorage ms;
 	ms.SetFromFile(reader.GetFile());
-	//std::cout << ms << std::endl;
 	if (ms != gdcm::MediaStorage::RTStructureSetStorage)
 	{
 		return 0;
@@ -654,7 +600,6 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 	}
 
 	const gdcm::DataElement& roicsq = ds.GetDataElement(troicsq);
-	//std::cout << roicsq << std::endl;
 	//const gdcm::SequenceOfItems *sqi = roicsq.GetSequenceOfItems();
 	gdcm::SmartPointer<gdcm::SequenceOfItems> sqi = roicsq.GetValueAsSQ();
 	if (!sqi || !sqi->GetNumberOfItems())
@@ -672,10 +617,7 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 	// For each Item in the DataSet create a vtkPolyData
 	for (unsigned int pd = 0; pd < sqi->GetNumberOfItems(); ++pd)
 	{
-		tissuestruct* tissue = new tissuestruct;
-		//tissues.push_back(tissue);
 		const gdcm::Item& item = sqi->GetItem(pd + 1); // Item start at #1
-		//std::cout << item << std::endl;
 		const gdcm::Item& sitem = ssqi->GetItem(pd + 1); // Item start at #1
 
 		const gdcm::DataSet& snestedds = sitem.GetNestedDataSet();
@@ -683,7 +625,6 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 		gdcm::Tag stcsq(0x3006, 0x0026);
 		if (!snestedds.FindDataElement(stcsq))
 		{
-			//return 0;
 			continue;
 		}
 
@@ -693,25 +634,17 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 		gdcm::Tag tcsq(0x3006, 0x0040);
 		if (!nestedds.FindDataElement(tcsq))
 		{
-			//return 0;
-			//continue;
 			sqi2 = 0;
 		}
 		else
 		{
 			const gdcm::DataElement& csq = nestedds.GetDataElement(tcsq);
-
 			sqi2 = csq.GetValueAsSQ();
-			if (!sqi2 || !sqi2->GetNumberOfItems())
-			{
-				//return 0;
-				continue;
-			}
 		}
 
+		auto tissue = new tissuestruct;
 		tissues.push_back(tissue);
 
-		//std::cout << nestedds << std::endl;
 		//(3006,002a) IS [255\192\96]                              # 10,3 ROI Display Color
 		gdcm::Tag troidc(0x3006, 0x002a);
 		gdcm::Attribute<0x3006, 0x002a> color = {};
@@ -719,95 +652,92 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 		{
 			const gdcm::DataElement& decolor = nestedds.GetDataElement(troidc);
 			color.SetFromDataElement(decolor);
-			(*tissues.rbegin())->color[0] = (float)color[0] / 255.0f;
-			(*tissues.rbegin())->color[1] = (float)color[1] / 255.0f;
-			(*tissues.rbegin())->color[2] = (float)color[2] / 255.0f;
+			tissue->color[0] = (float)color[0] / 255.0f;
+			tissue->color[1] = (float)color[1] / 255.0f;
+			tissue->color[2] = (float)color[2] / 255.0f;
 		}
 		else
 		{
-			(*tissues.rbegin())->color[0] = 1.0f;
-			(*tissues.rbegin())->color[1] = 0.0f;
-			(*tissues.rbegin())->color[2] = 0.0f;
+			tissue->color[0] = 1.0f;
+			tissue->color[1] = 0.0f;
+			tissue->color[2] = 0.0f;
 		}
 
-		unsigned int nitems;
-		if (sqi2 == 0)
-			nitems = 0;
-		else
-			nitems = static_cast<unsigned>(sqi2->GetNumberOfItems());
-		//this->SetNumberOfOutputPorts(nitems);
+		unsigned int nitems = (sqi2==0) ? 0 : static_cast<unsigned>(sqi2->GetNumberOfItems());
 
 		const gdcm::DataElement& sde = snestedds.GetDataElement(stcsq);
 		std::string s(sde.GetByteValue()->GetPointer(), sde.GetByteValue()->GetLength());
-		//std::cout << s << std::endl;
-		//newPts->GetData()->SetName( s.c_str() );
 		// In VTK there is no API to specify the name of a vtkPolyData, you can only specify Name
 		// for the scalars (pointdata or celldata), so let's do that...
 
 		//Check if the tissues has a contour sequence. If it doesn't, add the " (empty)" suffix.
-		if (nitems == 0)
-			s += " (empty)";
-		(*tissues.rbegin())->name = s;
+		if (nitems == 0) s += " (empty)";
+		tissue->name = s;
 
 		for (unsigned int i = 0; i < nitems; ++i)
 		{
 			const gdcm::Item& item2 = sqi2->GetItem(i + 1); // Item start at #1
 
 			const gdcm::DataSet& nestedds2 = item2.GetNestedDataSet();
-			//std::cout << nestedds2 << std::endl;
 			// (3006,0050) DS [43.57636\65.52504\-10.0\46.043102\62.564945\-10.0\49.126537\60.714... # 398,48 ContourData
 			gdcm::Tag tcontourdata(0x3006, 0x0050);
 			const gdcm::DataElement& contourdata = nestedds2.GetDataElement(tcontourdata);
-			//std::cout << contourdata << std::endl;
 
-			//const gdcm::ByteValue *bv = contourdata.GetByteValue();
 			gdcm::Attribute<0x3006, 0x0050> at;
 			at.SetFromDataElement(contourdata);
 
-			//newPts->SetNumberOfPoints( at.GetNumberOfValues() / 3 );
-			//assert( at.GetNumberOfValues() % 3 == 0); // FIXME
 			const double* pts = at.GetValues();
 			unsigned int npts = at.GetNumberOfValues() / 3;
-			(*tissues.rbegin())->outlinelength.push_back(npts);
-			size_t cur_length = (*tissues.rbegin())->points.size();
-			(*tissues.rbegin())->points.resize(cur_length + 3 * npts);
+			tissue->outlinelength.push_back(npts);
+			size_t cur_length = tissue->points.size();
+			tissue->points.resize(cur_length + 3 * npts);
 			for (unsigned int i = 0; i < npts * 3; i++, cur_length++)
 			{
-				(*tissues.rbegin())->points[cur_length] = (float)pts[i];
+				tissue->points[cur_length] = static_cast<float>(pts[i]);
 			}
 		}
 	}
 
 	//Sort the list of tissues giving to the smallest tissue the highest priority and to the biggest tissue the lowest
-	tissuevec tissuesAux;
+	tissuevec tissuesAux(tissues);
 	tissuesAux.clear();
-	for (int i = 0; i < tissues.size(); i++)
-		tissuesAux.push_back(tissues[i]);
-	tissues.clear();
 
 	for (int i = 0; i < tissuesAux.size(); i++)
 	{
-		tissuevec::iterator it;
-		it = tissues.begin();
 		int pos = 0;
-
 		for (int j = 0; j < tissues.size(); j++)
+		{
 			if (tissues[j]->points.size() > tissuesAux[i]->points.size())
 				pos++;
+		}
 
 		if (pos == tissues.size())
 			tissues.push_back(tissuesAux[i]);
 		else
-			tissues.insert(it + pos, tissuesAux[i]);
+			tissues.insert(tissues.begin() + pos, tissuesAux[i]);
 	}
 	tissuesAux.clear();
 
 	return 1;
 }
 
+template<typename T>
+void _CopyArray(const T* data, float* bits, int xm, int xp, int ym, int yp)
+{
+	size_t pos = 0;
+	for (int j = ym; j <= yp; j++)
+	{
+		for (int i = xm; i <= xp; i++, pos++)
+		{
+			bits[pos] = static_cast<float>(data[pos]);
+		}
+	}
+}
+
+//----------------------------------------------------------------------------
 bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsigned short& w, unsigned short& h)
 {
-	vtkGDCMImageReader* reader = vtkGDCMImageReader::New();
+	auto reader = vtkSmartPointer<vtkGDCMImageReader>::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -818,61 +748,31 @@ bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsi
 	reader->GetDataExtent(xm, xp, ym, yp, zm, zp);
 	h = yp - ym + 1;
 	w = xp - xm + 1;
-	//	if(yp-ym+1!=(int)h) return false;
-	//	if(xp-xm+1!=(int)w) return false;
 
 	vtkImageData* img = reader->GetOutput();
 
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
 
-	/*FILE *fp=fopen("C:\\test.txt","w");
-	fprintf(fp,"%s\n",className.c_str());;
-	fclose(fp);*/
-
 	unsigned long long pos = 0;
 	if (className == "vtkUnsignedCharArray")
 	{
 		unsigned char* ptr = (unsigned char*)img->GetScalarPointer(xm, ym, zm);
-		for (int j = ym; j <= yp; j++)
-		{
-			for (int i = xm; i <= xp; i++, pos++)
-			{
-				bits[pos] = (float)ptr[pos];
-			}
-		}
+		_CopyArray(ptr, bits, xm, xp, ym, xp);
 	}
 	else if (className == "vtkFloatArray")
 	{
 		float* ptr = (float*)img->GetScalarPointer(xm, ym, zm);
-		for (int j = ym; j <= yp; j++)
-		{
-			for (int i = xm; i <= xp; i++, pos++)
-			{
-				bits[pos] = ptr[pos];
-			}
-		}
+		_CopyArray(ptr, bits, xm, xp, ym, xp);
 	}
 	else if (className == "vtkDoubleArray")
 	{
 		double* ptr = (double*)img->GetScalarPointer(xm, ym, zm);
-		for (int j = ym; j <= yp; j++)
-		{
-			for (int i = xm; i <= xp; i++, pos++)
-			{
-				bits[pos] = (float)ptr[pos];
-			}
-		}
+		_CopyArray(ptr, bits, xm, xp, ym, xp);
 	}
 	else if (className == "vtkShortArray")
 	{
 		short* ptr = (short*)img->GetScalarPointer(xm, ym, zm);
-		for (int j = ym; j <= yp; j++)
-		{
-			for (int i = xm; i <= xp; i++, pos++)
-			{
-				bits[pos] = (float)ptr[pos];
-			}
-		}
+		_CopyArray(ptr, bits, xm, xp, ym, xp);
 	}
 	else
 	{
@@ -884,14 +784,13 @@ bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsi
 			}
 		}
 	}
-
-	reader->Delete();
 	return true;
 }
 
+//----------------------------------------------------------------------------
 bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsigned short& w, unsigned short& h, unsigned short& nrslices)
 {
-	vtkGDCMImageReader* reader = vtkGDCMImageReader::New();
+	auto reader = vtkSmartPointer<vtkGDCMImageReader>::New();
 	if (reader->CanReadFile(filename) == 0)
 	{
 		return false;
@@ -903,16 +802,10 @@ bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsi
 	h = yp - ym + 1;
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
-	//	if(yp-ym+1!=(int)h) return false;
-	//	if(xp-xm+1!=(int)w) return false;
 
 	vtkImageData* img = reader->GetOutput();
 
 	std::string className = img->GetPointData()->GetScalars()->GetClassName();
-
-	/*FILE *fp=fopen("C:\\test.txt","w");
-	fprintf(fp,"%s %i %i %i %i %i %i\n",className.c_str(),xm,xp,ym,yp,zm,zp);;
-	fclose(fp);*/
 
 	unsigned long long pos = 0;
 	if (className == "vtkUnsignedCharArray")
@@ -988,19 +881,47 @@ bool gdcmvtk_rtstruct::GetDicomUsingGDCM(const char* filename, float* bits, unsi
 			}
 		}
 	}
-
-	reader->Delete();
 	return true;
 }
 
+//----------------------------------------------------------------------------
 bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const char* filename, unsigned short& w, unsigned short& h, unsigned short& nrslices, float& dx, float& dy, float& dz, float* disp, float* dc)
 {
-	vtkGDCMImageReader* reader = vtkGDCMImageReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	float c1[3], c2[3], c3[3];
+	if (GetSizeUsingGDCM({std::string(filename)}, w, h, nrslices, dx, dy, dz, disp, c1, c2, c3))
+	{
+		for (unsigned short i = 0; i < 3; ++i)
+		{
+			dc[i] = c1[i];
+			dc[i + 3] = c2[i];
+		}
+		return true;
+	}
+	return false;
+}
+
+//----------------------------------------------------------------------------
+bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const std::vector<std::string>& filenames, unsigned short& w, unsigned short& h, unsigned short& nrslices, float& dx, float& dy, float& dz, float* disp, float* c1, float* c2, float* c3)
+{
+	auto reader = vtkSmartPointer<vtkGDCMImageReader>::New();
+	if (reader->CanReadFile(filenames[0].c_str()) == 0)
 	{
 		return false;
 	}
-	reader->SetFileName(filename);
+	if (filenames.size() == 1)
+	{
+		reader->SetFileName(filenames[0].c_str());
+	}
+	else 
+	{
+		auto files = vtkSmartPointer<vtkStringArray>::New();
+		for (const auto& f : filenames)
+		{
+			files->InsertNextValue(f);
+			std::cerr << f << "\n";
+		}
+		reader->SetFileNames(files);
+	}
 	int xm, xp, ym, yp, zm, zp;
 	reader->Update();
 	reader->GetDataExtent(xm, xp, ym, yp, zm, zp);
@@ -1008,34 +929,32 @@ bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const char* filename, unsigned short& w,
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
 	double a[3];
-	double b[3];
-	reader->GetDataSpacing(a);
+	reader->GetOutput()->GetSpacing(a);//GetDataSpacing(a);
 	dx = a[0];
 	dy = a[1];
 	dz = a[2];
+	double b[3];
 	reader->GetDataOrigin(b);
+	//std::cerr << "Dicom origin: " << b[0] << ", " << b[1] << ", " << b[2] << "\n";
 	reader->GetImagePositionPatient(b);
+	//std::cerr << "Dicom patient position: " << b[0] << ", " << b[1] << ", " << b[2] << "\n";
 	disp[0] = b[0];
 	disp[1] = b[1];
 	disp[2] = b[2];
 	vtkMatrix4x4* mat = reader->GetDirectionCosines();
 	for (unsigned short i = 0; i < 3; ++i)
 	{
-		dc[i] = mat->GetElement(i, 0);
-		dc[i + 3] = mat->GetElement(i, 1);
+		c1[i] = mat->GetElement(i, 0);
+		c2[i] = mat->GetElement(i, 1);
+		c3[i] = mat->GetElement(i, 2);
 	}
 
-	reader->Delete();
 	return true;
 }
 
-double gdcmvtk_rtstruct::GetZSPacing(std::string dir)
+//----------------------------------------------------------------------------
+double gdcmvtk_rtstruct::GetZSPacing(const std::vector<std::string>& files)
 {
-	bool recursive = false;
-	gdcm::Directory d;
-	d.Load(dir, recursive);
-	gdcm::Directory::FilenamesType const& files = d.GetFilenames();
-
 	std::vector<std::string> filenames(files.size());
 	std::copy(files.cbegin(), files.cend(), filenames.begin());
 
@@ -1047,8 +966,9 @@ double gdcmvtk_rtstruct::GetZSPacing(std::string dir)
 	return s.GetZSpacing();
 }
 
+//----------------------------------------------------------------------------
 gdcmvtk_rtstruct::tissuevec::~tissuevec()
 {
-	for (tissuevec::iterator it = begin(); it != end(); it++)
+	for (auto it = begin(); it != end(); it++)
 		delete *it;
 }

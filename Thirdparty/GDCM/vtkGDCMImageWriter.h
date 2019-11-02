@@ -38,20 +38,19 @@
 #ifndef VTKGDCMIMAGEWRITER_H
 #define VTKGDCMIMAGEWRITER_H
 
-#include "vtkGDCMApi.h"
 #include "vtkImageWriter.h"
+#include "vtkVersion.h"
 
 class vtkLookupTable;
 class vtkMedicalImageProperties;
 class vtkMatrix4x4;
 class vtkStringArray;
-
-class vtkGDCM_API vtkGDCMImageWriter : public vtkImageWriter
+class VTK_EXPORT vtkGDCMImageWriter : public vtkImageWriter
 {
 public:
   static vtkGDCMImageWriter *New();
   vtkTypeMacro(vtkGDCMImageWriter,vtkImageWriter);
-  virtual void PrintSelf(ostream& os, vtkIndent indent) override;
+  virtual void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
   // Pass in the vtkmedicalimageproperties object for medical information
@@ -71,7 +70,7 @@ public:
   vtkBooleanMacro(LossyFlag,int);
 
   // I need that...
-  virtual void Write() override;
+  virtual void Write();
 
   // Description:
   // Get the entension for this file format.
@@ -142,26 +141,26 @@ protected:
   ~vtkGDCMImageWriter();
 
 #if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
-  int FillInputPortInformation(int port, vtkInformation *info) override;
+  int FillInputPortInformation(int port, vtkInformation *info);
   int RequestInformation(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector) override;
+    vtkInformationVector *outputVector);
   int RequestUpdateExtent(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector) override;
+    vtkInformationVector *outputVector);
   int RequestData(
     vtkInformation *request,
     vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector) override;
+    vtkInformationVector *outputVector);
 #else
   void WriteSlice(vtkImageData *data);
 #endif /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
   int WriteGDCMData(vtkImageData *data, int timeStep);
 
 protected:
-  virtual /*const*/ char *GetFileName() override;
+  virtual /*const*/ char *GetFileName();
 
 private:
   vtkGDCMImageWriter(const vtkGDCMImageWriter&);  // Not implemented.

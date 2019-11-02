@@ -22,6 +22,7 @@ class ISEG_DATA_API Transform
 public:
 	float _m[4][4];
 
+	/// initialized as identity transform
 	Transform();
 	Transform(const float m[4][4]);
 
@@ -63,7 +64,7 @@ public:
 
 	// for padding, padding_lo[.] is positive
 	// for cropping, padding_lo[.] is negative
-	void paddingUpdateTransform(const int padding_lo[3], const float spacing[3]);
+	void paddingUpdateTransform(const int padding_lo[3], const Vec3& spacing);
 
 	float* operator[](size_t row) { return _m[row]; }
 	const float* operator[](size_t row) const { return _m[row]; }

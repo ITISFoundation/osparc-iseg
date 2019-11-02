@@ -787,13 +787,13 @@ void ImageViewerWidget::update_scaleoffsetfactor()
 		scalefactor = 1.0f;
 		scaleoffset = 0.0f;
 	}
-	else if (bmphand->return_mode(bmporwork) == 2)
+	else if (bmphand->return_mode(bmporwork) == eScaleMode::kFixedRange)
 	{
 		// Mode 2 assumes the range [0, 255]
 		scalefactor = contrast;
 		scaleoffset = (127.5f - 255 * scalefactor) * (1.0f - brightness) + 127.5f * brightness;
 	}
-	else if (bmphand->return_mode(bmporwork) == 1)
+	else if (bmphand->return_mode(bmporwork) == eScaleMode::kArbitraryRange)
 	{
 		// Mode 1 assumes an arbitrary range --> scale to range [0, 255]
 		auto r = range_mode1;

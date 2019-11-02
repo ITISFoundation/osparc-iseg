@@ -13,6 +13,14 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
+#include "Data/ItkUtils.h"
+#include "Data/ItkProgressObserver.h"
+#include "Data/SlicesHandlerITKInterface.h"
+
+#include <itkBinaryThresholdImageFilter.h>
+#include <itkMeanImageFilter.h>
+#include <itkSliceBySliceImageFilter.h>
+
 #include <QDoubleValidator>
 #include <QFileDialog>
 #include <QSignalMapper>
@@ -44,18 +52,31 @@ void ThresholdWidgetQt4::initUi()
 
 	auto mode_signal_mapping = new QSignalMapper(this);
 	mode_signal_mapping->setMapping(ui.mManualModeRadioButton, ui.mManualWidget);
+	mode_signal_mapping->setMapping(ui.mDensityModeRadioButton, ui.mDensityThresholdWidget);
 	mode_signal_mapping->setMapping(ui.mHistoModeRadioButton, ui.mHistoWidget);
 	mode_signal_mapping->setMapping(ui.mKMeansRadioButton, ui.mKmeansEMWidget);
 	mode_signal_mapping->setMapping(ui.mEMModeRadioButton, ui.mKmeansEMWidget);
 	QObject::connect(ui.mManualModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
+	QObject::connect(ui.mDensityModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
 	QObject::connect(ui.mHistoModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
 	QObject::connect(ui.mKMeansRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
 	QObject::connect(ui.mEMModeRadioButton, SIGNAL(clicked()), mode_signal_mapping, SLOT(map()));
-	QObject::connect(mode_signal_mapping, SIGNAL(mapped(QWidget*)), ui.mModeStackedWidget, SLOT(setCurrentWidget(QWidget*)));
+	QObject::connect(mode_signal_mapping, SIGNAL(mapped(QWidget*)), this, SLOT(on_ModeChanged(QWidget*)));
 
 	// init with manual mode
 	ui.mManualModeRadioButton->setChecked(true);
-	ui.mModeStackedWidget->setCurrentWidget(ui.mManualWidget);
+	on_ModeChanged(ui.mManualWidget);
+}
+
+void ThresholdWidgetQt4::on_ModeChanged(QWidget* current_widget)
+{
+	bool enable_init_centers = (current_widget == ui.mKmeansEMWidget);
+
+	ui.mUseCenterFileCheckBox->setEnabled(enable_init_centers);
+	ui.mCenterFilenameLineEdit->setEnabled(enable_init_centers && ui.mUseCenterFileCheckBox->isChecked());
+	ui.mSelectCenterFilenamePushButton->setEnabled(enable_init_centers && ui.mUseCenterFileCheckBox->isChecked());
+
+	ui.mModeStackedWidget->setCurrentWidget(current_widget);
 }
 
 void ThresholdWidgetQt4::updateUi()
@@ -66,11 +87,25 @@ void ThresholdWidgetQt4::updateUi()
 	ui.mSaveBordersPushButton->setDisabled(hideparams);
 	ui.mThresholdLowerLabel->setText(QString::number(range.first, 'g', 3));
 	ui.mThresholdUpperLabel->setText(QString::number(range.second, 'g', 3));
+	ui.mDensityIntensityMin->setText(QString::number(range.first, 'g', 3));
+	ui.mDensityIntensityMax->setText(QString::number(range.second, 'g', 3));
 	if (range.second != range.first)
 	{
 		const int slider_value = static_cast<int>((threshs[ui.mManualLimitNrSpinBox->value()] - range.first) * 200 / (range.second - range.first) + .5f);
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		ui.mThresholdHorizontalSlider->setValue(slider_value);
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
+
+		auto lineedit_block = ui.mThresholdBorderLineEdit->blockSignals(true);
 		ui.mThresholdBorderLineEdit->setText(QString::number(threshs[ui.mManualLimitNrSpinBox->value()], 'g', 3));
+		ui.mThresholdBorderLineEdit->blockSignals(lineedit_block);
+	}
+
+	if (ui.mDensityIntensityThresholdLineEdit->text().isEmpty())
+	{
+		auto lineedit_block = ui.mDensityIntensityThresholdLineEdit->blockSignals(true);
+		ui.mDensityIntensityThresholdLineEdit->setText(QString::number(range.first));
+		ui.mDensityIntensityThresholdLineEdit->blockSignals(lineedit_block);
 	}
 
 	//ui.mWeightBorderLineEdit->setText(QString::number(threshs[sb_tissuenr->value()], 'g', 3));
@@ -117,6 +152,9 @@ void ThresholdWidgetQt4::init()
 	auto range_validator = new QDoubleValidator(range.first, range.second, 1000, ui.mThresholdBorderLineEdit);
 	ui.mThresholdBorderLineEdit->setValidator(range_validator);
 
+	// same for density threshold widget
+	ui.mDensityIntensityThresholdLineEdit->setValidator(range_validator);
+
 	resetThresholds();
 
 	updateUi();
@@ -137,7 +175,9 @@ FILE* ThresholdWidgetQt4::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		dummy = ui.mThresholdHorizontalSlider->value();
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		dummy = ui.mHistoMinPixelsRatioHorizontalSlider->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
@@ -190,7 +230,9 @@ FILE* ThresholdWidgetQt4::LoadParams(FILE* fp, int version)
 	{
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
+		auto slider_block = ui.mThresholdHorizontalSlider->blockSignals(true);
 		ui.mThresholdHorizontalSlider->setValue(dummy);
+		ui.mThresholdHorizontalSlider->blockSignals(slider_block);
 		fread(&dummy, sizeof(int), 1, fp);
 		ui.mHistoMinPixelsRatioHorizontalSlider->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
@@ -261,8 +303,7 @@ void ThresholdWidgetQt4::on_mManualLimitNrSpinBox_valueChanged(int newValue)
 
 void ThresholdWidgetQt4::on_mLoadBordersPushButton_clicked()
 {
-	auto loadfilename =
-			QFileDialog::getOpenFileName(this, "Select Boarder file", QString::null,
+	auto loadfilename = QFileDialog::getOpenFileName(this, "Select Boarder file", QString::null,
 					"Boarders (*.txt)\n"
 					"All (*.*)");
 
@@ -364,6 +405,115 @@ void ThresholdWidgetQt4::on_mThresholdBorderLineEdit_editingFinished()
 	}
 
 	updateUi();
+}
+
+void ThresholdWidgetQt4::on_mDensityIntensityThresholdLineEdit_editingFinished()
+{
+	bool b1;
+	float val = ui.mDensityIntensityThresholdLineEdit->text().toFloat(&b1);
+	if (b1)
+	{
+		auto range = get_range();
+		int slider_value = static_cast<int>(100.f * (val - range.first) / (range.second - range.first) );
+
+		auto slider_block = ui.mDensityIntensityThresholdSlider->blockSignals(true);
+		ui.mDensityIntensityThresholdSlider->setValue(slider_value);
+		ui.mDensityIntensityThresholdSlider->blockSignals(slider_block);
+
+		doDensityThreshold();
+	}
+}
+
+void ThresholdWidgetQt4::on_mDensityIntensityThresholdSlider_valueChanged(int newValue)
+{
+	auto range = get_range();
+	int slider_value = ui.mDensityIntensityThresholdSlider->value();
+	float val = (range.second - range.first) * slider_value / 100.f + range.first;
+
+	auto slider_block = ui.mDensityIntensityThresholdLineEdit->blockSignals(true);
+	ui.mDensityIntensityThresholdLineEdit->setText(QString::number(val));
+	ui.mDensityIntensityThresholdLineEdit->blockSignals(slider_block);
+
+	doDensityThreshold();
+}
+
+void ThresholdWidgetQt4::on_mDensityRadiusSpinBox_valueChanged(int newValue)
+{
+	doDensityThreshold();
+}
+
+void ThresholdWidgetQt4::on_mDensityThresholdSpinBox_valueChanged(int newValue)
+{
+	doDensityThreshold();
+}
+
+void ThresholdWidgetQt4::doDensityThreshold(bool user_update)
+{
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = ui.mAllSlicesCheckBox->isChecked();
+	dataSelection.sliceNr = handler3D->active_slice();
+	dataSelection.work = true;
+	emit begin_datachange(dataSelection, this);
+
+	using slice_image = itk::Image<float, 2>;
+	using threshold_filter = itk::BinaryThresholdImageFilter<slice_image, slice_image>;
+	using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
+
+	float val = 0.f;
+	val = ui.mDensityIntensityThresholdLineEdit->text().toFloat();
+
+	auto threshold = threshold_filter::New();
+	threshold->SetLowerThreshold(val); // intensity threshold
+	threshold->SetInsideValue(1);
+	threshold->SetOutsideValue(0);
+
+	slice_image::SizeType radius;
+	radius[0] = ui.mDensityRadiusSpinBox->value(); // radius along x
+	radius[1] = ui.mDensityRadiusSpinBox->value(); // radius along y
+
+	auto mean = mean_filter::New();
+	mean->SetInput(threshold->GetOutput());
+	mean->SetRadius(radius);
+
+	auto threshold2 = threshold_filter::New();
+	threshold2->SetInput(mean->GetOutput());
+	threshold2->SetLowerThreshold(ui.mDensityThresholdSpinBox->value() / 100.f); // % above threshold
+	threshold2->SetInsideValue(255);
+	threshold2->SetOutsideValue(0);
+
+	SlicesHandlerITKInterface wrapper(handler3D);
+	if (!ui.mAllSlicesCheckBox->isChecked())
+	{
+		auto source = wrapper.GetSourceSlice();
+		auto target = wrapper.GetTargetSlice();
+
+		threshold->SetInput(source);
+
+		threshold2->Update();
+		iseg::Paste<slice_image, slice_image>(threshold2->GetOutput(), target);
+
+		handler3D->get_activebmphandler()->set_mode(eScaleMode::kFixedRange, true);
+	}
+	else if (user_update) // only update 3D when explicitly requested via Execute button
+	{
+		using input_image_type = itk::SliceContiguousImage<float>;
+		using image_type = itk::Image<float, 3>;
+		using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type, threshold_filter, threshold_filter>;
+
+		auto source = wrapper.GetSource(true);
+		auto target = wrapper.GetTarget(true);
+
+		auto slice_executor = slice_filter_type::New();
+		slice_executor->SetInput(source);
+		slice_executor->SetInputFilter(threshold);
+		slice_executor->SetOutputFilter(threshold2);
+
+		slice_executor->Update();
+		iseg::Paste<image_type, input_image_type>(slice_executor->GetOutput(), target);
+
+		handler3D->set_modeall(eScaleMode::kFixedRange, true);
+	}
+	emit end_datachange(this);
 }
 
 void ThresholdWidgetQt4::on_mHistoPxSpinBox_valueChanged(int newValue)
@@ -533,6 +683,10 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 			handler3D->threshold(threshs);
 		else
 			handler3D->get_activebmphandler()->threshold(threshs);
+	}
+	else if (ui.mDensityModeRadioButton->isChecked())
+	{
+		doDensityThreshold(true);
 	}
 	else if (ui.mHistoModeRadioButton->isChecked())
 	{

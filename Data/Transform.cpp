@@ -46,7 +46,7 @@ void Transform::setTransform(const float m[4][4])
 	}
 }
 
-void Transform::paddingUpdateTransform(const int padding_lo[3], const float spacing[3])
+void Transform::paddingUpdateTransform(const int padding_lo[3], const Vec3& spacing)
 {
 	Vec3 new_corner_before_transform(-padding_lo[0] * spacing[0],
 			-padding_lo[1] * spacing[1],

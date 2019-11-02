@@ -6256,8 +6256,6 @@ void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2)
 	{
 		_image_slices[slice1 + j].set_mode(1, false);
 	}
-
-	return;
 }
 
 void SlicesHandler::extrapolate(unsigned short origin1, unsigned short origin2,
@@ -6282,8 +6280,6 @@ void SlicesHandler::extrapolate(unsigned short origin1, unsigned short origin2,
 	}
 
 	_image_slices[target].set_mode(1, false);
-
-	return;
 }
 
 void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2,
@@ -6309,8 +6305,6 @@ void SlicesHandler::interpolate(unsigned short slice1, unsigned short slice2,
 	{
 		_image_slices[slice1 + j].set_mode(1, false);
 	}
-
-	return;
 }
 
 void SlicesHandler::set_slicethickness(float t)
@@ -6320,8 +6314,6 @@ void SlicesHandler::set_slicethickness(float t)
 	{
 		_os.set_thickness(t, i);
 	}
-
-	return;
 }
 
 float SlicesHandler::get_slicethickness() { return _thickness; }
@@ -6331,7 +6323,6 @@ void SlicesHandler::set_pixelsize(float dx1, float dy1)
 	_dx = dx1;
 	_dy = dy1;
 	_os.set_pixelsize(_dx, _dy);
-	return;
 }
 
 Pair SlicesHandler::get_pixelsize()
@@ -6347,10 +6338,9 @@ Transform SlicesHandler::transform() const { return _transform; }
 Transform SlicesHandler::get_transform_active_slices() const
 {
 	int plo[3] = {0, 0, -static_cast<int>(_startslice)};
-	float spacing[3] = {_dx, _dy, _thickness};
 
 	Transform tr_corrected(_transform);
-	tr_corrected.paddingUpdateTransform(plo, spacing);
+	tr_corrected.paddingUpdateTransform(plo, spacing());
 	return tr_corrected;
 }
 
@@ -7713,9 +7703,8 @@ void SlicesHandler::clear_undo()
 	this->_undoQueue.clear_undo();
 	if (_uelem != nullptr)
 		delete (_uelem);
-	_uelem = nullptr;
 
-	return;
+	_uelem = nullptr;
 }
 
 void SlicesHandler::reverse_undosliceorder()
@@ -7723,11 +7712,8 @@ void SlicesHandler::reverse_undosliceorder()
 	this->_undoQueue.reverse_undosliceorder(_nrslices);
 	if (_uelem != nullptr)
 	{
-		_uelem->dataSelection.sliceNr =
-				_nrslices - 1 - _uelem->dataSelection.sliceNr;
+		_uelem->dataSelection.sliceNr = _nrslices - 1 - _uelem->dataSelection.sliceNr;
 	}
-
-	return;
 }
 
 unsigned SlicesHandler::return_nrundo()
@@ -7776,11 +7762,14 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		unsigned short a, b, c;
 		float d, e, thick1;
 		float disp1[3];
-		float dc1[6]; // direction cosines
-		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e,
-						thick1, disp1, dc1))
+		float rot[3][3]; // rotation matrix
+		std::vector<std::string> files(lfilename.begin(), lfilename.end());
+		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(files, a, b, c, d, e, thick1, disp1, rot[0], rot[1], rot[2]))
 		{
-			Transform tr(disp1, dc1);
+			ISEG_INFO("Dicom series slice thickness: " << thick1)
+			Transform tr;
+			tr.setRotation(rot[0], rot[1], rot[2]);
+			tr.setOffset(disp1);
 
 			set_pixelsize(d, e);
 			set_slicethickness(thick1);
@@ -7789,41 +7778,38 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		if (lfilename.size() > 1)
 		{
-			QFileInfo fi(lfilename[0]);
-			QString directoryName = fi.absoluteDir().absolutePath();
-			double newThick =
-					gdcmvtk_rtstruct::GetZSPacing(directoryName.toStdString());
+			double newThick = gdcmvtk_rtstruct::GetZSPacing(files);
 			if (newThick)
 			{
+				ISEG_INFO("Dicom series slice z-spacing: " << newThick)
 				set_slicethickness(newThick);
+			}
+			else
+			{
+				ISEG_INFO("GetZSPacing failed: " << newThick)
 			}
 		}
 
 		for (int i = 0; i < lfilename.size(); i++)
 		{
-			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e,
-							thick1, disp1, dc1))
+			float dc1[6]; // not used
+			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e, thick1, disp1, dc1))
 			{
 				if (c >= 1)
 				{
-					unsigned long totsize = (unsigned long)(a)*b * c;
-					float* bits = (float*)malloc(sizeof(float) * totsize);
+					size_t totsize = static_cast<size_t>(a)*b * c;
+					std::vector<float> bits(totsize);
 
-					if (bits == nullptr)
+					if (bits.empty())
 						return 0;
 
-					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(
-							lfilename[i], bits, a, b, c);
+					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[i], bits.data(), a, b, c);
 					if (!canload)
 					{
-						free(bits);
 						return 0;
 					}
 
-					_image_slices[i]
-							.LoadArray(&(bits[(unsigned long)(a)*b * 0]), a, b);
-
-					free(bits);
+					_image_slices[i].LoadArray(&(bits[0]), a, b);
 				}
 			}
 		}
@@ -7840,7 +7826,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 
 		_width = _image_slices[0].return_width();
 		_height = _image_slices[0].return_height();
-		_area = _height * (unsigned int)_width;
+		_area = _height * static_cast<unsigned int>(_width);
 
 		new_overlay();
 
@@ -7864,8 +7850,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (c > 1)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
@@ -7977,7 +7962,9 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p,
 		return 1;
 	}
 	else
+	{
 		return 0;
+	}
 }
 
 int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
@@ -8020,8 +8007,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (_nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
@@ -8093,8 +8079,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1,
-				disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
 		if (_nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
@@ -8136,16 +8121,13 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 	DicomReader dcmread;
 	std::vector<float> vpos;
 
-	for (std::vector<const char*>::iterator it = lfilename->begin();
-			 it != lfilename->end(); it++)
+	for (const auto& fname: *lfilename)
 	{
-		dcmread.opendicom(*it);
+		dcmread.opendicom(fname);
 		vpos.push_back(dcmread.slicepos());
 		dcmread.closedicom();
 	}
 
-	float dummypos;
-	const char* dummyname;
 	short nrelem = (short)lfilename->size();
 
 	for (short i = 0; i < nrelem - 1; i++)
@@ -8154,13 +8136,8 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 		{
 			if (vpos[j] > vpos[j - 1])
 			{
-				dummypos = vpos[j];
-				vpos[j] = vpos[j - 1];
-				vpos[j - 1] = dummypos;
-
-				dummyname = (*lfilename)[j];
-				(*lfilename)[j] = (*lfilename)[j - 1];
-				(*lfilename)[j - 1] = dummyname;
+				std::swap(vpos[j], vpos[j - 1]);
+				std::swap((*lfilename)[j], (*lfilename)[j - 1]);
 			}
 		}
 	}
@@ -8180,16 +8157,15 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	DicomReader dcmread;
 
 	dicomseriesnr->clear();
-	for (auto it = vnames->begin(); it != vnames->end(); it++)
+	for (const auto& fname : *vnames)
 	{
-		dcmread.opendicom(*it);
-		auto it1 = dicomseriesnr->begin();
+		dcmread.opendicom(fname);
 		unsigned u = dcmread.seriesnr();
-		dicomseriesnrlist->push_back(u);
 		dcmread.closedicom();
-		while (it1 != dicomseriesnr->end() && (*it1) != u)
-			it1++;
-		if (it1 == dicomseriesnr->end())
+
+		dicomseriesnrlist->push_back(u);
+
+		if (std::find(dicomseriesnr->begin(), dicomseriesnr->end(), u) == dicomseriesnr->end())
 		{
 			dicomseriesnr->push_back(u);
 		}

@@ -32,4 +32,9 @@ using tissues_size_t = std::uint8_t; // Original tissues size type
 #define TISSUELAYERS_SIZE_MAX 255
 using tissuelayers_size_t = std::uint8_t;
 
+enum eScaleMode {
+	kArbitraryRange= 1, ///< assumes an arbitrary range
+	kFixedRange = 2		///< intensities are assumed to be in range [0,255]
+};
+
 } // namespace iseg

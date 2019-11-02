@@ -30,6 +30,13 @@
 
 namespace iseg {
 
+namespace
+{
+	float f1(float dI, float k) { return std::exp(-std::pow(dI / k, 2)); }
+
+	float f2(float dI, float k) { return 1 / (1 + std::pow(dI / k, 2)); }
+}
+
 SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
@@ -133,41 +140,25 @@ SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent,
 	hbox5->setFixedSize(hbox5->sizeHint());
 	vbox2->setFixedSize(vbox2->sizeHint());
 	vbox1->setFixedSize(vbox1->sizeHint());
-	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
-	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());
-
-	//	setFixedSize(vbox1->size());
 
 	method_changed(0);
 
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed(int)));
-	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
-	QObject::connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
-	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-			SLOT(sigmaslider_changed(int)));
-	QObject::connect(sl_sigma, SIGNAL(sliderPressed()), this,
-			SLOT(slider_pressed()));
-	QObject::connect(sl_sigma, SIGNAL(sliderReleased()), this,
-			SLOT(slider_released()));
-	QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
-			SLOT(kslider_changed(int)));
-	QObject::connect(sl_k, SIGNAL(sliderPressed()), this,
-			SLOT(slider_pressed()));
-	QObject::connect(sl_k, SIGNAL(sliderReleased()), this,
-			SLOT(slider_released()));
-	QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
-			SLOT(n_changed(int)));
-	QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
-			SLOT(kmax_changed(int)));
-
-	return;
+	connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed(int)));
+	connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
+	connect(contdiff, SIGNAL(clicked()), this, SLOT(continue_diff()));
+	connect(sl_sigma, SIGNAL(valueChanged(int)), this, SLOT(sigmaslider_changed(int)));
+	connect(sl_sigma, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+	connect(sl_sigma, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	connect(sl_k, SIGNAL(valueChanged(int)), this, SLOT(kslider_changed(int)));
+	connect(sl_k, SIGNAL(sliderPressed()), this, SLOT(slider_pressed()));
+	connect(sl_k, SIGNAL(sliderReleased()), this, SLOT(slider_released()));
+	connect(sb_n, SIGNAL(valueChanged(int)), this, SLOT(n_changed(int)));
+	connect(sb_kmax, SIGNAL(valueChanged(int)), this, SLOT(kmax_changed(int)));
 }
 
 SmoothingWidget::~SmoothingWidget()
 {
-	delete vbox1;
-	delete modegroup;
+
 }
 
 void SmoothingWidget::execute()
@@ -195,17 +186,17 @@ void SmoothingWidget::execute()
 		else if (rb_sigmafilter->isChecked())
 		{
 			handler3D->sigmafilter(
-					(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
+				(sl_k->value() + 1) * 0.01f * sb_kmax->value(),
+				(short unsigned)sb_n->value(), (short unsigned)sb_n->value());
 		}
 		else
 		{
 			handler3D->aniso_diff(1.0f, sb_iter->value(), f2,
-					sl_k->value() * 0.01f * sb_kmax->value(),
-					sl_restrain->value() * 0.01f);
+				sl_k->value() * 0.01f * sb_kmax->value(),
+				sl_restrain->value() * 0.01f);
 		}
 	}
-	else
+	else // current slice
 	{
 		if (rb_gaussian->isChecked())
 		{
@@ -222,16 +213,17 @@ void SmoothingWidget::execute()
 		else if (rb_sigmafilter->isChecked())
 		{
 			bmphand->sigmafilter((sl_k->value() + 1) * 0.01f * sb_kmax->value(),
-					(short unsigned)sb_n->value(),
-					(short unsigned)sb_n->value());
+				(short unsigned)sb_n->value(),
+				(short unsigned)sb_n->value());
 		}
 		else
 		{
 			bmphand->aniso_diff(1.0f, sb_iter->value(), f2,
-					sl_k->value() * 0.01f * sb_kmax->value(),
-					sl_restrain->value() * 0.01f);
+				sl_k->value() * 0.01f * sb_kmax->value(),
+				sl_restrain->value() * 0.01f);
 		}
 	}
+
 	emit end_datachange(this);
 }
 
@@ -510,15 +502,15 @@ FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
+		disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
 				SLOT(method_changed(int)));
-		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
+		disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
 				SLOT(sigmaslider_changed(int)));
-		QObject::disconnect(sl_k, SIGNAL(valueChanged(int)), this,
+		disconnect(sl_k, SIGNAL(valueChanged(int)), this,
 				SLOT(kslider_changed(int)));
-		QObject::disconnect(sb_n, SIGNAL(valueChanged(int)), this,
+		disconnect(sb_n, SIGNAL(valueChanged(int)), this,
 				SLOT(n_changed(int)));
-		QObject::disconnect(sb_kmax, SIGNAL(valueChanged(int)), this,
+		disconnect(sb_kmax, SIGNAL(valueChanged(int)), this,
 				SLOT(kmax_changed(int)));
 
 		int dummy;
@@ -549,15 +541,15 @@ FILE* SmoothingWidget::LoadParams(FILE* fp, int version)
 
 		method_changed(0);
 
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
+		connect(modegroup, SIGNAL(buttonClicked(int)), this,
 				SLOT(method_changed(int)));
-		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
+		connect(sl_sigma, SIGNAL(valueChanged(int)), this,
 				SLOT(sigmaslider_changed(int)));
-		QObject::connect(sl_k, SIGNAL(valueChanged(int)), this,
+		connect(sl_k, SIGNAL(valueChanged(int)), this,
 				SLOT(kslider_changed(int)));
-		QObject::connect(sb_n, SIGNAL(valueChanged(int)), this,
+		connect(sb_n, SIGNAL(valueChanged(int)), this,
 				SLOT(n_changed(int)));
-		QObject::connect(sb_kmax, SIGNAL(valueChanged(int)), this,
+		connect(sb_kmax, SIGNAL(valueChanged(int)), this,
 				SLOT(kmax_changed(int)));
 	}
 	return fp;

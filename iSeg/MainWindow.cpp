@@ -65,7 +65,7 @@
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QShortcut>
-#include <QSignalMapper.h>
+#include <QSignalMapper>
 #include <QStackedWidget>
 #include <qapplication.h>
 #include <qdockwidget.h>
@@ -2045,18 +2045,16 @@ void MainWindow::execute_resize(int resizetype)
 	if (ok)
 	{
 		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
-		if (handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8,
-						0) != 1)
+		if (handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		{
 			ok = false;
+		}
 	}
 
 	Transform tr = handler3D->transform();
-	Vec3 spacing = handler3D->spacing();
-
-	Transform transform_corrected(tr);
 	int plo[3] = {dxm, dym, dzm};
-	transform_corrected.paddingUpdateTransform(plo, spacing.v);
-	handler3D->set_transform(transform_corrected);
+	tr.paddingUpdateTransform(plo, handler3D->spacing());
+	handler3D->set_transform(tr);
 
 	// add color lookup table again
 	handler3D->UpdateColorLookupTable(lut);
@@ -2382,14 +2380,6 @@ void MainWindow::execute_loaddicom()
 
 		pixelsize_changed();
 		slicethickness_changed();
-
-		//	handler3D->LoadDICOM();
-
-		//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->workborder_changed();
-
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 		reset_brightnesscontrast();
 
@@ -2803,10 +2793,7 @@ void MainWindow::execute_loadrtstruct()
 {
 #ifndef NORTSTRUCTSUPPORT
 	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"RTstruct (*.dcm)\n"
-			"All (*.*)",
-			this); //, filename);
-
+			"RTstruct (*.dcm)\nAll (*.*)", this);
 	if (loadfilename.isEmpty())
 	{
 		return;
@@ -2814,13 +2801,10 @@ void MainWindow::execute_loadrtstruct()
 
 	RadiotherapyStructureSetImporter RI(loadfilename, handler3D, this);
 
-	QObject::connect(
-			&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
-			this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::connect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
-			this,
-			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
+	connect(&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
+			this, SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	connect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)),
+			this, SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
 	RI.move(QCursor::pos());
 	RI.exec();
@@ -2828,12 +2812,10 @@ void MainWindow::execute_loadrtstruct()
 	tissueTreeWidget->update_tree_widget();
 	tissuenr_changed(tissueTreeWidget->get_current_type() - 1);
 
-	QObject::disconnect(
-			&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
-			this,
-			SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
-	QObject::disconnect(
-			&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
+	// \todo is this necessary?
+	disconnect(&RI, SIGNAL(begin_datachange(iseg::DataSelection&, QWidget*, bool)),
+			this, SLOT(handle_begin_datachange(iseg::DataSelection&, QWidget*, bool)));
+	disconnect(&RI, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
 
 	reset_brightnesscontrast();
@@ -7214,7 +7196,16 @@ void MainWindow::execute_inversesliceorder()
 
 	handler3D->inversesliceorder();
 
-	//	pixelsize_changed();
+	if (QMessageBox::question(this, "iSeg",
+		"Would you like the first slice to remain in same position in space?",
+		QMessageBox::Yes, QMessageBox::No | QMessageBox::Default) == QMessageBox::Yes)
+	{
+		auto tr = handler3D->transform();
+		int shift[3] = {0, 0, -(handler3D->num_slices() - 1) };
+		tr.paddingUpdateTransform(shift, handler3D->spacing());
+		handler3D->set_transform(tr);
+	}
+
 	emit end_datachange(this, iseg::NoUndo);
 }
 

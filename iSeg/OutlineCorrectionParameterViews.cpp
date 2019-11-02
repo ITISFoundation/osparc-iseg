@@ -423,4 +423,33 @@ SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamV
 	setLayout(layout);
 }
 
+DensityThresholdParamView::DensityThresholdParamView(QWidget* parent /*= 0*/)
+{
+	_active_slice = new QRadioButton(tr("Current slice"));
+	_all_slices = new QRadioButton(tr("All slices (2D)"));
+	_3D = new QRadioButton(tr("Fully 3D"));
+	auto where_group = make_button_group(this, { _active_slice, _all_slices, _3D });
+	_active_slice->setChecked(true);
+	auto hbox = make_hbox({ _active_slice, _all_slices, _3D });
+
+	_density_radius = new QSpinBox;
+	_density_radius->setMinimum(1);
+	_density_radius->setMaximum(100);
+	_density_radius->setValue(1);
+
+	_density_threshold = new QSpinBox;
+	_density_threshold->setMinimum(1);
+	_density_threshold->setMaximum(100);
+	_density_threshold->setValue(50);
+
+	_execute = new QPushButton(QString("Execute"));
+
+	auto layout = new QFormLayout;
+	layout->addRow(tr("Apply to"), hbox);
+	layout->addRow(tr("Radius"), _density_radius);
+	layout->addRow(tr("Percent foreground"), _density_threshold);
+	layout->addRow(_execute);
+	setLayout(layout);
+}
+
 } // namespace iseg

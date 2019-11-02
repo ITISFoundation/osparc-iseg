@@ -30,7 +30,7 @@
 #include <q3vbox.h>
 #include <qbuttongroup.h>
 #include <qfiledialog.h>
-#include <qgridLayout.h>
+#include <qgridlayout.h>
 #include <qgroupbox.h>
 #include <qlabel.h>
 #include <qlayout.h>
@@ -207,23 +207,23 @@ void LoaderDicom::load_pushed()
 	if (!lnames->empty())
 	{
 		std::vector<const char*> vnames;
-		unsigned pos = 0;
-
 		if (dicomseriesnr.size() > 1)
 		{
-			for (auto it = lnames->begin(); it != lnames->end(); it++)
+			unsigned pos = 0;
+			for (const auto& name : *lnames)
 			{
-				if (dicomseriesnrlist[pos] == dicomseriesnr[seriesnrselection->currentItem()])
+				if (dicomseriesnrlist[pos++] == dicomseriesnr[seriesnrselection->currentItem()])
 				{
-					vnames.push_back((*it).ascii());
+					vnames.push_back(name.ascii());
 				}
-				pos++;
 			}
 		}
 		else
 		{
-			for (auto it = lnames->begin(); it != lnames->end(); it++)
-				vnames.push_back((*it).ascii());
+			for (const auto& name : *lnames)
+			{
+				vnames.push_back(name.ascii());
+			}
 		}
 
 		if (cb_subsect->isChecked())
@@ -234,8 +234,7 @@ void LoaderDicom::load_pushed()
 			if (reload)
 				handler3D->ReloadDICOM(vnames, p);
 			else
-				handler3D->LoadDICOM(vnames, p, xlength->value(),
-						ylength->value());
+				handler3D->LoadDICOM(vnames, p, xlength->value(), ylength->value());
 		}
 		else
 		{
@@ -250,15 +249,12 @@ void LoaderDicom::load_pushed()
 			Pair p;
 			if (rb_muscle->isChecked())
 			{
-				//				handler3D->get_range(&p);
 				p.high = 1190;
 				p.low = 890;
 			}
 			else if (rb_bone->isChecked())
 			{
 				handler3D->get_range(&p);
-				//				p.high=;
-				//				p.low=;
 			}
 			handler3D->scale_colors(p);
 			if (cb_crop->isChecked())
@@ -269,12 +265,10 @@ void LoaderDicom::load_pushed()
 		}
 
 		close();
-		return;
 	}
 	else
 	{
 		close();
-		return;
 	}
 }
 

@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 		Transform tr2(tr);
 
 		// do padding
-		float spacing[3] = {1.f, 2.f, 3.f};
+		Vec3 spacing(1.f, 2.f, 3.f);
 		{
 			// negative padding
 			int plo[3] = {-1, -2, -3};
