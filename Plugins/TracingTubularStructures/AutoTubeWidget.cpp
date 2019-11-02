@@ -173,7 +173,7 @@ void AutoTubeWidget::do_work()
 	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 	try
 	{
-		if (true) //(all_slices->isChecked())
+		if ((true)) //(all_slices->isChecked())
 		{
 			using input_type = itk::SliceContiguousImage<float>;
 			using tissues_type = itk::SliceContiguousImage<iseg::tissues_size_t>;

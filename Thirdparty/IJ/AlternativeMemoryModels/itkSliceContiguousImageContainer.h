@@ -130,7 +130,7 @@ protected:
   /** PrintSelf routine. Normally this is a protected internal method. It is
    * made public here so that Image can call this method.  Users should not
    * call this method but should call Print() instead. */
-  void PrintSelf(std::ostream& os, Indent indent) const ITK_OVERRIDE;
+  void PrintSelf(std::ostream& os, Indent indent) const override;
 
   virtual SliceArrayType AllocateSlices(ElementIdentifier numberOfSlices,
                                         ElementIdentifier sizeOfSlice) const;
@@ -149,18 +149,8 @@ private:
 
 } // end namespace itk
 
-// Define instantiation macro for this template.
-#define ITK_TEMPLATE_SliceContiguousImageContainer(_, EXPORT, x, y) namespace itk { \
-  _(2(class EXPORT SliceContiguousImageContainer< ITK_TEMPLATE_2 x >)) \
-  namespace Templates { typedef SliceContiguousImageContainer< ITK_TEMPLATE_2 x > SliceContiguousImageContainer##y; } \
-  }
-
-#if ITK_TEMPLATE_EXPLICIT
-# include "Templates/SliceContiguousImageContainer+-.h"
-#endif
-
-#if ITK_TEMPLATE_TXX
-# include "itkSliceContiguousImageContainer.txx"
+#ifndef ITK_MANUAL_INSTANTIATION
+#	include "itkSliceContiguousImageContainer.txx"
 #endif
 
 #endif

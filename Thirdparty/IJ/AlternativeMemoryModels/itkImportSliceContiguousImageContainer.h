@@ -144,18 +144,8 @@ private:
 
 } // end namespace itk
 
-// Define instantiation macro for this template.
-#define ITK_TEMPLATE_ImportSliceContiguousImageContainer(_, EXPORT, x, y) namespace itk { \
-  _(2(class EXPORT ImportSliceContiguousImageContainer< ITK_TEMPLATE_2 x >)) \
-  namespace Templates { typedef ImportSliceContiguousImageContainer< ITK_TEMPLATE_2 x > ImportSliceContiguousImageContainer##y; } \
-  }
-
-#if ITK_TEMPLATE_EXPLICIT
-# include "Templates/ImportSliceContiguousImageContainer+-.h"
-#endif
-
-#if ITK_TEMPLATE_TXX
-# include "itkImportSliceContiguousImageContainer.txx"
+#ifndef ITK_MANUAL_INSTANTIATION
+#	include "itkImportSliceContiguousImageContainer.txx"
 #endif
 
 #endif

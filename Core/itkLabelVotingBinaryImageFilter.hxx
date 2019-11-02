@@ -27,7 +27,6 @@
 #include "itkNeighborhoodInnerProduct.h"
 #include "itkImageRegionIterator.h"
 #include "itkNeighborhoodAlgorithm.h"
-#include "itkProgressReporter.h"
 
 #include <vector>
 #include <algorithm>
@@ -98,12 +97,7 @@ LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 {
 	m_NumberOfPixelsChanged = 0;
 
-	unsigned int numberOfThreads = this->GetNumberOfThreads();
-	m_Count.SetSize(numberOfThreads);
-	for (unsigned int i = 0; i < numberOfThreads; i++)
-	{
-		m_Count[i] = 0;
-	}
+	m_Count.store(0);
 }
 
 template< typename TInputImage, typename TOutputImage >
@@ -111,23 +105,15 @@ void
 LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 ::AfterThreadedGenerateData()
 {
-	m_NumberOfPixelsChanged = 0;
-
-	unsigned int numberOfThreads = this->GetNumberOfThreads();
-	m_Count.SetSize(numberOfThreads);
-	for (unsigned int t = 0; t < numberOfThreads; t++)
-	{
-		m_NumberOfPixelsChanged += m_Count[t];
-	}
+	m_NumberOfPixelsChanged = m_Count.load();
 }
 
 template< typename TInputImage, typename TOutputImage >
 void
 LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
-::ThreadedGenerateData(const OutputImageRegionType &outputRegionForThread,
-                       ThreadIdType threadId)
+::DynamicThreadedGenerateData(const OutputImageRegionType &outputRegionForThread)
 {
-	typedef typename InputImageType::PixelType PixelType;
+	using PixelType = typename InputImageType::PixelType;
 
 	class DenseMap
 	{
@@ -177,8 +163,6 @@ LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 	faceList = bC(input, outputRegionForThread, m_Radius);
 
 	typename NeighborhoodAlgorithm::ImageBoundaryFacesCalculator< InputImageType >::FaceListType::iterator fit;
-
-	ProgressReporter progress(this, threadId, outputRegionForThread.GetNumberOfPixels());
 
 	DenseMap histogram;
 	histogram.reserve(8 * m_Radius[0] * m_Radius[1] * m_Radius[2]);
@@ -257,11 +241,11 @@ LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 
 			++bit;
 			++it;
-			progress.CompletedPixel();
 		}
 	}
 
-	m_Count[threadId] = numberOfPixelsChanged;
+	// Do algorithm without handling threadId
+	m_Count.fetch_add(numberOfPixelsChanged, std::memory_order_relaxed);
 }
 
 /**

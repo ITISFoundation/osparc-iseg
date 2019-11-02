@@ -133,47 +133,11 @@ public:
 
   /** Allocate the image memory. The size of the image must
    * already be set, e.g. by calling SetRegions(). */
-  void Allocate();
+  void Allocate(bool initialize=false) override;
 
-  /** Convenience methods to set the LargestPossibleRegion,
-   *  BufferedRegion and RequestedRegion. Allocate must still be called.
-   */
-  void SetRegions(RegionType region)
-    {
-    this->SetLargestPossibleRegion(region);
-    this->SetBufferedRegion(region);
-    this->SetRequestedRegion(region);
-    };
-
-  void SetRegions(SizeType size)
-    {
-    RegionType region; region.SetSize(size);
-    this->SetLargestPossibleRegion(region);
-    this->SetBufferedRegion(region);
-    this->SetRequestedRegion(region);
-    };
-
-  /** Restore the data object to its initial state. This means releasing
+	/** Restore the data object to its initial state. This means releasing
    * memory. */
-  virtual void Initialize() ITK_OVERRIDE;
-
-  OffsetValueType ComputeOffset(const IndexType &ind) const
-  {
-    // need to add bounds checking for the region/buffer?
-    OffsetValueType offset=0;
-    const IndexType &bufferedRegionIndex = this->GetBufferedRegion().GetIndex();
-    const OffsetValueType *offsetTable = this->GetOffsetTable(); 
-  
-    // data is arranged as [][][][slice][row][col]
-    // with Index[0] = col, Index[1] = row, Index[2] = slice
-    for (int i=ImageDimension-1; i > 0; i--)
-      {
-      offset += (ind[i] - bufferedRegionIndex[i])*offsetTable[i];
-      }
-    offset += (ind[0] - bufferedRegionIndex[0]);
-
-    return offset;
-  }
+  void Initialize() override;
 
   /** Fill the image buffer with a value.  Be sure to call Allocate()
    * first. */
@@ -269,7 +233,7 @@ public:
    * simply calls CopyInformation() and copies the region ivars.
    * The implementation here refers to the superclass' implementation
    * and then copies over the pixel container. */
-  virtual void Graft(const DataObject *data) ITK_OVERRIDE;
+  virtual void Graft(const DataObject *data) override;
   
   /** Return the Pixel Accessor object */
   AccessorType GetPixelAccessor( void ) 
@@ -307,10 +271,9 @@ public:
        );
     }
 
-
 protected:
   SliceContiguousImage();
-  void PrintSelf( std::ostream& os, Indent indent ) const ITK_OVERRIDE;
+  void PrintSelf( std::ostream& os, Indent indent ) const override;
   virtual ~SliceContiguousImage() {};
   
 private:
@@ -325,18 +288,8 @@ private:
 
 } // end namespace itk
 
-// Define instantiation macro for this template.
-#define ITK_TEMPLATE_SliceContiguousImage(_, EXPORT, x, y) namespace itk { \
-  _(2(class EXPORT SliceContiguousImage< ITK_TEMPLATE_2 x >)) \
-  namespace Templates { typedef SliceContiguousImage< ITK_TEMPLATE_2 x > SliceContiguousImage##y; } \
-  }
-
-#if ITK_TEMPLATE_EXPLICIT
-# include "Templates/itkSliceContiguousImage+-.h"
-#endif
-
-#if ITK_TEMPLATE_TXX
-# include "itkSliceContiguousImage.txx"
+#ifndef ITK_MANUAL_INSTANTIATION
+#	include "itkSliceContiguousImage.txx"
 #endif
 
 #endif

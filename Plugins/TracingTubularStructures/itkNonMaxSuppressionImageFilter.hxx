@@ -59,9 +59,9 @@ NonMaxSuppressionImageFilter<TInputImage, TOutputImage>
   double range = static_cast< double >( requestedRegionSize[splitAxis] );
 
   unsigned int valuesPerThread =
-    static_cast< unsigned int >( vcl_ceil( range / static_cast< double >( num ) ) );
+    static_cast< unsigned int >( std::ceil( range / static_cast< double >( num ) ) );
   unsigned int maxThreadIdUsed =
-    static_cast< unsigned int >( vcl_ceil( range / static_cast< double >( valuesPerThread ) ) ) - 1;
+    static_cast< unsigned int >( std::ceil( range / static_cast< double >( valuesPerThread ) ) ) - 1;
 
   // Split the region
   if ( i < maxThreadIdUsed )
@@ -121,9 +121,9 @@ void
 NonMaxSuppressionImageFilter<TInputImage, TOutputImage >
 ::GenerateData(void)
 {
-  ThreadIdType nbthreads = this->GetNumberOfThreads();
+	auto nbthreads = this->GetNumberOfWorkUnits();
 
-  typename TInputImage::ConstPointer   inputImage(    this->GetInput ()   );
+	typename TInputImage::ConstPointer   inputImage(    this->GetInput ()   );
   typename TOutputImage::Pointer       outputImage(   this->GetOutput()        );
 
   //const unsigned int imageDimension = inputImage->GetImageDimension();
@@ -134,9 +134,9 @@ NonMaxSuppressionImageFilter<TInputImage, TOutputImage >
   typename ImageSource< OutputImageType >::ThreadStruct str;
   str.Filter = this;
 
-  MultiThreader* multithreader = this->GetMultiThreader();
-  multithreader->SetNumberOfThreads( nbthreads );
-  multithreader->SetSingleMethod(this->ThreaderCallback, &str);
+  auto multithreader = this->GetMultiThreader();
+	multithreader->SetNumberOfWorkUnits(nbthreads);
+	multithreader->SetSingleMethod(this->ThreaderCallback, &str);
 
   // multithread the execution
   for( unsigned int d=0; d<ImageDimension; d++ )

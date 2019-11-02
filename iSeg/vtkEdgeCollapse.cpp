@@ -989,7 +989,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			// Assumes that the cell ids don't change ordering
 			// (deleted cells are left in same position)
 			this->Normals->GetTuple(cellId, normal);
-			if (true)
+			if ((true))
 			{
 				double cost = vtkMath::Dot(normal, normal_new);
 				if (cost < NormalDotProductThreshold)
