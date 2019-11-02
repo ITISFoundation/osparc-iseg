@@ -459,6 +459,7 @@ public:
 	void set_undo3D(bool undo3D1);
 	void set_undonr(unsigned nr);
 	void set_undoarraynr(unsigned nr);
+	void mask_source(bool all_slices, float maskvalue);
 	void map_tissue_indices(const std::vector<tissues_size_t>& indexMap);
 	void remove_tissue(tissues_size_t tissuenr);
 	void remove_tissues(const std::set<tissues_size_t>& tissuenrs);

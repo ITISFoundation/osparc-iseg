@@ -8174,6 +8174,27 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 	std::sort(dicomseriesnr->begin(), dicomseriesnr->end());
 }
 
+void SlicesHandler::mask_source(bool all_slices, float maskvalue)
+{
+	const int iN = _endslice - _startslice;
+
+#pragma omp parallel for
+	for (int i = 0; i < iN; ++i)
+	{
+		int slice = _startslice + i;
+		auto source = source_slices()[slice];
+		auto target = target_slices()[slice];
+
+		for (unsigned int k = 0; k < _area; ++k)
+		{
+			if (target[k] == 0.f)
+			{
+				source[k] = maskvalue;
+			}
+		}		
+	}
+}
+
 void SlicesHandler::map_tissue_indices(const std::vector<tissues_size_t>& indexMap)
 {
 	int const iN = _nrslices;
