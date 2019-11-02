@@ -591,6 +591,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	cb_mask_3d = new QCheckBox("3D", this);
 	cb_mask_3d->setToolTip(Format("Mask source image in 3D or current slice only."));
 
+	auto lb_mask_value = new QLabel("Mask Value");
+	edit_mask_value = new QLineEdit(QString::number(0.f));
+	edit_mask_value->setValidator(new QDoubleValidator);
+	edit_mask_value->setToolTip(Format("Value which will be set in source outside of mask."));
+
 	pb_mask = new QPushButton("Mask Source", this);
 	pb_mask->setToolTip(Format("Mask source image based on target. The source image is set to zero at zero target pixels."));
 
@@ -1065,10 +1070,17 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	tissueadddock->setWidget(hboxtissueadderw);
 	addDockWidget(Qt::RightDockWidgetArea, tissueadddock);
 
+	QHBoxLayout* hboxmaskvalue = new QHBoxLayout;
+	hboxmaskvalue->setSpacing(0);
+	hboxmaskvalue->setMargin(0);
+	hboxmaskvalue->addWidget(lb_mask_value);
+	hboxmaskvalue->addWidget(edit_mask_value);
+
 	QVBoxLayout* vboxmasking = new QVBoxLayout;
 	vboxmasking->setSpacing(0);
 	vboxmasking->setMargin(0);
 	vboxmasking->addWidget(cb_mask_3d);
+	vboxmasking->addLayout(hboxmaskvalue);
 	vboxmasking->addWidget(pb_mask);
 
 	QWidget* vboxmaskingw = new QWidget;
@@ -5490,8 +5502,18 @@ void MainWindow::subtracthold_tissue_pushed()
 
 void MainWindow::mask_source()
 {
-	bool mask3d = cb_mask_3d->isChecked();
-	// todo
+	const bool mask3d = cb_mask_3d->isChecked();
+	const float maskvalue = edit_mask_value->text().toFloat();
+
+	iseg::DataSelection dataSelection;
+	dataSelection.allSlices = mask3d;
+	dataSelection.sliceNr = handler3D->active_slice();
+	dataSelection.bmp = true;
+	emit begin_datachange(dataSelection, this);
+
+	handler3D->mask_source(mask3d, maskvalue);
+
+	emit end_datachange(this);
 }
 
 void MainWindow::stophold_tissue_pushed()

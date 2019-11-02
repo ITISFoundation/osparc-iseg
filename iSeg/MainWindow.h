@@ -178,6 +178,7 @@ private:
 	QPushButton* swapAllBtn;
 	QPushButton* pb_work2tissue;
 	QCheckBox* cb_mask_3d;
+	QLineEdit* edit_mask_value;
 	QPushButton* pb_mask;
 	QMenuBar* menubar;
 	MenuWTT* file;
