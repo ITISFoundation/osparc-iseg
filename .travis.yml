@@ -35,17 +35,12 @@ install:
       sudo apt-get install libhdf5-dev
       sudo apt-get install libeigen3-dev
       sudo apt-get install libqt4-opengl-dev
-      #sudo apt-get install libvtk7-dev
       docker pull itisfoundation/iseg-ubuntu-vtk:8.2
       docker create --name vtkcontainer itisfoundation/iseg-ubuntu-vtk:8.2 bash
       docker cp vtkcontainer:/work ${TRAVIS_BUILD_DIR}/deps/vtk
-      #sudo apt-get install libinsighttoolkit4-dev
-      docker pull itisfoundation/iseg-ubuntu-itk:4.13
-      docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:4.13 bash
+      docker pull itisfoundation/iseg-ubuntu-itk:5.0.1
+      docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:5.0.1 bash
       docker cp itkcontainer:/work ${TRAVIS_BUILD_DIR}/deps/itk
-      #ITK_URL="http://downloads.sourceforge.net/project/itk/itk/4.13/InsightToolkit-4.13.1.tar.gz"
-      #ITK_URL="https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.0/InsightToolkit-5.0.0.tar.gz"
-      #test -d ${DEPS_DIR}/itk/lib || (mkdir -p itk/src && travis_retry wget --no-check-certificate --quiet -O - ${ITK_URL} | tar --strip-components=1 -xz -C itk/src && mkdir itk/build && cd itk/build && cmake ../src -DCMAKE_INSTALL_PREFIX=$PWD/.. -DModule_ITKReview=ON -DCMAKE_RULE_MESSAGES=OFF && make -j2 && make install && cd ${DEPS_DIR})
 
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
