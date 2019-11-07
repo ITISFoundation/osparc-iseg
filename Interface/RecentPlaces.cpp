@@ -53,8 +53,12 @@ QString _getFileName(QWidget* parent,
 
 void RecentPlaces::addRecent(const QString& path)
 {
+	if (path.isEmpty())
+		return;
+
 	// get directory
-	QString dir = QFileInfo(path).absoluteDir().absolutePath();
+	// QFileInfo::absolutePath: Returns a file's path absolute path. This doesn't include the file name.
+	QString dir = QFileInfo(path).isFile() ? QFileInfo(path).absolutePath() : path;
 
 	// push to top
 	_list.push_front(dir);

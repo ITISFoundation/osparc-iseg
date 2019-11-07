@@ -3130,6 +3130,14 @@ void MainWindow::SaveSettings()
 	settings.setValue("ContiguousMemory", this->handler3D->GetContiguousMemory());
 	settings.setValue("BloscEnabled", BloscEnabled());
 	settings.endGroup();
+	settings.beginGroup("RecentPlaces");
+	auto places = RecentPlaces::recentDirectories();
+	settings.setValue("NumberOfRecentPlaces", places.size());
+	for (size_t i=0; i<places.size(); ++i)
+	{
+		settings.setValue(("dir" + std::to_string(i)).c_str(), places[i]);
+	}
+	settings.endGroup();
 	settings.sync();
 }
 
@@ -3262,6 +3270,16 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		SetBloscEnabled(settings.value("BloscEnabled", false).toBool());
 		ISEG_INFO("BloscEnabled = " << BloscEnabled());
 		settings.endGroup();
+
+		settings.beginGroup("RecentPlaces");
+		auto N = settings.value("NumberOfRecentPlaces", 0).toUInt();
+		for (unsigned i = N; i > 0; --i)
+		{
+			auto dir = settings.value(("dir" + std::to_string(i - 1)).c_str(), QString()).toString();
+			RecentPlaces::addRecent(dir);
+		}
+		settings.endGroup();
+
 
 		if (this->handler3D->return_nrundo() == 0)
 			this->editmenu->setItemEnabled(undonr, false);
