@@ -3,7 +3,9 @@
 
 ## Description
 
-The Medical Image Segmentation Tool Set (iSEG) is a fully integrated segmentation (including pre- and postprocessing) toolbox for the efficient, fast, and flexible generation of anatomical models from various types of imaging data. iSEG includes a variety of semi-automatic segmentation methods. The key strengths of iSEG are a) a powerful set of tools for manual segmentation (correction), b) support for massive image sizes, c) suport for segmenting complex models with a large number of tissues. iSEG features a plugin mechanism, which allows users to easily extend the application with custom widgets. The development of iSEG has been driven by the [Virtual Population](https://www.itis.ethz.ch/virtual-population/) project at the [IT'IS Foundation](https://www.itis.ethz.ch/), due to a lack of alternatives amongst open source and commercial tools.
+The Medical Image Segmentation Tool Set (iSEG) is a fully integrated segmentation (including pre- and postprocessing) toolbox for the efficient, fast, and flexible generation of anatomical models from various types of imaging data. iSEG includes a variety of semi-automatic segmentation methods. The key strengths of iSEG are a) a powerful set of tools for manual segmentation (correction), b) support for massive image sizes, c) suport for segmenting complex models with a large number of tissues, e.g. for inserting thin layers. It is the only powerful segmentation platform, which supports color images, e.g. from the [NIH Visible Human](https://www.nlm.nih.gov/research/visible/visible_human.html) or [Visible Korean](https://doi.org/10.1002/ca.20275) projects.
+
+iSEG features a plugin mechanism, which allows users to easily extend the application with custom widgets. The development of iSEG has been driven by the [Virtual Population](https://www.itis.ethz.ch/virtual-population/) project at the [IT'IS Foundation](https://www.itis.ethz.ch/), due to a lack of alternatives amongst open source and commercial tools.
 
 ## Compilation instructions
 
@@ -14,7 +16,7 @@ Instructions as to how these libraries must be installed and compiled are provid
 
 The applications below are needed in order to compile iSEG and its dependencies.
 
-- [CMake:](https://cmake.org/) 3.6 minimum
+- [CMake:](https://cmake.org/) 3.12 minimum
 - Visual Studio 2015 or Xcode/Clang on MacOS
 - [Git](https://git-scm.com/)
 

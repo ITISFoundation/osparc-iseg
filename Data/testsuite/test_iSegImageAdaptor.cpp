@@ -16,7 +16,7 @@
 #include <itkRecursiveGaussianImageFilter.h>
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
-BOOST_AUTO_TEST_SUITE(Plugin_suite);
+BOOST_AUTO_TEST_SUITE(Data_suite);
 
 BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 {

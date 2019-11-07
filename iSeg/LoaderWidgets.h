@@ -382,6 +382,28 @@ private slots:
 	void type_changed(int);
 };
 
+class ExportImg : public QDialog
+{
+	Q_OBJECT
+public:
+	ExportImg(SlicesHandler* hand3D,
+			QWidget* parent = 0,
+			const char* name = 0,
+			Qt::WindowFlags wFlags = 0);
+	~ExportImg() {}
+
+private slots:
+	void save_pushed();
+
+private:
+	SlicesHandler* handler3D;
+	QButtonGroup* img_selection_group;
+	QButtonGroup* slice_selection_group;
+	QPushButton* pb_save;
+	QPushButton* pb_cancel;
+	QLineEdit* edit_name;
+};
+
 class ReloaderBmp2 : public QDialog
 {
 	Q_OBJECT

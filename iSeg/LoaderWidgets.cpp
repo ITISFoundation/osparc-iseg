@@ -14,11 +14,15 @@
 #include "LoaderWidgets.h"
 #include "XdmfImageReader.h"
 
+#include "Interface/LayoutTools.h"
+#include "Interface/RecentPlaces.h"
+
 #include "Data/Point.h"
 #include "Data/ScopedTimer.h"
 
 #include "Core/ColorLookupTable.h"
 #include "Core/ImageReader.h"
+#include "Core/ImageWriter.h"
 
 #include <vtkKdTree.h>
 #include <vtkPoints.h>
@@ -50,6 +54,77 @@ namespace iseg {
 
 namespace algo = boost::algorithm;
 namespace fs = boost::filesystem;
+
+ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlags f)
+	: QDialog(p, n, f), handler3D(h)
+{
+	auto img_selection_hbox = new QHBoxLayout;
+	img_selection_group = make_button_group({"Source", "Target", "Tissue"});
+	for (auto b : img_selection_group->buttons())
+	{
+		img_selection_hbox->addWidget(b);
+	}
+
+	auto slice_selection_hbox = new QHBoxLayout;
+	slice_selection_group = make_button_group({"Current Slice", "Active Slices"});
+	for (auto b : slice_selection_group->buttons())
+	{
+		img_selection_hbox->addWidget(b);
+	}
+
+	auto button_hbox = new QHBoxLayout;
+	button_hbox->addWidget(pb_save = new QPushButton("OK"));
+	button_hbox->addWidget(pb_cancel = new QPushButton("Cancel"));
+
+	auto top_layout = new QVBoxLayout;
+	top_layout->addLayout(img_selection_hbox);
+	top_layout->addLayout(slice_selection_hbox);
+	top_layout->addLayout(button_hbox);
+
+	connect(pb_save, SIGNAL(clicked()), this, SLOT(save_pushed()));
+	connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
+}
+
+void ExportImg::save_pushed()
+{
+	enum eImageSelection { kSource = 0,
+		kTarget = 1,
+		kTissue = 2 };
+
+	enum eSliceSelection { kSlice = 0,
+		kActiveSlices = 1,
+		kAllSlices = 2 };
+
+	// todo: what to do about file series, e.g. select with some option (including base name), select directory (or save file name without extension, then append)
+
+	QString filter =
+			"Nifty file (*.nii.gz *nii.gz)\n"
+			"Analyze file (*.hdr *.img)\n"
+			"Nrrd file (*.nrrd)\n"
+			"VTK file (*.vtk *vti)\n"
+			"BMP file (*.bmp)"
+			"PNG file (*.png)"
+			"JPG file (*.jpg *.jpeg)";
+	std::string file_path = RecentPlaces::getSaveFileName(this, "Save As", QString::null, filter).toStdString();
+	// current slice export does not work
+	bool current_slice = slice_selection_group->checkedId()==0;
+	bool active_slices = slice_selection_group->checkedId()==1;
+
+	ImageWriter w(true);
+
+	switch (img_selection_group->checkedId())
+	{
+	case eImageSelection::kSource:
+		w.writeVolume(file_path, handler3D->source_slices(), active_slices, handler3D);
+		break;
+	case eImageSelection::kTarget:
+		w.writeVolume(file_path, handler3D->target_slices(), active_slices, handler3D);
+		break;
+	case eImageSelection::kTissue:
+		w.writeVolume(file_path, handler3D->tissue_slices(handler3D->active_tissuelayer()), active_slices, handler3D);
+		break;
+	}
+}
 
 LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
 		bool breload, QWidget* parent, const char* name,
@@ -482,9 +557,8 @@ void LoaderRaw::load_pushed()
 
 void LoaderRaw::select_pushed()
 {
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, QString::null, this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, QString::null);
 	nameEdit->setText(loadfilename);
-	return;
 }
 
 SaverImg::SaverImg(SlicesHandler* hand3D, QWidget* parent, const char* name,

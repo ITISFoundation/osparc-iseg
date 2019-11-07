@@ -471,8 +471,7 @@ void MultiDatasetWidget::ChangeDatasetName()
 	{
 		if (radioButton.m_RadioButton->isChecked())
 		{
-			EditText edit_text_dlg(this->parentWidget(), "",
-					this->windowFlags());
+			EditText edit_text_dlg(this->parentWidget(), "", this->windowFlags());
 			edit_text_dlg.set_editable_text(radioButton.m_RadioButton->text());
 			if (edit_text_dlg.exec())
 			{
