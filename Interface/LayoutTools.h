@@ -47,4 +47,17 @@ inline QButtonGroup* make_button_group(QWidget* parent, std::initializer_list<QR
 	return group;
 }
 
+inline QButtonGroup* make_button_group(std::initializer_list<QString> button_names, const int checked_id = -1)
+{
+	auto group = new QButtonGroup;
+	int id = 0;
+	for (const auto &n : button_names)
+	{
+		auto rb = new QRadioButton(n);
+		rb->setChecked(id == checked_id);
+		group->addButton(rb, id++);
+	}
+	return group;
+}
+
 }

@@ -52,6 +52,7 @@
 
 #include "Interface/Plugin.h"
 #include "Interface/ProgressDialog.h"
+#include "Interface/RecentPlaces.h"
 
 #include "Data/Transform.h"
 
@@ -2489,8 +2490,8 @@ void MainWindow::execute_loadmhd()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"Metaheader (*.mhd *.mha)\nAll (*.*)", this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, 
+			"Metaheader (*.mhd *.mha)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
@@ -2517,10 +2518,8 @@ void MainWindow::execute_loadvtk()
 	emit begin_datachange(dataSelection, this, false);
 
 	bool res = true;
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"VTK (*.vti *.vtk)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, 
+			"VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		res = handler3D->ReadImage(loadfilename.ascii());
@@ -2553,11 +2552,8 @@ void MainWindow::execute_loadnifti()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All (*.*)",
-					this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+			"NIFTI (*.nii *.hdr *.img *.nii.gz)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
@@ -2583,10 +2579,8 @@ void MainWindow::execute_loadavw()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"AnalzyeAVW (*.avw)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadAvw(loadfilename.ascii());
@@ -2692,10 +2686,8 @@ void MainWindow::execute_reloadavw()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"AnalzyeAVW (*.avw)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, 
+			"AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadAVW(loadfilename.ascii(), handler3D->start_slice());
@@ -2713,11 +2705,8 @@ void MainWindow::execute_reloadmhd()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-					"Metaheader (*.mhd *.mha)\n"
-					"All (*.*)",
-					this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+			"Metaheader (*.mhd *.mha)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
@@ -2736,10 +2725,8 @@ void MainWindow::execute_reloadvtk()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"VTK (*.vti *.vtk)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, 
+			"VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
@@ -2758,16 +2745,13 @@ void MainWindow::execute_reloadnifti()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All (*.*)",
-					this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+			"NIFTI (*.nii *.hdr *.img *.nii.gz)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(
 				loadfilename.ascii(),
-				handler3D->start_slice()); // TODO: handle failure
+				handler3D->start_slice());
 		reset_brightnesscontrast();
 	}
 	emit end_datachange(this, iseg::ClearUndo);
@@ -2778,10 +2762,7 @@ void MainWindow::execute_loadsurface()
 	maybeSafe();
 
 	bool ok = true;
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"Surfaces & Polylines (*.stl *.vtk)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getSaveFileName(this, "Import Surface/Lines", QString::null, "Surfaces & Polylines (*.stl *.vtk)");
 	if (!loadfilename.isEmpty())
 	{
 		QCheckBox* cb = new QCheckBox("Intersect Only");
@@ -2807,6 +2788,7 @@ void MainWindow::execute_loadsurface()
 
 	if (ok)
 	{
+		// TODO: this is probably incorrect
 		reset_brightnesscontrast();
 	}
 	else
@@ -2820,8 +2802,8 @@ void MainWindow::execute_loadsurface()
 void MainWindow::execute_loadrtstruct()
 {
 #ifndef NORTSTRUCTSUPPORT
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"RTstruct (*.dcm)\nAll (*.*)", this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"RTstruct (*.dcm)\nAll (*.*)");
 	if (loadfilename.isEmpty())
 	{
 		return;
@@ -2861,7 +2843,8 @@ void MainWindow::execute_loadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTdose (*.dcm)\nAll (*.*)", this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadRTdose(loadfilename.ascii());
@@ -2885,7 +2868,8 @@ void MainWindow::execute_reloadrtdose()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "RTdose (*.dcm)\nAll (*.*)", this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadRTdose(loadfilename.ascii(), handler3D->start_slice()); // TODO: handle failure
@@ -2896,10 +2880,8 @@ void MainWindow::execute_reloadrtdose()
 
 void MainWindow::execute_loads4llivelink()
 {
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"S4L Link (*.h5)\n"
-			"All (*.*)",
-			this);
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"S4L Link (*.h5)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		loadS4Llink(loadfilename);
@@ -2934,8 +2916,8 @@ void MainWindow::execute_saveprojas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Projects (*.prj)\n", this); //, filename);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"Projects (*.prj)");
 
 	if (!savefilename.isEmpty())
 	{
@@ -3041,8 +3023,8 @@ void MainWindow::execute_savecopyas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Projects (*.prj)\n", this); //, filename);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"Projects (*.prj)");
 
 	if (!savefilename.isEmpty())
 	{
@@ -3147,6 +3129,14 @@ void MainWindow::SaveSettings()
 	settings.setValue("Compression", this->handler3D->GetCompression());
 	settings.setValue("ContiguousMemory", this->handler3D->GetContiguousMemory());
 	settings.setValue("BloscEnabled", BloscEnabled());
+	settings.endGroup();
+	settings.beginGroup("RecentPlaces");
+	auto places = RecentPlaces::recentDirectories();
+	settings.setValue("NumberOfRecentPlaces", static_cast<unsigned int>(places.size()));
+	for (unsigned int i=0; i<places.size(); ++i)
+	{
+		settings.setValue(("dir" + std::to_string(i)).c_str(), places[i]);
+	}
 	settings.endGroup();
 	settings.sync();
 }
@@ -3281,6 +3271,16 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		ISEG_INFO("BloscEnabled = " << BloscEnabled());
 		settings.endGroup();
 
+		settings.beginGroup("RecentPlaces");
+		auto N = settings.value("NumberOfRecentPlaces", 0).toUInt();
+		for (unsigned i = N; i > 0; --i)
+		{
+			auto dir = settings.value(("dir" + std::to_string(i - 1)).c_str(), QString()).toString();
+			RecentPlaces::addRecent(dir);
+		}
+		settings.endGroup();
+
+
 		if (this->handler3D->return_nrundo() == 0)
 			this->editmenu->setItemEnabled(undonr, false);
 		else
@@ -3297,8 +3297,8 @@ void MainWindow::execute_saveactiveslicesas()
 	dataSelection.tissueHierarchy = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Projects (*.prj)\n", this); //, filename);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"Projects (*.prj)");
 
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
@@ -3641,9 +3641,8 @@ void MainWindow::execute_mergeprojects()
 	std::vector<QString> mergefilenames;
 	mergeDialog.get_filenames(mergefilenames);
 
-	// Get save file name
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)", this,
-			"iSeg", "Save merged project as");
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+			"Projects (*.prj)");
 	if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 		savefilename.append(".prj");
 
@@ -3717,11 +3716,8 @@ void MainWindow::execute_loadproj()
 {
 	maybeSafe();
 
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"Projects (*.prj)\n"
-			"All (*.*)",
-			this); //, filename);
-
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"Projects (*.prj)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		loadproj(loadfilename);
@@ -3907,7 +3903,8 @@ void MainWindow::execute_createatlas()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Atlas file (*.atl)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"Atlas file (*.atl)");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".atl")))
 		savefilename.append(".atl");
@@ -3928,7 +3925,7 @@ void MainWindow::execute_reloadatlases()
 
 void MainWindow::execute_savetissues()
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, QString::null, this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null, QString::null);
 
 	if (!savefilename.isEmpty())
 	{
@@ -3943,7 +3940,8 @@ void MainWindow::execute_exportlabelfield()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "AmiraMesh Ascii (*.am)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"AmiraMesh Ascii (*.am)");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".am")))
 		savefilename.append(".am");
@@ -3964,7 +3962,8 @@ void MainWindow::execute_exportmat()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Matlab (*.mat)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+			"Matlab (*.mat)");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".mat")))
 		savefilename.append(".mat");
@@ -3979,7 +3978,8 @@ void MainWindow::execute_exportmat()
 
 void MainWindow::execute_exporthdf()
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "HDF (*.h5)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"HDF (*.h5)");
 
 	if (savefilename.length() > 3 && !savefilename.endsWith(QString(".h5")))
 		savefilename.append(".h5");
@@ -4004,7 +4004,8 @@ void MainWindow::execute_exportvtkascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK Ascii (*.vti *.vtk)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"VTK Ascii (*.vti *.vtk)");
 
 	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) || savefilename.endsWith(QString(".vtk"))))
 		savefilename.append(".vti");
@@ -4023,7 +4024,8 @@ void MainWindow::execute_exportvtkbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK bin (*.vti *.vtk)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"VTK bin (*.vti *.vtk)");
 
 	if (savefilename.length() > 4 && !(savefilename.endsWith(QString(".vti")) || savefilename.endsWith(QString(".vtk"))))
 		savefilename.append(".vti");
@@ -4042,7 +4044,8 @@ void MainWindow::execute_exportvtkcompressedascii()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK comp (*.vti)", this);
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"VTK comp (*.vti)");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
 		savefilename.append(".vti");
@@ -4061,8 +4064,8 @@ void MainWindow::execute_exportvtkcompressedbinary()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK comp (*.vti)", this);
-
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"VTK comp (*.vti)");
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".vti")))
 		savefilename.append(".vti");
 
@@ -4080,8 +4083,8 @@ void MainWindow::execute_exportxmlregionextent()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "XML extent (*.xml)", this);
-
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"XML extent (*.xml)");
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".xml")))
 		savefilename.append(".xml");
 
@@ -4107,8 +4110,8 @@ void MainWindow::execute_exporttissueindex()
 	iseg::DataSelection dataSelection;
 	emit begin_dataexport(dataSelection, this);
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "tissue index (*.txt)", this);
-
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+		"Tissue index (*.txt)");
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
 
@@ -4130,7 +4133,8 @@ void MainWindow::execute_exporttissueindex()
 
 void MainWindow::execute_loadtissues()
 {
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, QString::null, this);
+	// no filter ?
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, QString::null);
 	if (!loadfilename.isEmpty())
 	{
 		QMessageBox msgBox;
@@ -4977,10 +4981,8 @@ void MainWindow::execute_yslice()
 
 void MainWindow::execute_removetissues()
 {
-	QString filename = QFileDialog::getOpenFileName(QString::null,
-			"Text (*.txt)\n"
-			"All (*.*)",
-			this);
+	QString filename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"Text (*.txt)\nAll (*.*)");
 	if (!filename.isEmpty())
 	{
 		std::vector<tissues_size_t> types;
@@ -5006,10 +5008,8 @@ void MainWindow::execute_grouptissues()
 {
 	std::vector<tissues_size_t> olds, news;
 
-	QString filename = QFileDialog::getOpenFileName(QString::null,
-			"Text (*.txt)\n"
-			"All (*.*)",
-			this);
+	QString filename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"Text (*.txt)\nAll (*.*)");
 	if (!filename.isEmpty())
 	{
 		bool fail_on_unknown_tissue = true;
@@ -5350,10 +5350,6 @@ void MainWindow::subtract_tissue_shortkey()
 
 void MainWindow::addhold_tissue_pushed()
 {
-	/*	if(pb_addconn->isDown()){
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-	pb_addconn->setDown(false);
-	}*/
 	if (pb_sub->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
@@ -5378,39 +5374,14 @@ void MainWindow::addhold_tissue_pushed()
 		QObject::connect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
 		disconnect_mouseclick();
-		//		pb_addhold->setDown(false);
 	}
 	else
 	{
-		//		pb_addhold->setDown(true);
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
 		connect_mouseclick();
 	}
-	/*	if(pb_add3D->isDown()){
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-	pb_add3D->setDown(false);
-	}*/
 }
-
-/*void MainWindow::add_tissue_connected_pushed()
-{
-	if(pb_add->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_clicked(Point)));
-		pb_add->setDown(false);
-	}
-	if(pb_sub->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(subtract_tissue_clicked(Point)));
-		pb_sub->setDown(false);
-	}
-	if(pb_add3D->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-		pb_add3D->setDown(false);
-	}
-	pb_addconn->setDown(true);
-
-	QObject::connect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-}*/
 
 void MainWindow::subtract_tissue_pushed()
 {
@@ -5436,25 +5407,14 @@ void MainWindow::subtract_tissue_pushed()
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(subtracthold_tissue_clicked(Point)));
-		//		pb_subhold->setDown(false);
 		pb_subhold->setChecked(false);
 	}
 	if (pb_addhold->isChecked())
 	{
 		QObject::disconnect(work_show, SIGNAL(mousepressed_sign(Point)), this,
 				SLOT(addhold_tissue_clicked(Point)));
-		//		pb_addhold->setChecked(false);
 		pb_addhold->setChecked(false);
 	}
-	//	pb_sub->setDown(!pb_sub->isDown());
-	/*	if(pb_addconn->isDown()){
-			QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-			pb_addconn->setDown(false);
-		}
-		if(pb_add3D->isDown()){
-			QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-			pb_add3D->setDown(false);
-		}*/
 }
 
 void MainWindow::subtracthold_tissue_pushed()
@@ -5489,15 +5449,6 @@ void MainWindow::subtracthold_tissue_pushed()
 				SLOT(addhold_tissue_clicked(Point)));
 		pb_addhold->setChecked(false);
 	}
-	//	pb_subhold->setDown(!pb_subhold->isDown());
-	/*	if(pb_addconn->isDown()){
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-	pb_addconn->setDown(false);
-	}
-	if(pb_add3D->isDown()){
-	QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-	pb_add3D->setDown(false);
-	}*/
 }
 
 void MainWindow::mask_source()
@@ -5544,24 +5495,6 @@ void MainWindow::stophold_tissue_pushed()
 	}
 }
 
-/*void MainWindow::add_tissue_3D_pushed()
-{
-	if(pb_add->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_clicked(Point)));
-		pb_add->setDown(false);
-	}
-	if(pb_addconn->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_connected_clicked(Point)));
-		pb_addconn->setDown(false);
-	}
-	if(pb_sub->isDown()){
-		QObject::disconnect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(subtract_tissue_clicked(Point)));
-		pb_sub->setDown(false);
-	}
-	pb_add3D->setDown(true);
-	QObject::connect(work_show,SIGNAL(mousepressed_sign(Point)),this,SLOT(add_tissue_3D_clicked(Point)));
-}*/
-
 void MainWindow::do_work2tissue()
 {
 	iseg::DataSelection dataSelection;
@@ -5598,11 +5531,8 @@ void MainWindow::do_work2tissue_grouped()
 {
 	std::vector<tissues_size_t> olds, news;
 
-	QString filename = QFileDialog::getOpenFileName(QString::null,
-			"Text (*.txt)\n"
-			"All (*.*)",
-			this);
-
+	QString filename = RecentPlaces::getOpenFileName(this, "Open file", QString(),
+			"Text (*.txt)\nAll (*.*)");
 	if (!filename.isEmpty())
 	{
 		if (read_grouptissues(filename.ascii(), olds, news))
@@ -7668,8 +7598,8 @@ void MainWindow::execute_savecolorlookup()
 		return;
 	}
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "iSEG Color Lookup Table (*.lut)", this);
-
+	QString savefilename = RecentPlaces::getSaveFileName(this, "Save as", QString::null,
+			"iSEG Color Lookup Table (*.lut)");
 	if (!savefilename.endsWith(QString(".lut")))
 		savefilename.append(".lut");
 

@@ -12,7 +12,7 @@
 
   1. Install using homebrew: `brew install hdf5`
 
-- [ITK source code](https://sourceforge.net/projects/itk/files/itk/4.12/InsightToolkit-4.12.2.tar.gz/download): v4.12.2, or newer
+- [ITK source code](https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.0.1/InsightToolkit-5.0.1.tar.gz): v5.0, or newer
 
   1. Download and unzip the ITK folder
   2. CMake (source ITK folder, build in separate folder), press _Configure_
@@ -21,7 +21,7 @@
   5. Press _Generate_
   6. In build directory type `make`
 
-- [VTK source code](https://www.vtk.org/files/release/7.1/VTK-7.1.0.tar.gz): v7.1.0, or newer
+- [VTK source code](https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz): v7.1.0, or newer
 
   1. Install using homebrew: `brew install vtk`
 

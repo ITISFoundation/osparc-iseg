@@ -14,6 +14,7 @@ FILE(GLOB HEADERS *.h)
 SET(SOURCES
 	ProgressDialog.cpp
 	Plugin.cpp
+	RecentPlaces.cpp
 	WidgetInterface.cpp
 )
 

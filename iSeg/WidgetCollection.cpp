@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include "Interface/FormatTooltip.h"
+#include "Interface/RecentPlaces.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -1110,8 +1111,8 @@ void TissueHierarchyWidget::load_hierarchy_pressed()
 	}
 
 	// Get file name
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"), "",
-			tr("XML files (*.xml)"));
+	QString fileName = RecentPlaces::getOpenFileName(this, "Load File", QString::null,
+			"XML files (*.xml)");
 	if (fileName.isNull())
 	{
 		return;
@@ -1861,13 +1862,11 @@ extoverlay_widget::~extoverlay_widget()
 
 void extoverlay_widget::load_dataset_pressed()
 {
-	QString loadfilename =
-			QFileDialog::getOpenFileName(QString::null,
-					"VTK (*.vti *.vtk)\n"
-					"Raw files (*.raw)\n"
-					"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-					"All (*.*)",
-					this); // TODO: Support other file types
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+			"VTK (*.vti *.vtk)\n"
+			"Raw files (*.raw)\n"
+			"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
+			"All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		add_dataset(loadfilename);
