@@ -3132,8 +3132,8 @@ void MainWindow::SaveSettings()
 	settings.endGroup();
 	settings.beginGroup("RecentPlaces");
 	auto places = RecentPlaces::recentDirectories();
-	settings.setValue("NumberOfRecentPlaces", places.size());
-	for (size_t i=0; i<places.size(); ++i)
+	settings.setValue("NumberOfRecentPlaces", static_cast<unsigned int>(places.size()));
+	for (unsigned int i=0; i<places.size(); ++i)
 	{
 		settings.setValue(("dir" + std::to_string(i)).c_str(), places[i]);
 	}
