@@ -27,8 +27,8 @@ ELSE()
 	)
 ENDIF()
 
-IF(${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_BUILD} VERSION_LESS "7.1.0")
-	MESSAGE(WARNING "VTK version is lower than 7.1. Some parts of iSEG may depend on newer features")
+IF(${VTK_VERSION_MAJOR}.${VTK_VERSION_MINOR}.${VTK_VERSION_BUILD} VERSION_LESS "8.2.0")
+	MESSAGE(WARNING "VTK version is lower than 8.2. Some parts of iSEG may depend on newer features")
 ENDIF()
 
 MACRO(USE_VTK)
