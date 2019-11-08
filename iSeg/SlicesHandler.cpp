@@ -8542,19 +8542,19 @@ vtkImageData* SlicesHandler::make_vtktissueimage()
 bool SlicesHandler::export_tissue(const char* filename, bool binary) const
 {
 	auto slices = const_cast<SlicesHandler*>(this)->tissue_slices(_active_tissuelayer);
-	return ImageWriter(binary).writeVolume(filename, slices, true, this);
+	return ImageWriter(binary).writeVolume(filename, slices, ImageWriter::kActiveSlices, this);
 }
 
 bool SlicesHandler::export_bmp(const char* filename, bool binary) const
 {
 	auto slices = const_cast<SlicesHandler*>(this)->source_slices();
-	return ImageWriter(binary).writeVolume(filename, slices, true, this);
+	return ImageWriter(binary).writeVolume(filename, slices, ImageWriter::kActiveSlices, this);
 }
 
 bool SlicesHandler::export_work(const char* filename, bool binary) const
 {
 	auto slices = const_cast<SlicesHandler*>(this)->target_slices();
-	return ImageWriter(binary).writeVolume(filename, slices, true, this);
+	return ImageWriter(binary).writeVolume(filename, slices, ImageWriter::kActiveSlices, this);
 }
 
 bool SlicesHandler::print_xmlregionextent(const char* filename,

@@ -106,22 +106,20 @@ void ExportImg::save_pushed()
 			"PNG file (*.png)"
 			"JPG file (*.jpg *.jpeg)";
 	std::string file_path = RecentPlaces::getSaveFileName(this, "Save As", QString::null, filter).toStdString();
-	// current slice export does not work
-	bool current_slice = slice_selection_group->checkedId()==0;
-	bool active_slices = slice_selection_group->checkedId()==1;
+	auto slice_selection = static_cast<ImageWriter::eSliceSelection>(slice_selection_group->checkedId());
 
 	ImageWriter w(true);
 
 	switch (img_selection_group->checkedId())
 	{
 	case eImageSelection::kSource:
-		w.writeVolume(file_path, handler3D->source_slices(), active_slices, handler3D);
+		w.writeVolume(file_path, handler3D->source_slices(), slice_selection, handler3D);
 		break;
 	case eImageSelection::kTarget:
-		w.writeVolume(file_path, handler3D->target_slices(), active_slices, handler3D);
+		w.writeVolume(file_path, handler3D->target_slices(), slice_selection, handler3D);
 		break;
 	case eImageSelection::kTissue:
-		w.writeVolume(file_path, handler3D->tissue_slices(handler3D->active_tissuelayer()), active_slices, handler3D);
+		w.writeVolume(file_path, handler3D->tissue_slices(handler3D->active_tissuelayer()), slice_selection, handler3D);
 		break;
 	}
 }
@@ -452,8 +450,6 @@ LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),vbox2,SLOT(setShown(bool on)));
 
 	subsect_toggled();
-
-	return;
 }
 
 LoaderRaw::~LoaderRaw()

@@ -216,7 +216,7 @@ public:
 		handler._spacing = _spacing;
 		handler._transform = _transform;
 
-		bool active_slices = false;
+		auto active_slices = ImageWriter::eSliceSelection::kActiveSlices;
 		BOOST_REQUIRE(ImageWriter().writeVolume(_file_name.string(), handler.target_slices(), active_slices, &handler));
 	}
 
