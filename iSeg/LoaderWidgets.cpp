@@ -59,14 +59,14 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 	: QDialog(p, n, f), handler3D(h)
 {
 	auto img_selection_hbox = new QHBoxLayout;
-	img_selection_group = make_button_group({"Source", "Target", "Tissue"});
+	img_selection_group = make_button_group({"Source", "Target", "Tissue"}, 0);
 	for (auto b : img_selection_group->buttons())
 	{
 		img_selection_hbox->addWidget(b);
 	}
 
 	auto slice_selection_hbox = new QHBoxLayout;
-	slice_selection_group = make_button_group({"Current Slice", "Active Slices"});
+	slice_selection_group = make_button_group({"Current Slice", "Active Slices"}, 0);
 	for (auto b : slice_selection_group->buttons())
 	{
 		slice_selection_hbox->addWidget(b);

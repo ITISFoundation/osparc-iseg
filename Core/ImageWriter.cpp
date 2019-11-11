@@ -21,7 +21,7 @@
 #include <itkImageFileWriter.h>
 #include <itkImageSeriesWriter.h>
 #include <itkNumericSeriesFileNames.h>
-
+#include <itkRescaleIntensityImageFilter.h>
 
 #include <vtkNew.h>
 #include <vtkStructuredPointsWriter.h>
@@ -89,27 +89,32 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 		}
 		else if (ext == ".bmp" || ext == ".png" || ext == ".jpg" || ext == ".jpeg")
 		{
-			using image_type = itk::SliceContiguousImage<T>;
-			using contiguous_image_type = itk::Image<T, 3>;
-			using image_2d_type = itk::Image<T, 2>;
-			//using caster_type = itk::CastImageFilter<image_type, contiguous_image_type>;
-			using writer_type = itk::ImageSeriesWriter<image_type, image_2d_type>;
-			using names_generator_type = itk::NumericSeriesFileNames;
+			using t_slices_type = itk::SliceContiguousImage<T>;
+			using t_image_type = itk::Image<T, 3>;
+			using o_image_type = itk::Image<unsigned char, 3>;
+			using o_image2_type = itk::Image<unsigned char, 2>;
 
 			std::string format = (path.parent_path() / (path.stem().string() + "%04d" + ext)).string();
-
-			auto names_generator = names_generator_type::New();;
+			auto names_generator = itk::NumericSeriesFileNames::New();
 			names_generator->SetSeriesFormat(format.c_str());
 			names_generator->SetStartIndex(start);
 			names_generator->SetEndIndex(end-1);
 			names_generator->SetIncrementIndex(1);
 
-			//auto caster = caster_type::New();
-			//caster->SetInput(image);
+			using rescale_type = itk::RescaleIntensityImageFilter<t_slices_type, t_image_type>;
+			auto rescale = rescale_type::New();
+			rescale->SetInput(image);
+			rescale->SetOutputMinimum(0);
+			rescale->SetOutputMaximum(itk::NumericTraits<o_image_type::PixelType>::max());
 
+			using FilterType = itk::CastImageFilter<t_image_type, o_image_type>;
+			auto filter = FilterType::New();
+			filter->SetInput(rescale->GetOutput());
+
+			using writer_type = itk::ImageSeriesWriter<o_image_type, o_image2_type>;
 			auto writer = writer_type::New();
-			writer->SetInput(image);// caster->GetOutput());
 			writer->SetFileNames(names_generator->GetFileNames());
+			writer->SetInput(filter->GetOutput());
 
 			try
 			{
