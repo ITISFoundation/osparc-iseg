@@ -19,6 +19,9 @@
 #include <itkCastImageFilter.h>
 #include <itkImage.h>
 #include <itkImageFileWriter.h>
+#include <itkImageSeriesWriter.h>
+#include <itkNumericSeriesFileNames.h>
+
 
 #include <vtkNew.h>
 #include <vtkStructuredPointsWriter.h>
@@ -52,8 +55,8 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 	if (image)
 	{
 		boost::filesystem::path path(filename);
-		std::string extension = boost::algorithm::to_lower_copy(path.has_extension() ? path.extension().string() : "");
-		if (extension == ".vti" || extension == ".vtk")
+		std::string ext = boost::algorithm::to_lower_copy(path.has_extension() ? path.extension().string() : "");
+		if (ext == ".vti" || ext == ".vtk")
 		{
 			using image_type = itk::SliceContiguousImage<T>;
 			using contiguous_image_type = itk::Image<T, 3>;
@@ -67,7 +70,7 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 			connector->SetInput(caster->GetOutput());
 			connector->Update();
 
-			if (extension == ".vti")
+			if (ext == ".vti")
 			{
 				vtkNew<vtkXMLImageDataWriter> writer;
 				writer->SetFileName(filename.c_str());
@@ -82,6 +85,45 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 				writer->SetInputData(connector->GetOutput());
 				writer->SetFileType(m_Binary ? VTK_BINARY : VTK_ASCII);
 				return writer->Write() != 0;
+			}
+		}
+		else if (ext == ".bmp" || ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+		{
+			using image_type = itk::SliceContiguousImage<T>;
+			using contiguous_image_type = itk::Image<T, 3>;
+			using image_2d_type = itk::Image<T, 2>;
+			//using caster_type = itk::CastImageFilter<image_type, contiguous_image_type>;
+			using writer_type = itk::ImageSeriesWriter<image_type, image_2d_type>;
+			using names_generator_type = itk::NumericSeriesFileNames;
+
+			std::string format = (path.parent_path() / (path.stem().string() + "%03d" + ext)).string();
+
+			auto region = image->GetLargestPossibleRegion();
+			auto start = region.GetIndex();
+			auto size = region.GetSize();
+
+			auto names_generator = names_generator_type::New();;
+			names_generator->SetSeriesFormat(format.c_str());
+			names_generator->SetStartIndex(start[2]);
+			names_generator->SetEndIndex(start[2] + size[2] - 1);
+			names_generator->SetIncrementIndex(1);
+
+			//auto caster = caster_type::New();
+			//caster->SetInput(image);
+
+			auto writer = writer_type::New();
+			writer->SetInput(image);// caster->GetOutput());
+			writer->SetFileName(filename);
+			writer->SetFileNames(names_generator->GetFileNames());
+
+			try
+			{
+				writer->Update();
+				return true;
+			}
+			catch (const itk::ExceptionObject& e)
+			{
+				ISEG_ERROR(e.GetDescription());
 			}
 		}
 		else
@@ -107,6 +149,20 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 				ISEG_ERROR(e.GetDescription());
 			}
 		}
+	}
+	return false;
+}
+
+bool ImageWriter::writeVolume(const std::string& file_path, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection)
+{
+	switch (img_selection)
+	{
+	case eImageSelection::kSource:
+		return writeVolume<float>(file_path, handler->source_slices(), slice_selection, handler);
+	case eImageSelection::kTarget:
+		return writeVolume<float>(file_path, handler->target_slices(), slice_selection, handler);
+	case eImageSelection::kTissue:
+		return writeVolume<tissues_size_t>(file_path, handler->tissue_slices(handler->active_tissuelayer()), slice_selection, handler);
 	}
 	return false;
 }

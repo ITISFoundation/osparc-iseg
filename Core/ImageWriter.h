@@ -28,9 +28,19 @@ class ImageWriter
 public:
 	ImageWriter(bool binary = true) : m_Binary(binary) {}
 
-	enum eSliceSelection { kSlice = 0,
+	enum eImageSelection {
+		kSource = 0,
+		kTarget = 1,
+		kTissue = 2
+	};
+
+	enum eSliceSelection {
+		kSlice = 0,
 		kActiveSlices = 1,
-		kAllSlices = 2 };
+		kAllSlices = 2
+	};
+
+	ISEG_CORE_API bool writeVolume(const std::string& filename, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection);
 
 	template<typename T>
 	bool writeVolume(const std::string& filename, const std::vector<T*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);

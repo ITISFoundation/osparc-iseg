@@ -87,16 +87,7 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 
 void ExportImg::save_pushed()
 {
-	enum eImageSelection { kSource = 0,
-		kTarget = 1,
-		kTissue = 2 };
-
-	enum eSliceSelection { kSlice = 0,
-		kActiveSlices = 1,
-		kAllSlices = 2 };
-
 	// todo: what to do about file series, e.g. select with some option (including base name), select directory (or save file name without extension, then append)
-
 	QString filter =
 			"Nifty file (*.nii.gz *nii.gz)\n"
 			"Analyze file (*.hdr *.img)\n"
@@ -105,23 +96,13 @@ void ExportImg::save_pushed()
 			"BMP file (*.bmp)"
 			"PNG file (*.png)"
 			"JPG file (*.jpg *.jpeg)";
+
 	std::string file_path = RecentPlaces::getSaveFileName(this, "Save As", QString::null, filter).toStdString();
+	auto img_selection = static_cast<ImageWriter::eImageSelection>(img_selection_group->checkedId());
 	auto slice_selection = static_cast<ImageWriter::eSliceSelection>(slice_selection_group->checkedId());
 
 	ImageWriter w(true);
-
-	switch (img_selection_group->checkedId())
-	{
-	case eImageSelection::kSource:
-		w.writeVolume(file_path, handler3D->source_slices(), slice_selection, handler3D);
-		break;
-	case eImageSelection::kTarget:
-		w.writeVolume(file_path, handler3D->target_slices(), slice_selection, handler3D);
-		break;
-	case eImageSelection::kTissue:
-		w.writeVolume(file_path, handler3D->tissue_slices(handler3D->active_tissuelayer()), slice_selection, handler3D);
-		break;
-	}
+	w.writeVolume(file_path, handler3D, img_selection, slice_selection);
 }
 
 LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
@@ -688,8 +669,7 @@ void SaverImg::save_pushed()
 					QString s = nameEdit->text();
 					if (s.length() > 4 && !s.endsWith(QString(".bmp")))
 						s.append(".bmp");
-					res = (handler3D->get_activebmphandler()->SaveDIBitmap(
-										 s.ascii()) == 0);
+					res = (handler3D->get_activebmphandler()->SaveDIBitmap(s.ascii()) == 0);
 				}
 			}
 			else if (pictwork->isChecked())

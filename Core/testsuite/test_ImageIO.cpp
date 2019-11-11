@@ -396,6 +396,13 @@ BOOST_AUTO_TEST_CASE(VTI)
 	test.Read();
 }
 
+// --run_test=iSeg_suite/ImageIO_suite/PNG --log_level=message
+//BOOST_AUTO_TEST_CASE(PNG)
+//{
+//	TestIO test("temp.png", true);
+//	test.Write();
+//}
+
 // TestRunner.exe --run_test=iSeg_suite/ImageIO_suite/ColorImages --log_level=message
 BOOST_AUTO_TEST_CASE(ColorImages)
 {

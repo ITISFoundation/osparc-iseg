@@ -2896,13 +2896,12 @@ void MainWindow::execute_saveimg()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	SaverImg SI(handler3D, this);
-	SI.move(QCursor::pos());
-	SI.exec();
-
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
+	// SaverImg SI(handler3D, this);
+	// SI.move(QCursor::pos());
+	// SI.exec();
+	ExportImg export_dialog(handler3D, this);
+	export_dialog.move(QCursor::pos());
+	export_dialog.exec();
 
 	emit end_dataexport(this);
 }
