@@ -115,7 +115,7 @@ typedef void* handle;
 
 inline handle open(std::string const& file_name)
 {
-	return dlopen(file_name.c_str(), RTLD_LOCAL | RTLD_LAZY);
+	return dlopen(file_name.c_str(), RTLD_GLOBAL | RTLD_LAZY);
 }
 
 //_________________________________________________________________//

@@ -21,10 +21,9 @@ IF(ISEG_BUILD_TESTING)
 		test_Transform.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_iSegData ${SOURCES} ${HEADERS})
+	ADD_TESTSUITE(TestSuite_iSegData ${SOURCES} ${HEADERS})
 	TARGET_LINK_LIBRARIES(TestSuite_iSegData
 		iSegData
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_iSegData "TestSuite")
 ENDIF()

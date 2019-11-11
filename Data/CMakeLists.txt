@@ -17,6 +17,7 @@ SET(SOURCES
 	addLine.cpp
 	BrushInteraction.cpp
 	Color.cpp
+	ImageToITK.cpp
 	ItkProgressObserver.cpp
 	LogApi.cpp
 	SlicesHandlerITKInterface.cpp

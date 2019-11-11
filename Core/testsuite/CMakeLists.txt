@@ -22,11 +22,10 @@ IF(ISEG_BUILD_TESTING)
 		test_BinaryThinning.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_iSegCore ${SOURCES} ${HEADERS})
+	ADD_TESTSUITE(TestSuite_iSegCore ${SOURCES} ${HEADERS})
 	TARGET_LINK_LIBRARIES(TestSuite_iSegCore
-		iSegCore
 		iSegData
+		iSegCore
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_iSegCore "TestSuite")
 ENDIF()

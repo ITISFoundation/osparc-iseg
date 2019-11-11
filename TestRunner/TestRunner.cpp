@@ -114,7 +114,7 @@ typedef void* handle;
 
 inline handle open(std::string const& file_name)
 {
-	return dlopen(file_name.c_str(), RTLD_LOCAL | RTLD_LAZY);
+	return dlopen(file_name.c_str(), RTLD_GLOBAL | RTLD_LAZY);
 }
 
 //_________________________________________________________________//
@@ -175,11 +175,12 @@ bool load_test_lib(const std::string& test_lib_name)
 {
 	test_lib_handle = dyn_lib::open(test_lib_name);
 	if (!test_lib_handle)
+	{
 		throw std::logic_error(std::string("Unable to load test library ")
 															 .append(test_lib_name)
 															 .append(" : ")
 															 .append(dyn_lib::error()));
-
+	}
 	return true;
 }
 

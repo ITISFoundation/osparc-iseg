@@ -16,6 +16,7 @@
 
   1. Download and unzip the ITK folder
   2. CMake (source ITK folder, build in separate folder), press _Configure_
+    - "-DCMAKE_CXX_FLAGS=-std=c++11"
   3. Press configure and select the `Unix Makefile` generator
   4. Press _Advanced_ checkbox and select _BUILD_SHARED_LIBS_ , press configure again (CMake will find the ZLib library installed with the HDF5 package above)
   5. Press _Generate_
