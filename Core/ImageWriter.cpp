@@ -96,16 +96,12 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 			using writer_type = itk::ImageSeriesWriter<image_type, image_2d_type>;
 			using names_generator_type = itk::NumericSeriesFileNames;
 
-			std::string format = (path.parent_path() / (path.stem().string() + "%03d" + ext)).string();
-
-			auto region = image->GetLargestPossibleRegion();
-			auto start = region.GetIndex();
-			auto size = region.GetSize();
+			std::string format = (path.parent_path() / (path.stem().string() + "%04d" + ext)).string();
 
 			auto names_generator = names_generator_type::New();;
 			names_generator->SetSeriesFormat(format.c_str());
-			names_generator->SetStartIndex(start[2]);
-			names_generator->SetEndIndex(start[2] + size[2] - 1);
+			names_generator->SetStartIndex(start);
+			names_generator->SetEndIndex(end-1);
 			names_generator->SetIncrementIndex(1);
 
 			//auto caster = caster_type::New();
@@ -113,7 +109,6 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 
 			auto writer = writer_type::New();
 			writer->SetInput(image);// caster->GetOutput());
-			writer->SetFileName(filename);
 			writer->SetFileNames(names_generator->GetFileNames());
 
 			try

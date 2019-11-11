@@ -69,7 +69,7 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 	slice_selection_group = make_button_group({"Current Slice", "Active Slices"});
 	for (auto b : slice_selection_group->buttons())
 	{
-		img_selection_hbox->addWidget(b);
+		slice_selection_hbox->addWidget(b);
 	}
 
 	auto button_hbox = new QHBoxLayout;
@@ -80,6 +80,7 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 	top_layout->addLayout(img_selection_hbox);
 	top_layout->addLayout(slice_selection_hbox);
 	top_layout->addLayout(button_hbox);
+	setLayout(top_layout);
 
 	connect(pb_save, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
@@ -93,8 +94,8 @@ void ExportImg::save_pushed()
 			"Analyze file (*.hdr *.img)\n"
 			"Nrrd file (*.nrrd)\n"
 			"VTK file (*.vtk *vti)\n"
-			"BMP file (*.bmp)"
-			"PNG file (*.png)"
+			"BMP file (*.bmp)\n"
+			"PNG file (*.png)\n"
 			"JPG file (*.jpg *.jpeg)";
 
 	std::string file_path = RecentPlaces::getSaveFileName(this, "Save As", QString::null, filter).toStdString();
@@ -103,6 +104,8 @@ void ExportImg::save_pushed()
 
 	ImageWriter w(true);
 	w.writeVolume(file_path, handler3D, img_selection, slice_selection);
+
+	close();
 }
 
 LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
