@@ -18,9 +18,9 @@ IF(ISEG_BUILD_TESTING)
 		test_Metric.cpp
 	)
 	
-	ADD_LIBRARY(TestSuite_TraceTubesWidget ${SOURCES} ${HEADERS})
+	ADD_TESTSUITE(TestSuite_TraceTubesWidget ${SOURCES} ${HEADERS})
 	TARGET_LINK_LIBRARIES(TestSuite_TraceTubesWidget
+		iSegData
 		${MY_EXTERNAL_LINK_LIBRARIES}
 	)
-	VS_SET_PROPERTY(TestSuite_TraceTubesWidget "TestSuite")
 ENDIF()

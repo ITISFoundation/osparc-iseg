@@ -59,17 +59,17 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 	: QDialog(p, n, f), handler3D(h)
 {
 	auto img_selection_hbox = new QHBoxLayout;
-	img_selection_group = make_button_group({"Source", "Target", "Tissue"});
+	img_selection_group = make_button_group({"Source", "Target", "Tissue"}, 0);
 	for (auto b : img_selection_group->buttons())
 	{
 		img_selection_hbox->addWidget(b);
 	}
 
 	auto slice_selection_hbox = new QHBoxLayout;
-	slice_selection_group = make_button_group({"Current Slice", "Active Slices"});
+	slice_selection_group = make_button_group({"Current Slice", "Active Slices"}, 0);
 	for (auto b : slice_selection_group->buttons())
 	{
-		img_selection_hbox->addWidget(b);
+		slice_selection_hbox->addWidget(b);
 	}
 
 	auto button_hbox = new QHBoxLayout;
@@ -80,6 +80,7 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 	top_layout->addLayout(img_selection_hbox);
 	top_layout->addLayout(slice_selection_hbox);
 	top_layout->addLayout(button_hbox);
+	setLayout(top_layout);
 
 	connect(pb_save, SIGNAL(clicked()), this, SLOT(save_pushed()));
 	connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
@@ -87,43 +88,24 @@ ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlag
 
 void ExportImg::save_pushed()
 {
-	enum eImageSelection { kSource = 0,
-		kTarget = 1,
-		kTissue = 2 };
-
-	enum eSliceSelection { kSlice = 0,
-		kActiveSlices = 1,
-		kAllSlices = 2 };
-
 	// todo: what to do about file series, e.g. select with some option (including base name), select directory (or save file name without extension, then append)
-
 	QString filter =
 			"Nifty file (*.nii.gz *nii.gz)\n"
 			"Analyze file (*.hdr *.img)\n"
 			"Nrrd file (*.nrrd)\n"
 			"VTK file (*.vtk *vti)\n"
-			"BMP file (*.bmp)"
-			"PNG file (*.png)"
+			"BMP file (*.bmp)\n"
+			"PNG file (*.png)\n"
 			"JPG file (*.jpg *.jpeg)";
+
 	std::string file_path = RecentPlaces::getSaveFileName(this, "Save As", QString::null, filter).toStdString();
-	// current slice export does not work
-	bool current_slice = slice_selection_group->checkedId()==0;
-	bool active_slices = slice_selection_group->checkedId()==1;
+	auto img_selection = static_cast<ImageWriter::eImageSelection>(img_selection_group->checkedId());
+	auto slice_selection = static_cast<ImageWriter::eSliceSelection>(slice_selection_group->checkedId());
 
 	ImageWriter w(true);
+	w.writeVolume(file_path, handler3D, img_selection, slice_selection);
 
-	switch (img_selection_group->checkedId())
-	{
-	case eImageSelection::kSource:
-		w.writeVolume(file_path, handler3D->source_slices(), active_slices, handler3D);
-		break;
-	case eImageSelection::kTarget:
-		w.writeVolume(file_path, handler3D->target_slices(), active_slices, handler3D);
-		break;
-	case eImageSelection::kTissue:
-		w.writeVolume(file_path, handler3D->tissue_slices(handler3D->active_tissuelayer()), active_slices, handler3D);
-		break;
-	}
+	close();
 }
 
 LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
@@ -452,8 +434,6 @@ LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	//	QObject::connect(subsect,SIGNAL(toggled(bool on)),vbox2,SLOT(setShown(bool on)));
 
 	subsect_toggled();
-
-	return;
 }
 
 LoaderRaw::~LoaderRaw()
@@ -692,8 +672,7 @@ void SaverImg::save_pushed()
 					QString s = nameEdit->text();
 					if (s.length() > 4 && !s.endsWith(QString(".bmp")))
 						s.append(".bmp");
-					res = (handler3D->get_activebmphandler()->SaveDIBitmap(
-										 s.ascii()) == 0);
+					res = (handler3D->get_activebmphandler()->SaveDIBitmap(s.ascii()) == 0);
 				}
 			}
 			else if (pictwork->isChecked())

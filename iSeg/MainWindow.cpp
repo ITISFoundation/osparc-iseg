@@ -2896,13 +2896,12 @@ void MainWindow::execute_saveimg()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	SaverImg SI(handler3D, this);
-	SI.move(QCursor::pos());
-	SI.exec();
-
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
+	// SaverImg SI(handler3D, this);
+	// SI.move(QCursor::pos());
+	// SI.exec();
+	ExportImg export_dialog(handler3D, this);
+	export_dialog.move(QCursor::pos());
+	export_dialog.exec();
 
 	emit end_dataexport(this);
 }
@@ -3260,15 +3259,10 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		restoreGeometry(settings.value("geometry").toByteArray());
 		restoreState(settings.value("state").toByteArray());
 		this->handler3D->SetNumberOfUndoSteps(settings.value("NumberOfUndoSteps", 50).toUInt());
-		ISEG_INFO("NumberOfUndoSteps = " << this->handler3D->GetNumberOfUndoSteps());
 		this->handler3D->SetNumberOfUndoArrays(settings.value("NumberOfUndoArrays", 20).toUInt());
-		ISEG_INFO("NumberOfUndoArrays = " << this->handler3D->GetNumberOfUndoArrays());
 		this->handler3D->SetCompression(settings.value("Compression", 0).toInt());
-		ISEG_INFO("Compression = " << this->handler3D->GetCompression());
 		this->handler3D->SetContiguousMemory(settings.value("ContiguousMemory", true).toBool());
-		ISEG_INFO("ContiguousMemory = " << this->handler3D->GetContiguousMemory());
 		SetBloscEnabled(settings.value("BloscEnabled", false).toBool());
-		ISEG_INFO("BloscEnabled = " << BloscEnabled());
 		settings.endGroup();
 
 		settings.beginGroup("RecentPlaces");

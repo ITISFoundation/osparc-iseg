@@ -25,7 +25,7 @@ QString _getFileName(QWidget* parent,
 		const QString& caption,
 		const QString& dir,
 		const QString& filter,
-		QFileDialog::FileMode mode)
+		QFileDialog::AcceptMode mode)
 {
 	QString last_dir = !dir.isEmpty() ? dir : RecentPlaces::lastDirectory();
 	QList<QUrl> urls;
@@ -35,7 +35,8 @@ QString _getFileName(QWidget* parent,
 	}
 
 	QFileDialog dialog(parent);
-	dialog.setFileMode(mode);
+	dialog.setAcceptMode(mode);
+	dialog.setFileMode(mode == QFileDialog::AcceptOpen ? QFileDialog::ExistingFile : QFileDialog::AnyFile);
 	dialog.setCaption(caption);
 	dialog.setFilter(filter);
 	dialog.setDirectory(last_dir);
@@ -97,7 +98,7 @@ QString RecentPlaces::getOpenFileName(QWidget* parent,
 		const QString& dir,
 		const QString& filter)
 {
-	return _getFileName(parent, caption, dir, filter, QFileDialog::ExistingFile);
+	return _getFileName(parent, caption, dir, filter, QFileDialog::AcceptOpen);
 }
 
 QString RecentPlaces::getSaveFileName(QWidget* parent,
@@ -105,7 +106,7 @@ QString RecentPlaces::getSaveFileName(QWidget* parent,
 		const QString& dir,
 		const QString& filter)
 {
-	return _getFileName(parent, caption, dir, filter, QFileDialog::AnyFile);
+	return _getFileName(parent, caption, dir, filter, QFileDialog::AcceptSave);
 }
 
 }

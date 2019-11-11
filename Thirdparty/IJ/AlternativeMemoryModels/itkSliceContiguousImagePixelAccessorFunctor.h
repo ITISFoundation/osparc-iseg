@@ -36,8 +36,8 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template <class TImageType >
-class ITK_EXPORT SliceContiguousImagePixelAccessorFunctor
+template<class TImageType>
+class ITK_TEMPLATE_EXPORT SliceContiguousImagePixelAccessorFunctor
 {
 public:
 

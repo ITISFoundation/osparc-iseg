@@ -50,9 +50,8 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template <class TPixel >
-class ITK_EXPORT SliceContiguousImage :
-    public ImageBase< 3 >
+template<class TPixel>
+class ITK_TEMPLATE_EXPORT SliceContiguousImage : public ImageBase<3>
 {
 public:
   /** Standard class typedefs */

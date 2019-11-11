@@ -216,7 +216,7 @@ public:
 		handler._spacing = _spacing;
 		handler._transform = _transform;
 
-		bool active_slices = false;
+		auto active_slices = ImageWriter::eSliceSelection::kActiveSlices;
 		BOOST_REQUIRE(ImageWriter().writeVolume(_file_name.string(), handler.target_slices(), active_slices, &handler));
 	}
 
@@ -395,6 +395,13 @@ BOOST_AUTO_TEST_CASE(VTI)
 	test.Write();
 	test.Read();
 }
+
+// --run_test=iSeg_suite/ImageIO_suite/PNG --log_level=message
+//BOOST_AUTO_TEST_CASE(PNG)
+//{
+//	TestIO test("temp.png", true);
+//	test.Write();
+//}
 
 // TestRunner.exe --run_test=iSeg_suite/ImageIO_suite/ColorImages --log_level=message
 BOOST_AUTO_TEST_CASE(ColorImages)

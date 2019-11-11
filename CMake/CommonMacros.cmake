@@ -44,8 +44,17 @@ MACRO(SET_COMPILER_AND_LINKER_FLAGS)
 		SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} /debug:fastlink")
 		SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /debug:fastlink")
 	ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wno-inconsistent-missing-override -Wunreachable-code-aggressive")
+		# -std=c++11 -stdlib=libc++ 
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override -Wunreachable-code-aggressive")
 	ENDIF()
+ENDMACRO()
+
+MACRO(ADD_TESTSUITE project_name)
+	ADD_LIBRARY( ${project_name} ${ARGN} )
+
+	SET(TESTSUITE_NAMES ${TESTSUITE_NAMES};${project_name} CACHE INTERNAL "")
+	
+	VS_SET_PROPERTY(${project_name} "TestSuite")
 ENDMACRO()
 
 #

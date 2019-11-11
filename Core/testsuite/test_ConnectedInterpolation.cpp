@@ -18,6 +18,7 @@
 namespace iseg {
 
 BOOST_AUTO_TEST_SUITE(iSeg_suite);
+BOOST_AUTO_TEST_SUITE(Core_suite);
 BOOST_AUTO_TEST_SUITE(Interpolation_suite);
 
 // TestRunner.exe --run_test=iSeg_suite/Interpolation_suite/Interpolation_test --log_level=message
@@ -63,17 +64,17 @@ BOOST_AUTO_TEST_CASE(Interpolation_test)
 // --run_test=iSeg_suite/Interpolation_suite/ResampleFilterBug --log_level=message
 BOOST_AUTO_TEST_CASE(ResampleFilterBug)
 {
-	using image3_type = itk::Image<float,3>;
+	using image_type = itk::Image<float,3>;
 
-	image3_type::IndexType input_start = {0, 0, 0};
-	image3_type::SizeType input_size = {512, 512, 3};
-	image3_type::RegionType input_region(input_start, input_size);
-	image3_type::SpacingType input_spacing;
+	image_type::IndexType input_start = {0, 0, 0};
+	image_type::SizeType input_size = {512, 512, 3};
+	image_type::RegionType input_region(input_start, input_size);
+	image_type::SpacingType input_spacing;
 	input_spacing.Fill(1.0);
-	image3_type::PointType input_origin;
+	image_type::PointType input_origin;
 	input_origin.Fill(0.0);
 
-	auto input = image3_type::New();
+	auto input = image_type::New();
 	input->SetSpacing(input_spacing);
 	input->SetOrigin(input_origin);
 	input->SetRegions(input_region);
@@ -89,9 +90,9 @@ BOOST_AUTO_TEST_CASE(ResampleFilterBug)
 	spacing[2] = 1.0 / (size[2] + 1);
 	origin[2] = spacing[2];
 
-	auto interpolator = itk::LinearInterpolateImageFunction<image3_type, double>::New();
+	auto interpolator = itk::LinearInterpolateImageFunction<image_type, double>::New();
 
-	auto resample_filter = itk::ResampleImageFilter<image3_type, image3_type>::New();
+	auto resample_filter = itk::ResampleImageFilter<image_type, image_type>::New();
 	resample_filter->SetTransform(id.GetPointer());
 	resample_filter->SetInterpolator(interpolator);
 	resample_filter->SetOutputOrigin(origin);
@@ -102,6 +103,7 @@ BOOST_AUTO_TEST_CASE(ResampleFilterBug)
 	resample_filter->Update();
 }
 
+BOOST_AUTO_TEST_SUITE_END();
 BOOST_AUTO_TEST_SUITE_END();
 BOOST_AUTO_TEST_SUITE_END();
 

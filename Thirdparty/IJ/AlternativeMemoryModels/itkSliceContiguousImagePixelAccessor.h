@@ -40,8 +40,8 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template <class TType, class TSize >
-class ITK_EXPORT SliceContiguousImagePixelAccessor
+template<class TType, class TSize>
+class ITK_TEMPLATE_EXPORT SliceContiguousImagePixelAccessor
 {
 public:
 
