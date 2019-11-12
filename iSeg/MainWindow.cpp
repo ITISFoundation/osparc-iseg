@@ -2762,7 +2762,7 @@ void MainWindow::execute_loadsurface()
 	maybeSafe();
 
 	bool ok = true;
-	QString loadfilename = RecentPlaces::getSaveFileName(this, "Import Surface/Lines", QString::null, "Surfaces & Polylines (*.stl *.vtk)");
+	QString loadfilename = RecentPlaces::getOpenFileName(this, "Import Surface/Lines", QString::null, "Surfaces & Polylines (*.stl *.vtk)");
 	if (!loadfilename.isEmpty())
 	{
 		QCheckBox* cb = new QCheckBox("Intersect Only");

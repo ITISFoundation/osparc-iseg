@@ -76,7 +76,8 @@ void RecentPlaces::addRecent(const QString& path)
 
 	// get directory
 	// QFileInfo::absolutePath: Returns a file's path absolute path. This doesn't include the file name.
-	QString dir = QFileInfo(path).isFile() ? QFileInfo(path).absolutePath() : path;
+	QFileInfo fi(path);
+	QString dir = (fi.isDir()==false) ? fi.absolutePath() : path;
 
 	// push to top
 	_list.push_front(dir);
@@ -91,10 +92,11 @@ void RecentPlaces::addRecent(const QString& path)
 		_list.erase(end, _list.end());
 	}
 
-	// keep only last 5 results
-	if (_list.size() > 5)
+	// keep only last N results
+	const size_t num_places = 5;
+	if (_list.size() > num_places)
 	{
-		_list.resize(5);
+		_list.resize(num_places);
 	}
 }
 
