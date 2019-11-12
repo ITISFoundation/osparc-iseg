@@ -44,6 +44,23 @@ QString _getFileName(QWidget* parent,
 	if (dialog.exec() == QDialog::Accepted)
 	{
 		auto file_path = dialog.selectedFiles().value(0);
+		if (QFileInfo(file_path).completeSuffix().isEmpty() && !dialog.selectedNameFilter().isEmpty())
+		{
+			// append extension
+			auto filter = dialog.selectedNameFilter().toStdString();
+			auto pos0 = filter.find_first_of('*') + 1;
+			if (std::string::npos != pos0)
+			{
+				auto pos1 = std::min(
+					filter.find_first_of(' ', pos0),
+					filter.find_first_of(')', pos0));
+				if (std::string::npos != pos1)
+				{
+					file_path += QString::fromStdString(filter.substr(pos0, pos1 - pos0));
+				}
+			}
+		}
+
 		RecentPlaces::addRecent(file_path);
 		return file_path;
 	}

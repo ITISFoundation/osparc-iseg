@@ -13,6 +13,8 @@
 #include "MultiDatasetWidget.h"
 #include "SlicesHandler.h"
 
+#include "../Interface/RecentPlaces.h"
+
 #include <itkImageFileReader.h>
 #include <itkImageSeriesReader.h>
 #include <itkRawImageIO.h>
@@ -252,8 +254,8 @@ void MultiDatasetWidget::AddDatasetPressed()
 		case SupportedMultiDatasetTypes::supportedTypes::vtk:
 		{
 			bool res = true;
-			auto loadfilename = QFileDialog::getOpenFileName(this, tr("Open File"),
-					QString::null, tr("Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)"));
+			auto loadfilename = RecentPlaces::getOpenFileName(this, "Open File", "",
+				"Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)");
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();

@@ -2896,9 +2896,6 @@ void MainWindow::execute_saveimg()
 	dataSelection.tissues = true;
 	emit begin_dataexport(dataSelection, this);
 
-	// SaverImg SI(handler3D, this);
-	// SI.move(QCursor::pos());
-	// SI.exec();
 	ExportImg export_dialog(handler3D, this);
 	export_dialog.move(QCursor::pos());
 	export_dialog.exec();

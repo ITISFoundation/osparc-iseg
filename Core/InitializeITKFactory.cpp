@@ -35,8 +35,7 @@ void initializeITKFactory()
 	static boost::once_flag once_flag = BOOST_ONCE_INIT;
 	boost::call_once(once_flag, []() {
 		itk::ObjectFactoryBase::RegisterFactory(itk::MetaImageIOFactory::New());
-		itk::ObjectFactoryBase::RegisterFactory(
-			itk::NiftiImageIOFactory::New());
+		itk::ObjectFactoryBase::RegisterFactory(itk::NiftiImageIOFactory::New());
 		itk::ObjectFactoryBase::RegisterFactory(itk::NrrdImageIOFactory::New());
 		itk::ObjectFactoryBase::RegisterFactory(itk::VTKImageIOFactory::New());
 
