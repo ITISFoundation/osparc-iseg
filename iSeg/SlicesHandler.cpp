@@ -7755,6 +7755,12 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		_os.set_sizenr(_nrslices);
 		_image_slices.resize(_nrslices);
 
+		// make sure files are sorted according to z-position
+		if (lfilename.size() > 1)
+		{
+			DICOMsort(&lfilename);
+		}
+
 		_activeslice = 0;
 		_active_tissuelayer = 0;
 		_startslice = 0;
