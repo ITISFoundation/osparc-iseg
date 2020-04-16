@@ -423,33 +423,46 @@ SmoothTissuesParamView::SmoothTissuesParamView(QWidget* parent /*= 0*/) : ParamV
 	setLayout(layout);
 }
 
-DensityThresholdParamView::DensityThresholdParamView(QWidget* parent /*= 0*/)
+SpherizeParamView::SpherizeParamView(QWidget* parent /*= 0*/)
 {
-	_active_slice = new QRadioButton(tr("Current slice"));
-	_all_slices = new QRadioButton(tr("All slices (2D)"));
-	_3D = new QRadioButton(tr("Fully 3D"));
-	auto where_group = make_button_group(this, { _active_slice, _all_slices, _3D });
-	_active_slice->setChecked(true);
-	auto hbox = make_hbox({ _active_slice, _all_slices, _3D });
+	_target = new QRadioButton(QString("Target"));
+	_tissues = new QRadioButton(QString("Tissues"));
+	auto input_group = make_button_group(this, {_target, _tissues});
+	_target->setChecked(true);
 
-	_density_radius = new QSpinBox;
-	_density_radius->setMinimum(1);
-	_density_radius->setMaximum(100);
-	_density_radius->setValue(1);
+	_select_object = new QPushButton(tr("Select"));
+	_select_object->setCheckable(true);
+	_object_value = new QLineEdit(QString::number(255));
+	_object_value->setValidator(new QDoubleValidator);
 
-	_density_threshold = new QSpinBox;
-	_density_threshold->setMinimum(1);
-	_density_threshold->setMaximum(100);
-	_density_threshold->setValue(50);
+	_carve_inside = new QRadioButton(tr("Carve inside"));
+	_carve_inside->setToolTip(Format(
+		"Remove voxels from inside the selected object to open handles and enfore a genus '0'."));
+	_carve_outside = new QRadioButton(tr("Carve from outside"));
+	_carve_outside->setToolTip(Format(
+		"Add voxels around the selected object to close handles and cavities and enfore a genus '0'."));
+
+	auto how_group = make_button_group(this, {_carve_inside, _carve_outside});
+	_carve_inside->setChecked(true);
+
+	auto input_hbox = make_hbox({_target, _tissues});
+	auto object_hbox = make_hbox({_select_object, _object_value});
+	auto carve_hbox = make_hbox({_carve_inside, _carve_outside});
 
 	_execute = new QPushButton(QString("Execute"));
 
 	auto layout = new QFormLayout;
-	layout->addRow(tr("Apply to"), hbox);
-	layout->addRow(tr("Radius"), _density_radius);
-	layout->addRow(tr("Percent foreground"), _density_threshold);
+	layout->addRow(tr("Input image"), input_hbox);
+	layout->addRow(tr("Object value"), object_hbox);
+	layout->addRow(tr("Method"), carve_hbox);
 	layout->addRow(_execute);
 	setLayout(layout);
+}
+
+void SpherizeParamView::set_object_value(float v)
+{
+	_object_value->setText(QString::number(v));
+	_select_object->setChecked(false);
 }
 
 } // namespace iseg

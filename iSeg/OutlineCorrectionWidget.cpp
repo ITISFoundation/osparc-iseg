@@ -23,8 +23,9 @@
 #include "Data/ItkProgressObserver.h"
 #include "Data/SlicesHandlerITKInterface.h"
 
-
 #include "Core/SmoothTissues.h"
+#include "Core/itkFixTopologyCarveInside.h"
+#include "Core/itkFixTopologyCarveOutside.h"
 
 #include "Interface/ProgressDialog.h"
 
@@ -93,16 +94,16 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 			"Make sure that there are no unassigned regions "
 			"inside the segmented model."));
 
-	density_threshold = new QRadioButton("Density Threshold");
-	density_threshold->setToolTip(Format(
-		"Estimate density of tissue pixels in sliding window. "
-		"Select pixels with a density above a threshold as foreground."));
+	spherize = new QRadioButton("Spherize");
+	spherize->setToolTip(Format(
+			"Simplify voxel set by making small changes (add/remove voxels),"
+			"which make the voxel set manifold and topologically equivalent to a sphere."));
 
 	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
 	smooth_tissues->setToolTip(Format(
 			"This tool smooths all non-locked tissues but does not modify locked tissues."));
 
-	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, density_threshold, smooth_tissues};
+	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, spherize, smooth_tissues};
 	methods = new QButtonGroup(this);
 	for (auto w : method_radio_buttons)
 	{
@@ -132,7 +133,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	add_skin_params = new AddSkinParamView;
 	fill_skin_params = new FillSkinParamView(handler3D);
 	fill_all_params = new FillAllParamView;
-	density_thr_params = new DensityThresholdParamView;
+	spherize_params = new SpherizeParamView;
 	smooth_tissues_params = new SmoothTissuesParamView;
 
 	// layouts
@@ -145,7 +146,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	stacked_params->addWidget(add_skin_params);
 	stacked_params->addWidget(fill_skin_params);
 	stacked_params->addWidget(fill_all_params);
-	stacked_params->addWidget(density_thr_params);
+	stacked_params->addWidget(spherize_params);
 	stacked_params->addWidget(smooth_tissues_params);
 
 	auto top_layout = new QHBoxLayout;
@@ -170,6 +171,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(fill_holes_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 	connect(remove_islands_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 	connect(fill_gaps_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	connect(spherize_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
 
 	connect(brush_params->_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
 	connect(brush_params->_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
@@ -182,7 +184,7 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	connect(add_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
 	connect(fill_all_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(density_thr_params->_execute, SIGNAL(clicked()), this, SLOT(density_threshold_pushed()));
+	connect(spherize_params->_execute, SIGNAL(clicked()), this, SLOT(carve_pushed()));
 	connect(smooth_tissues_params->_execute, SIGNAL(clicked()), this, SLOT(smooth_tissues_pushed()));
 
 	selectobj = false;
@@ -982,85 +984,75 @@ float OutlineCorrectionWidget::get_object_value() const
 	return 0.f;
 }
 
-//TODO template<int ImageDimension>
-//TODO void DensityThreshold()
-//TODO {
-//TODO
-//TODO }
-
-void OutlineCorrectionWidget::density_threshold_pushed()
+void OutlineCorrectionWidget::carve_pushed()
 {
 	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = !density_thr_params->_active_slice->isChecked();
-	dataSelection.sliceNr = handler3D->active_slice();
+	dataSelection.allSlices = true;
 	dataSelection.work = true;
 	emit begin_datachange(dataSelection, this);
 
-	using tissue_image = itk::Image<unsigned short, 2>;
-	using slice_image = itk::Image<float, 2>;
-	using map_functor = iseg::Functor::MapLabels<unsigned short, float>;
-	using map_filter = itk::UnaryFunctorImageFilter<tissue_image, slice_image, map_functor>;
-	using threshold_filter = itk::BinaryThresholdImageFilter<slice_image, slice_image>;
-	using mean_filter = itk::MeanImageFilter<slice_image, slice_image>;
-
-	map_functor map;
-	map.m_Map.assign(handler3D->tissue_names().size() + 1, 0);
-	for (auto sel: handler3D->tissue_selection())
-	{
-		map.m_Map.at(sel) = 1;
-	}
-
-	auto mapper = map_filter::New();
-	mapper->SetFunctor(map);
-	//TODO map_filter->SetInput(tissues);
-
-	slice_image::SizeType radius;
-	radius[0] = density_thr_params->_density_radius->value(); // radius along x
-	radius[1] = density_thr_params->_density_radius->value(); // radius along y
-
-	auto mean = mean_filter::New();
-	mean->SetInput(mapper->GetOutput());
-	mean->SetRadius(radius);
-
-	auto threshold2 = threshold_filter::New();
-	threshold2->SetInput(mean->GetOutput());
-	threshold2->SetLowerThreshold(density_thr_params->_density_threshold->value() / 100.f); // % above threshold
-	threshold2->SetInsideValue(255);
-	threshold2->SetOutsideValue(0);
+	using label_image_type = itk::SliceContiguousImage<unsigned short>;
+	using target_image_type = itk::SliceContiguousImage<float>;
+	using image_type = itk::Image<unsigned char, 3>;
 
 	SlicesHandlerITKInterface wrapper(handler3D);
-	if (density_thr_params->_active_slice->isChecked())
+	auto tissues = wrapper.GetTissues(true);
+	auto target = wrapper.GetTarget(true);
+
+	const unsigned char FG = 255;
+
+	image_type::Pointer input;
+	if (spherize_params->work())
 	{
-		auto tissue = wrapper.GetTissuesSlice();
-		auto target = wrapper.GetTargetSlice();
-
-		mapper->SetInput(tissue);
-
-		threshold2->Update();
-		iseg::Paste<slice_image, slice_image>(threshold2->GetOutput(), target);
-
-		handler3D->get_activebmphandler()->set_mode(eScaleMode::kFixedRange, false);
+		auto threshold = itk::BinaryThresholdImageFilter<target_image_type, image_type>::New();
+		threshold->SetInput(target);
+		threshold->SetLowerThreshold(spherize_params->object_value());
+		threshold->SetUpperThreshold(spherize_params->object_value());
+		threshold->SetInsideValue(FG);
+		threshold->SetOutsideValue(0);
+		threshold->Update();
+		input = threshold->GetOutput();
 	}
-	else //if (user_update)
+	else if (handler3D->tissue_selection().size() == 1)
 	{
-		using input_image_type = itk::SliceContiguousImage<unsigned short>;
-		using output_image_type = itk::SliceContiguousImage<float>;
-		using image_type = itk::Image<float, 3>;
-		using slice_filter_type = itk::SliceBySliceImageFilter<input_image_type, image_type, map_filter, threshold_filter>;
+		auto selected_tissue = handler3D->tissue_selection().front();
 
-		auto tissues = wrapper.GetTissues(true);
-		auto target = wrapper.GetTarget(true);
+		auto threshold = itk::BinaryThresholdImageFilter<label_image_type, image_type>::New();
+		threshold->SetInput(tissues);
+		threshold->SetLowerThreshold(selected_tissue);
+		threshold->SetUpperThreshold(selected_tissue);
+		threshold->SetInsideValue(FG);
+		threshold->SetOutsideValue(0);
+		threshold->Update();
+		input = threshold->GetOutput();
+	}
 
-		auto slice_executor = slice_filter_type::New();
-		slice_executor->SetInput(tissues);
-		slice_executor->SetInputFilter(mapper);
-		slice_executor->SetOutputFilter(threshold2);
+	image_type::Pointer output;
+	if (spherize_params->_carve_inside->isChecked())
+	{
+		auto carve = itk::FixTopologyCarveInside<image_type, image_type>::New();
+		carve->SetInput(input);
+		carve->SetInsideValue(FG);
+		carve->SetOutsideValue(0);
+		carve->Update();
+		output = carve->GetOutput();
+	}
+	else
+	{
+		auto carve = itk::FixTopologyCarveOutside<image_type, image_type>::New();
+		carve->SetInput(input);
+		carve->SetInsideValue(FG);
+		carve->SetOutsideValue(0);
+		carve->Update();
+		output = carve->GetOutput();
+	}
 
-		slice_executor->Update();
-		iseg::Paste<image_type, output_image_type>(slice_executor->GetOutput(), target);
-
+	if (output)
+	{
+		iseg::Paste<image_type, target_image_type>(output, target);
 		handler3D->set_modeall(eScaleMode::kFixedRange, false);
 	}
+
 	emit end_datachange(this);
 }
 

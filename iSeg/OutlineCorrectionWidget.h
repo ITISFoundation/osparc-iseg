@@ -28,7 +28,7 @@ class FillHolesParamView;
 class AddSkinParamView;
 class FillSkinParamView;
 class FillAllParamView;
-class DensityThresholdParamView;
+class SpherizeParamView;
 class SmoothTissuesParamView;
 
 /** \brief Class which contains different methods to modify/correct target or tissues
@@ -74,7 +74,7 @@ private:
 	QRadioButton* addskin;
 	QRadioButton* fillskin;
 	QRadioButton* allfill;
-	QRadioButton* density_threshold;
+	QRadioButton* spherize;
 	QRadioButton* smooth_tissues;
 
 	ParamViewBase* current_params = nullptr;
@@ -87,7 +87,7 @@ private:
 	AddSkinParamView* add_skin_params;
 	FillSkinParamView* fill_skin_params;
 	FillAllParamView* fill_all_params;
-	DensityThresholdParamView* density_thr_params;
+	SpherizeParamView* spherize_params;
 	SmoothTissuesParamView* smooth_tissues_params;
 
 	// member/state variables
@@ -115,7 +115,7 @@ private slots:
 	void draw_guide();
 	void copy_guide(Point* p = nullptr);
 	void copy_pick_pushed();
-	void density_threshold_pushed();
+	void carve_pushed();
 	void smooth_tissues_pushed();
 };
 
