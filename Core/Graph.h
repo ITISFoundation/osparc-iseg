@@ -7,6 +7,7 @@
 
 #include <array>
 #include <cmath>
+#include <type_traits>
 
 namespace XCore
 {
@@ -50,7 +51,7 @@ namespace XCore
 
 	public:
 		using idx_type = TIndex;
-		using idx_value = typename idx_type::IndexValueType;
+		using idx_value = typename std::decay<decltype(std::declval<idx_type&>()[0])>::type;
 		using idx_list_type = StackVector<idx_type, Pow(3, D) - 1>;
 
 		CUniformGridGraph(const std::array<idx_value, D>& dims, const std::array<double, D>& spacing)
