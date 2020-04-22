@@ -28,17 +28,17 @@
 #include <vtkPointData.h>
 #include <vtkUnsignedShortArray.h>
 
+#include <vtkDecimatePro.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkLookupTable.h>
+#include <vtkPolyDataConnectivityFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPropPicker.h>
 #include <vtkProperty.h>
 #include <vtkQuadricLODActor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
-
-#include <vtkPolyDataConnectivityFilter.h>
 
 #include <vtkAutoInit.h>
 #ifdef ISEG_VTK_OPENGL2
@@ -77,8 +77,7 @@ void transform_slices_vtk(const std::vector<TIn*>& slices, size_t slice_size, TA
 	}
 }
 
-enum eActions
-{
+enum eActions {
 	kSelectTissue,
 	kGotoSlice,
 	kMarkPoint
@@ -111,6 +110,21 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	lb_connectivity_count = new QLabel("");
 	lb_connectivity_count->setToolTip("Number of connected regions");
 
+	reduction = new QLineEdit(QString::number(0));
+	reduction->setValidator(new QIntValidator(0, 100));
+	reduction->setToolTip("Reduction of number triangles in percent.");
+
+	// set default reduction depending number of voxels.
+	const auto N = static_cast<float>(hand3D->return_area()) * hand3D->num_slices();
+	if (N > 1e8)
+	{
+		reduction->setText(QString::number(80));
+	}
+	else if (N > 1e6)
+	{
+		reduction->setText(QString::number(50));
+	}
+
 	// layout
 	auto vbox = new QVBoxLayout;
 	vbox->addWidget(vtkWidget);
@@ -119,6 +133,10 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	transparency_hbox->addWidget(lb_trans);
 	transparency_hbox->addWidget(sl_trans);
 	vbox->addLayout(transparency_hbox);
+
+	auto reduction_hbox = new QHBoxLayout;
+	reduction_hbox->addWidget(reduction);
+	vbox->addLayout(reduction_hbox);
 
 	if (input_type == kSource)
 	{
@@ -145,9 +163,10 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	setLayout(vbox);
 
 	// connections
-	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this, SLOT(transp_changed()));
-	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
-	QObject::connect(bt_connectivity, SIGNAL(clicked()), this, SLOT(split_surface()));
+	connect(sl_trans, SIGNAL(sliderReleased()), this, SLOT(transp_changed()));
+	connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
+	connect(bt_connectivity, SIGNAL(clicked()), this, SLOT(split_surface()));
+	connect(reduction, SIGNAL(editingFinished()), this, SLOT(reduction_changed));
 
 	// setup vtk scene
 	ren3D = vtkSmartPointer<vtkRenderer>::New();
@@ -177,20 +196,24 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	input = vtkSmartPointer<vtkImageData>::New();
 	discreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
 	cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
+	decimate = vtkSmartPointer<vtkDecimatePro>::New();
+	decimate->PreserveTopologyOn();
+	decimate->BoundaryVertexDeletionOff();
+	decimate->SplittingOff();
+	decimate->SetTargetReduction(reduction->text().toDouble() / 100.0);
 
 	load();
 
 	vtkWidget->GetRenderWindow()->Render();
 }
 
-SurfaceViewerWidget::~SurfaceViewerWidget() 
+SurfaceViewerWidget::~SurfaceViewerWidget()
 {
-
 }
 
 bool SurfaceViewerWidget::isOpenGLSupported()
 {
-	// todo: check e.g. via some helper process 
+	// todo: check e.g. via some helper process
 	return true;
 }
 
@@ -278,7 +301,9 @@ void SurfaceViewerWidget::load()
 		cubes->SetInputData(input);
 		cubes->SetValue(0, range[0] + 0.01 * (range[1] - range[0]) * sl_thresh->value());
 
-		mapper->SetInputConnection(cubes->GetOutputPort());
+		decimate->SetInputConnection(cubes->GetOutputPort());
+
+		mapper->SetInputConnection(decimate->GetOutputPort());
 		mapper->ScalarVisibilityOff();
 	}
 	else
@@ -290,8 +315,9 @@ void SurfaceViewerWidget::load()
 		// merge duplicate points (check if necessary)
 		// connectivity filter & set random colors
 		// mapper set input to connectivity output
+		decimate->SetInputConnection(discreteCubes->GetOutputPort());
 
-		mapper->SetInputConnection(discreteCubes->GetOutputPort());
+		mapper->SetInputConnection(decimate->GetOutputPort());
 		if (input_type == kTarget)
 		{
 			mapper->ScalarVisibilityOff();
@@ -322,7 +348,7 @@ void SurfaceViewerWidget::split_surface()
 
 	auto num_regions = connectivity->GetNumberOfExtractedRegions();
 	ISEG_INFO("Number of disconnected regions: " << num_regions);
-	
+
 	// attach lookuptable
 	auto lut = vtkSmartPointer<vtkLookupTable>::New();
 	lut->SetNumberOfTableValues(num_regions);
@@ -336,7 +362,7 @@ void SurfaceViewerWidget::split_surface()
 
 	auto output = vtkSmartPointer<vtkPolyData>::New();
 	output->ShallowCopy(connectivity->GetOutput());
-	
+
 	mapper->SetInputData(output);
 	mapper->ScalarVisibilityOn();
 	mapper->SetColorModeToMapScalars();
@@ -555,6 +581,13 @@ void SurfaceViewerWidget::thresh_changed()
 	}
 }
 
+void SurfaceViewerWidget::reduction_changed()
+{
+	decimate->SetTargetReduction(reduction->text().toDouble() / 100.0);
+
+	vtkWidget->GetRenderWindow()->Render();
+}
+
 int SurfaceViewerWidget::get_picked_tissue() const
 {
 	double* worldPosition = picker->GetPickPosition();
@@ -580,4 +613,4 @@ int SurfaceViewerWidget::get_picked_tissue() const
 	return -1;
 }
 
-}// namespace iseg
+} // namespace iseg

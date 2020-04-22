@@ -81,6 +81,9 @@ public:
 	itkSetMacro(OutsideValue, InputImagePixelType);
 	itkGetConstMacro(OutsideValue, InputImagePixelType);
 
+	itkSetMacro(EnforceManifold, bool);
+	itkGetConstMacro(EnforceManifold, bool);
+
 	/** Get Skeleton by thinning image. */
 	OutputImageType* GetThinning();
 
@@ -116,6 +119,7 @@ protected:
 private:
 	InputImagePixelType m_InsideValue = 1;
 	InputImagePixelType m_OutsideValue = 0;
+	bool m_EnforceManifold = true;
 
 }; // end of FixTopologyCarveOutside class
 

@@ -24,6 +24,7 @@ class QVTKWidget;
 class QVTKInteractor;
 class QSlider;
 class QLabel;
+class QLineEdit;
 class QPushButton;
 class QCheckBox;
 
@@ -32,6 +33,7 @@ class vtkInteractorStyleTrackballCamera;
 class vtkImageData;
 class vtkFlyingEdges3D;
 class vtkDiscreteFlyingEdges3D;
+class vtkDecimatePro;
 class vtkPolyDataMapper;
 class vtkRenderer;
 class vtkEventQtSlotConnect;
@@ -75,6 +77,7 @@ public slots:
 protected slots:
 	void transp_changed();
 	void thresh_changed();
+	void reduction_changed();
 	void popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command);
 	void select_action(QAction*);
 
@@ -90,6 +93,7 @@ private:
 	QVTKWidget* vtkWidget;
 	QSlider* sl_trans;
 	QSlider* sl_thresh;
+	QLineEdit* reduction;
 	QPushButton* bt_update;
 	QPushButton* bt_connectivity;
 	QLabel* lb_connectivity_count;
@@ -102,6 +106,7 @@ private:
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
 	vtkSmartPointer<vtkDiscreteFlyingEdges3D> discreteCubes;
 	vtkSmartPointer<vtkFlyingEdges3D> cubes;
+	vtkSmartPointer<vtkDecimatePro> decimate;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkLookupTable> lut;

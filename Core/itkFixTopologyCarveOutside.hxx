@@ -154,10 +154,13 @@ void FixTopologyCarveOutside<TInputImage, TOutputImage>::ComputeThinImage()
 			bool can_carve = false;
 			if (EulerInvariant(ot.GetNeighborhood(), m_InsideValue))
 			{
-				// Check if point is simple (deletion does not change connectivity in the 3x3x3 neighborhood)
-				if (CCInvariant(ot.GetNeighborhood(), m_InsideValue))
+				if (!m_EnforceManifold || !NonmanifoldRemove(ot.GetNeighborhood(), m_InsideValue))
 				{
-					can_carve = true;
+					// Check if point is simple (deletion does not change connectivity in the 3x3x3 neighborhood)
+					if (CCInvariant(ot.GetNeighborhood(), m_InsideValue))
+					{
+						can_carve = true;
+					}
 				}
 			}
 

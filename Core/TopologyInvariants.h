@@ -30,7 +30,6 @@ bool EulerInvariant(const TNeighborhood& neighbors, const TLabel label)
 	// ==> If we mark the center as BG, then P, F, E and V are '0'.
 	static const int c = 27 / 2;
 
-//fprintf(stderr, "neighbors[c]: %d vs %d", static_cast<int>(neighbors[c]), static_cast<int>(label));
 	assert(neighbors[c] == label);
 
 	// Voxels (parallelepipeds) - count center
@@ -209,6 +208,30 @@ bool CCInvariant(TNeighborhood neighbors, const TLabel label)
 	neighbors[27 / 2] = 0;
 	unsigned cc_after = ConnectedComponents(neighbors, label);
 	return (cc_before == cc_after);
+}
+
+/** \brief Will voxels be manifold after removing center voxel?
+ */
+template<typename TNeighborhood, typename TLabel>
+bool NonmanifoldRemove(const TNeighborhood& neighbors, const TLabel label)
+{
+	static const int c = 27 / 2;
+
+	// test for non-manifold edges around center voxel
+	return (neighbors[c-1]==label && neighbors[c-3]==label && neighbors[c-1-3]!=label)
+		|| (neighbors[c+1]==label && neighbors[c-3]==label && neighbors[c+1-3]!=label)
+		|| (neighbors[c-1]==label && neighbors[c+3]==label && neighbors[c-1+3]!=label)
+		|| (neighbors[c+1]==label && neighbors[c+3]==label && neighbors[c+1+3]!=label)
+		//
+		|| (neighbors[c-1]==label && neighbors[c-9]==label && neighbors[c-1-9]!=label)
+		|| (neighbors[c+1]==label && neighbors[c-9]==label && neighbors[c+1-9]!=label)
+		|| (neighbors[c-1]==label && neighbors[c+9]==label && neighbors[c-1+9]!=label)
+		|| (neighbors[c+1]==label && neighbors[c+9]==label && neighbors[c+1+9]!=label)
+		//
+		|| (neighbors[c-3]==label && neighbors[c-9]==label && neighbors[c-3-9]!=label)
+		|| (neighbors[c+3]==label && neighbors[c-9]==label && neighbors[c+3-9]!=label)
+		|| (neighbors[c-3]==label && neighbors[c+9]==label && neighbors[c-3+9]!=label)
+		|| (neighbors[c+3]==label && neighbors[c+9]==label && neighbors[c+3+9]!=label);
 }
 
 } // namespace topology
