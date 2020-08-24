@@ -4275,6 +4275,7 @@ void MainWindow::start_surfaceviewer(int mode)
 
 	surface_viewer->show();
 	surface_viewer->raise();
+	surface_viewer->activateWindow();
 
 	emit end_dataexport(this);
 }
