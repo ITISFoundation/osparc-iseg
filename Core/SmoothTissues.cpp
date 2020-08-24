@@ -11,9 +11,9 @@
 
 #include "SmoothTissues.h"
 
+#include "../Data/ItkProgressObserver.h"
 #include "../Data/ItkUtils.h"
 #include "../Data/SlicesHandlerITKInterface.h"
-#include "../Data/ItkProgressObserver.h"
 
 #include <itkDiscreteGaussianImageFilter.h>
 #include <itkSignedMaurerDistanceMapImageFilter.h>
@@ -72,7 +72,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 				// compute sdf to tissue @ current location
 				sdf_images[it.Get()] = _ComputeSDF<label_image_type, real_image_type>(
 						tissues, it.Get(), sigma);
-				
+
 				if (progress)
 					progress->increment();
 			}
@@ -135,7 +135,8 @@ bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t e
 		progress->setNumberOfSteps(end_slice - start_slice);
 
 #pragma omp parallel for
-		for (std::int64_t slice = start_slice; slice < end_slice; ++slice)
+		for (std::int64_t slice = start_slice;
+				 slice < static_cast<std::int64_t>(end_slice); ++slice)
 		{
 			// get labelfield at current slice
 			auto tissues = itkhandler.GetTissuesSlice(slice);
