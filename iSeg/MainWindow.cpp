@@ -1856,6 +1856,9 @@ void MainWindow::execute_saveContours()
 
 void MainWindow::execute_swapxy()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -1909,6 +1912,9 @@ void MainWindow::execute_swapxy()
 
 void MainWindow::execute_swapxz()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -1965,6 +1971,9 @@ void MainWindow::execute_swapxz()
 
 void MainWindow::execute_swapyz()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -2020,6 +2029,9 @@ void MainWindow::execute_swapyz()
 
 void MainWindow::execute_resize(int resizetype)
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -4246,11 +4258,7 @@ void MainWindow::execute_new()
 void MainWindow::start_surfaceviewer(int mode)
 {
 	// ensure we don't have a viewer running
-	if (surface_viewer != nullptr)
-	{
-		surface_viewer->close();
-		delete surface_viewer;
-	}
+	surface_viewer_closed();
 
 	if (!SurfaceViewerWidget::isOpenGLSupported())
 	{
