@@ -160,7 +160,7 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	storeparams();
 
 	bool* mask = new bool[handler3D->return_area()];
-	if (mask == 0)
+	if (mask == nullptr)
 	{
 		QMessageBox::about(this, "Warning", "Not enough memory");
 		return;
@@ -203,7 +203,7 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 
 	bool error = false;
 	tissues_size_t tissuenr;
-	std::string namedummy = std::string("");
+	std::string namedummy;
 	for (int i = 1; i <= tissues.size(); i++) // i is priority
 	{
 		if (error)
@@ -258,13 +258,15 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 				const int endSL = handler3D->end_slice();
 
 				float swap_z = dc[0] * dc[4];
-				int slicenr = ceil(swap_z * (disp[2] - zcoord) / thick);
+				int slicenr = round(swap_z * (disp[2] - zcoord) / thick);
 
 				if (slicenr < 0 && swap_z > 0.f)
 				{
 					ISEG_WARNING("RTStruct import: strange slice value " << slicenr);
 					slicenr = endSL + slicenr; // TODO this is strange!
 				}
+
+				ISEG_INFO("RTStruct import: importing slice " << slicenr)
 
 				if (slicenr >= startSL && slicenr < endSL)
 				{

@@ -40,10 +40,10 @@
 #include "gdcmSequenceOfItems.h"
 #include "gdcmSmartPointer.h"
 
-vtkStandardNewMacro(vtkMyGDCMPolyDataReader)
+vtkStandardNewMacro(vtkMyGDCMPolyDataReader);
 
-		//----------------------------------------------------------------------------
-		vtkMyGDCMPolyDataReader::vtkMyGDCMPolyDataReader()
+//----------------------------------------------------------------------------
+vtkMyGDCMPolyDataReader::vtkMyGDCMPolyDataReader()
 {
 	this->FileName = NULL;
 	this->SetNumberOfInputPorts(0);
@@ -174,14 +174,14 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			ss1.str(swc);
 			gdcm::VR vr = gdcm::VR::DS;
 			size_t vrsize = vr.GetSizeof();
-			size_t count = gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), static_cast<unsigned>(swc.size()));
-			elwc.SetLength(count * vrsize);
+			size_t count = gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), swc.size());
+			elwc.SetLength(static_cast<unsigned long>(count * vrsize));
 			elwc.Read(ss1);
 			std::stringstream ss2;
 			std::string sww = std::string(bvww->GetPointer(), bvww->GetLength());
 			ss2.str(sww);
 			gdcm::Element<gdcm::VR::DS, gdcm::VM::VM1_n> elww;
-			elww.SetLength(count * vrsize);
+			elww.SetLength(static_cast<unsigned long>(count * vrsize));
 			elww.Read(ss2);
 			for (unsigned int i = 0; i < elwc.GetLength(); ++i)
 			{
