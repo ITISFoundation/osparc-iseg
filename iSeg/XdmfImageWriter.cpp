@@ -40,11 +40,11 @@ XdmfImageWriter::XdmfImageWriter()
 	this->Width = 0;
 	this->Height = 0;
 	this->Compression = 1;
-	this->PixelSize = 0;
-	this->ImageSlices = 0;
-	this->WorkSlices = 0;
-	this->TissueSlices = 0;
-	this->FileName = 0;
+	this->PixelSize = nullptr;
+	this->ImageSlices = nullptr;
+	this->WorkSlices = nullptr;
+	this->TissueSlices = nullptr;
+	this->FileName = nullptr;
 	this->CopyToContiguousMemory = false;
 }
 
@@ -68,7 +68,7 @@ bool XdmfImageWriter::Write(bool naked)
 bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 {
 	if (lut == nullptr)
-		return 1;
+		return true;
 
 	ScopedTimer timer("WriteColorLookup");
 
@@ -192,8 +192,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 			return 0;
 		}
 
-		size_t n = 0;
-		for (unsigned k = 0; k < nrslices; k++)
+		for (size_t n = 0, k = 0; k < nrslices; k++)
 		{
 			size_t pos = 0;
 			for (unsigned j = 0; j < height; j++)
@@ -212,24 +211,26 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 		}
 
 		// Target
-		n = 0;
-		for (unsigned k = 0; k < nrslices; k++)
-		{
-			size_t pos = 0;
-			for (unsigned j = 0; j < height; j++)
-			{
-				for (unsigned i = 0; i < width; i++, pos++)
-				{
-					bufferFloat[n] = sliceswork[k][pos];
-					n++;
-				}
-			}
-		}
+        if (sliceswork != nullptr)
+        {
+            for (size_t n = 0, k = 0; k < nrslices; k++)
+            {
+                size_t pos = 0;
+                for (unsigned j = 0; j < height; j++)
+                {
+                    for (unsigned i = 0; i < width; i++, pos++)
+                    {
+                        bufferFloat[n] = sliceswork[k][pos];
+                        n++;
+                    }
+                }
+            }
 
-		if (!writer.write(bufferFloat, "Target"))
-		{
-			ISEG_ERROR_MSG("writing Target");
-		}
+            if (!writer.write(bufferFloat, "Target"))
+            {
+                ISEG_ERROR_MSG("writing Target");
+            }
+        }
 
 		bufferFloat.clear();
 
@@ -247,8 +248,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp,
 			return 0;
 		}
 
-		n = 0;
-		for (unsigned k = 0; k < nrslices; k++)
+		for (size_t n = 0, k = 0; k < nrslices; k++)
 		{
 			size_t pos = 0;
 			for (unsigned j = 0; j < height; j++)

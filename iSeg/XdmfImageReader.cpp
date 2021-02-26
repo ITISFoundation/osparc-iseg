@@ -335,10 +335,10 @@ XdmfImageReader::XdmfImageReader()
 	this->Height = 0;
 	this->Compression = 1;
 	this->ImageTransform.setIdentity();
-	this->ImageSlices = 0;
-	this->WorkSlices = 0;
-	this->TissueSlices = 0;
-	this->FileName = 0;
+	this->ImageSlices = nullptr;
+	this->WorkSlices = nullptr;
+	this->TissueSlices = nullptr;
+	this->FileName = nullptr;
 	this->ReadContiguousMemory = false;
 }
 
@@ -534,10 +534,10 @@ HDFImageReader::HDFImageReader()
 	this->Width = 0;
 	this->Height = 0;
 	this->Compression = 1;
-	this->ImageSlices = 0;
-	this->WorkSlices = 0;
-	this->TissueSlices = 0;
-	this->FileName = 0;
+	this->ImageSlices = nullptr;
+	this->WorkSlices = nullptr;
+	this->TissueSlices = nullptr;
+	this->FileName = nullptr;
 	this->ReadContiguousMemory = false;
 }
 

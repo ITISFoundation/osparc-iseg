@@ -42,7 +42,7 @@ HDF5Writer::HDF5Writer()
 {
 	static_assert(std::is_same<size_type, hsize_t>::value, "type mismatch");
 	compression = 1;
-	loud = 0;
+	loud = false;
 	file = -1;
 	bufsize = 1024 * 1024;
 }
@@ -320,7 +320,7 @@ int HDF5Writer::write_attribute(const std::string& value, const std::string& nam
 
 	hid_t parent_handle = file;
 	hid_t group_handle;
-	std::string parent_path = "";
+	std::string parent_path;
 	for (size_t iter_path = 0; iter_path < path.size(); ++iter_path)
 	{
 		if (!path[iter_path].empty())
@@ -535,7 +535,7 @@ int HDF5Writer::writeData(const void* data, const std::string& type,
 		{
 			ok = 0;
 		}
-		else if (dataset >= 0 && data != 0)
+		else if (dataset >= 0 && data != nullptr)
 		{
 			if (type == "double")
 			{

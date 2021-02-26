@@ -97,7 +97,8 @@ public:
 	enum eImageType {
 		kPNG,
 		kBMP,
-		kJPG
+		kJPG,
+        kTIF
 	};
 
 	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames,
