@@ -25,12 +25,12 @@ class Settings : public QDialog
 	Q_OBJECT
 
 public:
-	explicit Settings(QWidget* parent = 0);
+	explicit Settings(QWidget* parent = nullptr);
 	~Settings();
 
 public slots:
-	virtual void accept();
-	virtual void reject();
+	void accept() override;
+	void reject() override;
 
 private:
 	Ui::Settings* ui;

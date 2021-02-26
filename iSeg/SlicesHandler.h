@@ -88,7 +88,7 @@ public:
 	std::shared_ptr<ColorLookupTable> GetColorLookupTable() { return _color_lookup_table; }
 
 	// Description: write project data into an Xdmf file
-	int SaveAllXdmf(const char* filename, int compression, bool naked = false);
+	int SaveAllXdmf(const char* filename, int compression, bool save_work, bool naked);
 	bool SaveMarkersHDF(const char* filename, bool naked, unsigned short version);
 	int SaveMergeAllXdmf(const char* filename, std::vector<QString>& mergeImagefilenames, unsigned short nrslicesTotal, int compression);
 	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
@@ -509,6 +509,8 @@ public:
 	void SetCompression(int c) { this->_hdf5_compression = c; }
 	bool GetContiguousMemory() const { return _contiguous_memory_io; }
 	void SetContiguousMemory(bool v) { _contiguous_memory_io = v; }
+    bool SaveTarget() const { return _save_target; }
+    void SetSaveTarget(bool v) { _save_target = v; }
 
 	int SaveRaw(const char* filename, bool work);
 	float DICOMsort(std::vector<const char*>* lfilename);
@@ -542,8 +544,9 @@ private:
 	UndoElem* _uelem;
 	UndoQueue _undoQueue;
 	bool _undo3D;
-	int _hdf5_compression;
-	bool _contiguous_memory_io;
+	int _hdf5_compression = 1;
+	bool _contiguous_memory_io = false; // Default: slice-by-slice
+    bool _save_target = true;
 };
 
 } // namespace iseg

@@ -24,11 +24,7 @@
 #include "Core/ImageReader.h"
 #include "Core/ImageWriter.h"
 
-#include <vtkKdTree.h>
-#include <vtkPoints.h>
-#include <vtkSmartPointer.h>
-#include <vtkStaticPointLocator.h>
-#include <vtkUnstructuredGrid.h>
+#include "Thirdparty/nanoflann/nanoflann.hpp"
 
 #include <q3hbox.h>
 #include <q3vbox.h>
@@ -49,6 +45,79 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
+
+namespace
+{
+    template <class VectorOfVectorsType, typename num_t = double, int DIM = -1, class Distance = nanoflann::metric_L2, typename IndexType = size_t>
+    struct KDTreeVectorOfVectorsAdaptor
+    {
+        using self_t = KDTreeVectorOfVectorsAdaptor<VectorOfVectorsType, num_t, DIM, Distance>;
+        using metric_t = typename Distance::template traits<num_t, self_t>::distance_t;
+        using index_t = nanoflann::KDTreeSingleIndexAdaptor< metric_t, self_t, DIM, IndexType>;
+
+        index_t* index; //! The kd-tree index for the user to call its methods as usual with any other FLANN index.
+
+        /// Constructor: takes a const ref to the vector of vectors object with the data points
+        KDTreeVectorOfVectorsAdaptor(const size_t /* dimensionality */, const VectorOfVectorsType &mat, const int leaf_max_size = 10) : m_data(mat)
+        {
+            assert(mat.size() != 0 && mat[0].size() != 0);
+            const size_t dims = mat[0].size();
+            if (DIM>0 && static_cast<int>(dims) != DIM)
+                throw std::runtime_error("Data set dimensionality does not match the 'DIM' template argument");
+            index = new index_t(static_cast<int>(dims), *this /* adaptor */, nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
+            index->buildIndex();
+        }
+
+        ~KDTreeVectorOfVectorsAdaptor() {
+            delete index;
+        }
+
+        const VectorOfVectorsType &m_data;
+
+        /** Query for the \a num_closest closest points to a given point (entered as query_point[0:dim-1]).
+        *  Note that this is a short-cut method for index->findNeighbors().
+        *  The user can also call index->... methods as desired.
+        * \note nChecks_IGNORED is ignored but kept for compatibility with the original FLANN interface.
+        */
+        inline void query(const num_t *query_point, const size_t num_closest, IndexType *out_indices, num_t *out_distances_sq, const int nChecks_IGNORED = 10) const
+        {
+            nanoflann::KNNResultSet<num_t, IndexType> resultSet(num_closest);
+            resultSet.init(out_indices, out_distances_sq);
+            index->findNeighbors(resultSet, query_point, nanoflann::SearchParams());
+        }
+
+        /** @name Interface expected by KDTreeSingleIndexAdaptor
+        * @{ */
+
+        const self_t & derived() const {
+            return *this;
+        }
+        self_t & derived() {
+            return *this;
+        }
+
+        // Must return the number of data points
+        inline size_t kdtree_get_point_count() const {
+            return m_data.size();
+        }
+
+        // Returns the dim'th component of the idx'th point in the class:
+        inline num_t kdtree_get_pt(const size_t idx, const size_t dim) const {
+            return m_data[idx][dim];
+        }
+
+        // Optional bounding-box computation: return false to default to a standard bbox computation loop.
+        //   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
+        //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+        template <class BBOX>
+        bool kdtree_get_bbox(BBOX & /*bb*/) const {
+            return false;
+        }
+
+        /** @} */
+
+    };
+}
 
 namespace iseg {
 
@@ -244,7 +313,6 @@ void LoaderDicom::subsect_toggled()
 		hbox2->hide();
 	}
 
-	return;
 }
 
 void LoaderDicom::ct_toggled()
@@ -489,7 +557,6 @@ void LoaderRaw::subsect_toggled()
 
 	//	vbox1->setFixedSize(vbox1->sizeHint());
 
-	return;
 }
 
 void LoaderRaw::load_pushed()
@@ -632,8 +699,6 @@ ReloaderRaw::ReloaderRaw(SlicesHandler* hand3D, QWidget* parent,
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
-
-	return;
 }
 
 ReloaderRaw::~ReloaderRaw()
@@ -659,7 +724,6 @@ void ReloaderRaw::subsect_toggled()
 
 	//	vbox1->setFixedSize(vbox1->sizeHint());
 
-	return;
 }
 
 void ReloaderRaw::load_pushed()
@@ -739,8 +803,6 @@ NewImg::NewImg(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(on_close()));
 
 	newPressed = false;
-
-	return;
 }
 
 NewImg::~NewImg() { delete vbox1; }
@@ -756,7 +818,6 @@ void NewImg::new_pushed()
 			(unsigned short)sb_nrslices->value());
 	newPressed = true;
 	close();
-	return;
 }
 
 void NewImg::on_close()
@@ -771,6 +832,10 @@ LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std:
 {
 	map_to_lut = new QCheckBox(QString("Map colors to lookup table"));
 	map_to_lut->setChecked(true);
+    if (typ == LoaderColorImages::kTIF)
+    {
+        map_to_lut->setEnabled(false);
+    }
 
 	subsect = new QCheckBox(QString("Subsection"));
 	subsect->setChecked(false);
@@ -879,34 +944,34 @@ void LoaderColorImages::load_quantize()
 		}
 		if (lut)
 		{
-			auto N = lut->NumberOfColors();
+			const auto N = lut->NumberOfColors();
 
-			auto points = vtkSmartPointer<vtkPoints>::New();
-			points->SetDataTypeToFloat();
-			points->SetNumberOfPoints(N);
+            using color_t = std::array<unsigned char, 3>;
+            using color_vector_t = std::vector<color_t>;
 
-			auto dataset = vtkSmartPointer<vtkUnstructuredGrid>::New();
-			dataset->SetPoints(points);
-
-			unsigned char rgb[3];
+            color_vector_t points(N);
 			for (size_t i = 0; i < N; ++i)
 			{
-				lut->GetColor(i, rgb);
-				points->SetPoint(i, rgb[0], rgb[1], rgb[2]);
+				lut->GetColor(i, points[i].data());
 			}
 
-			auto locator = vtkSmartPointer<vtkStaticPointLocator>::New();
-			{
-				ScopedTimer t("Build KdTree");
-				locator->SetDataSet(dataset);
-				locator->BuildLocator();
-			}
+            using distance_t = float;
+            using my_kd_tree_t = KDTreeVectorOfVectorsAdaptor< color_vector_t, distance_t >;
+            my_kd_tree_t tree(3, points, 10 /* max leaf */);
+            {
+                ScopedTimer t("Build kd-tree for colors");
+                tree.index->buildIndex();
+            }
 
 			unsigned w, h;
 			if (ImageReader::getInfo2D(m_filenames[0], w, h))
 			{
-				auto map_colors = [locator](unsigned char r, unsigned char g, unsigned char b) -> float {
-					return static_cast<float>(locator->FindClosestPoint(r, g, b));
+				const auto map_colors = [&tree](unsigned char r, unsigned char g, unsigned char b) -> float {
+                    size_t id;
+                    distance_t sqr_dist;
+                    std::array<distance_t,3> query_pt = {r,g,b};
+                    tree.query(&query_pt[0], 1, &id, &sqr_dist);
+					return static_cast<float>(id);
 				};
 
 				auto load = [&, this](float** slices) {
@@ -1163,7 +1228,7 @@ ChannelMixer::ChannelMixer(std::vector<const char*> filenames, QWidget* parent,
 	labelSliceValue->setFixedWidth(40);
 	spinSlice = new QSpinBox(vboxSlice);
 	spinSlice->setMinimum(0);
-	spinSlice->setMaximum(filenames.size() - 1);
+	spinSlice->setMaximum(static_cast<int>(filenames.size()) - 1);
 	spinSlice->setValue(0);
 	selectedSlice = spinSlice->value();
 
@@ -1562,8 +1627,6 @@ ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filen
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
 	QObject::connect(subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
-
-	return;
 }
 
 ReloaderBmp2::~ReloaderBmp2() { delete vbox1; }
@@ -1587,7 +1650,6 @@ void ReloaderBmp2::subsect_toggled()
 		yoffs->hide();
 	}
 
-	return;
 }
 
 void ReloaderBmp2::load_pushed()
@@ -1604,7 +1666,6 @@ void ReloaderBmp2::load_pushed()
 		handler3D->ReloadDIBitmap(m_filenames);
 	}
 	close();
-	return;
 }
 
 EditText::EditText(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
@@ -1625,8 +1686,6 @@ EditText::EditText(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 
 	QObject::connect(saveBut, SIGNAL(clicked()), this, SLOT(accept()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(reject()));
-
-	return;
 }
 
 EditText::~EditText() { delete vbox1; }
@@ -1672,8 +1731,6 @@ SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget* parent,
 
 	QObject::connect(selectBut, SIGNAL(clicked()), this, SLOT(accept()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(reject()));
-
-	return;
 }
 
 SupportedMultiDatasetTypes::~SupportedMultiDatasetTypes()

@@ -33,6 +33,7 @@ Settings::Settings(QWidget* parent)
 	this->ui->checkBoxContiguousMemory->setChecked(
 		mainWindow->handler3D->GetContiguousMemory());
 	this->ui->checkBoxEnableBlosc->setChecked(BloscEnabled());
+    this->ui->checkBoxSaveTarget->setChecked(mainWindow->handler3D->SaveTarget());
 }
 
 Settings::~Settings() { delete ui; }
@@ -45,6 +46,8 @@ void Settings::accept()
 	mainWindow->handler3D->SetContiguousMemory(
 		this->ui->checkBoxContiguousMemory->isChecked());
 	SetBloscEnabled(this->ui->checkBoxEnableBlosc->isChecked());
+    mainWindow->handler3D->SetSaveTarget(
+        this->ui->checkBoxSaveTarget->isChecked());
 
 	mainWindow->SaveSettings();
 	this->hide();

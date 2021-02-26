@@ -438,7 +438,7 @@ void vtkGDCMImageReader::FillMedicalImageInformation(const gdcm::ImageReader &re
       ss1.str( swc );
       gdcm::VR vr = gdcm::VR::DS;
       unsigned int vrsize = vr.GetSizeof();
-      unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), (unsigned int)swc.size());
+      unsigned int count = (unsigned int)gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), swc.size());
       elwc.SetLength( count * vrsize );
       elwc.Read( ss1 );
       std::stringstream ss2;
@@ -467,7 +467,7 @@ void vtkGDCMImageReader::FillMedicalImageInformation(const gdcm::ImageReader &re
       std::stringstream ss;
       ss.str( "" );
       std::string swe = std::string( bvwe->GetPointer(), bvwe->GetLength() );
-      unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), (unsigned int)swe.size()); (void)count;
+      unsigned int count = (unsigned int)gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), swe.size());
       // I found a case with only one W/L but two comments: WINDOW1\WINDOW2
       // SIEMENS-IncompletePixelData.dcm
       // oh wait but what if we have the countrary...

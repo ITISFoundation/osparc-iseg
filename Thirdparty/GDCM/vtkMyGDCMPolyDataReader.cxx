@@ -18,14 +18,14 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkStringArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkMedicalImageProperties.h"
 #include "vtkObjectFactory.h"
 #include "vtkPolyData.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkSmartPointer.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkStringArray.h"
 
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
@@ -40,7 +40,7 @@
 #include "gdcmSequenceOfItems.h"
 #include "gdcmSmartPointer.h"
 
-vtkStandardNewMacro(vtkMyGDCMPolyDataReader)
+vtkStandardNewMacro(vtkMyGDCMPolyDataReader);
 
 //----------------------------------------------------------------------------
 vtkMyGDCMPolyDataReader::vtkMyGDCMPolyDataReader()
@@ -173,15 +173,15 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			std::string swc = std::string(bvwc->GetPointer(), bvwc->GetLength());
 			ss1.str(swc);
 			gdcm::VR vr = gdcm::VR::DS;
-			unsigned int vrsize = vr.GetSizeof();
-			unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), static_cast<unsigned>(swc.size()));
-			elwc.SetLength(count * vrsize);
+			size_t vrsize = vr.GetSizeof();
+			size_t count = gdcm::VM::GetNumberOfElementsFromArray(swc.c_str(), swc.size());
+			elwc.SetLength(static_cast<unsigned long>(count * vrsize));
 			elwc.Read(ss1);
 			std::stringstream ss2;
 			std::string sww = std::string(bvww->GetPointer(), bvww->GetLength());
 			ss2.str(sww);
 			gdcm::Element<gdcm::VR::DS, gdcm::VM::VM1_n> elww;
-			elww.SetLength(count * vrsize);
+			elww.SetLength(static_cast<unsigned long>(count * vrsize));
 			elww.Read(ss2);
 			for (unsigned int i = 0; i < elwc.GetLength(); ++i)
 			{
@@ -202,7 +202,7 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			std::stringstream ss;
 			ss.str("");
 			std::string swe = std::string(bvwe->GetPointer(), bvwe->GetLength());
-			unsigned int count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
+			size_t count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
 
 			// I found a case with only one W/L but two comments: WINDOW1\WINDOW2
 			// SIEMENS-IncompletePixelData.dcm
@@ -255,7 +255,7 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 	{
 		return 0;
 	}
-	
+
 	gdcm::Tag tssroisq(0x3006, 0x0020);
 	if (!ds.FindDataElement(tssroisq))
 	{
@@ -284,7 +284,7 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 		auto outInfo1 = outputVector->GetInformationObject(pd);
 		auto output = vtkPolyData::SafeDownCast(outInfo1->Get(vtkDataObject::DATA_OBJECT()));
 
-		const gdcm::Item& item = sqi->GetItem(pd + 1); // Item start at #1
+		const gdcm::Item& item = sqi->GetItem(pd + 1);	 // Item start at #1
 		const gdcm::Item& sitem = ssqi->GetItem(pd + 1); // Item start at #1
 		const gdcm::DataSet& snestedds = sitem.GetNestedDataSet();
 
@@ -315,7 +315,7 @@ int vtkMyGDCMPolyDataReader::RequestData_RTStructureSetStorage(gdcm::Reader cons
 		const gdcm::DataElement& csq = nestedds.GetDataElement(tcsq);
 
 		gdcm::SmartPointer<gdcm::SequenceOfItems> sqi2 = csq.GetValueAsSQ();
-		if (!sqi2)// || !sqi2->GetNumberOfItems())
+		if (!sqi2) // || !sqi2->GetNumberOfItems())
 		{
 			continue;
 		}
@@ -437,9 +437,9 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 
 //----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestData(
-	vtkInformation* vtkNotUsed(request),
-	vtkInformationVector** vtkNotUsed(inputVector),
-	vtkInformationVector* outputVector)
+		vtkInformation* vtkNotUsed(request),
+		vtkInformationVector** vtkNotUsed(inputVector),
+		vtkInformationVector* outputVector)
 {
 	auto outInfo = outputVector->GetInformationObject(0);
 	if (outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER()) > 0)
@@ -521,9 +521,9 @@ int vtkMyGDCMPolyDataReader::RequestInformation_HemodynamicWaveformStorage(gdcm:
 
 //----------------------------------------------------------------------------
 int vtkMyGDCMPolyDataReader::RequestInformation(
-	vtkInformation* vtkNotUsed(request),
-	vtkInformationVector** vtkNotUsed(inputVector),
-	vtkInformationVector* outputVector)
+		vtkInformation* vtkNotUsed(request),
+		vtkInformationVector** vtkNotUsed(inputVector),
+		vtkInformationVector* outputVector)
 {
 	gdcm::Reader reader;
 	reader.SetFileName(this->FileName);
@@ -565,7 +565,7 @@ void vtkMyGDCMPolyDataReader::PrintSelf(ostream& os, vtkIndent indent)
 	this->Superclass::PrintSelf(os, indent);
 
 	os << indent << "File Name: "
-	   << (this->FileName ? this->FileName : "(none)") << "\n";
+		 << (this->FileName ? this->FileName : "(none)") << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -617,7 +617,7 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 	// For each Item in the DataSet create a vtkPolyData
 	for (unsigned int pd = 0; pd < sqi->GetNumberOfItems(); ++pd)
 	{
-		const gdcm::Item& item = sqi->GetItem(pd + 1); // Item start at #1
+		const gdcm::Item& item = sqi->GetItem(pd + 1);	 // Item start at #1
 		const gdcm::Item& sitem = ssqi->GetItem(pd + 1); // Item start at #1
 
 		const gdcm::DataSet& snestedds = sitem.GetNestedDataSet();
@@ -663,7 +663,7 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 			tissue->color[2] = 0.0f;
 		}
 
-		unsigned int nitems = (sqi2==0) ? 0 : static_cast<unsigned>(sqi2->GetNumberOfItems());
+		unsigned int nitems = (sqi2 == 0) ? 0 : static_cast<unsigned>(sqi2->GetNumberOfItems());
 
 		const gdcm::DataElement& sde = snestedds.GetDataElement(stcsq);
 		std::string s(sde.GetByteValue()->GetPointer(), sde.GetByteValue()->GetLength());
@@ -671,7 +671,8 @@ int gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(const char* filename, ti
 		// for the scalars (pointdata or celldata), so let's do that...
 
 		//Check if the tissues has a contour sequence. If it doesn't, add the " (empty)" suffix.
-		if (nitems == 0) s += " (empty)";
+		if (nitems == 0)
+			s += " (empty)";
 		tissue->name = s;
 
 		for (unsigned int i = 0; i < nitems; ++i)
@@ -912,7 +913,7 @@ bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const std::vector<std::string>& filename
 	{
 		reader->SetFileName(filenames[0].c_str());
 	}
-	else 
+	else
 	{
 		auto files = vtkSmartPointer<vtkStringArray>::New();
 		for (const auto& f : filenames)
@@ -929,7 +930,7 @@ bool gdcmvtk_rtstruct::GetSizeUsingGDCM(const std::vector<std::string>& filename
 	w = xp - xm + 1;
 	nrslices = zp - zm + 1;
 	double a[3];
-	reader->GetOutput()->GetSpacing(a);//GetDataSpacing(a);
+	reader->GetOutput()->GetSpacing(a); //GetDataSpacing(a);
 	dx = a[0];
 	dy = a[1];
 	dz = a[2];

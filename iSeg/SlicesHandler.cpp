@@ -134,8 +134,6 @@ SlicesHandler::SlicesHandler()
 	_loaded = false;
 	_uelem = nullptr;
 	_undo3D = true;
-	_hdf5_compression = 1;
-	_contiguous_memory_io = false; // Default: slice-by-slice
 }
 
 SlicesHandler::~SlicesHandler() { delete _tissue_hierachy; }
@@ -973,8 +971,7 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 	return code;
 }
 
-int SlicesHandler::SaveAllXdmf(const char* filename, int compression,
-		bool naked)
+int SlicesHandler::SaveAllXdmf(const char* filename, int compression, bool save_work, bool naked)
 {
 	float pixsize[3] = {_dx, _dy, _thickness};
 
@@ -985,15 +982,14 @@ int SlicesHandler::SaveAllXdmf(const char* filename, int compression,
 	{
 		bmpslices[i - _startslice] = _image_slices[i].return_bmp();
 		workslices[i - _startslice] = _image_slices[i].return_work();
-		tissueslices[i - _startslice] =
-				_image_slices[i].return_tissues(0); // TODO
+		tissueslices[i - _startslice] = _image_slices[i].return_tissues(0); // TODO
 	}
 
 	XdmfImageWriter writer;
 	writer.SetCopyToContiguousMemory(GetContiguousMemory());
 	writer.SetFileName(filename);
 	writer.SetImageSlices(bmpslices.data());
-	writer.SetWorkSlices(workslices.data());
+	writer.SetWorkSlices(save_work ? workslices.data() : nullptr);
 	writer.SetTissueSlices(tissueslices.data());
 	writer.SetNumberOfSlices(_endslice - _startslice);
 	writer.SetWidth(_width);
@@ -1836,7 +1832,7 @@ FILE* SlicesHandler::SaveProject(const char* filename,
 			imageFileExtension;
 	SaveAllXdmf(
 			QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data(),
-			this->_hdf5_compression, false);
+			this->_hdf5_compression, this->_save_target, false);
 
 	_startslice = startslice1;
 	_endslice = endslice1;
@@ -1853,7 +1849,7 @@ bool SlicesHandler::SaveCommunicationFile(const char* filename)
 
 	SaveAllXdmf(
 			QFileInfo(filename).dir().absFilePath(filename).toAscii().data(),
-			this->_hdf5_compression, true);
+			this->_hdf5_compression, this->_save_target, true);
 
 	_startslice = startslice1;
 	_endslice = endslice1;
@@ -1891,7 +1887,7 @@ FILE* SlicesHandler::SaveActiveSlices(const char* filename,
 			imageFileExtension;
 	SaveAllXdmf(
 			QFileInfo(filename).dir().absFilePath(imageFileName).toAscii().data(),
-			this->_hdf5_compression, false);
+			this->_hdf5_compression, this->_save_target, false);
 
 	return fp;
 }
@@ -3242,7 +3238,6 @@ void SlicesHandler::work2bmpall()
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].work2bmp();
 
-	return;
 }
 
 void SlicesHandler::bmp2workall()
@@ -3250,7 +3245,6 @@ void SlicesHandler::bmp2workall()
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].bmp2work();
 
-	return;
 }
 
 void SlicesHandler::work2tissueall()
@@ -3568,7 +3562,6 @@ void SlicesHandler::gaussian(float sigma)
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].gaussian(sigma);
 
-	return;
 }
 
 void SlicesHandler::fill_holes(float f, int minsize)
@@ -4101,7 +4094,6 @@ void SlicesHandler::aniso_diff(float dt, int n, float (*f)(float, float),
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].aniso_diff(dt, n, f, k, restraint);
 
-	return;
 }
 
 void SlicesHandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
@@ -4110,7 +4102,6 @@ void SlicesHandler::cont_anisodiff(float dt, int n, float (*f)(float, float),
 	for (unsigned short i = _startslice; i < _endslice; i++)
 		_image_slices[i].cont_anisodiff(dt, n, f, k, restraint);
 
-	return;
 }
 
 void SlicesHandler::median_interquartile(bool median)
@@ -4877,7 +4868,6 @@ void SlicesHandler::thresholded_growing(
 		}
 	}
 
-	return;
 }
 
 void SlicesHandler::add2tissueall_connected(tissues_size_t tissuetype, Point p,
@@ -5120,7 +5110,6 @@ void SlicesHandler::subtract_tissueall_connected(tissues_size_t tissuetype,
 		}
 	}
 
-	return;
 }
 
 void SlicesHandler::double_hysteretic(float thresh_low_l, float thresh_low_h,
@@ -6392,7 +6381,6 @@ void SlicesHandler::slicebmp_x(float* return_bits, unsigned short xcoord)
 		}
 	}
 
-	return;
 }
 
 void SlicesHandler::slicebmp_y(float* return_bits, unsigned short ycoord)
@@ -6410,7 +6398,6 @@ void SlicesHandler::slicebmp_y(float* return_bits, unsigned short ycoord)
 		}
 	}
 
-	return;
 }
 
 float* SlicesHandler::slicebmp_x(unsigned short xcoord)
@@ -6444,7 +6431,6 @@ void SlicesHandler::slicework_x(float* return_bits, unsigned short xcoord)
 		}
 	}
 
-	return;
 }
 
 void SlicesHandler::slicework_y(float* return_bits, unsigned short ycoord)
@@ -6462,7 +6448,6 @@ void SlicesHandler::slicework_y(float* return_bits, unsigned short ycoord)
 		}
 	}
 
-	return;
 }
 
 float* SlicesHandler::slicework_x(unsigned short xcoord)
@@ -6497,7 +6482,6 @@ void SlicesHandler::slicetissue_x(tissues_size_t* return_bits,
 		}
 	}
 
-	return;
 }
 
 void SlicesHandler::slicetissue_y(tissues_size_t* return_bits,
@@ -6516,7 +6500,6 @@ void SlicesHandler::slicetissue_y(tissues_size_t* return_bits,
 		}
 	}
 
-	return;
 }
 
 tissues_size_t* SlicesHandler::slicetissue_x(unsigned short xcoord)
@@ -6540,7 +6523,6 @@ tissues_size_t* SlicesHandler::slicetissue_y(unsigned short ycoord)
 void SlicesHandler::slicework_z(unsigned short slicenr)
 {
 	_image_slices[slicenr].return_work();
-	return;
 }
 
 template<typename TScalarType>
@@ -6960,7 +6942,6 @@ void SlicesHandler::add2tissueall(tissues_size_t tissuetype, Point p,
 		add2tissueall(tissuetype, f, override);
 	}
 
-	return;
 }
 
 void SlicesHandler::add2tissueall(tissues_size_t tissuetype, float f,
@@ -7527,7 +7508,7 @@ iseg::DataSelection SlicesHandler::undo()
 		}
 	}
 	else
-		return iseg::DataSelection();
+		return {};
 }
 
 iseg::DataSelection SlicesHandler::redo()
@@ -7536,7 +7517,7 @@ iseg::DataSelection SlicesHandler::redo()
 	{
 		_uelem = this->_undoQueue.redo();
 		if (_uelem == nullptr)
-			return iseg::DataSelection();
+			return {};
 		if (_uelem->multi)
 		{
 			MultiUndoElem* uelem1 = dynamic_cast<MultiUndoElem*>(_uelem);
@@ -7695,7 +7676,7 @@ iseg::DataSelection SlicesHandler::redo()
 		}
 	}
 	else
-		return iseg::DataSelection();
+		return {};
 }
 
 void SlicesHandler::clear_undo()
@@ -9573,7 +9554,6 @@ void SlicesHandler::add_skin3D_outside2(int ix, int iy, int iz, float setto)
 				work[i1] = 0;
 	}
 
-	return;
 }
 
 void SlicesHandler::add_skintissue3D_outside2(int ix, int iy, int iz, tissues_size_t f)
@@ -10429,7 +10409,6 @@ void SlicesHandler::add_skintissue3D(int ix, int iy, int iz, tissues_size_t f)
 				tissue[i1] = 0;
 	}
 
-	return;
 }
 
 void SlicesHandler::add_skintissue3D_outside(int ixyz, tissues_size_t f)
@@ -10709,7 +10688,6 @@ void SlicesHandler::add_skintissue3D_outside(int ixyz, tissues_size_t f)
 				tissue[i1] = 0;
 	}
 
-	return;
 }
 
 void SlicesHandler::fill_skin_3d(int thicknessX, int thicknessY, int thicknessZ,

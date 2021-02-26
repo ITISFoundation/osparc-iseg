@@ -87,63 +87,11 @@ int importSurfacePos = -1;
 int importRTstructPos = -1;
 } // namespace
 
-int bmpimgnr(QString* s)
+int bmpimgnr(QString* s, const QString& ext = ".bmp")
 {
 	int result = 0;
 	uint pos;
-	if (s->length() > 4 && s->endsWith(QString(".bmp")))
-	{
-		pos = s->length() - 5;
-	}
-	else
-	{
-		pos = s->length() - 1;
-	}
-	int base = 1;
-	QChar cdigit;
-	while (pos > 0 && (cdigit = s->at(pos)).isDigit())
-	{
-		result += cdigit.digitValue() * base;
-		base *= 10;
-		pos--;
-	}
-	if (pos == 0 && (cdigit = s->at(0)).isDigit())
-		result += cdigit.digitValue() * base;
-
-	return result;
-}
-
-int pngimgnr(QString* s)
-{
-	int result = 0;
-	uint pos;
-	if (s->length() > 4 && s->endsWith(QString(".png")))
-	{
-		pos = s->length() - 5;
-	}
-	else
-	{
-		pos = s->length() - 1;
-	}
-	int base = 1;
-	QChar cdigit;
-	while (pos > 0 && (cdigit = s->at(pos)).isDigit())
-	{
-		result += cdigit.digitValue() * base;
-		base *= 10;
-		pos--;
-	}
-	if (pos == 0 && (cdigit = s->at(0)).isDigit())
-		result += cdigit.digitValue() * base;
-
-	return result;
-}
-
-int jpgimgnr(QString* s)
-{
-	int result = 0;
-	uint pos;
-	if (s->length() > 4 && s->endsWith(QString(".jpg")))
+	if (s->length() > 4 && s->endsWith(ext))
 	{
 		pos = s->length() - 5;
 	}
@@ -1118,26 +1066,22 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 				QIcon(m_picpath.absFilePath(QString("filenew.png")).ascii()), "&New...",
 				this, SLOT(execute_new()));
 		loadmenu = new QMenu("loadmenu", this);
-		loadmenu->insertItem("Open .dcm...", this, SLOT(execute_loaddicom()));
-		loadmenu->insertItem("Open .bmp...", this, SLOT(execute_loadbmp()));
-		loadmenu->insertItem("Open .png...", this, SLOT(execute_loadpng()));
-		//loadmenu->insertItem( "Open .jpg...", this,  SLOT(execute_loadjpg()));
-		loadmenu->insertItem("Open .raw...", this, SLOT(execute_loadraw()));
-		loadmenu->insertItem("Open .mhd...", this, SLOT(execute_loadmhd()));
-		loadmenu->insertItem("Open .avw...", this, SLOT(execute_loadavw()));
-		loadmenu->insertItem("Open .vti/.vtk...", this, SLOT(execute_loadvtk()));
-		loadmenu->insertItem("Open NIfTI...", this, SLOT(execute_loadnifti()));
+		loadmenu->insertItem("Open Dicom (.dcm...)", this, SLOT(execute_loaddicom()));
+		loadmenu->insertItem("Open Image Series (.bmp, .png, ...)", this, SLOT(execute_load_image_series()));
+        loadmenu->insertItem("Open Medical Image (.mhd, .nii, ...)", this, SLOT(execute_load_medical_image()));
+        loadmenu->insertItem("Open Raw (.raw...)", this, SLOT(execute_loadraw()));
+		loadmenu->insertItem("Open Analyze Direct (.avw...)", this, SLOT(execute_loadavw()));
+		loadmenu->insertItem("Open VTK...", this, SLOT(execute_loadvtk()));
 		loadmenu->insertItem("Open RTdose...", this, SLOT(execute_loadrtdose()));
 		file->insertItem("&Open", loadmenu);
 	}
 	reloadmenu = new QMenu("reloadmenu", this);
-	reloadmenu->insertItem("Reopen .dc&m...", this, SLOT(execute_reloaddicom()));
-	reloadmenu->insertItem("Reopen .&bmp...", this, SLOT(execute_reloadbmp()));
-	reloadmenu->insertItem("Reopen .raw...", this, SLOT(execute_reloadraw()));
-	reloadmenu->insertItem("Reopen .mhd...", this, SLOT(execute_reloadmhd()));
-	reloadmenu->insertItem("Reopen .avw...", this, SLOT(execute_reloadavw()));
-	reloadmenu->insertItem("Reopen .vti/.vtk...", this, SLOT(execute_reloadvtk()));
-	reloadmenu->insertItem("Reopen NIfTI...", this, SLOT(execute_reloadnifti()));
+	reloadmenu->insertItem("Reopen Dicom (.dcm...)", this, SLOT(execute_reloaddicom()));
+	reloadmenu->insertItem("Reopen Image Series (.bmp)", this, SLOT(execute_reloadbmp()));
+	reloadmenu->insertItem("Reopen RAW (.raw...)", this, SLOT(execute_reloadraw()));
+	reloadmenu->insertItem("Reopen Medical Image (.mhd, .nii, ...)", this, SLOT(execute_reload_medical_image()));
+	reloadmenu->insertItem("Reopen Analyze Direct (.avw...)", this, SLOT(execute_reloadavw()));
+	reloadmenu->insertItem("Reopen VTK...", this, SLOT(execute_reloadvtk()));
 	reloadmenu->insertItem("Reopen RTdose...", this, SLOT(execute_reloadrtdose()));
 	file->insertItem("&Reopen", reloadmenu);
 
@@ -1856,6 +1800,9 @@ void MainWindow::execute_saveContours()
 
 void MainWindow::execute_swapxy()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -1909,6 +1856,9 @@ void MainWindow::execute_swapxy()
 
 void MainWindow::execute_swapxz()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -1965,6 +1915,9 @@ void MainWindow::execute_swapxz()
 
 void MainWindow::execute_swapyz()
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -2020,6 +1973,9 @@ void MainWindow::execute_swapyz()
 
 void MainWindow::execute_resize(int resizetype)
 {
+	// make sure we don't have surface viewer open
+	surface_viewer_closed();
+
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
 	dataSelection.bmp = true;
@@ -2250,11 +2206,12 @@ void MainWindow::EnableActionsAfterPrjLoaded(const bool enable)
 	update(importRTstructPos, enable);
 }
 
-void MainWindow::execute_loadbmp()
+void MainWindow::execute_load_image_series()
 {
 	maybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)",
+    QStringList files = QFileDialog::getOpenFileNames(
+        "Images (*.bmp);;Images (*.png);;Images (*.jpg *.jpeg);;Images (*.tif *.tiff);;All (*.*)",
 			QString::null, this, "open files dialog", "Select one or more files to open");
 
 	if (!files.empty())
@@ -2264,8 +2221,7 @@ void MainWindow::execute_loadbmp()
 		std::vector<int> vi;
 		vi.clear();
 
-		short nrelem = files.size();
-
+		short nrelem = static_cast<short>(files.size());
 		for (short i = 0; i < nrelem; i++)
 		{
 			vi.push_back(bmpimgnr(&files[i]));
@@ -2277,43 +2233,21 @@ void MainWindow::execute_loadbmp()
 			vfilenames.push_back(files[i].ascii());
 		}
 
-		iseg::DataSelection dataSelection;
-		dataSelection.allSlices = true;
-		dataSelection.bmp = true;
-		dataSelection.work = true;
-		dataSelection.tissues = true;
-		emit begin_datachange(dataSelection, this, false);
-
-		LoaderColorImages LB(handler3D, LoaderColorImages::kBMP, vfilenames, this);
-		LB.move(QCursor::pos());
-		LB.exec();
-
-		emit end_datachange(this, iseg::ClearUndo);
-
-		reset_brightnesscontrast();
-
-		EnableActionsAfterPrjLoaded(true);
-	}
-}
-
-void MainWindow::execute_loadpng()
-{
-	maybeSafe();
-
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.png)\nAll (*.*)",
-			QString::null, this, "open files dialog",
-			"Select one or more files to open");
-
-	if (!files.empty())
-	{
-		files.sort();
-
-		int nrelem = files.size();
-		std::vector<const char*> vfilenames;
-		for (int i = 0; i < nrelem; i++)
-		{
-			vfilenames.push_back(files[i].ascii());
-		}
+        auto format = LoaderColorImages::kBMP;
+        if (files.front().endsWith(".png", Qt::CaseInsensitive))
+        {
+            format = LoaderColorImages::kPNG;
+        }
+        else if (files.front().endsWith(".jpg", Qt::CaseInsensitive)
+            || files.front().endsWith(".jpeg", Qt::CaseInsensitive))
+        {
+            format = LoaderColorImages::kJPG;
+        }
+        else if (files.front().endsWith(".tif", Qt::CaseInsensitive)
+            || files.front().endsWith(".tiff", Qt::CaseInsensitive))
+        {
+            format = LoaderColorImages::kTIF;
+        }
 
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = true;
@@ -2322,61 +2256,11 @@ void MainWindow::execute_loadpng()
 		dataSelection.tissues = true;
 		emit begin_datachange(dataSelection, this, false);
 
-		LoaderColorImages LB(handler3D, LoaderColorImages::kPNG, vfilenames, this);
+		LoaderColorImages LB(handler3D, format, vfilenames, this);
 		LB.move(QCursor::pos());
 		LB.exec();
 
 		emit end_datachange(this, iseg::ClearUndo);
-
-		reset_brightnesscontrast();
-
-		EnableActionsAfterPrjLoaded(true);
-	}
-}
-
-void MainWindow::execute_loadjpg()
-{
-	maybeSafe();
-
-	QStringList files =
-			QFileDialog::getOpenFileNames("Images (*.jpg)\nAll (*.*)",
-					QString::null, this, "open files dialog",
-					"Select one or more files to open");
-
-	if (!files.empty())
-	{
-		files.sort();
-
-		std::vector<int> vi;
-		vi.clear();
-
-		short nrelem = files.size();
-
-		for (short i = 0; i < nrelem; i++)
-		{
-			vi.push_back(jpgimgnr(&files[i]));
-		}
-
-		std::vector<const char*> vfilenames;
-		for (short i = 0; i < nrelem; i++)
-		{
-			vfilenames.push_back(files[i].ascii());
-		}
-
-		iseg::DataSelection dataSelection;
-		dataSelection.allSlices = true;
-		dataSelection.bmp = true;
-		dataSelection.work = true;
-		dataSelection.tissues = true;
-		emit begin_datachange(dataSelection, this, false);
-
-		LoaderColorImages LB(handler3D, LoaderColorImages::kJPG, vfilenames, this);
-		LB.move(QCursor::pos());
-		LB.exec();
-
-		emit end_datachange(this, iseg::ClearUndo);
-
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 		reset_brightnesscontrast();
 
@@ -2479,7 +2363,7 @@ void MainWindow::execute_loadraw()
 	EnableActionsAfterPrjLoaded(true);
 }
 
-void MainWindow::execute_loadmhd()
+void MainWindow::execute_load_medical_image()
 {
 	maybeSafe();
 
@@ -2490,9 +2374,11 @@ void MainWindow::execute_loadmhd()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null, 
-			"Metaheader (*.mhd *.mha)\nAll (*.*)");
-	if (!loadfilename.isEmpty())
+    QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+        "Metaheader (*.mhd *.mha);;"
+        "NIFTI (*.nii *.hdr *.img *.nii.gz);;"
+        "All (*.*)");
+    if (!loadfilename.isEmpty())
 	{
 		handler3D->ReadImage(loadfilename.ascii());
 	}
@@ -2541,33 +2427,6 @@ void MainWindow::execute_loadvtk()
 	}
 }
 
-void MainWindow::execute_loadnifti()
-{
-	maybeSafe();
-
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.bmp = true;
-	dataSelection.work = true;
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this, false);
-
-	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
-			"NIFTI (*.nii *.hdr *.img *.nii.gz)\nAll (*.*)");
-	if (!loadfilename.isEmpty())
-	{
-		handler3D->ReadImage(loadfilename.ascii());
-	}
-
-	emit end_datachange(this, iseg::ClearUndo);
-	pixelsize_changed();
-	slicethickness_changed();
-
-	reset_brightnesscontrast();
-
-	EnableActionsAfterPrjLoaded(true);
-}
-
 void MainWindow::execute_loadavw()
 {
 	maybeSafe();
@@ -2608,14 +2467,13 @@ void MainWindow::execute_reloadbmp()
 		files.sort();
 
 		std::vector<int> vi;
-		vi.clear();
 
 		short nrelem = files.size();
 
-		for (short i = 0; i < nrelem; i++)
-		{
-			vi.push_back(bmpimgnr(&files[i]));
-		}
+        for (short i = 0; i < nrelem; i++)
+        {
+            vi.push_back(bmpimgnr(&files[i]));
+        }
 
 		std::vector<const char*> vfilenames;
 		for (short i = 0; i < nrelem; i++)
@@ -2648,7 +2506,7 @@ void MainWindow::execute_reloadbmp()
 		if (!files.empty())
 		{
 			QMessageBox::information(
-					this, "Segm. Tool",
+					this, "iSEG Warning",
 					"You have to select the same number of slices.\n");
 		}
 	}
@@ -2696,7 +2554,7 @@ void MainWindow::execute_reloadavw()
 	emit end_datachange(this, iseg::ClearUndo);
 }
 
-void MainWindow::execute_reloadmhd()
+void MainWindow::execute_reload_medical_image()
 {
 	iseg::DataSelection dataSelection;
 	dataSelection.allSlices = true;
@@ -2705,8 +2563,10 @@ void MainWindow::execute_reloadmhd()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
-			"Metaheader (*.mhd *.mha)\nAll (*.*)");
+    QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
+        "Metaheader (*.mhd *.mha);;"
+        "NIFTI (*.nii *.hdr *.img *.nii.gz);;"
+        "All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
@@ -2730,27 +2590,6 @@ void MainWindow::execute_reloadvtk()
 	if (!loadfilename.isEmpty())
 	{
 		handler3D->ReloadImage(loadfilename.ascii(),
-				handler3D->start_slice());
-		reset_brightnesscontrast();
-	}
-	emit end_datachange(this, iseg::ClearUndo);
-}
-
-void MainWindow::execute_reloadnifti()
-{
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.bmp = true;
-	dataSelection.work = true;
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this, false);
-
-	QString loadfilename = RecentPlaces::getOpenFileName(this, "Open file", QString::null,
-			"NIFTI (*.nii *.hdr *.img *.nii.gz)\nAll (*.*)");
-	if (!loadfilename.isEmpty())
-	{
-		handler3D->ReloadImage(
-				loadfilename.ascii(),
 				handler3D->start_slice());
 		reset_brightnesscontrast();
 	}
@@ -4246,11 +4085,7 @@ void MainWindow::execute_new()
 void MainWindow::start_surfaceviewer(int mode)
 {
 	// ensure we don't have a viewer running
-	if (surface_viewer != nullptr)
-	{
-		surface_viewer->close();
-		delete surface_viewer;
-	}
+	surface_viewer_closed();
 
 	if (!SurfaceViewerWidget::isOpenGLSupported())
 	{
@@ -4275,6 +4110,7 @@ void MainWindow::start_surfaceviewer(int mode)
 
 	surface_viewer->show();
 	surface_viewer->raise();
+	surface_viewer->activateWindow();
 
 	emit end_dataexport(this);
 }
