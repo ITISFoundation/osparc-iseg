@@ -290,7 +290,7 @@ bool MenuWTT::event(QEvent* e)
 {
 	// not needed from Qt 5.1 -> see QMenu::setToolTipVisible
 	const QHelpEvent* helpEvent = static_cast<QHelpEvent*>(e);
-	if (helpEvent->type() == QEvent::ToolTip && activeAction() != 0)
+	if (helpEvent->type() == QEvent::ToolTip && activeAction() != nullptr)
 	{
 		QToolTip::showText(helpEvent->globalPos(), activeAction()->toolTip());
 	}
@@ -2964,6 +2964,7 @@ void MainWindow::SaveSettings()
 	settings.setValue("Compression", this->handler3D->GetCompression());
 	settings.setValue("ContiguousMemory", this->handler3D->GetContiguousMemory());
 	settings.setValue("BloscEnabled", BloscEnabled());
+    settings.setValue("SaveTarget", this->handler3D->SaveTarget());
 	settings.endGroup();
 	settings.beginGroup("RecentPlaces");
 	auto places = RecentPlaces::recentDirectories();
@@ -3099,6 +3100,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		this->handler3D->SetCompression(settings.value("Compression", 0).toInt());
 		this->handler3D->SetContiguousMemory(settings.value("ContiguousMemory", true).toBool());
 		SetBloscEnabled(settings.value("BloscEnabled", false).toBool());
+        this->handler3D->SetSaveTarget(settings.value("SaveTarget", false).toBool());
 		settings.endGroup();
 
 		settings.beginGroup("RecentPlaces");
@@ -4149,7 +4151,7 @@ void MainWindow::execute_3Dvolumeviewertissue()
 
 	if (VV3D == nullptr)
 	{
-		VV3D = new VolumeViewerWidget(handler3D, false, true, true, 0);
+		VV3D = new VolumeViewerWidget(handler3D, false, true, true, nullptr);
 		QObject::connect(VV3D, SIGNAL(hasbeenclosed()), this, SLOT(VV3D_closed()));
 	}
 
@@ -4167,7 +4169,7 @@ void MainWindow::execute_3Dvolumeviewerbmp()
 
 	if (VV3Dbmp == nullptr)
 	{
-		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, 0);
+		VV3Dbmp = new VolumeViewerWidget(handler3D, true, true, true, nullptr);
 		QObject::connect(VV3Dbmp, SIGNAL(hasbeenclosed()), this, SLOT(VV3Dbmp_closed()));
 	}
 
@@ -4361,8 +4363,6 @@ void MainWindow::execute_scale()
 	QObject::disconnect(
 			&SW, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
-	return;
 }
 
 void MainWindow::execute_imagemath()
@@ -4384,8 +4384,6 @@ void MainWindow::execute_imagemath()
 	QObject::disconnect(
 			&IM, SIGNAL(end_datachange(QWidget*, iseg::EndUndoAction)), this,
 			SLOT(handle_end_datachange(QWidget*, iseg::EndUndoAction)));
-
-	return;
 }
 
 void MainWindow::execute_unwrap()
@@ -4398,7 +4396,6 @@ void MainWindow::execute_unwrap()
 	handler3D->unwrap(0.90f);
 
 	emit end_datachange(this);
-	return;
 }
 
 void MainWindow::execute_overlay()
@@ -4506,8 +4503,6 @@ void MainWindow::execute_undoconf()
 		editmenu->setItemEnabled(redonr, true);
 
 	this->SaveSettings();
-
-	return;
 }
 
 void MainWindow::execute_activeslicesconf()
@@ -4722,7 +4717,7 @@ void MainWindow::execute_xslice()
 	{
 		xsliceshower = new SliceViewerWidget(
 				handler3D, true, handler3D->get_slicethickness(),
-				zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
+				zoom_widget->get_zoom(), nullptr, nullptr, Qt::WStyle_StaysOnTop);
 		xsliceshower->zpos_changed();
 		if (ysliceshower != nullptr)
 		{
@@ -4770,7 +4765,7 @@ void MainWindow::execute_yslice()
 	{
 		ysliceshower = new SliceViewerWidget(
 				handler3D, false, handler3D->get_slicethickness(),
-				zoom_widget->get_zoom(), 0, 0, Qt::WStyle_StaysOnTop);
+				zoom_widget->get_zoom(), nullptr, nullptr, Qt::WStyle_StaysOnTop);
 		ysliceshower->zpos_changed();
 		if (xsliceshower != nullptr)
 		{
@@ -6787,7 +6782,7 @@ void MainWindow::LoadLoadProj(const QString& path1)
 		if (!qs_filename1.isEmpty())
 			AddLoadProj(qs_filename1);
 	}
-	if (fplatestproj != 0)
+	if (fplatestproj != nullptr)
 		fclose(fplatestproj);
 }
 

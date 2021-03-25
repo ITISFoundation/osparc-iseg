@@ -21,6 +21,9 @@
        <property name="toolTip">
         <string>Compression refers to gzip compression of image arrays in the HDF5 file. Zero ('0') is no compression, '9' is maximum compression.</string>
        </property>
+       <property name="maximum">
+        <number>9</number>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">

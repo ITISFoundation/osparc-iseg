@@ -546,7 +546,7 @@ private:
 	bool _undo3D;
 	int _hdf5_compression = 1;
 	bool _contiguous_memory_io = false; // Default: slice-by-slice
-    bool _save_target = true;
+    bool _save_target = false;
 };
 
 } // namespace iseg
