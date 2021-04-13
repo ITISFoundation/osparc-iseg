@@ -28,10 +28,8 @@ Settings::Settings(QWidget* parent)
 	assert(mainWindow);
 	ui->setupUi(this);
 
-	this->ui->spinBoxCompression->setValue(
-		mainWindow->handler3D->GetCompression());
-	this->ui->checkBoxContiguousMemory->setChecked(
-		mainWindow->handler3D->GetContiguousMemory());
+	this->ui->spinBoxCompression->setValue(mainWindow->handler3D->GetCompression());
+	this->ui->checkBoxContiguousMemory->setChecked(mainWindow->handler3D->GetContiguousMemory());
 	this->ui->checkBoxEnableBlosc->setChecked(BloscEnabled());
     this->ui->checkBoxSaveTarget->setChecked(mainWindow->handler3D->SaveTarget());
 }
@@ -41,13 +39,10 @@ Settings::~Settings() { delete ui; }
 void Settings::accept()
 {
 	ISEG_INFO("setting compression = " << this->ui->spinBoxCompression->value());
-	mainWindow->handler3D->SetCompression(
-		this->ui->spinBoxCompression->value());
-	mainWindow->handler3D->SetContiguousMemory(
-		this->ui->checkBoxContiguousMemory->isChecked());
+	mainWindow->handler3D->SetCompression(this->ui->spinBoxCompression->value());
+	mainWindow->handler3D->SetContiguousMemory(this->ui->checkBoxContiguousMemory->isChecked());
 	SetBloscEnabled(this->ui->checkBoxEnableBlosc->isChecked());
-    mainWindow->handler3D->SetSaveTarget(
-        this->ui->checkBoxSaveTarget->isChecked());
+    mainWindow->handler3D->SetSaveTarget(this->ui->checkBoxSaveTarget->isChecked());
 
 	mainWindow->SaveSettings();
 	this->hide();
