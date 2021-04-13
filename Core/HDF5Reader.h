@@ -21,8 +21,8 @@ namespace iseg {
 class ISEG_CORE_API HDF5Reader
 {
 public:
-	typedef unsigned long long size_type;
-	typedef long long hid_type;
+	using size_type = unsigned long long;
+	using hid_type = long long;
 	HDF5Reader();
 	~HDF5Reader();
 	int open(const std::string&);
@@ -47,6 +47,7 @@ public:
 	int read(long*, const std::string&);
 	int read(unsigned char*, const std::string&);
 	int read(unsigned short*, const std::string&);
+
 	int read(std::vector<double>&, const std::string&);
 	int read(std::vector<float>&, const std::string&);
 	int read(std::vector<int>&, const std::string&);
@@ -84,24 +85,15 @@ public:
 		return 1;
 	}
 
-	int loud;
+	bool loud = false;
 
 private:
-	template<typename T1, typename T2>
-	inline int read_cast(std::vector<T2>& v, const std::string& name)
-	{
-		std::vector<T1> v_temp;
-		int ret = read(v_temp, name);
-		v.resize(v_temp.size());
-		std::transform(v_temp.begin(), v_temp.end(), v.begin(),
-					   [](float x) { return static_cast<T2>(x); });
-		return ret;
-	}
+    template<typename T> int readVec(std::vector<T>&, const std::string&);
 
-	int readData(const std::string&);
+    template<typename T>
+    int readData(T* data, const std::string& name);
 
-	void* data;
-	hid_type file;
+	hid_type file = -1;
 };
 
 } // namespace iseg
