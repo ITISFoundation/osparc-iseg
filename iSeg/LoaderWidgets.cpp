@@ -46,78 +46,82 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 
-namespace
+namespace {
+template<class VectorOfVectorsType, typename num_t = double, int DIM = -1, class Distance = nanoflann::metric_L2, typename IndexType = size_t>
+struct KDTreeVectorOfVectorsAdaptor
 {
-    template <class VectorOfVectorsType, typename num_t = double, int DIM = -1, class Distance = nanoflann::metric_L2, typename IndexType = size_t>
-    struct KDTreeVectorOfVectorsAdaptor
-    {
-        using self_t = KDTreeVectorOfVectorsAdaptor<VectorOfVectorsType, num_t, DIM, Distance>;
-        using metric_t = typename Distance::template traits<num_t, self_t>::distance_t;
-        using index_t = nanoflann::KDTreeSingleIndexAdaptor< metric_t, self_t, DIM, IndexType>;
+	using self_t = KDTreeVectorOfVectorsAdaptor<VectorOfVectorsType, num_t, DIM, Distance>;
+	using metric_t = typename Distance::template traits<num_t, self_t>::distance_t;
+	using index_t = nanoflann::KDTreeSingleIndexAdaptor<metric_t, self_t, DIM, IndexType>;
 
-        index_t* index; //! The kd-tree index for the user to call its methods as usual with any other FLANN index.
+	index_t* index; //! The kd-tree index for the user to call its methods as usual with any other FLANN index.
 
-        /// Constructor: takes a const ref to the vector of vectors object with the data points
-        KDTreeVectorOfVectorsAdaptor(const size_t /* dimensionality */, const VectorOfVectorsType &mat, const int leaf_max_size = 10) : m_data(mat)
-        {
-            assert(mat.size() != 0 && mat[0].size() != 0);
-            const size_t dims = mat[0].size();
-            if (DIM>0 && static_cast<int>(dims) != DIM)
-                throw std::runtime_error("Data set dimensionality does not match the 'DIM' template argument");
-            index = new index_t(static_cast<int>(dims), *this /* adaptor */, nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
-            index->buildIndex();
-        }
+	/// Constructor: takes a const ref to the vector of vectors object with the data points
+	KDTreeVectorOfVectorsAdaptor(const size_t /* dimensionality */, const VectorOfVectorsType& mat, const int leaf_max_size = 10) : m_data(mat)
+	{
+		assert(mat.size() != 0 && mat[0].size() != 0);
+		const size_t dims = mat[0].size();
+		if (DIM > 0 && static_cast<int>(dims) != DIM)
+			throw std::runtime_error("Data set dimensionality does not match the 'DIM' template argument");
+		index = new index_t(static_cast<int>(dims), *this /* adaptor */, nanoflann::KDTreeSingleIndexAdaptorParams(leaf_max_size));
+		index->buildIndex();
+	}
 
-        ~KDTreeVectorOfVectorsAdaptor() {
-            delete index;
-        }
+	~KDTreeVectorOfVectorsAdaptor()
+	{
+		delete index;
+	}
 
-        const VectorOfVectorsType &m_data;
+	const VectorOfVectorsType& m_data;
 
-        /** Query for the \a num_closest closest points to a given point (entered as query_point[0:dim-1]).
+	/** Query for the \a num_closest closest points to a given point (entered as query_point[0:dim-1]).
         *  Note that this is a short-cut method for index->findNeighbors().
         *  The user can also call index->... methods as desired.
         * \note nChecks_IGNORED is ignored but kept for compatibility with the original FLANN interface.
         */
-        inline void query(const num_t *query_point, const size_t num_closest, IndexType *out_indices, num_t *out_distances_sq, const int nChecks_IGNORED = 10) const
-        {
-            nanoflann::KNNResultSet<num_t, IndexType> resultSet(num_closest);
-            resultSet.init(out_indices, out_distances_sq);
-            index->findNeighbors(resultSet, query_point, nanoflann::SearchParams());
-        }
+	inline void query(const num_t* query_point, const size_t num_closest, IndexType* out_indices, num_t* out_distances_sq, const int nChecks_IGNORED = 10) const
+	{
+		nanoflann::KNNResultSet<num_t, IndexType> resultSet(num_closest);
+		resultSet.init(out_indices, out_distances_sq);
+		index->findNeighbors(resultSet, query_point, nanoflann::SearchParams());
+	}
 
-        /** @name Interface expected by KDTreeSingleIndexAdaptor
+	/** @name Interface expected by KDTreeSingleIndexAdaptor
         * @{ */
 
-        const self_t & derived() const {
-            return *this;
-        }
-        self_t & derived() {
-            return *this;
-        }
+	const self_t& derived() const
+	{
+		return *this;
+	}
+	self_t& derived()
+	{
+		return *this;
+	}
 
-        // Must return the number of data points
-        inline size_t kdtree_get_point_count() const {
-            return m_data.size();
-        }
+	// Must return the number of data points
+	inline size_t kdtree_get_point_count() const
+	{
+		return m_data.size();
+	}
 
-        // Returns the dim'th component of the idx'th point in the class:
-        inline num_t kdtree_get_pt(const size_t idx, const size_t dim) const {
-            return m_data[idx][dim];
-        }
+	// Returns the dim'th component of the idx'th point in the class:
+	inline num_t kdtree_get_pt(const size_t idx, const size_t dim) const
+	{
+		return m_data[idx][dim];
+	}
 
-        // Optional bounding-box computation: return false to default to a standard bbox computation loop.
-        //   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
-        //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
-        template <class BBOX>
-        bool kdtree_get_bbox(BBOX & /*bb*/) const {
-            return false;
-        }
+	// Optional bounding-box computation: return false to default to a standard bbox computation loop.
+	//   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
+	//   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+	template<class BBOX>
+	bool kdtree_get_bbox(BBOX& /*bb*/) const
+	{
+		return false;
+	}
 
-        /** @} */
-
-    };
-}
+	/** @} */
+};
+} // namespace
 
 namespace iseg {
 
@@ -125,7 +129,7 @@ namespace algo = boost::algorithm;
 namespace fs = boost::filesystem;
 
 ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlags f)
-	: QDialog(p, n, f), handler3D(h)
+		: QDialog(p, n, f), handler3D(h)
 {
 	auto img_selection_hbox = new QHBoxLayout;
 	img_selection_group = make_button_group({"Source", "Target", "Tissue"}, 0);
@@ -312,7 +316,6 @@ void LoaderDicom::subsect_toggled()
 	{
 		hbox2->hide();
 	}
-
 }
 
 void LoaderDicom::ct_toggled()
@@ -556,7 +559,6 @@ void LoaderRaw::subsect_toggled()
 	}
 
 	//	vbox1->setFixedSize(vbox1->sizeHint());
-
 }
 
 void LoaderRaw::load_pushed()
@@ -723,7 +725,6 @@ void ReloaderRaw::subsect_toggled()
 	}
 
 	//	vbox1->setFixedSize(vbox1->sizeHint());
-
 }
 
 void ReloaderRaw::load_pushed()
@@ -832,10 +833,10 @@ LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std:
 {
 	map_to_lut = new QCheckBox(QString("Map colors to lookup table"));
 	map_to_lut->setChecked(true);
-    if (typ == LoaderColorImages::kTIF)
-    {
-        map_to_lut->setEnabled(false);
-    }
+	if (typ == LoaderColorImages::kTIF)
+	{
+		map_to_lut->setEnabled(false);
+	}
 
 	subsect = new QCheckBox(QString("Subsection"));
 	subsect->setChecked(false);
@@ -946,31 +947,34 @@ void LoaderColorImages::load_quantize()
 		{
 			const auto N = lut->NumberOfColors();
 
-            using color_t = std::array<unsigned char, 3>;
-            using color_vector_t = std::vector<color_t>;
+			using color_t = std::array<unsigned char, 3>;
+			using color_vector_t = std::vector<color_t>;
 
-            color_vector_t points(N);
+			color_vector_t points(N);
 			for (size_t i = 0; i < N; ++i)
 			{
 				lut->GetColor(i, points[i].data());
 			}
 
-            using distance_t = float;
-            using my_kd_tree_t = KDTreeVectorOfVectorsAdaptor< color_vector_t, distance_t >;
-            my_kd_tree_t tree(3, points, 10 /* max leaf */);
-            {
-                ScopedTimer t("Build kd-tree for colors");
-                tree.index->buildIndex();
-            }
+			using distance_t = float;
+			using my_kd_tree_t = KDTreeVectorOfVectorsAdaptor<color_vector_t, distance_t>;
+			my_kd_tree_t tree(3, points, 10 /* max leaf */);
+			{
+				ScopedTimer t("Build kd-tree for colors");
+				tree.index->buildIndex();
+			}
 
 			unsigned w, h;
 			if (ImageReader::getInfo2D(m_filenames[0], w, h))
 			{
 				const auto map_colors = [&tree](unsigned char r, unsigned char g, unsigned char b) -> float {
-                    size_t id;
-                    distance_t sqr_dist;
-                    std::array<distance_t,3> query_pt = {r,g,b};
-                    tree.query(&query_pt[0], 1, &id, &sqr_dist);
+					size_t id;
+					distance_t sqr_dist;
+					std::array<distance_t, 3> query_pt = {
+							static_cast<distance_t>(r),
+							static_cast<distance_t>(g),
+							static_cast<distance_t>(b)};
+					tree.query(&query_pt[0], 1, &id, &sqr_dist);
 					return static_cast<float>(id);
 				};
 
@@ -1649,7 +1653,6 @@ void ReloaderBmp2::subsect_toggled()
 		yoffset->hide();
 		yoffs->hide();
 	}
-
 }
 
 void ReloaderBmp2::load_pushed()

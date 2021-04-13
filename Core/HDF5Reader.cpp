@@ -33,7 +33,7 @@ HDF5Reader::HDF5Reader()
 HDF5Reader::~HDF5Reader() { close(); }
 
 void HDF5Reader::decompose(std::string& filename, std::string& dataname,
-						   const std::string& pathname)
+		const std::string& pathname)
 {
 	const std::string::size_type idx = pathname.find(':');
 
@@ -85,7 +85,7 @@ bool HDF5Reader::existsValidHdf5(const std::string& fname)
 	if (!exists)
 	{
 		std::cerr << "HDF5Reader::existsValidHdf5() : error, '" << fname
-				  << "' does not exist" << std::endl;
+							<< "' does not exist" << std::endl;
 		return false;
 	}
 #else
@@ -93,7 +93,7 @@ bool HDF5Reader::existsValidHdf5(const std::string& fname)
 	if (pFile == nullptr)
 	{
 		std::cerr << "HDF5Reader::existsValidHdf5() : error, '" << fname
-				  << "' does not exist" << std::endl;
+							<< "' does not exist" << std::endl;
 		return false;
 	}
 	else
@@ -118,7 +118,7 @@ int HDF5Reader::open(const std::string& fname)
 	if (!HDF5Reader::existsValidHdf5(fname))
 	{
 		std::cerr << "HDF5Reader::open() : " << fname
-				  << " does not exist or is not a valid hdf5 file" << std::endl;
+							<< " does not exist or is not a valid hdf5 file" << std::endl;
 		return 0;
 	}
 	file = H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -148,7 +148,7 @@ int HDF5Reader::close()
 }
 
 int HDF5Reader::getDatasetInfo(std::string& type, std::vector<size_type>& extents,
-							   const std::string& name)
+		const std::string& name)
 {
 	if (file < 0)
 	{
@@ -165,7 +165,7 @@ int HDF5Reader::getDatasetInfo(std::string& type, std::vector<size_type>& extent
 	{
 		if (loud)
 			std::cerr << "HDF5Reader::getDatasetInfo() : no such dataset: " << name
-					  << std::endl;
+								<< std::endl;
 		type = "none";
 		return 0;
 	}
@@ -226,7 +226,7 @@ int HDF5Reader::getDatasetInfo(std::string& type, std::vector<size_type>& extent
 	else
 	{
 		std::cerr << "HDF5Reader::getDatasetInfo() : warning, unsupported native type"
-				  << std::endl;
+							<< std::endl;
 		status = H5Tclose(native_type);
 		status = H5Tclose(datatype);
 		status = H5Dclose(dataset);
@@ -260,48 +260,88 @@ int HDF5Reader::getDatasetInfo(std::string& type, std::vector<size_type>& extent
 template<typename T>
 struct HdfType
 {
-    static hid_t type() { return -1; }
+	static hid_t type() { return -1; }
 };
 
-template <> struct HdfType<double> { static hid_t type() { return H5T_NATIVE_DOUBLE; } };
-template <> struct HdfType<float>  { static hid_t type() { return H5T_NATIVE_FLOAT; } };
-template <> struct HdfType<std::uint8_t>  { static hid_t type() { return H5T_NATIVE_UINT8; } };
-template <> struct HdfType<std::uint16_t> { static hid_t type() { return H5T_NATIVE_UINT16; } };
-template <> struct HdfType<std::uint32_t> { static hid_t type() { return H5T_NATIVE_UINT32; } };
-template <> struct HdfType<std::uint64_t> { static hid_t type() { return H5T_NATIVE_UINT64; } };
-template <> struct HdfType<std::int8_t>  { static hid_t type() { return H5T_NATIVE_INT8; } };
-template <> struct HdfType<std::int16_t> { static hid_t type() { return H5T_NATIVE_INT16; } };
-template <> struct HdfType<std::int32_t> { static hid_t type() { return H5T_NATIVE_INT32; } };
-template <> struct HdfType<std::int64_t> { static hid_t type() { return H5T_NATIVE_INT64; } };
+template<>
+struct HdfType<double>
+{
+	static hid_t type() { return H5T_NATIVE_DOUBLE; }
+};
+template<>
+struct HdfType<float>
+{
+	static hid_t type() { return H5T_NATIVE_FLOAT; }
+};
+template<>
+struct HdfType<std::uint8_t>
+{
+	static hid_t type() { return H5T_NATIVE_UINT8; }
+};
+template<>
+struct HdfType<std::uint16_t>
+{
+	static hid_t type() { return H5T_NATIVE_UINT16; }
+};
+template<>
+struct HdfType<std::uint32_t>
+{
+	static hid_t type() { return H5T_NATIVE_UINT32; }
+};
+template<>
+struct HdfType<std::uint64_t>
+{
+	static hid_t type() { return H5T_NATIVE_UINT64; }
+};
+template<>
+struct HdfType<std::int8_t>
+{
+	static hid_t type() { return H5T_NATIVE_INT8; }
+};
+template<>
+struct HdfType<std::int16_t>
+{
+	static hid_t type() { return H5T_NATIVE_INT16; }
+};
+template<>
+struct HdfType<std::int32_t>
+{
+	static hid_t type() { return H5T_NATIVE_INT32; }
+};
+template<>
+struct HdfType<std::int64_t>
+{
+	static hid_t type() { return H5T_NATIVE_INT64; }
+};
 
 int HDF5Reader::read(double* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(float* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(int* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(unsigned int* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(long* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(unsigned char* _data, const std::string& name)
 {
-    return this->readData(_data, name);
+	return this->readData(_data, name);
 }
 
 int HDF5Reader::read(unsigned short* _data, const std::string& name)
@@ -311,63 +351,63 @@ int HDF5Reader::read(unsigned short* _data, const std::string& name)
 
 int HDF5Reader::read(std::vector<double>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<float>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<int>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<unsigned int>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<long>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<unsigned char>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 int HDF5Reader::read(std::vector<unsigned short>& v, const std::string& name)
 {
-    return readVec(v, name);
+	return readVec(v, name);
 }
 
 template<typename T>
 int HDF5Reader::readVec(std::vector<T>& v, const std::string& name)
 {
-    std::string type;
-    std::vector<size_type> dims;
-    if (!getDatasetInfo(type, dims, name))
-        return 0;
-    if (dims.size() != 1)
-    {
-        warning("HDF5Reader::read() : rank must be 1 for std::vectors, returning");
-        return 0;
-    }
-    v.resize(dims[0]);
-    return this->readData(v.data(), name);
+	std::string type;
+	std::vector<size_type> dims;
+	if (!getDatasetInfo(type, dims, name))
+		return 0;
+	if (dims.size() != 1)
+	{
+		warning("HDF5Reader::read() : rank must be 1 for std::vectors, returning");
+		return 0;
+	}
+	v.resize(dims[0]);
+	return this->readData(v.data(), name);
 }
 
 int HDF5Reader::read(float* data, size_type offset, size_type length,
-					 const std::string& name)
+		const std::string& name)
 {
 	return HDF5IO().readData(file, name, offset, length, data) ? 1 : 0;
 }
 
 int HDF5Reader::read(unsigned short* data, size_type offset,
-					 size_type length, const std::string& name)
+		size_type length, const std::string& name)
 {
 	return HDF5IO().readData(file, name, offset, length, data) ? 1 : 0;
 }
@@ -375,61 +415,61 @@ int HDF5Reader::read(unsigned short* data, size_type offset,
 template<typename T>
 int HDF5Reader::readData(T* Array, const std::string& name)
 {
-    if (file < 0)
-    {
-        std::cerr << "HDF5Reader::readData() : no file open" << std::endl;
-        return 0;
-    }
-    if (!Array)
-    {
-        std::cerr << "HDF5Reader::readData() : no pointer to data" << std::endl;
-        return 0;
-    }
+	if (file < 0)
+	{
+		std::cerr << "HDF5Reader::readData() : no file open" << std::endl;
+		return 0;
+	}
+	if (!Array)
+	{
+		std::cerr << "HDF5Reader::readData() : no pointer to data" << std::endl;
+		return 0;
+	}
 
-    if (loud)
-        std::cerr << "HDF5Reader::readData() : loading dataset " << name << std::endl;
+	if (loud)
+		std::cerr << "HDF5Reader::readData() : loading dataset " << name << std::endl;
 
-    bool ok = false;
+	bool ok = false;
 
-    hid_t dataset = H5Dopen2(file, name.c_str(), H5P_DEFAULT);
-    if (dataset >= 0)
-    {
-        hid_t dataspace = H5Dget_space(dataset);
-        if (dataspace >= 0)
-        {
-            int rank = H5Sget_simple_extent_ndims(dataspace);
-            if (rank >= 0)
-            {
-                std::vector<hsize_t> dims(rank);
-                H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
-                H5Sselect_all(dataspace);
+	hid_t dataset = H5Dopen2(file, name.c_str(), H5P_DEFAULT);
+	if (dataset >= 0)
+	{
+		hid_t dataspace = H5Dget_space(dataset);
+		if (dataspace >= 0)
+		{
+			int rank = H5Sget_simple_extent_ndims(dataspace);
+			if (rank >= 0)
+			{
+				std::vector<hsize_t> dims(rank);
+				H5Sget_simple_extent_dims(dataspace, dims.data(), nullptr);
+				H5Sselect_all(dataspace);
 
-                if (H5Sselect_valid(dataspace) >= 0)
-                {
-                    // Define the memory space to read dataset.
-                    hid_t memoryspace = H5Screate_simple(rank, dims.data(), nullptr);
+				if (H5Sselect_valid(dataspace) >= 0)
+				{
+					// Define the memory space to read dataset.
+					hid_t memoryspace = H5Screate_simple(rank, dims.data(), nullptr);
 
-                    hid_t type_id = HdfType<T>::type();
-                    if (HdfType<T>::type < 0)
-                    {
-                        // get data type from file
-                        type_id = H5Dget_type(dataset);
-                    }
+					hid_t type_id = HdfType<T>::type();
+					if (type_id < 0)
+					{
+						// get data type from file
+						type_id = H5Dget_type(dataset);
+					}
 
-                    herr_t status = H5Dread(dataset, type_id, memoryspace, dataspace, H5P_DEFAULT, Array);
-                    ok = (status >= 0);
+					herr_t status = H5Dread(dataset, type_id, memoryspace, dataspace, H5P_DEFAULT, Array);
+					ok = (status >= 0);
 
-                    if (HdfType<T>::type() < 0)
-                        H5Tclose(type_id);
-                    H5Sclose(memoryspace);
-                }
-            }
-            H5Sclose(dataspace);
-        }
-        H5Dclose(dataset);
-    }
+					if (HdfType<T>::type() < 0)
+						H5Tclose(type_id);
+					H5Sclose(memoryspace);
+				}
+			}
+			H5Sclose(dataspace);
+		}
+		H5Dclose(dataset);
+	}
 
-    return ok ? 1 : 0;
+	return ok ? 1 : 0;
 }
 
 } // namespace iseg
