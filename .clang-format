@@ -50,3 +50,7 @@ SpaceInEmptyParentheses: false
 SpacesInAngles: false
 MaxEmptyLinesToKeep: 1
 ColumnLimit: 0
+ForEachMacros:
+  - foreach
+  - Q_FOREACH
+  - BOOST_FOREACH

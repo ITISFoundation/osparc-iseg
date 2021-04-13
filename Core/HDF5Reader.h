@@ -32,7 +32,7 @@ public:
 	static size_type totalSize(const std::vector<size_type>&);
 	std::vector<std::string> getGroupInfo(const std::string&);
 	int getDatasetInfo(std::string&, std::vector<size_type>&,
-					   const std::string&);
+			const std::string&);
 	int exists(const std::string&);
 
 	// Description:
@@ -57,9 +57,9 @@ public:
 	int read(std::vector<unsigned short>&, const std::string&);
 
 	int read(float* data, size_type offset, size_type length,
-			 const std::string& name);
+			const std::string& name);
 	int read(unsigned short* data, size_type offset, size_type length,
-			 const std::string& name);
+			const std::string& name);
 
 	template<class T>
 	static int read2(std::vector<T>& array, const std::string& path)
@@ -88,10 +88,11 @@ public:
 	bool loud = false;
 
 private:
-    template<typename T> int readVec(std::vector<T>&, const std::string&);
+	template<typename T>
+	int readVec(std::vector<T>&, const std::string&);
 
-    template<typename T>
-    int readData(T* data, const std::string& name);
+	template<typename T>
+	int readData(T* data, const std::string& name);
 
 	hid_type file = -1;
 };
