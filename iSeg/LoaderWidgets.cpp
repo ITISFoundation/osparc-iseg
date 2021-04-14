@@ -293,11 +293,8 @@ LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname,
 
 	QObject::connect(loadFile, SIGNAL(clicked()), this, SLOT(load_pushed()));
 	QObject::connect(cancelBut, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(cb_subsect, SIGNAL(clicked()), this,
-			SLOT(subsect_toggled()));
+	QObject::connect(cb_subsect, SIGNAL(clicked()), this, SLOT(subsect_toggled()));
 	QObject::connect(cb_ct, SIGNAL(clicked()), this, SLOT(ct_toggled()));
-
-	return;
 }
 
 LoaderDicom::~LoaderDicom()
@@ -598,10 +595,6 @@ void LoaderRaw::load_pushed()
 		close();
 		return;
 	}
-	else
-	{
-		return;
-	}
 }
 
 void LoaderRaw::select_pushed()
@@ -752,11 +745,6 @@ void ReloaderRaw::load_pushed()
 					slicenrbox->value());
 		}
 		close();
-		return;
-	}
-	else
-	{
-		return;
 	}
 }
 
