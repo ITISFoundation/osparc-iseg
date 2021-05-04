@@ -18,6 +18,7 @@ IF(ISEG_BUILD_TESTING)
 		test_Brush.cpp
 		test_Logging.cpp
 		test_iSegImageAdaptor.cpp
+		//test_SuperPixel.cpp
 		test_Transform.cpp
 	)
 	

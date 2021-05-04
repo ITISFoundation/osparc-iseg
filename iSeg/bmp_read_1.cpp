@@ -129,11 +129,6 @@ bmphandler::bmphandler()
 	sliceprovide_installer = SliceProviderInstaller::getinst();
 	stackcounter = 1;
 	mode1 = mode2 = 1;
-	return; // ?
-
-	redFactor = 0.299;
-	greenFactor = 0.587;
-	blueFactor = 0.114;
 }
 
 bmphandler::bmphandler(const bmphandler&)

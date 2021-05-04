@@ -40,7 +40,6 @@ public:
 
 private:
 	bool loaded;
-	bool ownlvlset;
 	bmphandler* image;
 	void reinitialize();
 	void make_step();

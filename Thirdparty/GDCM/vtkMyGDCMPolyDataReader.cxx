@@ -202,7 +202,7 @@ void vtkMyGDCMPolyDataReader::FillMedicalImageInformation(const gdcm::Reader& re
 			std::stringstream ss;
 			ss.str("");
 			std::string swe = std::string(bvwe->GetPointer(), bvwe->GetLength());
-			size_t count = gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
+			gdcm::VM::GetNumberOfElementsFromArray(swe.c_str(), static_cast<unsigned>(swe.size()));
 
 			// I found a case with only one W/L but two comments: WINDOW1\WINDOW2
 			// SIEMENS-IncompletePixelData.dcm
@@ -389,7 +389,7 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 	{
 		return 0;
 	}
-	const gdcm::DataElement& wba = nestedds.GetDataElement(twba);
+	nestedds.GetDataElement(twba);
 
 	//  (5400,1006) CS [SS]                                     #   2, 1 WaveformSampleInterpretation
 	// (5400,1010) OW 00ba\0030\ff76\ff8b\00a2\ffd3\ffae\ff50\0062\00c4\011e\00c2\00ba... # 57600, 1 WaveformData
@@ -416,7 +416,7 @@ int vtkMyGDCMPolyDataReader::RequestData_HemodynamicWaveformStorage(gdcm::Reader
 		x[0] = (float)p[i] / 8800; // ?
 		x[1] = (float)i;
 		x[2] = 0;
-		vtkIdType ptId = newPts->InsertNextPoint(x);
+		newPts->InsertNextPoint(x);
 	}
 	output->SetPoints(newPts);
 

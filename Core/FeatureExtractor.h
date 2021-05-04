@@ -40,6 +40,5 @@ private:
 	short unsigned width;
 	short unsigned height;
 	unsigned area;
-	float* mask;
 };
 } // namespace iseg

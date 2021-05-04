@@ -24,7 +24,7 @@
 #include <map>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/filesystem.hpp>
 
 // Boost chrono used for timing measurements

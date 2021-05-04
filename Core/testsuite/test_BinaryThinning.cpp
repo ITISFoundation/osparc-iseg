@@ -25,7 +25,6 @@ BOOST_AUTO_TEST_SUITE(BinaryThinning_suite);
 BOOST_AUTO_TEST_CASE(PalagyiKubaThinning_test)
 {
 	using input_type = itk::Image<float, 3>;
-	using output_type = itk::Image<unsigned short, 3>;
 
 	itk::Index<3> start = { 0, 0, 0 };
 	itk::Size<3> size = { 50, 70, 45 };

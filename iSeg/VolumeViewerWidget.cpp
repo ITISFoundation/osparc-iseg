@@ -704,11 +704,11 @@ void VolumeViewerWidget::thickness_changed(float thick)
 
 void VolumeViewerWidget::reload()
 {
-	int xm, xp, ym, yp, zm, zp;								//xxxa
+	int xm, xp, ym, yp, zm, zp; //xxxa
 	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
 	int size1[3];
 	input->GetDimensions(size1);
-	int w = hand3D->width(); //xxxa
+	//int w = hand3D->width(); //xxxa
 	if ((hand3D->width() != size1[0]) ||
 			(hand3D->height() != size1[1]) ||
 			(hand3D->num_slices() != size1[2]))

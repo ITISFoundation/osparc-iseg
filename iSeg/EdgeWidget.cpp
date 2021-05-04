@@ -133,8 +133,6 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
 
 EdgeWidget::~EdgeWidget()
 {
-	delete vbox1;
-	delete modegroup;
 }
 
 void EdgeWidget::on_slicenr_changed()

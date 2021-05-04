@@ -109,13 +109,13 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			BOOST_REQUIRE(fid >= 0);
 
 			auto before = boost::chrono::high_resolution_clock::now();
-			auto r = io.writeData(fid, dname, slices1.data(), num_slices, slice_size);
+			BOOST_CHECK(io.writeData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
 			size_t offset = 0;
 			for (size_t i = 0; i < num_slices; i++, offset += slice_size)
 			{
-				auto r = io.readData(fid, dname, offset, slice_size, data.data());
+				BOOST_CHECK(io.readData(fid, dname, offset, slice_size, data.data()));
 			}
 			auto const after = boost::chrono::high_resolution_clock::now();
 			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());
@@ -140,13 +140,13 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			BOOST_REQUIRE(fid >= 0);
 
 			auto before = boost::chrono::high_resolution_clock::now();
-			auto r = io.writeData(fid, dname, slices1.data(), num_slices, slice_size);
+			BOOST_CHECK(io.writeData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
 			size_t offset = 0;
 			for (size_t i = 0; i < num_slices; i++, offset += slice_size)
 			{
-				auto r = io.readData(fid, dname, offset, slice_size, data.data());
+				BOOST_CHECK(io.readData(fid, dname, offset, slice_size, data.data()));
 			}
 			auto const after = boost::chrono::high_resolution_clock::now();
 			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());

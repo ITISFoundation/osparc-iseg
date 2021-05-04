@@ -893,9 +893,6 @@ int SlicesHandler::LoadAllHDF(const char* filename)
 	{
 		offset[r] = tr_1d[r * 4 + 3];
 	}
-	arrayNames = reader.GetArrayNames();
-
-	const int NPA = arrayNames.size();
 
 	// read colors if any
 	UpdateColorLookupTable(reader.ReadColorLookup());
@@ -942,13 +939,9 @@ int SlicesHandler::LoadAllXdmf(const char* filename)
 		ISEG_ERROR_MSG("inconsistent dimensions in LoadAllXdmf");
 		return 0;
 	}
-	auto pixsize = reader.GetPixelSize();
 	auto transform = reader.GetImageTransform();
 	float origin[3];
 	transform.getOffset(origin);
-	arrayNames = reader.GetArrayNames();
-
-	const int NPA = arrayNames.size();
 
 	std::vector<float*> bmpslices(_nrslices);
 	std::vector<float*> workslices(_nrslices);
@@ -1943,7 +1936,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString
 		dummy_SlicesHandler.LoadHeader(fpMerge, tissuesVersion, version);
 
 		unsigned short mergeNrslices = dummy_SlicesHandler.num_slices();
-		float mergeThickness = dummy_SlicesHandler.get_slicethickness();
+		//float mergeThickness = dummy_SlicesHandler.get_slicethickness();
 
 		// Load input slices and save to merged project file
 		bmphandler tmpSlice;
@@ -2135,9 +2128,6 @@ bool SlicesHandler::LoadS4Llink(const char* filename, int& tissuesVersion)
 	nrofslices = reader.GetNumberOfSlices();
 	pixsize = reader.GetPixelSize();
 	tr_1d = reader.GetImageTransform();
-	arrayNames = reader.GetArrayNames();
-
-	const int NPA = arrayNames.size();
 
 	// taken from LoadProject()
 	_activeslice = 0;
@@ -2663,8 +2653,8 @@ bool SlicesHandler::SwapXZ()
 	w = num_slices();
 	h = height();
 	nrslices = width();
-	Pair p = get_pixelsize();
-	float thick = get_slicethickness();
+	//Pair p = get_pixelsize();
+	//float thick = get_slicethickness();
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
@@ -5345,22 +5335,16 @@ void SlicesHandler::interpolateworkgrey_medianset(unsigned short slice1,
 			}
 
 			// Remove vanishing components for interpolation
-			tissues_size_t* tissue1 =
-					_image_slices[slice1].return_tissues(_active_tissuelayer);
-			tissues_size_t* tissue2 =
-					_image_slices[slice2].return_tissues(_active_tissuelayer);
 			for (unsigned int i = 0; i < _area; ++i)
 			{
-				std::set<float>::iterator iter =
-						vanishing_comp_forward.find(connected_comp_forward[i]);
+				auto iter = vanishing_comp_forward.find(connected_comp_forward[i]);
 				if (iter != vanishing_comp_forward.end())
 				{
 					f_2[i] = f_1[i];
 				}
 				else
 				{
-					iter = vanishing_comp_backward.find(
-							connected_comp_backward[i]);
+					iter = vanishing_comp_backward.find(connected_comp_backward[i]);
 					if (iter != vanishing_comp_backward.end())
 					{
 						f_2[i] = f_1[i];
@@ -8163,18 +8147,25 @@ void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames,
 
 void SlicesHandler::mask_source(bool all_slices, float maskvalue)
 {
+	std::vector<bool> mask(TissueInfos::GetTissueCount() + 1, false);
+	const auto selected_tissues = TissueInfos::GetSelectedTissues();
+	for (auto label: selected_tissues)
+	{
+		mask.at(label) = true;
+	}
+
 	const int iN = _endslice - _startslice;
 
 #pragma omp parallel for
 	for (int i = 0; i < iN; ++i)
 	{
-		int slice = _startslice + i;
+		const int slice = _startslice + i;
+		const auto tissue = tissue_slices(0)[slice];
 		auto source = source_slices()[slice];
-		auto target = target_slices()[slice];
 
 		for (unsigned int k = 0; k < _area; ++k)
 		{
-			if (target[k] == 0.f)
+			if (!mask[tissue[k]])
 			{
 				source[k] = maskvalue;
 			}

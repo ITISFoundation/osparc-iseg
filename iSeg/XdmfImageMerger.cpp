@@ -86,7 +86,6 @@ int XdmfImageMerger::InternalWrite(
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(fileInfo.absolutePath());
 
-	const size_t N = (size_t)width * (size_t)height * (size_t)nrslicesTotal;
 	const size_t slice_size = static_cast<size_t>(width) * height;
 
 	float offset[3];

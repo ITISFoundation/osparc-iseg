@@ -362,7 +362,7 @@ int HDF5Writer::write_attribute(const std::string& value, const std::string& nam
 		if (dataspace_id >= 0)
 		{
 			hid_t tid1 = H5Tcopy(H5T_C_S1);
-			herr_t ret = H5Tset_size(tid1, value.length() + 1);
+			H5Tset_size(tid1, value.length() + 1);
 			hid_t attribute_id = H5Acreate(group_handle, attribute_name.c_str(), tid1, dataspace_id, H5P_DEFAULT);
 			if (attribute_id >= 0)
 			{
@@ -382,7 +382,7 @@ int HDF5Writer::write_attribute(const std::string& value, const std::string& nam
 			return 0;
 		}
 
-		herr_t status = H5Gclose(group_handle);
+		H5Gclose(group_handle);
 	}
 	else
 	{

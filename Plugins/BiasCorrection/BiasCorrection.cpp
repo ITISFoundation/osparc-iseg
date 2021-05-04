@@ -243,18 +243,14 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 {
 	bool verbose = false;
 
-	typedef typename ImagePointer::ObjectType ImageType;
-	typedef typename ImagePointer::ObjectType MaskImageType;
-	static const int ImageDimension = ImageType::ImageDimension;
+	using ImageType = typename ImagePointer::ObjectType;
+	using MaskImageType = typename ImagePointer::ObjectType;
 
-	typedef itk::N4BiasFieldCorrectionImageFilter<ImageType, MaskImageType,
-			ImageType>
-			CorrecterType;
-	typename CorrecterType::Pointer correcter = CorrecterType::New();
-	m_CurrentFilter = correcter;
+	using CorrectorType = itk::N4BiasFieldCorrectionImageFilter<ImageType, MaskImageType, ImageType>;
+	auto corrector = CorrectorType::New();
+	m_CurrentFilter = corrector;
 
-	QProgressDialog progress("Performing bias correction...", "Cancel", 0, 101,
-			this);
+	QProgressDialog progress("Performing bias correction...", "Cancel", 0, 101, this);
 	progress.setWindowModality(Qt::WindowModal);
 	progress.setModal(true);
 	progress.show();
@@ -265,7 +261,7 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 	/**
 	* handle the mask image
 	*/
-	bool isMaskImageSpecified = (maskImage.IsNotNull());
+	bool is_mask_specified = (maskImage.IsNotNull());
 	if (!maskImage)
 	{
 		if (verbose)
@@ -278,61 +274,59 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 		maskImage->CopyInformation(inputImage);
 		maskImage->SetRegions(inputImage->GetRequestedRegion());
 		maskImage->Allocate(false);
-		maskImage->FillBuffer(
-				itk::NumericTraits<typename MaskImageType::PixelType>::OneValue());
+		maskImage->FillBuffer(itk::NumericTraits<typename MaskImageType::PixelType>::OneValue());
 	}
 
 	/**
 	* convergence options
 	*/
-	typename CorrecterType::VariableSizeArrayType maximumNumberOfIterations(
-			numIters.size());
+	typename CorrectorType::VariableSizeArrayType max_number_iterations(numIters.size());
 	for (unsigned int d = 0; d < numIters.size(); d++)
 	{
-		maximumNumberOfIterations[d] = numIters[d];
+		max_number_iterations[d] = numIters[d];
 	}
-	correcter->SetMaximumNumberOfIterations(maximumNumberOfIterations);
+	corrector->SetMaximumNumberOfIterations(max_number_iterations);
 
-	typename CorrecterType::ArrayType numberOfFittingLevels;
-	numberOfFittingLevels.Fill(numIters.size());
-	correcter->SetNumberOfFittingLevels(numberOfFittingLevels);
-	correcter->SetConvergenceThreshold(0.0);
+	typename CorrectorType::ArrayType number_fitting_levels;
+	number_fitting_levels.Fill(numIters.size());
+	corrector->SetNumberOfFittingLevels(number_fitting_levels);
+	corrector->SetConvergenceThreshold(0.0);
 
-	typedef itk::ShrinkImageFilter<ImageType, ImageType> ShrinkerType;
-	typename ShrinkerType::Pointer shrinker = ShrinkerType::New();
+	using ShrinkerType = itk::ShrinkImageFilter<ImageType, ImageType>;
+	auto shrinker = ShrinkerType::New();
 	shrinker->SetInput(inputImage);
 	shrinker->SetShrinkFactors(shrinkFactor);
 
-	typedef itk::ShrinkImageFilter<MaskImageType, MaskImageType> MaskShrinkerType;
-	typename MaskShrinkerType::Pointer maskshrinker = MaskShrinkerType::New();
-	maskshrinker->SetInput(maskImage);
-	maskshrinker->SetShrinkFactors(shrinkFactor);
+	using MaskShrinkerType = itk::ShrinkImageFilter<MaskImageType, MaskImageType>;
+	auto mask_shrinker = MaskShrinkerType::New();
+	mask_shrinker->SetInput(maskImage);
+	mask_shrinker->SetShrinkFactors(shrinkFactor);
 
 	shrinker->Update();
-	maskshrinker->Update();
+	mask_shrinker->Update();
 
 	itk::TimeProbe timer;
 	timer.Start();
 
-	correcter->SetInput(shrinker->GetOutput());
-	correcter->SetMaskImage(maskshrinker->GetOutput());
+	corrector->SetInput(shrinker->GetOutput());
+	corrector->SetMaskImage(mask_shrinker->GetOutput());
 
-	typedef CommandIterationUpdate<CorrecterType> CommandType;
-	typename CommandType::Pointer observer = CommandType::New();
-	correcter->AddObserver(itk::IterationEvent(), observer);
+	using CommandType = CommandIterationUpdate<CorrectorType>;
+	auto observer = CommandType::New();
+	corrector->AddObserver(itk::IterationEvent(), observer);
 	observer->SetProgressObject(&progress, numIters);
 
 	/**
 	* histogram sharpening options
 	*/
-	//correcter->SetBiasFieldFullWidthAtHalfMaximum(0.15);
-	//correcter->SetWienerFilterNoise(0.01);
-	//correcter->SetNumberOfHistogramBins(200);
+	//corrector->SetBiasFieldFullWidthAtHalfMaximum(0.15);
+	//corrector->SetWienerFilterNoise(0.01);
+	//corrector->SetNumberOfHistogramBins(200);
 
 	try
 	{
-		// correcter->DebugOn();
-		correcter->Update();
+		// corrector->DebugOn();
+		corrector->Update();
 	}
 	catch (itk::ExceptionObject& e)
 	{
@@ -348,7 +342,7 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 
 	if (verbose)
 	{
-		correcter->Print(std::cout, 3);
+		corrector->Print(std::cout, 3);
 	}
 
 	timer.Stop();
@@ -364,47 +358,42 @@ ImagePointer BiasCorrectionWidget::DoBiasCorrection(
 	* the original input image by the bias field to get the final
 	* corrected image.
 	*/
-	typedef itk::BSplineControlPointImageFilter<
-			typename CorrecterType::BiasFieldControlPointLatticeType,
-			typename CorrecterType::ScalarImageType>
-			BSplinerType;
+	using BSplinerType = itk::BSplineControlPointImageFilter<
+			typename CorrectorType::BiasFieldControlPointLatticeType,
+			typename CorrectorType::ScalarImageType>;
 	typename BSplinerType::Pointer bspliner = BSplinerType::New();
-	bspliner->SetInput(correcter->GetLogBiasFieldControlPointLattice());
-	bspliner->SetSplineOrder(correcter->GetSplineOrder());
+	bspliner->SetInput(corrector->GetLogBiasFieldControlPointLattice());
+	bspliner->SetSplineOrder(corrector->GetSplineOrder());
 	bspliner->SetSize(inputImage->GetLargestPossibleRegion().GetSize());
 	bspliner->SetOrigin(inputImage->GetOrigin());
 	bspliner->SetDirection(inputImage->GetDirection());
 	bspliner->SetSpacing(inputImage->GetSpacing());
 	bspliner->Update();
 
-	typename ImageType::Pointer logField = AllocImage<ImageType>(inputImage);
+	auto log_field = AllocImage<ImageType>(inputImage);
 
-	itk::ImageRegionIterator<typename CorrecterType::ScalarImageType> ItB(
-			bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
-	itk::ImageRegionIterator<ImageType> ItF(logField,
-			logField->GetLargestPossibleRegion());
+	itk::ImageRegionIterator<typename CorrectorType::ScalarImageType> ItB(bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
+	itk::ImageRegionIterator<ImageType> ItF(log_field,log_field->GetLargestPossibleRegion());
 	for (ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF)
 	{
 		ItF.Set(ItB.Get()[0]);
 	}
 
-	typedef itk::ExpImageFilter<ImageType, ImageType> ExpFilterType;
-	typename ExpFilterType::Pointer expFilter = ExpFilterType::New();
-	expFilter->SetInput(logField);
-	expFilter->Update();
+	using ExpFilterType = itk::ExpImageFilter<ImageType, ImageType>;
+	auto exp_filter = ExpFilterType::New();
+	exp_filter->SetInput(log_field);
+	exp_filter->Update();
 
-	typedef itk::DivideImageFilter<ImageType, ImageType, ImageType> DividerType;
-	typename DividerType::Pointer divider = DividerType::New();
+	using DividerType = itk::DivideImageFilter<ImageType, ImageType, ImageType>;
+	auto divider = DividerType::New();
 	divider->SetInput1(inputImage);
-	divider->SetInput2(expFilter->GetOutput());
+	divider->SetInput2(exp_filter->GetOutput());
 	divider->Update();
 
-	if (isMaskImageSpecified)
+	if (is_mask_specified)
 	{
-		itk::ImageRegionIteratorWithIndex<ImageType> ItD(
-				divider->GetOutput(), divider->GetOutput()->GetLargestPossibleRegion());
-		itk::ImageRegionIterator<ImageType> ItI(
-				inputImage, inputImage->GetLargestPossibleRegion());
+		itk::ImageRegionIteratorWithIndex<ImageType> ItD(divider->GetOutput(), divider->GetOutput()->GetLargestPossibleRegion());
+		itk::ImageRegionIterator<ImageType> ItI(inputImage, inputImage->GetLargestPossibleRegion());
 		for (ItD.GoToBegin(), ItI.GoToBegin(); !ItD.IsAtEnd(); ++ItD, ++ItI)
 		{
 			if (maskImage->GetPixel(ItD.GetIndex()) ==

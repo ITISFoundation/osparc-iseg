@@ -501,7 +501,6 @@ public:
 	~ImageForestingTransformDistance() { free(lbel); }
 
 private:
-	float* Ebits;
 	coef* lbel;
 	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{

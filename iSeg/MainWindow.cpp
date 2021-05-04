@@ -23,6 +23,7 @@
 #include "InterpolationWidget.h"
 #include "LivewireWidget.h"
 #include "LoaderWidgets.h"
+#include "LogTable.h"
 #include "MainWindow.h"
 #include "MeasurementWidget.h"
 #include "MorphologyWidget.h"
@@ -68,6 +69,8 @@
 #include <QShortcut>
 #include <QSignalMapper>
 #include <QStackedWidget>
+#include <QStatusBar>
+#include <QToolButton>
 #include <qapplication.h>
 #include <qdockwidget.h>
 #include <qmenubar.h>
@@ -307,6 +310,17 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 		: QMainWindow(parent, name, wFlags)
 {
 	setObjectName("MainWindow");
+	statusBar()->showMessage("Ready");
+
+	auto log_button = new QToolButton;
+	//log_button->setStyleSheet("QToolButton { border: none; background-color: rgb(70,70,70); }");
+	log_button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	log_button->setArrowType(Qt::ArrowType::RightArrow);
+	log_button->setText("Log");
+	log_button->setCheckable(true);
+	log_button->setChecked(false);
+	log_button->setMinimumWidth(100);
+	statusBar()->addPermanentWidget(log_button);
 
 	undoStarted = false;
 	setContentsMargins(9, 4, 9, 4);
@@ -452,6 +466,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	work_show->setIsBmp(false);
 
 	reset_brightnesscontrast();
+
+	logWindow = new QLogTable(2, this);
 
 	zoom_widget = new ZoomWidget(1.0, m_picpath, this);
 
@@ -691,7 +707,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	setCentralWidget(hbox2w);
 
 	QWidget* vbox2w = new QWidget;
-	QWidget* rightvboxw = new QWidget;
 	QWidget* hbox1w = new QWidget;
 	QWidget* hboxslicew = new QWidget;
 	QWidget* hboxslicenrw = new QWidget;
@@ -911,6 +926,12 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	overlaydock->setWidget(overlay_widget);
 	addDockWidget(Qt::BottomDockWidgetArea, overlaydock);
+
+	auto log_window_dock = new QDockWidget("Log", this);
+	log_window_dock->setObjectName("Log Messages");
+	log_window_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+	log_window_dock->setWidget(logWindow);
+	addDockWidget(Qt::BottomDockWidgetArea, log_window_dock);
 
 	QVBoxLayout* vbox2 = new QVBoxLayout;
 	vbox2->setSpacing(0);
@@ -1214,6 +1235,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring,
 	hidemenu->addAction(tabswdock->toggleViewAction());
 	hidemenu->addAction(methodTabdock->toggleViewAction());
 	hidemenu->addAction(notesdock->toggleViewAction());
+	hidemenu->addAction(log_window_dock->toggleViewAction());
 	hidemenu->addAction(bitstackdock->toggleViewAction());
 	hidemenu->addAction(zoomdock->toggleViewAction());
 	hidemenu->addAction(tissuewdock->toggleViewAction());
@@ -3973,7 +3995,7 @@ void MainWindow::execute_loadtissues()
 		msgBox.setText("Do you want to append the new tissues or to replace the old tissues?");
 		QPushButton* appendButton = msgBox.addButton(tr("Append"), QMessageBox::AcceptRole);
 		QPushButton* replaceButton = msgBox.addButton(tr("Replace"), QMessageBox::AcceptRole);
-		QPushButton* abortButton = msgBox.addButton(QMessageBox::Abort);
+		msgBox.addButton(QMessageBox::Abort);
 		msgBox.setIcon(QMessageBox::Question);
 		msgBox.exec();
 
@@ -5482,7 +5504,7 @@ void MainWindow::modifTissue()
 	dataSelection.tissues = true;
 	emit begin_datachange(dataSelection, this, false);
 
-	tissues_size_t nr = tissueTreeWidget->get_current_type() - 1;
+	//tissues_size_t nr = tissueTreeWidget->get_current_type() - 1;
 
 	TissueAdder TA(true, tissueTreeWidget, this);
 	TA.exec();

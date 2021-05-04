@@ -40,6 +40,8 @@ class QScrollBar;
 class Q3ScrollView;
 class QAction;
 
+class QLogTable;
+
 namespace iseg {
 
 class SlicesHandler;
@@ -200,6 +202,7 @@ private:
 	TissueTreeWidget* tissueTreeWidget; // Widget visualizing the tissue hierarchy
 	QLineEdit* tissueFilter;
 	TissueHierarchyWidget* tissueHierarchyWidget; // Widget for selecting the tissue hierarchy
+	QLogTable* logWindow = nullptr;
 	QCheckBox* cb_tissuelock;
 	QPushButton* lockTissues;
 	QPushButton* addTissue;

@@ -253,7 +253,6 @@ void MultiDatasetWidget::AddDatasetPressed()
 		case SupportedMultiDatasetTypes::supportedTypes::nifti:
 		case SupportedMultiDatasetTypes::supportedTypes::vtk:
 		{
-			bool res = true;
 			auto loadfilename = RecentPlaces::getOpenFileName(this, "Open File", "",
 				"Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)");
 			if (!loadfilename.isEmpty())
@@ -438,7 +437,6 @@ void MultiDatasetWidget::SwitchDataset()
 				dataSelection.tissues = false;
 				emit begin_datachange(dataSelection, this, false);
 
-				float size = radioButton.m_Width * radioButton.m_Height;
 				const int nSlices = radioButton.m_BmpSlices.size();
 				assert(radioButton.m_BmpSlices.size() == m_Handler3D->num_slices());
 

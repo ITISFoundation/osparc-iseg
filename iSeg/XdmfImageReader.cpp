@@ -481,8 +481,6 @@ int XdmfImageReader::ParseXML()
 // BL TODO read rotation & origin from HDF5 part, if available
 int XdmfImageReader::Read()
 {
-	const size_t N = (size_t)this->Width * (size_t)this->Height *
-									 (size_t)this->NumberOfSlices;
 	ISEG_INFO("Reading " << this->FileName << ": " << Width << " x " << Height << " x " << NumberOfSlices);
 
 	QString qFileName(this->FileName);
@@ -621,7 +619,6 @@ int HDFImageReader::ParseHDF()
 
 int HDFImageReader::Read()
 {
-	const size_t N = (size_t)this->Width * (size_t)this->Height * (size_t)this->NumberOfSlices;
 	ISEG_INFO("Reading " << this->FileName << ": " << Width << " x " << Height << " x " << NumberOfSlices);
 
 	//	vector<int> dims;

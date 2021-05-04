@@ -149,10 +149,9 @@ void BoneSegmentationWidget::do_work()
 
 	QObject::connect(&progress, SIGNAL(canceled()), this, SLOT(cancel()));
 
-	typedef itk::Image<float, 3> TInput;
-	typedef itk::Image<unsigned int, 3> TOutput;
-	typedef itk::Image<int, 3> TIntImage;
-	typedef itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput> GraphCutFilterType;
+	using TInput = itk::Image<float, 3>;
+	using TOutput = itk::Image<unsigned int, 3>;
+	using GraphCutFilterType = itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput>;
 
 	// get input image
 	iseg::SlicesHandlerITKInterface itk_wrapper(m_Handler3D);
@@ -180,7 +179,7 @@ void BoneSegmentationWidget::do_work()
 		m_CurrentFilter = graphCutFilter;
 
 		auto observer = CommandProgressUpdate<GraphCutFilterType>::New();
-		auto observer_id = graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
+		graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
 		observer->SetProgressObject(&progress);
 
 		try

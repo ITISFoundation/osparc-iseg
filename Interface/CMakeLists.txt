@@ -12,13 +12,20 @@ USE_ITK()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
+	CollapsibleWidget.cpp
 	ProgressDialog.cpp
+	PropertyWidget.cpp
 	Plugin.cpp
 	RecentPlaces.cpp
 	WidgetInterface.cpp
 )
 
-QT4_WRAP_CPP(MOCSrcs ProgressDialog.h WidgetInterface.h)
+QT4_WRAP_CPP(MOCSrcs 
+	CollapsibleWidget.h
+	ProgressDialog.h
+	PropertyWidget.h
+	WidgetInterface.h
+)
 ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${HEADERS} ${MOCSrcs})
 TARGET_LINK_LIBRARIES(iSegInterface PRIVATE
 	iSegData

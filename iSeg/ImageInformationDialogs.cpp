@@ -238,10 +238,11 @@ void DisplacementDialog::dispz_changed()
 
 void DisplacementDialog::set_pressed()
 {
+	// this code just validates the values
 	bool bx, by, bz;
-	float dx1 = le_dispx->text().toFloat(&bx);
-	float dy1 = le_dispy->text().toFloat(&by);
-	float dz1 = le_dispz->text().toFloat(&bz);
+	le_dispx->text().toFloat(&bx);
+	le_dispy->text().toFloat(&by);
+	le_dispz->text().toFloat(&bz);
 	if (bx && by && bz)
 	{
 		accept();

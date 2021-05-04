@@ -50,6 +50,7 @@ SET(ViewerSrcs
 	Levelset.cpp
 	LivewireWidget.cpp
 	LoaderWidgets.cpp
+	LogTable.cpp
 	main.cpp
 	MainWindow.cpp
 	MeasurementWidget.cpp
@@ -105,6 +106,7 @@ SET(MyMocHeaders
 	InterpolationWidget.h
 	LivewireWidget.h
 	LoaderWidgets.h
+	LogTable.h
 	MainWindow.h
 	MeasurementWidget.h
 	MorphologyWidget.h

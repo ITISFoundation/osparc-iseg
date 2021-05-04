@@ -17,10 +17,13 @@
 #include "bmp_read_1.h"
 
 #include "Data/Logger.h"
+#include "Data/Property.h"
 
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
+
+#include "Interface/PropertyWidget.h"
 
 #include <QPlastiqueStyle>
 #include <QSplashScreen>
@@ -111,12 +114,7 @@ int main(int argc, char** argv)
 	namespace fs = boost::filesystem;
 
 	po::options_description desc("Allowed options");
-	desc.add_options()
-		("help", "produce help message")
-		("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")
-		("s4l", po::value<std::string>(), "start iSEG in S4L link mode")
-		("debug", po::bool_switch()->default_value(false), "show debug log messages")
-		("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
+	desc.add_options()("help", "produce help message")("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")("s4l", po::value<std::string>(), "start iSEG in S4L link mode")("debug", po::bool_switch()->default_value(false), "show debug log messages")("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(custom_parser).run(), vm);
 	po::notify(vm);
@@ -258,6 +256,29 @@ int main(int argc, char** argv)
 	{
 	}
 #endif
+
+	auto group = PropertyGroup::Create();
+	group->SetDescription("Settings");
+	auto pi = group->Add("Iterations", PropertyInt::Create(5));
+	pi->SetDescription("Number of iterations");
+	auto pf = group->Add("Relaxation", PropertyReal::Create(0.5));
+	auto child_group = group->Add("Advanced", PropertyGroup::Create());
+	child_group->SetDescription("Advanced Settings");
+	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
+	auto pb = child_group->Add("Use Foo", PropertyBool::Create(true));
+	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
+	auto pbtn = child_group->Add("Update", PropertyButton::Create([&group]() {
+		std::cerr << "PropertyButton triggered\n";
+		group->DumpTree();
+	}));
+
+	auto dialog = new QDialog(mainWindow);
+	auto layout = new QVBoxLayout;
+	layout->addWidget(new PropertyWidget(group));
+	dialog->setLayout(layout);
+	dialog->raise();
+	dialog->exec();
+	return 0;
 
 	mainWindow->showMaximized();
 	mainWindow->show();

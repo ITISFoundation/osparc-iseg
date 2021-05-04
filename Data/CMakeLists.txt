@@ -20,6 +20,7 @@ SET(SOURCES
 	ImageToITK.cpp
 	ItkProgressObserver.cpp
 	LogApi.cpp
+	Property.cpp
 	SlicesHandlerITKInterface.cpp
 	Transform.cpp
 )

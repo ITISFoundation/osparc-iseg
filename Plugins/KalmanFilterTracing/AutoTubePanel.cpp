@@ -590,8 +590,7 @@ void AutoTubePanel::export_lines()
 	// shallow copy - used to transform index to world coordinates
 	auto image_3d = itk_handler.GetSource(false);
 
-	typedef float PixelType;
-	using tissue_type = SlicesHandlerInterface::tissue_type;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
 
@@ -611,7 +610,6 @@ void AutoTubePanel::export_lines()
 			continue;
 		}
 
-		tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
 		for (int i(0); i < _handler3D->num_slices(); i++)
 		{
 			auto tissue = itk_handler.GetTissuesSlice(i);

@@ -144,7 +144,7 @@ bool RTDoseReader::ReadPixelData(const char* filename, float** bits)
 
 	const unsigned int* dims = image.GetDimensions();
 	const double* spacing = image.GetSpacing();
-	const double* origin = image.GetOrigin();
+	//const double* origin = image.GetOrigin();
 
 	for (unsigned int i = 0; i < dims[2]; ++i)
 	{

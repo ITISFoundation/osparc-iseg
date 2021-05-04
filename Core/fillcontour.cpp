@@ -373,7 +373,6 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 		pixel_extents[0] * (unsigned long)(pixel_extents[1] - 1);
 	for (unsigned short h = 0; h < pixel_extents[1]; h++)
 	{
-		bool initialstatus = false;
 		bool status = false;
 		std::list<transition>::iterator it = inouts.at(h).begin();
 		while (it != inouts.at(h).end() && it->pos < 0)

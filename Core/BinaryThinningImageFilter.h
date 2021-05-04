@@ -32,8 +32,6 @@ template<typename TInputImage, typename TOutputImage>
 typename TOutputImage::Pointer BinaryThinning(TInputImage* input, typename TInputImage::PixelType lower = 1)
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInputImage::ImageDimension);
-	using value_type = typename TInputImage::PixelType;
-
 	using input_type = TInputImage;
 	using output_type = TOutputImage;
 	using mask_type = itk::Image<unsigned char, ImageDimension>;
