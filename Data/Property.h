@@ -62,8 +62,8 @@ public:
 	void DumpTree() const;
 
 protected:
-	Property() {}
-	virtual ~Property() {}
+	Property() = default;
+	virtual ~Property() = default;
 
 	Property_ptr Parent() { return m_Parent.lock(); }
 	Property_cptr Parent() const { return m_Parent.lock(); }

@@ -172,7 +172,7 @@ void LivewireWidget::on_mouse_clicked(Point p)
 				dynamicold.clear();
 			}
 		}
-		establishedlengths.push_back(established.size());
+		establishedlengths.push_back(static_cast<int>(established.size()));
 		clicks.push_back(p);
 
 		emit vp1dyn_changed(&established, &dynamic);
@@ -458,8 +458,6 @@ void LivewireWidget::init()
 	init1();
 
 	hideparams_changed();
-
-	return;
 }
 
 void LivewireWidget::newloaded()

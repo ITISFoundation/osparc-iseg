@@ -31,7 +31,7 @@ public:
 	using Property_ptr = std::shared_ptr<Property>;
 	using Property_wptr = std::weak_ptr<Property>;
 
-	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = 0);
+	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 	void setProperty(Property_ptr p);
 	Property_ptr property() { return _property; }
