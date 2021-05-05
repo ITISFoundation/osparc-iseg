@@ -28,7 +28,8 @@
 #include <boost/filesystem.hpp>
 
 // Boost chrono used for timing measurements
-#include <boost/chrono.hpp>
+//#include <boost/chrono.hpp>
+//#include <chrono>
 
 namespace fs = boost::filesystem;
 namespace algo = boost::algorithm;

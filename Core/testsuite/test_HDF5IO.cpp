@@ -11,9 +11,9 @@
 
 #include "../HDF5IO.h"
 
-#include <boost/chrono.hpp>
 #include <boost/filesystem.hpp>
 
+#include <chrono>
 #include <string>
 
 namespace fs = boost::filesystem;
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			auto fid = io.create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
-			auto before = boost::chrono::high_resolution_clock::now();
+			auto before = std::chrono::high_resolution_clock::now();
 			BOOST_CHECK(io.writeData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			{
 				BOOST_CHECK(io.readData(fid, dname, offset, slice_size, data.data()));
 			}
-			auto const after = boost::chrono::high_resolution_clock::now();
-			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());
+			auto const after = std::chrono::high_resolution_clock::now();
+			auto ms = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(after - before).count());
 
 			BOOST_CHECK(io.close(fid));
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			auto fid = io.create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
-			auto before = boost::chrono::high_resolution_clock::now();
+			auto before = std::chrono::high_resolution_clock::now();
 			BOOST_CHECK(io.writeData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
@@ -148,8 +148,8 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			{
 				BOOST_CHECK(io.readData(fid, dname, offset, slice_size, data.data()));
 			}
-			auto const after = boost::chrono::high_resolution_clock::now();
-			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());
+			auto const after = std::chrono::high_resolution_clock::now();
+			auto ms = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(after - before).count());
 
 			BOOST_CHECK(io.close(fid));
 

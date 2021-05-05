@@ -44,7 +44,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <Eigen/Dense>
@@ -1410,7 +1409,7 @@ void AutoTubePanel::update_kalman_filters()
 			{
 				QMessageBox mBox;
 				mBox.setWindowTitle("Error");
-				mBox.setText(QString::fromStdString("No label map for slice " + boost::lexical_cast<std::string>(i) + ". Tool expects you to start at slice 0."));
+				mBox.setText(QString::fromStdString("No label map for slice " + std::to_string(i) + ". Tool expects you to start at slice 0."));
 				mBox.exec();
 				return;
 			}
@@ -2212,15 +2211,10 @@ void AutoTubePanel::item_double_clicked(QListWidgetItem* item)
 
 bool AutoTubePanel::is_label(const std::string& s)
 {
-	try
-	{
-		boost::lexical_cast<int>(s);
-		return true;
-	}
-	catch (boost::bad_lexical_cast&)
-	{
-	}
-	return false;
+	auto str = QString::fromStdString(s);
+	bool b = false;
+	str.toInt(&b);
+	return b;
 }
 
 void AutoTubePanel::item_edited(QListWidgetItem* Item)

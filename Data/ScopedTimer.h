@@ -11,8 +11,7 @@
 
 #include "Logger.h"
 
-#include <boost/chrono.hpp>
-
+#include <chrono>
 #include <string>
 
 namespace iseg {
@@ -24,7 +23,7 @@ public:
 	ScopedTimerT(const std::string& scope_name, const std::string& unit) 
 		: _scope_name(scope_name), _unit(unit)
 	{
-		_before = boost::chrono::high_resolution_clock::now();
+		_before = std::chrono::high_resolution_clock::now();
 	}
 	~ScopedTimerT()
 	{
@@ -33,8 +32,8 @@ public:
 
 	void new_scope(const std::string& scope_name)
 	{
-		auto const after = boost::chrono::high_resolution_clock::now();
-		double count = static_cast<double>( boost::chrono::duration_cast<TUnit>(after - _before).count() );
+		auto const after = std::chrono::high_resolution_clock::now();
+		double count = static_cast<double>(std::chrono::duration_cast<TUnit>(after - _before).count());
 		Log::note("TIMER", "%g %s in %s", count, _unit.c_str(), _scope_name.c_str());
 
 		_before = after;
@@ -44,21 +43,21 @@ public:
 private:
 	std::string _scope_name;
 	std::string _unit;
-	boost::chrono::high_resolution_clock::time_point _before;
+	std::chrono::high_resolution_clock::time_point _before;
 };
 
-class ScopedTimer : public ScopedTimerT<boost::chrono::seconds>
+class ScopedTimer : public ScopedTimerT<std::chrono::seconds>
 {
 public:
-	ScopedTimer(const std::string& scope_name) 
-		: ScopedTimerT<boost::chrono::seconds>(scope_name, "s") {}
+	ScopedTimer(const std::string& scope_name)
+			: ScopedTimerT<std::chrono::seconds>(scope_name, "s") {}
 };
 
-class ScopedTimerMilli : public ScopedTimerT<boost::chrono::milliseconds>
+class ScopedTimerMilli : public ScopedTimerT<std::chrono::milliseconds>
 {
 public:
-	ScopedTimerMilli(const std::string& scope_name) 
-		: ScopedTimerT<boost::chrono::milliseconds>(scope_name, "ms") {}
+	ScopedTimerMilli(const std::string& scope_name)
+			: ScopedTimerT<std::chrono::milliseconds>(scope_name, "ms") {}
 };
 
 }
