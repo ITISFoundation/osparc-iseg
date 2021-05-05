@@ -49,6 +49,7 @@
 #include <Eigen/Dense>
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 
 using boost::adaptors::transformed;
@@ -1562,7 +1563,7 @@ std::vector<double> AutoTubePanel::softmax(std::vector<double> distances, std::v
 		if (probabilities.size() > 1)
 			probability = probability / sum;
 
-		if (isnan(probability))
+		if (std::isnan(probability))
 			probability = 0;
 	}
 	return probabilities;
