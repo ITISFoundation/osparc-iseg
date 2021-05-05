@@ -67,9 +67,9 @@ class BinaryThinningImageFilter<TInputImage, TOutputImage, 3> : public itk::Bina
 {
 };
 
-typedef unsigned long LabelType;
-typedef itk::ShapeLabelObject<LabelType, 2> LabelObjectType;
-typedef itk::LabelMap<LabelObjectType> LabelMapType;
+using LabelType = unsigned long;
+using LabelObjectType = itk::ShapeLabelObject<LabelType, 2>;
+using LabelMapType = itk::LabelMap<LabelObjectType>;
 
 AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
 		const char* name, Qt::WindowFlags wFlags)
@@ -339,7 +339,7 @@ void AutoTubePanel::predict_k_filter()
 	}
 
 	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 
 	for (auto filter : k_filters)
@@ -429,7 +429,7 @@ void AutoTubePanel::add_to_tissues()
 	mBox.setDefaultButton(QMessageBox::No);
 	if (mBox.exec() == QMessageBox::Yes)
 	{
-		if (k_filters.size() > 0 && max_active_slice_reached == _handler3D->num_slices() - 1)
+		if (!k_filters.empty() && max_active_slice_reached == _handler3D->num_slices() - 1)
 		{
 			// get Kalman filter labels
 			std::vector<std::string> labels;
@@ -442,7 +442,7 @@ void AutoTubePanel::add_to_tissues()
 			// shallow copy - used to transform index to world coordinates
 			auto image_3d = itk_handler.GetSource(false);
 
-			typedef float PixelType;
+			using PixelType = float;
 			using tissue_type = SlicesHandlerInterface::tissue_type;
 			using ImageType = itk::Image<PixelType, 2>;
 			using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
@@ -668,7 +668,7 @@ void AutoTubePanel::remove_non_selected()
 	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
 
 	// making sure that they are selected objects
-	if (selected.size() > 0)
+	if (!selected.empty())
 	{
 		std::vector<int> rows_to_delete;
 
@@ -727,10 +727,10 @@ void AutoTubePanel::remove_non_selected()
 void AutoTubePanel::save_label_map(FILE* fp, LabelMapType::Pointer map)
 {
 
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(map);
 
@@ -810,7 +810,7 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 	int value;
 	itk::Index<2> index{{0, 0}};
 
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 	ImageType::SizeType size{{384, 384}};
 
@@ -825,7 +825,7 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 	map->Allocate(true);
 	map->Update();
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(map);
 	label2image->Update();
@@ -1392,7 +1392,7 @@ void AutoTubePanel::remove_k_filter()
 void AutoTubePanel::update_kalman_filters()
 {
 
-	if (k_filters.size() > 0 && label_maps[_handler3D->active_slice()])
+	if (!k_filters.empty() && label_maps[_handler3D->active_slice()])
 	{
 		// get cached data
 		_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
@@ -1483,7 +1483,7 @@ LabelMapType::Pointer AutoTubePanel::calculate_label_map_params(LabelMapType::Po
 std::map<LabelType, std::vector<double>> AutoTubePanel::get_label_map_params(LabelMapType::Pointer labelMap)
 {
 	std::map<LabelType, std::vector<double>> label_to_params;
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
 
@@ -1491,7 +1491,7 @@ std::map<LabelType, std::vector<double>> AutoTubePanel::get_label_map_params(Lab
 	std::map<LabelType, double> label_2_y;
 	std::map<LabelType, double> label_2_nb_pixels;
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(labelMap);
 	label2image->Update();
@@ -1655,7 +1655,7 @@ void AutoTubePanel::remove_object()
 
 char AutoTubePanel::get_random_char()
 {
-	unsigned seed = time(0);
+	unsigned seed = time(nullptr);
 	srand(seed);
 	return char(rand() % 26 + 'a');
 }
@@ -1677,7 +1677,7 @@ void AutoTubePanel::merge_selected_items()
 	QList<QListWidgetItem*> items = object_list->selectedItems();
 	if (items.size() > 1)
 	{
-		typedef itk::Image<unsigned char, 2> mask_type;
+		using mask_type = itk::Image<unsigned char, 2>;
 
 		_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
 
@@ -1787,7 +1787,7 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
 	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
 	if (label_maps[_handler3D->active_slice()])
 	{
-		typedef float PixelType;
+		using PixelType = float;
 		using ImageType = itk::Image<PixelType, 2>;
 		if (!label_maps[_handler3D->active_slice()])
 		{
@@ -1831,7 +1831,7 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
 		else if (_add_pixel->isChecked() && label == 0)
 		{
 
-			typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+			using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 			auto label2image = Label2ImageType::New();
 			label2image->SetInput(labelMap);
 			label2image->Update();
@@ -1850,7 +1850,7 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
 
 					image->Update();
 
-					typedef itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType> Image2LabelType;
+					using Image2LabelType = itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType>;
 					auto image2label = Image2LabelType::New();
 					image2label->SetInput(image);
 					image2label->Update();
@@ -1891,7 +1891,7 @@ bool AutoTubePanel::label_in_list(const std::string label)
 	bool in_list(false);
 	for (unsigned int i(0); i < objects.size(); i++)
 	{
-		if (objects[i].size() > 0)
+		if (!(objects[i]).empty())
 		{
 			for (auto o_label : objects[i])
 			{
@@ -1925,7 +1925,7 @@ void AutoTubePanel::extrapolate_results()
 	if (limit_slice <= _handler3D->active_slice() || limit_slice >= _handler3D->num_slices())
 		limit_slice = _handler3D->num_slices();
 
-	if (k_filters.size() > 0)
+	if (!k_filters.empty())
 	{
 
 		for (unsigned int index(_handler3D->active_slice()); index < limit_slice - 1; index++)
@@ -2341,7 +2341,7 @@ void AutoTubePanel::refresh_object_list()
 {
 	object_list->clear();
 	std::map<LabelType, std::string> l_to_t;
-	if (!objects.empty() && objects[_handler3D->active_slice()].size() > 0)
+	if (!objects.empty() && !(objects[_handler3D->active_slice()]).empty())
 	{
 		for (unsigned int i(0); i < objects[_handler3D->active_slice()].size(); i++)
 		{
@@ -2357,7 +2357,7 @@ void AutoTubePanel::refresh_probability_list()
 	object_probability_list->clear();
 	if (_handler3D->active_slice() != 0)
 	{
-		if (!_probabilities.empty() && _probabilities[_handler3D->active_slice()].size() > 0)
+		if (!_probabilities.empty() && !(_probabilities[_handler3D->active_slice()]).empty())
 		{
 			for (unsigned int i(0); i < _probabilities[_handler3D->active_slice()].size(); i++)
 			{
@@ -2470,13 +2470,13 @@ typename TImage::Pointer AutoTubePanel::compute_feature_image(TInput* source) co
 
 void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vector<itk::Index<2>>* pixels)
 {
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 
 	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
 	auto target = itk_handler.GetTargetSlice();
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(labelMap);
 	SAFE_UPDATE(label2image, return );
@@ -2628,7 +2628,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 		SAFE_UPDATE(rescale, return );
 		skeleton = rescale->GetOutput();
 	}
-	typedef itk::BinaryImageToLabelMapFilter<mask_type, LabelMapType> BinaryImageToLabelMapFilterType;
+	using BinaryImageToLabelMapFilterType = itk::BinaryImageToLabelMapFilter<mask_type, LabelMapType>;
 
 	typename mask_type::Pointer output;
 	if (skeleton)
@@ -2697,7 +2697,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 			auto merger = MergeLabelFilterType::New();
 			merger->SetInput(0, old_map);
 			merger->SetInput(1, map);
-			merger->SetMethod(MergeLabelFilterType::KEEP);
+			merger->SetMethod(MergeLabelFilterType::MethodChoice::KEEP);
 			SAFE_UPDATE(merger, return );
 
 			auto calculated_map = calculate_label_map_params(merger->GetOutput());

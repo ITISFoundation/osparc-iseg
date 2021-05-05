@@ -13,7 +13,7 @@ void Property::DumpTree(const Property* p, int indent) const
 {
 	const std::string name = p->Description().empty() ? p->Name() : p->Description();
 	ISEG_INFO(std::string(indent, ' ') << name << " : " << p->StringValue());
-	for (auto child : p->Properties())
+	for (const auto& child : p->Properties())
 	{
 		DumpTree(child.get(), indent + 2);
 	}

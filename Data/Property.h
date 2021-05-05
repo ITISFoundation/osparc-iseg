@@ -249,6 +249,9 @@ public:
 	{
 		return AddChild(name, v);
 	}
+
+protected:
+    PropertyGroup() = default;
 };
 
 } // namespace iseg
