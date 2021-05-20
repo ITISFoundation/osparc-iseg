@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,13 +19,19 @@
 
 namespace iseg {
 
-enum PatientSexEnum { Male, Female, Other, Unspecified };
+enum ePatientSexEnum { Male,
+	Female,
+	Other,
+	Unspecified };
 
-enum DoseUnitsEnum { Gray, Relative };
+enum eDoseUnitsEnum { Gray,
+	Relative };
 
-enum DoseTypeEnum { Physical, Effective, Error };
+enum eDoseTypeEnum { Physical,
+	Effective,
+	Error };
 
-enum DoseSummationTypeEnum {
+enum eDoseSummationTypeEnum {
 	Plan,
 	MultiPlan,
 	Fraction,
@@ -34,7 +40,7 @@ enum DoseSummationTypeEnum {
 	ControlPoint
 };
 
-enum CharacterSetEnum {
+enum eCharacterSetEnum {
 	Latin1
 	// TODO: Support other character sets
 };
@@ -53,24 +59,24 @@ public:
 	// --------------------------------------------------------------
 
 	// Patient's Name (Type = 2, VM = 1)
-	void SetPatientName(std::string value) { PatientName = value; };
-	std::string GetPatientName() { return PatientName; };
+	void SetPatientName(std::string value) { m_PatientName = value; };
+	std::string GetPatientName() { return m_PatientName; };
 	// Patient ID (Type = 2, VM = 1)
-	void SetPatientID(std::string value) { PatientID = value; };
-	std::string GetPatientID() { return PatientID; };
+	void SetPatientID(std::string value) { m_PatientId = value; };
+	std::string GetPatientID() { return m_PatientId; };
 	// Issuer of Patient ID Macro (Table 10-18)
 	// Patient's Birth Date (Type = 2, VM = 1)
 	void SetPatientBirthDate(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
-			PatientBirthDate[i] = values[i];
+			m_PatientBirthDate[i] = values[i];
 		}
 	};
-	unsigned short* GetPatientBirthDate() { return PatientBirthDate; };
+	unsigned short* GetPatientBirthDate() { return m_PatientBirthDate; };
 	// Patient's Sex (Type = 2, VM = 1)
-	void SetPatientSex(PatientSexEnum value) { PatientSex = value; };
-	PatientSexEnum GetPatientSex() { return PatientSex; };
+	void SetPatientSex(ePatientSexEnum value) { m_PatientSex = value; };
+	ePatientSexEnum GetPatientSex() { return m_PatientSex; };
 	// Referenced Patient Sequence (Type = 3, VM = ?)
 	// > SOP Instance Reference Macro (Table 10-11)
 	// Patient's Birth Time (Type = 3, VM = ?)
@@ -104,40 +110,40 @@ public:
 	// --------------------------------------------------------------
 
 	// Study Instance UID (Type = 1, VM = 1)
-	void SetStudyInstanceUID(std::string value) { StudyInstanceUID = value; };
-	std::string GetStudyInstanceUID() { return StudyInstanceUID; };
+	void SetStudyInstanceUID(std::string value) { m_StudyInstanceUid = value; };
+	std::string GetStudyInstanceUID() { return m_StudyInstanceUid; };
 	// Study Date (Type = 2, VM = 1)
 	void SetStudyDate(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
-			StudyDate[i] = values[i];
+			m_StudyDate[i] = values[i];
 		}
 	};
-	unsigned short* GetStudyDate() { return StudyDate; };
+	unsigned short* GetStudyDate() { return m_StudyDate; };
 	// Study Time (Type = 2, VM = 1)
 	void SetStudyTime(const unsigned short* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
-			StudyTime[i] = values[i];
+			m_StudyTime[i] = values[i];
 		}
 	};
-	unsigned short* GetStudyTime() { return StudyTime; };
+	unsigned short* GetStudyTime() { return m_StudyTime; };
 	// Referring Physician's Name (Type = 2, VM = 1)
 	void SetReferringPhysicianName(std::string value)
 	{
-		ReferringPhysicianName = value;
+		m_ReferringPhysicianName = value;
 	};
-	std::string GetReferringPhysicianName() { return ReferringPhysicianName; };
+	std::string GetReferringPhysicianName() { return m_ReferringPhysicianName; };
 	// Referring Physician Identification Sequence (Type = 3, VM = ?)
 	// > Person Identification Macro (Table 10-1)
 	// Study ID (Type = 1, VM = 1)
-	void SetStudyID(std::string value) { StudyID = value; };
-	std::string GetStudyID() { return StudyID; };
+	void SetStudyID(std::string value) { m_StudyId = value; };
+	std::string GetStudyID() { return m_StudyId; };
 	// Accession Number (Type = 2, VM = 1)
-	void SetAccessionNumber(std::string value) { AccessionNumber = value; };
-	std::string GetAccessionNumber() { return AccessionNumber; };
+	void SetAccessionNumber(std::string value) { m_AccessionNumber = value; };
+	std::string GetAccessionNumber() { return m_AccessionNumber; };
 	// Issuer of Accession Number Sequence (Type = 3, VM = ?)
 	// > HL7v2 Hierarchic Designator Macro (Table 10-17)
 	// Study Description (Type = 3, VM = ?)
@@ -162,28 +168,28 @@ public:
 	// Modality (Type = 1, VM = 1) // Fixed value "RTDOSE"
 	std::string GetModality() { return std::string("RTDOSE"); };
 	// Series Instance UID (Type = 1, VM = 1)
-	void SetSeriesInstanceUID(std::string value) { SeriesInstanceUID = value; };
-	std::string GetSeriesInstanceUID() { return SeriesInstanceUID; };
+	void SetSeriesInstanceUID(std::string value) { m_SeriesInstanceUid = value; };
+	std::string GetSeriesInstanceUID() { return m_SeriesInstanceUid; };
 	// Series Number (Type = 2, VM = 1)
-	void SetSeriesNumber(unsigned short value) { SeriesNumber = value; };
-	unsigned short GetSeriesNumber() { return SeriesNumber; };
+	void SetSeriesNumber(unsigned short value) { m_SeriesNumber = value; };
+	unsigned short GetSeriesNumber() const { return m_SeriesNumber; };
 	// Series Description (Type = 3, VM = ?)
 	// Series Description Code Sequence (Type = 3, VM = ?)
 	// > Code Sequence Macro (Table 8.8-1)
 	// Operators' Name (Type = 2, VM = 1-n)
 	void SetOperatorsName(unsigned short idx, std::string value)
 	{
-		OperatorsName[idx] = value;
+		m_OperatorsName[idx] = value;
 	};
 	void AddOperatorsName(std::string value)
 	{
-		OperatorsName.push_back(value);
+		m_OperatorsName.push_back(value);
 	};
 	std::string GetOperatorsName(unsigned short idx)
 	{
-		return OperatorsName[idx];
+		return m_OperatorsName[idx];
 	};
-	unsigned short GetOperatorsNameCount() { return OperatorsName.size(); };
+	unsigned short GetOperatorsNameCount() { return m_OperatorsName.size(); };
 	// Referenced Performed Procedure Step Sequence (Type = 3, VM = ?)
 	// > SOP Instance Reference Macro (Table 10-11)
 	// Request Attributes Sequence (Type = 3, VM = ?)
@@ -195,25 +201,25 @@ public:
 	// Frame of Reference UID (Type = 1, VM = 1)
 	void SetFrameOfReferenceUID(std::string value)
 	{
-		FrameOfReferenceUID = value;
+		m_FrameOfReferenceUid = value;
 	};
-	std::string GetFrameOfReferenceUID() { return FrameOfReferenceUID; };
+	std::string GetFrameOfReferenceUID() { return m_FrameOfReferenceUid; };
 	// Position Reference Indicator (Type = 2, VM = 1)
 	void SetPositionReferenceIndicator(std::string value)
 	{
-		PositionReferenceIndicator = value;
+		m_PositionReferenceIndicator = value;
 	};
 	std::string GetPositionReferenceIndicator()
 	{
-		return PositionReferenceIndicator;
+		return m_PositionReferenceIndicator;
 	};
 
 	// General Equipment Module (C7.5.1)
 	// --------------------------------------------------------------
 
 	// Manufacturer (Type = 2, VM = 1)
-	void SetManufacturer(std::string value) { Manufacturer = value; };
-	std::string GetManufacturer() { return Manufacturer; };
+	void SetManufacturer(std::string value) { m_Manufacturer = value; };
+	std::string GetManufacturer() { return m_Manufacturer; };
 	// Institution Name (Type = 3, VM = ?)
 	// Institution Address (Type = 3, VM = ?)
 	// Station Name (Type = 3, VM = ?)
@@ -231,8 +237,8 @@ public:
 	// --------------------------------------------------------------
 
 	// Instance Number (Type = 2, VM = 1)
-	void SetInstanceNumber(unsigned short value) { InstanceNumber = value; };
-	unsigned short GetInstanceNumber() { return InstanceNumber; };
+	void SetInstanceNumber(unsigned short value) { m_InstanceNumber = value; };
+	unsigned short GetInstanceNumber() const { return m_InstanceNumber; };
 	// Patient Orientation (Type = 2C, VM = ?)
 	// Content Date (Type = 2C, VM = ?)
 	// Content Time (Type = 2C, VM = ?)
@@ -278,31 +284,31 @@ public:
 	{
 		for (unsigned short i = 0; i < 2; ++i)
 		{
-			PixelSpacing[i] = values[i];
+			m_PixelSpacing[i] = values[i];
 		}
 	};
-	double* GetPixelSpacing() { return PixelSpacing; };
+	double* GetPixelSpacing() { return m_PixelSpacing; };
 	// Image Orientation (Patient) (Type = 1, VM = 6) // TODO
 	void SetImageOrientationPatient(const double* values)
 	{
 		for (unsigned short i = 0; i < 6; ++i)
 		{
-			ImageOrientationPatient[i] = values[i];
+			m_ImageOrientationPatient[i] = values[i];
 		}
 	};
-	double* GetImageOrientationPatient() { return ImageOrientationPatient; };
+	double* GetImageOrientationPatient() { return m_ImageOrientationPatient; };
 	// Image Position (Patient) (Type = 1, VM = 3) // TODO
 	void SetImagePositionPatient(const double* values)
 	{
 		for (unsigned short i = 0; i < 3; ++i)
 		{
-			ImagePositionPatient[i] = values[i];
+			m_ImagePositionPatient[i] = values[i];
 		}
 	};
-	double* GetImagePositionPatient() { return ImagePositionPatient; };
+	double* GetImagePositionPatient() { return m_ImagePositionPatient; };
 	// Slice Thickness (Type = 2, VM = 1)
-	void SetSliceThickness(double value) { SliceThickness = value; };
-	double GetSliceThickness() { return SliceThickness; };
+	void SetSliceThickness(double value) { m_SliceThickness = value; };
+	double GetSliceThickness() const { return m_SliceThickness; };
 	// Slice Location (Type = 3, VM = ?)
 
 	// Image Pixel Module (C7.6.3)
@@ -316,22 +322,22 @@ public:
 		return std::string("MONOCHROME2");
 	};
 	// Rows (Type = 1, VM = 1)
-	void SetRows(unsigned int value) { Rows = value; };
-	unsigned int GetRows() { return Rows; };
+	void SetRows(unsigned int value) { m_Rows = value; };
+	unsigned int GetRows() const { return m_Rows; };
 	// Columns (Type = 1, VM = 1)
-	void SetColumns(unsigned int value) { Columns = value; };
-	unsigned int GetColumns() { return Columns; };
+	void SetColumns(unsigned int value) { m_Columns = value; };
+	unsigned int GetColumns() const { return m_Columns; };
 	// Bits Allocated (Type = 1, VM = 1)
-	void SetBitsAllocated(unsigned short value) { BitsAllocated = value; };
-	unsigned short GetBitsAllocated() { return BitsAllocated; };
+	void SetBitsAllocated(unsigned short value) { m_BitsAllocated = value; };
+	unsigned short GetBitsAllocated() const { return m_BitsAllocated; };
 	// Bits Stored (Type = 1, VM = 1)
-	unsigned short GetBitsStored() { return BitsAllocated; };
+	unsigned short GetBitsStored() const { return m_BitsAllocated; };
 	// High Bit (Type = 1, VM = 1)
-	unsigned short GetHighBit() { return BitsAllocated - 1; };
+	unsigned short GetHighBit() const { return m_BitsAllocated - 1; };
 	// Pixel Representation (Type = 1, VM = 1)
 	unsigned short GetPixelRepresentation()
 	{
-		if (DoseType == Error)
+		if (m_DoseType == Error)
 		{
 			return 1;
 		}
@@ -341,8 +347,8 @@ public:
 		}
 	};
 	// Pixel Data (Type = 1C, VM = 1)
-	void SetPixelData(float* values) { PixelData = values; };
-	float* GetPixelData() { return PixelData; };
+	void SetPixelData(float* values) { m_PixelData = values; };
+	float* GetPixelData() { return m_PixelData; };
 	// Planar Configuration (Type = 1C, VM = 1)
 	// Pixel Aspect Ratio (Type = 1C, VM = 1)
 	// Smallest Image Pixel Value (Type = 3, VM = ?)
@@ -361,8 +367,8 @@ public:
 	// --------------------------------------------------------------
 
 	// Number Of Frames (Type = 1, VM = 1)
-	void SetNumberOfFrames(unsigned int value) { NumberOfFrames = value; };
-	unsigned int GetNumberOfFrames() { return NumberOfFrames; };
+	void SetNumberOfFrames(unsigned int value) { m_NumberOfFrames = value; };
+	unsigned int GetNumberOfFrames() const { return m_NumberOfFrames; };
 	// Frame Increment Pointer (Type = 1, VM = 1) // Fixed value Tag(3004,000c)
 	std::string GetFrameIncrementPointer()
 	{
@@ -386,20 +392,20 @@ public:
 	// High Bit (Type = 1C, VM = 1)						// See Image Pixel Module (C7.6.3)
 	// Pixel Representation (Type = 1C, VM = 1)			// See Image Pixel Module (C7.6.3)
 	// Dose Units (Type = 1, VM = 1)
-	void SetDoseUnits(DoseUnitsEnum value) { DoseUnits = value; };
-	DoseUnitsEnum GetDoseUnits() { return DoseUnits; };
+	void SetDoseUnits(eDoseUnitsEnum value) { m_DoseUnits = value; };
+	eDoseUnitsEnum GetDoseUnits() { return m_DoseUnits; };
 	// Dose Type (Type = 1, VM = 1)
-	void SetDoseType(DoseTypeEnum value) { DoseType = value; };
-	DoseTypeEnum GetDoseType() { return DoseType; };
+	void SetDoseType(eDoseTypeEnum value) { m_DoseType = value; };
+	eDoseTypeEnum GetDoseType() { return m_DoseType; };
 	// Instance Number (Type = 3, VM = ?)
 	// Dose Comment (Type = 3, VM = ?)
 	// Normalization Point (Type = 3, VM = ?)
 	// Dose Summation Type (Type = 1, VM = 1)
-	void SetDoseSummationType(DoseSummationTypeEnum value)
+	void SetDoseSummationType(eDoseSummationTypeEnum value)
 	{
-		DoseSummationType = value;
+		m_DoseSummationType = value;
 	};
-	DoseSummationTypeEnum GetDoseSummationType() { return DoseSummationType; };
+	eDoseSummationTypeEnum GetDoseSummationType() { return m_DoseSummationType; };
 	// Referenced RT Plan Sequence (Type = 1C, VM = 1-n)
 	// > SOP Instance Reference Macro (Table 10-11)
 	std::string GetReferencedRTPlanClassUID()
@@ -408,19 +414,19 @@ public:
 	}; // Radiation Therapy Plan Storage
 	void SetReferencedRTPlanInstanceUID(unsigned short idx, std::string value)
 	{
-		ReferencedRTPlanSequence[idx] = value;
+		m_ReferencedRtPlanSequence[idx] = value;
 	};
 	void AddReferencedRTPlanInstanceUID(std::string value)
 	{
-		ReferencedRTPlanSequence.push_back(value);
+		m_ReferencedRtPlanSequence.push_back(value);
 	};
 	std::string GetReferencedRTPlanInstanceUID(unsigned short idx)
 	{
-		return ReferencedRTPlanSequence[idx];
+		return m_ReferencedRtPlanSequence[idx];
 	};
 	unsigned short GetReferencedRTPlanInstanceUIDCount()
 	{
-		return ReferencedRTPlanSequence.size();
+		return m_ReferencedRtPlanSequence.size();
 	};
 	// > Referenced Fraction Group Sequence (Type = 1C, VM = ?) // TODO
 	// >> Referenced Fraction Group Number (Type = 1, VM = ?) // TODO
@@ -434,9 +440,9 @@ public:
 	// Grid Frame Offset Vector (Type = 1C, VM = 2-n)
 	void SetGridFrameOffsetVector(double* values)
 	{
-		GridFrameOffsetVector = values;
+		m_GridFrameOffsetVector = values;
 	};
-	double* GetGridFrameOffsetVector() { return GridFrameOffsetVector; };
+	double* GetGridFrameOffsetVector() { return m_GridFrameOffsetVector; };
 	// Dose Grid Scaling (Type = 1C, VM = 1)
 	double GetDoseGridScaling();
 	// Tissue Heterogeneity Correction (Type = 3, VM = ?)
@@ -450,24 +456,24 @@ public:
 		return std::string("1.2.840.10008.5.1.4.1.1.481.2");
 	};
 	// SOP Instance UID (Type = 1, VM = 1)
-	void SetSOPInstanceUID(std::string value) { SOPInstanceUID = value; };
-	std::string GetSOPInstanceUID() { return SOPInstanceUID; };
+	void SetSOPInstanceUID(std::string value) { m_SopInstanceUid = value; };
+	std::string GetSOPInstanceUID() { return m_SopInstanceUid; };
 	// Specific Character Set (Type = 1C, VM = 1-n)
-	void SetSpecificCharacterSet(unsigned short idx, CharacterSetEnum value)
+	void SetSpecificCharacterSet(unsigned short idx, eCharacterSetEnum value)
 	{
-		SpecificCharacterSet[idx] = value;
+		m_SpecificCharacterSet[idx] = value;
 	};
-	void AddSpecificCharacterSet(CharacterSetEnum value)
+	void AddSpecificCharacterSet(eCharacterSetEnum value)
 	{
-		SpecificCharacterSet.push_back(value);
+		m_SpecificCharacterSet.push_back(value);
 	};
-	CharacterSetEnum GetSpecificCharacterSet(unsigned short idx)
+	eCharacterSetEnum GetSpecificCharacterSet(unsigned short idx)
 	{
-		return SpecificCharacterSet[idx];
+		return m_SpecificCharacterSet[idx];
 	};
 	unsigned short GetSpecificCharacterSetCount()
 	{
-		return SpecificCharacterSet.size();
+		return m_SpecificCharacterSet.size();
 	};
 	// Instance Creation Date (Type = 3, VM = ?)
 	// Instance Creation Time (Type = 3, VM = ?)
@@ -525,40 +531,40 @@ public:
 	// Longitudinal Temporal Information Modified (Type = 3, VM = ?)
 
 protected:
-	std::string PatientName;
-	std::string PatientID;
-	unsigned short PatientBirthDate[3]; // Year, Month, Day
-	PatientSexEnum PatientSex;
-	std::string StudyInstanceUID;
-	unsigned short StudyDate[3]; // Year, Month, Day
-	unsigned short StudyTime[3]; // Hour, Minute, Second
-	std::string ReferringPhysicianName;
-	std::string StudyID;
-	std::string AccessionNumber;
-	std::string SeriesInstanceUID;
-	unsigned short SeriesNumber;
-	std::vector<std::string> OperatorsName;
-	std::string FrameOfReferenceUID;
-	std::string PositionReferenceIndicator;
-	std::string Manufacturer;
-	unsigned short InstanceNumber;
-	double PixelSpacing[2];
-	double ImageOrientationPatient[6];
-	double ImagePositionPatient[3];
-	double SliceThickness;
-	unsigned short Rows;
-	unsigned short Columns;
-	unsigned short BitsAllocated;
-	float* PixelData;
-	unsigned int NumberOfFrames;
-	DoseUnitsEnum DoseUnits;
-	DoseTypeEnum DoseType;
-	DoseSummationTypeEnum DoseSummationType;
-	std::vector<std::string> ReferencedRTPlanSequence;
-	double* GridFrameOffsetVector;
-	std::string SOPClassUID;
-	std::string SOPInstanceUID;
-	std::vector<CharacterSetEnum> SpecificCharacterSet;
+	std::string m_PatientName;
+	std::string m_PatientId;
+	unsigned short m_PatientBirthDate[3]; // Year, Month, Day
+	ePatientSexEnum m_PatientSex;
+	std::string m_StudyInstanceUid;
+	unsigned short m_StudyDate[3]; // Year, Month, Day
+	unsigned short m_StudyTime[3]; // Hour, Minute, Second
+	std::string m_ReferringPhysicianName;
+	std::string m_StudyId;
+	std::string m_AccessionNumber;
+	std::string m_SeriesInstanceUid;
+	unsigned short m_SeriesNumber;
+	std::vector<std::string> m_OperatorsName;
+	std::string m_FrameOfReferenceUid;
+	std::string m_PositionReferenceIndicator;
+	std::string m_Manufacturer;
+	unsigned short m_InstanceNumber;
+	double m_PixelSpacing[2];
+	double m_ImageOrientationPatient[6];
+	double m_ImagePositionPatient[3];
+	double m_SliceThickness;
+	unsigned short m_Rows;
+	unsigned short m_Columns;
+	unsigned short m_BitsAllocated;
+	float* m_PixelData;
+	unsigned int m_NumberOfFrames;
+	eDoseUnitsEnum m_DoseUnits;
+	eDoseTypeEnum m_DoseType;
+	eDoseSummationTypeEnum m_DoseSummationType;
+	std::vector<std::string> m_ReferencedRtPlanSequence;
+	double* m_GridFrameOffsetVector;
+	std::string m_SopClassUid;
+	std::string m_SopInstanceUid;
+	std::vector<eCharacterSetEnum> m_SpecificCharacterSet;
 };
 
 } // namespace iseg

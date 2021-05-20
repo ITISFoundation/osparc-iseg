@@ -11,6 +11,7 @@
 
 #include "iSegData.h"
 
+#include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <limits>
@@ -67,10 +68,10 @@ public:
 	const std::vector<Property_ptr>& Properties() const { return m_Properties; }
 
 	using change_callback_type = std::function<void(Property_ptr, eChangeType)>;
-	
-	change_callback_type onModified;
-	
-	change_callback_type onChildModified;
+
+	change_callback_type onModified; // NOLINT
+
+	change_callback_type onChildModified; // NOLINT
 
 	void DumpTree() const;
 
@@ -86,7 +87,7 @@ protected:
 
 	void OnModified(eChangeType change);
 
-	void OnChildModified(Property_ptr child, eChangeType change);
+	void OnChildModified(Property_ptr child, eChangeType change) const;
 
 	void DumpTree(const Property* p, int indent) const;
 
@@ -163,10 +164,7 @@ private:
 class ISEG_DATA_API PropertyInt : public PropertyTR<int>
 {
 public:
-	static std::shared_ptr<PropertyInt> Create(
-			value_type value,
-			value_type min_value = -std::numeric_limits<value_type>::max(),
-			value_type max_value = std::numeric_limits<value_type>::max());
+	static std::shared_ptr<PropertyInt> Create(value_type value, value_type min_value = -std::numeric_limits<value_type>::max(), value_type max_value = std::numeric_limits<value_type>::max());
 
 	eValueType Type() const override { return eValueType::kInteger; }
 
@@ -183,10 +181,7 @@ protected:
 class ISEG_DATA_API PropertyReal : public PropertyTR<double>
 {
 public:
-	static std::shared_ptr<PropertyReal> Create(
-			value_type value,
-			value_type min_value = -std::numeric_limits<value_type>::max(),
-			value_type max_value = std::numeric_limits<value_type>::max());
+	static std::shared_ptr<PropertyReal> Create(value_type value, value_type min_value = -std::numeric_limits<value_type>::max(), value_type max_value = std::numeric_limits<value_type>::max());
 
 	eValueType Type() const override { return eValueType::kReal; }
 
@@ -234,10 +229,19 @@ protected:
 	}
 };
 
-class ISEG_DATA_API PropertyButton : public PropertyT<std::function<void()>>
+class ISEG_DATA_API PropertyButton : public Property
 {
 public:
+	using value_type = std::function<void()>;
+
 	static std::shared_ptr<PropertyButton> Create(value_type value);
+
+	value_type Value() const { return m_Value; }
+	void SetValue(const value_type& v)
+	{
+		m_Value = v;
+		OnModified(Property::kValueChanged);
+	}
 
 	const std::string& ButtonText() const { return m_ButtonText; }
 	void SetButtonText(const std::string& v) { m_ButtonText = v; }
@@ -245,10 +249,10 @@ public:
 	eValueType Type() const override { return eValueType::kButton; }
 
 protected:
-	PropertyButton(const value_type& value)
-			: PropertyT<std::function<void()>>(value)
-	{
-	}
+	PropertyButton(const value_type& value) : m_Value(value) {}
+
+private:
+	value_type m_Value;
 	std::string m_ButtonText;
 };
 
@@ -262,7 +266,7 @@ public:
 	using descriptions_type = std::vector<description_type>;
 
 	/// Invalid value type constant
-	static const value_type kInvalidValue = static_cast<value_type>(-1);
+	static const value_type k_invalid_value = static_cast<value_type>(-1);
 
 	value_type Value() const;
 	void SetValue(const value_type value);
@@ -288,17 +292,14 @@ protected:
 	/** Constructor.		
 			Accepts a list of descriptions and the value corresponding to the index of the descriptions.
 		*/
-	explicit PropertyEnum(const descriptions_type& descriptions = descriptions_type(), const value_type value = kInvalidValue);
+	explicit PropertyEnum(const descriptions_type& descriptions = descriptions_type(), const value_type value = k_invalid_value);
 
 private:
-	/// Internal, lock-free implementation
-	description_type _ValueDescription() const;
-
-	values_type _values;
+	values_type m_Values;
 	/// Currently selected value
-	value_type _value;
+	value_type m_Value;
 	/// Invalid value description. Default: L"#Invalid"
-	description_type _invalid;
+	description_type m_Invalid;
 };
 
 class ISEG_DATA_API PropertyGroup : public Property

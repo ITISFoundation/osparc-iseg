@@ -13,14 +13,16 @@
 
 #include <QWidget>
 
-#include <memory>
 #include <map>
+#include <memory>
 
 class QBoxLayout;
 
 namespace iseg {
 
 class Property;
+using Property_ptr = std::shared_ptr<Property>;
+using Property_wptr = std::weak_ptr<Property>;
 
 /* \brief UI class to display and edit properties
 **/
@@ -28,28 +30,25 @@ class ISEG_INTERFACE_API PropertyWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	using Property_ptr = std::shared_ptr<Property>;
-	using Property_wptr = std::weak_ptr<Property>;
-
 	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 	void setProperty(Property_ptr p);
-	Property_ptr property() { return _property; }
+	Property_ptr property() { return m_Property; }
 
 signals:
-	void onPropertyEdited(Property_ptr);
+	void OnPropertyEdited(iseg::Property_ptr);
 
 private slots:
-	void toggleCollapsable(bool checked);
-	void edited();
+	void ToggleCollapsable(bool checked);
+	void Edited();
 
 private:
-	void build(Property_ptr p, QBoxLayout* layout);
-	QWidget* makePropertyUI(Property& prop);
+	void Build(Property_ptr p, QBoxLayout* layout);
+	QWidget* MakePropertyUi(Property& prop);
 
-	Property_ptr _property;
-	std::map<QWidget*, Property_wptr> _widgetPropertyMap;
-	std::map<QWidget*, QBoxLayout*> _collapseButtonLayoutMap;
+	Property_ptr m_Property;
+	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
+	std::map<QWidget*, QBoxLayout*> m_CollapseButtonLayoutMap;
 };
 
 } // namespace iseg

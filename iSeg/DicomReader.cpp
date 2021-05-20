@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -22,101 +22,101 @@
 
 namespace iseg {
 
-bool DicomReader::opendicom(const char* filename)
+bool DicomReader::Opendicom(const char* filename)
 {
-	depth = 0;
-	if ((fp = fopen(filename, "rb")) == nullptr)
+	m_Depth = 0;
+	if ((m_Fp = fopen(filename, "rb")) == nullptr)
 		return false;
 	else
 		return true;
 }
 
-void DicomReader::closedicom() { fclose(fp); }
+void DicomReader::Closedicom() { fclose(m_Fp); }
 
-unsigned short DicomReader::get_width()
+unsigned short DicomReader::GetWidth()
 {
 	unsigned short i = 0;
 
-	if (read_field(40, 17))
+	if (ReadField(40, 17))
 	{
-		i = (unsigned short)bin2int();
+		i = (unsigned short)Bin2int();
 	}
 
-	width = i;
+	m_Width = i;
 	return i;
 }
 
-unsigned short DicomReader::get_height()
+unsigned short DicomReader::GetHeight()
 {
 	unsigned short i = 0;
 
-	if (read_field(40, 16))
+	if (ReadField(40, 16))
 	{
-		i = (unsigned short)bin2int();
+		i = (unsigned short)Bin2int();
 	}
 
-	height = i;
+	m_Height = i;
 	return i;
 }
 
-bool DicomReader::load_pictureGDCM(const char* filename, float* bits)
+bool DicomReader::LoadPictureGdcm(const char* filename, float* bits)
 {
-	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, width, height);
+	return gdcmvtk_rtstruct::GetDicomUsingGDCM(filename, bits, m_Width, m_Height);
 }
 
-bool DicomReader::load_picture(float* bits)
+bool DicomReader::LoadPicture(float* bits)
 {
-	get_height();
-	get_width();
-	get_bitdepth();
+	GetHeight();
+	GetWidth();
+	GetBitdepth();
 
 	unsigned i;
 
-	if (go_label(32736, 16))
+	if (GoLabel(32736, 16))
 	{
-		if (fread(buffer1, 1, 4, fp) == 4)
+		if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 		{
-			if (buffer1[0] == 'O' && buffer1[1] == 'W')
+			if (m_Buffer1[0] == 'O' && m_Buffer1[1] == 'W')
 			{
-				if (fread(buffer1, 1, 4, fp) != 4)
+				if (fread(m_Buffer1, 1, 4, m_Fp) != 4)
 					return false;
 			}
 
-			i = (unsigned)buffer1[0] +
-				256 *
-					((unsigned)buffer1[1] +
-					 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+			i = (unsigned)m_Buffer1[0] +
+					256 *
+							((unsigned)m_Buffer1[1] +
+									256 * ((unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3]));
 
-			if (i == unsigned(width) * height * bitdepth / 8)
+			if (i == unsigned(m_Width) * m_Height * m_Bitdepth / 8)
 			{
 				unsigned char* bits1 = (unsigned char*)malloc(i);
-				if (bitdepth == 8)
+				if (m_Bitdepth == 8)
 				{
-					size_t readnr = fread(bits1, 1, i, fp);
+					size_t readnr = fread(bits1, 1, i, m_Fp);
 					if (readnr == i)
 					{
-						unsigned k = unsigned(width) * (height - 1);
+						unsigned k = unsigned(m_Width) * (m_Height - 1);
 						unsigned j = 0;
-						for (unsigned short h = 0; h < height; h++)
+						for (unsigned short h = 0; h < m_Height; h++)
 						{
-							for (unsigned short w = 0; w < width; w++)
+							for (unsigned short w = 0; w < m_Width; w++)
 							{
 								bits[k] = float(bits1[j]);
 								k++;
 								j++;
 							}
-							k -= 2 * width;
+							k -= 2 * m_Width;
 						}
 						free(bits1);
 						return true;
 					}
 					else
 					{
-						unsigned k = unsigned(width) * (height - 1);
+						unsigned k = unsigned(m_Width) * (m_Height - 1);
 						unsigned j = 0;
-						for (unsigned short h = 0; h < height; h++)
+						for (unsigned short h = 0; h < m_Height; h++)
 						{
-							for (unsigned short w = 0; w < width; w++)
+							for (unsigned short w = 0; w < m_Width; w++)
 							{
 								if (j < readnr)
 									bits[k] = float(bits1[j]);
@@ -125,23 +125,23 @@ bool DicomReader::load_picture(float* bits)
 								k++;
 								j++;
 							}
-							k -= 2 * width;
+							k -= 2 * m_Width;
 						}
 
 						free(bits1);
 						return true;
 					}
 				}
-				else if (bitdepth == 16)
+				else if (m_Bitdepth == 16)
 				{
-					size_t readnr = fread(bits1, 1, i, fp);
+					size_t readnr = fread(bits1, 1, i, m_Fp);
 					if (readnr == i)
 					{
 						unsigned k = 0;
-						unsigned j = unsigned(width) * (height - 1);
-						for (unsigned short h = 0; h < height; h++)
+						unsigned j = unsigned(m_Width) * (m_Height - 1);
+						for (unsigned short h = 0; h < m_Height; h++)
 						{
-							for (unsigned short w = 0; w < width; w++)
+							for (unsigned short w = 0; w < m_Width; w++)
 							{
 								bits[j] = float(bits1[k]);
 								k++;
@@ -149,7 +149,7 @@ bool DicomReader::load_picture(float* bits)
 								k++;
 								j++;
 							}
-							j -= (2 * width);
+							j -= (2 * m_Width);
 						}
 
 						free(bits1);
@@ -158,10 +158,10 @@ bool DicomReader::load_picture(float* bits)
 					else
 					{
 						unsigned k = 0;
-						unsigned j = unsigned(width) * (height - 1);
-						for (unsigned short h = 0; h < height; h++)
+						unsigned j = unsigned(m_Width) * (m_Height - 1);
+						for (unsigned short h = 0; h < m_Height; h++)
 						{
-							for (unsigned short w = 0; w < width; w++)
+							for (unsigned short w = 0; w < m_Width; w++)
 							{
 								if (k + 1 < readnr)
 								{
@@ -174,7 +174,7 @@ bool DicomReader::load_picture(float* bits)
 									bits[j] = 0;
 								j++;
 							}
-							j -= (2 * width);
+							j -= (2 * m_Width);
 						}
 
 						free(bits1);
@@ -198,39 +198,38 @@ bool DicomReader::load_picture(float* bits)
 		return false;
 }
 
-bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
-							   unsigned short dy)
+bool DicomReader::LoadPicture(float* bits, Point p, unsigned short dx, unsigned short dy)
 {
-	get_height();
-	get_width();
-	get_bitdepth();
+	GetHeight();
+	GetWidth();
+	GetBitdepth();
 
 	unsigned i;
-	if (go_label(32736, 16))
+	if (GoLabel(32736, 16))
 	{
-		if (fread(buffer1, 1, 4, fp) == 4)
+		if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 		{
-			if (buffer1[0] == 'O' && buffer1[1] == 'W')
+			if (m_Buffer1[0] == 'O' && m_Buffer1[1] == 'W')
 			{
-				if (fread(buffer1, 1, 4, fp) != 4)
+				if (fread(m_Buffer1, 1, 4, m_Fp) != 4)
 					return false;
 			}
 
-			i = (unsigned)buffer1[0] +
-				256 *
-					((unsigned)buffer1[1] +
-					 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+			i = (unsigned)m_Buffer1[0] +
+					256 *
+							((unsigned)m_Buffer1[1] +
+									256 * ((unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3]));
 
-			if (i == unsigned(width) * height * bitdepth / 8)
+			if (i == unsigned(m_Width) * m_Height * m_Bitdepth / 8)
 			{
 				unsigned char* bits1 = (unsigned char*)malloc(i);
-				if (bitdepth == 8)
+				if (m_Bitdepth == 8)
 				{
-					if (fread(bits1, 1, i, fp) == i)
+					if (fread(bits1, 1, i, m_Fp) == i)
 					{
 						unsigned j, k;
 						j = unsigned(dx) * (dy - 1);
-						k = unsigned(height - dy - p.py) * width + p.px;
+						k = unsigned(m_Height - dy - p.py) * m_Width + p.px;
 
 						for (unsigned h = 0; h < dy; h++)
 						{
@@ -238,7 +237,7 @@ bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
 							{
 								bits[j++] = float(bits1[k++]);
 							}
-							k += width - dx;
+							k += m_Width - dx;
 							j -= 2 * dx;
 						}
 						free(bits1);
@@ -250,13 +249,13 @@ bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
 						return false;
 					}
 				}
-				else if (bitdepth == 16)
+				else if (m_Bitdepth == 16)
 				{
-					if (fread(bits1, 1, i, fp) == i)
+					if (fread(bits1, 1, i, m_Fp) == i)
 					{
 						unsigned j, k;
 						j = unsigned(dx) * (dy - 1);
-						k = 2 * (unsigned(height - dy - p.py) * width + p.px);
+						k = 2 * (unsigned(m_Height - dy - p.py) * m_Width + p.px);
 
 						for (unsigned h = 0; h < dy; h++)
 						{
@@ -269,7 +268,7 @@ bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
 								j++;
 							}
 							j -= 2 * dx;
-							k += 2 * (width - dx);
+							k += 2 * (m_Width - dx);
 						}
 						free(bits1);
 						return true;
@@ -296,11 +295,11 @@ bool DicomReader::load_picture(float* bits, Point p, unsigned short dx,
 		return false;
 }
 
-bool DicomReader::load_picture(float* bits, float center, float contrast)
+bool DicomReader::LoadPicture(float* bits, float center, float contrast)
 {
-	if (load_picture(bits))
+	if (LoadPicture(bits))
 	{
-		for (unsigned i = 0; i < unsigned(width) * height; i++)
+		for (unsigned i = 0; i < unsigned(m_Width) * m_Height; i++)
 		{
 			bits[i] = (bits[i] - center - contrast / 2) * 255.0f / contrast;
 		}
@@ -310,12 +309,11 @@ bool DicomReader::load_picture(float* bits, float center, float contrast)
 		return false;
 }
 
-bool DicomReader::load_picture(float* bits, float center, float contrast, Point p,
-							   unsigned short dx, unsigned short dy)
+bool DicomReader::LoadPicture(float* bits, float center, float contrast, Point p, unsigned short dx, unsigned short dy)
 {
-	if (load_picture(bits, p, dx, dy))
+	if (LoadPicture(bits, p, dx, dy))
 	{
-		for (unsigned i = 0; i < unsigned(width) * height; i++)
+		for (unsigned i = 0; i < unsigned(m_Width) * m_Height; i++)
 		{
 			bits[i] = (bits[i] - center - contrast / 2) * 255.0f / contrast;
 		}
@@ -325,40 +323,40 @@ bool DicomReader::load_picture(float* bits, float center, float contrast, Point 
 		return false;
 }
 
-bool DicomReader::imagepos(float f[3])
+bool DicomReader::Imagepos(float f[3])
 {
 	bool ok = false;
-	if (read_field(32, 50))
+	if (ReadField(32, 50))
 	{
-		dsarray2float(f, 3);
+		Dsarray2float(f, 3);
 		ok = true;
 	}
 	return ok;
 }
 
-bool DicomReader::imageorientation(float f[6])
+bool DicomReader::Imageorientation(float f[6])
 {
 	bool ok = false;
-	if (read_field(32, 55))
+	if (ReadField(32, 55))
 	{
-		dsarray2float(f, 6);
+		Dsarray2float(f, 6);
 		ok = true;
 	}
 	return ok;
 }
 
-float DicomReader::slicepos()
+float DicomReader::Slicepos()
 {
 	float f = 0;
 
-	if (read_field(32, 50))
+	if (ReadField(32, 50))
 	{
 		float loc[3];
-		dsarray2float(loc, 3);
-		if (read_field(32, 55))
+		Dsarray2float(loc, 3);
+		if (ReadField(32, 55))
 		{
 			float orient[6];
-			dsarray2float(orient, 6);
+			Dsarray2float(orient, 6);
 			float vec1[3];
 			vec1[0] = orient[1] * orient[5] - orient[2] * orient[4];
 			vec1[1] = orient[2] * orient[3] - orient[0] * orient[5];
@@ -373,50 +371,50 @@ float DicomReader::slicepos()
 
 	if (f == 0)
 	{
-		if (read_field(32, 4161))
+		if (ReadField(32, 4161))
 		{
-			f = ds2float();
+			f = Ds2float();
 		}
-		else if (read_field(32, 19))
+		else if (ReadField(32, 19))
 		{
-			f = float(is2int());
+			f = float(Is2int());
 		}
 	}
 
 	return f;
 }
 
-unsigned DicomReader::seriesnr()
+unsigned DicomReader::Seriesnr()
 {
 	unsigned nr = 0;
 
-	if (read_field(32, 17))
-		nr = unsigned(is2int());
+	if (ReadField(32, 17))
+		nr = unsigned(Is2int());
 
 	return nr;
 }
 
-float DicomReader::thickness()
+float DicomReader::Thickness()
 {
 	float f = 1;
 
-	if (read_field(24, 136))
+	if (ReadField(24, 136))
 	{
-		f = ds2float();
+		f = Ds2float();
 	}
-	else if (read_field(24, 80))
+	else if (ReadField(24, 80))
 	{
-		f = ds2float();
+		f = Ds2float();
 	}
 
 	return f;
 }
 
-Pair DicomReader::pixelsize()
+Pair DicomReader::Pixelsize()
 {
 	Pair p;
 	p.low = p.high = 0;
-	if (read_field(40, 48))
+	if (ReadField(40, 48))
 	{
 		float f = 0;
 		float d = 1;
@@ -425,50 +423,50 @@ Pair DicomReader::pixelsize()
 
 		int pos = 0;
 
-		if (buffer[pos] == '+')
+		if (m_Buffer[pos] == '+')
 			pos++;
-		if (buffer[pos] == '-')
+		if (m_Buffer[pos] == '-')
 		{
 			pos++;
 			d = -1;
 		}
-		while (pos < (int)l && buffer[pos] >= '0' && buffer[pos] <= '9')
+		while (pos < (int)m_L && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 		{
-			f = f * 10 + float(buffer[pos] - '0');
+			f = f * 10 + float(m_Buffer[pos] - '0');
 			pos++;
 		}
-		if (pos < length && buffer[pos] == '.')
+		if (pos < length && m_Buffer[pos] == '.')
 		{
 			pos++;
-			while (pos < length && buffer[pos] >= '0' && buffer[pos] <= '9')
+			while (pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 			{
-				f = f * 10 + float(buffer[pos] - '0');
+				f = f * 10 + float(m_Buffer[pos] - '0');
 				d *= 10;
 				pos++;
 			}
 		}
 
-		if (pos < (int)l && (buffer[pos] == 'e' || buffer[pos] == 'E'))
+		if (pos < (int)m_L && (m_Buffer[pos] == 'e' || m_Buffer[pos] == 'E'))
 		{
 			pos++;
-			if (buffer[pos] == '+')
+			if (m_Buffer[pos] == '+')
 				pos++;
-			if (buffer[pos] == '-')
+			if (m_Buffer[pos] == '-')
 			{
 				pos++;
 				d1 = -1;
 			}
-			while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-				   buffer[pos] == ' ')
+			while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+						 m_Buffer[pos] == ' ')
 			{
-				if (buffer[pos] != ' ')
-					m = m * 10 + float(buffer[pos] - '0');
+				if (m_Buffer[pos] != ' ')
+					m = m * 10 + float(m_Buffer[pos] - '0');
 				pos++;
 			}
 		}
 
-		if (pos < (int)l &&
-			(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
+		if (pos < (int)m_L &&
+				(m_Buffer[pos] == '\\' || m_Buffer[pos] == ':' || m_Buffer[pos] == '/'))
 		{
 			p.low = f / d;
 			p.low *= pow(10.0f, d1 * m);
@@ -478,44 +476,44 @@ Pair DicomReader::pixelsize()
 			m = 0;
 			pos++;
 
-			if (buffer[pos] == '+')
+			if (m_Buffer[pos] == '+')
 				pos++;
-			if (buffer[pos] == '-')
+			if (m_Buffer[pos] == '-')
 			{
 				pos++;
 				d = -1;
 			}
-			while (pos < (int)l && buffer[pos] >= '0' && buffer[pos] <= '9')
+			while (pos < (int)m_L && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 			{
-				f = f * 10 + float(buffer[pos] - '0');
+				f = f * 10 + float(m_Buffer[pos] - '0');
 				pos++;
 			}
-			if (pos < length && buffer[pos] == '.')
+			if (pos < length && m_Buffer[pos] == '.')
 			{
 				pos++;
-				while (pos < length && buffer[pos] >= '0' && buffer[pos] <= '9')
+				while (pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 				{
-					f = f * 10 + float(buffer[pos] - '0');
+					f = f * 10 + float(m_Buffer[pos] - '0');
 					d *= 10;
 					pos++;
 				}
 			}
-			if (pos < (int)l && (buffer[pos] == 'e' || buffer[pos] == 'E'))
+			if (pos < (int)m_L && (m_Buffer[pos] == 'e' || m_Buffer[pos] == 'E'))
 			{
 				pos++;
-				if (buffer[pos] == '+')
+				if (m_Buffer[pos] == '+')
 					pos++;
-				if (buffer[pos] == '-')
+				if (m_Buffer[pos] == '-')
 				{
 					pos++;
 					d1 = -1;
 				}
-				while ((pos < length && buffer[pos] >= '0' &&
-						buffer[pos] <= '9') ||
-					   buffer[pos] == ' ')
+				while ((pos < length && m_Buffer[pos] >= '0' &&
+									 m_Buffer[pos] <= '9') ||
+							 m_Buffer[pos] == ' ')
 				{
-					if (buffer[pos] != ' ')
-						m = m * 10 + float(buffer[pos] - '0');
+					if (m_Buffer[pos] != ' ')
+						m = m * 10 + float(m_Buffer[pos] - '0');
 					pos++;
 				}
 			}
@@ -531,7 +529,7 @@ Pair DicomReader::pixelsize()
 		else
 			p.high = p.low = 1.0f;
 	}
-	else if (read_field(40, 52))
+	else if (ReadField(40, 52))
 	{
 		p.high = 1.0f;
 
@@ -539,18 +537,18 @@ Pair DicomReader::pixelsize()
 		i = j = 0;
 		int pos = 0;
 
-		while (pos < (int)l && buffer[pos] >= '0' && buffer[pos] <= '9')
+		while (pos < (int)m_L && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 		{
-			i = i * 10 + float(buffer[pos] - '0');
+			i = i * 10 + float(m_Buffer[pos] - '0');
 			pos++;
 		}
-		if (pos < (int)l &&
-			(buffer[pos] == '\\' || buffer[pos] == ':' || buffer[pos] == '/'))
+		if (pos < (int)m_L &&
+				(m_Buffer[pos] == '\\' || m_Buffer[pos] == ':' || m_Buffer[pos] == '/'))
 		{
 			pos++;
-			while (pos < length && buffer[pos] >= '0' && buffer[pos] <= '9')
+			while (pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 			{
-				j = j * 10 + float(buffer[pos] - '0');
+				j = j * 10 + float(m_Buffer[pos] - '0');
 				pos++;
 			}
 			if (j > 0)
@@ -565,42 +563,42 @@ Pair DicomReader::pixelsize()
 	return p;
 }
 
-unsigned short DicomReader::get_bitdepth()
+unsigned short DicomReader::GetBitdepth()
 {
 	unsigned short i = 16;
 
-	if (read_field(40, 256))
+	if (ReadField(40, 256))
 	{
-		i = (unsigned short)(buffer[0]) + 256 * (unsigned short)(buffer[1]);
+		i = (unsigned short)(m_Buffer[0]) + 256 * (unsigned short)(m_Buffer[1]);
 	}
 
-	bitdepth = i;
+	m_Bitdepth = i;
 	return i;
 }
 
-bool DicomReader::read_field(unsigned a, unsigned b)
+bool DicomReader::ReadField(unsigned a, unsigned b)
 {
-	go_start();
+	GoStart();
 	unsigned a1, b1;
 
-	if (read_fieldnr(a1, b1))
+	if (ReadFieldnr(a1, b1))
 	{
-		while (a1 < a || ((a1 == a) && (b1 < b)) || depth > 0)
+		while (a1 < a || ((a1 == a) && (b1 < b)) || m_Depth > 0)
 		{
-			if (!next_field())
+			if (!NextField())
 				return false;
-			if (!read_fieldnr(a1, b1))
+			if (!ReadFieldnr(a1, b1))
 				return false;
 		}
 		if (a1 == a && b1 == b)
 		{
-			if (read_fieldcontent())
+			if (ReadFieldcontent())
 				return true;
 			return false;
 		}
 		else
 		{
-			go_start();
+			GoStart();
 			return false;
 		}
 	}
@@ -608,32 +606,32 @@ bool DicomReader::read_field(unsigned a, unsigned b)
 		return false;
 }
 
-bool DicomReader::read_fieldnr(unsigned& a, unsigned& b)
+bool DicomReader::ReadFieldnr(unsigned& a, unsigned& b)
 {
-	if (fread(buffer1, 1, 4, fp) == 4)
+	if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 	{
-		a = (unsigned)buffer1[0] + 256 * (unsigned)buffer1[1];
-		b = (unsigned)buffer1[2] + 256 * (unsigned)buffer1[3];
+		a = (unsigned)m_Buffer1[0] + 256 * (unsigned)m_Buffer1[1];
+		b = (unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3];
 
 		if (a == 65534 && b == 57344)
 		{
-			if (fread(buffer1, 1, 4, fp) == 4)
+			if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 			{
-				if (buffer1[3] == 255 && buffer1[2] == 255 &&
-					buffer1[1] == 255 && buffer1[0] == 255)
+				if (m_Buffer1[3] == 255 && m_Buffer1[2] == 255 &&
+						m_Buffer1[1] == 255 && m_Buffer1[0] == 255)
 				{
-					depth++;
+					m_Depth++;
 				}
-				return read_fieldnr(a, b);
+				return ReadFieldnr(a, b);
 			}
 			else
 				return false;
 		}
 		else if (a == 65534 && (b == 57357 || b == 57565))
 		{
-			depth--;
-			if (fread(buffer1, 1, 4, fp) == 4)
-				return read_fieldnr(a, b);
+			m_Depth--;
+			if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
+				return ReadFieldnr(a, b);
 			else
 				return false;
 		}
@@ -644,16 +642,16 @@ bool DicomReader::read_fieldnr(unsigned& a, unsigned& b)
 		return false;
 }
 
-bool DicomReader::read_fieldcontent()
+bool DicomReader::ReadFieldcontent()
 {
-	read_length();
-	if (l == 1000000)
+	ReadLength();
+	if (m_L == 1000000)
 		return false;
 	else
 	{
-		if (l + 1 < length && unsigned(fread(buffer, 1, l, fp)) == l)
+		if (m_L + 1 < length && unsigned(fread(m_Buffer, 1, m_L, m_Fp)) == m_L)
 		{
-			buffer[l] = '\0';
+			m_Buffer[m_L] = '\0';
 			return true;
 		}
 		else
@@ -663,17 +661,17 @@ bool DicomReader::read_fieldcontent()
 	}
 }
 
-bool DicomReader::next_field()
+bool DicomReader::NextField()
 {
-	read_length();
-	if (l == 1000000)
+	ReadLength();
+	if (m_L == 1000000)
 		return false;
 	else
 	{
 #ifdef _MSC_VER
-		if (_fseeki64(fp, l, SEEK_CUR))
+		if (_fseeki64(m_Fp, m_L, SEEK_CUR))
 #else
-		if (fseek(fp, l, SEEK_CUR))
+		if (fseek(m_Fp, m_L, SEEK_CUR))
 #endif
 			return false;
 		else
@@ -681,36 +679,36 @@ bool DicomReader::next_field()
 	}
 }
 
-unsigned DicomReader::read_length()
+unsigned DicomReader::ReadLength()
 {
 	unsigned i = 0;
-	if (fread(buffer1, 1, 4, fp) == 4)
+	if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 	{
-		if (buffer1[0] >= 'A' && buffer1[0] <= 'z' && buffer1[1] >= 'A' &&
-			buffer1[1] <= 'z')
+		if (m_Buffer1[0] >= 'A' && m_Buffer1[0] <= 'z' && m_Buffer1[1] >= 'A' &&
+				m_Buffer1[1] <= 'z')
 		{
-			if (((buffer1[0] != 'O' || buffer1[1] != 'B') &&
-				 (buffer1[0] != 'O' || buffer1[1] != 'W') &&
-				 (buffer1[0] != 'S' || buffer1[1] != 'Q') &&
-				 (buffer1[0] != 'U' || buffer1[1] != 'N')))
+			if (((m_Buffer1[0] != 'O' || m_Buffer1[1] != 'B') &&
+							(m_Buffer1[0] != 'O' || m_Buffer1[1] != 'W') &&
+							(m_Buffer1[0] != 'S' || m_Buffer1[1] != 'Q') &&
+							(m_Buffer1[0] != 'U' || m_Buffer1[1] != 'N')))
 			{
-				i = (unsigned)buffer1[2] + 256 * (unsigned)buffer1[3];
+				i = (unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3];
 			}
 			else
 			{
-				if (buffer1[2] == 0 || buffer1[3] == 0)
+				if (m_Buffer1[2] == 0 || m_Buffer1[3] == 0)
 				{
-					if (fread(buffer1, 1, 4, fp) == 4)
+					if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 					{
-						if (buffer1[3] == 255 && buffer1[2] == 255 &&
-							buffer1[1] == 255 && buffer1[0] == 255)
+						if (m_Buffer1[3] == 255 && m_Buffer1[2] == 255 &&
+								m_Buffer1[1] == 255 && m_Buffer1[0] == 255)
 						{
 							i = 0;
-							depth++;
+							m_Depth++;
 						}
 						else
 						{
-							i = (unsigned)buffer1[0] + 256 * ((unsigned)buffer1[1] + 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+							i = (unsigned)m_Buffer1[0] + 256 * ((unsigned)m_Buffer1[1] + 256 * ((unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3]));
 						}
 					}
 					else
@@ -720,60 +718,60 @@ unsigned DicomReader::read_length()
 				}
 				else
 				{
-					i = (unsigned)buffer1[2] + 256 * (unsigned)buffer1[3];
+					i = (unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3];
 				}
 			}
 		}
 		else
 		{
-			if (buffer1[3] == 255 && buffer1[2] == 255 && 
-				buffer1[1] == 255 && buffer1[0] == 255)
+			if (m_Buffer1[3] == 255 && m_Buffer1[2] == 255 &&
+					m_Buffer1[1] == 255 && m_Buffer1[0] == 255)
 			{
 				i = 0;
-				depth++;
+				m_Depth++;
 			}
 			else
 			{
-				i = (unsigned)buffer1[0] + 256 * ((unsigned)buffer1[1] + 256 * ((unsigned)buffer1[2] + 256 * (unsigned)buffer1[3]));
+				i = (unsigned)m_Buffer1[0] + 256 * ((unsigned)m_Buffer1[1] + 256 * ((unsigned)m_Buffer1[2] + 256 * (unsigned)m_Buffer1[3]));
 			}
 		}
-		l = i;
+		m_L = i;
 	}
 	else
 	{
-		l = 1000000;
+		m_L = 1000000;
 	}
 
-	return l;
+	return m_L;
 }
 
-void DicomReader::go_start()
+void DicomReader::GoStart()
 {
 #ifdef _MSC_VER
-	int result = _fseeki64(fp, 128, SEEK_SET);
+	int result = _fseeki64(m_Fp, 128, SEEK_SET);
 #else
-	int result = fseek(fp, 128, SEEK_SET);
+	int result = fseek(m_Fp, 128, SEEK_SET);
 #endif
 
 	if (result == 0)
 	{
-		if (fread(buffer1, 1, 4, fp) == 4)
+		if (fread(m_Buffer1, 1, 4, m_Fp) == 4)
 		{
-			if (buffer1[0] != 'D' || buffer1[1] != 'I' || buffer1[2] != 'C' ||
-				buffer1[3] != 'M')
+			if (m_Buffer1[0] != 'D' || m_Buffer1[1] != 'I' || m_Buffer1[2] != 'C' ||
+					m_Buffer1[3] != 'M')
 #ifdef _MSC_VER
-				_fseeki64(fp, 0, SEEK_SET);
+				_fseeki64(m_Fp, 0, SEEK_SET);
 #else
-				fseek(fp, 0, SEEK_SET);
+				fseek(m_Fp, 0, SEEK_SET);
 #endif
 			else
 			{
-				fread(buffer1, 1, 4, fp);
+				fread(m_Buffer1, 1, 4, m_Fp);
 //				if(buffer1[0]!=2||buffer1[1]!=0||buffer1[2]!=0||buffer1[3]!=0){
 #ifdef _MSC_VER
-				_fseeki64(fp, 132, SEEK_SET);
+				_fseeki64(m_Fp, 132, SEEK_SET);
 #else
-				fseek(fp, 132, SEEK_SET);
+				fseek(m_Fp, 132, SEEK_SET);
 #endif
 				/*				} else {
 					read_fieldcontent();
@@ -784,33 +782,33 @@ void DicomReader::go_start()
 		}
 		else
 #ifdef _MSC_VER
-			_fseeki64(fp, 0, SEEK_SET);
+			_fseeki64(m_Fp, 0, SEEK_SET);
 #else
-			fseek(fp, 0, SEEK_SET);
+			fseek(m_Fp, 0, SEEK_SET);
 #endif
 	}
 	else
 	{
 #ifdef _MSC_VER
-		_fseeki64(fp, 0, SEEK_SET);
+		_fseeki64(m_Fp, 0, SEEK_SET);
 #else
-		fseek(fp, 0, SEEK_SET);
+		fseek(m_Fp, 0, SEEK_SET);
 #endif
 	}
 }
 
-bool DicomReader::go_label(unsigned a, unsigned b)
+bool DicomReader::GoLabel(unsigned a, unsigned b)
 {
-	go_start();
+	GoStart();
 	unsigned a1, b1;
 
-	if (read_fieldnr(a1, b1))
+	if (ReadFieldnr(a1, b1))
 	{
 		while (a1 < a || b1 < b)
 		{
-			if (!next_field())
+			if (!NextField())
 				return false;
-			if (!read_fieldnr(a1, b1))
+			if (!ReadFieldnr(a1, b1))
 				return false;
 		}
 		if (a1 == a && b1 == b)
@@ -819,7 +817,7 @@ bool DicomReader::go_label(unsigned a, unsigned b)
 		}
 		else
 		{
-			go_start();
+			GoStart();
 			return false;
 		}
 	}
@@ -827,7 +825,7 @@ bool DicomReader::go_label(unsigned a, unsigned b)
 		return false;
 }
 
-float DicomReader::ds2float()
+float DicomReader::Ds2float()
 {
 	float f = 0;
 	float d = 1;
@@ -836,49 +834,49 @@ float DicomReader::ds2float()
 
 	int pos = 0;
 
-	if (buffer[pos] == '+')
+	if (m_Buffer[pos] == '+')
 		pos++;
-	if (buffer[pos] == '-')
+	if (m_Buffer[pos] == '-')
 	{
 		pos++;
 		d = -1;
 	}
-	while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-		   buffer[pos] == ' ')
+	while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+				 m_Buffer[pos] == ' ')
 	{
-		if (buffer[pos] != ' ')
-			f = f * 10 + float(buffer[pos] - '0');
+		if (m_Buffer[pos] != ' ')
+			f = f * 10 + float(m_Buffer[pos] - '0');
 		pos++;
 	}
-	if (pos < length && buffer[pos] == '.')
+	if (pos < length && m_Buffer[pos] == '.')
 	{
 		pos++;
-		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-			   buffer[pos] == ' ')
+		while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+					 m_Buffer[pos] == ' ')
 		{
-			if (buffer[pos] != ' ')
+			if (m_Buffer[pos] != ' ')
 			{
-				f = f * 10 + float(buffer[pos] - '0');
+				f = f * 10 + float(m_Buffer[pos] - '0');
 				d *= 10;
 			}
 			pos++;
 		}
 	}
-	if (pos < length && (buffer[pos] == 'e' || buffer[pos] == 'E'))
+	if (pos < length && (m_Buffer[pos] == 'e' || m_Buffer[pos] == 'E'))
 	{
 		pos++;
-		if (buffer[pos] == '+')
+		if (m_Buffer[pos] == '+')
 			pos++;
-		if (buffer[pos] == '-')
+		if (m_Buffer[pos] == '-')
 		{
 			pos++;
 			d1 = -1;
 		}
-		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-			   buffer[pos] == ' ')
+		while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+					 m_Buffer[pos] == ' ')
 		{
-			if (buffer[pos] != ' ')
-				m = m * 10 + float(buffer[pos] - '0');
+			if (m_Buffer[pos] != ' ')
+				m = m * 10 + float(m_Buffer[pos] - '0');
 			pos++;
 		}
 	}
@@ -889,7 +887,7 @@ float DicomReader::ds2float()
 	return f;
 }
 
-float DicomReader::ds2float(int& pos)
+float DicomReader::Ds2float(int& pos)
 {
 	float f = 0;
 	float d = 1;
@@ -899,49 +897,49 @@ float DicomReader::ds2float(int& pos)
 	if (pos < 0 || pos >= length)
 		return 0;
 
-	if (buffer[pos] == '+')
+	if (m_Buffer[pos] == '+')
 		pos++;
-	if (buffer[pos] == '-')
+	if (m_Buffer[pos] == '-')
 	{
 		pos++;
 		d = -1;
 	}
-	while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-		   buffer[pos] == ' ')
+	while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+				 m_Buffer[pos] == ' ')
 	{
-		if (buffer[pos] != ' ')
-			f = f * 10 + float(buffer[pos] - '0');
+		if (m_Buffer[pos] != ' ')
+			f = f * 10 + float(m_Buffer[pos] - '0');
 		pos++;
 	}
-	if (pos < length && buffer[pos] == '.')
+	if (pos < length && m_Buffer[pos] == '.')
 	{
 		pos++;
-		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-			   buffer[pos] == ' ')
+		while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+					 m_Buffer[pos] == ' ')
 		{
-			if (buffer[pos] != ' ')
+			if (m_Buffer[pos] != ' ')
 			{
-				f = f * 10 + float(buffer[pos] - '0');
+				f = f * 10 + float(m_Buffer[pos] - '0');
 				d *= 10;
 			}
 			pos++;
 		}
 	}
-	if (pos < length && (buffer[pos] == 'e' || buffer[pos] == 'E'))
+	if (pos < length && (m_Buffer[pos] == 'e' || m_Buffer[pos] == 'E'))
 	{
 		pos++;
-		if (buffer[pos] == '+')
+		if (m_Buffer[pos] == '+')
 			pos++;
-		if (buffer[pos] == '-')
+		if (m_Buffer[pos] == '-')
 		{
 			pos++;
 			d1 = -1;
 		}
-		while ((pos < length && buffer[pos] >= '0' && buffer[pos] <= '9') ||
-			   buffer[pos] == ' ')
+		while ((pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9') ||
+					 m_Buffer[pos] == ' ')
 		{
-			if (buffer[pos] != ' ')
-				m = m * 10 + float(buffer[pos] - '0');
+			if (m_Buffer[pos] != ' ')
+				m = m * 10 + float(m_Buffer[pos] - '0');
 			pos++;
 		}
 	}
@@ -952,7 +950,7 @@ float DicomReader::ds2float(int& pos)
 	return f;
 }
 
-void DicomReader::dsarray2float(float* vals, unsigned short nrvals)
+void DicomReader::Dsarray2float(float* vals, unsigned short nrvals)
 {
 	int pos = 0;
 	unsigned short counter = 0;
@@ -960,31 +958,31 @@ void DicomReader::dsarray2float(float* vals, unsigned short nrvals)
 		vals[i] = 0;
 	while (counter < nrvals)
 	{
-		vals[counter] = ds2float(pos);
-		if (buffer[pos] != '\\' && counter + 1 != nrvals)
+		vals[counter] = Ds2float(pos);
+		if (m_Buffer[pos] != '\\' && counter + 1 != nrvals)
 			return;
 		pos++;
 		counter++;
 	}
 }
 
-int DicomReader::is2int()
+int DicomReader::Is2int()
 {
 	int i = 0;
 	int d = 1;
 
 	int pos = 0;
 
-	if (buffer[pos] == '+')
+	if (m_Buffer[pos] == '+')
 		pos++;
-	if (buffer[pos] == '-')
+	if (m_Buffer[pos] == '-')
 	{
 		pos++;
 		d = -1;
 	}
-	while (pos < length && buffer[pos] >= '0' && buffer[pos] <= '9')
+	while (pos < length && m_Buffer[pos] >= '0' && m_Buffer[pos] <= '9')
 	{
-		i = i * 10 + int(buffer[pos] - '0');
+		i = i * 10 + int(m_Buffer[pos] - '0');
 		pos++;
 	}
 
@@ -993,15 +991,15 @@ int DicomReader::is2int()
 	return i;
 }
 
-int DicomReader::bin2int()
+int DicomReader::Bin2int()
 {
 	int i = 0;
 	int pos = 0;
 	int power = 1;
 
-	while (pos < (int)l)
+	while (pos < (int)m_L)
 	{
-		i = i + int(buffer[pos]) * power;
+		i = i + int(m_Buffer[pos]) * power;
 		power *= 256;
 		pos++;
 	}

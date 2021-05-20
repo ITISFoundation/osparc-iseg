@@ -37,8 +37,8 @@
 #define Q_VTK_WIDGET_H
 
 #include "QVTKInteractor.h"
-#include <QWidget>
 #include <QTimer>
+#include <QWidget>
 
 class QVTKInteractorAdapter;
 
@@ -53,13 +53,12 @@ class vtkTDxDevice;
 #endif
 
 #if defined(Q_WS_MAC)
-# if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
-#  define QVTK_USE_COCOA
-# elif defined(VTK_USE_COCOA)
-#  error "VTK configured to use Cocoa, but Qt configured to use Carbon"
-# endif
+#if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
+#define QVTK_USE_COCOA
+#elif defined(VTK_USE_COCOA)
+#error "VTK configured to use Cocoa, but Qt configured to use Carbon"
 #endif
-
+#endif
 
 #include "QVTKWin32Header.h"
 
@@ -68,19 +67,16 @@ class QVTK_EXPORT QVTKWidget : public QWidget
 {
   Q_OBJECT
 
-  Q_PROPERTY(bool automaticImageCacheEnabled
-             READ isAutomaticImageCacheEnabled
-             WRITE setAutomaticImageCacheEnabled)
-  Q_PROPERTY(double maxRenderRateForImageCache
-             READ maxRenderRateForImageCache
-             WRITE setMaxRenderRateForImageCache)
-  Q_PROPERTY(bool deferRenderInPaintEvent
-             READ deferRenderInPaintEvent
-             WRITE setDeferRenderInPaintEvent)
+  Q_PROPERTY(bool automaticImageCacheEnabled READ isAutomaticImageCacheEnabled WRITE
+      setAutomaticImageCacheEnabled)
+  Q_PROPERTY(double maxRenderRateForImageCache READ maxRenderRateForImageCache WRITE
+      setMaxRenderRateForImageCache)
+  Q_PROPERTY(
+    bool deferRenderInPaintEvent READ deferRenderInPaintEvent WRITE setDeferRenderInPaintEvent)
 
 public:
   //! constructor
-  QVTKWidget(QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+  QVTKWidget(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
   //! destructor
   ~QVTKWidget() override;
 
@@ -192,7 +188,7 @@ public Q_SLOTS:
   // Receive notification of the creation of the TDxDevice.
   // Only relevant for Unix.
 #ifdef VTK_USE_TDX
-  void setDevice(vtkTDxDevice *device);
+  void setDevice(vtkTDxDevice* device);
 #endif
 
 protected Q_SLOTS:
@@ -237,7 +233,7 @@ protected:
   // overload focus event
   void focusOutEvent(QFocusEvent*) override;
   // overload Qt's event() to capture more keys
-  bool event( QEvent* e ) override;
+  bool event(QEvent* e) override;
 
   // overload context menu event
   void contextMenuEvent(QContextMenuEvent*) override;
@@ -256,7 +252,7 @@ protected:
   virtual bool paintCachedImage();
 
   // the vtk render window
-  vtkRenderWindow* mRenWin;
+  vtkRenderWindow* mRenWin = nullptr;
   bool UseTDx;
 
   // the paint engine
@@ -277,12 +273,11 @@ protected:
 
 protected:
   vtkImageData* mCachedImage;
-  bool cachedImageCleanFlag;
-  bool automaticImageCache;
-  double maxImageCacheRenderRate;
+  bool cachedImageCleanFlag = false;
+  bool automaticImageCache = false;
+  double maxImageCacheRenderRate = 1.0;
   QVTKInteractorAdapter* mIrenAdapter;
-  bool mDeferRenderInPaintEvent;
-
+  bool mDeferRenderInPaintEvent = false;
 
 private:
   //! unimplemented operator=
@@ -290,7 +285,7 @@ private:
   //! unimplemented copy
   QVTKWidget(const QVTKWidget&);
 
-  unsigned long renderEventCallbackObserverId;
+  unsigned long renderEventCallbackObserverId = 0;
 
   // Description:
   // Callback called on every vtkCommand::RenderEvent fired by the

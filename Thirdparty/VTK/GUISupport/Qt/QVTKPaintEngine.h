@@ -71,10 +71,8 @@ public:
   void drawPolygon(const QPoint* points, int pointCount, PolygonDrawMode mode) override;
 
 protected:
-
   QVTKWidget* Widget;
   QVTKPaintEngineInternal* Internal;
 };
 
 #endif
-

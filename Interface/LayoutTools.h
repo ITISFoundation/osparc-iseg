@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,9 +9,9 @@
  */
 #pragma once
 
+#include <QButtonGroup>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QButtonGroup>
 
 #include <initializer_list>
 
@@ -51,7 +51,7 @@ inline QButtonGroup* make_button_group(std::initializer_list<QString> button_nam
 {
 	auto group = new QButtonGroup;
 	int id = 0;
-	for (const auto &n : button_names)
+	for (const auto& n : button_names)
 	{
 		auto rb = new QRadioButton(n);
 		rb->setChecked(id == checked_id);
@@ -60,4 +60,4 @@ inline QButtonGroup* make_button_group(std::initializer_list<QString> button_nam
 	return group;
 }
 
-}
+} // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -24,107 +24,107 @@ namespace iseg {
 class ISEG_CORE_API BranchItem
 {
 public:
-	BranchItem(void) { Initialize(); }
+	BranchItem() { Initialize(); }
 	BranchItem(BranchItem* parent)
 	{
 		Initialize();
-		_parent = parent;
+		m_Parent = parent;
 	}
 
 	void Initialize()
 	{
-		_parent = nullptr;
-		_children.clear();
-		_centerList.clear();
-		_startVox[0] = _startVox[1] = _startVox[2] = 0;
-		_startVoxWorld[0] = _startVoxWorld[1] = _startVoxWorld[2] = 0;
-		_endVox[0] = _endVox[1] = _endVox[2] = 0;
-		_endVoxWorld[0] = _endVoxWorld[1] = _endVoxWorld[2] = 0;
+		m_Parent = nullptr;
+		m_Children.clear();
+		m_CenterList.clear();
+		m_StartVox[0] = m_StartVox[1] = m_StartVox[2] = 0;
+		m_StartVoxWorld[0] = m_StartVoxWorld[1] = m_StartVoxWorld[2] = 0;
+		m_EndVox[0] = m_EndVox[1] = m_EndVox[2] = 0;
+		m_EndVoxWorld[0] = m_EndVoxWorld[1] = m_EndVoxWorld[2] = 0;
 		if (availablelabels.empty())
 		{
 			for (unsigned i = 60000; i > 0; i--)
 				availablelabels.push_back(i);
 		}
-		_label = availablelabels.back();
+		m_Label = availablelabels.back();
 		availablelabels.pop_back();
 	}
 
 	//! Destructor
-	~BranchItem(void)
+	~BranchItem()
 	{
-		if (_parent != nullptr)
-			_parent->removeChild(getLabel());
-		_centerList.clear();
-		for (std::list<BranchItem*>::iterator it = _children.begin();
-				 it != _children.end(); it++)
+		if (m_Parent != nullptr)
+			m_Parent->RemoveChild(GetLabel());
+		m_CenterList.clear();
+		for (std::list<BranchItem*>::iterator it = m_Children.begin();
+				 it != m_Children.end(); it++)
 		{
-			(*it)->setParentDirty(nullptr);
+			(*it)->SetParentDirty(nullptr);
 			delete *it;
 		}
-		_children.clear();
-		availablelabels.push_back(_label);
+		m_Children.clear();
+		availablelabels.push_back(m_Label);
 	} // xxxa delete children?
 
-	BranchItem* getParent() { return _parent; }
-	std::list<BranchItem*>* getChildren() { return &_children; }
-	void addChild(BranchItem* child)
+	BranchItem* GetParent() { return m_Parent; }
+	std::list<BranchItem*>* GetChildren() { return &m_Children; }
+	void AddChild(BranchItem* child)
 	{
-		std::list<BranchItem*>::iterator it = _children.begin();
-		while ((it != _children.end()) && ((*it) != child))
+		std::list<BranchItem*>::iterator it = m_Children.begin();
+		while ((it != m_Children.end()) && ((*it) != child))
 			it++;
-		if (it == _children.end())
-			_children.push_back(child);
-		if (child->getParent() != this)
-			child->setParent(this);
+		if (it == m_Children.end())
+			m_Children.push_back(child);
+		if (child->GetParent() != this)
+			child->SetParent(this);
 	}
-	void removeChild(unsigned label)
+	void RemoveChild(unsigned label)
 	{
-		std::list<BranchItem*>::iterator it = _children.begin();
-		while ((it != _children.end()) && ((*it)->getLabel() != label))
+		std::list<BranchItem*>::iterator it = m_Children.begin();
+		while ((it != m_Children.end()) && ((*it)->GetLabel() != label))
 			it++;
-		if (it != _children.end())
+		if (it != m_Children.end())
 		{
-			(*it)->setParentDirty(nullptr);
+			(*it)->SetParentDirty(nullptr);
 			//xxxa delete *it?
-			_children.erase(it);
+			m_Children.erase(it);
 		}
 	}
-	void setParent(BranchItem* parent)
+	void SetParent(BranchItem* parent)
 	{
-		if (_parent != nullptr)
-			_parent->removeChild(getLabel());
-		_parent = parent;
+		if (m_Parent != nullptr)
+			m_Parent->RemoveChild(GetLabel());
+		m_Parent = parent;
 		if (parent != nullptr)
-			parent->addChild(this);
+			parent->AddChild(this);
 	}
 
-	unsigned getLabel() { return _label; }
-	void setLabel(unsigned label) { _label = label; }
+	unsigned GetLabel() const { return m_Label; }
+	void SetLabel(unsigned label) { m_Label = label; }
 
 	// Centerlist stuff (centerline of vessel)
-	std::vector<Vec3>* getCenterList() { return &_centerList; }
-	unsigned getCenterListSize() { return static_cast<unsigned>(_centerList.size()); }
-	Vec3 getCenterPointAt(unsigned index) { return _centerList.at(index); }
-	void correct_branchpoints()
+	std::vector<Vec3>* GetCenterList() { return &m_CenterList; }
+	unsigned GetCenterListSize() { return static_cast<unsigned>(m_CenterList.size()); }
+	Vec3 GetCenterPointAt(unsigned index) { return m_CenterList.at(index); }
+	void CorrectBranchpoints()
 	{
-		if (!_children.empty())
+		if (!m_Children.empty())
 		{
-			*(_centerList.rbegin()) = (*_children.begin())->getCenterPointAt(0);
-			for (std::list<BranchItem*>::iterator it = _children.begin();
-					 it != _children.end(); it++)
+			*(m_CenterList.rbegin()) = (*m_Children.begin())->GetCenterPointAt(0);
+			for (std::list<BranchItem*>::iterator it = m_Children.begin();
+					 it != m_Children.end(); it++)
 			{
-				(*it)->correct_branchpoints();
+				(*it)->CorrectBranchpoints();
 			}
 		}
 	}
 
-	void addCenter(Vec3 center) { _centerList.push_back(center); }
-	void setStartVox(Vec3 startVox) { _startVox = startVox; }
-	void setEndVox(Vec3 endVox) { _endVox = endVox; }
+	void AddCenter(Vec3 center) { m_CenterList.push_back(center); }
+	void SetStartVox(Vec3 startVox) { m_StartVox = startVox; }
+	void SetEndVox(Vec3 endVox) { m_EndVox = endVox; }
 
-	void doug_peuck(float epsilon, float dx, float dy, float dz)
+	void DougPeuck(float epsilon, float dx, float dy, float dz)
 	{
-		unsigned int n = (unsigned int)_centerList.size();
+		unsigned int n = (unsigned int)m_CenterList.size();
 		if (n > 2)
 		{
 			std::vector<bool> v1;
@@ -134,34 +134,32 @@ public:
 				v1[i] = false;
 			v1[0] = true;
 			v1[n - 1] = true;
-			doug_peuck_sub(epsilon, 0, n - 1, &v1, dx, dy, dz);
+			DougPeuckSub(epsilon, 0, n - 1, &v1, dx, dy, dz);
 
-			std::vector<Vec3>::iterator it = _centerList.begin();
+			std::vector<Vec3>::iterator it = m_CenterList.begin();
 			for (unsigned int i = 0; i < n; i++)
 			{
 				if (!v1[i])
-					it = _centerList.erase(it);
+					it = m_CenterList.erase(it);
 				else
 					it++;
 			}
 		}
-		return;
 	}
-	void doug_peuck_inclchildren(float epsilon, float dx, float dy, float dz)
+	void DougPeuckInclchildren(float epsilon, float dx, float dy, float dz)
 	{
-		doug_peuck(epsilon, dx, dy, dz);
-		for (std::list<BranchItem*>::iterator it = _children.begin();
-				 it != _children.end(); it++)
+		DougPeuck(epsilon, dx, dy, dz);
+		for (std::list<BranchItem*>::iterator it = m_Children.begin();
+				 it != m_Children.end(); it++)
 		{
-			(*it)->doug_peuck_inclchildren(epsilon, dx, dy, dz);
+			(*it)->DougPeuckInclchildren(epsilon, dx, dy, dz);
 		}
 	}
 
-	void doug_peuck(float epsilon, float dx, float dy, float dz,
-			std::vector<Vec3>& vp)
+	void DougPeuck(float epsilon, float dx, float dy, float dz, std::vector<Vec3>& vp)
 	{
 		vp.clear();
-		unsigned int n = (unsigned int)_centerList.size();
+		unsigned int n = (unsigned int)m_CenterList.size();
 		if (n > 2)
 		{
 			std::vector<bool> v1;
@@ -171,9 +169,9 @@ public:
 				v1[i] = false;
 			v1[0] = true;
 			v1[n - 1] = true;
-			doug_peuck_sub(epsilon, 0, n - 1, &v1, dx, dy, dz);
+			DougPeuckSub(epsilon, 0, n - 1, &v1, dx, dy, dz);
 
-			std::vector<Vec3>::iterator it = _centerList.begin();
+			std::vector<Vec3>::iterator it = m_CenterList.begin();
 			for (unsigned int i = 0; i < n; i++)
 			{
 				if (v1[i])
@@ -183,27 +181,25 @@ public:
 		}
 		else
 		{
-			vp = _centerList;
+			vp = m_CenterList;
 		}
-		return;
 	}
-	void doug_peuck_inclchildren(float epsilon, float dx, float dy, float dz,
-			std::vector<std::vector<Vec3>>& vp)
+	void DougPeuckInclchildren(float epsilon, float dx, float dy, float dz, std::vector<std::vector<Vec3>>& vp)
 	{
 		std::vector<Vec3> vp2;
-		doug_peuck(epsilon, dx, dy, dz, vp2);
+		DougPeuck(epsilon, dx, dy, dz, vp2);
 		vp.push_back(vp2);
-		for (std::list<BranchItem*>::iterator it = _children.begin();
-				 it != _children.end(); it++)
+		for (std::list<BranchItem*>::iterator it = m_Children.begin();
+				 it != m_Children.end(); it++)
 		{
-			(*it)->doug_peuck_inclchildren(epsilon, dx, dy, dz, vp);
+			(*it)->DougPeuckInclchildren(epsilon, dx, dy, dz, vp);
 		}
 	}
-	void getCenterListSlice(unsigned short slicenr, std::vector<Point>& vp)
+	void GetCenterListSlice(unsigned short slicenr, std::vector<Point>& vp)
 	{
 		Point p;
-		for (std::vector<Vec3>::iterator it = _centerList.begin();
-				 it != _centerList.end(); it++)
+		for (std::vector<Vec3>::iterator it = m_CenterList.begin();
+				 it != m_CenterList.end(); it++)
 		{
 			if ((unsigned short)((*it)[2] + 0.0001f) == slicenr)
 			{
@@ -213,73 +209,70 @@ public:
 			}
 		}
 	}
-	void getCenterListSlice_inclchildren(unsigned short slicenr,
-			std::vector<Point>& vp)
+	void GetCenterListSliceInclchildren(unsigned short slicenr, std::vector<Point>& vp)
 	{
-		getCenterListSlice(slicenr, vp);
-		for (std::list<BranchItem*>::iterator it = _children.begin();
-				 it != _children.end(); it++)
+		GetCenterListSlice(slicenr, vp);
+		for (std::list<BranchItem*>::iterator it = m_Children.begin();
+				 it != m_Children.end(); it++)
 		{
-			(*it)->getCenterListSlice_inclchildren(slicenr, vp);
+			(*it)->GetCenterListSliceInclchildren(slicenr, vp);
 		}
 	}
 
 protected:
-	void setParentDirty(BranchItem* parent)
+	void SetParentDirty(BranchItem* parent)
 	{
-		_parent = parent;
+		m_Parent = parent;
 		if (parent != nullptr)
-			parent->addChild(this);
+			parent->AddChild(this);
 	}
 
 public:
-	static void init_availablelabels();
+	static void InitAvailablelabels();
 
 private:
 	static std::vector<unsigned> availablelabels;
 	// unique label of branch at runtime
-	unsigned _label;
+	unsigned m_Label;
 	// parent branch, root => nullptr
-	BranchItem* _parent;
+	BranchItem* m_Parent;
 	// list of branch's children
-	std::list<BranchItem*> _children;
+	std::list<BranchItem*> m_Children;
 
 	// centerline list in world coordinates
-	std::vector<Vec3> _centerList;
+	std::vector<Vec3> m_CenterList;
 
-	Vec3 _startVox;			 // voxel (in voxel coord) where branch starts
-	Vec3 _startVoxWorld; // voxel (in world coord) where branch starts
+	Vec3 m_StartVox;			// voxel (in voxel coord) where branch starts
+	Vec3 m_StartVoxWorld; // voxel (in world coord) where branch starts
 	Vec3
-			_endVox; // voxel (in voxel coord) where branch ends (end of vessel or begin of other branches)
+			m_EndVox; // voxel (in voxel coord) where branch ends (end of vessel or begin of other branches)
 	Vec3
-			_endVoxWorld; // voxel (in world coord) where branch ends (end of vessel or begin of other branches)
-	void doug_peuck_sub(float epsilon, const unsigned int p1,
-			const unsigned int p2, std::vector<bool>* v1_p,
-			float dx, float dy, float dz)
+			m_EndVoxWorld; // voxel (in world coord) where branch ends (end of vessel or begin of other branches)
+	void DougPeuckSub(float epsilon, const unsigned int p1, const unsigned int p2, std::vector<bool>* v1_p, float dx, float dy, float dz)
 	{
 		//	cout << p1<<" "<<p2<<endl;
 		if (p2 <= p1 + 1)
 			return;
 		float dv, l;
 		float max_dist = 0;
-		Vec3 SIJ, SIV, SIH;
+		Vec3 sij, siv, sih;
 		unsigned int max_pos = p1;
 
-		SIJ[0] = (_centerList[p2][0] - _centerList[p1][0]) * dx;
-		SIJ[1] = (_centerList[p2][1] - _centerList[p1][1]) * dy;
-		SIJ[2] = (_centerList[p2][2] - _centerList[p1][2]) * dz;
+		sij[0] = (m_CenterList[p2][0] - m_CenterList[p1][0]) * dx;
+		sij[1] = (m_CenterList[p2][1] - m_CenterList[p1][1]) * dy;
+		sij[2] = (m_CenterList[p2][2] - m_CenterList[p1][2]) * dz;
 
-		l = SIJ[0] * SIJ[0] + SIJ[1] * SIJ[1] + SIJ[2] * SIJ[2];
+		l = sij[0] * sij[0] + sij[1] * sij[1] + sij[2] * sij[2];
 
 		for (unsigned int i = p1 + 1; i < p2; i++)
 		{
-			SIV[0] = (_centerList[i][0] - _centerList[p1][0]) * dx;
-			SIV[1] = (_centerList[i][1] - _centerList[p1][1]) * dy;
-			SIV[2] = (_centerList[i][2] - _centerList[p1][2]) * dz;
-			SIH[0] = SIV[1] * SIJ[2] - SIV[2] * SIJ[1];
-			SIH[1] = SIV[2] * SIJ[0] - SIV[0] * SIJ[2];
-			SIH[2] = SIV[0] * SIJ[1] - SIV[1] * SIJ[0];
-			dv = (SIH[0] * SIH[0] + SIH[1] * SIH[1] + SIH[2] * SIH[2]) / l;
+			siv[0] = (m_CenterList[i][0] - m_CenterList[p1][0]) * dx;
+			siv[1] = (m_CenterList[i][1] - m_CenterList[p1][1]) * dy;
+			siv[2] = (m_CenterList[i][2] - m_CenterList[p1][2]) * dz;
+			sih[0] = siv[1] * sij[2] - siv[2] * sij[1];
+			sih[1] = siv[2] * sij[0] - siv[0] * sij[2];
+			sih[2] = siv[0] * sij[1] - siv[1] * sij[0];
+			dv = (sih[0] * sih[0] + sih[1] * sih[1] + sih[2] * sih[2]) / l;
 			if (dv > max_dist)
 			{
 				max_dist = dv;
@@ -290,11 +283,9 @@ private:
 		if (max_dist > epsilon * epsilon)
 		{
 			(*v1_p)[max_pos] = true;
-			doug_peuck_sub(epsilon, p1, max_pos, v1_p, dx, dy, dz);
-			doug_peuck_sub(epsilon, max_pos, p2, v1_p, dx, dy, dz);
+			DougPeuckSub(epsilon, p1, max_pos, v1_p, dx, dy, dz);
+			DougPeuckSub(epsilon, max_pos, p2, v1_p, dx, dy, dz);
 		}
-
-		return;
 	}
 };
 

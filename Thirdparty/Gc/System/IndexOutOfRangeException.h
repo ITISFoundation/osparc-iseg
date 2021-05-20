@@ -30,35 +30,33 @@
 
 #include "ArgumentException.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+/** Index out of range exception class. */
+class IndexOutOfRangeException
+    : public ArgumentException
 {
-    namespace System
-    {
-        /** Index out of range exception class. */
-        class IndexOutOfRangeException 
-            : public ArgumentException
-        {
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            IndexOutOfRangeException(const char *func, int line)
-                : ArgumentException(func, line, "Index out of range.")
-            {}
+    IndexOutOfRangeException(const char * func, int line)
+        : ArgumentException(func, line, "Index out of range.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            IndexOutOfRangeException(const char *func, int line, const std::string &msg)
-                : ArgumentException(func, line, msg)
-            {}
-        };
-    }
+    IndexOutOfRangeException(const char * func, int line, const std::string & msg)
+        : ArgumentException(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::System
 
 #endif

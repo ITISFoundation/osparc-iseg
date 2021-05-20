@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,17 +14,16 @@
 namespace iseg { namespace plugin {
 
 namespace {
-LevelsetPlugin _register_addon;
+LevelsetPlugin register_addon;
 }
 
-LevelsetPlugin::LevelsetPlugin() {}
+LevelsetPlugin::LevelsetPlugin() = default;
 
-LevelsetPlugin::~LevelsetPlugin() {}
+LevelsetPlugin::~LevelsetPlugin() = default;
 
-WidgetInterface* LevelsetPlugin::create_widget(QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags) const
+WidgetInterface* LevelsetPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
 {
-	return new LevelsetWidget(slice_handler(), parent, name, wFlags);
+	return new LevelsetWidget(SliceHandler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

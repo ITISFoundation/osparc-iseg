@@ -90,7 +90,7 @@ NonMaxSuppressionImageFilter<TInputImage, TOutputImage>
 template <typename TInputImage, typename TOutputImage>
 void
 NonMaxSuppressionImageFilter<TInputImage, TOutputImage>
-::GenerateInputRequestedRegion() throw(InvalidRequestedRegionError)
+::GenerateInputRequestedRegion()
 {
   // call the superclass' implementation of this method. this should
   // copy the output requested region to the input requested region
@@ -119,7 +119,7 @@ NonMaxSuppressionImageFilter<TInputImage, TOutputImage>
 template <typename TInputImage, typename TOutputImage >
 void
 NonMaxSuppressionImageFilter<TInputImage, TOutputImage >
-::GenerateData(void)
+::GenerateData()
 {
 	auto nbthreads = this->GetNumberOfWorkUnits();
 
@@ -172,14 +172,14 @@ NonMaxSuppressionImageFilter<TInputImage, TOutputImage>
   ProgressReporter * progress = new ProgressReporter(this, threadId, NumberOfRows[m_CurrentDimension], 30, m_CurrentDimension * progressPerDimension, progressPerDimension);
 
 
-  typedef ImageLinearConstIteratorWithIndex< TInputImage  >  InputConstIteratorType;
-  typedef ImageLinearIteratorWithIndex< TOutputImage >  OutputIteratorType;
+  using InputConstIteratorType = ImageLinearConstIteratorWithIndex< TInputImage  >  ;
+  using OutputIteratorType = ImageLinearIteratorWithIndex<TOutputImage>;
 
   // for stages after the first
-  typedef ImageLinearConstIteratorWithIndex< TOutputImage  >  OutputConstIteratorType;
+  using OutputConstIteratorType = ImageLinearConstIteratorWithIndex<TOutputImage>;
 
 
-  typedef ImageRegion< TInputImage::ImageDimension > RegionType;
+  using RegionType = ImageRegion<TInputImage::ImageDimension>;
 
   typename TInputImage::ConstPointer   inputImage(    this->GetInput ()   );
   typename TOutputImage::Pointer       outputImage(   this->GetOutput()        );

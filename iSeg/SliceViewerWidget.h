@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -35,60 +35,56 @@
 
 namespace iseg {
 
-class bmptissuesliceshower : public QWidget
+class Bmptissuesliceshower : public QWidget
 {
 	Q_OBJECT
 public:
-	bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1,
-						 float thickness1, float zoom1, bool orientation,
-						 bool bmpon, bool tissuevisible1, bool zposvisible1,
-						 bool xyposvisible1, int xypos1, QWidget* parent = 0,
-						 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	void update();
-	void set_tissuevisible(bool on);
-	void set_zposvisible(bool on);
-	void set_xyposvisible(bool on);
-	void set_bmporwork(bool bmpon);
+	void SetTissuevisible(bool on);
+	void SetZposvisible(bool on);
+	void SetXyposvisible(bool on);
+	void SetBmporwork(bool bmpon);
 
 protected:
-	void paintEvent(QPaintEvent* e);
+	void paintEvent(QPaintEvent* e) override;
 
 private:
-	void reload_bits();
-	QImage image;
-	unsigned short width, height;
-	unsigned short nrslices, slicenr;
-	float* bmpbits;
-	tissues_size_t* tissue;
-	bool tissuevisible;
-	bool zposvisible;
-	bool xyposvisible;
-	int xypos;
-	bool directionx;
-	bool bmporwork;
-	SlicesHandler* handler3D;
-	float thickness;
-	float d;
-	float zoom;
-	float scalefactorbmp;
-	float scaleoffsetbmp;
-	float scalefactorwork;
-	float scaleoffsetwork;
+	void ReloadBits();
+	QImage m_Image;
+	unsigned short m_Width, m_Height;
+	unsigned short m_Nrslices, m_Slicenr;
+	float* m_Bmpbits;
+	tissues_size_t* m_Tissue;
+	bool m_Tissuevisible;
+	bool m_Zposvisible;
+	bool m_Xyposvisible;
+	int m_Xypos;
+	bool m_Directionx;
+	bool m_Bmporwork;
+	SlicesHandler* m_Handler3D;
+	float m_Thickness;
+	float m_D;
+	float m_Zoom;
+	float m_Scalefactorbmp;
+	float m_Scaleoffsetbmp;
+	float m_Scalefactorwork;
+	float m_Scaleoffsetwork;
 	//unsigned char mode;
 
 public slots:
-	void bmp_changed();
-	void work_changed();
-	void tissue_changed();
-	void slicenr_changed(int i);
-	void zpos_changed();
-	void xypos_changed(int i);
-	void thickness_changed(float thickness1);
-	void pixelsize_changed(Pair pixelsize1);
-	void set_zoom(double z);
-	void set_scale(float offset1, float factor1, bool bmporwork1);
-	void set_scaleoffset(float offset1, bool bmporwork1);
-	void set_scalefactor(float factor1, bool bmporwork1);
+	void BmpChanged();
+	void WorkChanged();
+	void TissueChanged();
+	void SlicenrChanged(int i);
+	void ZposChanged();
+	void XyposChanged(int i);
+	void ThicknessChanged(float thickness1);
+	void PixelsizeChanged(Pair pixelsize1);
+	void SetZoom(double z);
+	void SetScale(float offset1, float factor1, bool bmporwork1);
+	void SetScaleoffset(float offset1, bool bmporwork1);
+	void SetScalefactor(float factor1, bool bmporwork1);
 	//void mode_changed(unsigned char newmode);
 };
 
@@ -96,60 +92,58 @@ class SliceViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
-					  float thickness1, float zoom1, QWidget* parent = 0,
-					  const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~SliceViewerWidget();
-	int get_slicenr();
+	SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~SliceViewerWidget() override;
+	int GetSlicenr();
 
 protected:
-	void closeEvent(QCloseEvent*);
+	void closeEvent(QCloseEvent*) override;
 
 private:
-	Q3VBoxLayout* vbox;
-	Q3HBoxLayout* hbox;
-	Q3HBoxLayout* hbox2;
+	Q3VBoxLayout* m_Vbox;
+	Q3HBoxLayout* m_Hbox;
+	Q3HBoxLayout* m_Hbox2;
 	//	QHBox *hbox1;
-	QCheckBox* cb_tissuevisible;
-	QCheckBox* cb_zposvisible;
-	QCheckBox* cb_xyposvisible;
-	bmptissuesliceshower* shower;
-	QScrollBar* qsb_slicenr;
-	unsigned short nrslices;
-	bool tissuevisible;
-	bool directionx;
-	QRadioButton* rb_bmp;
-	QRadioButton* rb_work;
-	QButtonGroup* bg_bmporwork;
-	Q3ScrollView* scroller;
-	SlicesHandler* handler3D;
+	QCheckBox* m_CbTissuevisible;
+	QCheckBox* m_CbZposvisible;
+	QCheckBox* m_CbXyposvisible;
+	Bmptissuesliceshower* m_Shower;
+	QScrollBar* m_QsbSlicenr;
+	unsigned short m_Nrslices;
+	bool m_Tissuevisible;
+	bool m_Directionx;
+	QRadioButton* m_RbBmp;
+	QRadioButton* m_RbWork;
+	QButtonGroup* m_BgBmporwork;
+	Q3ScrollView* m_Scroller;
+	SlicesHandler* m_Handler3D;
 	//	float thickness;
-	bool xyexists;
+	bool m_Xyexists;
 
 signals:
-	void hasbeenclosed();
-	void slice_changed(int i);
+	void Hasbeenclosed();
+	void SliceChanged(int i);
 
 private slots:
-	void workorbmp_changed();
-	void xyposvisible_changed();
-	void zposvisible_changed();
-	void slicenr_changed(int i);
-	void tissuevisible_changed();
+	void WorkorbmpChanged();
+	void XyposvisibleChanged();
+	void ZposvisibleChanged();
+	void SlicenrChanged(int i);
+	void TissuevisibleChanged();
 
 public slots:
-	void bmp_changed();
-	void work_changed();
-	void tissue_changed();
-	void thickness_changed(float thickness1);
-	void pixelsize_changed(Pair pixelsize1);
-	void xyexists_changed(bool on);
-	void zpos_changed();
-	void xypos_changed(int i);
-	void set_zoom(double z);
-	void set_scale(float offset1, float factor1, bool bmporwork1);
-	void set_scaleoffset(float offset1, bool bmporwork1);
-	void set_scalefactor(float factor1, bool bmporwork1);
+	void BmpChanged();
+	void WorkChanged();
+	void TissueChanged();
+	void ThicknessChanged(float thickness1);
+	void PixelsizeChanged(Pair pixelsize1);
+	void XyexistsChanged(bool on);
+	void ZposChanged();
+	void XyposChanged(int i);
+	void SetZoom(double z);
+	void SetScale(float offset1, float factor1, bool bmporwork1);
+	void SetScaleoffset(float offset1, bool bmporwork1);
+	void SetScalefactor(float factor1, bool bmporwork1);
 };
 
 } // namespace iseg

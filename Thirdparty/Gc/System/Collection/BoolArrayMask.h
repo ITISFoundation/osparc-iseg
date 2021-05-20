@@ -30,104 +30,103 @@
 
 #include "IArrayMask.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        namespace Collection
-        {
-            /** Array mask implementation using bool array. 
+namespace Gc {
+namespace System {
+namespace Collection {
+/** Array mask implementation using bool array. 
             
                 Allows to specify which elements of an array are masked. The
                 number of unmasked elements and backward indexes are generated
                 on-demand.
             */
-            template <Size N>
-            class BoolArrayMask
-                : public IArrayMask<N>
-            {
-            protected:
-                /** Reference to the bool array. */
-                const Array<N,bool> &m_data;
-                /** Backward indexes. */
-                mutable Array<N,Size> m_bi;
-                /** Number of unmasked elements. */
-                mutable Size m_num_uel;
-                /** Masked element flag. */
-                bool m_mask_flag;
-                /** Number of unmasked elements has been calculated. */
-                mutable bool m_has_num_uel;
-                /** Backward indexes have been generated. */
-                mutable bool m_has_bi;
+template <Size N>
+class BoolArrayMask
+    : public IArrayMask<N>
+{
+  protected:
+    /** Reference to the bool array. */
+    const Array<N, bool> & m_data;
+    /** Backward indexes. */
+    mutable Array<N, Size> m_bi;
+    /** Number of unmasked elements. */
+    mutable Size m_num_uel;
+    /** Masked element flag. */
+    bool m_mask_flag;
+    /** Number of unmasked elements has been calculated. */
+    mutable bool m_has_num_uel;
+    /** Backward indexes have been generated. */
+    mutable bool m_has_bi;
 
-            public:
-                /** Constructor. 
+  public:
+    /** Constructor. 
                 
                     Takes reference to the \c bool array where masked
                     elements are those with mask_flag value.
                 */
-                BoolArrayMask(const Array<N,bool> &ba, bool mask_flag)
-                    : m_data(ba), m_mask_flag(mask_flag), m_has_num_uel(false), 
-                    m_has_bi(false)
-                {}
+    BoolArrayMask(const Array<N, bool> & ba, bool mask_flag)
+        : m_data(ba)
+        , m_mask_flag(mask_flag)
+        , m_has_num_uel(false)
+        , m_has_bi(false)
+    {}
 
-                virtual const Math::Algebra::Vector<N,Size>& Dimensions() const
-                {
-                    return m_data.Dimensions();
-                }
-
-                virtual Size Elements() const
-                {
-                    return m_data.Elements();
-                }
-
-                virtual Size UnmaskedElements() const
-                {
-                    if (!m_has_num_uel)
-                    {
-                        m_has_num_uel = true;
-                        m_num_uel = 0;
-
-                        for (const bool *it = m_data.Begin(); it != m_data.End(); ++it)
-                        {
-                            if (*it != m_mask_flag)
-                            {
-                                m_num_uel++;
-                            }
-                        }
-                    }
-
-                    return m_num_uel;
-                }
-
-                virtual bool IsMasked(Size nidx) const
-                {
-                    return m_data[nidx] == m_mask_flag;
-                }
-
-                virtual const System::Collection::Array<N,Size>& BackwardIndexes() const
-                {
-                    if (!m_has_bi)
-                    {
-                        m_has_bi = true;
-                        m_bi.Resize(m_data.Dimensions());
-
-                        Size idx = 0;
-                        for (const bool *it = m_data.Begin(); it != m_data.End(); ++it)
-                        {
-                            if (*it != m_mask_flag)
-                            {
-                                m_bi[it - m_data.Begin()] = idx;
-                                idx++;
-                            }
-                        }
-                    }
-
-                    return m_bi;
-                }
-            };
-        }
+    const Math::Algebra::Vector<N, Size> & Dimensions() const override
+    {
+        return m_data.Dimensions();
     }
+
+    Size Elements() const override
+    {
+        return m_data.Elements();
+    }
+
+    Size UnmaskedElements() const override
+    {
+        if (!m_has_num_uel)
+        {
+            m_has_num_uel = true;
+            m_num_uel = 0;
+
+            for (const bool * it = m_data.Begin(); it != m_data.End(); ++it)
+            {
+                if (*it != m_mask_flag)
+                {
+                    m_num_uel++;
+                }
+            }
+        }
+
+        return m_num_uel;
+    }
+
+    bool IsMasked(Size nidx) const override
+    {
+        return m_data[nidx] == m_mask_flag;
+    }
+
+    const System::Collection::Array<N, Size> & BackwardIndexes() const override
+    {
+        if (!m_has_bi)
+        {
+            m_has_bi = true;
+            m_bi.Resize(m_data.Dimensions());
+
+            Size idx = 0;
+            for (const bool * it = m_data.Begin(); it != m_data.End(); ++it)
+            {
+                if (*it != m_mask_flag)
+                {
+                    m_bi[it - m_data.Begin()] = idx;
+                    idx++;
+                }
+            }
+        }
+
+        return m_bi;
+    }
+};
 }
+}
+} // namespace Gc::System::Collection
 
 #endif

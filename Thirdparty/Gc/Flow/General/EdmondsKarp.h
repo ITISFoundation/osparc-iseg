@@ -31,13 +31,10 @@
 #include "../../Core.h"
 #include "FordFulkerson.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace General
-        {
-            /** Implementation of Edmonds/Karp maximum flow algorithm on general directed graphs.
+namespace Gc {
+namespace Flow {
+namespace General {
+/** Implementation of Edmonds/Karp maximum flow algorithm on general directed graphs.
 
                 Description of this algorithm can be found in:
                 - Jack Edmonds, Richard M. Karp: <em>Theoretical Improvements in 
@@ -60,37 +57,36 @@ namespace Gc
                 @tparam TFLOW %Data type used for the flow value.
                 @tparam TCAP %Data type used for arc capacity values.
             */
-		    template <class TFLOW, class TCAP>
-		    class GC_DLL_EXPORT EdmondsKarp 
-			    : public FordFulkerson<TFLOW,TCAP>
-		    {
-		    public:
-                /** Strategy for finding the augmenting paths in the residual graph. */
-			    enum Strategy
-			    {
-                    /** Shortest path method. */
-				    ShortestPathMethod,
-                    /** Fattest path method. */                    
-				    FattestPathMethod
-			    };
+template <class TFLOW, class TCAP>
+class GC_DLL_EXPORT EdmondsKarp
+    : public FordFulkerson<TFLOW, TCAP>
+{
+  public:
+    /** Strategy for finding the augmenting paths in the residual graph. */
+    enum Strategy {
+        /** Shortest path method. */
+        ShortestPathMethod,
+        /** Fattest path method. */
+        FattestPathMethod
+    };
 
-            protected:
-                using FordFulkerson<TFLOW,TCAP>::m_node_heap;
+  protected:
+    using FordFulkerson<TFLOW, TCAP>::m_node_heap;
 
-                /** Current path finding strategy. */
-			    Strategy m_strategy;
+    /** Current path finding strategy. */
+    Strategy m_strategy;
 
-		    public:
-			    /** Constructor. */
-			    EdmondsKarp()
-				    : FordFulkerson<TFLOW,TCAP>(), m_strategy(ShortestPathMethod)
-			    {}
+  public:
+    /** Constructor. */
+    EdmondsKarp()
+        : FordFulkerson<TFLOW, TCAP>()
+        , m_strategy(ShortestPathMethod)
+    {}
 
-			    /** Destructor. */
-			    virtual ~EdmondsKarp()
-			    {}
+    /** Destructor. */
+    ~EdmondsKarp() override = default;
 
-			    /** Select path searching strategy.
+    /** Select path searching strategy.
 
                     @param[in] strategy Selected strategy.
 
@@ -98,27 +94,27 @@ namespace Gc
 				    and capacity scaling. This combination will result into
 				    performance degradation.
 			    */
-			    void SelectStrategy (Strategy strategy)
-			    {
-				    m_strategy = strategy;
-			    }
+    void SelectStrategy(Strategy strategy)
+    {
+        m_strategy = strategy;
+    }
 
-                /** Get currently selected path searching strategy.
+    /** Get currently selected path searching strategy.
                     
                     @return Currently selected strategy.
                 */
-                Strategy CurrentStrategy() const
-                {
-                    return m_strategy;
-                }
+    Strategy CurrentStrategy() const
+    {
+        return m_strategy;
+    }
 
-		    private:
-			    virtual bool FindAugmentingPath (
-                    typename FordFulkerson<TFLOW,TCAP>::Node *source, 
-                    typename FordFulkerson<TFLOW,TCAP>::Node *sink, Size timestamp, 
-                    TCAP scale, TCAP &maxrjcap);
+  private:
+    bool FindAugmentingPath(
+        typename FordFulkerson<TFLOW, TCAP>::Node * source,
+        typename FordFulkerson<TFLOW, TCAP>::Node * sink, Size timestamp,
+        TCAP scale, TCAP & maxrjcap) override;
 
-			    /** Find the shortest path from the source to the sink.
+    /** Find the shortest path from the source to the sink.
                 
                     Implemented using breadth first search.
 
@@ -131,11 +127,11 @@ namespace Gc
                         a new threshold).
 				    @return \c True if augmenting path exists, \c false otherwise .
 			    */
-			    bool BreadthFirstSearch (typename FordFulkerson<TFLOW,TCAP>::Node *source, 
-                    typename FordFulkerson<TFLOW,TCAP>::Node *sink, Size timestamp, 
-                    TCAP scale, TCAP &maxrjcap);
+    bool BreadthFirstSearch(typename FordFulkerson<TFLOW, TCAP>::Node * source,
+                            typename FordFulkerson<TFLOW, TCAP>::Node * sink, Size timestamp,
+                            TCAP scale, TCAP & maxrjcap);
 
-			    /** Find the fattest path from source to sink.
+    /** Find the fattest path from source to sink.
 
                     This methods implements a variant of the Jarnik/Prim minimum 
                     spanning tree algorithm, starting with the source node and adding 
@@ -146,11 +142,11 @@ namespace Gc
 				    @param[in] timestamp Current timestamp.
 				    @return \c True if augmenting path exists, \c false otherwise.
 			    */
-			    bool FattestPathSearch (typename FordFulkerson<TFLOW,TCAP>::Node *source, 
-                    typename FordFulkerson<TFLOW,TCAP>::Node *sink, Size timestamp);
-		    };
-        }
-	}
+    bool FattestPathSearch(typename FordFulkerson<TFLOW, TCAP>::Node * source,
+                           typename FordFulkerson<TFLOW, TCAP>::Node * sink, Size timestamp);
+};
 }
+}
+} // namespace Gc::Flow::General
 
 #endif

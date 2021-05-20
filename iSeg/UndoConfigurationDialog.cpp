@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,6 +11,8 @@
 
 #include "UndoConfigurationDialog.h"
 
+#include "Interface/QtConnect.h"
+
 #include <QFormLayout>
 #include <qcheckbox.h>
 #include <qlabel.h>
@@ -19,46 +21,43 @@
 
 namespace iseg {
 
-UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name,
-												 Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
 {
 	auto layout = new QFormLayout;
 
-	cb_undo3D = new QCheckBox;
-	cb_undo3D->setChecked(handler3D->return_undo3D());
+	m_CbUndo3D = new QCheckBox;
+	m_CbUndo3D->setChecked(m_Handler3D->ReturnUndo3D());
 
-	sb_nrundo = new QSpinBox(1, 100, 1, nullptr);
-	sb_nrundo->setValue(handler3D->GetNumberOfUndoSteps());
-	sb_nrundoarrays = new QSpinBox(6, 10000, 1, nullptr);
-	sb_nrundoarrays->setValue(handler3D->GetNumberOfUndoArrays());
+	m_SbNrundo = new QSpinBox(1, 100, 1, nullptr);
+	m_SbNrundo->setValue(m_Handler3D->GetNumberOfUndoSteps());
+	m_SbNrundoarrays = new QSpinBox(6, 10000, 1, nullptr);
+	m_SbNrundoarrays->setValue(m_Handler3D->GetNumberOfUndoArrays());
 
-	pb_close = new QPushButton("Accept");
+	m_PbClose = new QPushButton("Accept");
 
 	// layout
-	layout->addRow(tr("Enable 3D Undo"), cb_undo3D);
-	layout->addRow(tr("Maximal nr of undo steps"), sb_nrundo);
-	layout->addRow(tr("Maximal nr of stored images"), sb_nrundoarrays);
-	layout->addRow(pb_close);
+	layout->addRow(tr("Enable 3D Undo"), m_CbUndo3D);
+	layout->addRow(tr("Maximal nr of undo steps"), m_SbNrundo);
+	layout->addRow(tr("Maximal nr of stored images"), m_SbNrundoarrays);
+	layout->addRow(m_PbClose);
 
 	setLayout(layout);
 
 	// connections
-	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(ok_pressed()));
+	QObject_connect(m_PbClose, SIGNAL(clicked()), this, SLOT(OkPressed()));
 }
 
-UndoConfigurationDialog::~UndoConfigurationDialog() 
-{
-	
-}
+UndoConfigurationDialog::~UndoConfigurationDialog()
+= default;
 
-void UndoConfigurationDialog::ok_pressed()
+void UndoConfigurationDialog::OkPressed()
 {
-	handler3D->set_undo3D(cb_undo3D->isChecked());
-	handler3D->SetNumberOfUndoArrays((unsigned)sb_nrundoarrays->value());
-	handler3D->SetNumberOfUndoSteps((unsigned)sb_nrundo->value());
+	m_Handler3D->SetUndo3D(m_CbUndo3D->isChecked());
+	m_Handler3D->SetNumberOfUndoArrays((unsigned)m_SbNrundoarrays->value());
+	m_Handler3D->SetNumberOfUndoSteps((unsigned)m_SbNrundo->value());
 
 	close();
 }
 
-}// namespace iseg
+} // namespace iseg

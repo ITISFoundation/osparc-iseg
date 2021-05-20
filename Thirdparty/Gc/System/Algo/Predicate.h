@@ -30,133 +30,129 @@
 
 #include "Function.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        namespace Algo
-        {        
-            /** Basic predicate functors. */
-            namespace Predicate
-            {
-                /////////////////////////////////////////////////////////////
-                // Unary predicates
-                /////////////////////////////////////////////////////////////
+namespace Gc {
+namespace System {
+namespace Algo {
+/** Basic predicate functors. */
+namespace Predicate {
+/////////////////////////////////////////////////////////////
+// Unary predicates
+/////////////////////////////////////////////////////////////
 
-                /** Equal to a fixed value predicate. 
+/** Equal to a fixed value predicate. 
             
                     @remarks The functor holds a copy of the value so it can be
                         safely deleted.
                 */
-                template <class T>
-                struct EqualTo
-                    : public UnaryFunction<T,bool>
-                {
-                    T m_val;
+template <class T>
+struct EqualTo
+    : public UnaryFunction<T, bool>
+{
+    T m_val;
 
-                    bool operator()(const T& val) const
-                    {
-                        return (val == m_val);
-                    }
+    bool operator()(const T & val) const
+    {
+        return (val == m_val);
+    }
 
-                    EqualTo(const T& val)
-                        : m_val(val)
-                    {}
-                };
+    EqualTo(const T & val)
+        : m_val(val)
+    {}
+};
 
-                /** Equal to a fixed value predicate. 
+/** Equal to a fixed value predicate. 
             
                     @warning Only reference to the value is taken. Don't use
                         with temporary values.
                 */
-                template <class T>
-                struct EqualToRef
-                    : public UnaryFunction<T,bool>
-                {
-                    const T& m_val;
+template <class T>
+struct EqualToRef
+    : public UnaryFunction<T, bool>
+{
+    const T & m_val;
 
-                    bool operator()(const T& val) const
-                    {
-                        return (val == m_val);
-                    }
-
-                    EqualToRef(const T& val)
-                        : m_val(val)
-                    {}
-                };
-
-                /////////////////////////////////////////////////////////////
-                // Binary predicates
-                /////////////////////////////////////////////////////////////
-
-                /** Equal to predicate. */
-                template <class T>
-                struct Equal
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 == v2);
-                    }
-                };
-
-                /** Not equal to predicate. */
-                template <class T>
-                struct NotEqual
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 != v2);
-                    }
-                };
-
-                /** Less than predicate. */
-                template <class T>
-                struct Less
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 < v2);
-                    }
-                };
-
-                /** Less than or equal to predicate. */
-                template <class T>
-                struct LessOrEqual
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 <= v2);
-                    }
-                };
-
-                /** Greater than predicate. */
-                template <class T>
-                struct Greater
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 > v2);
-                    }
-                };
-
-                /** Greater than or equal to predicate. */
-                template <class T>
-                struct GreaterOrEqual
-                    : public BinaryFunction<T,T,bool>
-                {                
-                    bool operator()(const T& v1, const T& v2) const
-                    {
-                        return (v1 >= v2);
-                    }
-                };
-            }
-        }
+    bool operator()(const T & val) const
+    {
+        return (val == m_val);
     }
+
+    EqualToRef(const T & val)
+        : m_val(val)
+    {}
+};
+
+/////////////////////////////////////////////////////////////
+// Binary predicates
+/////////////////////////////////////////////////////////////
+
+/** Equal to predicate. */
+template <class T>
+struct Equal
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 == v2);
+    }
+};
+
+/** Not equal to predicate. */
+template <class T>
+struct NotEqual
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 != v2);
+    }
+};
+
+/** Less than predicate. */
+template <class T>
+struct Less
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 < v2);
+    }
+};
+
+/** Less than or equal to predicate. */
+template <class T>
+struct LessOrEqual
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 <= v2);
+    }
+};
+
+/** Greater than predicate. */
+template <class T>
+struct Greater
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 > v2);
+    }
+};
+
+/** Greater than or equal to predicate. */
+template <class T>
+struct GreaterOrEqual
+    : public BinaryFunction<T, T, bool>
+{
+    bool operator()(const T & v1, const T & v2) const
+    {
+        return (v1 >= v2);
+    }
+};
+} // namespace Predicate
 }
+}
+} // namespace Gc::System::Algo
 
 #endif

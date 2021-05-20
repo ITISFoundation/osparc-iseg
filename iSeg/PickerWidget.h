@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -23,59 +23,58 @@ class PickerWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	PickerWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~PickerWidget();
+	PickerWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~PickerWidget() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void init() override;
-	void cleanup() override;
-	void newloaded() override;
+	void Init() override;
+	void Cleanup() override;
+	void NewLoaded() override;
 	std::string GetName() override { return std::string("Picker"); };
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("picker.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
-	void on_mouse_clicked(Point p) override;
+	void OnMouseClicked(Point p) override;
 
-	void update_active();
-	void showborder();
+	void UpdateActive();
+	void Showborder();
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned int width;
-	unsigned int height;
-	bool hasclipboard;
-	bool shiftpressed;
-	bool clipboardworkortissue;
-	bool* mask;
-	bool* currentselection;
-	float* valuedistrib;
-	unsigned char mode;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned int m_Width;
+	unsigned int m_Height;
+	bool m_Hasclipboard;
+	bool m_Shiftpressed;
+	bool m_Clipboardworkortissue;
+	bool* m_Mask;
+	bool* m_Currentselection;
+	float* m_Valuedistrib;
+	unsigned char m_Mode;
 
-	QPushButton* pb_copy;
-	QPushButton* pb_paste;
-	QPushButton* pb_cut;
-	QPushButton* pb_delete;
-	QRadioButton* rb_work;
-	QRadioButton* rb_tissue;
-	QRadioButton* rb_erase;
-	QRadioButton* rb_fill;
+	QPushButton* m_PbCopy;
+	QPushButton* m_PbPaste;
+	QPushButton* m_PbCut;
+	QPushButton* m_PbDelete;
+	QRadioButton* m_RbWork;
+	QRadioButton* m_RbTissue;
+	QRadioButton* m_RbErase;
+	QRadioButton* m_RbFill;
 
-	std::vector<Point> selection;
+	std::vector<Point> m_Selection;
 
 signals:
-	void vp1_changed(std::vector<Point>* vp1);
+	void Vp1Changed(std::vector<Point>* vp1);
 
 private slots:
-	void copy_pressed();
-	void cut_pressed();
-	void paste_pressed();
-	void delete_pressed();
+	void CopyPressed();
+	void CutPressed();
+	void PastePressed();
+	void DeletePressed();
 
-	void worktissue_changed(int);
-	void bmphand_changed(bmphandler* bmph);
+	void WorktissueChanged(int);
+	void BmphandChanged(Bmphandler* bmph);
 
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
@@ -83,4 +82,3 @@ protected:
 };
 
 } // namespace iseg
-

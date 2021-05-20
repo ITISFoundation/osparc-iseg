@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -17,10 +17,9 @@ class ISEG_CORE_API RTDoseReader
 {
 public:
 	RTDoseReader();
-	~RTDoseReader();
+	~RTDoseReader() = default;
 
-	static bool ReadSizeData(const char* filename, unsigned int* dims,
-							 double* spacing, double* origin, double* dc);
+	static bool ReadSizeData(const char* filename, unsigned int* dims, double* spacing, double* origin, double* dc);
 	static bool ReadPixelData(const char* filename, float** bits);
 };
 

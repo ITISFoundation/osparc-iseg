@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -22,33 +22,30 @@ public:
 	KMeans();
 	~KMeans();
 
-	void init(short unsigned w, short unsigned h, short nrclass,
-			  short dimension, float** bit, float* weight);
-	void init(short unsigned w, short unsigned h, short nrclass,
-			  short dimension, float** bit, float* weight, float* center);
-	unsigned make_iter(unsigned maxiter, unsigned converged);
-	void return_m(float* result_bits);
-	void apply_to(float** sources, float* result_bits);
-	void init_centers(float* center);
-	void init_centers();
-	void init_centers_rand();
+	void Init(short unsigned w, short unsigned h, short nrclass, short dimension, float** bit, float* weight);
+	void Init(short unsigned w, short unsigned h, short nrclass, short dimension, float** bit, float* weight, float* center);
+	unsigned MakeIter(unsigned maxiter, unsigned converged);
+	void ReturnM(float* result_bits);
+	void ApplyTo(float** sources, float* result_bits);
+	void InitCenters(float* center);
+	void InitCenters();
+	void InitCentersRand();
 	/// BL TODO allocates centers using malloc -> probably never freed
-	bool get_centers_from_file(const std::string& fileName, float*& centers,
-							   int& dimensions, int& classes);
-	float* return_centers();
+	bool GetCentersFromFile(const std::string& fileName, float*& centers, int& dimensions, int& classes);
+	float* ReturnCenters();
 
 private:
-	void recompute_centers();
-	unsigned recompute_membership();
-	short* m;
-	short nrclasses;
-	short dim;
-	float** bits;
-	float* weights;
-	float* centers;
-	short unsigned width;
-	short unsigned height;
-	unsigned area;
+	void RecomputeCenters();
+	unsigned RecomputeMembership();
+	short* m_M;
+	short m_Nrclasses;
+	short m_Dim;
+	float** m_Bits;
+	float* m_Weights;
+	float* m_Centers;
+	short unsigned m_Width;
+	short unsigned m_Height;
+	unsigned m_Area;
 };
 
 } // namespace iseg

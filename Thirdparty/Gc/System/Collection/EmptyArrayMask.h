@@ -30,76 +30,74 @@
 
 #include "IArrayMask.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+namespace Collection {
+/** Array mask class where all elements are unmasked. */
+template <Size N>
+class EmptyArrayMask
+    : public IArrayMask<N>
 {
-    namespace System
-    {
-        namespace Collection
-        {
-            /** Array mask class where all elements are unmasked. */
-            template <Size N>
-            class EmptyArrayMask
-                : public IArrayMask<N>
-            {
-            protected:
-                /** Dimensions of the mask. */
-                Math::Algebra::Vector<N,Size> m_dim;
-                /** Number of unmasked elements. */
-                Size m_num_uel;
-                /** Backward indexes. */
-                mutable Array<N,Size> m_bi;
-                /** Backward indexes have been generated. */
-                mutable bool m_has_bi;
+  protected:
+    /** Dimensions of the mask. */
+    Math::Algebra::Vector<N, Size> m_dim;
+    /** Number of unmasked elements. */
+    Size m_num_uel;
+    /** Backward indexes. */
+    mutable Array<N, Size> m_bi;
+    /** Backward indexes have been generated. */
+    mutable bool m_has_bi;
 
-            public:
-                /** Constructor. 
+  public:
+    /** Constructor. 
 
                     @param[in] dim Dimensions of the mask.
                 */
-                EmptyArrayMask(const Math::Algebra::Vector<N,Size> &dim)
-                    : m_dim(dim), m_has_bi(false)
-                {
-                    m_num_uel = dim.Product();
-                }
-
-                virtual const Math::Algebra::Vector<N,Size>& Dimensions() const
-                {
-                    return m_dim;
-                }
-
-                virtual Size Elements() const
-                {
-                    return m_num_uel;
-                }
-
-                virtual Size UnmaskedElements() const
-                {
-                    return m_num_uel;
-                }
-
-                virtual bool IsMasked(Size nidx) const
-                {
-                    return false;
-                }
-
-                virtual const System::Collection::Array<N,Size>& BackwardIndexes() const
-                {
-                    if (!m_has_bi)
-                    {
-                        m_has_bi = true;
-                        m_bi.Resize(m_dim);
-
-                        for (Size i = 0; i < m_bi.Elements(); i++)
-                        {
-                            m_bi[i] = i;
-                        }
-                    }
-
-                    return m_bi;
-                }
-            };
-        }
+    EmptyArrayMask(const Math::Algebra::Vector<N, Size> & dim)
+        : m_dim(dim)
+        , m_has_bi(false)
+    {
+        m_num_uel = dim.Product();
     }
+
+    const Math::Algebra::Vector<N, Size> & Dimensions() const override
+    {
+        return m_dim;
+    }
+
+    Size Elements() const override
+    {
+        return m_num_uel;
+    }
+
+    Size UnmaskedElements() const override
+    {
+        return m_num_uel;
+    }
+
+    bool IsMasked(Size nidx) const override
+    {
+        return false;
+    }
+
+    const System::Collection::Array<N, Size> & BackwardIndexes() const override
+    {
+        if (!m_has_bi)
+        {
+            m_has_bi = true;
+            m_bi.Resize(m_dim);
+
+            for (Size i = 0; i < m_bi.Elements(); i++)
+            {
+                m_bi[i] = i;
+            }
+        }
+
+        return m_bi;
+    }
+};
 }
+}
+} // namespace Gc::System::Collection
 
 #endif

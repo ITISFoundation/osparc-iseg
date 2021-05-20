@@ -32,50 +32,46 @@
 #include "../../Math/Algebra/Vector.h"
 #include "Array.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        namespace Collection
-        {
-            /** Array mask interface class. 
+namespace Gc {
+namespace System {
+namespace Collection {
+/** Array mask interface class. 
             
                 Allows to specify which elements of an array are masked.
             */
-            template <Size N>
-            class IArrayMask
-            {
-            public:
-                /** Virtual destructor. */
-                virtual ~IArrayMask() 
-                {}
+template <Size N>
+class IArrayMask
+{
+  public:
+    /** Virtual destructor. */
+    virtual ~IArrayMask() = default;
 
-                /** Dimensions of the mask. */
-                virtual const Math::Algebra::Vector<N,Size>& Dimensions() const = 0;
+    /** Dimensions of the mask. */
+    virtual const Math::Algebra::Vector<N, Size> & Dimensions() const = 0;
 
-                /** Number of elements. */
-                virtual Size Elements() const = 0;
+    /** Number of elements. */
+    virtual Size Elements() const = 0;
 
-                /** Number of unmasked elements. */
-                virtual Size UnmaskedElements() const = 0;
+    /** Number of unmasked elements. */
+    virtual Size UnmaskedElements() const = 0;
 
-                /** Returns whether node is masked or not. 
+    /** Returns whether node is masked or not. 
 
                     @param[in] nidx Node index.
                 */
-                virtual bool IsMasked(Size nidx) const = 0;
+    virtual bool IsMasked(Size nidx) const = 0;
 
-                /** Backward conversion indexes. 
+    /** Backward conversion indexes. 
                 
                     Returns a reference to an array that for each element contains its
                     unmasked index (i.e., 0 for first unmasked element, 1 for second
                     unmasked element and so on). If the given element is masked then 
                     the corresponding backward index is unspecified.
                 */
-                virtual const System::Collection::Array<N,Size>& BackwardIndexes() const = 0;
-            };
-        }
-    }
+    virtual const System::Collection::Array<N, Size> & BackwardIndexes() const = 0;
+};
 }
+}
+} // namespace Gc::System::Collection
 
 #endif

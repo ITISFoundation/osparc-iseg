@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -45,23 +45,22 @@ class TraceTubesWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~TraceTubesWidget() {}
+	TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~TraceTubesWidget() override = default;
 
-	void init() override;
-	void newloaded() override;
-	void cleanup() override;
+	void Init() override;
+	void NewLoaded() override;
+	void Cleanup() override;
 	std::string GetName() override;
 	QIcon GetIcon(QDir picdir) override;
 
 private:
-	void on_slicenr_changed() override;
-	void on_mouse_released(iseg::Point p) override;
+	void OnSlicenrChanged() override;
+	void OnMouseReleased(iseg::Point p) override;
 
-	void update_points();
+	void UpdatePoints();
 
-	int get_padding() const;
+	int GetPadding() const;
 
 	enum eMetric {
 		kIntensity = 0,
@@ -69,47 +68,47 @@ private:
 		kHessian3D,
 		kTarget
 	};
-	itk::Image<float, 3>::Pointer compute_vesselness(const itk::ImageBase<3>::RegionType& requested_region) const;
+	itk::Image<float, 3>::Pointer ComputeVesselness(const itk::ImageBase<3>::RegionType& requested_region) const;
 
-	itk::Image<float, 3>::Pointer compute_blobiness(const itk::ImageBase<3>::RegionType& requested_region) const;
+	itk::Image<float, 3>::Pointer ComputeBlobiness(const itk::ImageBase<3>::RegionType& requested_region) const;
 
-	itk::Image<float, 3>::Pointer compute_object_sdf(const itk::ImageBase<3>::RegionType& requested_region) const;
+	itk::Image<float, 3>::Pointer ComputeObjectSdf(const itk::ImageBase<3>::RegionType& requested_region) const;
 
 	template<class TSpeedImage>
-	void do_work_template(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
+	void DoWorkTemplate(TSpeedImage* speed_image, const itk::ImageBase<3>::RegionType& requested_region);
 
-	iseg::SlicesHandlerInterface* _handler;
-	std::vector<iseg::Point3D> _points;
+	iseg::SlicesHandlerInterface* m_Handler;
+	std::vector<iseg::Point3D> m_Points;
 
-	QWidget* _main_options;
-	QComboBox* _metric;
-	QLineEdit* _intensity_value;
-	QLineEdit* _intensity_weight;
-	QLineEdit* _angle_weight;
-	QLineEdit* _line_radius;
-	QLineEdit* _active_region_padding;
-	QLineEdit* _debug_metric_file_path;
-	QPushButton* _clear_points;
-	QPushButton* _estimate_intensity;
-	QPushButton* _execute_button;
+	QWidget* m_MainOptions;
+	QComboBox* m_Metric;
+	QLineEdit* m_IntensityValue;
+	QLineEdit* m_IntensityWeight;
+	QLineEdit* m_AngleWeight;
+	QLineEdit* m_LineRadius;
+	QLineEdit* m_ActiveRegionPadding;
+	QLineEdit* m_DebugMetricFilePath;
+	QPushButton* m_ClearPoints;
+	QPushButton* m_EstimateIntensity;
+	QPushButton* m_ExecuteButton;
 
-	QWidget* _empty_options;
+	QWidget* m_EmptyOptions;
 
-	QWidget* _vesselness_options;
-	QLineEdit* _sigma;
-	QCheckBox* _dark_objects;
-	QLineEdit* _alpha;
-	QLineEdit* _beta;
-	QLineEdit* _gamma;
+	QWidget* m_VesselnessOptions;
+	QLineEdit* m_Sigma;
+	QCheckBox* m_DarkObjects;
+	QLineEdit* m_Alpha;
+	QLineEdit* m_Beta;
+	QLineEdit* m_Gamma;
 
-	QWidget* _target_options;
-	QLineEdit* _path_file_name;
+	QWidget* m_TargetOptions;
+	QLineEdit* m_PathFileName;
 
-	QStackedWidget* _options_stack;
+	QStackedWidget* m_OptionsStack;
 
 private slots:
-	void do_work();
-	void clear_points();
-	void estimate_intensity();
-	void on_metric_changed();
+	void DoWork();
+	void ClearPoints();
+	void EstimateIntensity();
+	void OnMetricChanged();
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -37,8 +37,7 @@ size_t ColorLookupTable::NumberOfColors() const
 
 void ColorLookupTable::SetColor(size_t idx, unsigned char rgb[3])
 {
-	m_Lut->SetTableValue(idx, rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0,
-						 1.0);
+	m_Lut->SetTableValue(idx, rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0, 1.0);
 }
 
 void ColorLookupTable::GetColor(size_t idx, unsigned char uchar_rgb[3]) const
@@ -61,8 +60,7 @@ void ColorLookupTable::GetColor(double v, unsigned char uchar_rgb[3]) const
 	uchar_rgb[2] = static_cast<unsigned char>(clamp(rgb[2] * 255.0));
 }
 
-void ColorLookupTable::GetColor(double v, unsigned char& r, unsigned char& g,
-								unsigned char& b) const
+void ColorLookupTable::GetColor(double v, unsigned char& r, unsigned char& g, unsigned char& b) const
 {
 	double rgb[3];
 	m_Lut->GetColor(v, rgb);

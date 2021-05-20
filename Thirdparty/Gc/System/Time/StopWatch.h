@@ -28,92 +28,90 @@
 #ifndef GC_SYSTEM_TIME_STOPWATCH_H
 #define GC_SYSTEM_TIME_STOPWATCH_H
 
-#include <time.h>
 #include "../../Core.h"
 #include "../../Type.h"
 #include "../ArgumentException.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        /** Date and time handling. */
-        namespace Time
-        {
-            /** %Time interval measuring class, that can be enabled/disabled at runtime. 
+#include <ctime>
+
+namespace Gc {
+namespace System {
+/** Date and time handling. */
+namespace Time {
+/** %Time interval measuring class, that can be enabled/disabled at runtime. 
             
                 The measured interval starts when the object is constructed (or manually
                 using the Start() method) and ends when the object is destructed (or manually
                 using the End() method). At the end the time interval is put to the standard
                 output.
             */
-            class GC_DLL_EXPORT StopWatch
-            {
-            private:
-                /** Global toggle switch of the stopwatch output. */
-                static bool ms_is_enabled;
+class GC_DLL_EXPORT StopWatch
+{
+  private:
+    /** Global toggle switch of the stopwatch output. */
+    static bool ms_is_enabled;
 
-            protected:
-                /** Method/function name. */
-                std::string m_func;
-                /** Line number. */
-                Int32 m_line;
-                /** Message text. */
-                std::string m_msg;
-                /** Start timestamp. */
-                clock_t m_start;
-                /** Start timestamp has been captured. */
-                bool m_has_start;
+  protected:
+    /** Method/function name. */
+    std::string m_func;
+    /** Line number. */
+    Int32 m_line;
+    /** Message text. */
+    std::string m_msg;
+    /** Start timestamp. */
+    clock_t m_start;
+    /** Start timestamp has been captured. */
+    bool m_has_start;
 
-            public:
-                /** Constructor. */
-                StopWatch()
-                {
-                    m_has_start = false;
-                }
-
-                /** Constructor. 
-                
-                    @param[in] func Method/function name.
-                    @param[in] line Line number.
-                    @param[in] msg Auxiliary message to be printed. Can be NULL.
-                */
-                StopWatch(const char *func, Int32 line, const char *msg = NULL)
-                {
-                    Start(func, line, msg);
-                }
-
-                /** Destructor. */
-                ~StopWatch()
-                {
-                    End();
-                }
-
-                /** Start time measuring manually. 
-                
-                    @param[in] func Method/function name.
-                    @param[in] line Line number.
-                    @param[in] msg Auxiliary message to be printed. Can be NULL.
-                */
-                void Start(const char *func, Int32 line, const char *msg = NULL);
-
-                /** End time measuring manually. */
-                void End();
-
-                /** Globaly enable/disable stopwatch output. */
-                static void EnableOutput(bool enable)
-                {
-                    ms_is_enabled = enable;
-                }
-
-                /** Check whether stopwatch output is enabled. */
-                static bool IsOutputEnabled()
-                {
-                    return ms_is_enabled;
-                }
-            };
-        }
+  public:
+    /** Constructor. */
+    StopWatch()
+    {
+        m_has_start = false;
     }
+
+    /** Constructor. 
+                
+                    @param[in] func Method/function name.
+                    @param[in] line Line number.
+                    @param[in] msg Auxiliary message to be printed. Can be NULL.
+                */
+    StopWatch(const char * func, Int32 line, const char * msg = nullptr)
+    {
+        Start(func, line, msg);
+    }
+
+    /** Destructor. */
+    ~StopWatch()
+    {
+        End();
+    }
+
+    /** Start time measuring manually. 
+                
+                    @param[in] func Method/function name.
+                    @param[in] line Line number.
+                    @param[in] msg Auxiliary message to be printed. Can be NULL.
+                */
+    void Start(const char * func, Int32 line, const char * msg = nullptr);
+
+    /** End time measuring manually. */
+    void End();
+
+    /** Globaly enable/disable stopwatch output. */
+    static void EnableOutput(bool enable)
+    {
+        ms_is_enabled = enable;
+    }
+
+    /** Check whether stopwatch output is enabled. */
+    static bool IsOutputEnabled()
+    {
+        return ms_is_enabled;
+    }
+};
+} // namespace Time
 }
+} // namespace Gc::System
 
 #endif

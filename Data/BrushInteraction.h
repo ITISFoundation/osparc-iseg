@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,52 +19,47 @@
 
 namespace iseg {
 
-	class ISEG_DATA_API BrushInteraction
+class ISEG_DATA_API BrushInteraction
+{
+public:
+	BrushInteraction(SlicesHandlerInterface* handler, const boost::function<void(DataSelection)>& begin, const boost::function<void(eEndUndoAction)>& end, const boost::function<void(std::vector<Point>*)>& vpdynchanged)
+			: m_BeginDatachange(begin), m_EndDatachange(end), m_VpdynChanged(vpdynchanged)
 	{
-	public:
-		BrushInteraction(SlicesHandlerInterface* handler,
-			const boost::function<void(DataSelection)>& begin,
-			const boost::function<void(EndUndoAction)>& end,
-			const boost::function<void(std::vector<Point>*)>& vpdynchanged) 
-			: begin_datachange(begin)
-			, end_datachange(end)
-			, vpdyn_changed(vpdynchanged)
-		{
-			init(handler);
-		}
+		Init(handler);
+	}
 
-		/// throws std::runtime_error if handler is invalid
-		void init(SlicesHandlerInterface* handler);
+	/// throws std::runtime_error if handler is invalid
+	void Init(SlicesHandlerInterface* handler);
 
-		void set_radius(float radius) { _radius = radius; }
-		void set_brush_target(bool on) { _brush_target = on; }
-		void set_tissue_value(tissues_size_t v) { _tissue_value = v; }
-		void set_target_value(float v) { _target_value = v; }
+	void SetRadius(float radius) { m_Radius = radius; }
+	void SetBrushTarget(bool on) { m_BrushTarget = on; }
+	void SetTissueValue(tissues_size_t v) { m_TissueValue = v; }
+	void SetTargetValue(float v) { m_TargetValue = v; }
 
-		void on_mouse_clicked(Point p);
+	void OnMouseClicked(Point p);
 
-		void on_mouse_moved(Point p);
+	void OnMouseMoved(Point p);
 
-		void on_mouse_released(Point p);
+	void OnMouseReleased(Point p);
 
-		void draw_circle(Point p);
+	void DrawCircle(Point p);
 
-	private:
-		boost::function<void(DataSelection)> begin_datachange;
-		boost::function<void(EndUndoAction)> end_datachange;
-		boost::function<void(std::vector<Point>*)> vpdyn_changed;
+private:
+	boost::function<void(DataSelection)> m_BeginDatachange;
+	boost::function<void(eEndUndoAction)> m_EndDatachange;
+	boost::function<void(std::vector<Point>*)> m_VpdynChanged;
 
-		SlicesHandlerInterface* _slice_handler;
-		std::vector<bool> _cached_tissue_locks;
-		unsigned _width;
-		unsigned _height;
-		float _dx;
-		float _dy;
-		float _radius = 1.0f;
-		bool _brush_target = true;
-		float _target_value = 255.f;
-		tissues_size_t _tissue_value = 1;
-		Point _last_pt;
-	};
+	SlicesHandlerInterface* m_SliceHandler;
+	std::vector<bool> m_CachedTissueLocks;
+	unsigned m_Width;
+	unsigned m_Height;
+	float m_Dx;
+	float m_Dy;
+	float m_Radius = 1.0f;
+	bool m_BrushTarget = true;
+	float m_TargetValue = 255.f;
+	tissues_size_t m_TissueValue = 1;
+	Point m_LastPt;
+};
 
 } // namespace iseg

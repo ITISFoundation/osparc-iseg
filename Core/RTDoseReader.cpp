@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,12 +18,9 @@
 
 namespace iseg {
 
-RTDoseReader::RTDoseReader() {}
+RTDoseReader::RTDoseReader() = default;
 
-RTDoseReader::~RTDoseReader() {}
-
-bool RTDoseReader::ReadSizeData(const char* filename, unsigned int* dims,
-								double* spacing, double* origin, double* dc)
+bool RTDoseReader::ReadSizeData(const char* filename, unsigned int* dims, double* spacing, double* origin, double* dc)
 {
 	gdcm::ImageReader imreader;
 	imreader.SetFileName(filename);
@@ -72,8 +69,7 @@ bool RTDoseReader::ReadPixelData(const char* filename, float** bits)
 
 	// (0028,0009) SQ (Sequence with explicit length #=1)      # Frame increment pointer // TODO: Should be equal to 3004000C (Grid Frame Offset Vector), ignore???
 	gdcm::Attribute<0x0028, 0x0009> atframeincrptr;
-	atframeincrptr.SetFromDataElement(
-		ds.GetDataElement(atframeincrptr.GetTag()));
+	atframeincrptr.SetFromDataElement(ds.GetDataElement(atframeincrptr.GetTag()));
 	if (atframeincrptr.GetValue() != gdcm::Tag(0x3004, 0x000C))
 	{
 		delete reader;
@@ -106,13 +102,12 @@ bool RTDoseReader::ReadPixelData(const char* filename, float** bits)
 	gdcm::Attribute<0x3004, 0x0002> atdoseunits;
 	atdoseunits.SetFromDataElement(ds.GetDataElement(atdoseunits.GetTag()));
 	double gridscaling = 1.0;
-	if (atdoseunits.GetValue().compare("GY") == 0)
+	if (atdoseunits.GetValue() == "GY")
 	{
 		// (3004,000E) SQ (Sequence with explicit length #=1)      # Dose Grid Scaling
 		// Scaling factor that when multiplied by the pixel data yields grid doses in the dose units
 		gdcm::Attribute<0x3004, 0x000E> atgridscaling;
-		atgridscaling.SetFromDataElement(
-			ds.GetDataElement(atgridscaling.GetTag()));
+		atgridscaling.SetFromDataElement(ds.GetDataElement(atgridscaling.GetTag()));
 		gridscaling = atgridscaling.GetValue();
 	}
 

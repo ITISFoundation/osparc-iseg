@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -36,72 +36,71 @@ class SmoothingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	SmoothingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~SmoothingWidget();
+	SmoothingWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~SmoothingWidget() override;
 	QSize sizeHint() const override;
-	void init() override;
-	void newloaded() override;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Smooth"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("smoothing.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
+	Q3HBox* m_Hboxoverall;
+	Q3VBox* m_Vboxmethods;
+	Q3HBox* m_Hbox1;
+	Q3HBox* m_Hbox2;
+	Q3HBox* m_Hbox3;
+	Q3HBox* m_Hbox4;
+	Q3HBox* m_Hbox5;
 	//	Q3HBox *hbox6;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	QLabel* txt_n;
-	QLabel* txt_sigma1;
-	QLabel* txt_sigma2;
-	QLabel* txt_dt;
-	QLabel* txt_iter;
-	QLabel* txt_k;
-	QLabel* txt_restrain1;
-	QLabel* txt_restrain2;
-	QSlider* sl_sigma;
-	QSlider* sl_k;
-	QSlider* sl_restrain;
-	QSpinBox* sb_n;
-	QSpinBox* sb_iter;
-	QSpinBox* sb_kmax;
+	Q3VBox* m_Vbox1;
+	Q3VBox* m_Vbox2;
+	QLabel* m_TxtN;
+	QLabel* m_TxtSigma1;
+	QLabel* m_TxtSigma2;
+	QLabel* m_TxtDt;
+	QLabel* m_TxtIter;
+	QLabel* m_TxtK;
+	QLabel* m_TxtRestrain1;
+	QLabel* m_TxtRestrain2;
+	QSlider* m_SlSigma;
+	QSlider* m_SlK;
+	QSlider* m_SlRestrain;
+	QSpinBox* m_SbN;
+	QSpinBox* m_SbIter;
+	QSpinBox* m_SbKmax;
 	//	QSpinBox *sb_restrainmax;
-	QCheckBox* allslices;
-	QRadioButton* rb_gaussian;
-	QRadioButton* rb_average;
-	QRadioButton* rb_median;
-	QRadioButton* rb_sigmafilter;
-	QRadioButton* rb_anisodiff;
-	QButtonGroup* modegroup;
-	QPushButton* pushexec;
-	QPushButton* contdiff;
-	
-	bool dontundo;
+	QCheckBox* m_Allslices;
+	QRadioButton* m_RbGaussian;
+	QRadioButton* m_RbAverage;
+	QRadioButton* m_RbMedian;
+	QRadioButton* m_RbSigmafilter;
+	QRadioButton* m_RbAnisodiff;
+	QButtonGroup* m_Modegroup;
+	QPushButton* m_Pushexec;
+	QPushButton* m_Contdiff;
+
+	bool m_Dontundo;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void execute();
-	void continue_diff();
-	void method_changed(int);
-	void sigmaslider_changed(int newval);
-	void kslider_changed(int newval);
-	void n_changed(int newval);
-	void kmax_changed(int newval);
-	void slider_pressed();
-	void slider_released();
+	void BmphandChanged(Bmphandler* bmph);
+	void Execute();
+	void ContinueDiff();
+	void MethodChanged(int);
+	void SigmasliderChanged(int newval);
+	void KsliderChanged(int newval);
+	void NChanged(int newval);
+	void KmaxChanged(int newval);
+	void SliderPressed();
+	void SliderReleased();
 };
 
 } // namespace iseg

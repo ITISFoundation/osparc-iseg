@@ -30,35 +30,33 @@
 
 #include "Exception.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+/** Overflow exception class. */
+class OverflowException
+    : public Exception
 {
-    namespace System
-    {
-        /** Overflow exception class. */
-        class OverflowException 
-            : public Exception
-        {
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            OverflowException(const char *func, int line)
-                : Exception(func, line, "Overflow.")
-            {}
+    OverflowException(const char * func, int line)
+        : Exception(func, line, "Overflow.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            OverflowException(const char *func, int line, const std::string &msg)
-                : Exception(func, line, msg)
-            {}
-        };
-    }
+    OverflowException(const char * func, int line, const std::string & msg)
+        : Exception(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::System
 
 #endif

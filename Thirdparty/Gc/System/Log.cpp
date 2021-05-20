@@ -25,60 +25,58 @@
     @date 2010
 */
 
-#include <stdio.h>
 #include "Log.h"
 
-namespace Gc
+#include <cstdio>
+
+namespace Gc {
+namespace System {
+/***********************************************************************************/
+
+// Standard C output by default
+Log::ITarget * Log::ms_target = nullptr;
+/***********************************************************************************/
+
+void Log::Message(const std::string & str)
 {
-    namespace System
+    if (ms_target != nullptr)
     {
-        /***********************************************************************************/
-
-        // Standard C output by default
-        Log::ITarget *Log::ms_target = NULL;
-
-        /***********************************************************************************/
-
-        void Log::Message(const std::string& str)
-        {
-            if (ms_target != NULL)
-            {
-                ms_target->Message(str);
-            }
-            else
-            {
-                fprintf(stdout, "%s\n", str.c_str());
-            }
-        }
-
-        /***********************************************************************************/
-
-        void Log::Warning(const std::string& str)
-        {
-            if (ms_target != NULL)
-            {
-                ms_target->Message(str);
-            }
-            else
-            {
-                fprintf(stdout, "%s\n", str.c_str());
-            }
-        }
-
-        /***********************************************************************************/
-
-        void Log::Error(const std::string& str)
-        {
-            if (ms_target != NULL)
-            {
-                ms_target->Message(str);
-            }
-            else
-            {
-                fprintf(stderr, "%s\n", str.c_str());
-            }
-        }
-
-        /***********************************************************************************/
+        ms_target->Message(str);
+    }
+    else
+    {
+        fprintf(stdout, "%s\n", str.c_str());
     }
 }
+
+/***********************************************************************************/
+
+void Log::Warning(const std::string & str)
+{
+    if (ms_target != nullptr)
+    {
+        ms_target->Message(str);
+    }
+    else
+    {
+        fprintf(stdout, "%s\n", str.c_str());
+    }
+}
+
+/***********************************************************************************/
+
+void Log::Error(const std::string & str)
+{
+    if (ms_target != nullptr)
+    {
+        ms_target->Message(str);
+    }
+    else
+    {
+        fprintf(stderr, "%s\n", str.c_str());
+    }
+}
+
+/***********************************************************************************/
+}
+} // namespace Gc::System

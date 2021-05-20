@@ -28,8 +28,8 @@
 #ifndef GC_TYPE_H
 #define GC_TYPE_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 // 64bit architecture detection
 #if (defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined(__x86_64__))
@@ -37,58 +37,57 @@
 #endif
 
 /** Global library namespace. */
-namespace Gc
-{
-    /** Signed 8-bit decimal number. */
-	typedef int8_t Int8;
-    /** Unsigned 8-bit decimal number. */
-	typedef uint8_t Uint8;
+namespace Gc {
+/** Signed 8-bit decimal number. */
+using Int8 = int8_t;
+/** Unsigned 8-bit decimal number. */
+using Uint8 = uint8_t;
 
-    /** Signed 16-bit decimal number. */
-	typedef int16_t Int16;
-    /** Unsigned 16-bit decimal number. */
-	typedef uint16_t Uint16;
+/** Signed 16-bit decimal number. */
+using Int16 = int16_t;
+/** Unsigned 16-bit decimal number. */
+using Uint16 = uint16_t;
 
-    /** Signed 32-bit decimal number. */
-	typedef int32_t Int32;
-    /** Unsigned 32-bit decimal number. */
-	typedef uint32_t Uint32;
+/** Signed 32-bit decimal number. */
+using Int32 = int32_t;
+/** Unsigned 32-bit decimal number. */
+using Uint32 = uint32_t;
 
-    /** Signed 64-bit decimal number. */
-	typedef int64_t Int64;
-    /** Unsigned 64-bit decimal number. */
-	typedef uint64_t Uint64;
+/** Signed 64-bit decimal number. */
+using Int64 = int64_t;
+/** Unsigned 64-bit decimal number. */
+using Uint64 = uint64_t;
 
-    /** Single precision floating point number. */
-    typedef float Float32;
-    /** Double precision floating point number. */
-    typedef double Float64;
+/** Single precision floating point number. */
+using Float32 = float;
+/** Double precision floating point number. */
+using Float64 = double;
 
 #ifdef GC_PLATFORM_X64
-    /** Platform dependent integer. 
+/** Platform dependent integer. 
     
         32-bit on 32-bit platforms, 64-bit on 64-bit platforms.
     */
-    typedef Int64 Pint;
+using Pint = Int64;
 
-    /** Platform dependent size type. 
+/** Platform dependent size type. 
     
         32-bit on 32-bit platforms, 64-bit on 64-bit platforms.
     */
-	typedef Uint64 Size;
+using Size = Uint64;
 #else
-    /** Platform dependent integer. 
+/** Platform dependent integer. 
     
         32-bit on 32-bit platforms, 64-bit on 64-bit platforms.
     */
-    typedef Int32 Pint;
+using Pint = Int32;
 
-    /** Platform dependent size type. 
+/** Platform dependent size type. 
     
         32-bit on 32-bit platforms, 64-bit on 64-bit platforms.
     */
-	typedef Uint32 Size;
+using Size = Uint32;
 #endif
-}
+} // namespace Gc
 
 #endif

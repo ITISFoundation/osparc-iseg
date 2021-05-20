@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,353 +20,349 @@
 #include "Core/ImageForestingTransform.h"
 #include "Core/Pair.h"
 
-#include <QTime>
 #include <QFormLayout>
+#include <QTime>
 
 namespace iseg {
 
-LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
 	setToolTip(Format("Use the Auto Trace to follow ideal contour path or draw "
 										"contours around a tissue to segment it."));
 
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	drawing = false;
-	lw = lwfirst = nullptr;
+	m_Drawing = false;
+	m_Lw = m_Lwfirst = nullptr;
 
 	// parameters
-	straight = new QRadioButton(QString("Straight"));
-	autotrace = new QRadioButton(QString("Auto Trace"));
-	autotrace->setToolTip(Format(
-			"The Livewire (intelligent scissors) algorithm "
-			"to automatically identify the ideal contour path.This algorithm uses "
-			"information "
-			"about the strength and orientation of the(smoothed) image gradient, "
-			"the zero - crossing of the Laplacian (for fine tuning) together with "
-			"some weighting "
-			"to favor straighter lines to determine the most likely contour path. "
-			"The "
-			"contouring is started by clicking the left mouse button. Each "
-			"subsequent left "
-			"button click fixes another point and the suggested contour line in "
-			"between. "
-			"<br>"
-			"Successive removing of unwanted points is achieved by clicking the "
-			"middle "
-			"mouse button. A double left click closes the contour while a double "
-			"middle "
-			"click aborts the line drawing process."));
-	freedraw = new QRadioButton(QString("Free"));
-	auto drawmode = make_button_group(this, {straight, autotrace, freedraw});
-	autotrace->setChecked(true);
+	m_Straight = new QRadioButton(QString("Straight"));
+	m_Autotrace = new QRadioButton(QString("Auto Trace"));
+	m_Autotrace->setToolTip(Format("The Livewire (intelligent scissors) algorithm "
+																 "to automatically identify the ideal contour path.This algorithm uses "
+																 "information "
+																 "about the strength and orientation of the(smoothed) image gradient, "
+																 "the zero - crossing of the Laplacian (for fine tuning) together with "
+																 "some weighting "
+																 "to favor straighter lines to determine the most likely contour path. "
+																 "The "
+																 "contouring is started by clicking the left mouse button. Each "
+																 "subsequent left "
+																 "button click fixes another point and the suggested contour line in "
+																 "between. "
+																 "<br>"
+																 "Successive removing of unwanted points is achieved by clicking the "
+																 "middle "
+																 "mouse button. A double left click closes the contour while a double "
+																 "middle "
+																 "click aborts the line drawing process."));
+	m_Freedraw = new QRadioButton(QString("Free"));
+	auto drawmode = make_button_group(this, {m_Straight, m_Autotrace, m_Freedraw});
+	m_Autotrace->setChecked(true);
 
-	cb_freezing = new QCheckBox;
-	cb_freezing->setToolTip(Format(
-			"Specify the number of seconds after which a line segment is "
-			"frozen even without mouse click if it has not changed."));
-	sb_freezing = new QSpinBox(1, 10, 1, nullptr);
-	sb_freezing->setValue(3);
+	m_CbFreezing = new QCheckBox;
+	m_CbFreezing->setToolTip(Format("Specify the number of seconds after which a line segment is "
+																	"frozen even without mouse click if it has not changed."));
+	m_SbFreezing = new QSpinBox(1, 10, 1, nullptr);
+	m_SbFreezing->setValue(3);
 
-	cb_closing = new QCheckBox;
-	cb_closing->setChecked(true);
+	m_CbClosing = new QCheckBox;
+	m_CbClosing->setChecked(true);
 
 	// layout
-	auto method_layout = make_vbox({straight, autotrace, freedraw});
+	auto method_layout = make_vbox({m_Straight, m_Autotrace, m_Freedraw});
 	auto method_area = new QFrame;
 	method_area->setLayout(method_layout);
 	method_area->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
 	method_area->setLineWidth(1);
 	method_area->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-	params_layout = new QFormLayout;
-	params_layout->addRow("Close contour", cb_closing);
-	params_layout->addRow("Freezing", cb_freezing);
-	params_layout->addRow("Freezing delay (s)", sb_freezing);
+	m_ParamsLayout = new QFormLayout;
+	m_ParamsLayout->addRow("Close contour", m_CbClosing);
+	m_ParamsLayout->addRow("Freezing", m_CbFreezing);
+	m_ParamsLayout->addRow("Freezing delay (s)", m_SbFreezing);
 
 	auto top_layout = new QHBoxLayout;
 	top_layout->addWidget(method_area);
-	top_layout->addLayout(params_layout);
+	top_layout->addLayout(m_ParamsLayout);
 
 	setLayout(top_layout);
 
 	// initialize
-	cooling = false;
-	cb_freezing->setChecked(cooling);
+	m_Cooling = false;
+	m_CbFreezing->setChecked(m_Cooling);
 
-	sbfreezing_changed(sb_freezing->value());
-	freezing_changed();
-	mode_changed();
+	SbfreezingChanged(m_SbFreezing->value());
+	FreezingChanged();
+	ModeChanged();
 
 	// connections
-	connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-	connect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-	connect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+	QObject_connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(ModeChanged()));
+	QObject_connect(m_CbFreezing, SIGNAL(clicked()), this, SLOT(FreezingChanged()));
+	QObject_connect(m_SbFreezing, SIGNAL(valueChanged(int)), this, SLOT(SbfreezingChanged(int)));
 }
 
 LivewireWidget::~LivewireWidget()
 {
-	if (lw != nullptr)
-		delete lw;
-	if (lwfirst != nullptr)
-		delete lwfirst;
+	if (m_Lw != nullptr)
+		delete m_Lw;
+	if (m_Lwfirst != nullptr)
+		delete m_Lwfirst;
 }
 
-void LivewireWidget::on_mouse_clicked(Point p)
+void LivewireWidget::OnMouseClicked(Point p)
 {
-	if (!drawing)
+	if (!m_Drawing)
 	{
-		if (autotrace->isChecked())
+		if (m_Autotrace->isChecked())
 		{
-			if (lw == nullptr)
+			if (m_Lw == nullptr)
 			{
-				lw = bmphand->livewireinit(p);
-				lwfirst = bmphand->livewireinit(p);
+				m_Lw = m_Bmphand->Livewireinit(p);
+				m_Lwfirst = m_Bmphand->Livewireinit(p);
 			}
 			else
 			{
-				lw->change_pt(p);
-				lwfirst->change_pt(p);
+				m_Lw->ChangePt(p);
+				m_Lwfirst->ChangePt(p);
 			}
 			//		lw=bmphand->livewireinit(p);
 			//		lwfirst=bmphand->livewireinit(p);
 		}
-		p1 = p2 = p;
-		clicks.clear();
-		establishedlengths.clear();
-		clicks.push_back(p);
-		establishedlengths.push_back(0);
-		drawing = true;
-		if (cooling)
+		m_P1 = m_P2 = p;
+		m_Clicks.clear();
+		m_Establishedlengths.clear();
+		m_Clicks.push_back(p);
+		m_Establishedlengths.push_back(0);
+		m_Drawing = true;
+		if (m_Cooling)
 		{
-			dynamicold.clear();
-			times.clear();
+			m_Dynamicold.clear();
+			m_Times.clear();
 		}
 	}
 	else
 	{
-		if (straight->isChecked())
+		if (m_Straight->isChecked())
 		{
-			addLine(&established, p1, p);
-			dynamic.clear();
-			if (cb_closing->isChecked())
-				addLine(&dynamic, p2, p);
-			p1 = p;
+			addLine(&m_Established, m_P1, p);
+			m_Dynamic.clear();
+			if (m_CbClosing->isChecked())
+				addLine(&m_Dynamic, m_P2, p);
+			m_P1 = p;
 		}
 		else
 		{
-			lw->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(),
-					dynamic.end());
-			if (cb_closing->isChecked())
-				lwfirst->return_path(p, &dynamic);
+			m_Lw->ReturnPath(p, &m_Dynamic);
+			m_Established.insert(m_Established.end(), m_Dynamic.begin(), m_Dynamic.end());
+			if (m_CbClosing->isChecked())
+				m_Lwfirst->ReturnPath(p, &m_Dynamic);
 			else
-				dynamic.clear();
-			lw->change_pt(p);
-			if (cooling)
+				m_Dynamic.clear();
+			m_Lw->ChangePt(p);
+			if (m_Cooling)
 			{
-				times.clear();
-				dynamicold.clear();
+				m_Times.clear();
+				m_Dynamicold.clear();
 			}
 		}
-		establishedlengths.push_back(static_cast<int>(established.size()));
-		clicks.push_back(p);
+		m_Establishedlengths.push_back(static_cast<int>(m_Established.size()));
+		m_Clicks.push_back(p);
 
-		emit vp1dyn_changed(&established, &dynamic);
+		emit Vp1dynChanged(&m_Established, &m_Dynamic);
 	}
 }
 
-void LivewireWidget::pt_doubleclicked(Point p)
+void LivewireWidget::PtDoubleclicked(Point p)
 {
-	if (drawing && !freedraw->isChecked())
+	if (m_Drawing && !m_Freedraw->isChecked())
 	{
-		clicks.push_back(p);
-		if (straight->isChecked())
+		m_Clicks.push_back(p);
+		if (m_Straight->isChecked())
 		{
-			addLine(&established, p1, p);
-			addLine(&established, p2, p);
+			addLine(&m_Established, m_P1, p);
+			addLine(&m_Established, m_P2, p);
 		}
-		else if (autotrace->isChecked())
+		else if (m_Autotrace->isChecked())
 		{
-			lw->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(), dynamic.end());
-			lwfirst->return_path(p, &dynamic);
-			established.insert(established.end(), dynamic.begin(), dynamic.end());
-		}
-
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = true;
-		emit begin_datachange(dataSelection, this);
-
-		bmphand->fill_contour(&established, true);
-
-		emit end_datachange(this);
-
-		dynamic.clear();
-		established.clear();
-		if (cooling)
-		{
-			dynamicold.clear();
-			times.clear();
+			m_Lw->ReturnPath(p, &m_Dynamic);
+			m_Established.insert(m_Established.end(), m_Dynamic.begin(), m_Dynamic.end());
+			m_Lwfirst->ReturnPath(p, &m_Dynamic);
+			m_Established.insert(m_Established.end(), m_Dynamic.begin(), m_Dynamic.end());
 		}
 
-		drawing = false;
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = true;
+		emit BeginDatachange(data_selection, this);
 
-		emit vp1dyn_changed(&established, &dynamic);
+		m_Bmphand->FillContour(&m_Established, true);
+
+		emit EndDatachange(this);
+
+		m_Dynamic.clear();
+		m_Established.clear();
+		if (m_Cooling)
+		{
+			m_Dynamicold.clear();
+			m_Times.clear();
+		}
+
+		m_Drawing = false;
+
+		emit Vp1dynChanged(&m_Established, &m_Dynamic);
 	}
 }
 
-void LivewireWidget::pt_midclicked(Point p)
+void LivewireWidget::PtMidclicked(Point p)
 {
-	if (drawing)
+	if (m_Drawing)
 	{
-		if (clicks.size() == 1)
+		if (m_Clicks.size() == 1)
 		{
-			pt_doubleclickedmid(p);
+			PtDoubleclickedmid(p);
 			return;
 		}
 		else
 		{
-			if (straight->isChecked())
+			if (m_Straight->isChecked())
 			{
-				established.clear();
-				dynamic.clear();
-				clicks.pop_back();
-				establishedlengths.pop_back();
-				p1 = clicks.back();
-				addLine(&dynamic, p1, p);
-				auto it = clicks.begin();
-				Point pp = p2;
+				m_Established.clear();
+				m_Dynamic.clear();
+				m_Clicks.pop_back();
+				m_Establishedlengths.pop_back();
+				m_P1 = m_Clicks.back();
+				addLine(&m_Dynamic, m_P1, p);
+				auto it = m_Clicks.begin();
+				Point pp = m_P2;
 				it++;
-				while (it != clicks.end())
+				while (it != m_Clicks.end())
 				{
-					addLine(&established, pp, *it);
+					addLine(&m_Established, pp, *it);
 					pp = *it;
 					it++;
 				}
-				if (cb_closing->isChecked())
-					addLine(&dynamic, p2, p);
-				emit vp1dyn_changed(&established, &dynamic);
+				if (m_CbClosing->isChecked())
+					addLine(&m_Dynamic, m_P2, p);
+				emit Vp1dynChanged(&m_Established, &m_Dynamic);
 			}
-			else if (autotrace->isChecked())
+			else if (m_Autotrace->isChecked())
 			{
-				dynamic.clear();
-				clicks.pop_back();
-				establishedlengths.pop_back();
-				auto it1 = established.begin();
-				for (int i = 0; i < establishedlengths.back(); i++)
+				m_Dynamic.clear();
+				m_Clicks.pop_back();
+				m_Establishedlengths.pop_back();
+				auto it1 = m_Established.begin();
+				for (int i = 0; i < m_Establishedlengths.back(); i++)
 					it1++;
-				established.erase(it1, established.end());
-				p1 = clicks.back();
-				lw->change_pt(p1);
-				lw->return_path(p, &dynamic);
-				if (cooling)
+				m_Established.erase(it1, m_Established.end());
+				m_P1 = m_Clicks.back();
+				m_Lw->ChangePt(m_P1);
+				m_Lw->ReturnPath(p, &m_Dynamic);
+				if (m_Cooling)
 				{
-					times.resize(dynamic.size());
+					m_Times.resize(m_Dynamic.size());
 					QTime now = QTime::currentTime();
-					auto tit = times.begin();
-					while (tit != times.end())
+					auto tit = m_Times.begin();
+					while (tit != m_Times.end())
 					{
 						*tit = now;
 						tit++;
 					}
-					dynamicold.clear();
+					m_Dynamicold.clear();
 				}
-				if (cb_closing->isChecked())
-					lwfirst->return_path(p, &dynamic);
+				if (m_CbClosing->isChecked())
+					m_Lwfirst->ReturnPath(p, &m_Dynamic);
 
-				emit vp1dyn_changed(&established, &dynamic);
+				emit Vp1dynChanged(&m_Established, &m_Dynamic);
 			}
 		}
 	}
 }
 
-void LivewireWidget::pt_doubleclickedmid(Point p)
+void LivewireWidget::PtDoubleclickedmid(Point p)
 {
-	if (drawing)
+	if (m_Drawing)
 	{
-		dynamic.clear();
-		established.clear();
-		establishedlengths.clear();
-		clicks.clear();
-		drawing = false;
+		m_Dynamic.clear();
+		m_Established.clear();
+		m_Establishedlengths.clear();
+		m_Clicks.clear();
+		m_Drawing = false;
 
-		if (cooling)
+		if (m_Cooling)
 		{
-			dynamicold.clear();
-			times.clear();
+			m_Dynamicold.clear();
+			m_Times.clear();
 		}
-		emit vp1dyn_changed(&established, &dynamic);
+		emit Vp1dynChanged(&m_Established, &m_Dynamic);
 	}
 }
 
-void LivewireWidget::on_mouse_released(Point p)
+void LivewireWidget::OnMouseReleased(Point p)
 {
-	if (freedraw->isChecked() && drawing)
+	if (m_Freedraw->isChecked() && m_Drawing)
 	{
-		clicks.push_back(p);
-		addLine(&dynamic, p1, p);
-		addLine(&dynamic, p2, p);
+		m_Clicks.push_back(p);
+		addLine(&m_Dynamic, m_P1, p);
+		addLine(&m_Dynamic, m_P2, p);
 
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = true;
-		emit begin_datachange(dataSelection, this);
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = true;
+		emit BeginDatachange(data_selection, this);
 
-		bmphand->fill_contour(&dynamic, true);
+		m_Bmphand->FillContour(&m_Dynamic, true);
 
-		emit end_datachange(this);
+		emit EndDatachange(this);
 
-		dynamic.clear();
-		dynamic1.clear();
-		established.clear();
+		m_Dynamic.clear();
+		m_Dynamic1.clear();
+		m_Established.clear();
 
-		drawing = false;
+		m_Drawing = false;
 
-		emit vp1dyn_changed(&established, &dynamic);
+		emit Vp1dynChanged(&m_Established, &m_Dynamic);
 	}
 }
 
-void LivewireWidget::on_mouse_moved(Point p)
+void LivewireWidget::OnMouseMoved(Point p)
 {
-	if (drawing)
+	if (m_Drawing)
 	{
-		if (freedraw->isChecked())
+		if (m_Freedraw->isChecked())
 		{
-			dynamic1.clear();
-			addLine(&dynamic, p1, p);
-			dynamic1.insert(dynamic1.begin(), dynamic.begin(), dynamic.end());
-			addLine(&dynamic1, p2, p);
-			emit vpdyn_changed(&dynamic1);
-			p1 = p;
-			clicks.push_back(p);
+			m_Dynamic1.clear();
+			addLine(&m_Dynamic, m_P1, p);
+			m_Dynamic1.insert(m_Dynamic1.begin(), m_Dynamic.begin(), m_Dynamic.end());
+			addLine(&m_Dynamic1, m_P2, p);
+			emit VpdynChanged(&m_Dynamic1);
+			m_P1 = p;
+			m_Clicks.push_back(p);
 		}
-		else if (straight->isChecked())
+		else if (m_Straight->isChecked())
 		{
-			dynamic.clear();
-			addLine(&dynamic, p1, p);
-			if (cb_closing->isChecked())
-				addLine(&dynamic, p2, p);
-			emit vpdyn_changed(&dynamic);
+			m_Dynamic.clear();
+			addLine(&m_Dynamic, m_P1, p);
+			if (m_CbClosing->isChecked())
+				addLine(&m_Dynamic, m_P2, p);
+			emit VpdynChanged(&m_Dynamic);
 		}
 		else
 		{
-			lw->return_path(p, &dynamic);
-			if (cb_closing->isChecked())
-				lwfirst->return_path(p, &dynamic1);
+			m_Lw->ReturnPath(p, &m_Dynamic);
+			if (m_CbClosing->isChecked())
+				m_Lwfirst->ReturnPath(p, &m_Dynamic1);
 
-			if (cooling)
+			if (m_Cooling)
 			{
 				std::vector<Point>::reverse_iterator rit, ritold;
-				rit = dynamic.rbegin();
-				ritold = dynamicold.rbegin();
-				times.resize(dynamic.size());
-				auto tit = times.begin();
-				while (rit != dynamic.rend() && ritold != dynamicold.rend() &&
+				rit = m_Dynamic.rbegin();
+				ritold = m_Dynamicold.rbegin();
+				m_Times.resize(m_Dynamic.size());
+				auto tit = m_Times.begin();
+				while (rit != m_Dynamic.rend() && ritold != m_Dynamicold.rend() &&
 							 (*rit).px == (*ritold).px && (*rit).py == (*ritold).py)
 				{
 					rit++;
@@ -375,215 +371,214 @@ void LivewireWidget::on_mouse_moved(Point p)
 				}
 
 				QTime now = QTime::currentTime();
-				while (tit != times.end())
+				while (tit != m_Times.end())
 				{
 					*tit = now;
 					tit++;
 				}
 
-				dynamicold.clear();
-				dynamicold.insert(dynamicold.begin(), dynamic.begin(),
-						dynamic.end());
+				m_Dynamicold.clear();
+				m_Dynamicold.insert(m_Dynamicold.begin(), m_Dynamic.begin(), m_Dynamic.end());
 
-				tit = times.begin();
+				tit = m_Times.begin();
 
-				if (tit->msecsTo(now) >= tlimit2)
+				if (tit->msecsTo(now) >= m_Tlimit2)
 				{
-					rit = dynamic.rbegin();
-					while (tit != times.end() && tit->msecsTo(now) >= tlimit1)
+					rit = m_Dynamic.rbegin();
+					while (tit != m_Times.end() && tit->msecsTo(now) >= m_Tlimit1)
 					{
 						tit++;
 						rit++;
 					}
 
 					rit--;
-					lw->change_pt(*rit);
+					m_Lw->ChangePt(*rit);
 					rit++;
-					established.insert(established.end(), dynamic.rbegin(), rit);
-					times.erase(times.begin(), tit);
+					m_Established.insert(m_Established.end(), m_Dynamic.rbegin(), rit);
+					m_Times.erase(m_Times.begin(), tit);
 
-					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
-					emit vp1dyn_changed(&established, &dynamic);
+					if (m_CbClosing->isChecked())
+						m_Dynamic.insert(m_Dynamic.end(), m_Dynamic1.begin(), m_Dynamic1.end());
+					emit Vp1dynChanged(&m_Established, &m_Dynamic);
 				}
 				else
 				{
-					if (cb_closing->isChecked())
-						dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
-					emit vpdyn_changed(&dynamic);
+					if (m_CbClosing->isChecked())
+						m_Dynamic.insert(m_Dynamic.end(), m_Dynamic1.begin(), m_Dynamic1.end());
+					emit VpdynChanged(&m_Dynamic);
 				}
 			}
 			else
 			{
-				if (cb_closing->isChecked())
-					dynamic.insert(dynamic.end(), dynamic1.begin(), dynamic1.end());
-				emit vpdyn_changed(&dynamic);
+				if (m_CbClosing->isChecked())
+					m_Dynamic.insert(m_Dynamic.end(), m_Dynamic1.begin(), m_Dynamic1.end());
+				emit VpdynChanged(&m_Dynamic);
 			}
 		}
 	}
 }
 
-void LivewireWidget::init()
+void LivewireWidget::Init()
 {
-	if (activeslice != handler3D->active_slice())
+	if (m_Activeslice != m_Handler3D->ActiveSlice())
 	{
-		activeslice = handler3D->active_slice();
-		bmphand = handler3D->get_activebmphandler();
+		m_Activeslice = m_Handler3D->ActiveSlice();
+		m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-		dynamic.clear();
-		established.clear();
-		clicks.clear();
-		establishedlengths.clear();
+		m_Dynamic.clear();
+		m_Established.clear();
+		m_Clicks.clear();
+		m_Establishedlengths.clear();
 
-		if (cooling)
+		if (m_Cooling)
 		{
-			dynamicold.clear();
-			times.clear();
+			m_Dynamicold.clear();
+			m_Times.clear();
 		}
 
-		if (lw != nullptr)
+		if (m_Lw != nullptr)
 		{
-			delete lw;
-			lw = nullptr;
+			delete m_Lw;
+			m_Lw = nullptr;
 		}
-		if (lwfirst != nullptr)
+		if (m_Lwfirst != nullptr)
 		{
-			delete lwfirst;
-			lwfirst = nullptr;
+			delete m_Lwfirst;
+			m_Lwfirst = nullptr;
 		}
 
-		emit vp1dyn_changed(&established, &dynamic);
+		emit Vp1dynChanged(&m_Established, &m_Dynamic);
 	}
 
-	init1();
+	Init1();
 
-	hideparams_changed();
+	HideParamsChanged();
 }
 
-void LivewireWidget::newloaded()
+void LivewireWidget::NewLoaded()
 {
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	dynamic.clear();
-	established.clear();
-	clicks.clear();
-	establishedlengths.clear();
+	m_Dynamic.clear();
+	m_Established.clear();
+	m_Clicks.clear();
+	m_Establishedlengths.clear();
 
-	if (cooling)
+	if (m_Cooling)
 	{
-		dynamicold.clear();
-		times.clear();
+		m_Dynamicold.clear();
+		m_Times.clear();
 	}
 
-	if (lw != nullptr)
+	if (m_Lw != nullptr)
 	{
-		delete lw;
-		lw = nullptr;
+		delete m_Lw;
+		m_Lw = nullptr;
 	}
-	if (lwfirst != nullptr)
+	if (m_Lwfirst != nullptr)
 	{
-		delete lwfirst;
-		lwfirst = nullptr;
+		delete m_Lwfirst;
+		m_Lwfirst = nullptr;
 	}
 }
 
-void LivewireWidget::init1()
+void LivewireWidget::Init1()
 {
 	Point p;
 	p.px = p.py = 0;
 
-	drawing = false;
+	m_Drawing = false;
 }
 
-void LivewireWidget::cleanup()
+void LivewireWidget::Cleanup()
 {
-	dynamic.clear();
-	established.clear();
-	clicks.clear();
-	establishedlengths.clear();
+	m_Dynamic.clear();
+	m_Established.clear();
+	m_Clicks.clear();
+	m_Establishedlengths.clear();
 
-	if (cooling)
+	if (m_Cooling)
 	{
-		dynamicold.clear();
-		times.clear();
+		m_Dynamicold.clear();
+		m_Times.clear();
 	}
 
-	drawing = false;
-	if (lw != nullptr)
-		delete lw;
-	if (lw != nullptr)
-		delete lwfirst;
-	lw = lwfirst = nullptr;
+	m_Drawing = false;
+	if (m_Lw != nullptr)
+		delete m_Lw;
+	if (m_Lw != nullptr)
+		delete m_Lwfirst;
+	m_Lw = m_Lwfirst = nullptr;
 
-	emit vp1dyn_changed(&established, &dynamic);
+	emit Vp1dynChanged(&m_Established, &m_Dynamic);
 }
 
-void LivewireWidget::bmp_changed()
+void LivewireWidget::BmpChanged()
 {
-	cleanup();
-	bmphand = handler3D->get_activebmphandler();
-	init1();
+	Cleanup();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	Init1();
 }
 
-void LivewireWidget::on_slicenr_changed()
+void LivewireWidget::OnSlicenrChanged()
 {
-	activeslice = handler3D->active_slice();
-	bmphand_changed(handler3D->get_activebmphandler());
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	BmphandChanged(m_Handler3D->GetActivebmphandler());
 }
 
-void LivewireWidget::bmphand_changed(bmphandler* bmph)
+void LivewireWidget::BmphandChanged(Bmphandler* bmph)
 {
-	bmphand = bmph;
+	m_Bmphand = bmph;
 
-	dynamic.clear();
-	established.clear();
-	clicks.clear();
-	establishedlengths.clear();
+	m_Dynamic.clear();
+	m_Established.clear();
+	m_Clicks.clear();
+	m_Establishedlengths.clear();
 
-	if (cooling)
+	if (m_Cooling)
 	{
-		dynamicold.clear();
-		times.clear();
+		m_Dynamicold.clear();
+		m_Times.clear();
 	}
 
-	if (lw != nullptr)
+	if (m_Lw != nullptr)
 	{
-		delete lw;
-		lw = nullptr;
+		delete m_Lw;
+		m_Lw = nullptr;
 	}
-	if (lwfirst != nullptr)
+	if (m_Lwfirst != nullptr)
 	{
-		delete lwfirst;
-		lwfirst = nullptr;
+		delete m_Lwfirst;
+		m_Lwfirst = nullptr;
 	}
 
-	init1();
+	Init1();
 
-	emit vp1dyn_changed(&established, &dynamic);
+	emit Vp1dynChanged(&m_Established, &m_Dynamic);
 }
 
-void LivewireWidget::mode_changed()
+void LivewireWidget::ModeChanged()
 {
-	cb_freezing->setEnabled(autotrace->isChecked());
-	params_layout->labelForField(cb_freezing)->setEnabled(autotrace->isChecked());
-	freezing_changed();
+	m_CbFreezing->setEnabled(m_Autotrace->isChecked());
+	m_ParamsLayout->labelForField(m_CbFreezing)->setEnabled(m_Autotrace->isChecked());
+	FreezingChanged();
 
-	cb_closing->setEnabled(!freedraw->isChecked());
-	params_layout->labelForField(cb_closing)->setEnabled(cb_closing->isEnabled());
+	m_CbClosing->setEnabled(!m_Freedraw->isChecked());
+	m_ParamsLayout->labelForField(m_CbClosing)->setEnabled(m_CbClosing->isEnabled());
 }
 
-void LivewireWidget::freezing_changed()
+void LivewireWidget::FreezingChanged()
 {
-	cooling = cb_freezing->isChecked();
-	sb_freezing->setEnabled(cooling && autotrace->isChecked());
-	params_layout->labelForField(sb_freezing)->setEnabled(sb_freezing->isEnabled());
+	m_Cooling = m_CbFreezing->isChecked();
+	m_SbFreezing->setEnabled(m_Cooling && m_Autotrace->isChecked());
+	m_ParamsLayout->labelForField(m_SbFreezing)->setEnabled(m_SbFreezing->isEnabled());
 }
 
-void LivewireWidget::sbfreezing_changed(int i)
+void LivewireWidget::SbfreezingChanged(int i)
 {
-	tlimit1 = i * 1000;
-	tlimit2 = (float(i) + 0.5f) * 1000;
+	m_Tlimit1 = i * 1000;
+	m_Tlimit2 = (float(i) + 0.5f) * 1000;
 }
 
 FILE* LivewireWidget::SaveParams(FILE* fp, int version)
@@ -591,17 +586,17 @@ FILE* LivewireWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = sb_freezing->value();
+		dummy = m_SbFreezing->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)autotrace->isChecked();
+		dummy = (int)m_Autotrace->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)straight->isChecked();
+		dummy = (int)m_Straight->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)freedraw->isChecked();
+		dummy = (int)m_Freedraw->isChecked();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_freezing->isChecked());
+		dummy = (int)(m_CbFreezing->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(cb_closing->isChecked());
+		dummy = (int)(m_CbClosing->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -612,38 +607,38 @@ FILE* LivewireWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		//disconnect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-		disconnect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-		disconnect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+		//QObject_disconnect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(ModeChanged()));
+		QObject_disconnect(m_CbFreezing, SIGNAL(clicked()), this, SLOT(FreezingChanged()));
+		QObject_disconnect(m_SbFreezing, SIGNAL(valueChanged(int)), this, SLOT(SbfreezingChanged(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_freezing->setValue(dummy);
+		m_SbFreezing->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		autotrace->setChecked(dummy > 0);
+		m_Autotrace->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		straight->setChecked(dummy > 0);
+		m_Straight->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		freedraw->setChecked(dummy > 0);
+		m_Freedraw->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		cb_freezing->setChecked(dummy > 0);
+		m_CbFreezing->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		cb_closing->setChecked(dummy > 0);
+		m_CbClosing->setChecked(dummy > 0);
 
-		sbfreezing_changed(sb_freezing->value());
-		freezing_changed();
-		mode_changed();
+		SbfreezingChanged(m_SbFreezing->value());
+		FreezingChanged();
+		ModeChanged();
 
-		//connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-		connect(cb_freezing, SIGNAL(clicked()), this, SLOT(freezing_changed()));
-		connect(sb_freezing, SIGNAL(valueChanged(int)), this, SLOT(sbfreezing_changed(int)));
+		//QObject_connect(drawmode, SIGNAL(buttonClicked(int)), this, SLOT(ModeChanged()));
+		QObject_connect(m_CbFreezing, SIGNAL(clicked()), this, SLOT(FreezingChanged()));
+		QObject_connect(m_SbFreezing, SIGNAL(valueChanged(int)), this, SLOT(SbfreezingChanged(int)));
 	}
 	return fp;
 }
 
-void LivewireWidget::hideparams_changed()
+void LivewireWidget::HideParamsChanged()
 {
-	mode_changed();
+	ModeChanged();
 }
 
-}// namespace iseg
+} // namespace iseg

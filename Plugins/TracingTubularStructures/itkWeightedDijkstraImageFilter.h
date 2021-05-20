@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -60,9 +60,7 @@ public:
 		bit64 dir1[] = {j[0] - (bit64)i[0], j[1] - (bit64)i[1], j[2] - (bit64)i[2]};
 		bit64 dir0[] = {(bit64)i[0] - iprev[0], (bit64)i[1] - iprev[1], (bit64)i[2] - iprev[2]};
 		auto pLength = ComputeLength(dir1[0] * m_Spacing[0], dir1[1] * m_Spacing[1], dir1[2] * m_Spacing[2]);
-		auto pSmoothness = ComputeAngle(
-				dir0[0] * m_Spacing[0], dir0[1] * m_Spacing[1], dir0[2] * m_Spacing[2],
-				dir1[0] * m_Spacing[0], dir1[1] * m_Spacing[1], dir1[2] * m_Spacing[2]);
+		auto pSmoothness = ComputeAngle(dir0[0] * m_Spacing[0], dir0[1] * m_Spacing[1], dir0[2] * m_Spacing[2], dir1[0] * m_Spacing[0], dir1[1] * m_Spacing[1], dir1[2] * m_Spacing[2]);
 
 		return m_IntensityWeight * (iDifference + sIDifference) + m_LengthWeight * pLength + m_AngleWeight * pSmoothness;
 	}
@@ -73,9 +71,7 @@ public:
 	}
 
 	// computes max(0, 1 - cos( Theta )), not the actual angle, i.e. value is in range[0,2]
-	inline SpacingValueType ComputeAngle(
-			SpacingValueType x1, SpacingValueType y1, SpacingValueType z1,
-			SpacingValueType x2, SpacingValueType y2, SpacingValueType z2) const
+	inline SpacingValueType ComputeAngle(SpacingValueType x1, SpacingValueType y1, SpacingValueType z1, SpacingValueType x2, SpacingValueType y2, SpacingValueType z2) const
 	{
 		// same direction:     1 - 1    = 0
 		// opposite direction: 1 - (-1) = 2
@@ -121,7 +117,7 @@ public:
 
 protected:
 	WeightedDijkstraImageFilter();
-	virtual ~WeightedDijkstraImageFilter() {}
+	~WeightedDijkstraImageFilter() override {}
 	void PrintSelf(std::ostream& os, Indent indent) const override;
 	void GenerateData() override;
 

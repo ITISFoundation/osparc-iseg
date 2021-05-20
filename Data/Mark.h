@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -21,31 +21,33 @@ struct Mark
 	Mark(unsigned label = 0) : mark(label) {}
 	Mark(const Mark& r) : p(r.p), mark(r.mark), name(r.name) {}
 
-	static const tissues_size_t RED = -1;
-	static const tissues_size_t GREEN = -2;
-	static const tissues_size_t BLUE = -3;
-	static const tissues_size_t WHITE = -4;
+	static const tissues_size_t red = -1;
+	static const tissues_size_t green = -2;
+	static const tissues_size_t blue = -3;
+	static const tissues_size_t white = -4;
 
 	union {
-		Point p;
-		struct { short px, py; };
+		Point p; // NOLINT
+		struct
+		{
+			short px, py; // NOLINT
+		};
 	};
-	unsigned mark;
-	std::string name;
+	unsigned mark;		// NOLINT
+	std::string name; // NOLINT
 };
 
-struct augmentedmark
+struct AugmentedMark
 {
-	Point p;
-	unsigned short slicenr;
-	unsigned mark;
-	std::string name;
+	Point p;								// NOLINT
+	unsigned short slicenr; // NOLINT
+	unsigned mark;					// NOLINT
+	std::string name;				// NOLINT
 };
 
-inline bool operator!=(augmentedmark a, augmentedmark b)
+inline bool operator!=(AugmentedMark a, AugmentedMark b)
 {
-	return (a.p.px != b.p.px) || (a.p.py != b.p.py) ||
-				 (a.slicenr != b.slicenr) || (a.mark != b.mark) || (a.name != b.name);
+	return (a.p.px != b.p.px) || (a.p.py != b.p.py) || (a.slicenr != b.slicenr) || (a.mark != b.mark) || (a.name != b.name);
 }
 
 } // namespace iseg

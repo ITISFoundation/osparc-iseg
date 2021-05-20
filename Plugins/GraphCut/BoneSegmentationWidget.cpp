@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -31,13 +31,13 @@ template<class TFilter>
 class CommandProgressUpdate : public itk::Command
 {
 public:
-	typedef CommandProgressUpdate Self;
-	typedef itk::Command Superclass;
-	typedef itk::SmartPointer<Self> Pointer;
+	using Self = CommandProgressUpdate; // NOLINT
+	using Superclass = itk::Command;		// NOLINT
+	using Pointer = itk::SmartPointer<Self>;
 	itkNewMacro(Self);
 
 protected:
-	CommandProgressUpdate() {}
+	CommandProgressUpdate() = default;
 
 public:
 	void SetProgressObject(QProgressDialog* progress) { m_Progress = progress; }
@@ -47,8 +47,7 @@ public:
 		Execute((const itk::Object*)caller, event);
 	}
 
-	void Execute(const itk::Object* object,
-			const itk::EventObject& event) override
+	void Execute(const itk::Object* object, const itk::EventObject& event) override
 	{
 		auto filter = dynamic_cast<const TFilter*>(object);
 
@@ -67,37 +66,32 @@ private:
 
 } // namespace
 
-BoneSegmentationWidget::BoneSegmentationWidget(
-		iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D),
-			m_CurrentFilter(nullptr)
+BoneSegmentationWidget::BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D), m_CurrentFilter(nullptr)
 {
-	setToolTip(Format(
-			"A fully-automatic method for segmenting the femur from 3D CT "
-			"scans, based on the graph-cut segmentation framework and bone "
-			"enhancement filters."
-			"<br>"
-			"Krcah et al., 'Fully automatic and fast segmentation of the "
-			"femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
+	setToolTip(Format("A fully-automatic method for segmenting the femur from 3D CT "
+										"scans, based on the graph-cut segmentation framework and bone "
+										"enhancement filters."
+										"<br>"
+										"Krcah et al., 'Fully automatic and fast segmentation of the "
+										"femur bone from 3D-CT images with no shape prior', IEEE, 2011"));
 
-	m_CurrentSlice = m_Handler3D->active_slice();
+	m_CurrentSlice = m_Handler3D->ActiveSlice();
 
 	m_VGrid = new Q3VBox(this);
 
 	m_HGrid1 = new Q3HBox(m_VGrid);
 	m_LabelMaxFlowAlgorithm = new QLabel("Max-Flow Algorithm: ", m_HGrid1);
 	m_MaxFlowAlgorithm = new QComboBox(m_HGrid1);
-	m_MaxFlowAlgorithm->setToolTip(
-			QString("Choose Max-Flow algorithm used to perform Graph-Cut."));
+	m_MaxFlowAlgorithm->setToolTip(QString("Choose Max-Flow algorithm used to perform Graph-Cut."));
 	m_MaxFlowAlgorithm->insertItem(QString("Kohli"));
 	m_MaxFlowAlgorithm->insertItem(QString("PushLabel-Fifo"));
 	m_MaxFlowAlgorithm->insertItem(QString("PushLabel-H_PRF"));
 	m_MaxFlowAlgorithm->setCurrentItem(0);
 
-	m_6Connectivity = new QCheckBox(QString("6-Connectivity"), m_VGrid);
-	m_6Connectivity->setToolTip(QString("Use fully connected neighborhood or "
-																			"only city-block neighbors (26 vs 6)."));
+	m_M6Connectivity = new QCheckBox(QString("6-Connectivity"), m_VGrid);
+	m_M6Connectivity->setToolTip(QString("Use fully connected neighborhood or "
+																			 "only city-block neighbors (26 vs 6)."));
 
 	// TODO: this should re-use active-slices
 	m_UseSliceRange = new QCheckBox(QString("Use Slice Range"), m_VGrid);
@@ -117,19 +111,18 @@ BoneSegmentationWidget::BoneSegmentationWidget(
 
 	m_VGrid->setMinimumWidth(std::max(300, m_VGrid->sizeHint().width()));
 
-	QObject::connect(m_Execute, SIGNAL(clicked()), this, SLOT(do_work()));
-	QObject::connect(m_UseSliceRange, SIGNAL(clicked()), this,
-			SLOT(showsliders()));
+	QObject_connect(m_Execute, SIGNAL(clicked()), this, SLOT(DoWork()));
+	QObject_connect(m_UseSliceRange, SIGNAL(clicked()), this, SLOT(Showsliders()));
 }
 
-void BoneSegmentationWidget::showsliders()
+void BoneSegmentationWidget::Showsliders()
 {
 	if (m_UseSliceRange->isChecked() == true)
 	{
-		m_Start->setMaximum(m_Handler3D->end_slice());
+		m_Start->setMaximum(m_Handler3D->EndSlice());
 		m_Start->setEnabled(true);
-		m_End->setMaximum(m_Handler3D->end_slice());
-		m_End->setValue(m_Handler3D->end_slice());
+		m_End->setMaximum(m_Handler3D->EndSlice());
+		m_End->setValue(m_Handler3D->EndSlice());
 		m_End->setEnabled(true);
 	}
 	else
@@ -139,7 +132,7 @@ void BoneSegmentationWidget::showsliders()
 	}
 }
 
-void BoneSegmentationWidget::do_work()
+void BoneSegmentationWidget::DoWork()
 {
 	QProgressDialog progress("Performing graph cut...", "Cancel", 0, 101, this);
 	progress.setWindowModality(Qt::WindowModal);
@@ -147,11 +140,11 @@ void BoneSegmentationWidget::do_work()
 	progress.show();
 	progress.setValue(1);
 
-	QObject::connect(&progress, SIGNAL(canceled()), this, SLOT(cancel()));
+	QObject_connect(&progress, SIGNAL(canceled()), this, SLOT(Cancel()));
 
-	using TInput = itk::Image<float, 3>;
-	using TOutput = itk::Image<unsigned int, 3>;
-	using GraphCutFilterType = itk::ImageGraphCutFilter<TInput, TInput, TInput, TOutput>;
+	using input_type = itk::Image<float, 3>;
+	using output_type = itk::Image<unsigned int, 3>;
+	using graph_cut_filter_type = itk::ImageGraphCutFilter<input_type, input_type, input_type, output_type>;
 
 	// get input image
 	iseg::SlicesHandlerITKInterface itk_wrapper(m_Handler3D);
@@ -160,44 +153,42 @@ void BoneSegmentationWidget::do_work()
 	assert(m_MaxFlowAlgorithm->currentItem() > 0);
 
 	// setup algorithm
-	auto graphCutFilter = GraphCutFilterType::New();
-	graphCutFilter->SetNumberOfRequiredInputs(1);
-	graphCutFilter->SetInputImage(input);
-	graphCutFilter->SetMaxFlowAlgorithm(
-			static_cast<GraphCutFilterType::eMaxFlowAlgorithm>(
-					m_MaxFlowAlgorithm->currentItem()));
-	graphCutFilter->SetForegroundPixelValue(255);
-	graphCutFilter->SetBackgroundPixelValue(0);
-	graphCutFilter->SetSigma(0.2);
+	auto graph_cut_filter = graph_cut_filter_type::New();
+	graph_cut_filter->SetNumberOfRequiredInputs(1);
+	graph_cut_filter->SetInputImage(input);
+	graph_cut_filter->SetMaxFlowAlgorithm(static_cast<graph_cut_filter_type::eMaxFlowAlgorithm>(m_MaxFlowAlgorithm->currentItem()));
+	graph_cut_filter->SetForegroundPixelValue(255);
+	graph_cut_filter->SetBackgroundPixelValue(0);
+	graph_cut_filter->SetSigma(0.2);
 
-	if (m_6Connectivity->isChecked())
-		graphCutFilter->SetConnectivity(true);
+	if (m_M6Connectivity->isChecked())
+		graph_cut_filter->SetConnectivity(true);
 
 	// assumes input image is 3D
 	if (input->GetLargestPossibleRegion().GetSize(2) > 1)
 	{
-		m_CurrentFilter = graphCutFilter;
+		m_CurrentFilter = graph_cut_filter;
 
-		auto observer = CommandProgressUpdate<GraphCutFilterType>::New();
-		graphCutFilter->AddObserver(itk::ProgressEvent(), observer);
+		auto observer = CommandProgressUpdate<graph_cut_filter_type>::New();
+		graph_cut_filter->AddObserver(itk::ProgressEvent(), observer);
 		observer->SetProgressObject(&progress);
 
 		try
 		{
-			graphCutFilter->Update();
+			graph_cut_filter->Update();
 
-			auto output = graphCutFilter->GetOutput();
+			auto output = graph_cut_filter->GetOutput();
 
 			auto target = itk_wrapper.GetTarget(m_UseSliceRange->isChecked());
 
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.work = true;
-			emit begin_datachange(dataSelection, this);
+			iseg::DataSelection data_selection;
+			data_selection.allSlices = true;
+			data_selection.work = true;
+			emit BeginDatachange(data_selection, this);
 
-			iseg::Paste<TOutput, iseg::SlicesHandlerITKInterface::image_ref_type>(output, target);
+			iseg::Paste<output_type, iseg::SlicesHandlerITKInterface::image_ref_type>(output, target);
 
-			emit end_datachange(this);
+			emit EndDatachange(this);
 		}
 		catch (itk::ExceptionObject&)
 		{
@@ -207,7 +198,7 @@ void BoneSegmentationWidget::do_work()
 	}
 }
 
-void BoneSegmentationWidget::cancel()
+void BoneSegmentationWidget::Cancel()
 {
 	if (m_CurrentFilter)
 	{
@@ -223,18 +214,18 @@ QSize BoneSegmentationWidget::sizeHint() const
 
 BoneSegmentationWidget::~BoneSegmentationWidget() { delete m_VGrid; }
 
-void BoneSegmentationWidget::on_slicenr_changed()
+void BoneSegmentationWidget::OnSlicenrChanged()
 {
-	m_CurrentSlice = m_Handler3D->active_slice();
+	m_CurrentSlice = m_Handler3D->ActiveSlice();
 }
 
-void BoneSegmentationWidget::init()
+void BoneSegmentationWidget::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
-void BoneSegmentationWidget::newloaded()
+void BoneSegmentationWidget::NewLoaded()
 {
-	m_CurrentSlice = m_Handler3D->active_slice();
+	m_CurrentSlice = m_Handler3D->ActiveSlice();
 }

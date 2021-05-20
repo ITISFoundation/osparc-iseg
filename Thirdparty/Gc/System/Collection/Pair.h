@@ -28,50 +28,48 @@
 #ifndef GC_SYSTEM_COLLECTION_PAIR_H
 #define GC_SYSTEM_COLLECTION_PAIR_H
 
-namespace Gc
+namespace Gc {
+namespace System {
+namespace Collection {
+/** A pair of values which may be of a different data type. */
+template <class T1, class T2>
+class Pair
 {
-    namespace System
+  public:
+    /** First element. */
+    T1 m_first;
+    /** Second element. */
+    T2 m_second;
+
+  public:
+    /** Default constructor. */
+    Pair() = default;
+
+    /** Constructor. */
+    Pair(const T1 & v1, const T2 & v2)
+        : m_first(v1)
+        , m_second(v2)
+    {}
+
+    /** Copy constructor. */
+    Pair(const Pair<T1, T2> & p)
+        : m_first(p.m_first)
+        , m_second(p.m_second)
+    {}
+
+    /** Assignment operator. */
+    Pair<T1, T2> & operator=(const Pair<T1, T2> & p)
     {
-        namespace Collection
+        if (this != &p)
         {
-            /** A pair of values which may be of a different data type. */
-            template <class T1, class T2> 
-            class Pair
-            {
-            public:
-                /** First element. */
-                T1 m_first;
-                /** Second element. */
-                T2 m_second;
-
-            public:
-                /** Default constructor. */
-                Pair()
-                {}
-
-                /** Constructor. */
-                Pair(const T1& v1, const T2& v2)
-                    : m_first(v1), m_second(v2)
-                {}
-
-                /** Copy constructor. */
-                Pair(const Pair<T1,T2>& p)
-                    : m_first(p.m_first), m_second(p.m_second)
-                {}
-
-                /** Assignment operator. */
-                Pair<T1,T2>& operator=(const Pair<T1,T2>& p)
-                {
-                    if (this != &p)
-                    {
-                        m_first = p.m_first;
-                        m_second = p.m_second;
-                    }
-                    return *this;
-                }
-            };
+            m_first = p.m_first;
+            m_second = p.m_second;
         }
+        return *this;
     }
+};
 }
+}
+} // namespace Gc::System::Collection
 
 #endif

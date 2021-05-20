@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -48,9 +48,9 @@ namespace dyn_lib {
 
 #	include <windows.h>
 
-typedef HINSTANCE handle;
+using handle_type = HINSTANCE;
 
-inline handle open(std::string const& file_name)
+inline handle_type open(std::string const& file_name)
 {
 	return LoadLibrary(file_name.c_str());
 }
@@ -58,14 +58,14 @@ inline handle open(std::string const& file_name)
 //_________________________________________________________________//
 
 template<typename TargType>
-inline TargType locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle_type h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(GetProcAddress(h, symbol.c_str()));
 }
 
 //_________________________________________________________________//
 
-inline void close(handle h)
+inline void close(handle_type h)
 {
 	if (h)
 		FreeLibrary(h);
@@ -77,10 +77,7 @@ inline std::string error()
 {
 	LPTSTR msg = nullptr;
 
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-				  nullptr, GetLastError(),
-				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msg, 0,
-				  nullptr);
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&msg, 0, nullptr);
 
 	std::string res(msg == nullptr ? "Unable to get any error message" : msg);
 
@@ -112,9 +109,9 @@ fs::path get_exe_dir()
 #	include <sys/stat.h>
 #	include <sys/types.h>
 
-typedef void* handle;
+using handle_type = void*;
 
-inline handle open(std::string const& file_name)
+inline handle_type open(std::string const& file_name)
 {
 	return dlopen(file_name.c_str(), RTLD_GLOBAL | RTLD_LAZY);
 }
@@ -122,14 +119,14 @@ inline handle open(std::string const& file_name)
 //_________________________________________________________________//
 
 template<typename TargType>
-inline TargType locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle_type h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(dlsym(h, symbol.c_str()));
 }
 
 //_________________________________________________________________//
 
-inline void close(handle h)
+inline void close(handle_type h)
 {
 	if (h)
 		dlclose(h);
@@ -170,12 +167,12 @@ namespace iseg { namespace plugin {
 
 bool LoadPlugin(const std::string& plugin_file_path)
 {
-	dyn_lib::handle lib_handle = dyn_lib::open(plugin_file_path);
+	dyn_lib::handle_type lib_handle = dyn_lib::open(plugin_file_path);
 	if (!lib_handle)
 		throw std::logic_error(std::string("Unable to load plugin ")
-								   .append(plugin_file_path)
-								   .append(" : ")
-								   .append(dyn_lib::error()));
+															 .append(plugin_file_path)
+															 .append(" : ")
+															 .append(dyn_lib::error()));
 
 	return true;
 }
@@ -189,7 +186,7 @@ bool LoadPlugins(const std::string& directory_path)
 	{
 		fs::path plugin_folder(directory_path);
 		if (fs::exists(plugin_folder) && fs::is_directory(plugin_folder) &&
-			!fs::is_empty(plugin_folder))
+				!fs::is_empty(plugin_folder))
 		{
 			fs::directory_iterator dir_itr(plugin_folder);
 			fs::directory_iterator end_iter;

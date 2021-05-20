@@ -1,7 +1,7 @@
 #include "LogTable.h"
 
-#include <QtGui>
 #include <QFont>
+#include <QtGui>
 
 #define PART_OF_CONTENT_TO_KEEP 0.75
 
@@ -22,26 +22,26 @@
     
     The default font will be a 10pt Courier.
 */
-QLogTable::QLogTable(int numCols, QWidget* parent) : QAbstractScrollArea(parent), numberOfColumns(numCols), limit(NoLimit)
+QLogTable::QLogTable(int numCols, QWidget* parent) : QAbstractScrollArea(parent), m_NumberOfColumns(numCols), m_Limit(NoLimit)
 {
-	curFont = QFont("Courier", 10, QFont::Normal);
-	rowHeight = QFontMetrics(curFont).lineSpacing() + 3;
+	m_CurFont = QFont("Courier", 10, QFont::Normal);
+	m_RowHeight = QFontMetrics(m_CurFont).lineSpacing() + 3;
 
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-	content = new QList<QList<QString>>;
-	colWidth = new int[numberOfColumns];
-	for (int i = 0; i < numberOfColumns; i++)
+	m_Content = new QList<QList<QString>>;
+	m_ColWidth = new int[m_NumberOfColumns];
+	for (int i = 0; i < m_NumberOfColumns; i++)
 	{
-		colWidth[i] = 0;
+		m_ColWidth[i] = 0;
 	}
 
-	verticalScrollBar()->setMaximum(content->size() * rowHeight);
-	verticalScrollBar()->setSingleStep(rowHeight);
+	verticalScrollBar()->setMaximum(m_Content->size() * m_RowHeight);
+	verticalScrollBar()->setSingleStep(m_RowHeight);
 	verticalScrollBar()->setPageStep((height() * 8) / 10);
-	horizontalScrollBar()->setSingleStep(QFontMetrics(curFont).maxWidth());
-	horizontalScrollBar()->setPageStep(10 * QFontMetrics(curFont).maxWidth());
+	horizontalScrollBar()->setSingleStep(QFontMetrics(m_CurFont).maxWidth());
+	horizontalScrollBar()->setPageStep(10 * QFontMetrics(m_CurFont).maxWidth());
 }
 
 /*!
@@ -49,15 +49,15 @@ QLogTable::QLogTable(int numCols, QWidget* parent) : QAbstractScrollArea(parent)
 */
 QLogTable::~QLogTable()
 {
-	delete[] colWidth;
+	delete[] m_ColWidth;
 }
 
 /*!
     Remove all text in the table and clear the widget
 */
-void QLogTable::clearBuffer()
+void QLogTable::ClearBuffer()
 {
-	content->clear();
+	m_Content->clear();
 	viewport()->update();
 }
 
@@ -69,45 +69,45 @@ void QLogTable::setFont(QFont& f)
 {
 	if (f.styleHint() == QFont::TypeWriter || f.styleHint() == QFont::Courier)
 	{
-		curFont = f;
-		rowHeight = QFontMetrics(curFont).lineSpacing() + 3;
-		verticalScrollBar()->setSingleStep(rowHeight);
+		m_CurFont = f;
+		m_RowHeight = QFontMetrics(m_CurFont).lineSpacing() + 3;
+		verticalScrollBar()->setSingleStep(m_RowHeight);
 	}
 }
 
 /*!
     Set the content limit
 */
-void QLogTable::setLimit(int l)
+void QLogTable::SetLimit(int l)
 {
-	limit = l;
+	m_Limit = l;
 }
 
 /*!
     Set the number of columns of the widget
     Remove some columns or add some new empty columns
 */
-void QLogTable::setColumnsNumber(int n)
+void QLogTable::SetColumnsNumber(int n)
 {
-	if ((n > 0) && (n != numberOfColumns))
+	if ((n > 0) && (n != m_NumberOfColumns))
 	{
 		int* colw = new int[n];
-		for (int i = 0; i < (n < numberOfColumns ? n : numberOfColumns); i++)
+		for (int i = 0; i < (n < m_NumberOfColumns ? n : m_NumberOfColumns); i++)
 		{
-			colw[i] = colWidth[i];
+			colw[i] = m_ColWidth[i];
 		}
-		if (n > numberOfColumns)
+		if (n > m_NumberOfColumns)
 		{
-			for (int i = numberOfColumns; i < n; i++)
+			for (int i = m_NumberOfColumns; i < n; i++)
 			{
 				colw[i] = 0;
 			}
 		}
 
-		int* oldcolw = colWidth;
+		int* oldcolw = m_ColWidth;
 
-		colWidth = colw;
-		numberOfColumns = n;
+		m_ColWidth = colw;
+		m_NumberOfColumns = n;
 
 		delete[] oldcolw;
 	}
@@ -119,22 +119,22 @@ void QLogTable::setColumnsNumber(int n)
     
     So number of columns should equal to str.size()
 */
-void QLogTable::appendRow(const QStringList& str)
+void QLogTable::AppendRow(const QStringList& str)
 {
 	if (!str.isEmpty())
 	{
 
-		manageLimit();
+		ManageLimit();
 
-		(*content) << str;
+		(*m_Content) << str;
 
-		for (int i = 0; (i < numberOfColumns) && (i < str.size()); i++)
+		for (int i = 0; (i < m_NumberOfColumns) && (i < str.size()); i++)
 		{
-			if (str[i].size() > colWidth[i])
-				colWidth[i] = str[i].size();
+			if (str[i].size() > m_ColWidth[i])
+				m_ColWidth[i] = str[i].size();
 		}
 
-		updateScrollbar();
+		UpdateScrollbar();
 		// Set the scrollbar position at the bottom of the widget
 		if (!verticalScrollBar()->isSliderDown() && !horizontalScrollBar()->isSliderDown())
 		{
@@ -144,31 +144,31 @@ void QLogTable::appendRow(const QStringList& str)
 	}
 }
 
-void QLogTable::manageLimit()
+void QLogTable::ManageLimit()
 {
-	if ((limit != NoLimit) && (content->size() >= limit))
+	if ((m_Limit != NoLimit) && (m_Content->size() >= m_Limit))
 	{
 		// Remove a part of the content
-		QList<QList<QString>>::iterator e = content->begin();
-		e += (int)(limit * (1 - PART_OF_CONTENT_TO_KEEP));
-		content->erase(content->begin(), e);
+		QList<QList<QString>>::iterator e = m_Content->begin();
+		e += (int)(m_Limit * (1 - PART_OF_CONTENT_TO_KEEP));
+		m_Content->erase(m_Content->begin(), e);
 	}
 }
 
 /*! \internal
     Update scrollbar values (current and maximum)
 */
-void QLogTable::updateScrollbar()
+void QLogTable::UpdateScrollbar()
 {
 	// Update the scrollbar
-	int max = (content->size() * rowHeight) - viewport()->height();
+	int max = (m_Content->size() * m_RowHeight) - viewport()->height();
 	verticalScrollBar()->setMaximum(max < 0 ? 0 : max);
 
 	int maxlinelength = 0;
 
-	for (int i = 0; i < numberOfColumns; i++)
+	for (int i = 0; i < m_NumberOfColumns; i++)
 	{
-		maxlinelength += colWidth[i] * QFontMetrics(curFont).maxWidth() + 5;
+		maxlinelength += m_ColWidth[i] * QFontMetrics(m_CurFont).maxWidth() + 5;
 	}
 
 	max = (maxlinelength)-viewport()->width();
@@ -199,7 +199,7 @@ void QLogTable::resizeEvent(QResizeEvent* event)
 {
 	QPainter p(viewport());
 	verticalScrollBar()->setPageStep((height() * 8) / 10);
-	updateScrollbar();
+	UpdateScrollbar();
 }
 
 /*! \internal
@@ -207,7 +207,7 @@ void QLogTable::resizeEvent(QResizeEvent* event)
 void QLogTable::paintEvent(QPaintEvent* event)
 {
 	QPainter p(viewport());
-	paint(&p, event);
+	Paint(&p, event);
 }
 
 /*! \internal
@@ -215,62 +215,62 @@ void QLogTable::paintEvent(QPaintEvent* event)
     Only lines displayed by the widget are painted. The very low QTextLayout API is used
     to optimize the display.
 */
-void QLogTable::paint(QPainter* p, QPaintEvent* e)
+void QLogTable::Paint(QPainter* p, QPaintEvent* e)
 {
-	bool lineDrawn = false;
-	const int xOffset = horizontalScrollBar()->value();
-	const int yOffset = verticalScrollBar()->value();
+	bool line_drawn = false;
+	const int x_offset = horizontalScrollBar()->value();
+	const int y_offset = verticalScrollBar()->value();
 
-	QPen textPen(Qt::black);
-	QPen linesPen(Qt::gray);
-	linesPen.setStyle(Qt::DotLine);
+	QPen text_pen(Qt::black);
+	QPen lines_pen(Qt::gray);
+	lines_pen.setStyle(Qt::DotLine);
 
 	QRect r = e->rect();
-	p->translate(-xOffset, -yOffset);
-	r.translate(xOffset, yOffset);
+	p->translate(-x_offset, -y_offset);
+	r.translate(x_offset, y_offset);
 	p->setClipRect(r);
 
-	for (int i = (r.top() / rowHeight); i < (r.bottom() / rowHeight) + 1; i++)
+	for (int i = (r.top() / m_RowHeight); i < (r.bottom() / m_RowHeight) + 1; i++)
 	{
-		if (i < content->size())
+		if (i < m_Content->size())
 		{
 			int x = 0;
-			for (int j = 0; j < (numberOfColumns < content->at(i).size() ? numberOfColumns : content->at(i).size()); j++)
+			for (int j = 0; j < (m_NumberOfColumns < m_Content->at(i).size() ? m_NumberOfColumns : m_Content->at(i).size()); j++)
 			{
 
-				QTextLayout textLayout(content->at(i).at(j), curFont);
-				textLayout.beginLayout();
-				textLayout.createLine();
-				textLayout.endLayout();
+				QTextLayout text_layout(m_Content->at(i).at(j), m_CurFont);
+				text_layout.beginLayout();
+				text_layout.createLine();
+				text_layout.endLayout();
 
-				p->setPen(textPen);
-				textLayout.draw(p, QPointF(x, i * rowHeight));
+				p->setPen(text_pen);
+				text_layout.draw(p, QPointF(x, i * m_RowHeight));
 
-				x += colWidth[j] * QFontMetrics(curFont).maxWidth() + 5;
+				x += m_ColWidth[j] * QFontMetrics(m_CurFont).maxWidth() + 5;
 
-				if (!lineDrawn)
+				if (!line_drawn)
 				{ // Draw the vertical line but only once
-					p->setPen(linesPen);
-					p->drawLine(x - 3, r.top(), x - 3, (content->size() * rowHeight < r.bottom() ? content->size() * rowHeight - 2 : r.bottom()));
+					p->setPen(lines_pen);
+					p->drawLine(x - 3, r.top(), x - 3, (m_Content->size() * m_RowHeight < r.bottom() ? m_Content->size() * m_RowHeight - 2 : r.bottom()));
 				}
 			}
-			lineDrawn = true;
+			line_drawn = true;
 
 			// Draw horizontal lines (normally x = right limit of the table)
-			p->setPen(linesPen);
-			p->drawLine(r.left(), (i + 1) * rowHeight - 2, ((x - 3) < r.right() ? (x - 3) : r.right()), (i + 1) * rowHeight - 2);
+			p->setPen(lines_pen);
+			p->drawLine(r.left(), (i + 1) * m_RowHeight - 2, ((x - 3) < r.right() ? (x - 3) : r.right()), (i + 1) * m_RowHeight - 2);
 		}
 	}
 }
 
 QTextStream& operator<<(QTextStream& out, const QLogTable& table)
 {
-	for (int i = 0; i < table.content->size(); ++i)
+	for (int i = 0; i < table.m_Content->size(); ++i)
 	{
-		for (int j = 0; j < (table.numberOfColumns < table.content->at(i).size() ? table.numberOfColumns : table.content->at(i).size()); j++)
+		for (int j = 0; j < (table.m_NumberOfColumns < table.m_Content->at(i).size() ? table.m_NumberOfColumns : table.m_Content->at(i).size()); j++)
 		{
-			QString str = table.content->at(i).at(j);
-			str = str.leftJustified(1 + table.colWidth[j], ' ');
+			QString str = table.m_Content->at(i).at(j);
+			str = str.leftJustified(1 + table.m_ColWidth[j], ' ');
 			out << str;
 		}
 		out << endl;

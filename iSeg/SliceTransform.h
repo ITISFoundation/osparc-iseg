@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,7 +14,7 @@
 namespace iseg {
 
 class SlicesHandler;
-class bmphandler;
+class Bmphandler;
 
 class SliceTransform
 {
@@ -35,10 +35,8 @@ public:
 
 	void Translate(int offsetX, int offsetY, bool apply = true);
 	void Rotate(double angle, int centerX, int centerY, bool apply = true);
-	void Scale(double factorX, double factorY, int centerX, int centerY,
-			bool apply = true);
-	void Shear(double angle, bool shearXAxis, int axisPosition,
-			bool apply = true);
+	void Scale(double factorX, double factorY, int centerX, int centerY, bool apply = true);
+	void Shear(double angle, bool shearXAxis, int axisPosition, bool apply = true);
 	void Flip(bool flipXAxis, int axisPosition, bool apply = true);
 	void Matrix(double* inverseMatrix, bool apply = true);
 
@@ -57,20 +55,20 @@ private:
 
 private:
 	// Image data
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeSlice;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_ActiveSlice;
 
 	// Original slice data
-	float* originalSource;
-	float* originalTarget;
-	tissues_size_t* originalTissues;
+	float* m_OriginalSource;
+	float* m_OriginalTarget;
+	tissues_size_t* m_OriginalTissues;
 
 	// Transformation
-	double transformMatrix[3 * 3];
-	bool transformSource;
-	bool transformTarget;
-	bool transformTissues;
+	double m_TransformMatrix[3 * 3];
+	bool m_TransformSource;
+	bool m_TransformTarget;
+	bool m_TransformTissues;
 };
 
 } // namespace iseg

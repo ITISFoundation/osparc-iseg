@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,101 +13,94 @@
 
 namespace iseg {
 
-MultidimensionalGamma::MultidimensionalGamma() { m = nullptr; }
+MultidimensionalGamma::MultidimensionalGamma() { m_M = nullptr; }
 
-void MultidimensionalGamma::init(short unsigned w, short unsigned h,
-		short nrclass, short dimension, float** bit,
-		float* weight, float** centers1, float* tol_f1,
-		float* tol_d1, float dx1, float dy1)
+void MultidimensionalGamma::Init(short unsigned w, short unsigned h, short nrclass, short dimension, float** bit, float* weight, float** centers1, float* tol_f1, float* tol_d1, float dx1, float dy1)
 {
-	width = w;
-	height = h;
-	area = unsigned(w) * h;
-	nrclasses = nrclass;
-	dim = dimension;
-	bits = bit;
-	centers = centers1;
-	weights = weight;
-	tol_f = tol_f1;
-	tol_d = tol_d1;
-	dx = dx1;
-	dy = dy1;
-	m = (short*)malloc(sizeof(unsigned) * area);
-	minvals = (float*)malloc(sizeof(float) * area);
-
-	return;
+	m_Width = w;
+	m_Height = h;
+	m_Area = unsigned(w) * h;
+	m_Nrclasses = nrclass;
+	m_Dim = dimension;
+	m_Bits = bit;
+	m_Centers = centers1;
+	m_Weights = weight;
+	m_TolF = tol_f1;
+	m_TolD = tol_d1;
+	m_Dx = dx1;
+	m_Dy = dy1;
+	m_M = (short*)malloc(sizeof(unsigned) * m_Area);
+	m_Minvals = (float*)malloc(sizeof(float) * m_Area);
 }
 
-void MultidimensionalGamma::return_image(float* result_bits)
+void MultidimensionalGamma::ReturnImage(float* result_bits)
 {
-	for (unsigned i = 0; i < area; i++)
-		result_bits[i] = 255.0f / (nrclasses - 1) * m[i];
-	return;
+	for (unsigned i = 0; i < m_Area; i++)
+		result_bits[i] = 255.0f / (m_Nrclasses - 1) * m_M[i];
 }
 
 MultidimensionalGamma::~MultidimensionalGamma()
 {
-	free(m);
-	free(minvals);
-	return;
+	free(m_M);
+	free(m_Minvals);
 }
 
-void MultidimensionalGamma::execute()
+void MultidimensionalGamma::Execute()
 {
 	float val;
-	for (unsigned i = 0; i < area; i++)
+	for (unsigned i = 0; i < m_Area; i++)
 	{
-		minvals[i] = 123E30f;
-		m[i] = 0;
+		m_Minvals[i] = 123E30f;
+		m_M[i] = 0;
 	}
-	for (short classnr = 0; classnr < nrclasses; classnr++)
+	for (short classnr = 0; classnr < m_Nrclasses; classnr++)
 	{
-		for (unsigned i = 0; i < area; i++)
+		for (unsigned i = 0; i < m_Area; i++)
 		{
-			val = (bits[0][i] - centers[classnr][0]) *
-						(bits[0][i] - centers[classnr][0]) * weights[0] * weights[0] /
-						(tol_f[0] * tol_f[0]);
-			for (short dimnr = 1; dimnr < dim; dimnr++)
+			val = (m_Bits[0][i] - m_Centers[classnr][0]) *
+						(m_Bits[0][i] - m_Centers[classnr][0]) * m_Weights[0] * m_Weights[0] /
+						(m_TolF[0] * m_TolF[0]);
+			for (short dimnr = 1; dimnr < m_Dim; dimnr++)
 			{
 				float factor1 =
-						tol_f[dimnr] * tol_f[dimnr] / (tol_d[dimnr] * tol_d[dimnr]);
-				float minvaldim = (bits[dimnr][i] - centers[classnr][dimnr]) *
-													(bits[dimnr][i] - centers[classnr][dimnr]);
-				float dummy = (bits[dimnr][i] - centers[classnr][dimnr]) *
-											tol_d[dimnr] / tol_f[dimnr];
+						m_TolF[dimnr] * m_TolF[dimnr] / (m_TolD[dimnr] * m_TolD[dimnr]);
+				float minvaldim = (m_Bits[dimnr][i] - m_Centers[classnr][dimnr]) *
+													(m_Bits[dimnr][i] - m_Centers[classnr][dimnr]);
+				float dummy = (m_Bits[dimnr][i] - m_Centers[classnr][dimnr]) *
+											m_TolD[dimnr] / m_TolF[dimnr];
 				if (dummy < 0)
 					dummy = -dummy;
-				if (dummy > 3 * tol_d[dimnr])
-					dummy = 3 * tol_d[dimnr];
-				int nxsize = int(dummy / dx);
-				int nysize = int(dummy / dy);
+				if (dummy > 3 * m_TolD[dimnr])
+					dummy = 3 * m_TolD[dimnr];
+				int nxsize = int(dummy / m_Dx);
+				int nysize = int(dummy / m_Dy);
 				int nxmin, nymin, nxmax, nymax;
-				nxmin = -std::min(nxsize, (int)(i % width));
-				nxmax = std::min(nxsize, width - (int)(i % width));
-				nymin = -std::min(nysize, (int)(i / width));
-				nymax = std::min(nysize, height - (int)(i / width));
-				unsigned j = i + nxmin + nymin * width;
+				nxmin = -std::min(nxsize, (int)(i % m_Width));
+				nxmax = std::min(nxsize, m_Width - (int)(i % m_Width));
+				nymin = -std::min(nysize, (int)(i / m_Width));
+				nymax = std::min(nysize, m_Height - (int)(i / m_Width));
+				unsigned j = i + nxmin + nymin * m_Width;
 				for (int ny = nymin; ny < nymax; ny++)
 				{
 					for (int nx = nxmin; nx < nxmax; nx++)
 					{
 						float valdim =
-								(bits[dimnr][j] - centers[classnr][dimnr]) *
-										(bits[dimnr][j] - centers[classnr][dimnr]) +
+								(m_Bits[dimnr][j] - m_Centers[classnr][dimnr]) *
+										(m_Bits[dimnr][j] - m_Centers[classnr][dimnr]) +
 								factor1 * (nx * nx + ny * ny);
 						if (valdim < minvaldim)
 							minvaldim = valdim;
 						j++;
 					}
-					j += width + nxmin - nxmax;
+					j += m_Width + nxmin - nxmax;
 				}
-				val += minvaldim * weights[dimnr] * weights[dimnr] /
-							 (tol_f[dimnr] * tol_f[dimnr]);
+				val += minvaldim * m_Weights[dimnr] * m_Weights[dimnr] /
+							 (m_TolF[dimnr] * m_TolF[dimnr]);
 			}
-			if (val < minvals[i])
+			if (val < m_Minvals[i])
 			{
-				minvals[i] = val;
-				m[i] = classnr;
+				m_Minvals[i] = val;
+				m_M[i] = classnr;
 			}
 		}
 	}

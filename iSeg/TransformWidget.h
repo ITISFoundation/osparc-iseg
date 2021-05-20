@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -34,14 +34,13 @@ class TransformWidget : public WidgetInterface
 	Q_OBJECT
 
 public:
-	TransformWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~TransformWidget();
+	TransformWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~TransformWidget() override;
 
-	void init() override;
-	void cleanup() override;
-	void newloaded() override;
-	void hideparams_changed() override;
+	void Init() override;
+	void Cleanup() override;
+	void NewLoaded() override;
+	void HideParamsChanged() override;
 
 	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Transform"); }
@@ -52,11 +51,11 @@ public:
 private:
 	struct TransformParametersStruct
 	{
-		int translationOffset[2];
-		double rotationAngle;
-		double scalingFactor[2];
-		double shearingAngle;
-		int transformCenter[2];
+		int m_TranslationOffset[2];
+		double m_RotationAngle;
+		double m_ScalingFactor[2];
+		double m_ShearingAngle;
+		int m_TransformCenter[2];
 	};
 
 	bool GetIsIdentityTransform();
@@ -68,70 +67,70 @@ private:
 	void BitsChanged();
 
 private:
-	void on_slicenr_changed() override;
-	void on_mouse_clicked(Point p) override;
+	void OnSlicenrChanged() override;
+	void OnMouseClicked(Point p) override;
+	void BmpChanged() override;
+	void WorkChanged() override;
+	void TissuesChanged() override;
 
 	// Image data
-	SlicesHandler* handler3D;
+	SlicesHandler* m_Handler3D;
 
 	// Slice transform
-	SliceTransform* sliceTransform;
+	SliceTransform* m_SliceTransform;
 
 	// Widgets
-	Q3HBox* hBoxOverall;
-	Q3VBox* vBoxTransforms;
-	Q3VBox* vBoxParams;
-	Q3HBox* hBoxSelectData;
-	Q3HBox* hBoxSlider1;
-	Q3HBox* hBoxSlider2;
-	Q3HBox* hBoxFlip;
-	Q3HBox* hBoxAxisSelection;
-	Q3HBox* hBoxCenter;
-	Q3HBox* hBoxExecute;
+	Q3HBox* m_HBoxOverall;
+	Q3VBox* m_VBoxTransforms;
+	Q3VBox* m_VBoxParams;
+	Q3HBox* m_HBoxSelectData;
+	Q3HBox* m_HBoxSlider1;
+	Q3HBox* m_HBoxSlider2;
+	Q3HBox* m_HBoxFlip;
+	Q3HBox* m_HBoxAxisSelection;
+	Q3HBox* m_HBoxCenter;
+	Q3HBox* m_HBoxExecute;
 
-	QCheckBox* transformSourceCheckBox;
-	QCheckBox* transformTargetCheckBox;
-	QCheckBox* transformTissuesCheckBox;
+	QCheckBox* m_TransformSourceCheckBox;
+	QCheckBox* m_TransformTargetCheckBox;
+	QCheckBox* m_TransformTissuesCheckBox;
 
-	QCheckBox* allSlicesCheckBox;
-	QPushButton* executePushButton;
-	QPushButton* cancelPushButton;
+	QCheckBox* m_AllSlicesCheckBox;
+	QPushButton* m_ExecutePushButton;
+	QPushButton* m_CancelPushButton;
 
-	QRadioButton* translateRadioButton;
-	QRadioButton* rotateRadioButton;
-	QRadioButton* scaleRadioButton;
-	QRadioButton* shearRadioButton;
-	QRadioButton* flipRadioButton;
+	QRadioButton* m_TranslateRadioButton;
+	QRadioButton* m_RotateRadioButton;
+	QRadioButton* m_ScaleRadioButton;
+	QRadioButton* m_ShearRadioButton;
+	QRadioButton* m_FlipRadioButton;
 	//QRadioButton *matrixRadioButton;
-	QButtonGroup* transformButtonGroup;
+	QButtonGroup* m_TransformButtonGroup;
 
-	QLabel* slider1Label;
-	QLabel* slider2Label;
-	QSlider* slider1;
-	QSlider* slider2;
-	QLineEdit* lineEdit1;
-	QLineEdit* lineEdit2;
+	QLabel* m_Slider1Label;
+	QLabel* m_Slider2Label;
+	QSlider* m_Slider1;
+	QSlider* m_Slider2;
+	QLineEdit* m_LineEdit1;
+	QLineEdit* m_LineEdit2;
 
-	QRadioButton* xAxisRadioButton;
-	QRadioButton* yAxisRadioButton;
-	QButtonGroup* axisButtonGroup;
+	QRadioButton* m_XAxisRadioButton;
+	QRadioButton* m_YAxisRadioButton;
+	QButtonGroup* m_AxisButtonGroup;
 
-	QPushButton* flipPushButton;
+	QPushButton* m_FlipPushButton;
 
-	QLabel* centerLabel;
-	QLabel* centerCoordsLabel;
-	QPushButton* centerSelectPushButton;
+	QLabel* m_CenterLabel;
+	QLabel* m_CenterCoordsLabel;
+	QPushButton* m_CenterSelectPushButton;
 
 	// Transform parameters
-	bool disableUpdatePreview;
-	double updateParameter1;
-	double updateParameter2;
-	TransformParametersStruct transformParameters;
+	bool m_DisableUpdatePreview;
+	double m_UpdateParameter1;
+	double m_UpdateParameter2;
+	TransformParametersStruct m_TransformParameters;
 
 public slots:
-	void bmp_changed();
-	void work_changed();
-	void tissues_changed();
 	void CancelPushButtonClicked();
 	void ExecutePushButtonClicked();
 

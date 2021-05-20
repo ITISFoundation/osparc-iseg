@@ -12,11 +12,11 @@
 #include "itkRGBToLabColorSpacePixelAccessor.h"
 
 #include <itkCastImageFilter.h>
+#include <itkGradientAnisotropicDiffusionImageFilter.h>
 #include <itkImageAdaptor.h>
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
 #include <itkRescaleIntensityImageFilter.h>
-#include <itkGradientAnisotropicDiffusionImageFilter.h>
 #include <itkSLICImageFilter.h>
 
 #include <itkImageIOFactory.h>
@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE(SLIC)
 	using RGBToLabAdaptorType = itk::ImageAdaptor<RGBImageType, RGBToLabType>;
 
 	//using ImageType = itk::Image<itk::Vector<float,3>, 2>;	//itk::VectorImage<float, 2>;
-	using ImageType = itk::Image<float, 2>;									//itk::VectorImage<float, 2>;
-	using LabelImageType = itk::Image<unsigned int, 2>;							// int not supported by PNG writer
-	using OutputImageType = itk::Image<float, 2>;									//itk::VectorImage<float, 2>;
+	using ImageType = itk::Image<float, 2>;							//itk::VectorImage<float, 2>;
+	using LabelImageType = itk::Image<unsigned int, 2>; // int not supported by PNG writer
+	using OutputImageType = itk::Image<float, 2>;				//itk::VectorImage<float, 2>;
 	using SLICFilterType = itk::SLICImageFilter<ImageType, LabelImageType>;
 
 	//using ReaderType = itk::ImageFileReader<RGBImageType>;

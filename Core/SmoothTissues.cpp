@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -56,7 +56,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 	bool ok = false;
 
 	if (progress)
-		progress->setNumberOfSteps(locks.size() + 1);
+		progress->SetNumberOfSteps(locks.size() + 1);
 
 	// compute smooth signed distance function (sdf) for each non-locked tissue
 	std::vector<typename real_image_type::Pointer> sdf_images(locks.size(), nullptr);
@@ -70,11 +70,10 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 				ok = true; // at least one unlocked tissue found
 
 				// compute sdf to tissue @ current location
-				sdf_images[it.Get()] = _ComputeSDF<label_image_type, real_image_type>(
-						tissues, it.Get(), sigma);
+				sdf_images[it.Get()] = _ComputeSDF<label_image_type, real_image_type>(tissues, it.Get(), sigma);
 
 				if (progress)
-					progress->increment();
+					progress->Increment();
 			}
 		}
 	}
@@ -110,7 +109,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 	}
 
 	if (progress)
-		progress->setValue(locks.size() + 1);
+		progress->SetValue(locks.size() + 1);
 
 	return ok;
 }
@@ -118,7 +117,7 @@ bool _SmoothTissues(TInput* tissues, const std::vector<bool>& locks, double sigm
 bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t end_slice, double sigma, bool smooth3d, ProgressInfo* progress)
 {
 	SlicesHandlerITKInterface itkhandler(handler);
-	auto locks = handler->tissue_locks();
+	auto locks = handler->TissueLocks();
 
 	if (smooth3d)
 	{
@@ -132,7 +131,7 @@ bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t e
 	{
 		using label_image_type = itk::Image<unsigned short, 2>;
 
-		progress->setNumberOfSteps(end_slice - start_slice);
+		progress->SetNumberOfSteps(end_slice - start_slice);
 
 #pragma omp parallel for
 		for (std::int64_t slice = start_slice;
@@ -143,7 +142,7 @@ bool SmoothTissues(SlicesHandlerInterface* handler, size_t start_slice, size_t e
 
 			_SmoothTissues<label_image_type>(tissues, locks, sigma, nullptr);
 
-			progress->increment();
+			progress->Increment();
 		}
 	}
 

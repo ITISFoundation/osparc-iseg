@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,10 +20,10 @@ class ISEG_DATA_API Color
 {
 public:
 	union {
-		std::array<float, 3> v;
+		std::array<float, 3> v; // NOLINT
 		struct
 		{
-			float r, g, b;
+			float r, g, b; // NOLINT
 		};
 	};
 
@@ -35,16 +35,16 @@ public:
 	const float& operator[](int pos) const { return v[pos]; }
 
 	/// given any current color, return the next color in a sequency of random colors
-	static Color nextRandom(const Color& prev);
+	static Color NextRandom(const Color& prev);
 
-	std::tuple<unsigned char, unsigned char, unsigned char> toUChar() const;
+	std::tuple<unsigned char, unsigned char, unsigned char> ToUChar() const;
 
-	std::tuple<float, float, float> toHSL() const;
+	std::tuple<float, float, float> ToHsl() const;
 
-	static Color fromHSL(float fh, float fs, float fl);
+	static Color FromHsl(float fh, float fs, float fl);
 
 private:
-	static float hue2rgb(float p, float q, float t);
+	static float Hue2rgb(float p, float q, float t);
 };
 
 } // namespace iseg

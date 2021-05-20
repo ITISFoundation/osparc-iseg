@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -17,55 +17,50 @@
 
 namespace iseg {
 
-class bmphandler;
+class Bmphandler;
 
 class Levelset
 {
 public:
 	Levelset();
-	void init(unsigned short h, unsigned short w, Point p, float* kbit,
-			  float* Pbit, float balloon, float epsilon1, float step_size);
-	void init(unsigned short h, unsigned short w, float* initial, float f,
-			  float* kbit, float* Pbit, float balloon, float epsilon1,
-			  float step_size);
-	void init(unsigned short h, unsigned short w, float* levlset, float* kbit,
-			  float* Pbit, float balloon, float epsilon1, float step_size);
-	void iterate(unsigned nrsteps, unsigned updatefreq);
-	void set_k(float* kbit);
-	void set_P(float* Pbit);
-	void return_levelset(float* output);
-	void return_zerolevelset(std::vector<std::vector<Point>>* v1,
-							 std::vector<std::vector<Point>>* v2, int minsize);
+	void Init(unsigned short h, unsigned short w, Point p, float* kbit, float* Pbit, float balloon, float epsilon1, float step_size);
+	void Init(unsigned short h, unsigned short w, float* initial, float f, float* kbit, float* Pbit, float balloon, float epsilon1, float step_size);
+	void Init(unsigned short h, unsigned short w, float* levlset, float* kbit, float* Pbit, float balloon, float epsilon1, float step_size);
+	void Iterate(unsigned nrsteps, unsigned updatefreq);
+	void SetK(float* kbit);
+	void SetP(float* Pbit);
+	void ReturnLevelset(float* output);
+	void ReturnZerolevelset(std::vector<std::vector<Point>>* v1, std::vector<std::vector<Point>>* v2, int minsize);
 	~Levelset();
 
 private:
-	bool loaded;
-	bmphandler* image;
-	void reinitialize();
-	void make_step();
-	float stepsize;
-	float epsilon;
-	float balloon1;
-	unsigned short width;
-	unsigned short height;
-	unsigned area;
+	bool m_Loaded;
+	Bmphandler* m_Image;
+	void Reinitialize();
+	void MakeStep();
+	float m_Stepsize;
+	float m_Epsilon;
+	float m_Balloon1;
+	unsigned short m_Width;
+	unsigned short m_Height;
+	unsigned m_Area;
 	//		float *levset;
-	float* devx;
-	float* devy;
-	float* devxx;
-	float* devxy;
-	float* devyy;
-	float* kbits;
-	float* Pbits;
-	float* Px;
-	float* Py;
-	void diffx(float* input, float* output);
-	void diffy(float* input, float* output);
-	void diffxx(float* input, float* output);
-	void diffxy(float* input, float* output);
-	void diffyy(float* input, float* output);
-	SliceProvider* sliceprovide;
-	SliceProviderInstaller* sliceprovide_installer;
+	float* m_Devx;
+	float* m_Devy;
+	float* m_Devxx;
+	float* m_Devxy;
+	float* m_Devyy;
+	float* m_Kbits;
+	float* m_Pbits;
+	float* m_Px;
+	float* m_Py;
+	void Diffx(float* input, float* output) const;
+	void Diffy(float* input, float* output) const;
+	void Diffxx(float* input, float* output) const;
+	void Diffxy(float* input, float* output) const;
+	void Diffyy(float* input, float* output) const;
+	SliceProvider* m_Sliceprovide;
+	SliceProviderInstaller* m_SliceprovideInstaller;
 };
 
 } // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,41 +15,37 @@
 namespace iseg { namespace plugin {
 
 namespace {
-GCBoneSegmentationPlugin _register_bone_seg;
-GCTissueSeparatorPlugin _register_tissue_sep;
+GCBoneSegmentationPlugin register_bone_seg;
+GCTissueSeparatorPlugin register_tissue_sep;
 } // namespace
 
-GCBoneSegmentationPlugin::GCBoneSegmentationPlugin() {}
+GCBoneSegmentationPlugin::GCBoneSegmentationPlugin() = default;
 
-GCBoneSegmentationPlugin::~GCBoneSegmentationPlugin() {}
+GCBoneSegmentationPlugin::~GCBoneSegmentationPlugin() = default;
 
-std::string GCBoneSegmentationPlugin::description() const
+std::string GCBoneSegmentationPlugin::Description() const
 {
 	return "Automatic bone segmentation in CT images using graph-cut method.";
 }
 
-WidgetInterface* GCBoneSegmentationPlugin::create_widget(QWidget* parent,
-		const char* name,
-		Qt::WindowFlags wFlags) const
+WidgetInterface* GCBoneSegmentationPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
 {
-	return new BoneSegmentationWidget(slice_handler(), parent, name, wFlags);
+	return new BoneSegmentationWidget(SliceHandler(), parent, name, wFlags);
 }
 
 //////////////////////////////////////////////////////////////////////////
-GCTissueSeparatorPlugin::GCTissueSeparatorPlugin() {}
+GCTissueSeparatorPlugin::GCTissueSeparatorPlugin() = default;
 
-GCTissueSeparatorPlugin::~GCTissueSeparatorPlugin() {}
+GCTissueSeparatorPlugin::~GCTissueSeparatorPlugin() = default;
 
-std::string GCTissueSeparatorPlugin::description() const
+std::string GCTissueSeparatorPlugin::Description() const
 {
 	return "Separate tissue using only minor user-input.";
 }
 
-WidgetInterface* GCTissueSeparatorPlugin::create_widget(QWidget* parent,
-		const char* name,
-		Qt::WindowFlags wFlags) const
+WidgetInterface* GCTissueSeparatorPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
 {
-	return new TissueSeparatorWidget(slice_handler(), parent, name, wFlags);
+	return new TissueSeparatorWidget(SliceHandler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

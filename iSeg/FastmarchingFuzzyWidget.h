@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -23,72 +23,72 @@ namespace iseg {
 class ImageForestingTransformAdaptFuzzy;
 class ImageForestingTransformFastMarching;
 class SlicesHandler;
-class bmphandler;
+class Bmphandler;
 
 class FastmarchingFuzzyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~FastmarchingFuzzyWidget();
-	void init() override;
-	void newloaded() override;
-	void cleanup() override;
+	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~FastmarchingFuzzyWidget() override;
+	void Init() override;
+	void NewLoaded() override;
+	void Cleanup() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Fuzzy"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("fuzzy.png"))); }
 
 protected:
-	void on_slicenr_changed() override;
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_released(Point p) override;
-	void on_mouse_moved(Point p) override;
+	void OnSlicenrChanged() override;
+	void OnMouseClicked(Point p) override;
+	void OnMouseReleased(Point p) override;
+	void OnMouseMoved(Point p) override;
+	void BmpChanged() override;
 
 private:
-	float* map;
-	ImageForestingTransformFastMarching* IFTmarch;
-	ImageForestingTransformAdaptFuzzy* IFTfuzzy;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
+	void Getrange();
+	void Execute();
 
-	QStackedLayout* params_stack_layout;
-	QSlider* sl_sigma;
-	QSlider* sl_thresh;
-	QSpinBox* sb_thresh;
-	QSlider* sl_m1;
-	QSpinBox* sb_m1;
-	QSlider* sl_s1;
-	QSpinBox* sb_s1;
-	QSlider* sl_s2;
-	QSpinBox* sb_s2;
-	QSlider* sl_extend;
-	QRadioButton* rb_fastmarch;
-	QRadioButton* rb_fuzzy;
-	QRadioButton* rb_drag;
-	QRadioButton* rb_slider;
+	float* m_Map;
+	ImageForestingTransformFastMarching* m_IfTmarch;
+	ImageForestingTransformAdaptFuzzy* m_IfTfuzzy;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
 
-	void getrange();
-	float sigma, thresh, m1, s1, s2;
-	float sigmamax;
-	float extend, extendmax;
-	unsigned area;
-	void execute();
-	std::vector<Point> vpdyn_arg;
+	QStackedLayout* m_ParamsStackLayout;
+	QSlider* m_SlSigma;
+	QSlider* m_SlThresh;
+	QSpinBox* m_SbThresh;
+	QSlider* m_SlM1;
+	QSpinBox* m_SbM1;
+	QSlider* m_SlS1;
+	QSpinBox* m_SbS1;
+	QSlider* m_SlS2;
+	QSpinBox* m_SbS2;
+	QSlider* m_SlExtend;
+	QRadioButton* m_RbFastmarch;
+	QRadioButton* m_RbFuzzy;
+	QRadioButton* m_RbDrag;
+	QRadioButton* m_RbSlider;
+
+	float m_Sigma, m_Thresh, m_M1, m_S1, m_S2;
+	float m_Sigmamax;
+	float m_Extend, m_Extendmax;
+	unsigned m_Area;
+	std::vector<Point> m_VpdynArg;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void slextend_changed(int i);
-	void slextend_pressed();
-	void slextend_released();
-	void bmp_changed();
-	void method_changed();
-	void interact_changed();
-	void spinbox_changed();
-	void slider_changed();
+	void BmphandChanged(Bmphandler* bmph);
+	void SlextendChanged(int i);
+	void SlextendPressed();
+	void SlextendReleased();
+	void MethodChanged();
+	void InteractChanged();
+	void SpinboxChanged();
+	void SliderChanged();
 };
 
 } // namespace iseg

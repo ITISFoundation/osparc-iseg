@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,7 +14,7 @@ namespace itk {
 
 template<typename TImage, typename TForeground, typename TBackground, typename TOutput>
 ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::ImageGraphCutFilter()
-		: m_Sigma(0.2), m_ForegroundPixelValue(255), m_BackgroundPixelValue(0), m_PrintTimer(true), m_6Connected(false), m_UseForegroundBackground(false), m_UseGradientMagnitude(false), m_MaxFlowAlgorithm(kKohli), m_UseIntensity(false), m_ForegroundValue(400), m_BackgroundValue(-50)
+		:  m_ForegroundPixelValue(255), m_BackgroundPixelValue(0),  m_MaxFlowAlgorithm(kKohli) 
 {
 	this->SetNumberOfRequiredInputs(3);
 }
@@ -123,11 +123,11 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 	itk::Size<3> radius;
 	radius.Fill(3);
 
-	typedef itk::ShapedNeighborhoodIterator<InputImageType> IteratorType;
+	using IteratorType = itk::ShapedNeighborhoodIterator<InputImageType>;
 	typename IteratorType::OffsetType center = {{0, 0, 0}};
 
 	//Gaussian Filter for Edge enhancement
-	typedef itk::DiscreteGaussianImageFilter<InputImageType, InputImageType> filterType;
+	using filterType = itk::DiscreteGaussianImageFilter<InputImageType, InputImageType>;
 	auto gaussianFilter = filterType::New();
 	gaussianFilter->SetInput(images.input);
 	gaussianFilter->SetVariance(1);
@@ -142,7 +142,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 	}
 	Gc::System::Algo::Sort::Heap(nb.Begin(), nb.End());
 
-	//typedef itk::ShapedNeighborhoodIterator<InputImageType> IteratorType;
+	//using IteratorType = itk::ShapedNeighborhoodIterator<InputImageType>;
 
 	// Traverses the image adding the following bidirectional edges:
 	// 1. currentPixel <-> pixel below it
@@ -278,8 +278,8 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 		for (int i = 0; i < 2; i++)
 		{
 			double sigma = sigmas[i];
-			typedef itk::ImageDuplicator<InputImageType> DuplicatorType;
-			typedef itk::RecursiveGaussianImageFilter<InputImageType, InputImageType> FilterType;
+			using DuplicatorType = itk::ImageDuplicator<InputImageType>;
+			using FilterType = itk::RecursiveGaussianImageFilter<InputImageType>;
 
 			auto duplicator = DuplicatorType::New();
 			auto duplicator2 = DuplicatorType::New();
@@ -356,7 +356,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			duplicator6->Update();
 			auto Ixy = duplicator6->GetOutput();
 
-			typedef itk::GradientMagnitudeImageFilter<InputImageType, InputImageType> GradFilterType;
+			using GradFilterType = itk::GradientMagnitudeImageFilter<InputImageType, InputImageType>;
 			auto gradfilter = GradFilterType::New();
 			gradfilter->SetInput(images.input);
 			auto Igrad = gradfilter->GetOutput();
@@ -364,9 +364,9 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 			std::cout << "Hessiancomplete";
 			//Now we have all the components and need to compute the eigenvalues somehow. Store them in lambda1-3. Also compute GM-Vector
 			{
-				typedef itk::Matrix<double, 3, 3> MatrixType;
-				typedef itk::Vector<double, 3> VectorType;
-				typedef itk::SymmetricEigenAnalysis<MatrixType, VectorType, MatrixType> Eigenanalyse;
+				using MatrixType = itk::Matrix<double, 3, 3>;
+				using VectorType = itk::Vector<double, 3>;
+				using Eigenanalyse = itk::SymmetricEigenAnalysis<MatrixType, VectorType>;
 
 				IteratorType iterator3(radius, Ixx, Ixx->GetLargestPossibleRegion());
 				IteratorType iterator4(radius, Iyy, Iyy->GetLargestPossibleRegion());
@@ -585,7 +585,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 	{
 		itk::Size<3> rad;
 		rad.Fill(1);
-		typedef itk::ShapedNeighborhoodIterator<ForegroundImageType> IteratorTypefb;
+		using IteratorTypefb = itk::ShapedNeighborhoodIterator<ForegroundImageType>;
 		typename IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
 
 		IteratorTypefb iteratorfb(rad, images.foreground, images.foreground->GetLargestPossibleRegion());
@@ -618,7 +618,7 @@ void ImageGraphCutFilter<TImage, TForeground, TBackground, TOutput>::InitializeG
 	{
 		itk::Size<3> rad;
 		rad.Fill(1);
-		typedef itk::ShapedNeighborhoodIterator<ForegroundImageType> IteratorTypefb;
+		using IteratorTypefb = itk::ShapedNeighborhoodIterator<ForegroundImageType>;
 		typename IteratorTypefb::OffsetType centerfb = {{0, 0, 0}};
 
 		IteratorTypefb iteratorfb(rad, images.foreground, images.foreground->GetLargestPossibleRegion());

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,7 +16,7 @@
 #pragma warning(disable : 4996)
 #pragma warning(disable : 4091)
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <fstream>
 #include <iomanip>
@@ -50,20 +50,20 @@ namespace dyn_lib {
 
 #	include <windows.h>
 
-typedef HINSTANCE handle;
+using handle_type = HINSTANCE;
 
-inline handle open(std::string const& file_name)
+inline handle_type open(std::string const& file_name)
 {
 	return LoadLibrary(file_name.c_str());
 }
 
 template<typename TargType>
-inline TargType locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle_type h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(GetProcAddress(h, symbol.c_str()));
 }
 
-inline void close(handle h)
+inline void close(handle_type h)
 {
 	if (h)
 		FreeLibrary(h);
@@ -108,9 +108,9 @@ fs::path get_exe_dir()
 #	include <sys/stat.h>
 #	include <sys/types.h>
 
-typedef void* handle;
+using handle_type = void*;
 
-inline handle open(std::string const& file_name)
+inline handle_type open(std::string const& file_name)
 {
 	return dlopen(file_name.c_str(), RTLD_GLOBAL | RTLD_LAZY);
 }
@@ -118,14 +118,14 @@ inline handle open(std::string const& file_name)
 //_________________________________________________________________//
 
 template<typename TargType>
-inline TargType locate_symbol(handle h, std::string const& symbol)
+inline TargType locate_symbol(handle_type h, std::string const& symbol)
 {
 	return reinterpret_cast<TargType>(dlsym(h, symbol.c_str()));
 }
 
 //_________________________________________________________________//
 
-inline void close(handle h)
+inline void close(handle_type h)
 {
 	if (h)
 		dlclose(h);
@@ -167,7 +167,7 @@ namespace {
 std::string init_func_name("init_unit_test");
 fs::path exe_folder;
 
-dyn_lib::handle test_lib_handle;
+dyn_lib::handle_type test_lib_handle;
 
 bool load_test_lib(const std::string& test_lib_name)
 {

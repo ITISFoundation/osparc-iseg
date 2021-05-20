@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,53 +27,47 @@
 
 namespace iseg {
 
-MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
+MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	hboxOverall = new Q3HBoxLayout(this);
-	vboxOverall = new Q3VBoxLayout();
-	hboxOverall->addLayout(vboxOverall);
+	m_HboxOverall = new Q3HBoxLayout(this);
+	m_VboxOverall = new Q3VBoxLayout();
+	m_HboxOverall->addLayout(m_VboxOverall);
 
 	// Add dataset button
 	m_AddDatasetButton = new QPushButton("Add Dataset...", this);
-	vboxOverall->addWidget(m_AddDatasetButton);
+	m_VboxOverall->addWidget(m_AddDatasetButton);
 
 	// Dataset selection group box
 	m_DatasetsGroupBox = new QGroupBox("- Available datasets -");
 	m_VboxDatasets = new Q3VBoxLayout(m_DatasetsGroupBox);
 	m_VboxDatasets->addStretch(1);
 	m_DatasetsGroupBox->setLayout(m_VboxDatasets);
-	vboxOverall->addWidget(m_DatasetsGroupBox);
+	m_VboxOverall->addWidget(m_DatasetsGroupBox);
 
 	//Buttons
-	QHBoxLayout* buttonsGrid = new QHBoxLayout();
-	vboxOverall->addLayout(buttonsGrid);
+	QHBoxLayout* buttons_grid = new QHBoxLayout();
+	m_VboxOverall->addLayout(buttons_grid);
 
 	// Add dataset button
 	m_LoadDatasetButton = new QPushButton("Load Dataset", this);
-	buttonsGrid->addWidget(m_LoadDatasetButton);
+	buttons_grid->addWidget(m_LoadDatasetButton);
 
 	m_ChangeNameButton = new QPushButton("Change Name", this);
-	buttonsGrid->addWidget(m_ChangeNameButton);
+	buttons_grid->addWidget(m_ChangeNameButton);
 
 	m_RemoveDatasetButton = new QPushButton("Remove Dataset", this);
-	buttonsGrid->addWidget(m_RemoveDatasetButton);
+	buttons_grid->addWidget(m_RemoveDatasetButton);
 	m_RemoveDatasetButton->setEnabled(false);
 
 	m_DatasetsGroupBox->setMinimumHeight(200);
-	setFixedHeight(hboxOverall->sizeHint().height());
+	setFixedHeight(m_HboxOverall->sizeHint().height());
 
-	connect(m_AddDatasetButton, SIGNAL(clicked()), this,
-			SLOT(AddDatasetPressed()));
-	connect(m_LoadDatasetButton, SIGNAL(clicked()), this,
-			SLOT(SwitchDataset()));
-	connect(m_ChangeNameButton, SIGNAL(clicked()), this,
-			SLOT(ChangeDatasetName()));
-	connect(m_RemoveDatasetButton, SIGNAL(clicked()), this,
-			SLOT(RemoveDataset()));
-	connect(m_DatasetsGroupBox, SIGNAL(clicked()), this,
-			SLOT(DatasetSelectionChanged()));
+	QObject_connect(m_AddDatasetButton, SIGNAL(clicked()), this, SLOT(AddDatasetPressed()));
+	QObject_connect(m_LoadDatasetButton, SIGNAL(clicked()), this, SLOT(SwitchDataset()));
+	QObject_connect(m_ChangeNameButton, SIGNAL(clicked()), this, SLOT(ChangeDatasetName()));
+	QObject_connect(m_RemoveDatasetButton, SIGNAL(clicked()), this, SLOT(RemoveDataset()));
+	QObject_connect(m_DatasetsGroupBox, SIGNAL(clicked()), this, SLOT(DatasetSelectionChanged()));
 
 	Initialize();
 }
@@ -116,12 +110,12 @@ void MultiDatasetWidget::NewLoaded()
 
 	Initialize();
 
-	const unsigned short w_loaded = m_Handler3D->width();
-	const unsigned short h_loaded = m_Handler3D->height();
-	const unsigned short nrofslices_loaded = m_Handler3D->num_slices();
+	const unsigned short w_loaded = m_Handler3D->Width();
+	const unsigned short h_loaded = m_Handler3D->Height();
+	const unsigned short nrofslices_loaded = m_Handler3D->NumSlices();
 
-	const bool checkMatch = true;
-	if (checkMatch)
+	const bool check_match = true;
+	if (check_match)
 	{
 		if (w_loaded == 512 && h_loaded == 512 && nrofslices_loaded == 1)
 		{
@@ -130,21 +124,21 @@ void MultiDatasetWidget::NewLoaded()
 		}
 	}
 
-	SDatasetInfo newRadioButton;
+	SDatasetInfo new_radio_button;
 	// Create the copy of the main dataset only when adding a second dataset
 	//CopyImagesSlices(m_Handler3D, newRadioButton);
 
 	QStringList paths;
 	paths.append("main_Dataset");
-	AddDatasetToList(newRadioButton, paths);
+	AddDatasetToList(new_radio_button, paths);
 
-	QFont font(newRadioButton.m_RadioButton->font());
+	QFont font(new_radio_button.m_RadioButton->font());
 	font.setBold(true);
-	newRadioButton.m_RadioButton->setFont(font);
-	newRadioButton.m_RadioButton->setChecked(true);
-	newRadioButton.m_IsActive = true;
+	new_radio_button.m_RadioButton->setFont(font);
+	new_radio_button.m_RadioButton->setChecked(true);
+	new_radio_button.m_IsActive = true;
 
-	m_RadioButtons.push_back(newRadioButton);
+	m_RadioButtons.push_back(new_radio_button);
 }
 
 void MultiDatasetWidget::AddDatasetPressed()
@@ -152,32 +146,30 @@ void MultiDatasetWidget::AddDatasetPressed()
 	SupportedMultiDatasetTypes dlg;
 	dlg.exec();
 
-	int selectedType = dlg.GetSelectedType();
+	int selected_type = dlg.GetSelectedType();
 
-	if (selectedType != -1)
+	if (selected_type != -1)
 	{
 		using image_type = itk::Image<float, 3>;
 		image_type::Pointer image;
 
 		QStringList loadfilenames;
-		MultiDatasetWidget::SDatasetInfo dataInfo;
-		dataInfo.m_IsActive = false;
+		MultiDatasetWidget::SDatasetInfo data_info;
+		data_info.m_IsActive = false;
 
-		switch (SupportedMultiDatasetTypes::supportedTypes(selectedType))
+		switch (SupportedMultiDatasetTypes::eSupportedTypes(selected_type))
 		{
-		case SupportedMultiDatasetTypes::supportedTypes::bmp:
-		case SupportedMultiDatasetTypes::supportedTypes::dcm:
-		{
+		case SupportedMultiDatasetTypes::eSupportedTypes::bmp:
+		case SupportedMultiDatasetTypes::eSupportedTypes::dcm: {
 			loadfilenames = QFileDialog::getOpenFileNames(
 					"Images (*.dcm *.dicom *.bmp)\n"
 					"All (*)",
-					QString::null, this, "Open Files",
-					"Select one or more files to open");
+					QString::null, this, "Open Files", "Select one or more files to open");
 
 			std::vector<std::string> files;
-			for (const auto& f : loadfilenames)
+			for (auto it=loadfilenames.begin(); it!=loadfilenames.end(); ++it)
 			{
-				files.push_back(f.toStdString());
+				files.push_back(it->toStdString());
 			}
 			auto reader = itk::ImageSeriesReader<image_type>::New();
 			reader->SetFileNames(files);
@@ -194,19 +186,18 @@ void MultiDatasetWidget::AddDatasetPressed()
 		}
 		break;
 
-		case SupportedMultiDatasetTypes::supportedTypes::raw:
-		{
+		case SupportedMultiDatasetTypes::eSupportedTypes::raw: {
 
-			LoaderRaw LR(nullptr, this);
-			LR.setSkipReading(true);
-			LR.move(QCursor::pos());
-			LR.exec();
+			LoaderRaw lr(nullptr, this);
+			lr.SetSkipReading(true);
+			lr.move(QCursor::pos());
+			lr.exec();
 
-			QString loadfilename = LR.GetFileName();
-			auto dims = LR.getDimensions();
-			auto start = LR.getSubregionStart();
-			auto size = LR.getSubregionSize();
-			int bits = LR.getBits();
+			QString loadfilename = lr.GetFileName();
+			auto dims = lr.GetDimensions();
+			auto start = lr.GetSubregionStart();
+			auto size = lr.GetSubregionSize();
+			int bits = lr.GetBits();
 
 			loadfilenames.append(loadfilename);
 
@@ -250,11 +241,9 @@ void MultiDatasetWidget::AddDatasetPressed()
 		}
 		break;
 
-		case SupportedMultiDatasetTypes::supportedTypes::nifti:
-		case SupportedMultiDatasetTypes::supportedTypes::vtk:
-		{
-			auto loadfilename = RecentPlaces::getOpenFileName(this, "Open File", "",
-				"Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)");
+		case SupportedMultiDatasetTypes::eSupportedTypes::nifti:
+		case SupportedMultiDatasetTypes::eSupportedTypes::vtk: {
+			auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open File", "", "Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)");
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();
@@ -283,24 +272,24 @@ void MultiDatasetWidget::AddDatasetPressed()
 		{
 			auto dims = image->GetBufferedRegion().GetSize();
 
-			success = (m_Handler3D->width() == dims[0] && m_Handler3D->height() == dims[1] && m_Handler3D->num_slices() == dims[2]);
+			success = (m_Handler3D->Width() == dims[0] && m_Handler3D->Height() == dims[1] && m_Handler3D->NumSlices() == dims[2]);
 			if (!success)
 			{
-				QMessageBox msgBox(QMessageBox::Warning, "", "The image dimensions do not match. Do you want to resample the new dataset?", QMessageBox::Yes | QMessageBox::No);
-				msgBox.setDefaultButton(QMessageBox::No);
-				int ret = msgBox.exec();
+				QMessageBox msg_box(QMessageBox::Warning, "", "The image dimensions do not match. Do you want to resample the new dataset?", QMessageBox::Yes | QMessageBox::No);
+				msg_box.setDefaultButton(QMessageBox::No);
+				int ret = msg_box.exec();
 
 				if (ret == QMessageBox::Yes)
 				{
-					itk::Size<3> size = {m_Handler3D->width(), m_Handler3D->height(), m_Handler3D->num_slices()};
-					double spacing[3] = {m_Handler3D->spacing().x, m_Handler3D->spacing().y, m_Handler3D->spacing().z};
-					auto transform = m_Handler3D->transform();
+					itk::Size<3> size = {m_Handler3D->Width(), m_Handler3D->Height(), m_Handler3D->NumSlices()};
+					double spacing[3] = {m_Handler3D->Spacing().x, m_Handler3D->Spacing().y, m_Handler3D->Spacing().z};
+					auto transform = m_Handler3D->ImageTransform();
 
 					itk::Point<itk::SpacePrecisionType, 3> origin;
-					transform.getOffset(origin);
+					transform.GetOffset(origin);
 
 					itk::Matrix<itk::SpacePrecisionType, 3, 3> direction;
-					transform.getRotation(direction);
+					transform.GetRotation(direction);
 
 					try
 					{
@@ -327,15 +316,15 @@ void MultiDatasetWidget::AddDatasetPressed()
 		if (success)
 		{
 			// add to available datasets
-			AddDatasetToList(dataInfo, loadfilenames);
+			AddDatasetToList(data_info, loadfilenames);
 
-			std::array<size_t, 3> dims = {m_Handler3D->width(), m_Handler3D->height(), m_Handler3D->num_slices()};
+			std::array<size_t, 3> dims = {m_Handler3D->Width(), m_Handler3D->Height(), m_Handler3D->NumSlices()};
 
 			// create the copy of the main dataset only when adding a second dataset
 			if (m_RadioButtons.size() == 1)
 			{
 				const SlicesHandler* chandler = m_Handler3D;
-				CopyImagesSlices(chandler->source_slices(), dims, m_RadioButtons.at(0));
+				CopyImagesSlices(chandler->SourceSlices(), dims, m_RadioButtons.at(0));
 			}
 
 			// copy image to slices
@@ -347,21 +336,18 @@ void MultiDatasetWidget::AddDatasetPressed()
 				bmp_slices[i] = buffer + i * slice_size;
 			}
 
-			CopyImagesSlices(bmp_slices, dims, dataInfo);
-			m_RadioButtons.push_back(dataInfo);
+			CopyImagesSlices(bmp_slices, dims, data_info);
+			m_RadioButtons.push_back(data_info);
 		}
 	}
 }
 
-bool MultiDatasetWidget::CheckInfoAndAddToList(
-		MultiDatasetWidget::SDatasetInfo& newRadioButton,
-		QStringList loadfilenames, unsigned short width, unsigned short height,
-		unsigned short nrofslices)
+bool MultiDatasetWidget::CheckInfoAndAddToList(MultiDatasetWidget::SDatasetInfo& newRadioButton, QStringList loadfilenames, unsigned short width, unsigned short height, unsigned short nrofslices)
 {
 	// check whether the new dataset matches the dataset loaded
-	const unsigned short w_loaded = m_Handler3D->width();
-	const unsigned short h_loaded = m_Handler3D->height();
-	const unsigned short nrofslices_loaded = m_Handler3D->num_slices();
+	const unsigned short w_loaded = m_Handler3D->Width();
+	const unsigned short h_loaded = m_Handler3D->Height();
+	const unsigned short nrofslices_loaded = m_Handler3D->NumSlices();
 
 	if (w_loaded == width && h_loaded == height && nrofslices_loaded == nrofslices)
 	{
@@ -369,37 +355,28 @@ bool MultiDatasetWidget::CheckInfoAndAddToList(
 	}
 	else
 	{
-		QMessageBox mb(
-				"Loading failed",
-				"The resolution of the dataset must match the one loaded.",
-				QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default,
-				QMessageBox::NoButton, QMessageBox::NoButton);
+		QMessageBox mb("Loading failed", "The resolution of the dataset must match the one loaded.", QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 		mb.exec();
 	}
 
 	return false;
 }
 
-bool MultiDatasetWidget::AddDatasetToList(
-		MultiDatasetWidget::SDatasetInfo& newRadioButton,
-		QStringList loadfilenames)
+bool MultiDatasetWidget::AddDatasetToList(MultiDatasetWidget::SDatasetInfo& newRadioButton, QStringList loadfilenames)
 {
-	QString butText = loadfilenames[0];
+	QString but_text = loadfilenames[0];
 	newRadioButton.m_RadioButton = new QRadioButton(QFileInfo(loadfilenames[0]).fileName());
 	newRadioButton.m_DatasetFilepath = loadfilenames;
-	newRadioButton.m_RadioButtonText = butText;
+	newRadioButton.m_RadioButtonText = but_text;
 
 	m_VboxDatasets->addWidget(newRadioButton.m_RadioButton, 0, Qt::AlignTop);
 
-	connect(newRadioButton.m_RadioButton, SIGNAL(clicked()), this, SLOT(DatasetSelectionChanged()));
+	QObject_connect(newRadioButton.m_RadioButton, SIGNAL(clicked()), this, SLOT(DatasetSelectionChanged()));
 
 	return !newRadioButton.m_DatasetFilepath.empty();
 }
 
-void MultiDatasetWidget::CopyImagesSlices(
-		const std::vector<const float*>& bmp_slices,
-		const std::array<size_t, 3>& dims,
-		MultiDatasetWidget::SDatasetInfo& newRadioButton)
+void MultiDatasetWidget::CopyImagesSlices(const std::vector<const float*>& bmp_slices, const std::array<size_t, 3>& dims, MultiDatasetWidget::SDatasetInfo& newRadioButton)
 {
 	const size_t nrslices = dims[2];
 	const size_t width = dims[0];
@@ -420,45 +397,45 @@ void MultiDatasetWidget::CopyImagesSlices(
 
 void MultiDatasetWidget::SwitchDataset()
 {
-	for (auto& radioButton : m_RadioButtons)
+	for (auto& radio_button : m_RadioButtons)
 	{
-		if (radioButton.m_RadioButton->isChecked())
+		if (radio_button.m_RadioButton->isChecked())
 		{
-			QFont font(radioButton.m_RadioButton->font());
+			QFont font(radio_button.m_RadioButton->font());
 			font.setBold(true);
-			radioButton.m_RadioButton->setFont(font);
+			radio_button.m_RadioButton->setFont(font);
 
-			if (!radioButton.m_BmpSlices.empty())
+			if (!radio_button.m_BmpSlices.empty())
 			{
-				iseg::DataSelection dataSelection;
-				dataSelection.allSlices = true;
-				dataSelection.bmp = true;
-				dataSelection.work = false;
-				dataSelection.tissues = false;
-				emit begin_datachange(dataSelection, this, false);
+				DataSelection data_selection;
+				data_selection.allSlices = true;
+				data_selection.bmp = true;
+				data_selection.work = false;
+				data_selection.tissues = false;
+				emit BeginDatachange(data_selection, this, false);
 
-				const int nSlices = radioButton.m_BmpSlices.size();
-				assert(radioButton.m_BmpSlices.size() == m_Handler3D->num_slices());
+				const int n_slices = radio_button.m_BmpSlices.size();
+				assert(radio_button.m_BmpSlices.size() == m_Handler3D->NumSlices());
 
-				for (int i = 0; i < nSlices; i++)
+				for (int i = 0; i < n_slices; i++)
 				{
-					m_Handler3D->copy2bmp(i, radioButton.m_BmpSlices.at(i), 1);
+					m_Handler3D->Copy2bmp(i, radio_button.m_BmpSlices.at(i), 1);
 				}
 
 				m_ItIsBeingLoaded = true;
-				radioButton.m_IsActive = true;
+				radio_button.m_IsActive = true;
 
-				emit end_datachange(this, iseg::ClearUndo);
-				emit dataset_changed();
+				emit EndDatachange(this, iseg::ClearUndo);
+				emit DatasetChanged();
 			}
 			continue;
 		}
 		else
 		{
-			QFont font(radioButton.m_RadioButton->font());
+			QFont font(radio_button.m_RadioButton->font());
 			font.setBold(false);
-			radioButton.m_RadioButton->setFont(font);
-			radioButton.m_IsActive = false;
+			radio_button.m_RadioButton->setFont(font);
+			radio_button.m_IsActive = false;
 		}
 	}
 
@@ -467,17 +444,17 @@ void MultiDatasetWidget::SwitchDataset()
 
 void MultiDatasetWidget::ChangeDatasetName()
 {
-	for (auto& radioButton : m_RadioButtons)
+	for (auto& radio_button : m_RadioButtons)
 	{
-		if (radioButton.m_RadioButton->isChecked())
+		if (radio_button.m_RadioButton->isChecked())
 		{
 			EditText edit_text_dlg(this->parentWidget(), "", this->windowFlags());
-			edit_text_dlg.set_editable_text(radioButton.m_RadioButton->text());
+			edit_text_dlg.SetEditableText(radio_button.m_RadioButton->text());
 			if (edit_text_dlg.exec())
 			{
-				QString returning_text = edit_text_dlg.get_editable_text();
-				radioButton.m_RadioButtonText = returning_text;
-				radioButton.m_RadioButton->setText(returning_text);
+				QString returning_text = edit_text_dlg.GetEditableText();
+				radio_button.m_RadioButtonText = returning_text;
+				radio_button.m_RadioButton->setText(returning_text);
 			}
 			break;
 		}
@@ -487,18 +464,16 @@ void MultiDatasetWidget::ChangeDatasetName()
 void MultiDatasetWidget::RemoveDataset()
 {
 	int index = 0;
-	for (auto& radioButton : m_RadioButtons)
+	for (auto& radio_button : m_RadioButtons)
 	{
-		if (radioButton.m_RadioButton->isChecked())
+		if (radio_button.m_RadioButton->isChecked())
 		{
-			m_VboxDatasets->removeWidget(radioButton.m_RadioButton);
+			m_VboxDatasets->removeWidget(radio_button.m_RadioButton);
 
-			std::for_each(radioButton.m_BmpSlices.begin(),
-					radioButton.m_BmpSlices.end(),
-					[](float* element) { free(element); });
-			radioButton.m_BmpSlices.clear();
+			std::for_each(radio_button.m_BmpSlices.begin(), radio_button.m_BmpSlices.end(), [](float* element) { free(element); });
+			radio_button.m_BmpSlices.clear();
 
-			delete radioButton.m_RadioButton;
+			delete radio_button.m_RadioButton;
 
 			m_RadioButtons.erase(m_RadioButtons.begin() + index);
 
@@ -570,8 +545,7 @@ std::vector<float*> MultiDatasetWidget::GetBmpData(const int multiDS_index)
 	return std::vector<float*>();
 }
 
-void MultiDatasetWidget::SetBmpData(const int multiDS_index,
-		std::vector<float*> bmp_bits_vc)
+void MultiDatasetWidget::SetBmpData(const int multiDS_index, std::vector<float*> bmp_bits_vc)
 {
 	if (multiDS_index < m_RadioButtons.size())
 	{

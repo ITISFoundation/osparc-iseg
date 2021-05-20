@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,9 +15,9 @@
 
 #include "Core/Pair.h"
 
+#include <QDir>
 #include <QScrollArea>
 #include <QWidget>
-#include <QDir>
 
 #include <vector>
 
@@ -36,53 +36,52 @@ class AtlasWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~AtlasWidget();
-	bool isOK;
+	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~AtlasWidget() override;
+	bool m_IsOk;
 
 private:
-	bool loadfile(const char* filename);
+	bool Loadfile(const char* filename);
 
 private:
-	QLabel* lb_contrast;
-	QLabel* lb_brightness;
-	QLabel* lb_transp;
-	QLabel* lb_name;
-	QSlider* sl_contrast;
-	QSlider* sl_brightness;
-	QSlider* sl_transp;
-	AtlasViewer* atlasViewer;
-	QScrollArea* sa_viewer;
-	ZoomWidget* zoomer;
-	QScrollBar* scb_slicenr;
-	QButtonGroup* bg_orient;
-	QRadioButton* rb_x;
-	QRadioButton* rb_y;
-	QRadioButton* rb_z;
-	QHBoxLayout* hbox1;
-	QHBoxLayout* hbox2;
-	QHBoxLayout* hbox3;
-	QVBoxLayout* vbox1;
+	QLabel* m_LbContrast;
+	QLabel* m_LbBrightness;
+	QLabel* m_LbTransp;
+	QLabel* m_LbName;
+	QSlider* m_SlContrast;
+	QSlider* m_SlBrightness;
+	QSlider* m_SlTransp;
+	AtlasViewer* m_AtlasViewer;
+	QScrollArea* m_SaViewer;
+	ZoomWidget* m_Zoomer;
+	QScrollBar* m_ScbSlicenr;
+	QButtonGroup* m_BgOrient;
+	QRadioButton* m_RbX;
+	QRadioButton* m_RbY;
+	QRadioButton* m_RbZ;
+	QHBoxLayout* m_Hbox1;
+	QHBoxLayout* m_Hbox2;
+	QHBoxLayout* m_Hbox3;
+	QVBoxLayout* m_Vbox1;
 
-	float* image;
-	tissues_size_t* tissue;
-	float minval, maxval;
-	float dx, dy, dz;
-	unsigned short dimx, dimy, dimz;
-	std::vector<float> color_r;
-	std::vector<float> color_g;
-	std::vector<float> color_b;
-	std::vector<QString> tissue_names;
+	float* m_Image;
+	tissues_size_t* m_Tissue;
+	float m_Minval, m_Maxval;
+	float m_Dx, m_Dy, m_Dz;
+	unsigned short m_Dimx, m_Dimy, m_Dimz;
+	std::vector<float> m_ColorR;
+	std::vector<float> m_ColorG;
+	std::vector<float> m_ColorB;
+	std::vector<QString> m_TissueNames;
 
-	QDir m_picpath;
+	QDir m_MPicpath;
 
 private slots:
-	void scb_slicenr_changed();
-	void sl_transp_changed();
-	void xyz_changed();
-	void pt_moved(tissues_size_t val);
-	void sl_brightcontr_moved();
+	void ScbSlicenrChanged();
+	void SlTranspChanged();
+	void XyzChanged();
+	void PtMoved(tissues_size_t val);
+	void SlBrightcontrMoved();
 };
 
 } // namespace iseg

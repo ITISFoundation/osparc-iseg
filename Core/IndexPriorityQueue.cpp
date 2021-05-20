@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,149 +15,149 @@ namespace iseg {
 
 IndexPriorityQueue::IndexPriorityQueue(unsigned size2, float* valuemap1)
 {
-	Q.clear();
-	indexmap = (int*)malloc(size2 * sizeof(int));
+	m_Q.clear();
+	m_Indexmap = (int*)malloc(size2 * sizeof(int));
 	for (unsigned i = 0; i < size2; i++)
-		indexmap[i] = -1;
-	valuemap = valuemap1;
-	l = 0;
-	size1 = size2;
+		m_Indexmap[i] = -1;
+	m_Valuemap = valuemap1;
+	m_L = 0;
+	m_Size1 = size2;
 }
 
-void IndexPriorityQueue::clear()
+void IndexPriorityQueue::Clear()
 {
-	for (size_t i = 0; i < Q.size(); i++)
-		indexmap[Q[i]] = -1;
-	Q.clear();
-	l = 0;
+	for (size_t i = 0; i < m_Q.size(); i++)
+		m_Indexmap[m_Q[i]] = -1;
+	m_Q.clear();
+	m_L = 0;
 }
 
-unsigned IndexPriorityQueue::pop()
+unsigned IndexPriorityQueue::Pop()
 {
-	if (l <= 1)
+	if (m_L <= 1)
 	{
-		if (l == 1)
+		if (m_L == 1)
 		{
-			unsigned pos = Q.front();
-			indexmap[pos] = -1;
-			Q.pop_back();
-			l = 0;
+			unsigned pos = m_Q.front();
+			m_Indexmap[pos] = -1;
+			m_Q.pop_back();
+			m_L = 0;
 			return pos;
 		}
 		else
-			return size1;
+			return m_Size1;
 	}
 	else
 	{
 		unsigned child, test_node;
 		test_node = 0;
-		unsigned pos = Q.front();
-		indexmap[pos] = -1;
+		unsigned pos = m_Q.front();
+		m_Indexmap[pos] = -1;
 
-		l--;
-		unsigned pos1 = Q[l];
+		m_L--;
+		unsigned pos1 = m_Q[m_L];
 		for (;;)
 		{
 			child = test_node * 2 + 1;
-			if ((child) >= l)
+			if ((child) >= m_L)
 				break;
-			if ((child + 1) < l && valuemap[Q[child]] > valuemap[Q[child + 1]])
+			if ((child + 1) < m_L && m_Valuemap[m_Q[child]] > m_Valuemap[m_Q[child + 1]])
 				child++;
-			if (valuemap[pos1] > valuemap[Q[child]])
+			if (m_Valuemap[pos1] > m_Valuemap[m_Q[child]])
 			{
 				//			Q[test_node]=Q[child];
-				indexmap[Q[test_node] = Q[child]] = test_node;
+				m_Indexmap[m_Q[test_node] = m_Q[child]] = test_node;
 				test_node = child;
 			}
 			else
 				break;
 		}
-		Q[test_node] = pos1;
-		indexmap[pos1] = test_node;
+		m_Q[test_node] = pos1;
+		m_Indexmap[pos1] = test_node;
 
-		Q.pop_back();
+		m_Q.pop_back();
 		return pos;
 	}
 }
 
-void IndexPriorityQueue::insert(unsigned pos, float value)
+void IndexPriorityQueue::Insert(unsigned pos, float value)
 {
-	if (indexmap[pos] == -1)
+	if (m_Indexmap[pos] == -1)
 	{
 		unsigned test_node, parent_node;
-		Q.push_back(pos);
-		test_node = l;
-		l++;
+		m_Q.push_back(pos);
+		test_node = m_L;
+		m_L++;
 
-		valuemap[pos] = value;
+		m_Valuemap[pos] = value;
 
 		while (test_node > 0)
 		{
 			parent_node = (test_node - 1) / 2;
-			if (valuemap[Q[parent_node]] > value)
+			if (m_Valuemap[m_Q[parent_node]] > value)
 			{
-				Q[test_node] = Q[parent_node];
-				indexmap[Q[test_node]] = test_node;
+				m_Q[test_node] = m_Q[parent_node];
+				m_Indexmap[m_Q[test_node]] = test_node;
 				test_node = parent_node;
 			}
 			else
 				break;
 		}
 
-		Q[test_node] = pos;
-		indexmap[pos] = test_node;
+		m_Q[test_node] = pos;
+		m_Indexmap[pos] = test_node;
 	}
 	else
-		change(pos, value);
+		Change(pos, value);
 }
 
-void IndexPriorityQueue::insert(unsigned pos)
+void IndexPriorityQueue::Insert(unsigned pos)
 {
-	if (indexmap[pos] == -1)
+	if (m_Indexmap[pos] == -1)
 	{
-		Q.push_back(pos);
-		const float value = valuemap[pos];
+		m_Q.push_back(pos);
+		const float value = m_Valuemap[pos];
 		unsigned test_node, parent_node;
-		test_node = l;
+		test_node = m_L;
 
 		while (test_node > 0)
 		{
 			parent_node = (test_node - 1) / 2;
-			if (valuemap[Q[parent_node]] > value)
+			if (m_Valuemap[m_Q[parent_node]] > value)
 			{
-				Q[test_node] = Q[parent_node];
-				indexmap[Q[test_node]] = test_node;
+				m_Q[test_node] = m_Q[parent_node];
+				m_Indexmap[m_Q[test_node]] = test_node;
 				test_node = parent_node;
 			}
 			else
 				break;
 		}
 
-		Q[test_node] = pos;
-		indexmap[pos] = test_node;
+		m_Q[test_node] = pos;
+		m_Indexmap[pos] = test_node;
 
-		l++;
+		m_L++;
 	}
 }
 
-void IndexPriorityQueue::remove(unsigned pos)
+void IndexPriorityQueue::Remove(unsigned pos)
 {
-	if (indexmap[pos] >= 0)
+	if (m_Indexmap[pos] >= 0)
 	{
-		if (l > 1)
+		if (m_L > 1)
 		{
-			unsigned test_node = indexmap[pos];
+			unsigned test_node = m_Indexmap[pos];
 			unsigned parent_node, child, pos1;
-			pos1 = Q[l - 1];
-			float val = valuemap[pos1];
+			pos1 = m_Q[m_L - 1];
+			float val = m_Valuemap[pos1];
 
 			while (test_node > 0)
 			{
 				parent_node = (test_node - 1) / 2;
-				if (valuemap[Q[parent_node]] > val)
+				if (m_Valuemap[m_Q[parent_node]] > val)
 				{
-					Q[test_node] = Q[parent_node];
-					indexmap[Q[test_node]] = test_node;
+					m_Q[test_node] = m_Q[parent_node];
+					m_Indexmap[m_Q[test_node]] = test_node;
 					test_node = parent_node;
 				}
 				else
@@ -167,52 +167,52 @@ void IndexPriorityQueue::remove(unsigned pos)
 			for (;;)
 			{
 				child = test_node * 2 + 1;
-				if ((child + 1) >= l)
+				if ((child + 1) >= m_L)
 					break;
-				if ((child + 2) < l &&
-						valuemap[Q[child]] > valuemap[Q[child + 1]])
+				if ((child + 2) < m_L &&
+						m_Valuemap[m_Q[child]] > m_Valuemap[m_Q[child + 1]])
 					child++;
-				if (val > valuemap[Q[child]])
+				if (val > m_Valuemap[m_Q[child]])
 				{
 					//					Q[test_node]=Q[child];
-					indexmap[Q[test_node] = Q[child]] = test_node;
+					m_Indexmap[m_Q[test_node] = m_Q[child]] = test_node;
 					test_node = child;
 				}
 				else
 					break;
 			}
 
-			Q[test_node] = pos1;
-			indexmap[pos1] = test_node;
-			indexmap[pos] = -1;
-			l--;
-			Q.pop_back();
+			m_Q[test_node] = pos1;
+			m_Indexmap[pos1] = test_node;
+			m_Indexmap[pos] = -1;
+			m_L--;
+			m_Q.pop_back();
 		}
-		else if (l == 1)
+		else if (m_L == 1)
 		{
-			unsigned pos = Q.front();
-			indexmap[pos] = -1;
-			l--;
-			Q.pop_back();
+			unsigned pos = m_Q.front();
+			m_Indexmap[pos] = -1;
+			m_L--;
+			m_Q.pop_back();
 		}
 	}
 }
 
-void IndexPriorityQueue::change(unsigned pos, float value)
+void IndexPriorityQueue::Change(unsigned pos, float value)
 {
-	if (indexmap[pos] >= 0)
+	if (m_Indexmap[pos] >= 0)
 	{
-		unsigned test_node = indexmap[pos];
+		unsigned test_node = m_Indexmap[pos];
 		unsigned parent_node, child;
-		valuemap[pos] = value;
+		m_Valuemap[pos] = value;
 
 		while (test_node > 0)
 		{
 			parent_node = (test_node - 1) / 2;
-			if (valuemap[Q[parent_node]] > value)
+			if (m_Valuemap[m_Q[parent_node]] > value)
 			{
-				Q[test_node] = Q[parent_node];
-				indexmap[Q[test_node]] = test_node;
+				m_Q[test_node] = m_Q[parent_node];
+				m_Indexmap[m_Q[test_node]] = test_node;
 				test_node = parent_node;
 			}
 			else
@@ -222,97 +222,96 @@ void IndexPriorityQueue::change(unsigned pos, float value)
 		for (;;)
 		{
 			child = test_node * 2 + 1;
-			if ((child) >= l)
+			if ((child) >= m_L)
 				break;
-			if ((child + 1) < l && valuemap[Q[child]] > valuemap[Q[child + 1]])
+			if ((child + 1) < m_L && m_Valuemap[m_Q[child]] > m_Valuemap[m_Q[child + 1]])
 				child++;
-			if (value > valuemap[Q[child]])
+			if (value > m_Valuemap[m_Q[child]])
 			{
 				//				Q[test_node]=Q[child];
-				indexmap[Q[test_node] = Q[child]] = test_node;
+				m_Indexmap[m_Q[test_node] = m_Q[child]] = test_node;
 				test_node = child;
 			}
 			else
 				break;
 		}
 
-		Q[test_node] = pos;
-		indexmap[pos] = test_node;
+		m_Q[test_node] = pos;
+		m_Indexmap[pos] = test_node;
 	}
 }
 
-void IndexPriorityQueue::make_smaller(unsigned pos, float value)
+void IndexPriorityQueue::MakeSmaller(unsigned pos, float value)
 {
-	if (indexmap[pos] >= 0)
+	if (m_Indexmap[pos] >= 0)
 	{
-		unsigned test_node = indexmap[pos];
+		unsigned test_node = m_Indexmap[pos];
 		unsigned parent_node;
-		valuemap[pos] = value;
+		m_Valuemap[pos] = value;
 
 		while (test_node > 0)
 		{
 			parent_node = (test_node - 1) / 2;
-			if (valuemap[Q[parent_node]] > value)
+			if (m_Valuemap[m_Q[parent_node]] > value)
 			{
-				Q[test_node] = Q[parent_node];
-				indexmap[Q[test_node]] = test_node;
+				m_Q[test_node] = m_Q[parent_node];
+				m_Indexmap[m_Q[test_node]] = test_node;
 				test_node = parent_node;
 			}
 			else
 				break;
 		}
 
-		Q[test_node] = pos;
-		indexmap[pos] = test_node;
+		m_Q[test_node] = pos;
+		m_Indexmap[pos] = test_node;
 	}
 }
 
-void IndexPriorityQueue::make_larger(unsigned pos, float value)
+void IndexPriorityQueue::MakeLarger(unsigned pos, float value)
 {
-	if (indexmap[pos] >= 0)
+	if (m_Indexmap[pos] >= 0)
 	{
-		unsigned test_node = indexmap[pos];
+		unsigned test_node = m_Indexmap[pos];
 		unsigned child;
-		valuemap[pos] = value;
+		m_Valuemap[pos] = value;
 
 		for (;;)
 		{
 			child = test_node * 2 + 1;
-			if ((child) >= l)
+			if ((child) >= m_L)
 				break;
-			if ((child + 1) < l && valuemap[Q[child]] > valuemap[Q[child + 1]])
+			if ((child + 1) < m_L && m_Valuemap[m_Q[child]] > m_Valuemap[m_Q[child + 1]])
 				child++;
-			if (value > valuemap[Q[child]])
+			if (value > m_Valuemap[m_Q[child]])
 			{
 				//				Q[test_node]=Q[child];
-				indexmap[Q[test_node] = Q[child]] = test_node;
+				m_Indexmap[m_Q[test_node] = m_Q[child]] = test_node;
 				test_node = child;
 			}
 			else
 				break;
 		}
 
-		Q[test_node] = pos;
-		indexmap[pos] = test_node;
+		m_Q[test_node] = pos;
+		m_Indexmap[pos] = test_node;
 	}
 }
 
-void IndexPriorityQueue::print_queue()
+void IndexPriorityQueue::PrintQueue()
 {
-	for (auto it = Q.begin(); it != Q.end(); it++)
-		std::cout << valuemap[*it] << ", ";
+	for (auto it = m_Q.begin(); it != m_Q.end(); it++)
+		std::cout << m_Valuemap[*it] << ", ";
 	std::cout << "." << std::endl;
 }
 
-bool IndexPriorityQueue::empty() { return l == 0; }
-bool IndexPriorityQueue::in_queue(unsigned pos) { return indexmap[pos] != -1; }
+bool IndexPriorityQueue::Empty() const { return m_L == 0; }
+bool IndexPriorityQueue::InQueue(unsigned pos) { return m_Indexmap[pos] != -1; }
 
 IndexPriorityQueue::~IndexPriorityQueue()
 {
-	free(indexmap);
-	return;
+	free(m_Indexmap);
 }
 
-unsigned IndexPriorityQueue::size() { return l; }
+unsigned IndexPriorityQueue::Size() const { return m_L; }
 
 } // namespace iseg

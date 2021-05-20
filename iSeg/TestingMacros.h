@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,23 +16,23 @@
 
 #pragma once
 
-#define check(expr)                                                            \
-	if ((expr) == false)                                                       \
-	{                                                                          \
-		ISEG_ERROR("Expression false: " << (#expr));      \
-		error_counter++;                                                       \
+#define check(expr)                              \
+	if ((expr) == false)                           \
+	{                                              \
+		ISEG_ERROR("Expression false: " << (#expr)); \
+		error_counter++;                             \
 	}
-#define check_equal(expr1, expr2)                                              \
-	if ((expr1) != (expr2))                                                    \
-	{                                                                          \
-		ISEG_ERROR("Expression false: " << (expr1)                    \
-				  << " != " << (expr2));                           \
-		error_counter++;                                                       \
+#define check_equal(expr1, expr2)                          \
+	if ((expr1) != (expr2))                                  \
+	{                                                        \
+		ISEG_ERROR("Expression false: " << (expr1)             \
+																		<< " != " << (expr2)); \
+		error_counter++;                                       \
 	}
-#define check_not_equal(expr1, expr2)                                          \
-	if ((expr1) == (expr2))                                                    \
-	{                                                                          \
-		ISEG_ERROR("Expression false: " << (expr1)                    \
-				  << " == " << (expr2));                           \
-		error_counter++;                                                       \
+#define check_not_equal(expr1, expr2)                      \
+	if ((expr1) == (expr2))                                  \
+	{                                                        \
+		ISEG_ERROR("Expression false: " << (expr1)             \
+																		<< " == " << (expr2)); \
+		error_counter++;                                       \
 	}

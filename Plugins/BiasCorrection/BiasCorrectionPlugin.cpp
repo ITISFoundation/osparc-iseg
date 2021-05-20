@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,17 +14,16 @@
 namespace iseg { namespace plugin {
 
 namespace {
-BiasCorrectionPlugin _register_addon;
+BiasCorrectionPlugin register_addon;
 }
 
-BiasCorrectionPlugin::BiasCorrectionPlugin() {}
+BiasCorrectionPlugin::BiasCorrectionPlugin() = default;
 
-BiasCorrectionPlugin::~BiasCorrectionPlugin() {}
+BiasCorrectionPlugin::~BiasCorrectionPlugin() = default;
 
-WidgetInterface* BiasCorrectionPlugin::create_widget(QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags) const
+WidgetInterface* BiasCorrectionPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
 {
-	return new BiasCorrectionWidget(slice_handler(), parent, name, wFlags);
+	return new BiasCorrectionWidget(SliceHandler(), parent, name, wFlags);
 }
 
 }} // namespace iseg::plugin

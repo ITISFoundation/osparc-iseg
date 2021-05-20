@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,9 +15,7 @@
 
 namespace iseg {
 
-bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
-		int nz, const char* comment, int commentlength,
-		const char* varname, int varnamelength, bool complex)
+bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny, int nz, const char* comment, int commentlength, const char* varname, int varnamelength, bool complex)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -115,10 +113,7 @@ bool matexport::print_mat(const char* filename, float* matrix, int nx, int ny,
 	return true;
 }
 
-bool matexport::print_matslices(const char* filename, float** matrix, int nx,
-		int ny, int nz, const char* comment,
-		int commentlength, const char* varname,
-		int varnamelength, bool complex)
+bool matexport::print_matslices(const char* filename, float** matrix, int nx, int ny, int nz, const char* comment, int commentlength, const char* varname, int varnamelength, bool complex)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -219,9 +214,7 @@ bool matexport::print_matslices(const char* filename, float** matrix, int nx,
 	return true;
 }
 
-bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
-		int ny, int nz, const char* comment, int commentlength,
-		const char* varname, int varnamelength)
+bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx, int ny, int nz, const char* comment, int commentlength, const char* varname, int varnamelength)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -309,10 +302,7 @@ bool matexport::print_mat(const char* filename, unsigned char* matrix, int nx,
 	fclose(fp);
 	return true;
 }
-bool matexport::print_matslices(const char* filename, unsigned char** matrix,
-		int nx, int ny, int nz, const char* comment,
-		int commentlength, const char* varname,
-		int varnamelength)
+bool matexport::print_matslices(const char* filename, unsigned char** matrix, int nx, int ny, int nz, const char* comment, int commentlength, const char* varname, int varnamelength)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -401,9 +391,7 @@ bool matexport::print_matslices(const char* filename, unsigned char** matrix,
 }
 
 #ifdef TISSUES_SIZE_TYPEDEF
-bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
-		int ny, int nz, char* comment, int commentlength,
-		char* varname, int varnamelength)
+bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx, int ny, int nz, char* comment, int commentlength, char* varname, int varnamelength)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");
@@ -518,10 +506,7 @@ bool matexport::print_mat(const char* filename, tissues_size_t* matrix, int nx,
 	fclose(fp);
 	return true;
 }
-bool matexport::print_matslices(const char* filename, tissues_size_t** matrix,
-		int nx, int ny, int nz, const char* comment,
-		int commentlength, const char* varname,
-		int varnamelength)
+bool matexport::print_matslices(const char* filename, tissues_size_t** matrix, int nx, int ny, int nz, const char* comment, int commentlength, const char* varname, int varnamelength)
 {
 	FILE* fp;
 	fp = fopen(filename, "wb");

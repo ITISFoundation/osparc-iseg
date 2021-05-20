@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -28,356 +28,335 @@
 
 namespace iseg {
 
-TransformWidget::TransformWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+TransformWidget::TransformWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
 	setToolTip(Format("Shift/rotate/scale the Source, Target or Tissue."));
 
-	sliceTransform = new SliceTransform(hand3D);
-	sliceTransform->SelectTransformData(true, true, true);
-	updateParameter1 = updateParameter2 = 0.0;
-	disableUpdatePreview = true;
+	m_SliceTransform = new SliceTransform(hand3D);
+	m_SliceTransform->SelectTransformData(true, true, true);
+	m_UpdateParameter1 = m_UpdateParameter2 = 0.0;
+	m_DisableUpdatePreview = true;
 
 	// Boxes
-	hBoxOverall = new Q3HBox(this);
-	hBoxOverall->setMargin(8);
-	vBoxTransforms = new Q3VBox(hBoxOverall);
-	vBoxParams = new Q3VBox(hBoxOverall);
-	hBoxSelectData = new Q3HBox(vBoxParams);
-	hBoxSlider1 = new Q3HBox(vBoxParams);
-	hBoxSlider2 = new Q3HBox(vBoxParams);
-	hBoxFlip = new Q3HBox(vBoxParams);
-	hBoxAxisSelection = new Q3HBox(vBoxParams);
-	hBoxCenter = new Q3HBox(vBoxParams);
+	m_HBoxOverall = new Q3HBox(this);
+	m_HBoxOverall->setMargin(8);
+	m_VBoxTransforms = new Q3VBox(m_HBoxOverall);
+	m_VBoxParams = new Q3VBox(m_HBoxOverall);
+	m_HBoxSelectData = new Q3HBox(m_VBoxParams);
+	m_HBoxSlider1 = new Q3HBox(m_VBoxParams);
+	m_HBoxSlider2 = new Q3HBox(m_VBoxParams);
+	m_HBoxFlip = new Q3HBox(m_VBoxParams);
+	m_HBoxAxisSelection = new Q3HBox(m_VBoxParams);
+	m_HBoxCenter = new Q3HBox(m_VBoxParams);
 
 	// Transformation selection radio buttons
-	translateRadioButton =
-			new QRadioButton(QString("Translate"), vBoxTransforms);
-	rotateRadioButton = new QRadioButton(QString("Rotate"), vBoxTransforms);
-	scaleRadioButton = new QRadioButton(QString("Scale"), vBoxTransforms);
-	shearRadioButton = new QRadioButton(QString("Shear"), vBoxTransforms);
-	flipRadioButton = new QRadioButton(QString("Flip"), vBoxTransforms);
+	m_TranslateRadioButton =
+			new QRadioButton(QString("Translate"), m_VBoxTransforms);
+	m_RotateRadioButton = new QRadioButton(QString("Rotate"), m_VBoxTransforms);
+	m_ScaleRadioButton = new QRadioButton(QString("Scale"), m_VBoxTransforms);
+	m_ShearRadioButton = new QRadioButton(QString("Shear"), m_VBoxTransforms);
+	m_FlipRadioButton = new QRadioButton(QString("Flip"), m_VBoxTransforms);
 	//matrixRadioButton = new QRadioButton(QString("Matrix"), vBoxTransforms);
-	transformButtonGroup = new QButtonGroup(vBoxTransforms);
-	transformButtonGroup->insert(translateRadioButton);
-	transformButtonGroup->insert(rotateRadioButton);
-	transformButtonGroup->insert(scaleRadioButton);
-	transformButtonGroup->insert(shearRadioButton);
-	transformButtonGroup->insert(flipRadioButton);
+	m_TransformButtonGroup = new QButtonGroup(m_VBoxTransforms);
+	m_TransformButtonGroup->insert(m_TranslateRadioButton);
+	m_TransformButtonGroup->insert(m_RotateRadioButton);
+	m_TransformButtonGroup->insert(m_ScaleRadioButton);
+	m_TransformButtonGroup->insert(m_ShearRadioButton);
+	m_TransformButtonGroup->insert(m_FlipRadioButton);
 	//transformButtonGroup->insert(matrixRadioButton);
-	translateRadioButton->setChecked(TRUE);
+	m_TranslateRadioButton->setChecked(TRUE);
 
 	// Data selection check boxes
-	transformSourceCheckBox = new QCheckBox(QString("Source"), hBoxSelectData);
-	transformTargetCheckBox = new QCheckBox(QString("Target"), hBoxSelectData);
-	transformTissuesCheckBox =
-			new QCheckBox(QString("Tissues"), hBoxSelectData);
-	transformSourceCheckBox->setChecked(TRUE);
-	transformTargetCheckBox->setChecked(TRUE);
-	transformTissuesCheckBox->setChecked(TRUE);
+	m_TransformSourceCheckBox = new QCheckBox(QString("Source"), m_HBoxSelectData);
+	m_TransformTargetCheckBox = new QCheckBox(QString("Target"), m_HBoxSelectData);
+	m_TransformTissuesCheckBox =
+			new QCheckBox(QString("Tissues"), m_HBoxSelectData);
+	m_TransformSourceCheckBox->setChecked(TRUE);
+	m_TransformTargetCheckBox->setChecked(TRUE);
+	m_TransformTissuesCheckBox->setChecked(TRUE);
 
 	// Axis selection radio buttons
-	xAxisRadioButton = new QRadioButton(QString("x axis "), hBoxAxisSelection);
-	yAxisRadioButton = new QRadioButton(QString("y axis "), hBoxAxisSelection);
-	axisButtonGroup = new QButtonGroup(hBoxAxisSelection);
-	axisButtonGroup->insert(xAxisRadioButton);
-	axisButtonGroup->insert(yAxisRadioButton);
-	xAxisRadioButton->setChecked(TRUE);
+	m_XAxisRadioButton = new QRadioButton(QString("x axis "), m_HBoxAxisSelection);
+	m_YAxisRadioButton = new QRadioButton(QString("y axis "), m_HBoxAxisSelection);
+	m_AxisButtonGroup = new QButtonGroup(m_HBoxAxisSelection);
+	m_AxisButtonGroup->insert(m_XAxisRadioButton);
+	m_AxisButtonGroup->insert(m_YAxisRadioButton);
+	m_XAxisRadioButton->setChecked(TRUE);
 
 	// Sliders
-	slider1Label = new QLabel("Offset x ", hBoxSlider1);
-	slider1 = new QSlider(Qt::Horizontal, hBoxSlider1);
-	lineEdit1 = new QLineEdit("-00000", hBoxSlider1);
-	lineEdit1->setAlignment(Qt::AlignRight);
-	slider2Label = new QLabel("Offset y ", hBoxSlider2);
-	slider2 = new QSlider(Qt::Horizontal, hBoxSlider2);
-	lineEdit2 = new QLineEdit("-00000", hBoxSlider2);
-	lineEdit2->setAlignment(Qt::AlignRight);
+	m_Slider1Label = new QLabel("Offset x ", m_HBoxSlider1);
+	m_Slider1 = new QSlider(Qt::Horizontal, m_HBoxSlider1);
+	m_LineEdit1 = new QLineEdit("-00000", m_HBoxSlider1);
+	m_LineEdit1->setAlignment(Qt::AlignRight);
+	m_Slider2Label = new QLabel("Offset y ", m_HBoxSlider2);
+	m_Slider2 = new QSlider(Qt::Horizontal, m_HBoxSlider2);
+	m_LineEdit2 = new QLineEdit("-00000", m_HBoxSlider2);
+	m_LineEdit2->setAlignment(Qt::AlignRight);
 
 	// Flip button
-	flipPushButton = new QPushButton("Flip", hBoxFlip);
+	m_FlipPushButton = new QPushButton("Flip", m_HBoxFlip);
 
 	// Center
-	centerLabel = new QLabel("Center coordinates: ", hBoxCenter);
-	centerCoordsLabel = new QLabel("(0000, 0000)", hBoxCenter);
-	centerSelectPushButton = new QPushButton("Select", hBoxCenter);
-	centerSelectPushButton->setCheckable(true);
+	m_CenterLabel = new QLabel("Center coordinates: ", m_HBoxCenter);
+	m_CenterCoordsLabel = new QLabel("(0000, 0000)", m_HBoxCenter);
+	m_CenterSelectPushButton = new QPushButton("Select", m_HBoxCenter);
+	m_CenterSelectPushButton->setCheckable(true);
 	SetCenterDefault();
 
 	// Common widgets
-	hBoxExecute = new Q3HBox(vBoxParams);
-	executePushButton = new QPushButton("Execute", hBoxExecute);
-	allSlicesCheckBox =
-			new QCheckBox(QString("Apply to all slices"), hBoxExecute);
-	allSlicesCheckBox->setLayoutDirection(Qt::RightToLeft);
-	cancelPushButton = new QPushButton("Cancel", vBoxParams);
+	m_HBoxExecute = new Q3HBox(m_VBoxParams);
+	m_ExecutePushButton = new QPushButton("Execute", m_HBoxExecute);
+	m_AllSlicesCheckBox =
+			new QCheckBox(QString("Apply to all slices"), m_HBoxExecute);
+	m_AllSlicesCheckBox->setLayoutDirection(Qt::RightToLeft);
+	m_CancelPushButton = new QPushButton("Cancel", m_VBoxParams);
 
 	// Layout
-	vBoxParams->setMargin(5);
-	vBoxTransforms->setMargin(5);
-	vBoxTransforms->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vBoxTransforms->setLineWidth(1);
+	m_VBoxParams->setMargin(5);
+	m_VBoxTransforms->setMargin(5);
+	m_VBoxTransforms->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	m_VBoxTransforms->setLineWidth(1);
 
-	slider1->setFixedWidth(300);
-	slider2->setFixedWidth(300);
+	m_Slider1->setFixedWidth(300);
+	m_Slider2->setFixedWidth(300);
 
-	executePushButton->setFixedWidth(100);
-	cancelPushButton->setFixedWidth(100);
+	m_ExecutePushButton->setFixedWidth(100);
+	m_CancelPushButton->setFixedWidth(100);
 
-	vBoxTransforms->setFixedSize(vBoxTransforms->sizeHint());
-	vBoxParams->setFixedSize(vBoxParams->sizeHint());
-	hBoxSelectData->setFixedSize(hBoxSelectData->sizeHint());
-	hBoxSlider1->setFixedSize(hBoxSlider1->sizeHint());
-	hBoxSlider2->setFixedSize(hBoxSlider2->sizeHint());
-	hBoxFlip->setFixedSize(hBoxFlip->sizeHint());
-	hBoxAxisSelection->setFixedSize(hBoxAxisSelection->sizeHint());
-	hBoxCenter->setFixedSize(hBoxCenter->sizeHint());
-	hBoxExecute->setFixedSize(hBoxExecute->sizeHint());
+	m_VBoxTransforms->setFixedSize(m_VBoxTransforms->sizeHint());
+	m_VBoxParams->setFixedSize(m_VBoxParams->sizeHint());
+	m_HBoxSelectData->setFixedSize(m_HBoxSelectData->sizeHint());
+	m_HBoxSlider1->setFixedSize(m_HBoxSlider1->sizeHint());
+	m_HBoxSlider2->setFixedSize(m_HBoxSlider2->sizeHint());
+	m_HBoxFlip->setFixedSize(m_HBoxFlip->sizeHint());
+	m_HBoxAxisSelection->setFixedSize(m_HBoxAxisSelection->sizeHint());
+	m_HBoxCenter->setFixedSize(m_HBoxCenter->sizeHint());
+	m_HBoxExecute->setFixedSize(m_HBoxExecute->sizeHint());
 
-	centerCoordsLabel->setFixedSize(centerCoordsLabel->sizeHint());
-	lineEdit1->setFixedSize(lineEdit1->sizeHint());
-	lineEdit2->setFixedSize(lineEdit2->sizeHint());
+	m_CenterCoordsLabel->setFixedSize(m_CenterCoordsLabel->sizeHint());
+	m_LineEdit1->setFixedSize(m_LineEdit1->sizeHint());
+	m_LineEdit2->setFixedSize(m_LineEdit2->sizeHint());
 
-	hBoxSelectData->show();
-	hBoxSlider1->show();
-	hBoxSlider2->show();
-	hBoxFlip->hide();
-	hBoxAxisSelection->hide();
-	hBoxCenter->hide();
+	m_HBoxSelectData->show();
+	m_HBoxSlider1->show();
+	m_HBoxSlider2->show();
+	m_HBoxFlip->hide();
+	m_HBoxAxisSelection->hide();
+	m_HBoxCenter->hide();
 
 	// Signals
-	QObject::connect(transformButtonGroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(TransformChanged(int)));
+	QObject_connect(m_TransformButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(TransformChanged(int)));
 
-	QObject::connect(transformSourceCheckBox, SIGNAL(stateChanged(int)), this,
-			SLOT(SelectSourceChanged(int)));
-	QObject::connect(transformTargetCheckBox, SIGNAL(stateChanged(int)), this,
-			SLOT(SelectTargetChanged(int)));
-	QObject::connect(transformTissuesCheckBox, SIGNAL(stateChanged(int)), this,
-			SLOT(SelectTissuesChanged(int)));
+	QObject_connect(m_TransformSourceCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectSourceChanged(int)));
+	QObject_connect(m_TransformTargetCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectTargetChanged(int)));
+	QObject_connect(m_TransformTissuesCheckBox, SIGNAL(stateChanged(int)), this, SLOT(SelectTissuesChanged(int)));
 
-	QObject::connect(slider1, SIGNAL(valueChanged(int)), this,
-			SLOT(Slider1Changed(int)));
-	QObject::connect(slider2, SIGNAL(valueChanged(int)), this,
-			SLOT(Slider2Changed(int)));
+	QObject_connect(m_Slider1, SIGNAL(valueChanged(int)), this, SLOT(Slider1Changed(int)));
+	QObject_connect(m_Slider2, SIGNAL(valueChanged(int)), this, SLOT(Slider2Changed(int)));
 
-	QObject::connect(lineEdit1, SIGNAL(editingFinished()), this,
-			SLOT(LineEdit1Edited()));
-	QObject::connect(lineEdit2, SIGNAL(editingFinished()), this,
-			SLOT(LineEdit2Edited()));
+	QObject_connect(m_LineEdit1, SIGNAL(editingFinished()), this, SLOT(LineEdit1Edited()));
+	QObject_connect(m_LineEdit2, SIGNAL(editingFinished()), this, SLOT(LineEdit2Edited()));
 
-	QObject::connect(flipPushButton, SIGNAL(clicked()), this,
-			SLOT(FlipPushButtonClicked()));
-	QObject::connect(executePushButton, SIGNAL(clicked()), this,
-			SLOT(ExecutePushButtonClicked()));
-	QObject::connect(cancelPushButton, SIGNAL(clicked()), this,
-			SLOT(CancelPushButtonClicked()));
+	QObject_connect(m_FlipPushButton, SIGNAL(clicked()), this, SLOT(FlipPushButtonClicked()));
+	QObject_connect(m_ExecutePushButton, SIGNAL(clicked()), this, SLOT(ExecutePushButtonClicked()));
+	QObject_connect(m_CancelPushButton, SIGNAL(clicked()), this, SLOT(CancelPushButtonClicked()));
 }
 
-TransformWidget::~TransformWidget() { delete sliceTransform; }
+TransformWidget::~TransformWidget() { delete m_SliceTransform; }
 
 void TransformWidget::Slider1Changed(int value)
 {
-	lineEdit1->blockSignals(true);
-	slider1->blockSignals(true);
+	m_LineEdit1->blockSignals(true);
+	m_Slider1->blockSignals(true);
 
 	// Update parameter and label values
-	if (translateRadioButton->isChecked())
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate: Linear scale: y = x, x in [-width, width]
-		updateParameter1 = value;
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = value;
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
-	else if (rotateRadioButton->isChecked())
+	else if (m_RotateRadioButton->isChecked())
 	{
 		// Rotate: Linear scale: y = x, x in [-180, 180]
-		updateParameter1 = value;
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = value;
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter1 = std::pow(10, value / 50.0 - 1.0);
-		updateParameter1 = std::floor(updateParameter1 * 100) /
-											 100.0; // Round to two fractional digits
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = std::pow(10, value / 50.0 - 1.0);
+		m_UpdateParameter1 = std::floor(m_UpdateParameter1 * 100) /
+												 100.0; // Round to two fractional digits
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
-	else if (shearRadioButton->isChecked())
+	else if (m_ShearRadioButton->isChecked())
 	{
 		// Shear: Linear scale: y = x, x in [-45, 45]
-		updateParameter1 = value;
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = value;
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
 
 	// Update transformation preview
 	UpdatePreview();
 
-	lineEdit1->blockSignals(false);
-	slider1->blockSignals(false);
+	m_LineEdit1->blockSignals(false);
+	m_Slider1->blockSignals(false);
 }
 
 void TransformWidget::Slider2Changed(int value)
 {
-	lineEdit2->blockSignals(true);
-	slider2->blockSignals(true);
+	m_LineEdit2->blockSignals(true);
+	m_Slider2->blockSignals(true);
 
-	if (translateRadioButton->isChecked())
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate: Linear scale: y = x, x in [-height, height]
-		updateParameter2 = value;
-		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
+		m_UpdateParameter2 = value;
+		m_LineEdit2->setText(QString("%1").arg(m_UpdateParameter2, 0, 'f', 2));
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter2 = std::pow(10, value / 50.0 - 1.0);
-		updateParameter2 = std::floor(updateParameter2 * 100) /
-											 100.0; // Round to two fractional digits
-		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
+		m_UpdateParameter2 = std::pow(10, value / 50.0 - 1.0);
+		m_UpdateParameter2 = std::floor(m_UpdateParameter2 * 100) /
+												 100.0; // Round to two fractional digits
+		m_LineEdit2->setText(QString("%1").arg(m_UpdateParameter2, 0, 'f', 2));
 	}
 
 	// Update transformation preview
 	UpdatePreview();
 
-	lineEdit2->blockSignals(false);
-	slider2->blockSignals(false);
+	m_LineEdit2->blockSignals(false);
+	m_Slider2->blockSignals(false);
 }
 
 void TransformWidget::LineEdit1Edited()
 {
-	lineEdit1->blockSignals(true);
-	slider1->blockSignals(true);
+	m_LineEdit1->blockSignals(true);
+	m_Slider1->blockSignals(true);
 
-	double value = lineEdit1->text().toDouble();
-	if (translateRadioButton->isChecked() || rotateRadioButton->isChecked() ||
-			shearRadioButton->isChecked())
+	double value = m_LineEdit1->text().toDouble();
+	if (m_TranslateRadioButton->isChecked() || m_RotateRadioButton->isChecked() ||
+			m_ShearRadioButton->isChecked())
 	{
 		// Translate: Linear scale: y = x, x in [-width, width]
 		// Rotate: Linear scale: y = x, x in [-180, 180]
 		// Shear: Linear scale: y = x, x in [-45, 45]
-		updateParameter1 = std::max((double)slider1->minimum(), std::min(value, (double)slider1->maximum()));
-		slider1->setValue(std::floor(updateParameter1 + 0.5));
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = std::max((double)m_Slider1->minimum(), std::min(value, (double)m_Slider1->maximum()));
+		m_Slider1->setValue(std::floor(m_UpdateParameter1 + 0.5));
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter1 = std::max(0.1, std::min(value, 10.0));
-		slider1->setValue(std::floor((std::log10(updateParameter1) + 1) * 50.0 + 0.5));
-		lineEdit1->setText(QString("%1").arg(updateParameter1, 0, 'f', 2));
+		m_UpdateParameter1 = std::max(0.1, std::min(value, 10.0));
+		m_Slider1->setValue(std::floor((std::log10(m_UpdateParameter1) + 1) * 50.0 + 0.5));
+		m_LineEdit1->setText(QString("%1").arg(m_UpdateParameter1, 0, 'f', 2));
 	}
 
 	// Update transformation preview
 	UpdatePreview();
 
-	lineEdit1->blockSignals(false);
-	slider1->blockSignals(false);
+	m_LineEdit1->blockSignals(false);
+	m_Slider1->blockSignals(false);
 }
 
 void TransformWidget::LineEdit2Edited()
 {
-	lineEdit2->blockSignals(true);
-	slider2->blockSignals(true);
+	m_LineEdit2->blockSignals(true);
+	m_Slider2->blockSignals(true);
 
-	double value = lineEdit2->text().toDouble();
-	if (translateRadioButton->isChecked())
+	double value = m_LineEdit2->text().toDouble();
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate: Linear scale: y = x, x in [-height, height]
-		updateParameter2 = std::max((double)slider2->minimum(), std::min(value, (double)slider2->maximum()));
-		slider2->setValue(std::floor(updateParameter2 + 0.5));
-		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
+		m_UpdateParameter2 = std::max((double)m_Slider2->minimum(), std::min(value, (double)m_Slider2->maximum()));
+		m_Slider2->setValue(std::floor(m_UpdateParameter2 + 0.5));
+		m_LineEdit2->setText(QString("%1").arg(m_UpdateParameter2, 0, 'f', 2));
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale: Logarithmic scale: y = 10^(x/50-1), x in [0, 100]
-		updateParameter2 = std::max(0.1, std::min(value, 10.0));
-		slider2->setValue(std::floor((std::log10(updateParameter2) + 1) * 50.0 + 0.5));
-		lineEdit2->setText(QString("%1").arg(updateParameter2, 0, 'f', 2));
+		m_UpdateParameter2 = std::max(0.1, std::min(value, 10.0));
+		m_Slider2->setValue(std::floor((std::log10(m_UpdateParameter2) + 1) * 50.0 + 0.5));
+		m_LineEdit2->setText(QString("%1").arg(m_UpdateParameter2, 0, 'f', 2));
 	}
 
 	// Update transformation preview
 	UpdatePreview();
 
-	lineEdit2->blockSignals(false);
-	slider2->blockSignals(false);
+	m_LineEdit2->blockSignals(false);
+	m_Slider2->blockSignals(false);
 }
 
 void TransformWidget::UpdatePreview()
 {
-	if (disableUpdatePreview)
+	if (m_DisableUpdatePreview)
 	{
 		return;
 	}
 
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.bmp = transformSourceCheckBox->isChecked();
-	dataSelection.work = transformTargetCheckBox->isChecked();
-	dataSelection.tissues = transformTissuesCheckBox->isChecked();
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.bmp = m_TransformSourceCheckBox->isChecked();
+	data_selection.work = m_TransformTargetCheckBox->isChecked();
+	data_selection.tissues = m_TransformTissuesCheckBox->isChecked();
+	emit BeginDatachange(data_selection, this, false);
 
-	if (translateRadioButton->isChecked())
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate
-		sliceTransform->Translate(
-				updateParameter1 - transformParameters.translationOffset[0],
-				updateParameter2 - transformParameters.translationOffset[1]);
-		transformParameters.translationOffset[0] = updateParameter1;
-		transformParameters.translationOffset[1] = updateParameter2;
+		m_SliceTransform->Translate(m_UpdateParameter1 - m_TransformParameters.m_TranslationOffset[0], m_UpdateParameter2 - m_TransformParameters.m_TranslationOffset[1]);
+		m_TransformParameters.m_TranslationOffset[0] = m_UpdateParameter1;
+		m_TransformParameters.m_TranslationOffset[1] = m_UpdateParameter2;
 	}
-	else if (rotateRadioButton->isChecked())
+	else if (m_RotateRadioButton->isChecked())
 	{
 		// Rotate
-		sliceTransform->Rotate(updateParameter1 -
-															 transformParameters.rotationAngle,
-				transformParameters.transformCenter[0],
-				transformParameters.transformCenter[1]);
-		transformParameters.rotationAngle = updateParameter1;
+		m_SliceTransform->Rotate(m_UpdateParameter1 -
+																 m_TransformParameters.m_RotationAngle,
+				m_TransformParameters.m_TransformCenter[0], m_TransformParameters.m_TransformCenter[1]);
+		m_TransformParameters.m_RotationAngle = m_UpdateParameter1;
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale
-		sliceTransform->Scale(
-				updateParameter1 / transformParameters.scalingFactor[0],
-				updateParameter2 / transformParameters.scalingFactor[1],
-				transformParameters.transformCenter[0],
-				transformParameters.transformCenter[1]);
-		transformParameters.scalingFactor[0] = updateParameter1;
-		transformParameters.scalingFactor[1] = updateParameter2;
+		m_SliceTransform->Scale(m_UpdateParameter1 / m_TransformParameters.m_ScalingFactor[0], m_UpdateParameter2 / m_TransformParameters.m_ScalingFactor[1], m_TransformParameters.m_TransformCenter[0], m_TransformParameters.m_TransformCenter[1]);
+		m_TransformParameters.m_ScalingFactor[0] = m_UpdateParameter1;
+		m_TransformParameters.m_ScalingFactor[1] = m_UpdateParameter2;
 	}
-	else if (shearRadioButton->isChecked())
+	else if (m_ShearRadioButton->isChecked())
 	{
 		// Shear
-		if (xAxisRadioButton->isChecked())
+		if (m_XAxisRadioButton->isChecked())
 		{
-			sliceTransform->Shear(updateParameter1 -
-																transformParameters.shearingAngle,
-					true, transformParameters.transformCenter[0]);
+			m_SliceTransform->Shear(m_UpdateParameter1 -
+																	m_TransformParameters.m_ShearingAngle,
+					true, m_TransformParameters.m_TransformCenter[0]);
 		}
 		else
 		{
-			sliceTransform->Shear(
-					updateParameter1 - transformParameters.shearingAngle, false,
-					transformParameters.transformCenter[1]);
+			m_SliceTransform->Shear(m_UpdateParameter1 - m_TransformParameters.m_ShearingAngle, false, m_TransformParameters.m_TransformCenter[1]);
 		}
-		transformParameters.shearingAngle = updateParameter1;
+		m_TransformParameters.m_ShearingAngle = m_UpdateParameter1;
 	}
-	else if (flipRadioButton->isChecked())
+	else if (m_FlipRadioButton->isChecked())
 	{
 		// Update flipping
-		if (xAxisRadioButton->isChecked())
+		if (m_XAxisRadioButton->isChecked())
 		{
-			sliceTransform->Flip(true, transformParameters.transformCenter[0]);
+			m_SliceTransform->Flip(true, m_TransformParameters.m_TransformCenter[0]);
 		}
 		else
 		{
-			sliceTransform->Flip(false, transformParameters.transformCenter[1]);
+			m_SliceTransform->Flip(false, m_TransformParameters.m_TransformCenter[1]);
 		}
 	}
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
 void TransformWidget::TransformChanged(int index)
@@ -386,58 +365,58 @@ void TransformWidget::TransformChanged(int index)
 	ResetWidgets();
 
 	// Show the corresponding widgets
-	if (translateRadioButton->isChecked())
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate
-		slider1Label->setText("Offset x ");
-		slider2Label->setText("Offset y ");
-		hBoxSlider1->show();
-		hBoxSlider2->show();
-		hBoxFlip->hide();
-		hBoxAxisSelection->hide();
-		hBoxCenter->hide();
+		m_Slider1Label->setText("Offset x ");
+		m_Slider2Label->setText("Offset y ");
+		m_HBoxSlider1->show();
+		m_HBoxSlider2->show();
+		m_HBoxFlip->hide();
+		m_HBoxAxisSelection->hide();
+		m_HBoxCenter->hide();
 	}
-	else if (rotateRadioButton->isChecked())
+	else if (m_RotateRadioButton->isChecked())
 	{
 		// Rotate
-		slider1Label->setText("Angle ");
-		hBoxSlider1->show();
-		hBoxSlider2->hide();
-		hBoxFlip->hide();
-		hBoxAxisSelection->hide();
-		hBoxCenter->show();
+		m_Slider1Label->setText("Angle ");
+		m_HBoxSlider1->show();
+		m_HBoxSlider2->hide();
+		m_HBoxFlip->hide();
+		m_HBoxAxisSelection->hide();
+		m_HBoxCenter->show();
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale
-		slider1Label->setText("Factor x ");
-		slider2Label->setText("Factor y ");
-		hBoxSlider1->show();
-		hBoxSlider2->show();
-		hBoxFlip->hide();
-		hBoxAxisSelection->hide();
-		hBoxCenter->show();
+		m_Slider1Label->setText("Factor x ");
+		m_Slider2Label->setText("Factor y ");
+		m_HBoxSlider1->show();
+		m_HBoxSlider2->show();
+		m_HBoxFlip->hide();
+		m_HBoxAxisSelection->hide();
+		m_HBoxCenter->show();
 	}
-	else if (shearRadioButton->isChecked())
+	else if (m_ShearRadioButton->isChecked())
 	{
 		// Shear
-		slider1Label->setText("Angle ");
-		hBoxSlider1->show();
-		hBoxSlider2->hide();
-		hBoxFlip->hide();
-		hBoxAxisSelection->show();
-		hBoxCenter->show();
-		xAxisRadioButton->setChecked(true);
+		m_Slider1Label->setText("Angle ");
+		m_HBoxSlider1->show();
+		m_HBoxSlider2->hide();
+		m_HBoxFlip->hide();
+		m_HBoxAxisSelection->show();
+		m_HBoxCenter->show();
+		m_XAxisRadioButton->setChecked(true);
 	}
-	else if (flipRadioButton->isChecked())
+	else if (m_FlipRadioButton->isChecked())
 	{
 		// Flip
-		hBoxSlider1->hide();
-		hBoxSlider2->hide();
-		hBoxFlip->show();
-		hBoxAxisSelection->show();
-		hBoxCenter->show();
-		xAxisRadioButton->setChecked(true);
+		m_HBoxSlider1->hide();
+		m_HBoxSlider2->hide();
+		m_HBoxFlip->show();
+		m_HBoxAxisSelection->show();
+		m_HBoxCenter->show();
+		m_XAxisRadioButton->setChecked(true);
 	} /*else if (matrixRadioButton->isChecked()) {
 		// Matrix
 		hBoxSlider1->hide();
@@ -450,92 +429,86 @@ void TransformWidget::TransformChanged(int index)
 
 void TransformWidget::SelectSourceChanged(int state)
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.bmp = true;
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.bmp = true;
+	emit BeginDatachange(data_selection, this, false);
 
 	// Set data to be transformed
-	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-			transformTargetCheckBox->isChecked(),
-			transformTissuesCheckBox->isChecked());
+	m_SliceTransform->SelectTransformData(m_TransformSourceCheckBox->isChecked(), m_TransformTargetCheckBox->isChecked(), m_TransformTissuesCheckBox->isChecked());
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
 void TransformWidget::SelectTargetChanged(int state)
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this, false);
 
 	// Set data to be transformed
-	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-			transformTargetCheckBox->isChecked(),
-			transformTissuesCheckBox->isChecked());
+	m_SliceTransform->SelectTransformData(m_TransformSourceCheckBox->isChecked(), m_TransformTargetCheckBox->isChecked(), m_TransformTissuesCheckBox->isChecked());
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
 void TransformWidget::SelectTissuesChanged(int state)
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.tissues = true;
+	emit BeginDatachange(data_selection, this, false);
 
 	// Set data to be transformed
-	sliceTransform->SelectTransformData(transformSourceCheckBox->isChecked(),
-			transformTargetCheckBox->isChecked(),
-			transformTissuesCheckBox->isChecked());
+	m_SliceTransform->SelectTransformData(m_TransformSourceCheckBox->isChecked(), m_TransformTargetCheckBox->isChecked(), m_TransformTissuesCheckBox->isChecked());
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
-QSize TransformWidget::sizeHint() const { return hBoxOverall->sizeHint(); }
+QSize TransformWidget::sizeHint() const { return m_HBoxOverall->sizeHint(); }
 
-void TransformWidget::on_slicenr_changed()
+void TransformWidget::OnSlicenrChanged()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.bmp = transformSourceCheckBox->isChecked();
-	dataSelection.work = transformTargetCheckBox->isChecked();
-	dataSelection.tissues = transformTissuesCheckBox->isChecked();
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.bmp = m_TransformSourceCheckBox->isChecked();
+	data_selection.work = m_TransformTargetCheckBox->isChecked();
+	data_selection.tissues = m_TransformTissuesCheckBox->isChecked();
+	emit BeginDatachange(data_selection, this, false);
 
 	// Change active slice in transform object
-	sliceTransform->ActiveSliceChanged();
+	m_SliceTransform->ActiveSliceChanged();
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
-void TransformWidget::init()
+void TransformWidget::Init()
 {
 	// Initialize transformation
-	sliceTransform->Initialize();
+	m_SliceTransform->Initialize();
 
 	// Show tab
-	hideparams_changed();
+	HideParamsChanged();
 }
 
-void TransformWidget::cleanup()
+void TransformWidget::Cleanup()
 {
 	// Cancel transform
 	CancelPushButtonClicked();
 
 	// Hide tab
-	hideparams_changed();
+	HideParamsChanged();
 }
 
-void TransformWidget::newloaded()
+void TransformWidget::NewLoaded()
 {
 	// Reload transform data
-	sliceTransform->NewDataLoaded();
+	m_SliceTransform->NewDataLoaded();
 
 	// Reset the tab widgets
 	ResetWidgets();
@@ -544,122 +517,119 @@ void TransformWidget::newloaded()
 	SetCenterDefault();
 }
 
-void TransformWidget::hideparams_changed()
+void TransformWidget::HideParamsChanged()
 {
 	if (hideparams)
 	{
-		vBoxParams->hide();
+		m_VBoxParams->hide();
 	}
 	else
 	{
 		ResetWidgets();
 		SetCenterDefault();
-		vBoxParams->show();
+		m_VBoxParams->show();
 	}
 }
 
 bool TransformWidget::GetIsIdentityTransform()
 {
-	return sliceTransform->GetIsIdentityTransform();
+	return m_SliceTransform->GetIsIdentityTransform();
 }
 
-void TransformWidget::GetDataSelection(bool& source, bool& target,
-		bool& tissues)
+void TransformWidget::GetDataSelection(bool& source, bool& target, bool& tissues)
 {
-	source = transformSourceCheckBox->isChecked();
-	target = transformTargetCheckBox->isChecked();
-	tissues = transformTissuesCheckBox->isChecked();
+	source = m_TransformSourceCheckBox->isChecked();
+	target = m_TransformTargetCheckBox->isChecked();
+	tissues = m_TransformTissuesCheckBox->isChecked();
 }
 
-void TransformWidget::on_mouse_clicked(Point p)
+void TransformWidget::OnMouseClicked(Point p)
 {
-	if (centerSelectPushButton->isChecked())
+	if (m_CenterSelectPushButton->isChecked())
 	{
 		ResetWidgets();
 		SetCenter(p.px, p.py);
-		centerSelectPushButton->setChecked(false);
+		m_CenterSelectPushButton->setChecked(false);
 	}
 }
 
-void TransformWidget::BitsChanged() { newloaded(); }
+void TransformWidget::BitsChanged() { NewLoaded(); }
 
-void TransformWidget::bmp_changed() { BitsChanged(); }
+void TransformWidget::BmpChanged() { BitsChanged(); }
 
-void TransformWidget::work_changed() { BitsChanged(); }
+void TransformWidget::WorkChanged() { BitsChanged(); }
 
-void TransformWidget::tissues_changed() { BitsChanged(); }
+void TransformWidget::TissuesChanged() { BitsChanged(); }
 
 void TransformWidget::SetCenter(int x, int y)
 {
-	transformParameters.transformCenter[0] = x;
-	transformParameters.transformCenter[1] = y;
+	m_TransformParameters.m_TransformCenter[0] = x;
+	m_TransformParameters.m_TransformCenter[1] = y;
 
 	// Display center coordinates
-	centerCoordsLabel->setText(QString("(%1, %2)").arg(x).arg(y));
+	m_CenterCoordsLabel->setText(QString("(%1, %2)").arg(x).arg(y));
 }
 
 void TransformWidget::SetCenterDefault()
 {
-	SetCenter(handler3D->width() / 2, handler3D->height() / 2);
+	SetCenter(m_Handler3D->Width() / 2, m_Handler3D->Height() / 2);
 }
 
 void TransformWidget::ResetWidgets()
 {
-	disableUpdatePreview = true;
+	m_DisableUpdatePreview = true;
 
 	// Reset transform parameters
-	transformParameters.translationOffset[0] =
-			transformParameters.translationOffset[1] = 0;
-	transformParameters.rotationAngle = 0.0;
-	transformParameters.scalingFactor[0] =
-			transformParameters.scalingFactor[1] = 1.0;
-	transformParameters.shearingAngle = 0.0;
+	m_TransformParameters.m_TranslationOffset[0] =
+			m_TransformParameters.m_TranslationOffset[1] = 0;
+	m_TransformParameters.m_RotationAngle = 0.0;
+	m_TransformParameters.m_ScalingFactor[0] =
+			m_TransformParameters.m_ScalingFactor[1] = 1.0;
+	m_TransformParameters.m_ShearingAngle = 0.0;
 
 	// Reset sliders
-	if (translateRadioButton->isChecked())
+	if (m_TranslateRadioButton->isChecked())
 	{
 		// Translate: Range = [-width, width], value = 0
-		slider1->setRange(-(int)handler3D->width(),
-				handler3D->width());
-		slider1->setSteps(1, 10);
-		slider1->setValue(0);
-		Slider1Changed(slider1->value());
-		slider2->setRange(-(int)handler3D->height(),
-				handler3D->height());
-		slider2->setSteps(1, 10);
-		slider2->setValue(0);
-		Slider2Changed(slider2->value());
+		m_Slider1->setRange(-(int)m_Handler3D->Width(), m_Handler3D->Width());
+		m_Slider1->setSteps(1, 10);
+		m_Slider1->setValue(0);
+		Slider1Changed(m_Slider1->value());
+		m_Slider2->setRange(-(int)m_Handler3D->Height(), m_Handler3D->Height());
+		m_Slider2->setSteps(1, 10);
+		m_Slider2->setValue(0);
+		Slider2Changed(m_Slider2->value());
 	}
-	else if (rotateRadioButton->isChecked())
+	else if (m_RotateRadioButton->isChecked())
 	{
 		// Rotate: Range = [-180, 180], value = 0
-		slider1->setRange(-180, 180);
-		slider1->setSteps(1, 10);
-		slider1->setValue(0);
-		Slider1Changed(slider1->value());
+		m_Slider1->setRange(-180, 180);
+		m_Slider1->setSteps(1, 10);
+		m_Slider1->setValue(0);
+		Slider1Changed(m_Slider1->value());
 	}
-	else if (scaleRadioButton->isChecked())
+	else if (m_ScaleRadioButton->isChecked())
 	{
 		// Scale: Range = [0, 100], value = 50
-		slider1->setRange(0, 100);
-		slider1->setSteps(1, 10);
-		slider1->setValue(50);
-		Slider1Changed(slider1->value());
-		slider2->setRange(0, 100);
-		slider2->setSteps(1, 10);
-		slider2->setValue(50);
-		Slider2Changed(slider2->value());
+		m_Slider1->setRange(0, 100);
+		m_Slider1->setSteps(1, 10);
+		m_Slider1->setValue(50);
+		Slider1Changed(m_Slider1->value());
+		m_Slider2->setRange(0, 100);
+		m_Slider2->setSteps(1, 10);
+		m_Slider2->setValue(50);
+		Slider2Changed(m_Slider2->value());
 	}
-	else if (shearRadioButton->isChecked())
+	else if (m_ShearRadioButton->isChecked())
 	{
 		// Shear: Range = [-45, 45], value = 0
-		slider1->setRange(-45, 45);
-		slider1->setSteps(1, 10);
-		slider1->setValue(0);
-		Slider1Changed(slider1->value());
+		m_Slider1->setRange(-45, 45);
+		m_Slider1->setSteps(1, 10);
+		m_Slider1->setValue(0);
+		Slider1Changed(m_Slider1->value());
 	}
 
-	disableUpdatePreview = false;
+	m_DisableUpdatePreview = false;
 }
 
 void TransformWidget::FlipPushButtonClicked()
@@ -670,45 +640,45 @@ void TransformWidget::FlipPushButtonClicked()
 
 void TransformWidget::ExecutePushButtonClicked()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = allSlicesCheckBox->isChecked();
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.bmp = transformSourceCheckBox->isChecked();
-	dataSelection.work = transformTargetCheckBox->isChecked();
-	dataSelection.tissues = transformTissuesCheckBox->isChecked();
+	DataSelection data_selection;
+	data_selection.allSlices = m_AllSlicesCheckBox->isChecked();
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.bmp = m_TransformSourceCheckBox->isChecked();
+	data_selection.work = m_TransformTargetCheckBox->isChecked();
+	data_selection.tissues = m_TransformTissuesCheckBox->isChecked();
 
 	// Undo start point
-	sliceTransform->SwapDataPointers();
-	emit begin_datachange(dataSelection, this);
-	sliceTransform->SwapDataPointers();
+	m_SliceTransform->SwapDataPointers();
+	emit BeginDatachange(data_selection, this);
+	m_SliceTransform->SwapDataPointers();
 
 	// Apply the transformation
-	sliceTransform->Execute(allSlicesCheckBox->isChecked());
+	m_SliceTransform->Execute(m_AllSlicesCheckBox->isChecked());
 
 	// Reset the widgets
 	ResetWidgets();
 
 	// Undo end point
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
 void TransformWidget::CancelPushButtonClicked()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.bmp = transformSourceCheckBox->isChecked();
-	dataSelection.work = transformTargetCheckBox->isChecked();
-	dataSelection.tissues = transformTissuesCheckBox->isChecked();
-	emit begin_datachange(dataSelection, this, false);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.bmp = m_TransformSourceCheckBox->isChecked();
+	data_selection.work = m_TransformTargetCheckBox->isChecked();
+	data_selection.tissues = m_TransformTissuesCheckBox->isChecked();
+	emit BeginDatachange(data_selection, this, false);
 
 	// Cancel the transformation
-	sliceTransform->Cancel();
+	m_SliceTransform->Cancel();
 
 	// Reset the widgets
 	ResetWidgets();
 
 	// Signal data change
-	emit end_datachange(this, iseg::NoUndo);
+	emit EndDatachange(this, iseg::NoUndo);
 }
 
 } // namespace iseg

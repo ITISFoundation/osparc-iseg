@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,25 +20,24 @@ namespace iseg {
 class ISEG_CORE_API FeatureExtractor
 {
 public:
-	void init(float* bit, Point p1, Point p2, short unsigned w,
-			short unsigned h);
-	void set_bits(float* bit);
-	void set_window(Point p1, Point p2);
-	float return_average();
-	float return_stddev();
-	void return_extrema(Pair* p);
+	void Init(float* bit, Point p1, Point p2, short unsigned w, short unsigned h);
+	void SetBits(float* bit);
+	void SetWindow(Point p1, Point p2);
+	float ReturnAverage() const;
+	float ReturnStddev();
+	void ReturnExtrema(Pair* p) const;
 
 private:
-	float* bits;
-	short xmin;
-	short xmax;
-	short ymin;
-	short ymax;
-	float valmin;
-	float valmax;
-	float average;
-	short unsigned width;
-	short unsigned height;
-	unsigned area;
+	float* m_Bits;
+	short m_Xmin;
+	short m_Xmax;
+	short m_Ymin;
+	short m_Ymax;
+	float m_Valmin;
+	float m_Valmax;
+	float m_Average;
+	short unsigned m_Width;
+	short unsigned m_Height;
+	unsigned m_Area;
 };
 } // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -39,70 +39,69 @@ class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	InterpolationWidget(SlicesHandler *hand3D, QWidget *parent = 0,
-			const char *name = 0, Qt::WindowFlags wFlags = 0);
-	~InterpolationWidget();
+	InterpolationWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~InterpolationWidget() override;
 	QSize sizeHint() const override;
-	void init() override;
-	void newloaded() override;
-	FILE *SaveParams(FILE *fp, int version) override;
-	FILE *LoadParams(FILE *fp, int version) override;
+	void Init() override;
+	void NewLoaded() override;
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 	std::string GetName() override { return std::string("Interpolate"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("interpolate.png"))); }
 
 private:
-	void on_tissuenr_changed(int i) override;
-	void on_slicenr_changed() override;
-	
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_released(Point p) override;
-	void on_mouse_moved(Point p) override;
+	void OnTissuenrChanged(int i) override;
+	void OnSlicenrChanged() override;
 
-	SlicesHandler *handler3D;
-	BrushInteraction *brush;
+	void OnMouseClicked(Point p) override;
+	void OnMouseReleased(Point p) override;
+	void OnMouseMoved(Point p) override;
 
-	Q3HBox *hboxoverall;
-	Q3VBox *vboxmethods;
-	Q3VBox *vboxdataselect;
-	Q3VBox *vboxparams;
-	Q3VBox *vboxexecute;
-	Q3HBox *hboxextra;
-	Q3HBox *hboxbatch;
-	QLabel *txt_slicenr;
-	QSpinBox *sb_slicenr;
-	QLabel *txt_batchstride;
-	QSpinBox *sb_batchstride;
-	QPushButton *pushexec;
-	QPushButton *pushstart;
-	QRadioButton *rb_tissue;
-	QRadioButton *rb_tissueall;
-	QRadioButton *rb_work;
-	QButtonGroup *sourcegroup;
-	QRadioButton *rb_inter;
+	SlicesHandler* m_Handler3D;
+	BrushInteraction* m_Brush;
+
+	Q3HBox* m_Hboxoverall;
+	Q3VBox* m_Vboxmethods;
+	Q3VBox* m_Vboxdataselect;
+	Q3VBox* m_Vboxparams;
+	Q3VBox* m_Vboxexecute;
+	Q3HBox* m_Hboxextra;
+	Q3HBox* m_Hboxbatch;
+	QLabel* m_TxtSlicenr;
+	QSpinBox* m_SbSlicenr;
+	QLabel* m_TxtBatchstride;
+	QSpinBox* m_SbBatchstride;
+	QPushButton* m_Pushexec;
+	QPushButton* m_Pushstart;
+	QRadioButton* m_RbTissue;
+	QRadioButton* m_RbTissueall;
+	QRadioButton* m_RbWork;
+	QButtonGroup* m_Sourcegroup;
+	QRadioButton* m_RbInter;
 	//	QRadioButton *rb_intergrey;
-	QRadioButton *rb_extra;
-	QRadioButton *rb_batchinter;
-	QButtonGroup *modegroup;
-	QRadioButton *rb_4connectivity;
-	QRadioButton *rb_8connectivity;
-	QButtonGroup *connectivitygroup;
-	QCheckBox *cb_medianset;
-	QCheckBox *cb_connectedshapebased;
-	QCheckBox *cb_brush;
-	QLineEdit *brush_radius;
-	unsigned short startnr;
-	unsigned short nrslices;
-	unsigned short tissuenr;
+	QRadioButton* m_RbExtra;
+	QRadioButton* m_RbBatchinter;
+	QButtonGroup* m_Modegroup;
+	QRadioButton* m_Rb4connectivity;
+	QRadioButton* m_Rb8connectivity;
+	QButtonGroup* m_Connectivitygroup;
+	QCheckBox* m_CbMedianset;
+	QCheckBox* m_CbConnectedshapebased;
+	QCheckBox* m_CbBrush;
+	QLineEdit* m_BrushRadius;
+	unsigned short m_Startnr;
+	unsigned short m_Nrslices;
+	unsigned short m_Tissuenr;
 
 public slots:
-	void handler3D_changed();
+	void Handler3DChanged();
 
 private slots:
-	void startslice_pressed();
-	void execute();
-	void method_changed();
-	void source_changed();
-	void brush_changed();
+	void StartslicePressed();
+	void Execute();
+	void MethodChanged();
+	void SourceChanged();
+	void BrushChanged();
 };
 
 } // namespace iseg

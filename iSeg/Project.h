@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,16 +18,16 @@ class Project
 {
 public:
 	Project();
-	QString m_loadprojfilename1;
-	QString m_loadprojfilename2;
-	QString m_loadprojfilename3;
-	QString m_loadprojfilename4;
-	QString m_filename;
-	int lpf1nr;
-	int lpf2nr;
-	int lpf3nr;
-	int lpf4nr;
-	int separatornr;
+	QString m_MLoadprojfilename1;
+	QString m_MLoadprojfilename2;
+	QString m_MLoadprojfilename3;
+	QString m_MLoadprojfilename4;
+	QString m_MFilename;
+	int m_Lpf1nr;
+	int m_Lpf2nr;
+	int m_Lpf3nr;
+	int m_Lpf4nr;
+	int m_Separatornr;
 };
 
 } // namespace iseg

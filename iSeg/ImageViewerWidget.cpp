@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,18 +14,20 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
-#include "Data/ExtractBoundary.h"
-#include "Data/Point.h"
+#include "Interface/QtConnect.h"
 
 #include "Core/ColorLookupTable.h"
+
+#include "Data/ExtractBoundary.h"
+#include "Data/Point.h"
 
 #include <QAction>
 #include <QCloseEvent>
 #include <QContextMenuEvent>
+#include <QMenu>
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <QMenu>
 #include <qapplication.h>
 #include <qcolor.h>
 #include <qevent.h>
@@ -45,156 +47,147 @@
 namespace iseg {
 
 ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(true), picturevisible(true),
-			markvisible(true), overlayvisible(false), workborder(false),
-			crosshairxvisible(false), crosshairyvisible(false) //,showvp(false)
+		: QWidget(parent, name, wFlags) //,showvp(false)
 {
-	brightness = scaleoffset = 0.0f;
-	contrast = scalefactor = 1.0f;
-	mode = 1;
-	zoom = 1.0;
-	pixelsize.high = pixelsize.low = 1.0f;
-	workborderlimit = true;
-	actual_color.setRgb(255, 255, 255);
-	outline_color.setRgb(255, 255, 255);
-	crosshairxpos = 0;
-	crosshairypos = 0;
-	marks = nullptr;
-	overlayalpha = 0.0f;
-	
-	selecttissue = new QAction("Select Tissue", this);
-	addtoselection = new QAction("Select Tissue", this);
-	viewtissue = new QAction("View Tissue Surface", this);
-	viewtarget = new QAction("View Target Surface", this);
-	nexttargetslice = new QAction("Next Target Slice", this);
-	addmark = new QAction("&Add Mark", this);
-	addlabel = new QAction("Add &Label", this);
-	removemark = new QAction("&Remove Mark", this);
-	clearmarks = new QAction("&Clear Marks", this);
-	addtissue = new QAction("Add &Tissue", this);
-	addtissueconnected = new QAction("Add Tissue &Conn", this);
-	addtissue3D = new QAction("Add Tissue 3&D", this);
-	subtissue = new QAction("&Subtract Tissue", this);
-	addtissuelarger = new QAction("Add Tissue &Larger", this);
-	connect(addmark, SIGNAL(activated()), this, SLOT(add_mark()));
-	connect(addlabel, SIGNAL(activated()), this, SLOT(add_label()));
-	connect(clearmarks, SIGNAL(activated()), this, SLOT(clear_marks()));
-	connect(removemark, SIGNAL(activated()), this, SLOT(remove_mark()));
-	connect(addtissue, SIGNAL(activated()), this, SLOT(add_tissue()));
-	connect(addtissueconnected, SIGNAL(activated()), this, SLOT(add_tissue_connected()));
-	connect(subtissue, SIGNAL(activated()), this, SLOT(sub_tissue()));
-	connect(addtissue3D, SIGNAL(activated()), this, SLOT(add_tissue_3D()));
-	connect(addtissuelarger, SIGNAL(activated()), this, SLOT(add_tissuelarger()));
-	connect(selecttissue, SIGNAL(activated()), this, SLOT(select_tissue()));
-	connect(addtoselection, SIGNAL(activated()), this, SLOT(add_to_selected_tissues()));
-	connect(viewtissue, SIGNAL(activated()), this, SLOT(view_tissue_surface()));
-	connect(viewtarget, SIGNAL(activated()), this, SLOT(view_target_surface()));
-	connect(nexttargetslice, SIGNAL(activated()), this, SLOT(next_target_slice()));
+	m_Brightness = m_Scaleoffset = 0.0f;
+	m_Contrast = m_Scalefactor = 1.0f;
+	m_Mode = 1;
+	m_Zoom = 1.0;
+	m_Pixelsize.high = m_Pixelsize.low = 1.0f;
+	m_Workborderlimit = true;
+	m_ActualColor.setRgb(255, 255, 255);
+	m_OutlineColor.setRgb(255, 255, 255);
+	m_Crosshairxpos = 0;
+	m_Crosshairypos = 0;
+	m_Marks = nullptr;
+	m_Overlayalpha = 0.0f;
+
+	m_Selecttissue = new QAction("Select Tissue", this);
+	m_Addtoselection = new QAction("Select Tissue", this);
+	m_Viewtissue = new QAction("View Tissue Surface", this);
+	m_Viewtarget = new QAction("View Target Surface", this);
+	m_Nexttargetslice = new QAction("Next Target Slice", this);
+	m_Addmark = new QAction("&Add Mark", this);
+	m_Addlabel = new QAction("Add &Label", this);
+	m_Removemark = new QAction("&Remove Mark", this);
+	m_Clearmarks = new QAction("&Clear Marks", this);
+	m_Addtissue = new QAction("Add &Tissue", this);
+	m_Addtissueconnected = new QAction("Add Tissue &Conn", this);
+	m_Addtissue3D = new QAction("Add Tissue 3&D", this);
+	m_Subtissue = new QAction("&Subtract Tissue", this);
+	m_Addtissuelarger = new QAction("Add Tissue &Larger", this);
+	QObject_connect(m_Addmark, SIGNAL(activated()), this, SLOT(AddMark()));
+	QObject_connect(m_Addlabel, SIGNAL(activated()), this, SLOT(AddLabel()));
+	QObject_connect(m_Clearmarks, SIGNAL(activated()), this, SLOT(ClearMarks()));
+	QObject_connect(m_Removemark, SIGNAL(activated()), this, SLOT(RemoveMark()));
+	QObject_connect(m_Addtissue, SIGNAL(activated()), this, SLOT(AddTissue()));
+	QObject_connect(m_Addtissueconnected, SIGNAL(activated()), this, SLOT(AddTissueConnected()));
+	QObject_connect(m_Subtissue, SIGNAL(activated()), this, SLOT(SubTissue()));
+	QObject_connect(m_Addtissue3D, SIGNAL(activated()), this, SLOT(AddTissue3D()));
+	QObject_connect(m_Addtissuelarger, SIGNAL(activated()), this, SLOT(AddTissuelarger()));
+	QObject_connect(m_Selecttissue, SIGNAL(activated()), this, SLOT(SelectTissue()));
+	QObject_connect(m_Addtoselection, SIGNAL(activated()), this, SLOT(AddToSelectedTissues()));
+	QObject_connect(m_Viewtissue, SIGNAL(activated()), this, SLOT(ViewTissueSurface()));
+	QObject_connect(m_Viewtarget, SIGNAL(activated()), this, SLOT(ViewTargetSurface()));
+	QObject_connect(m_Nexttargetslice, SIGNAL(activated()), this, SLOT(NextTargetSlice()));
 }
 
 ImageViewerWidget::~ImageViewerWidget()
 {
-	delete addmark;
-	delete addlabel;
-	delete removemark;
-	delete clearmarks;
-	delete addtissue;
-	delete addtissueconnected;
-	delete addtissue3D;
-	delete subtissue;
-	delete addtissuelarger;
-	delete selecttissue;
-	delete addtoselection;
+	delete m_Addmark;
+	delete m_Addlabel;
+	delete m_Removemark;
+	delete m_Clearmarks;
+	delete m_Addtissue;
+	delete m_Addtissueconnected;
+	delete m_Addtissue3D;
+	delete m_Subtissue;
+	delete m_Addtissuelarger;
+	delete m_Selecttissue;
+	delete m_Addtoselection;
 }
 
-void ImageViewerWidget::mode_changed(unsigned char newmode, bool updatescale)
+void ImageViewerWidget::ModeChanged(unsigned char newmode, bool updatescale)
 {
-	if (newmode != 0 && mode != newmode)
+	if (newmode != 0 && m_Mode != newmode)
 	{
-		mode = newmode;
+		m_Mode = newmode;
 		if (updatescale)
 		{
-			update_scaleoffsetfactor();
+			UpdateScaleoffsetfactor();
 		}
 	}
 }
 
-void ImageViewerWidget::get_scaleoffsetfactor(float& offset1, float& factor1)
+void ImageViewerWidget::GetScaleoffsetfactor(float& offset1, float& factor1) const
 {
-	offset1 = scaleoffset;
-	factor1 = scalefactor;
+	offset1 = m_Scaleoffset;
+	factor1 = m_Scalefactor;
 }
 
-void ImageViewerWidget::set_zoom(double z)
+void ImageViewerWidget::SetZoom(double z)
 {
-	if (z != zoom)
+	if (z != m_Zoom)
 	{
 		//QPoint oldCenter = visibleRegion().boundingRect().center();
-		QPoint oldCenter = rect().center();
-		QPoint newCenter;
-		if (mousePosZoom.x() == 0 && mousePosZoom.y() == 0)
+		QPoint old_center = rect().center();
+		QPoint new_center;
+		if (m_MousePosZoom.x() == 0 && m_MousePosZoom.y() == 0)
 		{
-			newCenter = z * oldCenter / zoom;
+			new_center = z * old_center / m_Zoom;
 		}
 		else
 		{
-			newCenter = zoom * (oldCenter + z * mousePosZoom / zoom - mousePosZoom) / z;
+			new_center = m_Zoom * (old_center + z * m_MousePosZoom / m_Zoom - m_MousePosZoom) / z;
 		}
 
-		zoom = z;
-		int const w = static_cast<int>(width) * zoom * pixelsize.high;
-		int const h = static_cast<int>(height) * zoom * pixelsize.low;
+		m_Zoom = z;
+		int const w = static_cast<int>(m_Width) * m_Zoom * m_Pixelsize.high;
+		int const h = static_cast<int>(m_Height) * m_Zoom * m_Pixelsize.low;
 		setFixedSize(w, h);
-		if (mousePosZoom.x() != 0 && mousePosZoom.y() != 0)
+		if (m_MousePosZoom.x() != 0 && m_MousePosZoom.y() != 0)
 		{
-			emit setcenter_sign(newCenter.x(), newCenter.y());
+			emit SetcenterSign(new_center.x(), new_center.y());
 		}
 	}
 }
 
-void ImageViewerWidget::pixelsize_changed(Pair pixelsize1)
+void ImageViewerWidget::PixelsizeChanged(Pair pixelsize1)
 {
-	if (pixelsize1.high != pixelsize.high || pixelsize1.low != pixelsize.low)
+	if (pixelsize1.high != m_Pixelsize.high || pixelsize1.low != m_Pixelsize.low)
 	{
-		pixelsize = pixelsize1;
-		setFixedSize((int)width * zoom * pixelsize.high,
-				(int)height * zoom * pixelsize.low);
+		m_Pixelsize = pixelsize1;
+		setFixedSize((int)m_Width * m_Zoom * m_Pixelsize.high, (int)m_Height * m_Zoom * m_Pixelsize.low);
 		repaint();
 	}
 }
 
 void ImageViewerWidget::paintEvent(QPaintEvent* e)
 {
-	marks = handler3D->get_activebmphandler()->return_marks();
-	if (image.size() != QSize(0, 0)) // is an image loaded?
+	m_Marks = m_Handler3D->GetActivebmphandler()->ReturnMarks();
+	if (m_Image.size() != QSize(0, 0)) // is an image loaded?
 	{
 		{
 			QPainter painter(this);
 			painter.setClipRect(e->rect());
-			painter.scale(zoom * pixelsize.high, zoom * pixelsize.low);
-			painter.drawImage(0, 0, image_decorated);
-			painter.setPen(QPen(actual_color));
+			painter.scale(m_Zoom * m_Pixelsize.high, m_Zoom * m_Pixelsize.low);
+			painter.drawImage(0, 0, m_ImageDecorated);
+			painter.setPen(QPen(m_ActualColor));
 
-			if (marks != nullptr)
+			if (m_Marks != nullptr)
 			{
 				unsigned char r, g, b;
-				for (auto& m : *marks)
+				for (auto& m : *m_Marks)
 				{
 					std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
 					QColor qc1(r, g, b);
 					painter.setPen(QPen(qc1));
 
-					painter.drawLine(
-							int(m.p.px) - 2, int(height - m.p.py) - 3,
-							int(m.p.px) + 2, int(height - m.p.py) + 1);
-					painter.drawLine(
-							int(m.p.px) - 2, int(height - m.p.py) + 1,
-							int(m.p.px) + 2, int(height - m.p.py) - 3);
+					painter.drawLine(int(m.p.px) - 2, int(m_Height - m.p.py) - 3, int(m.p.px) + 2, int(m_Height - m.p.py) + 1);
+					painter.drawLine(int(m.p.px) - 2, int(m_Height - m.p.py) + 1, int(m.p.px) + 2, int(m_Height - m.p.py) - 3);
 					if (!m.name.empty())
 					{
-						painter.drawText(int(m.p.px) + 3,
-								int(height - m.p.py) + 1,
-								QString(m.name.c_str()));
+						painter.drawText(int(m.p.px) + 3, int(m_Height - m.p.py) + 1, QString(m.name.c_str()));
 					}
 				}
 			}
@@ -202,46 +195,44 @@ void ImageViewerWidget::paintEvent(QPaintEvent* e)
 		{
 			QPainter painter1(this);
 
-			float dx = zoom * pixelsize.high;
-			float dy = zoom * pixelsize.low;
+			float dx = m_Zoom * m_Pixelsize.high;
+			float dy = m_Zoom * m_Pixelsize.low;
 
-			for (auto& p : vpdyn)
+			for (auto& p : m_Vpdyn)
 			{
-				painter1.fillRect(
-						int(dx * p.px), int(dy * (height - p.py - 1)),
-						int(dx + 0.999f), int(dy + 0.999f), actual_color);
+				painter1.fillRect(int(dx * p.px), int(dy * (m_Height - p.py - 1)), int(dx + 0.999f), int(dy + 0.999f), m_ActualColor);
 			}
 		}
 	}
 }
 
-void ImageViewerWidget::bmp_changed() { update(); }
+void ImageViewerWidget::BmpChanged() { update(); }
 
-void ImageViewerWidget::slicenr_changed()
+void ImageViewerWidget::SlicenrChanged()
 {
-	activeslice = handler3D->active_slice();
-	bmphand_changed(handler3D->get_activebmphandler());
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	BmphandChanged(m_Handler3D->GetActivebmphandler());
 }
 
-void ImageViewerWidget::bmphand_changed(bmphandler* bmph)
+void ImageViewerWidget::BmphandChanged(Bmphandler* bmph)
 {
-	bmphand = bmph;
-	if (bmporwork)
-		bmpbits = bmph->return_bmpfield();
+	m_Bmphand = bmph;
+	if (m_Bmporwork)
+		m_Bmpbits = bmph->ReturnBmpfield();
 	else
-		bmpbits = bmph->return_workfield();
-	tissue = bmph->return_tissuefield(handler3D->active_tissuelayer());
-	marks = bmph->return_marks();
+		m_Bmpbits = bmph->ReturnWorkfield();
+	m_Tissue = bmph->ReturnTissuefield(m_Handler3D->ActiveTissuelayer());
+	m_Marks = bmph->ReturnMarks();
 
-	mode_changed(bmph->return_mode(bmporwork), false);
-	update_scaleoffsetfactor();
+	ModeChanged(bmph->ReturnMode(m_Bmporwork), false);
+	UpdateScaleoffsetfactor();
 
-	reload_bits();
-	if (workborder)
+	ReloadBits();
+	if (m_Workborder)
 	{
-		if (bmporwork)
+		if (m_Bmporwork)
 		{
-			workborder_changed();
+			WorkborderChanged();
 		}
 	}
 	else
@@ -250,19 +241,16 @@ void ImageViewerWidget::bmphand_changed(bmphandler* bmph)
 	}
 }
 
-void ImageViewerWidget::overlay_changed()
+void ImageViewerWidget::OverlayChanged()
 {
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void ImageViewerWidget::overlay_changed(QRect rect)
+void ImageViewerWidget::OverlayChanged(QRect rect)
 {
-	reload_bits();
-	repaint((int)(rect.left() * zoom * pixelsize.high),
-			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-			(int)ceil(rect.width() * zoom * pixelsize.high),
-			(int)ceil(rect.height() * zoom * pixelsize.low));
+	ReloadBits();
+	repaint((int)(rect.left() * m_Zoom * m_Pixelsize.high), (int)((m_Height - 1 - rect.bottom()) * m_Zoom * m_Pixelsize.low), (int)ceil(rect.width() * m_Zoom * m_Pixelsize.high), (int)ceil(rect.height() * m_Zoom * m_Pixelsize.low));
 }
 
 void ImageViewerWidget::update()
@@ -270,136 +258,131 @@ void ImageViewerWidget::update()
 	QRect rect;
 	rect.setLeft(0);
 	rect.setTop(0);
-	rect.setRight(width - 1);
-	rect.setBottom(height - 1);
+	rect.setRight(m_Width - 1);
+	rect.setBottom(m_Height - 1);
 	update(rect);
 }
 
 void ImageViewerWidget::update(QRect rect)
 {
-	bmphand = handler3D->get_activebmphandler();
-	overlaybits = handler3D->return_overlay();
-	mode_changed(bmphand->return_mode(bmporwork), false);
-	update_scaleoffsetfactor();
-	if (bmporwork)
-		bmpbits = bmphand->return_bmpfield();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	m_Overlaybits = m_Handler3D->ReturnOverlay();
+	ModeChanged(m_Bmphand->ReturnMode(m_Bmporwork), false);
+	UpdateScaleoffsetfactor();
+	if (m_Bmporwork)
+		m_Bmpbits = m_Bmphand->ReturnBmpfield();
 	else
-		bmpbits = bmphand->return_workfield();
-	tissue = bmphand->return_tissuefield(handler3D->active_tissuelayer());
-	marks = bmphand->return_marks();
+		m_Bmpbits = m_Bmphand->ReturnWorkfield();
+	m_Tissue = m_Bmphand->ReturnTissuefield(m_Handler3D->ActiveTissuelayer());
+	m_Marks = m_Bmphand->ReturnMarks();
 
-	if (bmphand->return_width() != width || bmphand->return_height() != height)
+	if (m_Bmphand->ReturnWidth() != m_Width || m_Bmphand->ReturnHeight() != m_Height)
 	{
-		vp.clear();
-		vp_old.clear();
-		vp1.clear();
-		vp1_old.clear();
-		vpdyn.clear();
-		vpdyn_old.clear();
-		vm.clear();
-		vm_old.clear();
-		width = bmphand->return_width();
-		height = bmphand->return_height();
-		image.create(int(width), int(height), 32);
-		image_decorated.create(int(width), int(height), 32);
-		setFixedSize((int)width * zoom * pixelsize.high,
-				(int)height * zoom * pixelsize.low);
+		m_Vp.clear();
+		m_VpOld.clear();
+		m_Vp1.clear();
+		m_Vp1Old.clear();
+		m_Vpdyn.clear();
+		m_VpdynOld.clear();
+		m_Vm.clear();
+		m_VmOld.clear();
+		m_Width = m_Bmphand->ReturnWidth();
+		m_Height = m_Bmphand->ReturnHeight();
+		m_Image.create(int(m_Width), int(m_Height), 32);
+		m_ImageDecorated.create(int(m_Width), int(m_Height), 32);
+		setFixedSize((int)m_Width * m_Zoom * m_Pixelsize.high, (int)m_Height * m_Zoom * m_Pixelsize.low);
 
-		if (bmporwork && workborder)
+		if (m_Bmporwork && m_Workborder)
 		{
-			reload_bits();
-			workborder_changed();
+			ReloadBits();
+			WorkborderChanged();
 			return;
 		}
 	}
 
-	reload_bits();
-	repaint((int)(rect.left() * zoom * pixelsize.high),
-			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-			(int)ceil(rect.width() * zoom * pixelsize.high),
-			(int)ceil(rect.height() * zoom * pixelsize.low));
+	ReloadBits();
+	repaint((int)(rect.left() * m_Zoom * m_Pixelsize.high), (int)((m_Height - 1 - rect.bottom()) * m_Zoom * m_Pixelsize.low), (int)ceil(rect.width() * m_Zoom * m_Pixelsize.high), (int)ceil(rect.height() * m_Zoom * m_Pixelsize.low));
 }
 
-void ImageViewerWidget::init(SlicesHandler* hand3D, bool bmporwork1)
+void ImageViewerWidget::Init(SlicesHandler* hand3D, bool bmporwork1)
 {
-	handler3D = hand3D;
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
-	overlaybits = handler3D->return_overlay();
-	bmporwork = bmporwork1;
-	if (bmporwork)
-		bmpbits = bmphand->return_bmpfield();
+	m_Handler3D = hand3D;
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	m_Overlaybits = m_Handler3D->ReturnOverlay();
+	m_Bmporwork = bmporwork1;
+	if (m_Bmporwork)
+		m_Bmpbits = m_Bmphand->ReturnBmpfield();
 	else
-		bmpbits = bmphand->return_workfield();
-	tissue = bmphand->return_tissuefield(hand3D->active_tissuelayer());
-	width = bmphand->return_width();
-	height = bmphand->return_height();
-	marks = bmphand->return_marks();
-	image.create(int(width), int(height), 32);
-	image_decorated.create(int(width), int(height), 32);
+		m_Bmpbits = m_Bmphand->ReturnWorkfield();
+	m_Tissue = m_Bmphand->ReturnTissuefield(hand3D->ActiveTissuelayer());
+	m_Width = m_Bmphand->ReturnWidth();
+	m_Height = m_Bmphand->ReturnHeight();
+	m_Marks = m_Bmphand->ReturnMarks();
+	m_Image.create(int(m_Width), int(m_Height), 32);
+	m_ImageDecorated.create(int(m_Width), int(m_Height), 32);
 
-	setFixedSize((int)width * zoom * pixelsize.high,
-			(int)height * zoom * pixelsize.low);
+	setFixedSize((int)m_Width * m_Zoom * m_Pixelsize.high, (int)m_Height * m_Zoom * m_Pixelsize.low);
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-	mode_changed(bmphand->return_mode(bmporwork), false);
-	update_range();
-	update_scaleoffsetfactor();
+	ModeChanged(m_Bmphand->ReturnMode(m_Bmporwork), false);
+	UpdateRange();
+	UpdateScaleoffsetfactor();
 
-	reload_bits();
-	if (workborder)
+	ReloadBits();
+	if (m_Workborder)
 	{
-		if (bmporwork)
-			workborder_changed();
+		if (m_Bmporwork)
+			WorkborderChanged();
 		else
 			repaint();
 	}
 	show();
 }
 
-void ImageViewerWidget::update_range()
+void ImageViewerWidget::UpdateRange()
 {
 	// Recompute ranges for all slices
-	if (bmporwork)
+	if (m_Bmporwork)
 	{
-		handler3D->compute_bmprange_mode1(&range_mode1);
+		m_Handler3D->ComputeBmprangeMode1(&m_RangeMode1);
 	}
 	else
 	{
-		handler3D->compute_range_mode1(&range_mode1);
+		m_Handler3D->ComputeRangeMode1(&m_RangeMode1);
 	}
 }
 
-void ImageViewerWidget::update_range(unsigned short slicenr)
+void ImageViewerWidget::UpdateRange(unsigned short slicenr)
 {
 	// Recompute range only for single slice
-	if (bmporwork)
+	if (m_Bmporwork)
 	{
-		handler3D->compute_bmprange_mode1(slicenr, &range_mode1);
+		m_Handler3D->ComputeBmprangeMode1(slicenr, &m_RangeMode1);
 	}
 	else
 	{
-		handler3D->compute_range_mode1(slicenr, &range_mode1);
+		m_Handler3D->ComputeRangeMode1(slicenr, &m_RangeMode1);
 	}
 }
 
-void ImageViewerWidget::reload_bits()
+void ImageViewerWidget::ReloadBits()
 {
-	auto color_lut = handler3D->GetColorLookupTable();
+	auto color_lut = m_Handler3D->GetColorLookupTable();
 
-	float* bmpbits1 = *bmpbits;
-	tissues_size_t* tissue1 = *tissue;
+	float* bmpbits1 = *m_Bmpbits;
+	tissues_size_t* tissue1 = *m_Tissue;
 	unsigned pos = 0;
 	int f;
 	unsigned char r, g, b;
 
-	for (int y = height - 1; y >= 0; y--)
+	for (int y = m_Height - 1; y >= 0; y--)
 	{
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < m_Width; x++)
 		{
-			if (picturevisible)
+			if (m_Picturevisible)
 			{
-				if (color_lut && bmporwork)
+				if (color_lut && m_Bmporwork)
 				{
 					// \todo not sure if we should allow to 'scale & offset & clamp' when a color lut is available
 					//f = max(0.0f, min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
@@ -407,17 +390,17 @@ void ImageViewerWidget::reload_bits()
 				}
 				else
 				{
-					r = g = b = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits1)[pos]));
+					r = g = b = (int)std::max(0.0f, std::min(255.0f, m_Scaleoffset + m_Scalefactor * (bmpbits1)[pos]));
 				}
 
 				// overlay only visible if picture is visible
-				if (overlayvisible)
+				if (m_Overlayvisible)
 				{
-					f = std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (overlaybits)[pos]));
+					f = std::max(0.0f, std::min(255.0f, m_Scaleoffset + m_Scalefactor * (m_Overlaybits)[pos]));
 
-					r = (1.0f - overlayalpha) * r + overlayalpha * f;
-					g = (1.0f - overlayalpha) * g + overlayalpha * f;
-					b = (1.0f - overlayalpha) * b + overlayalpha * f;
+					r = (1.0f - m_Overlayalpha) * r + m_Overlayalpha * f;
+					g = (1.0f - m_Overlayalpha) * g + m_Overlayalpha * f;
+					b = (1.0f - m_Overlayalpha) * b + m_Overlayalpha * f;
 				}
 			}
 			else
@@ -425,7 +408,7 @@ void ImageViewerWidget::reload_bits()
 				r = g = b = 0;
 			}
 
-			if (tissuevisible && tissue1[pos] != 0)
+			if (m_Tissuevisible && tissue1[pos] != 0)
 			{
 				// blend with tissue color
 				auto rgbo = TissueInfos::GetTissueColor(tissue1[pos]);
@@ -433,246 +416,243 @@ void ImageViewerWidget::reload_bits()
 				r = static_cast<unsigned char>(r + alpha * (255.0f * rgbo[0] - r));
 				g = static_cast<unsigned char>(g + alpha * (255.0f * rgbo[1] - g));
 				b = static_cast<unsigned char>(b + alpha * (255.0f * rgbo[2] - b));
-				image.setPixel(x, y, qRgb(r, g, b));
+				m_Image.setPixel(x, y, qRgb(r, g, b));
 			}
 			else // no tissue
 			{
-				image.setPixel(x, y, qRgb(r, g, b));
+				m_Image.setPixel(x, y, qRgb(r, g, b));
 			}
 			pos++;
 		}
 	}
 
 	// copy to decorated image
-	image_decorated = image;
+	m_ImageDecorated = m_Image;
 
 	// now decorate
-	QRgb color_used = actual_color.rgb();
-	QRgb color_dim = (actual_color.light(30)).rgb();
+	QRgb color_used = m_ActualColor.rgb();
+	QRgb color_dim = (m_ActualColor.light(30)).rgb();
 
-	if (workborder && bmporwork &&
-			((!workborderlimit) || (unsigned)vp.size() < unsigned(width) * height / 5))
+	if (m_Workborder && m_Bmporwork &&
+			((!m_Workborderlimit) || (unsigned)m_Vp.size() < unsigned(m_Width) * m_Height / 5))
 	{
-		for (auto& p : vp)
+		for (auto& p : m_Vp)
 		{
-			image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_dim);
+			m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_dim);
 		}
 	}
 
-	for (auto& p : vp1)
+	for (auto& p : m_Vp1)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_used);
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_used);
 	}
 
-	for (auto& m : vm)
+	for (auto& m : m_Vm)
 	{
 		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
+		m_ImageDecorated.setPixel(int(m.p.px), int(m_Height - m.p.py - 1), qRgb(r, g, b));
 	}
 
-	if (crosshairxvisible)
+	if (m_Crosshairxvisible)
 	{
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < m_Width; x++)
 		{
-			image_decorated.setPixel(x, height - 1 - crosshairxpos, qRgb(0, 255, 0));
-			image.setPixel(x, height - 1 - crosshairxpos, qRgb(0, 255, 0));
+			m_ImageDecorated.setPixel(x, m_Height - 1 - m_Crosshairxpos, qRgb(0, 255, 0));
+			m_Image.setPixel(x, m_Height - 1 - m_Crosshairxpos, qRgb(0, 255, 0));
 		}
 	}
 
-	if (crosshairyvisible)
+	if (m_Crosshairyvisible)
 	{
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < m_Height; y++)
 		{
-			image_decorated.setPixel(crosshairypos, y, qRgb(0, 255, 0));
-			image.setPixel(crosshairypos, y, qRgb(0, 255, 0));
+			m_ImageDecorated.setPixel(m_Crosshairypos, y, qRgb(0, 255, 0));
+			m_Image.setPixel(m_Crosshairypos, y, qRgb(0, 255, 0));
 		}
 	}
 }
 
-void ImageViewerWidget::tissue_changed()
+void ImageViewerWidget::TissueChanged()
 {
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void ImageViewerWidget::tissue_changed(QRect rect)
+void ImageViewerWidget::TissueChanged(QRect rect)
 {
-	reload_bits();
-	repaint((int)(rect.left() * zoom * pixelsize.high),
-			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-			(int)ceil(rect.width() * zoom * pixelsize.high),
-			(int)ceil(rect.height() * zoom * pixelsize.low));
+	ReloadBits();
+	repaint((int)(rect.left() * m_Zoom * m_Pixelsize.high), (int)((m_Height - 1 - rect.bottom()) * m_Zoom * m_Pixelsize.low), (int)ceil(rect.width() * m_Zoom * m_Pixelsize.high), (int)ceil(rect.height() * m_Zoom * m_Pixelsize.low));
 }
 
-void ImageViewerWidget::mark_changed()
+void ImageViewerWidget::MarkChanged()
 {
-	marks = bmphand->return_marks();
+	m_Marks = m_Bmphand->ReturnMarks();
 	repaint();
 }
 
-bool ImageViewerWidget::toggle_tissuevisible()
+bool ImageViewerWidget::ToggleTissuevisible()
 {
-	tissuevisible = !tissuevisible;
+	m_Tissuevisible = !m_Tissuevisible;
 	update();
-	return tissuevisible;
+	return m_Tissuevisible;
 }
 
-bool ImageViewerWidget::toggle_picturevisible()
+bool ImageViewerWidget::TogglePicturevisible()
 {
-	picturevisible = !picturevisible;
+	m_Picturevisible = !m_Picturevisible;
 	update();
-	return picturevisible;
+	return m_Picturevisible;
 }
 
-bool ImageViewerWidget::toggle_markvisible()
+bool ImageViewerWidget::ToggleMarkvisible()
 {
-	markvisible = !markvisible;
+	m_Markvisible = !m_Markvisible;
 	repaint();
-	return markvisible;
+	return m_Markvisible;
 }
 
-bool ImageViewerWidget::toggle_overlayvisible()
+bool ImageViewerWidget::ToggleOverlayvisible()
 {
-	overlayvisible = !overlayvisible;
+	m_Overlayvisible = !m_Overlayvisible;
 	update();
-	return overlayvisible;
+	return m_Overlayvisible;
 }
 
-void ImageViewerWidget::set_tissuevisible(bool on)
+void ImageViewerWidget::SetTissuevisible(bool on)
 {
-	tissuevisible = on;
-	update();
-}
-
-void ImageViewerWidget::set_picturevisible(bool on)
-{
-	picturevisible = on;
+	m_Tissuevisible = on;
 	update();
 }
 
-void ImageViewerWidget::set_markvisible(bool on)
+void ImageViewerWidget::SetPicturevisible(bool on)
 {
-	markvisible = on;
+	m_Picturevisible = on;
+	update();
+}
+
+void ImageViewerWidget::SetMarkvisible(bool on)
+{
+	m_Markvisible = on;
 	repaint();
 }
 
-void ImageViewerWidget::set_overlayvisible(bool on)
+void ImageViewerWidget::SetOverlayvisible(bool on)
 {
-	overlayvisible = on;
+	m_Overlayvisible = on;
 	update();
 }
 
-void ImageViewerWidget::set_overlayalpha(float alpha)
+void ImageViewerWidget::SetOverlayalpha(float alpha)
 {
-	overlayalpha = alpha;
+	m_Overlayalpha = alpha;
 	update();
 }
 
-void ImageViewerWidget::add_mark()
+void ImageViewerWidget::AddMark()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
 
-	emit addmark_sign(p);
+	emit AddmarkSign(p);
 }
 
-void ImageViewerWidget::add_label()
+void ImageViewerWidget::AddLabel()
 {
 	bool ok;
-	QString newText = QInputDialog::getText("Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok, this);
+	QString new_text = QInputDialog::getText("Label", "Enter a name for the label:", QLineEdit::Normal, "", &ok, this);
 	if (ok)
 	{
 		Point p;
-		p.px = (unsigned short)eventx;
-		p.py = (unsigned short)eventy;
-		emit addlabel_sign(p, newText.ascii());
+		p.px = (unsigned short)m_Eventx;
+		p.py = (unsigned short)m_Eventy;
+		emit AddlabelSign(p, new_text.ascii());
 	}
 }
 
-void ImageViewerWidget::clear_marks() { emit clearmarks_sign(); }
+void ImageViewerWidget::ClearMarks() { emit ClearmarksSign(); }
 
-void ImageViewerWidget::remove_mark()
+void ImageViewerWidget::RemoveMark()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit removemark_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit RemovemarkSign(p);
 }
 
-void ImageViewerWidget::add_tissue()
+void ImageViewerWidget::AddTissue()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit addtissue_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit AddtissueSign(p);
 }
 
-void ImageViewerWidget::add_tissue_connected()
+void ImageViewerWidget::AddTissueConnected()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit addtissueconnected_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit AddtissueconnectedSign(p);
 }
 
-void ImageViewerWidget::add_tissue_3D()
+void ImageViewerWidget::AddTissue3D()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit addtissue3D_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit Addtissue3DSign(p);
 }
 
-void ImageViewerWidget::sub_tissue()
+void ImageViewerWidget::SubTissue()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit subtissue_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit SubtissueSign(p);
 }
 
-void ImageViewerWidget::add_tissuelarger()
+void ImageViewerWidget::AddTissuelarger()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit addtissuelarger_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit AddtissuelargerSign(p);
 }
 
-void ImageViewerWidget::select_tissue()
+void ImageViewerWidget::SelectTissue()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit selecttissue_sign(p, true);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit SelecttissueSign(p, true);
 }
 
-void ImageViewerWidget::view_tissue_surface()
+void ImageViewerWidget::ViewTissueSurface()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit viewtissue_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit ViewtissueSign(p);
 }
-void ImageViewerWidget::view_target_surface()
+void ImageViewerWidget::ViewTargetSurface()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit viewtarget_sign(p);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit ViewtargetSign(p);
 }
 
-void ImageViewerWidget::next_target_slice()
+void ImageViewerWidget::NextTargetSlice()
 {
-	auto target_slices = handler3D->target_slices();
-	size_t slice_size = handler3D->width() * handler3D->height();
+	auto target_slices = m_Handler3D->TargetSlices();
+	size_t slice_size = m_Handler3D->Width() * m_Handler3D->Height();
 
 	// find next slice
 	int slice = -1;
 	auto non_zero = [](float v) { return v != 0.f; };
 
-	for (int s = handler3D->active_slice() + 1; s < handler3D->num_slices(); ++s)
+	for (int s = m_Handler3D->ActiveSlice() + 1; s < m_Handler3D->NumSlices(); ++s)
 	{
 		auto data = target_slices.at(s);
 		if (std::any_of(data, data + slice_size, non_zero))
@@ -684,7 +664,7 @@ void ImageViewerWidget::next_target_slice()
 
 	if (slice == -1)
 	{
-		for (int s = 0; s <= handler3D->active_slice(); ++s)
+		for (int s = 0; s <= m_Handler3D->ActiveSlice(); ++s)
 		{
 			auto data = target_slices.at(s);
 			if (std::any_of(data, data + slice_size, non_zero))
@@ -701,110 +681,110 @@ void ImageViewerWidget::next_target_slice()
 	}
 	else
 	{
-		handler3D->set_active_slice(slice, true);
+		m_Handler3D->SetActiveSlice(slice, true);
 	}
 }
 
-void ImageViewerWidget::add_to_selected_tissues()
+void ImageViewerWidget::AddToSelectedTissues()
 {
 	Point p;
-	p.px = (unsigned short)eventx;
-	p.py = (unsigned short)eventy;
-	emit selecttissue_sign(p, false);
+	p.px = (unsigned short)m_Eventx;
+	p.py = (unsigned short)m_Eventy;
+	emit SelecttissueSign(p, false);
 }
 
-void ImageViewerWidget::zoom_in() { set_zoom(2 * zoom); }
+void ImageViewerWidget::ZoomIn() { SetZoom(2 * m_Zoom); }
 
-void ImageViewerWidget::zoom_out() { set_zoom(0.5 * zoom); }
+void ImageViewerWidget::ZoomOut() { SetZoom(0.5 * m_Zoom); }
 
-void ImageViewerWidget::unzoom() { set_zoom(1.0); }
+void ImageViewerWidget::Unzoom() { SetZoom(1.0); }
 
-double ImageViewerWidget::return_zoom() { return zoom; }
+double ImageViewerWidget::ReturnZoom() const { return m_Zoom; }
 
 void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-	eventx = (int)std::max(std::min(width - 1.0, (event->x() / (zoom * pixelsize.high))), 0.0);
-	eventy = (int)std::max(std::min(height - 1.0, height - 1 - (event->y() / (zoom * pixelsize.low))), 0.0);
+	m_Eventx = (int)std::max(std::min(m_Width - 1.0, (event->x() / (m_Zoom * m_Pixelsize.high))), 0.0);
+	m_Eventy = (int)std::max(std::min(m_Height - 1.0, m_Height - 1 - (event->y() / (m_Zoom * m_Pixelsize.low))), 0.0);
 
-	QMenu contextMenu(this);
+	QMenu context_menu(this);
 	// tissue selection
 	if (event->modifiers() == Qt::ControlModifier)
 	{
-		contextMenu.addAction(addtoselection);
+		context_menu.addAction(m_Addtoselection);
 	}
 	else
 	{
-		contextMenu.addAction(selecttissue);
+		context_menu.addAction(m_Selecttissue);
 	}
 
 	// surface view
-	if (bmporwork)
+	if (m_Bmporwork)
 	{
-		contextMenu.addAction(viewtissue);
+		context_menu.addAction(m_Viewtissue);
 	}
 	else
 	{
-		contextMenu.addAction(viewtarget);
-		contextMenu.addAction(nexttargetslice);
+		context_menu.addAction(m_Viewtarget);
+		context_menu.addAction(m_Nexttargetslice);
 
 		// add to tissue
-		contextMenu.insertSeparator();
-		contextMenu.addAction(addtissue);
-		contextMenu.addAction(subtissue);
-		contextMenu.addAction(addtissue3D);
-		contextMenu.addAction(addtissueconnected);
-		contextMenu.addAction(addtissuelarger);
+		context_menu.insertSeparator();
+		context_menu.addAction(m_Addtissue);
+		context_menu.addAction(m_Subtissue);
+		context_menu.addAction(m_Addtissue3D);
+		context_menu.addAction(m_Addtissueconnected);
+		context_menu.addAction(m_Addtissuelarger);
 	}
 
 	// marks
-	contextMenu.insertSeparator();
-	contextMenu.addAction(addmark);
-	contextMenu.addAction(addlabel);
-	contextMenu.addAction(removemark);
-	contextMenu.addAction(clearmarks);
+	context_menu.insertSeparator();
+	context_menu.addAction(m_Addmark);
+	context_menu.addAction(m_Addlabel);
+	context_menu.addAction(m_Removemark);
+	context_menu.addAction(m_Clearmarks);
 
-	contextMenu.exec(event->globalPos());
+	context_menu.exec(event->globalPos());
 }
 
-void ImageViewerWidget::set_brightnesscontrast(float bright, float contr, bool paint)
+void ImageViewerWidget::SetBrightnesscontrast(float bright, float contr, bool paint)
 {
-	brightness = bright;
-	contrast = contr;
-	update_scaleoffsetfactor();
+	m_Brightness = bright;
+	m_Contrast = contr;
+	UpdateScaleoffsetfactor();
 	if (paint)
 	{
-		reload_bits();
+		ReloadBits();
 		repaint();
 	}
 }
 
-void ImageViewerWidget::update_scaleoffsetfactor()
+void ImageViewerWidget::UpdateScaleoffsetfactor()
 {
-	bmphandler* bmphand = handler3D->get_activebmphandler();
-	if (bmporwork && handler3D->GetColorLookupTable())
+	Bmphandler* bmphand = m_Handler3D->GetActivebmphandler();
+	if (m_Bmporwork && m_Handler3D->GetColorLookupTable())
 	{
 		// Disable scaling/offset for color mapped images, since it would break the lookup table
-		scalefactor = 1.0f;
-		scaleoffset = 0.0f;
+		m_Scalefactor = 1.0f;
+		m_Scaleoffset = 0.0f;
 	}
-	else if (bmphand->return_mode(bmporwork) == eScaleMode::kFixedRange)
+	else if (bmphand->ReturnMode(m_Bmporwork) == eScaleMode::kFixedRange)
 	{
 		// Mode 2 assumes the range [0, 255]
-		scalefactor = contrast;
-		scaleoffset = (127.5f - 255 * scalefactor) * (1.0f - brightness) + 127.5f * brightness;
+		m_Scalefactor = m_Contrast;
+		m_Scaleoffset = (127.5f - 255 * m_Scalefactor) * (1.0f - m_Brightness) + 127.5f * m_Brightness;
 	}
-	else if (bmphand->return_mode(bmporwork) == eScaleMode::kArbitraryRange)
+	else if (bmphand->ReturnMode(m_Bmporwork) == eScaleMode::kArbitraryRange)
 	{
 		// Mode 1 assumes an arbitrary range --> scale to range [0, 255]
-		auto r = range_mode1;
+		auto r = m_RangeMode1;
 		if (r.high == r.low)
 		{
 			r.high = r.low + 1.f;
 		}
-		scalefactor = 255.0f * contrast / (r.high - r.low);
-		scaleoffset = (127.5f - r.high * scalefactor) * (1.0f - brightness) + (127.5f - r.low * scalefactor) * brightness;
+		m_Scalefactor = 255.0f * m_Contrast / (r.high - r.low);
+		m_Scaleoffset = (127.5f - r.high * m_Scalefactor) * (1.0f - m_Brightness) + (127.5f - r.low * m_Scalefactor) * m_Brightness;
 	}
-	emit scaleoffsetfactor_changed(scaleoffset, scalefactor, bmporwork);
+	emit ScaleoffsetfactorChanged(m_Scaleoffset, m_Scalefactor, m_Bmporwork);
 }
 
 void ImageViewerWidget::mousePressEvent(QMouseEvent* e)
@@ -812,16 +792,16 @@ void ImageViewerWidget::mousePressEvent(QMouseEvent* e)
 	Point p;
 	//	p.px=(unsigned short)(e->x()/(zoom*pixelsize.high));
 	//	p.py=(unsigned short)height-1-(e->y()/(zoom*pixelsize.low));
-	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+	p.px = (unsigned short)std::max(std::min(m_Width - 1.0, (e->x() / (m_Zoom * m_Pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(m_Height - 1.0, m_Height - ((e->y() + 1) / (m_Zoom * m_Pixelsize.low))), 0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
-		emit mousepressed_sign(p);
+		emit MousepressedSign(p);
 	}
 	else if (e->button() == Qt::MidButton)
 	{
-		emit mousepressedmid_sign(p);
+		emit MousepressedmidSign(p);
 	}
 }
 
@@ -830,36 +810,36 @@ void ImageViewerWidget::mouseReleaseEvent(QMouseEvent* e)
 	if (e->button() == Qt::LeftButton)
 	{
 		Point p;
-		p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-		p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+		p.px = (unsigned short)std::max(std::min(m_Width - 1.0, (e->x() / (m_Zoom * m_Pixelsize.high))), 0.0);
+		p.py = (unsigned short)std::max(std::min(m_Height - 1.0, m_Height - ((e->y() + 1) / (m_Zoom * m_Pixelsize.low))), 0.0);
 
-		emit mousereleased_sign(p);
+		emit MousereleasedSign(p);
 	}
 }
 
 void ImageViewerWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+	p.px = (unsigned short)std::max(std::min(m_Width - 1.0, (e->x() / (m_Zoom * m_Pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(m_Height - 1.0, m_Height - ((e->y() + 1) / (m_Zoom * m_Pixelsize.low))), 0.0);
 
 	if (e->button() == Qt::LeftButton)
 	{
-		emit mousedoubleclick_sign(p);
+		emit MousedoubleclickSign(p);
 	}
 	else if (e->button() == Qt::MidButton)
 	{
-		emit mousedoubleclickmid_sign(p);
+		emit MousedoubleclickmidSign(p);
 	}
 }
 
 void ImageViewerWidget::mouseMoveEvent(QMouseEvent* e)
 {
 	Point p;
-	p.px = (unsigned short)std::max(std::min(width - 1.0, (e->x() / (zoom * pixelsize.high))), 0.0);
-	p.py = (unsigned short)std::max(std::min(height - 1.0, height - ((e->y() + 1) / (zoom * pixelsize.low))), 0.0);
+	p.px = (unsigned short)std::max(std::min(m_Width - 1.0, (e->x() / (m_Zoom * m_Pixelsize.high))), 0.0);
+	p.py = (unsigned short)std::max(std::min(m_Height - 1.0, m_Height - ((e->y() + 1) / (m_Zoom * m_Pixelsize.low))), 0.0);
 
-	emit mousemoved_sign(p);
+	emit MousemovedSign(p);
 }
 
 void ImageViewerWidget::wheelEvent(QWheelEvent* e)
@@ -868,9 +848,9 @@ void ImageViewerWidget::wheelEvent(QWheelEvent* e)
 
 	if (e->state() & Qt::ControlModifier)
 	{
-		mousePosZoom = e->pos();
-		emit mousePosZoom_sign(mousePosZoom);
-		emit wheelrotatedctrl_sign(delta);
+		m_MousePosZoom = e->pos();
+		emit MousePosZoomSign(m_MousePosZoom);
+		emit WheelrotatedctrlSign(delta);
 	}
 	else
 	{
@@ -878,324 +858,313 @@ void ImageViewerWidget::wheelEvent(QWheelEvent* e)
 	}
 }
 
-void ImageViewerWidget::recompute_workborder()
+void ImageViewerWidget::RecomputeWorkborder()
 {
-	bmphand = handler3D->get_activebmphandler();
-	vp = extract_boundary(bmphand->return_work(), width, height, Point());
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	m_Vp = extract_boundary(m_Bmphand->ReturnWork(), m_Width, m_Height, Point());
 }
 
-void ImageViewerWidget::workborder_changed()
+void ImageViewerWidget::WorkborderChanged()
 {
-	if (workborder)
+	if (m_Workborder)
 	{
-		recompute_workborder();
-		vp_changed();
+		RecomputeWorkborder();
+		VpChanged();
 	}
 }
 
-void ImageViewerWidget::workborder_changed(QRect rect)
+void ImageViewerWidget::WorkborderChanged(QRect rect)
 {
-	if (workborder)
+	if (m_Workborder)
 	{
-		recompute_workborder();
-		vp_changed(rect);
+		RecomputeWorkborder();
+		VpChanged(rect);
 	}
 }
 
-void ImageViewerWidget::vp_to_image_decorator()
+void ImageViewerWidget::VpToImageDecorator()
 {
-	if ((!workborderlimit) || ((unsigned)vp_old.size() < unsigned(width) * height / 5))
+	if ((!m_Workborderlimit) || ((unsigned)m_VpOld.size() < unsigned(m_Width) * m_Height / 5))
 	{
-		for (auto& p : vp_old)
+		for (auto& p : m_VpOld)
 		{
-			image_decorated.setPixel(int(p.px), int(height - p.py - 1),
-					image.pixel(int(p.px), int(height - p.py - 1)));
+			m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), m_Image.pixel(int(p.px), int(m_Height - p.py - 1)));
 		}
 	}
 
-	QRgb color_used = outline_color.rgb();
-	QRgb color_dim = (outline_color.light(30)).rgb();
-	if ((!workborderlimit) || ((unsigned)vp.size() < unsigned(width) * height / 5))
+	QRgb color_used = m_OutlineColor.rgb();
+	QRgb color_dim = (m_OutlineColor.light(30)).rgb();
+	if ((!m_Workborderlimit) || ((unsigned)m_Vp.size() < unsigned(m_Width) * m_Height / 5))
 	{
-		for (auto& p : vp)
+		for (auto& p : m_Vp)
 		{
-			image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_dim);
+			m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_dim);
 		}
 	}
 
-	for (auto& p : vp1_old)
+	for (auto& p : m_Vp1Old)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1),
-				image.pixel(int(p.px), int(height - p.py - 1)));
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), m_Image.pixel(int(p.px), int(m_Height - p.py - 1)));
 	}
 
-	for (auto& p : vp1)
+	for (auto& p : m_Vp1)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_used);
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_used);
 	}
 
-	for (auto& m : vm_old)
+	for (auto& m : m_VmOld)
 	{
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1),
-				image.pixel(int(m.p.px), int(height - m.p.py - 1)));
+		m_ImageDecorated.setPixel(int(m.p.px), int(m_Height - m.p.py - 1), m_Image.pixel(int(m.p.px), int(m_Height - m.p.py - 1)));
 	}
 
 	unsigned char r, g, b;
-	for (auto& m : vm)
+	for (auto& m : m_Vm)
 	{
 		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
+		m_ImageDecorated.setPixel(int(m.p.px), int(m_Height - m.p.py - 1), qRgb(r, g, b));
 	}
 }
 
-void ImageViewerWidget::vp_changed()
+void ImageViewerWidget::VpChanged()
 {
-	vp_to_image_decorator();
+	VpToImageDecorator();
 
 	repaint();
 
-	vp_old = vp;
-	vp1_old = vp1;
-	vm_old = vm;
+	m_VpOld = m_Vp;
+	m_Vp1Old = m_Vp1;
+	m_VmOld = m_Vm;
 }
 
-void ImageViewerWidget::vp_changed(QRect rect)
+void ImageViewerWidget::VpChanged(QRect rect)
 {
-	vp_to_image_decorator();
+	VpToImageDecorator();
 
 	if (rect.left() > 0)
 		rect.setLeft(rect.left() - 1);
 	if (rect.top() > 0)
 		rect.setTop(rect.top() - 1);
-	if (rect.right() + 1 < width)
+	if (rect.right() + 1 < m_Width)
 		rect.setRight(rect.right() + 1);
-	if (rect.bottom() + 1 < height)
+	if (rect.bottom() + 1 < m_Height)
 		rect.setBottom(rect.bottom() + 1);
-	repaint((int)(rect.left() * zoom * pixelsize.high),
-			(int)((height - 1 - rect.bottom()) * zoom * pixelsize.low),
-			(int)ceil(rect.width() * zoom * pixelsize.high),
-			(int)ceil(rect.height() * zoom * pixelsize.low));
+	repaint((int)(rect.left() * m_Zoom * m_Pixelsize.high), (int)((m_Height - 1 - rect.bottom()) * m_Zoom * m_Pixelsize.low), (int)ceil(rect.width() * m_Zoom * m_Pixelsize.high), (int)ceil(rect.height() * m_Zoom * m_Pixelsize.low));
 
-	vp_old = vp;
-	vp1_old = vp1;
-	vm_old = vm;
+	m_VpOld = m_Vp;
+	m_Vp1Old = m_Vp1;
+	m_VmOld = m_Vm;
 }
 
-void ImageViewerWidget::vp1dyn_changed()
+void ImageViewerWidget::Vp1dynChanged()
 {
-	if ((!workborderlimit) || ((unsigned)vp_old.size() < unsigned(width) * height / 5))
+	if ((!m_Workborderlimit) || ((unsigned)m_VpOld.size() < unsigned(m_Width) * m_Height / 5))
 	{
-		for (auto& p : vp_old)
+		for (auto& p : m_VpOld)
 		{
-			image_decorated.setPixel(int(p.px), int(height - p.py - 1),
-					image.pixel(int(p.px), int(height - p.py - 1)));
+			m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), m_Image.pixel(int(p.px), int(m_Height - p.py - 1)));
 		}
 	}
 
-	QRgb color_used = actual_color.rgb();
-	QRgb color_dim = (actual_color.light(30)).rgb();
-	QRgb color_highlight = (actual_color.lighter(60)).rgb();
-	if ((!workborderlimit) || ((unsigned)vp.size() < unsigned(width) * height / 5))
+	QRgb color_used = m_ActualColor.rgb();
+	QRgb color_dim = (m_ActualColor.light(30)).rgb();
+	QRgb color_highlight = (m_ActualColor.lighter(60)).rgb();
+	if ((!m_Workborderlimit) || ((unsigned)m_Vp.size() < unsigned(m_Width) * m_Height / 5))
 	{
-		for (auto& p : vp)
+		for (auto& p : m_Vp)
 		{
-			image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_dim);
+			m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_dim);
 		}
 	}
 
-	for (auto& p : vp1_old)
+	for (auto& p : m_Vp1Old)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1),
-				image.pixel(int(p.px), int(height - p.py - 1)));
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), m_Image.pixel(int(p.px), int(m_Height - p.py - 1)));
 	}
 
-	for (auto& p : vp1)
+	for (auto& p : m_Vp1)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_used);
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_used);
 	}
 
-	for (auto& p : limit_points)
+	for (auto& p : m_LimitPoints)
 	{
-		image_decorated.setPixel(int(p.px), int(height - p.py - 1), color_highlight);
+		m_ImageDecorated.setPixel(int(p.px), int(m_Height - p.py - 1), color_highlight);
 	}
 
-	for (auto& m : vm_old)
+	for (auto& m : m_VmOld)
 	{
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1),
-				image.pixel(int(m.p.px), int(height - m.p.py - 1)));
+		m_ImageDecorated.setPixel(int(m.p.px), int(m_Height - m.p.py - 1), m_Image.pixel(int(m.p.px), int(m_Height - m.p.py - 1)));
 	}
 
 	unsigned char r, g, b;
-	for (auto& m : vm)
+	for (auto& m : m_Vm)
 	{
 		std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(m.mark);
-		image_decorated.setPixel(int(m.p.px), int(height - m.p.py - 1), qRgb(r, g, b));
+		m_ImageDecorated.setPixel(int(m.p.px), int(m_Height - m.p.py - 1), qRgb(r, g, b));
 	}
 
 	repaint();
 
-	vpdyn_old = vpdyn;
-	vp_old = vp;
-	vp1_old = vp1;
-	vm_old = vm;
+	m_VpdynOld = m_Vpdyn;
+	m_VpOld = m_Vp;
+	m_Vp1Old = m_Vp1;
+	m_VmOld = m_Vm;
 }
 
-void ImageViewerWidget::vpdyn_changed()
+void ImageViewerWidget::VpdynChanged()
 {
 	repaint();
 }
 
-void ImageViewerWidget::set_workbordervisible(bool on)
+void ImageViewerWidget::SetWorkbordervisible(bool on)
 {
 	if (on)
 	{
-		if (bmporwork && !workborder)
+		if (m_Bmporwork && !m_Workborder)
 		{
-			workborder = true;
-			workborder_changed();
+			m_Workborder = true;
+			WorkborderChanged();
 		}
 	}
 	else
 	{
-		if (workborder && bmporwork)
+		if (m_Workborder && m_Bmporwork)
 		{
-			vp.clear();
-			workborder = false;
-			reload_bits();
+			m_Vp.clear();
+			m_Workborder = false;
+			ReloadBits();
 			repaint();
 		}
 	}
 }
 
-void ImageViewerWidget::set_outline_color(const QColor& c)
+void ImageViewerWidget::SetOutlineColor(const QColor& c)
 {
-	if (outline_color != c)
+	if (m_OutlineColor != c)
 	{
-		outline_color = c;
+		m_OutlineColor = c;
 
 		// this will trigger a repaint with the new color
-		vp_changed();
+		VpChanged();
 	}
 }
 
-bool ImageViewerWidget::toggle_workbordervisible()
+bool ImageViewerWidget::ToggleWorkbordervisible()
 {
-	if (workborder)
+	if (m_Workborder)
 	{
-		if (bmporwork)
+		if (m_Bmporwork)
 		{
-			vp.clear();
-			workborder = false;
-			reload_bits();
+			m_Vp.clear();
+			m_Workborder = false;
+			ReloadBits();
 			repaint();
 		}
 	}
 	else
 	{
-		if (bmporwork)
+		if (m_Bmporwork)
 		{
-			workborder = true;
-			workborder_changed();
+			m_Workborder = true;
+			WorkborderChanged();
 		}
 	}
 
-	return workborder;
+	return m_Workborder;
 }
 
-bool ImageViewerWidget::return_workbordervisible() { return workborder; }
+bool ImageViewerWidget::ReturnWorkbordervisible() const { return m_Workborder; }
 
-void ImageViewerWidget::set_vp1(std::vector<Point>* vp1_arg)
+void ImageViewerWidget::SetVp1(std::vector<Point>* vp1_arg)
 {
-	vp1.clear();
-	vp1.insert(vp1.begin(), vp1_arg->begin(), vp1_arg->end());
-	vp_changed();
+	m_Vp1.clear();
+	m_Vp1.insert(m_Vp1.begin(), vp1_arg->begin(), vp1_arg->end());
+	VpChanged();
 }
 
-void ImageViewerWidget::set_vm(std::vector<Mark>* vm_arg)
+void ImageViewerWidget::SetVm(std::vector<Mark>* vm_arg)
 {
-	vm.clear();
-	vm.insert(vm.begin(), vm_arg->begin(), vm_arg->end());
-	vp_changed();
+	m_Vm.clear();
+	m_Vm.insert(m_Vm.begin(), vm_arg->begin(), vm_arg->end());
+	VpChanged();
 }
 
-void ImageViewerWidget::set_vpdyn(std::vector<Point>* vpdyn_arg)
+void ImageViewerWidget::SetVpdyn(std::vector<Point>* vpdyn_arg)
 {
-	vpdyn.clear();
-	vpdyn.insert(vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
-	vpdyn_changed();
+	m_Vpdyn.clear();
+	m_Vpdyn.insert(m_Vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
+	VpdynChanged();
 }
 
-void ImageViewerWidget::set_vp1_dyn(std::vector<Point>* vp1_arg,
-		std::vector<Point>* vpdyn_arg,
-		const bool also_points /*= false*/)
+void ImageViewerWidget::SetVp1Dyn(std::vector<Point>* vp1_arg, std::vector<Point>* vpdyn_arg, bool also_points)
 {
-	vp1.clear();
-	vp1.insert(vp1.begin(), vp1_arg->begin(), vp1_arg->end());
-	vpdyn.clear();
-	vpdyn.insert(vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
-	limit_points.clear();
-	if (also_points && vp1.size() > 1)
+	m_Vp1.clear();
+	m_Vp1.insert(m_Vp1.begin(), vp1_arg->begin(), vp1_arg->end());
+	m_Vpdyn.clear();
+	m_Vpdyn.insert(m_Vpdyn.begin(), vpdyn_arg->begin(), vpdyn_arg->end());
+	m_LimitPoints.clear();
+	if (also_points && m_Vp1.size() > 1)
 	{
-		limit_points.push_back(vp1.front());
-		limit_points.push_back(vp1.back());
+		m_LimitPoints.push_back(m_Vp1.front());
+		m_LimitPoints.push_back(m_Vp1.back());
 	}
-	vp1dyn_changed();
+	Vp1dynChanged();
 }
 
-void ImageViewerWidget::color_changed(int tissue)
+void ImageViewerWidget::ColorChanged(int tissue)
 {
 	unsigned char r, g, b;
 	std::tie(r, g, b) = TissueInfos::GetTissueColorMapped(tissue + 1);
-	actual_color.setRgb(r, g, b);
-	vp_changed();
+	m_ActualColor.setRgb(r, g, b);
+	VpChanged();
 }
 
-void ImageViewerWidget::crosshairx_changed(int i)
+void ImageViewerWidget::CrosshairxChanged(int i)
 {
-	if (i < height)
+	if (i < m_Height)
 	{
-		crosshairxpos = i;
+		m_Crosshairxpos = i;
 
-		if (crosshairxvisible)
+		if (m_Crosshairxvisible)
 		{
-			reload_bits();
+			ReloadBits();
 			repaint();
 		}
 	}
 }
 
-void ImageViewerWidget::crosshairy_changed(int i)
+void ImageViewerWidget::CrosshairyChanged(int i)
 {
-	if (i < width)
+	if (i < m_Width)
 	{
-		crosshairypos = i;
+		m_Crosshairypos = i;
 
-		if (crosshairyvisible)
+		if (m_Crosshairyvisible)
 		{
-			reload_bits();
+			ReloadBits();
 			repaint();
 		}
 	}
 }
 
-void ImageViewerWidget::set_crosshairxvisible(bool on)
+void ImageViewerWidget::SetCrosshairxvisible(bool on)
 {
-	if (crosshairxvisible != on)
+	if (m_Crosshairxvisible != on)
 	{
-		crosshairxvisible = on;
-		reload_bits();
+		m_Crosshairxvisible = on;
+		ReloadBits();
 		repaint();
 	}
 }
 
-void ImageViewerWidget::set_crosshairyvisible(bool on)
+void ImageViewerWidget::SetCrosshairyvisible(bool on)
 {
-	if (crosshairyvisible != on)
+	if (m_Crosshairyvisible != on)
 	{
-		crosshairyvisible = on;
-		reload_bits();
+		m_Crosshairyvisible = on;
+		ReloadBits();
 		repaint();
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

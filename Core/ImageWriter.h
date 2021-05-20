@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -40,19 +40,17 @@ public:
 		kAllSlices = 2
 	};
 
-	ISEG_CORE_API bool writeVolume(const std::string& filename, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection);
+	ISEG_CORE_API bool WriteVolume(const std::string& filename, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection);
 
 	template<typename T>
-	bool writeVolume(const std::string& filename, const std::vector<T*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
+	bool WriteVolume(const std::string& filename, const std::vector<T*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
 
 private:
 	bool m_Binary;
 };
 
-iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<float>(
-		const std::string& filename, const std::vector<float*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
+iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::WriteVolume<float>(const std::string& filename, const std::vector<float*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
 
-iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::writeVolume<tissues_size_t>(
-		const std::string& filename, const std::vector<tissues_size_t*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
+iSegCore_TEMPLATE template ISEG_CORE_API bool ImageWriter::WriteVolume<tissues_size_t>(const std::string& filename, const std::vector<tissues_size_t*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler);
 
 } // namespace iseg

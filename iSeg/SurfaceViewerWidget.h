@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -53,68 +53,66 @@ public:
 	enum eInputType { kSource,
 		kTarget,
 		kSelectedTissues };
-	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type,
-			QWidget* parent = 0, const char* name = 0,
-			Qt::WindowFlags wFlags = 0);
-	virtual ~SurfaceViewerWidget();
+	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~SurfaceViewerWidget() override;
 
-	static bool isOpenGLSupported();
+	static bool IsOpenGlSupported();
 
 protected:
-	void load();
-	void build_lookuptable();
-	int get_picked_tissue() const;
+	void Load();
+	void BuildLookuptable();
+	int GetPickedTissue() const;
 	void closeEvent(QCloseEvent*) override;
 	//void resizeEvent(QResizeEvent*) override;
 
 public slots:
-	void tissue_changed();
-	void pixelsize_changed(Pair p);
-	void thickness_changed(float thick);
-	void reload();
-	void split_surface();
+	void TissueChanged();
+	void PixelsizeChanged(Pair p);
+	void ThicknessChanged(float thick);
+	void Reload();
+	void SplitSurface();
 
 protected slots:
-	void transp_changed();
-	void thresh_changed();
-	void reduction_changed();
-	void popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command);
-	void select_action(QAction*);
+	void TranspChanged();
+	void ThreshChanged();
+	void ReductionChanged();
+	void Popup(vtkObject* obj, unsigned long, void* client_data, void*, vtkCommand* command);
+	void SelectAction(QAction*);
 
 signals:
-	void hasbeenclosed();
-	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
-	void end_datachange(QWidget* sender = nullptr, iseg::EndUndoAction undoAction = iseg::EndUndo);
+	void Hasbeenclosed();
+	void BeginDatachange(DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
+	void EndDatachange(QWidget* sender = nullptr, eEndUndoAction undoAction = iseg::EndUndo);
 
 private:
-	eInputType input_type;
-	SlicesHandler* hand3D;
+	eInputType m_InputType;
+	SlicesHandler* m_Hand3D;
 
-	QVTKWidget* vtkWidget;
-	QSlider* sl_trans;
-	QSlider* sl_thresh;
-	QLineEdit* reduction;
-	QPushButton* bt_update;
-	QPushButton* bt_connectivity;
-	QLabel* lb_connectivity_count;
+	QVTKWidget* m_VtkWidget;
+	QSlider* m_SlTrans;
+	QSlider* m_SlThresh;
+	QLineEdit* m_Reduction;
+	QPushButton* m_BtUpdate;
+	QPushButton* m_BtConnectivity;
+	QLabel* m_LbConnectivityCount;
 
-	vtkSmartPointer<QVTKInteractor> iren;
-	vtkSmartPointer<vtkEventQtSlotConnect> connections;
-	vtkSmartPointer<vtkPropPicker> picker;
-	vtkSmartPointer<vtkImageData> input;
-	vtkSmartPointer<vtkRenderer> ren3D;
-	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style;
-	vtkSmartPointer<vtkDiscreteFlyingEdges3D> discreteCubes;
-	vtkSmartPointer<vtkFlyingEdges3D> cubes;
-	vtkSmartPointer<vtkDecimatePro> decimate;
-	vtkSmartPointer<vtkPolyDataMapper> mapper;
-	vtkSmartPointer<vtkActor> actor;
-	vtkSmartPointer<vtkLookupTable> lut;
+	vtkSmartPointer<QVTKInteractor> m_Iren;
+	vtkSmartPointer<vtkEventQtSlotConnect> m_Connections;
+	vtkSmartPointer<vtkPropPicker> m_Picker;
+	vtkSmartPointer<vtkImageData> m_Input;
+	vtkSmartPointer<vtkRenderer> m_Ren3D;
+	vtkSmartPointer<vtkInteractorStyleTrackballCamera> m_Style;
+	vtkSmartPointer<vtkDiscreteFlyingEdges3D> m_DiscreteCubes;
+	vtkSmartPointer<vtkFlyingEdges3D> m_Cubes;
+	vtkSmartPointer<vtkDecimatePro> m_Decimate;
+	vtkSmartPointer<vtkPolyDataMapper> m_Mapper;
+	vtkSmartPointer<vtkActor> m_Actor;
+	vtkSmartPointer<vtkLookupTable> m_Lut;
 
-	double range[2];
-	std::map<int, tissues_size_t> index_tissue_map;
-	unsigned int startLabel;
-	unsigned int endLabel;
+	double m_Range[2];
+	std::map<int, tissues_size_t> m_IndexTissueMap;
+	unsigned int m_StartLabel;
+	unsigned int m_EndLabel;
 };
 
 } // namespace iseg

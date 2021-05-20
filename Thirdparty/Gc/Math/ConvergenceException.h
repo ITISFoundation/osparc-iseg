@@ -30,35 +30,33 @@
 
 #include "../System/Exception.h"
 
-namespace Gc
+namespace Gc {
+namespace Math {
+/** Numerical algorithm convergence failure exception. */
+class ConvergenceException
+    : public System::Exception
 {
-    namespace Math
-    {
-        /** Numerical algorithm convergence failure exception. */
-        class ConvergenceException 
-            : public System::Exception
-        {
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            ConvergenceException(const char *func, Int32 line)
-                : System::Exception(func, line, "Convergence error.")
-            {}
+    ConvergenceException(const char * func, Int32 line)
+        : System::Exception(func, line, "Convergence error.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            ConvergenceException(const char *func, Int32 line, const std::string &msg)
-                : System::Exception(func, line, msg)
-            {}
-        };
-    }
+    ConvergenceException(const char * func, Int32 line, const std::string & msg)
+        : System::Exception(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::Math
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,9 +9,9 @@
  */
 #pragma once
 
-#include "iSegData.h"
-#include "SlicesHandlerInterface.h"
 #include "ImageToITK.h"
+#include "SlicesHandlerInterface.h"
+#include "iSegData.h"
 
 namespace iseg {
 
@@ -24,7 +24,7 @@ public:
 	using image_ref_type = itk::SliceContiguousImage<pixel_type>;
 	using tissues_ref_type = itk::SliceContiguousImage<tissue_type>;
 
-	SlicesHandlerITKInterface(SlicesHandlerInterface* sh) : _handler(sh) {}
+	SlicesHandlerITKInterface(SlicesHandlerInterface* sh) : m_Handler(sh) {}
 
 	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(bool active_slices);
 	itk::SliceContiguousImage<pixel_type>::Pointer GetSource(size_t start_slice, size_t end_slice);
@@ -50,7 +50,7 @@ public:
 	itk::Image<tissue_type, 3>::Pointer GetTissuesDeprecated(bool active_slices);
 
 private:
-	SlicesHandlerInterface* _handler;
+	SlicesHandlerInterface* m_Handler;
 };
 
 } // namespace iseg

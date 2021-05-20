@@ -32,108 +32,104 @@
 #include "../../System/Collection/Array.h"
 #include "../../System/Collection/IArrayMask.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        namespace Segmentation
-        {
-            /** Voxel mask flag. */
-            enum MaskFlag
-            {
-                /** Ignore the voxel (exclude it from the computation). */
-                MaskIgnore = 0,
-                /** The voxel is known to be background (hard constraint). */
-                MaskSource = 1,
-                /** The voxel is known to be foreground (hard constraint). */
-                MaskSink = 2,
-                /** Classify this voxel (include it in the computation). */
-                MaskUnknown = 3
-            };
+namespace Gc {
+namespace Algo {
+namespace Segmentation {
+/** Voxel mask flag. */
+enum MaskFlag {
+    /** Ignore the voxel (exclude it from the computation). */
+    MaskIgnore = 0,
+    /** The voxel is known to be background (hard constraint). */
+    MaskSource = 1,
+    /** The voxel is known to be foreground (hard constraint). */
+    MaskSink = 2,
+    /** Classify this voxel (include it in the computation). */
+    MaskUnknown = 3
+};
 
-            /** %Mask specification interface for segmentation algorithms. 
+/** %Mask specification interface for segmentation algorithms. 
             
                 The mask itself is specified using an array of MaskFlag values
                 for each image element.
             */
-            template <Size N>
-            class Mask
-                : public System::Collection::IArrayMask<N>
-            {
-            protected:
-                /** Reference to the mask. */
-                const System::Collection::Array<N,Uint8> &m_mask;
-                /** Backward indexes. */
-                System::Collection::Array<N,Size> m_back_idx;
-                /** Number of unmasked elements. */
-                Size m_unm_elems;
+template <Size N>
+class Mask
+    : public System::Collection::IArrayMask<N>
+{
+  protected:
+    /** Reference to the mask. */
+    const System::Collection::Array<N, Uint8> & m_mask;
+    /** Backward indexes. */
+    System::Collection::Array<N, Size> m_back_idx;
+    /** Number of unmasked elements. */
+    Size m_unm_elems;
 
-            public:
-                /** Constructor. 
+  public:
+    /** Constructor. 
 
                     Calculates number of unmasked elements and creates backward indexes.
                 */
-                Mask(const System::Collection::Array<N,Uint8> &mask)
-                    : m_mask(mask)
-                {
-                    m_unm_elems = 0;
-                    m_back_idx.Resize(mask.Dimensions());
+    Mask(const System::Collection::Array<N, Uint8> & mask)
+        : m_mask(mask)
+    {
+        m_unm_elems = 0;
+        m_back_idx.Resize(mask.Dimensions());
 
-                    Size *di = m_back_idx.Begin();
-                    for (const Uint8 *dm = mask.Begin(); dm != mask.End(); dm++, di++)
-                    {
-                        if (*dm == MaskUnknown)
-                        {
-                            *di = m_unm_elems;
-                            m_unm_elems++;
-                        }
-                        else
-                        {
-                            *di = Size(-1);
-                        }
-                    }
-                }
+        Size * di = m_back_idx.Begin();
+        for (const Uint8 * dm = mask.Begin(); dm != mask.End(); dm++, di++)
+        {
+            if (*dm == MaskUnknown)
+            {
+                *di = m_unm_elems;
+                m_unm_elems++;
+            }
+            else
+            {
+                *di = Size(-1);
+            }
+        }
+    }
 
-                /** Dimensions of the mask. */
-                virtual const Math::Algebra::Vector<N,Size>& Dimensions() const
-                {
-                    return m_mask.Dimensions();
-                }
+    /** Dimensions of the mask. */
+    const Math::Algebra::Vector<N, Size> & Dimensions() const override
+    {
+        return m_mask.Dimensions();
+    }
 
-                /** Number of elements. */
-                virtual Size Elements() const
-                {
-                    return m_mask.Elements();
-                }
+    /** Number of elements. */
+    Size Elements() const override
+    {
+        return m_mask.Elements();
+    }
 
-                /** Number of unmasked elements. */
-                virtual Size UnmaskedElements() const
-                {
-                    return m_unm_elems;
-                }
+    /** Number of unmasked elements. */
+    Size UnmaskedElements() const override
+    {
+        return m_unm_elems;
+    }
 
-                /** Returns whether node is masked or not. 
+    /** Returns whether node is masked or not. 
 
                     @param[in] nidx Node index.
                 */
-                virtual bool IsMasked(Size nidx) const
-                {
-                    return m_mask[nidx] != MaskUnknown;
-                }
+    bool IsMasked(Size nidx) const override
+    {
+        return m_mask[nidx] != MaskUnknown;
+    }
 
-                /** Backward conversion indexes. 
+    /** Backward conversion indexes. 
 
                     Returns a reference to an array that for each element contains its
                     index to an array of unmasked elements. If the given element is
                     masked then the corresponding backward index is unspecified.
                 */
-                virtual const System::Collection::Array<N,Size>& BackwardIndexes() const
-                {
-                    return m_back_idx;
-                }
-            };
-        }
+    const System::Collection::Array<N, Size> & BackwardIndexes() const override
+    {
+        return m_back_idx;
     }
+};
 }
+}
+} // namespace Gc::Algo::Segmentation
 
 #endif

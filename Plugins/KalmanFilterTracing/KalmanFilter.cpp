@@ -13,84 +13,84 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
-KalmanFilter::KalmanFilter() : z(VectorXd::Constant(N, 0)), z_hat(VectorXd::Constant(N, 0)), x(VectorXd::Random(N)), v(VectorXd::Random(N)), n(VectorXd::Random(N)), m(VectorXd::Constant(N, x.mean())), F(MatrixXd::Identity(N, N)), H(MatrixXd::Identity(N, N)), P(MatrixXd::Identity(N, N)), Q(MatrixXd::Identity(N, N)), R(MatrixXd::Identity(N, N)), W(MatrixXd::Random(N, N)), S(MatrixXd::Random(N, N)), slice(0), iteration(0), last_slice(-1)
+KalmanFilter::KalmanFilter() : m_Z(VectorXd::Constant(N, 0)), m_ZHat(VectorXd::Constant(N, 0)), m_X(VectorXd::Random(N)), m_V(VectorXd::Random(N)), m_N(VectorXd::Random(N)), m_M(VectorXd::Constant(N, m_X.mean())), m_F(MatrixXd::Identity(N, N)), m_H(MatrixXd::Identity(N, N)), m_P(MatrixXd::Identity(N, N)), m_Q(MatrixXd::Identity(N, N)), m_R(MatrixXd::Identity(N, N)), m_W(MatrixXd::Random(N, N)), m_S(MatrixXd::Random(N, N))
 {
-	P = 10 * P;
+	m_P = 10 * m_P;
 	std::random_device rd;	//Will be used to obtain a seed for the random number engine
 	std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
 	std::uniform_real_distribution<> dis(0, 0.5);
 	std::normal_distribution<> norm(0, dis(gen));
-	Q *= norm(gen);
-	R *= norm(gen);
+	m_Q *= norm(gen);
+	m_R *= norm(gen);
 	for (unsigned int i(0); i < N; i++)
 	{
-		v(i) = norm(gen);
-		n(i) = 0;
+		m_V(i) = norm(gen);
+		m_N(i) = 0;
 	}
 }
 
 KalmanFilter::KalmanFilter(const KalmanFilter& k)
 {
-	z = k.z;
-	z_hat = k.z_hat;
-	x = k.x;
-	v = k.v;
-	n = k.n;
-	m = k.m;
-	F = k.F;
-	H = k.H;
-	P = k.P;
-	W = k.W;
-	S = k.S;
-	Q = k.Q;
-	R = k.R;
-	slice = k.slice;
-	iteration = k.iteration;
-	label = k.label;
-	last_slice = k.last_slice;
+	m_Z = k.m_Z;
+	m_ZHat = k.m_ZHat;
+	m_X = k.m_X;
+	m_V = k.m_V;
+	m_N = k.m_N;
+	m_M = k.m_M;
+	m_F = k.m_F;
+	m_H = k.m_H;
+	m_P = k.m_P;
+	m_W = k.m_W;
+	m_S = k.m_S;
+	m_Q = k.m_Q;
+	m_R = k.m_R;
+	m_Slice = k.m_Slice;
+	m_Iteration = k.m_Iteration;
+	m_Label = k.m_Label;
+	m_LastSlice = k.m_LastSlice;
 }
 
-void KalmanFilter::set_last_slice(int i)
+void KalmanFilter::SetLastSlice(int i)
 {
-	last_slice = i;
+	m_LastSlice = i;
 }
-int KalmanFilter::get_last_slice() const
+int KalmanFilter::GetLastSlice() const
 {
-	return last_slice;
+	return m_LastSlice;
 }
-void KalmanFilter::state_prediction()
+void KalmanFilter::StatePrediction()
 {
-	x = F * x + v;
+	m_X = m_F * m_X + m_V;
 }
-void KalmanFilter::measurement_prediction()
+void KalmanFilter::MeasurementPrediction()
 {
 
-	z_hat = H * x;
+	m_ZHat = m_H * m_X;
 }
 
-void KalmanFilter::measurement_residual()
+void KalmanFilter::MeasurementResidual()
 {
-	v = z - z_hat;
+	m_V = m_Z - m_ZHat;
 }
 
-void KalmanFilter::set_measurement(std::vector<double>& params)
+void KalmanFilter::SetMeasurement(std::vector<double>& params)
 {
 
-	if (params.size() == z.size())
+	if (params.size() == m_Z.size())
 		for (unsigned int i(0); i < params.size(); i++)
-			z(i) = params[i];
+			m_Z(i) = params[i];
 }
 
-void KalmanFilter::state_prediction_covariance()
+void KalmanFilter::StatePredictionCovariance()
 {
-	P = F * P * F.transpose() + Q;
+	m_P = m_F * m_P * m_F.transpose() + m_Q;
 }
 
-void KalmanFilter::measurement_prediction_covariance()
+void KalmanFilter::MeasurementPredictionCovariance()
 {
-	S = H * P * H.transpose() + R;
+	m_S = m_H * m_P * m_H.transpose() + m_R;
 }
-bool KalmanFilter::ensure_probability(double probability)
+bool KalmanFilter::EnsureProbability(double probability)
 {
 	if (probability >= 0 && probability <= 1)
 		return true;
@@ -98,36 +98,36 @@ bool KalmanFilter::ensure_probability(double probability)
 		return false;
 }
 
-void KalmanFilter::gain()
+void KalmanFilter::Gain()
 {
-	W = P * H.transpose() * S.inverse();
+	m_W = m_P * m_H.transpose() * m_S.inverse();
 }
 
-void KalmanFilter::updated_state_estimate()
+void KalmanFilter::UpdatedStateEstimate()
 {
-	x = x + W * v;
+	m_X = m_X + m_W * m_V;
 }
 
-void KalmanFilter::updated_state_covariance()
+void KalmanFilter::UpdatedStateCovariance()
 {
-	P = P - W * S * W.transpose();
+	m_P = m_P - m_W * m_S * m_W.transpose();
 }
 
-void KalmanFilter::work()
+void KalmanFilter::Work()
 {
 
-	state_prediction();
-	measurement_prediction();
-	measurement_residual();
-	state_prediction_covariance();
-	measurement_prediction_covariance();
-	gain();
-	updated_state_estimate();
-	updated_state_covariance();
-	iteration += 1;
+	StatePrediction();
+	MeasurementPrediction();
+	MeasurementResidual();
+	StatePredictionCovariance();
+	MeasurementPredictionCovariance();
+	Gain();
+	UpdatedStateEstimate();
+	UpdatedStateCovariance();
+	m_Iteration += 1;
 }
 
-double KalmanFilter::standard_deviation(const VectorXd& vec)
+double KalmanFilter::StandardDeviation(const VectorXd& vec) const
 {
 	double std(0);
 	VectorXd abs_vec(N);
@@ -139,61 +139,61 @@ double KalmanFilter::standard_deviation(const VectorXd& vec)
 	return sqrt(std);
 }
 
-std::vector<double> KalmanFilter::get_measurement()
+std::vector<double> KalmanFilter::GetMeasurement()
 {
 	std::vector<double> measurement(N);
 	for (unsigned int i(0); i < N; i++)
 	{
-		measurement[i] = z(i);
+		measurement[i] = m_Z(i);
 	}
 	return measurement;
 }
 
-int KalmanFilter::get_iteration() const
+int KalmanFilter::GetIteration() const
 {
-	return iteration;
+	return m_Iteration;
 }
 
-void KalmanFilter::set_iteration(int i)
+void KalmanFilter::SetIteration(int i)
 {
-	iteration = i;
+	m_Iteration = i;
 }
 
-int KalmanFilter::get_slice() const
+int KalmanFilter::GetSlice() const
 {
-	return slice;
+	return m_Slice;
 }
 
-void KalmanFilter::set_slice(int i)
+void KalmanFilter::SetSlice(int i)
 {
-	slice = i;
+	m_Slice = i;
 }
 
-void KalmanFilter::set_label(std::string str)
+void KalmanFilter::SetLabel(std::string str)
 {
-	label = str;
+	m_Label = str;
 }
 
-std::string KalmanFilter::get_label() const
+std::string KalmanFilter::GetLabel() const
 {
-	return label;
+	return m_Label;
 }
-double KalmanFilter::diff_btw_predicated_object(std::vector<double> object_params)
+double KalmanFilter::DiffBtwPredicatedObject(std::vector<double> object_params)
 {
-	VectorXd _v(N);
+	VectorXd v(N);
 	for (unsigned int i(0); i < N; i++)
 	{
-		_v(i) = abs(z_hat(i) - object_params[i]);
+		v(i) = abs(m_ZHat(i) - object_params[i]);
 	}
-	return _v.sum();
+	return v.sum();
 }
 
-std::vector<double> KalmanFilter::get_prediction() const
+std::vector<double> KalmanFilter::GetPrediction() const
 {
 	std::vector<double> measurement(N);
 	for (unsigned int i(0); i < N; i++)
 	{
-		measurement[i] = z_hat(i);
+		measurement[i] = m_ZHat(i);
 	}
 	return measurement;
 }

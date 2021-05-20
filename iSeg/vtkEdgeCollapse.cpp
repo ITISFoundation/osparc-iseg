@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -45,20 +45,20 @@
 
 #include "predicates.h"
 
-struct gp
+struct Gp
 {
-	static double exactinit()
+	static double Exactinit()
 	{
 		static double v = ::exactinit();
 		return v;
 	}
 
-	static double getepsilon()
+	static double Getepsilon()
 	{
 		static double eps = ::getepsilon();
 		return eps;
 	}
-	static double orient3d(double a[3], double b[3], double c[3], double d[3])
+	static double Orient3d(double a[3], double b[3], double c[3], double d[3])
 	{
 		return ::orient3d(a, b, d, c);
 	}
@@ -69,10 +69,10 @@ namespace MESH {
 template<class TElem, class TValue = double>
 struct SortElement
 {
-	SortElement(TElem e, TValue v) : elem(e), value(v) {}
-	bool operator<(SortElement const& rhs) const { return value < rhs.value; }
-	TElem elem;
-	TValue value;
+	SortElement(TElem e, TValue v) : m_Elem(e), m_Value(v) {}
+	bool operator<(SortElement const& rhs) const { return m_Value < rhs.value; }
+	TElem m_Elem;
+	TValue m_Value;
 };
 
 class Triangle
@@ -80,16 +80,16 @@ class Triangle
 public:
 	Triangle(int i1, int i2, int i3, int lab = 0)
 	{
-		n1 = i1;
-		n2 = i2;
-		n3 = i3;
-		label = lab;
-		isValid = true;
+		m_N1 = i1;
+		m_N2 = i2;
+		m_N3 = i3;
+		m_Label = lab;
+		m_IsValid = true;
 	}
 	bool operator<(const Triangle& rhs) const
 	{
-		int tri0[3] = {n1, n2, n3};
-		int tri1[3] = {rhs.n1, rhs.n2, rhs.n3};
+		int tri0[3] = {m_N1, m_N2, m_N3};
+		int tri1[3] = {rhs.m_N1, rhs.m_N2, rhs.m_N3};
 		std::sort(tri0, tri0 + 3);
 		std::sort(tri1, tri1 + 3);
 		if (tri0[0] != tri1[0])
@@ -101,25 +101,24 @@ public:
 	}
 	bool operator==(const Triangle& rhs) const
 	{
-		int tri0[3] = {n1, n2, n3};
-		int tri1[3] = {rhs.n1, rhs.n2, rhs.n3};
+		int tri0[3] = {m_N1, m_N2, m_N3};
+		int tri1[3] = {rhs.m_N1, rhs.m_N2, rhs.m_N3};
 		std::sort(tri0, tri0 + 3);
 		std::sort(tri1, tri1 + 3);
 		return (tri0[0] == tri1[0] && tri0[1] == tri1[1] && tri0[2] == tri1[2]);
 	}
 	friend std::ostream& operator<<(std::ostream& os, const Triangle& t)
 	{
-		os << t.n1 << " " << t.n2 << " " << t.n3;
+		os << t.m_N1 << " " << t.m_N2 << " " << t.m_N3;
 		return os;
 	}
-	int n1, n2, n3;
-	bool isValid;
-	int label;
+	int m_N1, m_N2, m_N3;
+	bool m_IsValid;
+	int m_Label;
 };
 
 bool NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& tris);
-bool NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& changedtris,
-						std::vector<Triangle>& closetris);
+bool NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& changedtris, std::vector<Triangle>& closetris);
 } // namespace MESH
 
 //----------------------------------------------------------------------------
@@ -138,8 +137,8 @@ vtkEdgeCollapse::vtkEdgeCollapse()
 	this->PointIds = vtkIdList::New();
 	this->GCell = vtkGenericCell::New();
 	this->CellLocator = vtkCellLocator::New();
-	this->Normals = 0;
-	this->Labels = 0;
+	this->Normals = nullptr;
+	this->Labels = nullptr;
 
 	// Computed values which can be queried by the user
 	this->NumberOfEdgeCollapses = 0;
@@ -155,12 +154,12 @@ vtkEdgeCollapse::vtkEdgeCollapse()
 	this->UseMaximumEdgeLength = 0;
 	this->MaximumEdgeLength = VTK_DOUBLE_MAX;
 	this->MeshIsManifold = 0;
-	this->DomainLabelName = 0;
+	this->DomainLabelName = nullptr;
 	this->IntersectionCheckLevel = 2;
 	this->NumberOfClosestPoints = 30; // currently not used
 	this->Loud = 0;
 
-	gp::exactinit();
+	Gp::Exactinit();
 }
 
 //----------------------------------------------------------------------------
@@ -175,50 +174,48 @@ vtkEdgeCollapse::~vtkEdgeCollapse()
 	this->PointIds->Delete();
 	this->GCell->Delete();
 	this->CellLocator->Delete();
-	if (this->Normals != 0)
+	if (this->Normals != nullptr)
 	{
 		this->Normals->Delete();
 	}
-	if (this->DomainLabelName != 0)
+	if (this->DomainLabelName != nullptr)
 	{
 		delete[] this->DomainLabelName;
 	}
 }
 
 //----------------------------------------------------------------------------
-int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
-								 vtkInformationVector** inputVector,
-								 vtkInformationVector* outputVector)
+int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
 	// get the info objects
-	vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
-	vtkInformation* outInfo = outputVector->GetInformationObject(0);
+	vtkInformation* in_info = inputVector[0]->GetInformationObject(0);
+	vtkInformation* out_info = outputVector->GetInformationObject(0);
 
 	// get the input and output
 	vtkPolyData* input =
-		vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+			vtkPolyData::SafeDownCast(in_info->Get(vtkDataObject::DATA_OBJECT()));
 	vtkPolyData* output =
-		vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+			vtkPolyData::SafeDownCast(out_info->Get(vtkDataObject::DATA_OBJECT()));
 
-	vtkIdType numPts;
-	vtkIdType numTris;
-	vtkIdType edgeId, i;
+	vtkIdType num_pts;
+	vtkIdType num_tris;
+	vtkIdType edge_id, i;
 	int j;
 	double cost;
 	double x1[3], x2[3];
-	vtkIdType endPtIds[2];
+	vtkIdType end_pt_ids[2];
 	vtkIdType npts, *pts;
-	vtkIdType numDeletedTris = 0;
+	vtkIdType num_deleted_tris = 0;
 
 	MinLength2 = this->MinimumEdgeLength * this->MinimumEdgeLength;
 	NormalDotProductThreshold =
-		std::cos(this->MaximumNormalAngleDeviation * 3.141592654f / 180.0);
+			std::cos(this->MaximumNormalAngleDeviation * 3.141592654f / 180.0);
 	NumberOfEdgeCollapses = 0;
 	NumberOfEdgeFlips = 0;
 
 	// check some assumptions about the data
 	if (input->GetPolys() == nullptr || input->GetPoints() == nullptr ||
-		input->GetPointData() == nullptr || input->GetFieldData() == nullptr)
+			input->GetPointData() == nullptr || input->GetFieldData() == nullptr)
 	{
 		vtkErrorMacro("Nothing to decimate");
 		return 1;
@@ -241,39 +238,38 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 	vtkCellArray* polys = vtkCellArray::New();
 	this->Mesh->SetPolys(polys);
 	polys->Delete();
-	vtkIdList* Ids = vtkIdList::New();
-	Ids->SetNumberOfIds(input->GetNumberOfCells());
+	vtkIdList* ids = vtkIdList::New();
+	ids->SetNumberOfIds(input->GetNumberOfCells());
 	for (j = 0; j < input->GetNumberOfCells(); j++)
-		Ids->SetId(j, j);
-	this->Mesh->CopyCells(input, Ids);
-	Ids->Delete();
+		ids->SetId(j, j);
+	this->Mesh->CopyCells(input, ids);
+	ids->Delete();
 
 	//this->Mesh->GetFieldData()->PassData(input->GetFieldData());
 	this->Mesh->BuildCells();
 	this->Mesh->BuildLinks();
 
 	// If duplicate triangles exist in input, map these to single triangle
-	if (DomainLabelName != 0 && strlen(DomainLabelName) > 0 &&
-		input->GetCellData()->HasArray(DomainLabelName))
+	if (DomainLabelName != nullptr && strlen(DomainLabelName) > 0 &&
+			input->GetCellData()->HasArray(DomainLabelName))
 	{
-		this->MapDuplicateTriangles(
-			input->GetCellData()->GetArray(DomainLabelName));
+		this->MapDuplicateTriangles(input->GetCellData()->GetArray(DomainLabelName));
 		this->Labels = this->Mesh->GetCellData()->GetArray(DomainLabelName);
 		assert(input->GetNumberOfCells() == this->Mesh->GetNumberOfCells());
 		assert(this->Mesh->GetNumberOfCells() ==
-			   this->Labels->GetNumberOfTuples());
+					 this->Labels->GetNumberOfTuples());
 	}
-	else if (DomainLabelName != 0 && strlen(DomainLabelName) > 0)
+	else if (DomainLabelName != nullptr && strlen(DomainLabelName) > 0)
 	{
 		std::cerr << "WARNING: could not locate cell data array "
-				  << DomainLabelName << std::endl;
+							<< DomainLabelName << std::endl;
 	}
-	numTris = this->Mesh->GetNumberOfPolys();
-	numPts = this->Mesh->GetNumberOfPoints();
+	num_tris = this->Mesh->GetNumberOfPolys();
+	num_pts = this->Mesh->GetNumberOfPoints();
 	this->UpdateProgress(0.1);
 
 	// Compute edges and priority for each edge
-	this->Edges->InitEdgeInsertion(numPts, 1); // storing edge id as attribute
+	this->Edges->InitEdgeInsertion(num_pts, 1); // storing edge id as attribute
 	this->EdgeCosts->Allocate(this->Mesh->GetPolys()->GetNumberOfCells() * 3);
 	for (i = 0; i < this->Mesh->GetNumberOfCells(); i++)
 	{
@@ -288,10 +284,10 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 				// If this edge has not been processed, get an id for it, add it to
 				// the edge list (Edges), and add its endpoints to the EndPoint1List
 				// and EndPoint2List (the 2 endpoints to different lists).
-				edgeId = this->Edges->GetNumberOfEdges();
-				this->Edges->InsertEdge(pts[j], pts[(j + 1) % 3], edgeId);
-				this->EndPoint1List->InsertId(edgeId, pts[j]);
-				this->EndPoint2List->InsertId(edgeId, pts[(j + 1) % 3]);
+				edge_id = this->Edges->GetNumberOfEdges();
+				this->Edges->InsertEdge(pts[j], pts[(j + 1) % 3], edge_id);
+				this->EndPoint1List->InsertId(edge_id, pts[j]);
+				this->EndPoint2List->InsertId(edge_id, pts[(j + 1) % 3]);
 			}
 		}
 	}
@@ -299,11 +295,11 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 	// Compute the cost of and target point for collapsing each edge.
 	for (i = 0; i < this->Edges->GetNumberOfEdges(); i++)
 	{
-		endPtIds[0] = this->EndPoint1List->GetId(i);
-		endPtIds[1] = this->EndPoint2List->GetId(i);
+		end_pt_ids[0] = this->EndPoint1List->GetId(i);
+		end_pt_ids[1] = this->EndPoint2List->GetId(i);
 
-		this->Mesh->GetPoint(endPtIds[0], x1);
-		this->Mesh->GetPoint(endPtIds[1], x2);
+		this->Mesh->GetPoint(end_pt_ids[0], x1);
+		this->Mesh->GetPoint(end_pt_ids[1], x2);
 		cost = vtkMath::Distance2BetweenPoints(x1, x2);
 		if (cost < MinLength2)
 		{
@@ -323,49 +319,49 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 	// OK collapse edges until desired reduction is reached
 	if (Loud)
 		cout << "Starting edge collapse" << endl;
-	int numEdgesToCollapse = this->EdgeCosts->GetNumberOfItems() * 0.5;
+	int num_edges_to_collapse = this->EdgeCosts->GetNumberOfItems() * 0.5;
 	int abort = 0, processed = 0;
-	edgeId = this->EdgeCosts->Pop(0, cost);
-	while (!abort && edgeId >= 0)
+	edge_id = this->EdgeCosts->Pop(0, cost);
+	while (!abort && edge_id >= 0)
 	{
 		if (!(processed++ % 1000))
 		{
 			double myprogress =
-				std::min(1.0, 0.25 + 0.75 * processed / numEdgesToCollapse);
+					std::min(1.0, 0.25 + 0.75 * processed / num_edges_to_collapse);
 			printf("\rProgress = %3f", myprogress);
 			this->UpdateProgress(myprogress);
 			abort = this->GetAbortExecute();
 		}
 
-		endPtIds[0] = this->EndPoint1List->GetId(edgeId);
-		endPtIds[1] = this->EndPoint2List->GetId(edgeId);
+		end_pt_ids[0] = this->EndPoint1List->GetId(edge_id);
+		end_pt_ids[1] = this->EndPoint2List->GetId(edge_id);
 
 		// Keep node endPtIds[0] (later remove unused node endPtIds[1])
-		if (isboundary[endPtIds[1]])
-			std::swap(endPtIds[0], endPtIds[1]);
+		if (isboundary[end_pt_ids[1]])
+			std::swap(end_pt_ids[0], end_pt_ids[1]);
 
-		if (this->IsCollapseLegal(endPtIds[0], endPtIds[1]))
+		if (this->IsCollapseLegal(end_pt_ids[0], end_pt_ids[1]))
 		{
 			this->NumberOfEdgeCollapses++;
 
-			this->UpdateEdgeData(endPtIds[0], endPtIds[1]);
+			this->UpdateEdgeData(end_pt_ids[0], end_pt_ids[1]);
 
 			// Update the output triangles.
-			numDeletedTris += this->CollapseEdge(endPtIds[0], endPtIds[1]);
-			this->ActualReduction = (double)numDeletedTris / numTris;
+			num_deleted_tris += this->CollapseEdge(end_pt_ids[0], end_pt_ids[1]);
+			this->ActualReduction = (double)num_deleted_tris / num_tris;
 		}
-		else if (this->IsCollapseLegal(endPtIds[1], endPtIds[0]))
+		else if (this->IsCollapseLegal(end_pt_ids[1], end_pt_ids[0]))
 		{
 			this->NumberOfEdgeCollapses++;
 
-			this->UpdateEdgeData(endPtIds[1], endPtIds[0]);
+			this->UpdateEdgeData(end_pt_ids[1], end_pt_ids[0]);
 
 			// Update the output triangles.
-			numDeletedTris += this->CollapseEdge(endPtIds[1], endPtIds[0]);
-			this->ActualReduction = (double)numDeletedTris / numTris;
+			num_deleted_tris += this->CollapseEdge(end_pt_ids[1], end_pt_ids[0]);
+			this->ActualReduction = (double)num_deleted_tris / num_tris;
 		}
 
-		edgeId = this->EdgeCosts->Pop(0, cost);
+		edge_id = this->EdgeCosts->Pop(0, cost);
 	}
 	printf("\n");
 
@@ -386,28 +382,28 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 	}
 
 	// copy the simplified mesh from the working mesh to the output mesh
-	if (DomainLabelName != 0 && input->GetCellData()->HasArray(DomainLabelName))
+	if (DomainLabelName != nullptr && input->GetCellData()->HasArray(DomainLabelName))
 	{
 		this->CreateDuplicateTriangles(output);
 	}
 	else
 	{
-		vtkIdList* outputCellList = vtkIdList::New();
+		vtkIdList* output_cell_list = vtkIdList::New();
 		for (i = 0; i < this->Mesh->GetNumberOfCells(); i++)
 		{
 			if (this->Mesh->GetCell(i)->GetCellType() == VTK_TRIANGLE)
 			{
-				outputCellList->InsertNextId(i);
+				output_cell_list->InsertNextId(i);
 			}
 		}
 		output->Reset();
-		output->Allocate(this->Mesh, outputCellList->GetNumberOfIds());
+		output->Allocate(this->Mesh, output_cell_list->GetNumberOfIds());
 		//output->GetPointData()->CopyAllocate(this->Mesh->GetPointData(),1);
-		output->CopyCells(this->Mesh, outputCellList);
+		output->CopyCells(this->Mesh, output_cell_list);
 
 		this->Mesh->DeleteLinks();
 		this->Mesh->Delete();
-		outputCellList->Delete();
+		output_cell_list->Delete();
 	}
 
 	if (Loud)
@@ -423,8 +419,7 @@ int vtkEdgeCollapse::RequestData(vtkInformation* vtkNotUsed(request),
 }
 
 //----------------------------------------------------------------------------
-double vtkEdgeCollapse::ComputeAngleAtFirstPoint(vtkIdType i1, vtkIdType i2,
-												 vtkIdType i3)
+double vtkEdgeCollapse::ComputeAngleAtFirstPoint(vtkIdType i1, vtkIdType i2, vtkIdType i3)
 {
 	double p1[3], p2[3], p3[3];
 	this->Mesh->GetPoint(i1, p1);
@@ -435,13 +430,12 @@ double vtkEdgeCollapse::ComputeAngleAtFirstPoint(vtkIdType i1, vtkIdType i2,
 	const double v13[3] = {p1[0] - p3[0], p1[1] - p3[1], p1[2] - p3[2]};
 
 	double cosa =
-		vtkMath::Dot(v12, v13) / vtkMath::Norm(v12) * vtkMath::Norm(v13);
+			vtkMath::Dot(v12, v13) / vtkMath::Norm(v12) * vtkMath::Norm(v13);
 	return std::acos(std::max(std::min(cosa, 1.0), -1.0));
 }
 
 //----------------------------------------------------------------------------
-vtkIdType vtkEdgeCollapse::FindThirdNode(vtkIdType i0, vtkIdType i1,
-										 const vtkIdType pts[3])
+vtkIdType vtkEdgeCollapse::FindThirdNode(vtkIdType i0, vtkIdType i1, const vtkIdType pts[3])
 {
 	vtkIdType n3 = -1;
 	for (int k = 0; k < 3; k++)
@@ -458,7 +452,7 @@ vtkIdType vtkEdgeCollapse::FindThirdNode(vtkIdType i0, vtkIdType i1,
 //----------------------------------------------------------------------------
 int vtkEdgeCollapse::DelaunayFlipEdges()
 {
-	vtkIdType i, j, edgeId, n1, n2, n3, n4;
+	vtkIdType i, j, edge_id, n1, n2, n3, n4;
 	vtkIdType *pts, *pts2, ids[3];
 	vtkIdType npts, npts2;
 	double pri;
@@ -468,8 +462,7 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 	vtkNew(vtkEdgeTable, edges);
 
 	// compute edges and priority for each edge
-	edges->InitEdgeInsertion(this->Mesh->GetNumberOfPoints(),
-							 1); // storing edge id as attribute
+	edges->InitEdgeInsertion(this->Mesh->GetNumberOfPoints(), 1); // storing edge id as attribute
 	flipPriority->Allocate(this->Mesh->GetPolys()->GetNumberOfCells() * 3);
 	for (i = 0; i < this->Mesh->GetNumberOfCells(); i++)
 	{
@@ -487,14 +480,13 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 				n1 = pts[j];
 				n2 = pts[(j + 1) % 3];
 
-				edgeId = edges->GetNumberOfEdges();
+				edge_id = edges->GetNumberOfEdges();
 
 				this->Mesh->GetCellEdgeNeighbors(i, n1, n2, this->Neighbors);
 				if (this->Neighbors->GetNumberOfIds() == 1)
 				{
 					n3 = pts[(j + 2) % 3];
-					this->Mesh->GetCellPoints(this->Neighbors->GetId(0), npts2,
-											  pts2);
+					this->Mesh->GetCellPoints(this->Neighbors->GetId(0), npts2, pts2);
 					n4 = this->FindThirdNode(n1, n2, pts2);
 					assert(n4 >= 0 && n3 != n4);
 					double angle3 = this->ComputeAngleAtFirstPoint(n3, n1, n2);
@@ -503,24 +495,24 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 					pri = angle3 + angle4 - 3.141592654f;
 					if (pri > 0.0)
 					{
-						edges->InsertEdge(n1, n2, edgeId);
-						endPts1->InsertId(edgeId, n1);
-						endPts2->InsertId(edgeId, n2);
-						flipPriority->Insert(-pri, edgeId);
+						edges->InsertEdge(n1, n2, edge_id);
+						endPts1->InsertId(edge_id, n1);
+						endPts2->InsertId(edge_id, n2);
+						flipPriority->Insert(-pri, edge_id);
 					}
 				}
 			}
 		}
 	}
 
-	edgeId = flipPriority->Pop(0, pri);
-	while (edgeId >= 0)
+	edge_id = flipPriority->Pop(0, pri);
+	while (edge_id >= 0)
 	{
-		n1 = endPts1->GetId(edgeId);
-		n2 = endPts2->GetId(edgeId);
+		n1 = endPts1->GetId(edge_id);
+		n2 = endPts2->GetId(edge_id);
 
 		// fetch the next edge to flip, placed here on purpose
-		edgeId = flipPriority->Pop(0, pri);
+		edge_id = flipPriority->Pop(0, pri);
 
 		if (!this->Mesh->IsEdge(n1, n2))
 			continue;
@@ -530,7 +522,7 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 
 		// Can only flip manifold edges
 		if (!(this->Neighbors->GetNumberOfIds() == 2) ||
-			!(this->Neighbors->GetId(0) != this->Neighbors->GetId(1)))
+				!(this->Neighbors->GetId(0) != this->Neighbors->GetId(1)))
 			continue;
 
 		// Find n3,n4, i.e., the third nodes of the two triangles
@@ -573,7 +565,7 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 		vtkPolygon::ComputeNormal(this->Mesh->GetPoints(), 3, ids, n234);
 
 		if (vtkMath::Dot(n123, n142) < this->NormalDotProductThreshold ||
-			vtkMath::Dot(n143, n234) < this->NormalDotProductThreshold)
+				vtkMath::Dot(n143, n234) < this->NormalDotProductThreshold)
 			continue;
 
 		// Do Self-Intersection Test
@@ -591,16 +583,14 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 
 			switch (this->IntersectionCheckLevel)
 			{
-			case 1:
-			{
+			case 1: {
 				this->Mesh->GetPointCells(n1, ncells, cells);
 				neighbors.insert(cells, cells + ncells);
 				this->Mesh->GetPointCells(n2, ncells, cells);
 				neighbors.insert(cells, cells + ncells);
 			}
 			break;
-			default:
-			{
+			default: {
 				this->Mesh->GetPointCells(n1, ncells, cells);
 				neighbors.insert(cells, cells + ncells);
 				this->Mesh->GetPointCells(n2, ncells, cells);
@@ -615,15 +605,13 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 			neighbors.erase(this->Neighbors->GetId(0));
 			neighbors.erase(this->Neighbors->GetId(1));
 			for (std::set<vtkIdType>::iterator it = neighbors.begin();
-				 it != neighbors.end(); ++it)
+					 it != neighbors.end(); ++it)
 			{
 				this->Mesh->GetCellPoints(*it, npts, pts);
 				assert(npts == 3);
-				triangles_nearby.push_back(
-					MESH::Triangle(pts[0], pts[1], pts[2]));
+				triangles_nearby.push_back(MESH::Triangle(pts[0], pts[1], pts[2]));
 			}
-			if (!NoSelfIntersection(this->Mesh->GetPoints(),
-									triangles_after_flip, triangles_nearby))
+			if (!NoSelfIntersection(this->Mesh->GetPoints(), triangles_after_flip, triangles_nearby))
 				continue;
 		}
 
@@ -655,24 +643,24 @@ int vtkEdgeCollapse::DelaunayFlipEdges()
 //----------------------------------------------------------------------------
 int vtkEdgeCollapse::CollapseEdge(vtkIdType pt0Id, vtkIdType pt1Id)
 {
-	int j, numDeleted = 0;
+	int j, num_deleted = 0;
 	vtkIdType* pts;
 	vtkIdType npts;
 	vtkIdType i;
-	vtkIdType cellId;
+	vtkIdType cell_id;
 
 	this->Mesh->GetPointCells(pt0Id, this->CollapseCellIds);
 	for (i = 0; i < this->CollapseCellIds->GetNumberOfIds(); i++)
 	{
-		cellId = this->CollapseCellIds->GetId(i);
-		this->Mesh->GetCellPoints(cellId, npts, pts);
+		cell_id = this->CollapseCellIds->GetId(i);
+		this->Mesh->GetCellPoints(cell_id, npts, pts);
 		for (j = 0; j < 3; j++)
 		{
 			if (pts[j] == pt1Id)
 			{
-				this->Mesh->RemoveCellReference(cellId);
-				this->Mesh->DeleteCell(cellId);
-				numDeleted++;
+				this->Mesh->RemoveCellReference(cell_id);
+				this->Mesh->DeleteCell(cell_id);
+				num_deleted++;
 			}
 		}
 	}
@@ -681,72 +669,72 @@ int vtkEdgeCollapse::CollapseEdge(vtkIdType pt0Id, vtkIdType pt1Id)
 	this->Mesh->ResizeCellList(pt0Id, this->CollapseCellIds->GetNumberOfIds());
 	for (i = 0; i < this->CollapseCellIds->GetNumberOfIds(); i++)
 	{
-		cellId = this->CollapseCellIds->GetId(i);
-		this->Mesh->GetCellPoints(cellId, npts, pts);
+		cell_id = this->CollapseCellIds->GetId(i);
+		this->Mesh->GetCellPoints(cell_id, npts, pts);
 		// making sure we don't already have the triangle we're about to
 		// change this one to
 		if ((pts[0] == pt1Id &&
-			 this->Mesh->IsTriangle(pt0Id, pts[1], pts[2])) ||
-			(pts[1] == pt1Id &&
-			 this->Mesh->IsTriangle(pts[0], pt0Id, pts[2])) ||
-			(pts[2] == pt1Id && this->Mesh->IsTriangle(pts[0], pts[1], pt0Id)))
+						this->Mesh->IsTriangle(pt0Id, pts[1], pts[2])) ||
+				(pts[1] == pt1Id &&
+						this->Mesh->IsTriangle(pts[0], pt0Id, pts[2])) ||
+				(pts[2] == pt1Id && this->Mesh->IsTriangle(pts[0], pts[1], pt0Id)))
 		{
-			this->Mesh->RemoveCellReference(cellId);
-			this->Mesh->DeleteCell(cellId);
-			numDeleted++;
+			this->Mesh->RemoveCellReference(cell_id);
+			this->Mesh->DeleteCell(cell_id);
+			num_deleted++;
 		}
 		else
 		{
-			this->Mesh->AddReferenceToCell(pt0Id, cellId);
-			this->Mesh->ReplaceCellPoint(cellId, pt1Id, pt0Id);
+			this->Mesh->AddReferenceToCell(pt0Id, cell_id);
+			this->Mesh->ReplaceCellPoint(cell_id, pt1Id, pt0Id);
 		}
 	}
 	this->Mesh->DeletePoint(pt1Id);
 
-	return numDeleted;
+	return num_deleted;
 }
 
 //----------------------------------------------------------------------------
 // FIXME: memory allocation clean up
 void vtkEdgeCollapse::UpdateEdgeData(vtkIdType pt0Id, vtkIdType pt1Id)
 { // Assumption is that later CollapseEdge will remove pt1Id
-	vtkIdList* changedEdges = vtkIdList::New();
-	vtkIdType i, edgeId, edge[2];
+	vtkIdList* changed_edges = vtkIdList::New();
+	vtkIdType i, edge_id, edge[2];
 	double cost;
 	double x1[3], x2[3];
 
 	// Find all edges with exactly either of these 2 endpoints.
-	this->FindAffectedEdges(pt0Id, pt1Id, changedEdges);
+	this->FindAffectedEdges(pt0Id, pt1Id, changed_edges);
 
 	// Reset the endpoints for these edges to reflect the new point from the
 	// collapsed edge.
 	// Add these new edges to the edge table.
 	// Remove the the changed edges from the priority queue.
-	for (i = 0; i < changedEdges->GetNumberOfIds(); i++)
+	for (i = 0; i < changed_edges->GetNumberOfIds(); i++)
 	{
-		edge[0] = this->EndPoint1List->GetId(changedEdges->GetId(i));
-		edge[1] = this->EndPoint2List->GetId(changedEdges->GetId(i));
+		edge[0] = this->EndPoint1List->GetId(changed_edges->GetId(i));
+		edge[1] = this->EndPoint2List->GetId(changed_edges->GetId(i));
 
 		// Remove all affected edges from the priority queue.
 		// This does not include collapsed edge.
-		this->EdgeCosts->DeleteId(changedEdges->GetId(i));
+		this->EdgeCosts->DeleteId(changed_edges->GetId(i));
 
 		// Determine the new set of edges
 		if (edge[0] == pt1Id)
 		{
 			if (this->Edges->IsEdge(edge[1], pt0Id) == -1)
 			{ // The edge will be completely new, add it.
-				edgeId = this->Edges->GetNumberOfEdges();
-				this->Edges->InsertEdge(edge[1], pt0Id, edgeId);
-				this->EndPoint1List->InsertId(edgeId, edge[1]);
-				this->EndPoint2List->InsertId(edgeId, pt0Id);
+				edge_id = this->Edges->GetNumberOfEdges();
+				this->Edges->InsertEdge(edge[1], pt0Id, edge_id);
+				this->EndPoint1List->InsertId(edge_id, edge[1]);
+				this->EndPoint2List->InsertId(edge_id, pt0Id);
 				// Compute cost (target point/data) and add to priority cue.
 				this->Mesh->GetPoint(edge[1], x1);
 				this->Mesh->GetPoint(pt0Id, x2);
 				cost = vtkMath::Distance2BetweenPoints(x1, x2);
 				if (cost < this->MinLength2)
 				{
-					this->EdgeCosts->Insert(cost, edgeId);
+					this->EdgeCosts->Insert(cost, edge_id);
 				}
 			}
 		}
@@ -754,17 +742,17 @@ void vtkEdgeCollapse::UpdateEdgeData(vtkIdType pt0Id, vtkIdType pt1Id)
 		{ // The edge will be completely new, add it.
 			if (this->Edges->IsEdge(edge[0], pt0Id) == -1)
 			{
-				edgeId = this->Edges->GetNumberOfEdges();
-				this->Edges->InsertEdge(edge[0], pt0Id, edgeId);
-				this->EndPoint1List->InsertId(edgeId, edge[0]);
-				this->EndPoint2List->InsertId(edgeId, pt0Id);
+				edge_id = this->Edges->GetNumberOfEdges();
+				this->Edges->InsertEdge(edge[0], pt0Id, edge_id);
+				this->EndPoint1List->InsertId(edge_id, edge[0]);
+				this->EndPoint2List->InsertId(edge_id, pt0Id);
 				// Compute cost (target point/data) and add to priority cue.
 				this->Mesh->GetPoint(edge[0], x1);
 				this->Mesh->GetPoint(pt0Id, x2);
 				cost = vtkMath::Distance2BetweenPoints(x1, x2);
 				if (cost < this->MinLength2)
 				{
-					this->EdgeCosts->Insert(cost, edgeId);
+					this->EdgeCosts->Insert(cost, edge_id);
 				}
 			}
 		}
@@ -775,21 +763,19 @@ void vtkEdgeCollapse::UpdateEdgeData(vtkIdType pt0Id, vtkIdType pt1Id)
 			cost = vtkMath::Distance2BetweenPoints(x1, x2);
 			if (cost < this->MinLength2)
 			{
-				this->EdgeCosts->Insert(cost, changedEdges->GetId(i));
+				this->EdgeCosts->Insert(cost, changed_edges->GetId(i));
 			}
 		}
 	}
 
-	changedEdges->Delete();
-	return;
+	changed_edges->Delete();
 }
 
 //----------------------------------------------------------------------------
-void vtkEdgeCollapse::FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id,
-										vtkIdList* edges)
+void vtkEdgeCollapse::FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id, vtkIdList* edges)
 {
 	unsigned short ncells;
-	vtkIdType *cells, npts, *pts, edgeId;
+	vtkIdType *cells, npts, *pts, edge_id;
 	unsigned short i, j;
 
 	edges->Reset();
@@ -800,10 +786,10 @@ void vtkEdgeCollapse::FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id,
 		for (j = 0; j < 3; j++)
 		{
 			if (pts[j] != p1Id && pts[j] != p2Id &&
-				(edgeId = this->Edges->IsEdge(pts[j], p2Id)) >= 0 &&
-				edges->IsId(edgeId) == -1)
+					(edge_id = this->Edges->IsEdge(pts[j], p2Id)) >= 0 &&
+					edges->IsId(edge_id) == -1)
 			{
-				edges->InsertNextId(edgeId);
+				edges->InsertNextId(edge_id);
 			}
 		}
 	}
@@ -815,18 +801,17 @@ void vtkEdgeCollapse::FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id,
 		for (j = 0; j < 3; j++)
 		{
 			if (pts[j] != p1Id && pts[j] != p2Id &&
-				(edgeId = this->Edges->IsEdge(pts[j], p1Id)) >= 0 &&
-				edges->IsId(edgeId) == -1)
+					(edge_id = this->Edges->IsEdge(pts[j], p1Id)) >= 0 &&
+					edges->IsId(edge_id) == -1)
 			{
-				edges->InsertNextId(edgeId);
+				edges->InsertNextId(edge_id);
 			}
 		}
 	}
 }
 
 //----------------------------------------------------------------------------
-bool vtkEdgeCollapse::IsDegenerateTriangle(vtkIdType i0, vtkIdType i1,
-										   vtkIdType i2)
+bool vtkEdgeCollapse::IsDegenerateTriangle(vtkIdType i0, vtkIdType i1, vtkIdType i2)
 {
 	return (i0 == i1 || i0 == i2 || i1 == i2);
 }
@@ -834,13 +819,12 @@ bool vtkEdgeCollapse::IsDegenerateTriangle(vtkIdType i0, vtkIdType i1,
 //----------------------------------------------------------------------------
 int vtkEdgeCollapse::GetOriginalNormal(double pos[3], double normal[3])
 {
-	if (this->CellLocator != 0 && this->Normals != 0)
+	if (this->CellLocator != nullptr && this->Normals != nullptr)
 	{
 		double cp[3], dist2;
 		vtkIdType cellid;
 		int subid;
-		this->CellLocator->FindClosestPoint(pos, cp, this->GCell, cellid, subid,
-											dist2);
+		this->CellLocator->FindClosestPoint(pos, cp, this->GCell, cellid, subid, dist2);
 		if (cellid < 0)
 			return false;
 
@@ -856,7 +840,7 @@ void vtkEdgeCollapse::ComputeNormals(vtkPolyData* input)
 {
 	vtkIdType* pts;
 	vtkIdType npts;
-	vtkIdType cellId;
+	vtkIdType cell_id;
 	// build cell locator, to find normal on original surface
 	this->CellLocator->SetDataSet(input);
 	this->CellLocator->SetMaxLevel(8);
@@ -869,30 +853,30 @@ void vtkEdgeCollapse::ComputeNormals(vtkPolyData* input)
 
 	double n[3];
 	vtkCellArray* polys = input->GetPolys();
-	for (cellId = 0, polys->InitTraversal(); polys->GetNextCell(npts, pts);
-		 cellId++)
+	for (cell_id = 0, polys->InitTraversal(); polys->GetNextCell(npts, pts);
+			 cell_id++)
 	{
 		vtkPolygon::ComputeNormal(input->GetPoints(), npts, pts, n);
-		this->Normals->InsertTuple(cellId, n);
+		this->Normals->InsertTuple(cell_id, n);
 	}
 }
 
 //----------------------------------------------------------------------------
 void vtkEdgeCollapse::ComputeManifoldedness()
 {
-	isboundary.resize(this->Mesh->GetNumberOfPoints(), 0);
+	isboundary.resize(this->Mesh->GetNumberOfPoints(), false);
 	if (this->MeshIsManifold)
 		return;
 
 	vtkIdType* pts;
 	vtkIdType npts;
-	vtkIdType cellId;
+	vtkIdType cell_id;
 	vtkCellArray* polys = this->Mesh->GetPolys();
-	for (cellId = 0, polys->InitTraversal(); polys->GetNextCell(npts, pts);
-		 cellId++)
+	for (cell_id = 0, polys->InitTraversal(); polys->GetNextCell(npts, pts);
+			 cell_id++)
 	{
 		// skip this cell if is e.g. VTK_EMPTY_CELL
-		if (Mesh->GetCellType(cellId) != VTK_TRIANGLE)
+		if (Mesh->GetCellType(cell_id) != VTK_TRIANGLE)
 			continue;
 
 		for (int i = 0; i < npts; i++)
@@ -900,18 +884,18 @@ void vtkEdgeCollapse::ComputeManifoldedness()
 			vtkIdType i1 = pts[i];
 			vtkIdType i2 = pts[(i + 1) % npts];
 
-			this->Mesh->GetCellEdgeNeighbors(cellId, i1, i2, this->Neighbors);
-			int numNei = this->Neighbors->GetNumberOfIds();
+			this->Mesh->GetCellEdgeNeighbors(cell_id, i1, i2, this->Neighbors);
+			int num_nei = this->Neighbors->GetNumberOfIds();
 
 			// at a manifold edge, there should be one neighboring triangle
 			// 0   : boundary
 			// 1   : ordinary
 			// 2++ : non-manifold edge
-			if (numNei != 1)
+			if (num_nei != 1)
 			{
 				//edgemap[Edge(i1,i2)] = numNei+1;
-				isboundary[i1] = 1;
-				isboundary[i2] = 1;
+				isboundary[i1] = true;
+				isboundary[i2] = true;
 				InputIsNonmanifold = 1;
 			}
 		}
@@ -948,14 +932,14 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 	// There should only be 2 degenerate triangles (if mesh is manifold)
 	//
 	// this->Mesh->GetPointCells(i2, this->Neighbors); called above
-	int countDegenerate = 0;
+	int count_degenerate = 0;
 	double normal_new[3];
 	double normal[3];
 	std::list<vtkIdType> degenerate;
 	for (int k = 0; k < this->Neighbors->GetNumberOfIds(); k++)
 	{
-		vtkIdType cellId = this->Neighbors->GetId(k);
-		this->Mesh->GetCellPoints(cellId, this->PointIds);
+		vtkIdType cell_id = this->Neighbors->GetId(k);
+		this->Mesh->GetCellPoints(cell_id, this->PointIds);
 		vtkIdType* ids = this->PointIds->GetPointer(0);
 		assert(!this->IsDegenerateTriangle(ids[0], ids[1], ids[2]));
 		for (int i = 0; i < 3; i++)
@@ -963,15 +947,13 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 				ids[i] = i1;
 		if (this->IsDegenerateTriangle(ids[0], ids[1], ids[2]))
 		{
-			countDegenerate++;
-			degenerate.push_back(cellId);
+			count_degenerate++;
+			degenerate.push_back(cell_id);
 		}
 		else
 		{
 			// Compute area
-			vtkPolygon::ComputeNormal(this->Mesh->GetPoints(), 3,
-									  this->PointIds->GetPointer(0),
-									  normal_new);
+			vtkPolygon::ComputeNormal(this->Mesh->GetPoints(), 3, this->PointIds->GetPointer(0), normal_new);
 
 			// The normals of the new triangles should point
 			// more or less in the same direction as the old triangles
@@ -988,7 +970,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			//TODO: clean-up this code
 			// Assumes that the cell ids don't change ordering
 			// (deleted cells are left in same position)
-			this->Normals->GetTuple(cellId, normal);
+			this->Normals->GetTuple(cell_id, normal);
 			if ((true))
 			{
 				double cost = vtkMath::Dot(normal, normal_new);
@@ -1001,14 +983,14 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			else
 			{
 				cout << "Could not find closest point on original surface"
-					 << endl;
+						 << endl;
 				return false;
 			}
 		}
 	} // end for all i2 triangles
 
 	// Only those triangles at edge i1,i2 should be degenerate
-	if (countDegenerate > edge_tris)
+	if (count_degenerate > edge_tris)
 	{
 		return false;
 	}
@@ -1056,8 +1038,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 	nodes_i1.sort();
 	nodes_i2.sort();
 	std::list<vtkIdType> inter;
-	std::set_intersection(nodes_i1.begin(), nodes_i1.end(), nodes_i2.begin(),
-						  nodes_i2.end(), std::back_inserter(inter));
+	std::set_intersection(nodes_i1.begin(), nodes_i1.end(), nodes_i2.begin(), nodes_i2.end(), std::back_inserter(inter));
 	inter.unique();
 	if (inter.size() != 2 + edge_tris)
 	{
@@ -1083,8 +1064,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 
 		switch (IntersectionCheckLevel)
 		{
-		case 1:
-		{
+		case 1: {
 			this->Mesh->GetPointCells(i2, ncells, cells);
 			for (int k = 0; k < this->Neighbors->GetNumberOfIds(); k++)
 			{
@@ -1092,8 +1072,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			}
 		}
 		break;
-		case 2:
-		{
+		case 2: {
 			for (it = inter.begin(); it != inter.end(); ++it)
 			{
 				this->Mesh->GetPointCells(*it, ncells, cells);
@@ -1104,12 +1083,10 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			}
 		}
 		break;
-		case 3:
-		{
+		case 3: {
 			nodes_i1.unique(); // TODO: is this necessary
 			nodes_i2.unique();
-			set_union(nodes_i1.begin(), nodes_i1.end(), nodes_i2.begin(),
-					  nodes_i2.end(), std::back_inserter(nodes_i));
+			set_union(nodes_i1.begin(), nodes_i1.end(), nodes_i2.begin(), nodes_i2.end(), std::back_inserter(nodes_i));
 			for (it = nodes_i.begin(); it != nodes_i.end(); ++it)
 			{
 				this->Mesh->GetPointCells(*it, ncells, cells);
@@ -1120,8 +1097,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			}
 		}
 		break;
-		default:
-		{
+		default: {
 			double x[3];
 			this->Mesh->GetPoint(i2, x);
 			double bounds[6] = {x[0], x[0], x[1], x[1], x[2], x[2]};
@@ -1151,7 +1127,7 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 			for (int i = 0; i < this->Neighbors->GetNumberOfIds(); i++)
 			{
 				if (this->CellLocator->GetDataSet()->GetCellType(i) ==
-					VTK_TRIANGLE)
+						VTK_TRIANGLE)
 				{
 					triangles_after_collapse.insert(this->Neighbors->GetId(i));
 				}
@@ -1161,28 +1137,28 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 		}
 
 		// Do self-intersection test
-		assert(degenerate.size() == countDegenerate);
+		assert(degenerate.size() == count_degenerate);
 		for (it = degenerate.begin(); it != degenerate.end(); ++it)
 		{
 			triangles_after_collapse.erase(*it);
 		}
 		std::vector<MESH::Triangle> tris;
 		for (std::set<vtkIdType>::iterator sit =
-				 triangles_after_collapse.begin();
-			 sit != triangles_after_collapse.end(); ++sit)
+						 triangles_after_collapse.begin();
+				 sit != triangles_after_collapse.end(); ++sit)
 		{
 			this->Mesh->GetCellPoints(*sit, npts, pts);
 			if (npts != 3)
 				continue;
 
 			MESH::Triangle tri(pts[0], pts[1], pts[2]);
-			if (tri.n1 == i2)
-				tri.n1 = i1;
-			if (tri.n2 == i2)
-				tri.n2 = i1;
-			if (tri.n3 == i2)
-				tri.n3 = i1;
-			assert(!this->IsDegenerateTriangle(tri.n1, tri.n2, tri.n3));
+			if (tri.m_N1 == i2)
+				tri.m_N1 = i1;
+			if (tri.m_N2 == i2)
+				tri.m_N2 = i1;
+			if (tri.m_N3 == i2)
+				tri.m_N3 = i1;
+			assert(!this->IsDegenerateTriangle(tri.m_N1, tri.m_N2, tri.m_N3));
 			tris.push_back(tri);
 		}
 		if (!NoSelfIntersection(this->Mesh->GetPoints(), tris))
@@ -1195,19 +1171,18 @@ bool vtkEdgeCollapse::IsCollapseLegal(vtkIdType i1, vtkIdType i2)
 //----------------------------------------------------------------------------
 int vtkEdgeCollapse::SubdivideEdges()
 {
-	vtkIdType i, j, edgeId, n1, n2, n3;
+	vtkIdType i, j, edge_id, n1, n2, n3;
 	vtkIdType* pts;
-	vtkIdType npts, cellId;
-	double length2, x1[3], x2[3], x3[3], newX[3];
-	double MaxLength2 = MaximumEdgeLength * MaximumEdgeLength;
+	vtkIdType npts, cell_id;
+	double length2, x1[3], x2[3], x3[3], new_x[3];
+	double max_length2 = MaximumEdgeLength * MaximumEdgeLength;
 	vtkNew(vtkPriorityQueue, splitPriority);
 	vtkNew(vtkIdList, endPts1);
 	vtkNew(vtkIdList, endPts2);
 	vtkNew(vtkEdgeTable, edges);
 
 	// compute edges and priority for each edge
-	edges->InitEdgeInsertion(this->Mesh->GetNumberOfPoints(),
-							 1); // storing edge id as attribute
+	edges->InitEdgeInsertion(this->Mesh->GetNumberOfPoints(), 1); // storing edge id as attribute
 	splitPriority->Allocate(this->Mesh->GetPolys()->GetNumberOfCells() * 3);
 	for (i = 0; i < this->Mesh->GetNumberOfCells(); i++)
 	{
@@ -1225,27 +1200,27 @@ int vtkEdgeCollapse::SubdivideEdges()
 				n1 = pts[j];
 				n2 = pts[(j + 1) % 3];
 
-				edgeId = edges->GetNumberOfEdges();
+				edge_id = edges->GetNumberOfEdges();
 				this->Mesh->GetPoint(n1, x1);
 				this->Mesh->GetPoint(n2, x2);
 				length2 = vtkMath::Distance2BetweenPoints(x1, x2);
-				if (length2 > MaxLength2)
+				if (length2 > max_length2)
 				{
-					edges->InsertEdge(n1, n2, edgeId);
-					endPts1->InsertId(edgeId, n1);
-					endPts2->InsertId(edgeId, n2);
+					edges->InsertEdge(n1, n2, edge_id);
+					endPts1->InsertId(edge_id, n1);
+					endPts2->InsertId(edge_id, n2);
 					// lower values are popped first, so negative sign pops longest edges first
-					splitPriority->Insert(-length2, edgeId);
+					splitPriority->Insert(-length2, edge_id);
 				}
 			}
 		}
 	}
 
-	edgeId = splitPriority->Pop(0, length2);
-	while (edgeId >= 0)
+	edge_id = splitPriority->Pop(0, length2);
+	while (edge_id >= 0)
 	{
-		n1 = endPts1->GetId(edgeId);
-		n2 = endPts2->GetId(edgeId);
+		n1 = endPts1->GetId(edge_id);
+		n2 = endPts2->GetId(edge_id);
 		assert(this->Mesh->IsEdge(n1, n2));
 
 		// find adjacent triangles
@@ -1255,80 +1230,78 @@ int vtkEdgeCollapse::SubdivideEdges()
 		// create point at center of edge (or somewhere else?)
 		this->Mesh->GetPoint(n1, x1);
 		this->Mesh->GetPoint(n2, x2);
-		newX[0] = 0.5 * (x1[0] + x2[0]);
-		newX[1] = 0.5 * (x1[1] + x2[1]);
-		newX[2] = 0.5 * (x1[2] + x2[2]);
-		vtkIdType newPtId = this->Mesh->InsertNextLinkedPoint(
-			newX, 2 * this->Neighbors->GetNumberOfIds());
+		new_x[0] = 0.5 * (x1[0] + x2[0]);
+		new_x[1] = 0.5 * (x1[1] + x2[1]);
+		new_x[2] = 0.5 * (x1[2] + x2[2]);
+		vtkIdType new_pt_id = this->Mesh->InsertNextLinkedPoint(new_x, 2 * this->Neighbors->GetNumberOfIds());
 
 		for (i = 0; i < Neighbors->GetNumberOfIds(); i++)
 		{
-			cellId = Neighbors->GetId(i);
+			cell_id = Neighbors->GetId(i);
 
 			// get third node of triangle
-			this->Mesh->GetCellPoints(cellId, this->PointIds);
-			vtkIdType newCellId = this->Mesh->InsertNextLinkedCell(
-				VTK_TRIANGLE, 3, this->PointIds->GetPointer(0));
+			this->Mesh->GetCellPoints(cell_id, this->PointIds);
+			vtkIdType new_cell_id = this->Mesh->InsertNextLinkedCell(VTK_TRIANGLE, 3, this->PointIds->GetPointer(0));
 			if (this->Labels)
 			{
-				this->Labels->InsertNextTuple1(this->Labels->GetTuple1(cellId));
+				this->Labels->InsertNextTuple1(this->Labels->GetTuple1(cell_id));
 				assert(this->Labels->GetNumberOfTuples() ==
-					   this->Mesh->GetNumberOfCells());
+							 this->Mesh->GetNumberOfCells());
 			}
 
 			// modify old triangle to use newPtId instead of n2, i.e. (n1,n3,newPtId)
-			this->Mesh->RemoveReferenceToCell(n2, cellId);
-			this->Mesh->ReplaceCellPoint(cellId, n2, newPtId);
+			this->Mesh->RemoveReferenceToCell(n2, cell_id);
+			this->Mesh->ReplaceCellPoint(cell_id, n2, new_pt_id);
 			// should have already created enough space for point cells in InsertNextLinkedPoint
-			this->Mesh->ResizeCellList(newPtId, 1);
-			this->Mesh->AddReferenceToCell(newPtId, cellId);
+			this->Mesh->ResizeCellList(new_pt_id, 1);
+			this->Mesh->AddReferenceToCell(new_pt_id, cell_id);
 
 			// add other half of triangle
 			// modify old triangle to use newPtId instead of n1, i.e. (n2,n3,newPtId)
-			this->Mesh->RemoveReferenceToCell(n1, newCellId);
-			this->Mesh->ReplaceCellPoint(newCellId, n1, newPtId);
+			this->Mesh->RemoveReferenceToCell(n1, new_cell_id);
+			this->Mesh->ReplaceCellPoint(new_cell_id, n1, new_pt_id);
 			// should have already created enough space for point cells in InsertNextLinkedPoint
-			this->Mesh->ResizeCellList(newPtId, 1);
-			this->Mesh->AddReferenceToCell(newPtId, newCellId);
+			this->Mesh->ResizeCellList(new_pt_id, 1);
+			this->Mesh->AddReferenceToCell(new_pt_id, new_cell_id);
 
 			// add edge between newPtId and third node of triangle to queue
 			n3 = FindThirdNode(n1, n2, this->PointIds->GetPointer(0));
 			this->Mesh->GetPoint(n3, x3);
-			double len2 = vtkMath::Distance2BetweenPoints(newX, x3);
-			if (len2 > MaxLength2)
+			double len2 = vtkMath::Distance2BetweenPoints(new_x, x3);
+			if (len2 > max_length2)
 			{
-				edgeId = edges->GetNumberOfEdges();
-				edges->InsertEdge(n3, newPtId, edgeId);
-				endPts1->InsertId(edgeId, n3);
-				endPts2->InsertId(edgeId, newPtId);
-				splitPriority->Insert(-len2, edgeId);
+				edge_id = edges->GetNumberOfEdges();
+				edges->InsertEdge(n3, new_pt_id, edge_id);
+				endPts1->InsertId(edge_id, n3);
+				endPts2->InsertId(edge_id, new_pt_id);
+				splitPriority->Insert(-len2, edge_id);
 			}
 		}
 
 		// half length, quarter squared length
 		this->Mesh->GetPoint(n1, x1);
-		this->Mesh->GetPoint(newPtId, x2);
+		this->Mesh->GetPoint(new_pt_id, x2);
 		length2 = vtkMath::Distance2BetweenPoints(x1, x2);
 		// add new edge to Priority Queue
-		if (length2 > MaxLength2)
+		if (length2 > max_length2)
 		{
-			edgeId = edges->GetNumberOfEdges();
-			edges->InsertEdge(n1, newPtId, edgeId);
-			endPts1->InsertId(edgeId, n1);
-			endPts2->InsertId(edgeId, newPtId);
-			splitPriority->Insert(-length2, edgeId);
+			edge_id = edges->GetNumberOfEdges();
+			edges->InsertEdge(n1, new_pt_id, edge_id);
+			endPts1->InsertId(edge_id, n1);
+			endPts2->InsertId(edge_id, new_pt_id);
+			splitPriority->Insert(-length2, edge_id);
 
-			edgeId = edges->GetNumberOfEdges();
-			edges->InsertEdge(n2, newPtId, edgeId);
-			endPts1->InsertId(edgeId, n2);
-			endPts2->InsertId(edgeId, newPtId);
-			splitPriority->Insert(-length2, edgeId);
+			edge_id = edges->GetNumberOfEdges();
+			edges->InsertEdge(n2, new_pt_id, edge_id);
+			endPts1->InsertId(edge_id, n2);
+			endPts2->InsertId(edge_id, new_pt_id);
+			splitPriority->Insert(-length2, edge_id);
 		}
 
 		this->NumberOfEdgeDivisions++;
 
 		// fetch the next edge to split
-		edgeId = splitPriority->Pop(0, length2);
+		edge_id = splitPriority->Pop(0, length2);
 		assert(endPts1->GetNumberOfIds() == edges->GetNumberOfEdges());
 	}
 
@@ -1351,7 +1324,7 @@ void vtkEdgeCollapse::MapDuplicateTriangles(vtkDataArray* labels)
 
 	// Check for duplicates, create a special label for duplicates
 	if(Loud) cout << "Check for duplicates, creating new labels" << endl;
-	typedef MESH::SortElement<vtkIdType, MESH::Triangle> SortTriangle;
+	using SortTriangle = MESH::SortElement<vtkIdType, MESH::Triangle>;
 	std::set<SortTriangle> unique;
 	std::set<SortTriangle>::iterator it;
 	std::vector<bool> isduplicate(numTris,0);
@@ -1418,20 +1391,20 @@ void vtkEdgeCollapse::MapDuplicateTriangles(vtkDataArray* labels)
 	double* range = labels->GetRange();
 	if (Loud)
 		std::cout << "[" << range[0] << "," << range[1] << "]" << std::endl;
-	int newLabel = range[1] + 2;
-	vtkIdType numTris = this->Mesh->GetNumberOfPolys();
+	int new_label = range[1] + 2;
+	vtkIdType num_tris = this->Mesh->GetNumberOfPolys();
 
 	vtkIntArray* newlabels = vtkIntArray::New();
-	newlabels->SetNumberOfTuples(numTris);
+	newlabels->SetNumberOfTuples(num_tris);
 	newlabels->SetName(DomainLabelName);
 
 	// Check for duplicates, create a special label for duplicates
 	if (Loud)
 		cout << "Check for duplicates, creating new labels" << endl;
 	LabelMapType labelmap;
-	std::vector<bool> isvisited(numTris, false);
-	std::vector<bool> isduplicate(numTris, false);
-	for (vtkIdType i = 0; i < numTris; ++i)
+	std::vector<bool> isvisited(num_tris, false);
+	std::vector<bool> isduplicate(num_tris, false);
+	for (vtkIdType i = 0; i < num_tris; ++i)
 	{
 		if (isvisited[i])
 			continue;
@@ -1450,16 +1423,14 @@ void vtkEdgeCollapse::MapDuplicateTriangles(vtkDataArray* labels)
 			int label_i = labels->GetTuple1(i);
 			int label_other = labels->GetTuple1(this->Neighbors->GetId(0));
 			assert(label_i != label_other);
-			DuplicateLabel duplicate(std::min(label_i, label_other),
-									 std::max(label_i, label_other));
+			DuplicateLabel duplicate(std::min(label_i, label_other), std::max(label_i, label_other));
 			// Check if this interface already has been mapped to a label
 			LabelMapType::iterator labelit = labelmap.find(duplicate);
 			if (labelit != labelmap.end())
 			{
 				assert(this->Neighbors->GetId(0) >= 0 &&
-					   this->Neighbors->GetId(0) < numTris);
-				newlabels->SetTuple1(this->Neighbors->GetId(0),
-									 labelit->second);
+							 this->Neighbors->GetId(0) < num_tris);
+				newlabels->SetTuple1(this->Neighbors->GetId(0), labelit->second);
 				newlabels->SetTuple1(i, labelit->second);
 				isvisited[i] = isvisited[this->Neighbors->GetId(0)] = true;
 				// mark triangle with larger label as duplicate
@@ -1471,12 +1442,12 @@ void vtkEdgeCollapse::MapDuplicateTriangles(vtkDataArray* labels)
 			// Not yet, now create a new label for this interface
 			else
 			{
-				labelmap[duplicate] = ++newLabel;
-				ilabelmap[newLabel] = duplicate;
+				labelmap[duplicate] = ++new_label;
+				ilabelmap[new_label] = duplicate;
 				assert(this->Neighbors->GetId(0) >= 0 &&
-					   this->Neighbors->GetId(0) < numTris);
-				newlabels->SetTuple1(this->Neighbors->GetId(0), newLabel);
-				newlabels->SetTuple1(i, newLabel);
+							 this->Neighbors->GetId(0) < num_tris);
+				newlabels->SetTuple1(this->Neighbors->GetId(0), new_label);
+				newlabels->SetTuple1(i, new_label);
 				isvisited[i] = isvisited[this->Neighbors->GetId(0)] = true;
 				// mark triangle with larger label as duplicate
 				if (label_i < label_other)
@@ -1490,19 +1461,19 @@ void vtkEdgeCollapse::MapDuplicateTriangles(vtkDataArray* labels)
 	newlabels->Delete();
 
 	// Now remove the duplicate triangles
-	int NumberOfDuplicateTriangles = 0;
-	for (vtkIdType i = 0; i < numTris; i++)
+	int number_of_duplicate_triangles = 0;
+	for (vtkIdType i = 0; i < num_tris; i++)
 	{
 		if (isduplicate[i])
 		{
 			this->Mesh->RemoveCellReference(i);
 			this->Mesh->DeleteCell(i);
 			assert(this->Mesh->GetCellType(i) == VTK_EMPTY_CELL);
-			NumberOfDuplicateTriangles++;
+			number_of_duplicate_triangles++;
 		}
 	}
-	std::cerr << "NumberOfDuplicateTriangles " << NumberOfDuplicateTriangles
-			  << std::endl;
+	std::cerr << "NumberOfDuplicateTriangles " << number_of_duplicate_triangles
+						<< std::endl;
 }
 
 //----------------------------------------------------------------------------
@@ -1510,11 +1481,11 @@ void vtkEdgeCollapse::CreateDuplicateTriangles(vtkPolyData* output)
 {
 	vtkIdType i;
 	output->Reset();
-	vtkIdList* outputCellList = vtkIdList::New();
-	vtkIdList* flipCellList = vtkIdList::New();
+	vtkIdList* output_cell_list = vtkIdList::New();
+	vtkIdList* flip_cell_list = vtkIdList::New();
 
 	vtkDataArray* inlabels =
-		this->Mesh->GetCellData()->GetArray(DomainLabelName);
+			this->Mesh->GetCellData()->GetArray(DomainLabelName);
 	assert(inlabels);
 	assert(this->Mesh->GetNumberOfCells() == inlabels->GetNumberOfTuples());
 
@@ -1531,34 +1502,34 @@ void vtkEdgeCollapse::CreateDuplicateTriangles(vtkPolyData* output)
 			{
 				// This triangle represents two domains, i.e. interface
 				DuplicateLabel duplicate = it->second;
-				labels->InsertNextTuple1(duplicate.first);  //domain 1
+				labels->InsertNextTuple1(duplicate.first);	//domain 1
 				labels->InsertNextTuple1(duplicate.second); //domain 2
-				outputCellList->InsertNextId(i);
-				outputCellList->InsertNextId(i);
-				flipCellList->InsertNextId(outputCellList->GetNumberOfIds() -
-										   1);
+				output_cell_list->InsertNextId(i);
+				output_cell_list->InsertNextId(i);
+				flip_cell_list->InsertNextId(output_cell_list->GetNumberOfIds() -
+																		 1);
 			}
 			else
 			{
 				labels->InsertNextTuple1(label);
-				outputCellList->InsertNextId(i);
+				output_cell_list->InsertNextId(i);
 			}
 		}
 	}
-	output->Allocate(this->Mesh, outputCellList->GetNumberOfIds());
-	output->CopyCells(this->Mesh, outputCellList);
+	output->Allocate(this->Mesh, output_cell_list->GetNumberOfIds());
+	output->CopyCells(this->Mesh, output_cell_list);
 
-	for (i = 0; i < flipCellList->GetNumberOfIds(); i++)
+	for (i = 0; i < flip_cell_list->GetNumberOfIds(); i++)
 	{
-		vtkIdType id = flipCellList->GetId(i);
+		vtkIdType id = flip_cell_list->GetId(i);
 		assert(id >= 0 && id < output->GetNumberOfPolys());
 		output->ReverseCell(id);
 	}
 
 	output->GetCellData()->AddArray(labels);
 	labels->Delete();
-	outputCellList->Delete();
-	flipCellList->Delete();
+	output_cell_list->Delete();
+	flip_cell_list->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -1569,9 +1540,9 @@ void vtkEdgeCollapse::PrintSelf(ostream& os, vtkIndent indent)
 
 //----------------------------------------------------------------------------
 
-typedef double REAL;
+using REAL = double;
 // Labels that signify the result of triangle-triangle intersection test.
-enum interresult {
+enum eInterresult {
 	DISJOINT,
 	INTERSECT,
 	SHAREVERTEX,
@@ -1591,14 +1562,13 @@ enum interresult {
 	BELOWHULL2
 };
 // Triangle-triangle intersection test
-enum interresult edge_vert_col_inter(REAL*, REAL*, REAL*);
-enum interresult edge_edge_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
-enum interresult tri_vert_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
-enum interresult tri_edge_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
-enum interresult tri_edge_inter_tail(REAL*, REAL*, REAL*, REAL*, REAL*, REAL,
-									 REAL);
-enum interresult tri_edge_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
-enum interresult tri_tri_inter(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
+enum eInterresult edge_vert_col_inter(REAL*, REAL*, REAL*);
+enum eInterresult edge_edge_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
+enum eInterresult tri_vert_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
+enum eInterresult tri_edge_cop_inter(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
+enum eInterresult tri_edge_inter_tail(REAL*, REAL*, REAL*, REAL*, REAL*, REAL, REAL);
+enum eInterresult tri_edge_inter(REAL*, REAL*, REAL*, REAL*, REAL*);
+enum eInterresult tri_tri_inter(REAL*, REAL*, REAL*, REAL*, REAL*, REAL*);
 
 bool MESH::NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& tris)
 {
@@ -1608,79 +1578,77 @@ bool MESH::NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& tris)
 	vtkIdType ntris = static_cast<vtkIdType>(tris.size());
 	for (vtkIdType i = 0; i < ntris - 1; i++)
 	{
-		mesh->GetPoint(tris[i].n1, x1);
-		mesh->GetPoint(tris[i].n2, x2);
-		mesh->GetPoint(tris[i].n3, x3);
+		mesh->GetPoint(tris[i].m_N1, x1);
+		mesh->GetPoint(tris[i].m_N2, x2);
+		mesh->GetPoint(tris[i].m_N3, x3);
 
 		// the test is assumed to symmetric
 		for (vtkIdType j = i + 1; j < ntris; j++)
 		{
 			std::set<int> nunion;
-			nunion.insert(tris[i].n1);
-			nunion.insert(tris[i].n2);
-			nunion.insert(tris[i].n3);
-			nunion.insert(tris[j].n1);
-			nunion.insert(tris[j].n2);
-			nunion.insert(tris[j].n3);
+			nunion.insert(tris[i].m_N1);
+			nunion.insert(tris[i].m_N2);
+			nunion.insert(tris[i].m_N3);
+			nunion.insert(tris[j].m_N1);
+			nunion.insert(tris[j].m_N2);
+			nunion.insert(tris[j].m_N3);
 			// Assumption is that two triangles, which share an edge cannot self-intersect
 			// -> why not avoid adding these triangles in the first place?
 			if (nunion.size() == 4)
 				continue;
 
-			mesh->GetPoint(tris[j].n1, y1);
-			mesh->GetPoint(tris[j].n2, y2);
-			mesh->GetPoint(tris[j].n3, y3);
+			mesh->GetPoint(tris[j].m_N1, y1);
+			mesh->GetPoint(tris[j].m_N2, y2);
+			mesh->GetPoint(tris[j].m_N3, y3);
 
-			interresult intersect = tri_tri_inter(x1, x2, x3, y1, y2, y3);
+			eInterresult intersect = tri_tri_inter(x1, x2, x3, y1, y2, y3);
 
 			if (intersect == INTERSECT || intersect == SHAREFACE)
 			{
 				return false;
 			}
 		} //for j
-	}	 //for i
+	}		//for i
 	return true;
 }
 
-bool MESH::NoSelfIntersection(vtkPoints* mesh,
-							  std::vector<Triangle>& changedtris,
-							  std::vector<Triangle>& closetris)
+bool MESH::NoSelfIntersection(vtkPoints* mesh, std::vector<Triangle>& changedtris, std::vector<Triangle>& closetris)
 {
 	double x1[3], x2[3], x3[3];
 	double y1[3], y2[3], y3[3];
 
 	for (int i = 0; i < changedtris.size(); i++)
 	{
-		mesh->GetPoint(changedtris[i].n1, x1);
-		mesh->GetPoint(changedtris[i].n2, x2);
-		mesh->GetPoint(changedtris[i].n3, x3);
+		mesh->GetPoint(changedtris[i].m_N1, x1);
+		mesh->GetPoint(changedtris[i].m_N2, x2);
+		mesh->GetPoint(changedtris[i].m_N3, x3);
 
 		for (int j = 0; j < closetris.size(); j++)
 		{
 			std::set<int> nunion;
-			nunion.insert(changedtris[i].n1);
-			nunion.insert(changedtris[i].n2);
-			nunion.insert(changedtris[i].n3);
-			nunion.insert(closetris[j].n1);
-			nunion.insert(closetris[j].n2);
-			nunion.insert(closetris[j].n3);
+			nunion.insert(changedtris[i].m_N1);
+			nunion.insert(changedtris[i].m_N2);
+			nunion.insert(changedtris[i].m_N3);
+			nunion.insert(closetris[j].m_N1);
+			nunion.insert(closetris[j].m_N2);
+			nunion.insert(closetris[j].m_N3);
 			// Assumption is that two triangles, which share an edge cannot self-intersect
 			// -> why not avoid adding these triangles in the first place?
 			if (nunion.size() == 4)
 				continue;
 
-			mesh->GetPoint(closetris[j].n1, y1);
-			mesh->GetPoint(closetris[j].n2, y2);
-			mesh->GetPoint(closetris[j].n3, y3);
+			mesh->GetPoint(closetris[j].m_N1, y1);
+			mesh->GetPoint(closetris[j].m_N2, y2);
+			mesh->GetPoint(closetris[j].m_N3, y3);
 
-			interresult intersect = tri_tri_inter(x1, x2, x3, y1, y2, y3);
+			eInterresult intersect = tri_tri_inter(x1, x2, x3, y1, y2, y3);
 
 			if (intersect == INTERSECT || intersect == SHAREFACE)
 			{
 				return false;
 			}
 		} //for j
-	}	 //for i
+	}		//for i
 	return true;
 }
 
@@ -1720,7 +1688,7 @@ bool MESH::NoSelfIntersection(vtkPoints* mesh,
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult edge_vert_col_inter(REAL* A, REAL* B, REAL* P)
+enum eInterresult edge_vert_col_inter(REAL* A, REAL* B, REAL* P)
 {
 	int i = 0;
 	do
@@ -1806,23 +1774,22 @@ enum interresult edge_vert_col_inter(REAL* A, REAL* B, REAL* P)
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q,
-									 REAL* R)
+enum eInterresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q, REAL* R)
 {
 	REAL s1, s2, s3, s4;
 
 #ifdef SELF_CHECK
 	assert(R != nullptr);
 #endif
-	s1 = gp::orient3d(A, B, R, P);
-	s2 = gp::orient3d(A, B, R, Q);
+	s1 = Gp::Orient3d(A, B, R, P);
+	s2 = Gp::Orient3d(A, B, R, Q);
 	if (s1 * s2 > 0.0)
 	{
 		// Both p and q are at the same side of ab.
 		return DISJOINT;
 	}
-	s3 = gp::orient3d(P, Q, R, A);
-	s4 = gp::orient3d(P, Q, R, B);
+	s3 = Gp::Orient3d(P, Q, R, A);
+	s4 = Gp::Orient3d(P, Q, R, B);
 	if (s3 * s4 > 0.0)
 	{
 		// Both a and b are at the same side of pq.
@@ -1833,8 +1800,8 @@ enum interresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q,
 	//   (1) Only one of p and q is collinear with ab;
 	//   (2) Both p and q are collinear with ab;
 	//   (3) Only one of a and b is collinear with pq.
-	enum interresult abp, abq;
-	enum interresult pqa, pqb;
+	enum eInterresult abp, abq;
+	enum eInterresult pqa, pqb;
 
 	if (s1 == 0.0)
 	{
@@ -1883,7 +1850,7 @@ enum interresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q,
 			// The last case. They are disjointed.
 #ifdef SELF_CHECK
 			assert((abp == DISJOINT) &&
-				   (abp == abq && abq == pqa && pqa == pqb));
+						 (abp == abq && abq == pqa && pqa == pqb));
 #endif
 			return DISJOINT;
 		}
@@ -1971,7 +1938,7 @@ enum interresult edge_edge_cop_inter(REAL* A, REAL* B, REAL* P, REAL* Q,
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult tri_vert_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* R)
+enum eInterresult tri_vert_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* R)
 {
 	REAL s1, s2, s3;
 	int sign;
@@ -1981,26 +1948,26 @@ enum interresult tri_vert_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* R)
 #endif
 	// Adjust the orientation of a, b, c and r, so that we can assume that
 	//   r is strictly in ABC- (i.e., r is above ABC wrt. right-hand rule).
-	s1 = gp::orient3d(A, B, C, R);
+	s1 = Gp::Orient3d(A, B, C, R);
 #ifdef SELF_CHECK
 	assert(s1 != 0.0);
 #endif
 	sign = s1 < 0.0 ? 1 : -1;
 
 	// Test starts from here.
-	s1 = gp::orient3d(A, B, R, P) * sign;
+	s1 = Gp::Orient3d(A, B, R, P) * sign;
 	if (s1 < 0.0)
 	{
 		// p is in ABR-.
 		return DISJOINT;
 	}
-	s2 = gp::orient3d(B, C, R, P) * sign;
+	s2 = Gp::Orient3d(B, C, R, P) * sign;
 	if (s2 < 0.0)
 	{
 		// p is in BCR-.
 		return DISJOINT;
 	}
-	s3 = gp::orient3d(C, A, R, P) * sign;
+	s3 = Gp::Orient3d(C, A, R, P) * sign;
 	if (s3 < 0.0)
 	{
 		// p is in CAR-.
@@ -2065,11 +2032,10 @@ enum interresult tri_vert_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* R)
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult tri_edge_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q,
-									REAL* R)
+enum eInterresult tri_edge_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q, REAL* R)
 {
-	enum interresult abpq, bcpq, capq;
-	enum interresult abcp, abcq;
+	enum eInterresult abpq, bcpq, capq;
+	enum eInterresult abcp, abcq;
 
 	// Test if pq is intersecting one of edges of abc.
 	abpq = edge_edge_cop_inter(A, B, P, Q, R);
@@ -2145,8 +2111,7 @@ enum interresult tri_edge_cop_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q,
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
-									 REAL* Q, REAL s1, REAL s2)
+enum eInterresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q, REAL s1, REAL s2)
 {
 	REAL s3, s4, s5;
 	int sign;
@@ -2163,19 +2128,19 @@ enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
 		// Adjust the orientation of a, b, c and p, so that we can assume that
 		//   p is strictly in ABC-, and q is strictly in ABC+.
 		sign = s1 < 0.0 ? 1 : -1;
-		s3 = gp::orient3d(A, B, P, Q) * sign;
+		s3 = Gp::Orient3d(A, B, P, Q) * sign;
 		if (s3 < 0.0)
 		{
 			// q is at ABP-.
 			return DISJOINT;
 		}
-		s4 = gp::orient3d(B, C, P, Q) * sign;
+		s4 = Gp::Orient3d(B, C, P, Q) * sign;
 		if (s4 < 0.0)
 		{
 			// q is at BCP-.
 			return DISJOINT;
 		}
-		s5 = gp::orient3d(C, A, P, Q) * sign;
+		s5 = Gp::Orient3d(C, A, P, Q) * sign;
 		if (s5 < 0.0)
 		{
 			// q is at CAP-.
@@ -2251,9 +2216,9 @@ enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
 
 	// pq is coplanar with abc.  Calculate a point which is exactly not
 	//   coplanar with a, b, and c.
-	REAL R[3], N[3];
+	REAL r[3], n[3];
 	REAL ax, ay, az, bx, by, bz;
-	REAL epsilon = gp::getepsilon();
+	REAL epsilon = Gp::Getepsilon();
 
 	ax = A[0] - B[0];
 	ay = A[1] - B[1];
@@ -2261,22 +2226,22 @@ enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
 	bx = A[0] - C[0];
 	by = A[1] - C[1];
 	bz = A[2] - C[2];
-	N[0] = ay * bz - by * az;
-	N[1] = az * bx - bz * ax;
-	N[2] = ax * by - bx * ay;
+	n[0] = ay * bz - by * az;
+	n[1] = az * bx - bz * ax;
+	n[2] = ax * by - bx * ay;
 	// The normal should not be a zero vector (otherwise, abc are collinear).
 #ifdef SELF_CHECK
 	assert((fabs(N[0]) + fabs(N[1]) + fabs(N[2])) > 0.0);
 #endif
 	// The reference point R is lifted from A to the normal direction with
 	//   a distance d = average edge length of the triangle abc.
-	R[0] = N[0] + A[0];
-	R[1] = N[1] + A[1];
-	R[2] = N[2] + A[2];
+	r[0] = n[0] + A[0];
+	r[1] = n[1] + A[1];
+	r[2] = n[2] + A[2];
 	// Becareful the case: if the non-zero component(s) in N is smaller than
 	//   the machine epsilon (i.e., 2^(-16) for double), R will exactly equal
 	//   to A due to the round-off error.  Do check if it is.
-	if (R[0] == A[0] && R[1] == A[1] && R[2] == A[2])
+	if (r[0] == A[0] && r[1] == A[1] && r[2] == A[2])
 	{
 		int i, j;
 		for (i = 0; i < 3; i++)
@@ -2287,21 +2252,21 @@ enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
 			j = 2;
 			do
 			{
-				if (N[i] > 0.0)
+				if (n[i] > 0.0)
 				{
-					N[i] += (j * epsilon);
+					n[i] += (j * epsilon);
 				}
 				else
 				{
-					N[i] -= (j * epsilon);
+					n[i] -= (j * epsilon);
 				}
-				R[i] = N[i] + A[i];
+				r[i] = n[i] + A[i];
 				j *= 2;
-			} while (R[i] == A[i]);
+			} while (r[i] == A[i]);
 		}
 	}
 
-	return tri_edge_cop_inter(A, B, C, P, Q, R);
+	return tri_edge_cop_inter(A, B, C, P, Q, r);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2314,13 +2279,13 @@ enum interresult tri_edge_inter_tail(REAL* A, REAL* B, REAL* C, REAL* P,
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult tri_edge_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q)
+enum eInterresult tri_edge_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q)
 {
 	REAL s1, s2;
 
 	// Test the locations of p and q with respect to ABC.
-	s1 = gp::orient3d(A, B, C, P);
-	s2 = gp::orient3d(A, B, C, Q);
+	s1 = Gp::Orient3d(A, B, C, P);
+	s2 = Gp::Orient3d(A, B, C, Q);
 
 	return tri_edge_inter_tail(A, B, C, P, Q, s1, s2);
 }
@@ -2335,31 +2300,30 @@ enum interresult tri_edge_inter(REAL* A, REAL* B, REAL* C, REAL* P, REAL* Q)
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-enum interresult tri_tri_inter(REAL* A, REAL* B, REAL* C, REAL* O, REAL* P,
-							   REAL* Q)
+enum eInterresult tri_tri_inter(REAL* A, REAL* B, REAL* C, REAL* O, REAL* P, REAL* Q)
 {
 	REAL s_o, s_p, s_q;
 	REAL s_a, s_b, s_c;
 
-	s_o = gp::orient3d(A, B, C, O);
-	s_p = gp::orient3d(A, B, C, P);
-	s_q = gp::orient3d(A, B, C, Q);
+	s_o = Gp::Orient3d(A, B, C, O);
+	s_p = Gp::Orient3d(A, B, C, P);
+	s_q = Gp::Orient3d(A, B, C, Q);
 	if ((s_o * s_p > 0.0) && (s_o * s_q > 0.0))
 	{
 		// o, p, q are all in the same halfspace of ABC.
 		return DISJOINT;
 	}
 
-	s_a = gp::orient3d(O, P, Q, A);
-	s_b = gp::orient3d(O, P, Q, B);
-	s_c = gp::orient3d(O, P, Q, C);
+	s_a = Gp::Orient3d(O, P, Q, A);
+	s_b = Gp::Orient3d(O, P, Q, B);
+	s_c = Gp::Orient3d(O, P, Q, C);
 	if ((s_a * s_b > 0.0) && (s_a * s_c > 0.0))
 	{
 		// a, b, c are all in the same halfspace of OPQ.
 		return DISJOINT;
 	}
 
-	enum interresult abcop, abcpq, abcqo;
+	enum eInterresult abcop, abcpq, abcqo;
 	int shareedge = 0;
 
 	abcop = tri_edge_inter_tail(A, B, C, O, P, s_o, s_p);
@@ -2400,7 +2364,7 @@ enum interresult tri_tri_inter(REAL* A, REAL* B, REAL* C, REAL* O, REAL* P,
 #endif
 
 	// Continue to detect whether opq and abc are intersecting or not.
-	enum interresult opqab, opqbc, opqca;
+	enum eInterresult opqab, opqbc, opqca;
 
 	opqab = tri_edge_inter_tail(O, P, Q, A, B, s_a, s_b);
 	if (opqab == INTERSECT)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,9 +13,11 @@
 // BL TODO replace by ImageReader
 namespace iseg { namespace ChannelExtractor {
 
-enum ChannelEnum { kRed, kGreen, kBlue, kAlpha };
+enum eChannelEnum { kRed,
+	kGreen,
+	kBlue,
+	kAlpha };
 
-bool getSlice(const char* filename, float* slice, int channel, unsigned slicenr,
-			  unsigned width, unsigned height);
+bool getSlice(const char* filename, float* slice, int channel, unsigned slicenr, unsigned width, unsigned height);
 
 }} // namespace iseg::ChannelExtractor

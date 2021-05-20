@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -22,25 +22,25 @@ class ISEG_CORE_API IndexPriorityQueue
 {
 public:
 	IndexPriorityQueue(unsigned size2, float* valuemap1);
-	unsigned pop();
-	unsigned size();
-	void insert(unsigned pos);
-	void insert(unsigned pos, float value);
-	void change(unsigned pos, float value);
-	void make_smaller(unsigned pos, float value);
-	void make_larger(unsigned pos, float value);
-	void remove(unsigned pos);
-	void print_queue();
-	bool empty();
-	void clear();
-	bool in_queue(unsigned pos);
+	unsigned Pop();
+	unsigned Size() const;
+	void Insert(unsigned pos);
+	void Insert(unsigned pos, float value);
+	void Change(unsigned pos, float value);
+	void MakeSmaller(unsigned pos, float value);
+	void MakeLarger(unsigned pos, float value);
+	void Remove(unsigned pos);
+	void PrintQueue();
+	bool Empty() const;
+	void Clear();
+	bool InQueue(unsigned pos);
 	~IndexPriorityQueue();
 
 private:
-	int* indexmap;
-	float* valuemap;
-	std::vector<unsigned> Q;
-	unsigned l;
-	unsigned size1;
+	int* m_Indexmap;
+	float* m_Valuemap;
+	std::vector<unsigned> m_Q;
+	unsigned m_L;
+	unsigned m_Size1;
 };
 } // namespace iseg

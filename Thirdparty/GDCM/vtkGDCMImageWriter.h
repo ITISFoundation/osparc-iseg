@@ -48,9 +48,9 @@ class vtkStringArray;
 class VTK_EXPORT vtkGDCMImageWriter : public vtkImageWriter
 {
 public:
-  static vtkGDCMImageWriter *New();
-  vtkTypeMacro(vtkGDCMImageWriter,vtkImageWriter);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkGDCMImageWriter* New();
+  vtkTypeMacro(vtkGDCMImageWriter, vtkImageWriter);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Pass in the vtkmedicalimageproperties object for medical information
@@ -65,27 +65,25 @@ public:
 
   // Description:
   // Set/Get whether or not the image was compressed using a lossy compression algorithm
-  vtkGetMacro(LossyFlag,int);
-  vtkSetMacro(LossyFlag,int);
-  vtkBooleanMacro(LossyFlag,int);
+  vtkGetMacro(LossyFlag, int);
+  vtkSetMacro(LossyFlag, int);
+  vtkBooleanMacro(LossyFlag, int);
 
   // I need that...
-  virtual void Write();
+  void Write() override;
 
   // Description:
   // Get the entension for this file format.
-  virtual const char* GetFileExtensions() {
-    return ".dcm .DCM"; }
+  virtual const char* GetFileExtensions() { return ".dcm .DCM"; }
 
   // Description:
   // Get the name of this file format.
-  virtual const char* GetDescriptiveName() {
-    return "DICOM"; }
+  virtual const char* GetDescriptiveName() { return "DICOM"; }
 
   // Description:
   // You need to manually specify the direction the image is in to write a valid DICOM file
   // since vtkImageData do not contains one (eg. MR Image Storage, CT Image Storage...)
-  virtual void SetDirectionCosines(vtkMatrix4x4 *matrix);
+  virtual void SetDirectionCosines(vtkMatrix4x4* matrix);
   vtkGetObjectMacro(DirectionCosines, vtkMatrix4x4);
   virtual void SetDirectionCosinesFromImageOrientationPatient(const double dircos[6]);
 
@@ -98,8 +96,8 @@ public:
 
   // Description:
   // See vtkGDCMImageReader for list of ImageFormat
-  vtkGetMacro(ImageFormat,int);
-  vtkSetMacro(ImageFormat,int);
+  vtkGetMacro(ImageFormat, int);
+  vtkSetMacro(ImageFormat, int);
 
   // Description:
   // Set/Get whether the data comes from the file starting in the lower left
@@ -110,8 +108,8 @@ public:
 
   // Description:
   // For color image (more than a single comp) you can specify the planar configuration you prefer
-  vtkSetMacro(PlanarConfiguration,int);
-  vtkGetMacro(PlanarConfiguration,int);
+  vtkSetMacro(PlanarConfiguration, int);
+  vtkGetMacro(PlanarConfiguration, int);
 
   // Description:
   // Set/Get specific StudyUID / SeriesUID
@@ -120,63 +118,58 @@ public:
   vtkSetStringMacro(SeriesUID);
   vtkGetStringMacro(SeriesUID);
 
-//BTX
-  enum CompressionTypes {
+  // BTX
+  enum CompressionTypes
+  {
     NO_COMPRESSION = 0,   // raw (default)
     JPEG_COMPRESSION,     // JPEG
     JPEG2000_COMPRESSION, // J2K
     JPEGLS_COMPRESSION,   // JPEG-LS
     RLE_COMPRESSION       // RLE
   };
-//ETX
+  // ETX
   // Set/Get the compression type
   vtkSetMacro(CompressionType, int);
   vtkGetMacro(CompressionType, int);
 
-  //void SetCompressionTypeFromString(const char *);
-  //const char *GetCompressionTypeAsString();
+  // void SetCompressionTypeFromString(const char *);
+  // const char *GetCompressionTypeAsString();
 
 protected:
   vtkGDCMImageWriter();
-  ~vtkGDCMImageWriter();
+  ~vtkGDCMImageWriter() override;
 
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
-  int FillInputPortInformation(int port, vtkInformation *info);
-  int RequestInformation(
-    vtkInformation *request,
-    vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
-  int RequestUpdateExtent(
-    vtkInformation *request,
-    vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
-  int RequestData(
-    vtkInformation *request,
-    vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector);
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 #else
-  void WriteSlice(vtkImageData *data);
+  void WriteSlice(vtkImageData* data);
 #endif /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
-  int WriteGDCMData(vtkImageData *data, int timeStep);
+  int WriteGDCMData(vtkImageData* data, int timeStep);
 
 protected:
-  virtual /*const*/ char *GetFileName();
+  /*const*/ char* GetFileName() override;
 
 private:
-  vtkGDCMImageWriter(const vtkGDCMImageWriter&);  // Not implemented.
-  void operator=(const vtkGDCMImageWriter&);  // Not implemented.
+  vtkGDCMImageWriter(const vtkGDCMImageWriter&) = delete;
+  void operator=(const vtkGDCMImageWriter&) = delete;
 
   // VTK structs:
-  //vtkLookupTable *LookupTable;
-  vtkMedicalImageProperties *MedicalImageProperties;
-  char *StudyUID;
-  char *SeriesUID;
+  // vtkLookupTable *LookupTable;
+  vtkMedicalImageProperties* MedicalImageProperties;
+  char* StudyUID;
+  char* SeriesUID;
 
   int DataUpdateExtent[6];
   int ImageFormat;
 
-  vtkStringArray *FileNames;
-  vtkMatrix4x4 *DirectionCosines;
+  vtkStringArray* FileNames;
+  vtkMatrix4x4* DirectionCosines;
 
   double Shift;
   double Scale;

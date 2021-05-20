@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,41 +27,39 @@ class MorphologyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~MorphologyWidget() {}
-	void init() override;
-	void newloaded() override;
+	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~MorphologyWidget() override = default;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Morpho"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("morphology.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
 
-	QRadioButton* rb_open;
-	QRadioButton* rb_close;
-	QRadioButton* rb_erode;
-	QRadioButton* rb_dilate;
-	QCheckBox* node_connectivity;
-	QCheckBox* true_3d;
-	QLineEdit* operation_radius;
-	QCheckBox* pixel_units;
-	QCheckBox* all_slices;
-	QPushButton* execute_button;
+	QRadioButton* m_RbOpen;
+	QRadioButton* m_RbClose;
+	QRadioButton* m_RbErode;
+	QRadioButton* m_RbDilate;
+	QCheckBox* m_NodeConnectivity;
+	QCheckBox* m_True3d;
+	QLineEdit* m_OperationRadius;
+	QCheckBox* m_PixelUnits;
+	QCheckBox* m_AllSlices;
+	QPushButton* m_ExecuteButton;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void execute();
-	void units_changed();
-	void all_slices_changed();
+	void BmphandChanged(Bmphandler* bmph);
+	void Execute();
+	void UnitsChanged();
+	void AllSlicesChanged();
 };
 
 } // namespace iseg
-

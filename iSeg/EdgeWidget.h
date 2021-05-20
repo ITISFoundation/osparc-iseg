@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -36,60 +36,59 @@ class EdgeWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~EdgeWidget();
+	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~EdgeWidget() override;
 	QSize sizeHint() const override;
-	void init() override;
-	void newloaded() override;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Edge"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("edge.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3VBox* vbox1;
-	QLabel* txt_sigmal;
-	QLabel* txt_sigma2;
-	QLabel* txt_thresh11;
-	QLabel* txt_thresh12;
-	QLabel* txt_thresh21;
-	QLabel* txt_thresh22;
-	QSlider* sl_sigma;
-	QSlider* sl_thresh1;
-	QSlider* sl_thresh2;
-	QCheckBox* cb_3d;
-	QPushButton* btn_export_centerlines;
-	QPushButton* btn_exec;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
+	Q3HBox* m_Hboxoverall;
+	Q3VBox* m_Vboxmethods;
+	Q3HBox* m_Hbox1;
+	Q3HBox* m_Hbox2;
+	Q3HBox* m_Hbox3;
+	Q3HBox* m_Hbox4;
+	Q3VBox* m_Vbox1;
+	QLabel* m_TxtSigmal;
+	QLabel* m_TxtSigma2;
+	QLabel* m_TxtThresh11;
+	QLabel* m_TxtThresh12;
+	QLabel* m_TxtThresh21;
+	QLabel* m_TxtThresh22;
+	QSlider* m_SlSigma;
+	QSlider* m_SlThresh1;
+	QSlider* m_SlThresh2;
+	QCheckBox* m_Cb3d;
+	QPushButton* m_BtnExportCenterlines;
+	QPushButton* m_BtnExec;
 
-	QRadioButton* rb_sobel;
-	QRadioButton* rb_laplacian;
-	QRadioButton* rb_interquartile;
-	QRadioButton* rb_momentline;
-	QRadioButton* rb_gaussline;
-	QRadioButton* rb_canny;
-	QRadioButton* rb_laplacianzero;
-	QRadioButton* rb_centerlines;
-	QButtonGroup* modegroup;
+	QRadioButton* m_RbSobel;
+	QRadioButton* m_RbLaplacian;
+	QRadioButton* m_RbInterquartile;
+	QRadioButton* m_RbMomentline;
+	QRadioButton* m_RbGaussline;
+	QRadioButton* m_RbCanny;
+	QRadioButton* m_RbLaplacianzero;
+	QRadioButton* m_RbCenterlines;
+	QButtonGroup* m_Modegroup;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void execute();
-	void export_centerlines();
-	void method_changed(int);
-	void slider_changed(int newval);
+	void BmphandChanged(Bmphandler* bmph);
+	void Execute();
+	void ExportCenterlines();
+	void MethodChanged(int);
+	void SliderChanged(int newval);
 };
 
 } // namespace iseg

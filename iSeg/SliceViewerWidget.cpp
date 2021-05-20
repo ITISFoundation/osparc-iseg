@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -12,6 +12,8 @@
 #include "SliceViewerWidget.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
+
+#include "Interface/QtConnect.h"
 
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>
@@ -31,183 +33,176 @@
 
 namespace iseg {
 
-bmptissuesliceshower::bmptissuesliceshower(
-		SlicesHandler* hand3D, unsigned short slicenr1, float thickness1,
-		float zoom1, bool orientation, bool bmpon, bool tissuevisible1,
-		bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), tissuevisible(tissuevisible1),
-			handler3D(hand3D), slicenr(slicenr1), directionx(orientation),
-			bmporwork(bmpon), thickness(thickness1), zposvisible(zposvisible1),
-			xyposvisible(xyposvisible1), xypos(xypos1), zoom(zoom1)
+Bmptissuesliceshower::Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QWidget(parent, name, wFlags), m_Tissuevisible(tissuevisible1), m_Handler3D(hand3D), m_Slicenr(slicenr1), m_Directionx(orientation), m_Bmporwork(bmpon), m_Thickness(thickness1), m_Zposvisible(zposvisible1), m_Xyposvisible(xyposvisible1), m_Xypos(xypos1), m_Zoom(zoom1)
 {
-	if (directionx)
+	if (m_Directionx)
 	{
-		if (bmporwork)
-			bmpbits = handler3D->slicebmp_x(slicenr);
+		if (m_Bmporwork)
+			m_Bmpbits = m_Handler3D->SlicebmpX(m_Slicenr);
 		else
-			bmpbits = handler3D->slicework_x(slicenr);
-		tissue = handler3D->slicetissue_x(slicenr);
-		width = handler3D->height();
-		height = handler3D->num_slices();
-		d = handler3D->get_pixelsize().low;
+			m_Bmpbits = m_Handler3D->SliceworkX(m_Slicenr);
+		m_Tissue = m_Handler3D->SlicetissueX(m_Slicenr);
+		m_Width = m_Handler3D->Height();
+		m_Height = m_Handler3D->NumSlices();
+		m_D = m_Handler3D->GetPixelsize().low;
 	}
 	else
 	{
-		if (bmporwork)
-			bmpbits = handler3D->slicebmp_y(slicenr);
+		if (m_Bmporwork)
+			m_Bmpbits = m_Handler3D->SlicebmpY(m_Slicenr);
 		else
-			bmpbits = handler3D->slicework_y(slicenr);
-		tissue = handler3D->slicetissue_y(slicenr);
-		width = handler3D->width();
-		height = handler3D->num_slices();
-		d = handler3D->get_pixelsize().high;
+			m_Bmpbits = m_Handler3D->SliceworkY(m_Slicenr);
+		m_Tissue = m_Handler3D->SlicetissueY(m_Slicenr);
+		m_Width = m_Handler3D->Width();
+		m_Height = m_Handler3D->NumSlices();
+		m_D = m_Handler3D->GetPixelsize().high;
 	}
 
-	scalefactorbmp = 1.0f;
-	scaleoffsetbmp = 0.0f;
-	scalefactorwork = 1.0f;
-	scaleoffsetwork = 0.0f;
+	m_Scalefactorbmp = 1.0f;
+	m_Scaleoffsetbmp = 0.0f;
+	m_Scalefactorwork = 1.0f;
+	m_Scaleoffsetwork = 0.0f;
 
-	image.create(int(width), int(height), 32);
+	m_Image.create(int(m_Width), int(m_Height), 32);
 
-	setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+	setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 	show();
 
-	reload_bits();
+	ReloadBits();
 }
 
-void bmptissuesliceshower::paintEvent(QPaintEvent* e)
+void Bmptissuesliceshower::paintEvent(QPaintEvent* e)
 {
-	if (image.size() != QSize(0, 0))
+	if (m_Image.size() != QSize(0, 0))
 	{ // is an image loaded?
 		QPainter painter(this);
 		painter.setClipRect(e->rect());
-		painter.scale(d * zoom, thickness * zoom);
-		painter.drawImage(0, 0, image);
+		painter.scale(m_D * m_Zoom, m_Thickness * m_Zoom);
+		painter.drawImage(0, 0, m_Image);
 	}
 }
 
-void bmptissuesliceshower::set_bmporwork(bool bmpon)
+void Bmptissuesliceshower::SetBmporwork(bool bmpon)
 {
-	if (bmpon != bmporwork)
+	if (bmpon != m_Bmporwork)
 	{
-		bmporwork = bmpon;
+		m_Bmporwork = bmpon;
 		update();
 	}
 }
 
-void bmptissuesliceshower::bmp_changed()
+void Bmptissuesliceshower::BmpChanged()
 {
-	if (bmporwork)
-	{
-		update();
-	}
-}
-
-void bmptissuesliceshower::work_changed()
-{
-	if (!bmporwork)
+	if (m_Bmporwork)
 	{
 		update();
 	}
 }
 
-void bmptissuesliceshower::update()
+void Bmptissuesliceshower::WorkChanged()
 {
-	ISEG_DEBUG("SliceViewerWidget::update (slice:" << handler3D->active_slice() << ")");
+	if (!m_Bmporwork)
+	{
+		update();
+	}
+}
+
+void Bmptissuesliceshower::update()
+{
+	ISEG_DEBUG("SliceViewerWidget::update (slice:" << m_Handler3D->ActiveSlice() << ")");
 	unsigned short w, h;
 
-	if (directionx)
+	if (m_Directionx)
 	{
-		w = handler3D->height();
-		h = handler3D->num_slices();
+		w = m_Handler3D->Height();
+		h = m_Handler3D->NumSlices();
 	}
 	else
 	{
-		w = handler3D->width();
-		h = handler3D->num_slices();
+		w = m_Handler3D->Width();
+		h = m_Handler3D->NumSlices();
 	}
 
-	if (w != width || h != height)
+	if (w != m_Width || h != m_Height)
 	{
-		width = w;
-		height = h;
-		image.create(int(w), int(h), 32);
-		setFixedSize((int)(w * d * zoom), (int)(h * thickness * zoom));
-		free(bmpbits);
-		free(tissue);
-		if (directionx)
+		m_Width = w;
+		m_Height = h;
+		m_Image.create(int(w), int(h), 32);
+		setFixedSize((int)(w * m_D * m_Zoom), (int)(h * m_Thickness * m_Zoom));
+		free(m_Bmpbits);
+		free(m_Tissue);
+		if (m_Directionx)
 		{
-			if (bmporwork)
-				bmpbits = handler3D->slicebmp_x(slicenr);
+			if (m_Bmporwork)
+				m_Bmpbits = m_Handler3D->SlicebmpX(m_Slicenr);
 			else
-				bmpbits = handler3D->slicework_x(slicenr);
-			tissue = handler3D->slicetissue_x(slicenr);
+				m_Bmpbits = m_Handler3D->SliceworkX(m_Slicenr);
+			m_Tissue = m_Handler3D->SlicetissueX(m_Slicenr);
 		}
 		else
 		{
-			if (bmporwork)
-				bmpbits = handler3D->slicebmp_y(slicenr);
+			if (m_Bmporwork)
+				m_Bmpbits = m_Handler3D->SlicebmpY(m_Slicenr);
 			else
-				bmpbits = handler3D->slicework_y(slicenr);
-			tissue = handler3D->slicetissue_y(slicenr);
+				m_Bmpbits = m_Handler3D->SliceworkY(m_Slicenr);
+			m_Tissue = m_Handler3D->SlicetissueY(m_Slicenr);
 		}
 	}
 	else
 	{
-		if (directionx)
+		if (m_Directionx)
 		{
-			if (bmporwork)
-				handler3D->slicebmp_x(bmpbits, slicenr);
+			if (m_Bmporwork)
+				m_Handler3D->SlicebmpX(m_Bmpbits, m_Slicenr);
 			else
-				handler3D->slicework_x(bmpbits, slicenr);
-			handler3D->slicetissue_x(tissue, slicenr);
+				m_Handler3D->SliceworkX(m_Bmpbits, m_Slicenr);
+			m_Handler3D->SlicetissueX(m_Tissue, m_Slicenr);
 		}
 		else
 		{
-			if (bmporwork)
-				handler3D->slicebmp_y(bmpbits, slicenr);
+			if (m_Bmporwork)
+				m_Handler3D->SlicebmpY(m_Bmpbits, m_Slicenr);
 			else
-				handler3D->slicework_y(bmpbits, slicenr);
-			handler3D->slicetissue_y(tissue, slicenr);
+				m_Handler3D->SliceworkY(m_Bmpbits, m_Slicenr);
+			m_Handler3D->SlicetissueY(m_Tissue, m_Slicenr);
 		}
 	}
 
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::reload_bits()
+void Bmptissuesliceshower::ReloadBits()
 {
 	unsigned pos = 0;
 	int f;
-	if (tissuevisible)
+	if (m_Tissuevisible)
 	{
 		float scaleoffset, scalefactor;
-		if (bmporwork)
-			scaleoffset = scaleoffsetbmp;
+		if (m_Bmporwork)
+			scaleoffset = m_Scaleoffsetbmp;
 		else
-			scaleoffset = scaleoffsetwork;
-		if (bmporwork)
-			scalefactor = scalefactorbmp;
+			scaleoffset = m_Scaleoffsetwork;
+		if (m_Bmporwork)
+			scalefactor = m_Scalefactorbmp;
 		else
-			scalefactor = scalefactorwork;
+			scalefactor = m_Scalefactorwork;
 		unsigned char r, g, b;
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < m_Height; y++)
 		{
-			for (int x = 0; x < width; x++)
+			for (int x = 0; x < m_Width; x++)
 			{
-				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
-				if (tissue[pos] == 0)
+				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (m_Bmpbits)[pos]));
+				if (m_Tissue[pos] == 0)
 				{
-					image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
+					m_Image.setPixel(x, y, qRgb(int(f), int(f), int(f)));
 				}
 				else
 				{
-					TissueInfos::GetTissueColorBlendedRGB(tissue[pos], r, g, b, f);
-					image.setPixel(x, y, qRgb(r, g, b));
+					TissueInfos::GetTissueColorBlendedRGB(m_Tissue[pos], r, g, b, f);
+					m_Image.setPixel(x, y, qRgb(r, g, b));
 				}
 				pos++;
 			}
@@ -216,403 +211,398 @@ void bmptissuesliceshower::reload_bits()
 	else
 	{
 		float scaleoffset, scalefactor;
-		if (bmporwork)
-			scaleoffset = scaleoffsetbmp;
+		if (m_Bmporwork)
+			scaleoffset = m_Scaleoffsetbmp;
 		else
-			scaleoffset = scaleoffsetwork;
-		if (bmporwork)
-			scalefactor = scalefactorbmp;
+			scaleoffset = m_Scaleoffsetwork;
+		if (m_Bmporwork)
+			scalefactor = m_Scalefactorbmp;
 		else
-			scalefactor = scalefactorwork;
-		for (int y = 0; y < height; y++)
+			scalefactor = m_Scalefactorwork;
+		for (int y = 0; y < m_Height; y++)
 		{
-			for (int x = 0; x < width; x++)
+			for (int x = 0; x < m_Width; x++)
 			{
-				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (bmpbits)[pos]));
-				image.setPixel(x, y, qRgb(f, f, f));
+				f = (int)std::max(0.0f, std::min(255.0f, scaleoffset + scalefactor * (m_Bmpbits)[pos]));
+				m_Image.setPixel(x, y, qRgb(f, f, f));
 				pos++;
 			}
 		}
 	}
 
-	if (zposvisible)
+	if (m_Zposvisible)
 	{
-		for (int x = 0; x < width; x++)
+		for (int x = 0; x < m_Width; x++)
 		{
-			image.setPixel(x, handler3D->active_slice(), qRgb(0, 255, 0));
+			m_Image.setPixel(x, m_Handler3D->ActiveSlice(), qRgb(0, 255, 0));
 		}
 	}
 
-	if (xyposvisible)
+	if (m_Xyposvisible)
 	{
-		for (int y = 0; y < height; y++)
+		for (int y = 0; y < m_Height; y++)
 		{
-			image.setPixel(xypos, y, qRgb(0, 255, 0));
+			m_Image.setPixel(m_Xypos, y, qRgb(0, 255, 0));
 		}
 	}
 }
 
-void bmptissuesliceshower::set_scale(float offset1, float factor1, bool bmporwork1)
+void Bmptissuesliceshower::SetScale(float offset1, float factor1, bool bmporwork1)
 {
 	if (bmporwork1)
 	{
-		scalefactorbmp = factor1;
-		scaleoffsetbmp = offset1;
+		m_Scalefactorbmp = factor1;
+		m_Scaleoffsetbmp = offset1;
 	}
 	else
 	{
-		scalefactorwork = factor1;
-		scaleoffsetwork = offset1;
+		m_Scalefactorwork = factor1;
+		m_Scaleoffsetwork = offset1;
 	}
 
-	if (bmporwork == bmporwork1)
+	if (m_Bmporwork == bmporwork1)
 	{
-		reload_bits();
+		ReloadBits();
 		repaint();
 	}
 }
 
-void bmptissuesliceshower::set_scaleoffset(float offset1, bool bmporwork1)
+void Bmptissuesliceshower::SetScaleoffset(float offset1, bool bmporwork1)
 {
 	if (bmporwork1)
-		scaleoffsetbmp = offset1;
+		m_Scaleoffsetbmp = offset1;
 	else
-		scaleoffsetwork = offset1;
+		m_Scaleoffsetwork = offset1;
 
-	if (bmporwork == bmporwork1)
+	if (m_Bmporwork == bmporwork1)
 	{
-		reload_bits();
+		ReloadBits();
 		repaint();
 	}
 }
 
-void bmptissuesliceshower::set_scalefactor(float factor1, bool bmporwork1)
+void Bmptissuesliceshower::SetScalefactor(float factor1, bool bmporwork1)
 {
 	if (bmporwork1)
-		scalefactorbmp = factor1;
+		m_Scalefactorbmp = factor1;
 	else
-		scalefactorwork = factor1;
+		m_Scalefactorwork = factor1;
 
-	if (bmporwork == bmporwork1)
+	if (m_Bmporwork == bmporwork1)
 	{
-		reload_bits();
+		ReloadBits();
 		repaint();
 	}
 }
 
-void bmptissuesliceshower::tissue_changed()
+void Bmptissuesliceshower::TissueChanged()
 {
-	if (directionx)
+	if (m_Directionx)
 	{
-		handler3D->slicetissue_x(tissue, slicenr);
+		m_Handler3D->SlicetissueX(m_Tissue, m_Slicenr);
 	}
 	else
 	{
-		handler3D->slicetissue_y(tissue, slicenr);
+		m_Handler3D->SlicetissueY(m_Tissue, m_Slicenr);
 	}
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::set_tissuevisible(bool on)
+void Bmptissuesliceshower::SetTissuevisible(bool on)
 {
-	tissuevisible = on;
+	m_Tissuevisible = on;
 	update();
 }
 
-void bmptissuesliceshower::slicenr_changed(int i)
+void Bmptissuesliceshower::SlicenrChanged(int i)
 {
-	slicenr = (unsigned short)i;
+	m_Slicenr = (unsigned short)i;
 	update();
 }
 
-void bmptissuesliceshower::thickness_changed(float thickness1)
+void Bmptissuesliceshower::ThicknessChanged(float thickness1)
 {
-	if (thickness != thickness1)
+	if (m_Thickness != thickness1)
 	{
-		thickness = thickness1;
+		m_Thickness = thickness1;
 
-		setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+		setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 
 		repaint();
 	}
 }
 
-void bmptissuesliceshower::pixelsize_changed(Pair pixelsize1)
+void Bmptissuesliceshower::PixelsizeChanged(Pair pixelsize1)
 {
 	float d1;
-	if (directionx)
+	if (m_Directionx)
 		d1 = pixelsize1.low;
 	else
 		d1 = pixelsize1.high;
 
-	if (d1 != d)
+	if (d1 != m_D)
 	{
-		d = d1;
+		m_D = d1;
 
-		setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+		setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 
 		repaint();
 
-		if (directionx)
+		if (m_Directionx)
 		{
-			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+			setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 		}
 		else
 		{
-			setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+			setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 		}
 	}
 }
-void bmptissuesliceshower::set_zposvisible(bool on)
+void Bmptissuesliceshower::SetZposvisible(bool on)
 {
-	zposvisible = on;
-	reload_bits();
+	m_Zposvisible = on;
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::set_xyposvisible(bool on)
+void Bmptissuesliceshower::SetXyposvisible(bool on)
 {
-	xyposvisible = on;
+	m_Xyposvisible = on;
 
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::zpos_changed()
+void Bmptissuesliceshower::ZposChanged()
 {
-	reload_bits();
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::xypos_changed(int i)
+void Bmptissuesliceshower::XyposChanged(int i)
 {
-	if (i < width)
-		xypos = i;
-	reload_bits();
+	if (i < m_Width)
+		m_Xypos = i;
+	ReloadBits();
 	repaint();
 }
 
-void bmptissuesliceshower::set_zoom(double z)
+void Bmptissuesliceshower::SetZoom(double z)
 {
-	if (z != zoom)
+	if (z != m_Zoom)
 	{
-		zoom = z;
-		setFixedSize((int)(width * d * zoom), (int)(height * thickness * zoom));
+		m_Zoom = z;
+		setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 		repaint();
 	}
 }
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation,
-		float thickness1, float zoom1,
-		QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), handler3D(hand3D), directionx(orientation),
-			xyexists(false)
+SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QWidget(parent, name, wFlags), m_Handler3D(hand3D), m_Directionx(orientation), m_Xyexists(false)
 {
-	if (directionx)
-		nrslices = handler3D->width();
+	if (m_Directionx)
+		m_Nrslices = m_Handler3D->Width();
 	else
-		nrslices = handler3D->height();
+		m_Nrslices = m_Handler3D->Height();
 
-	vbox = new Q3VBoxLayout(this);
+	m_Vbox = new Q3VBoxLayout(this);
 
-	scroller = new Q3ScrollView(this);
-	shower = new bmptissuesliceshower(handler3D, 0, thickness1, zoom1, directionx, true, true, false, false, 0, this);
+	m_Scroller = new Q3ScrollView(this);
+	m_Shower = new Bmptissuesliceshower(m_Handler3D, 0, thickness1, zoom1, m_Directionx, true, true, false, false, 0, this);
 
-	vbox->addWidget(scroller);
-	scroller->addChild(shower);
+	m_Vbox->addWidget(m_Scroller);
+	m_Scroller->addChild(m_Shower);
 
-	hbox = new Q3HBoxLayout(this);
-	vbox->addLayout(hbox);
-	hbox2 = new Q3HBoxLayout(this);
-	vbox->addLayout(hbox2);
+	m_Hbox = new Q3HBoxLayout(this);
+	m_Vbox->addLayout(m_Hbox);
+	m_Hbox2 = new Q3HBoxLayout(this);
+	m_Vbox->addLayout(m_Hbox2);
 
-	cb_tissuevisible = new QCheckBox("Show tissues", this);
-	hbox->addWidget(cb_tissuevisible);
-	cb_tissuevisible->setChecked(true);
+	m_CbTissuevisible = new QCheckBox("Show tissues", this);
+	m_Hbox->addWidget(m_CbTissuevisible);
+	m_CbTissuevisible->setChecked(true);
 
-	rb_bmp = new QRadioButton("Source", this);
-	hbox->addWidget(rb_bmp);
-	rb_work = new QRadioButton("Target", this);
-	hbox->addWidget(rb_work);
+	m_RbBmp = new QRadioButton("Source", this);
+	m_Hbox->addWidget(m_RbBmp);
+	m_RbWork = new QRadioButton("Target", this);
+	m_Hbox->addWidget(m_RbWork);
 
-	bg_bmporwork = new QButtonGroup(this);
-	bg_bmporwork->insert(rb_bmp);
-	bg_bmporwork->insert(rb_work);
+	m_BgBmporwork = new QButtonGroup(this);
+	m_BgBmporwork->insert(m_RbBmp);
+	m_BgBmporwork->insert(m_RbWork);
 
-	cb_zposvisible = new QCheckBox("Show zpos", this);
-	hbox2->addWidget(cb_zposvisible);
-	cb_zposvisible->setChecked(false);
-	cb_xyposvisible = new QCheckBox("Show xypos", this);
-	hbox2->addWidget(cb_xyposvisible);
-	cb_xyposvisible->setChecked(false);
-	cb_xyposvisible->setEnabled(false);
+	m_CbZposvisible = new QCheckBox("Show zpos", this);
+	m_Hbox2->addWidget(m_CbZposvisible);
+	m_CbZposvisible->setChecked(false);
+	m_CbXyposvisible = new QCheckBox("Show xypos", this);
+	m_Hbox2->addWidget(m_CbXyposvisible);
+	m_CbXyposvisible->setChecked(false);
+	m_CbXyposvisible->setEnabled(false);
 
-	rb_bmp->setChecked(TRUE);
+	m_RbBmp->setChecked(TRUE);
 
-	qsb_slicenr = new QScrollBar(1, nrslices, 1, 5, 1, Qt::Horizontal, this);
-	vbox->addWidget(qsb_slicenr);
+	m_QsbSlicenr = new QScrollBar(1, m_Nrslices, 1, 5, 1, Qt::Horizontal, this);
+	m_Vbox->addWidget(m_QsbSlicenr);
 
-	connect(qsb_slicenr, SIGNAL(valueChanged(int)), this, SLOT(slicenr_changed(int)));
-	connect(cb_tissuevisible, SIGNAL(clicked()), this, SLOT(tissuevisible_changed()));
-	connect(bg_bmporwork, SIGNAL(buttonClicked(int)), this, SLOT(workorbmp_changed()));
+	QObject_connect(m_QsbSlicenr, SIGNAL(valueChanged(int)), this, SLOT(SlicenrChanged(int)));
+	QObject_connect(m_CbTissuevisible, SIGNAL(clicked()), this, SLOT(TissuevisibleChanged()));
+	QObject_connect(m_BgBmporwork, SIGNAL(buttonClicked(int)), this, SLOT(WorkorbmpChanged()));
 
-	connect(cb_xyposvisible, SIGNAL(clicked()), this, SLOT(xyposvisible_changed()));
-	connect(cb_zposvisible, SIGNAL(clicked()), this, SLOT(zposvisible_changed()));
+	QObject_connect(m_CbXyposvisible, SIGNAL(clicked()), this, SLOT(XyposvisibleChanged()));
+	QObject_connect(m_CbZposvisible, SIGNAL(clicked()), this, SLOT(ZposvisibleChanged()));
 
 	show();
 }
 
 SliceViewerWidget::~SliceViewerWidget()
 {
-	delete vbox;
-	delete shower;
-	delete scroller;
-	delete cb_tissuevisible;
-	delete cb_zposvisible;
-	delete cb_xyposvisible;
-	delete rb_bmp;
-	delete rb_work;
-	delete bg_bmporwork;
-	delete qsb_slicenr;
+	delete m_Vbox;
+	delete m_Shower;
+	delete m_Scroller;
+	delete m_CbTissuevisible;
+	delete m_CbZposvisible;
+	delete m_CbXyposvisible;
+	delete m_RbBmp;
+	delete m_RbWork;
+	delete m_BgBmporwork;
+	delete m_QsbSlicenr;
 }
 
 void SliceViewerWidget::closeEvent(QCloseEvent* qce)
 {
-	emit hasbeenclosed();
+	emit Hasbeenclosed();
 	QWidget::closeEvent(qce);
 }
 
-void SliceViewerWidget::slicenr_changed(int i)
+void SliceViewerWidget::SlicenrChanged(int i)
 {
-	shower->slicenr_changed(i - 1);
-	emit slice_changed(i - 1);
+	m_Shower->SlicenrChanged(i - 1);
+	emit SliceChanged(i - 1);
 }
 
-int SliceViewerWidget::get_slicenr() { return qsb_slicenr->value() - 1; }
+int SliceViewerWidget::GetSlicenr() { return m_QsbSlicenr->value() - 1; }
 
-void SliceViewerWidget::bmp_changed()
+void SliceViewerWidget::BmpChanged()
 {
-	if (rb_bmp->isChecked())
+	if (m_RbBmp->isChecked())
 	{
 		unsigned short nrslicesnew;
-		if (directionx)
-			nrslicesnew = handler3D->width();
+		if (m_Directionx)
+			nrslicesnew = m_Handler3D->Width();
 		else
-			nrslicesnew = handler3D->height();
+			nrslicesnew = m_Handler3D->Height();
 
-		if (nrslicesnew != nrslices)
+		if (nrslicesnew != m_Nrslices)
 		{
-			nrslices = nrslicesnew;
-			qsb_slicenr->setMaxValue((int)nrslices);
-			qsb_slicenr->setValue(1);
-			shower->slicenr_changed(0);
+			m_Nrslices = nrslicesnew;
+			m_QsbSlicenr->setMaxValue((int)m_Nrslices);
+			m_QsbSlicenr->setValue(1);
+			m_Shower->SlicenrChanged(0);
 		}
 		else
-			shower->bmp_changed();
+			m_Shower->BmpChanged();
 
-		qsb_slicenr->setFixedWidth(shower->size().width());
+		m_QsbSlicenr->setFixedWidth(m_Shower->size().width());
 	}
 }
 
-void SliceViewerWidget::work_changed()
+void SliceViewerWidget::WorkChanged()
 {
-	if (rb_work->isChecked())
+	if (m_RbWork->isChecked())
 	{
 		unsigned short nrslicesnew;
-		if (directionx)
-			nrslicesnew = handler3D->width();
+		if (m_Directionx)
+			nrslicesnew = m_Handler3D->Width();
 		else
-			nrslicesnew = handler3D->height();
+			nrslicesnew = m_Handler3D->Height();
 
-		if (nrslicesnew != nrslices)
+		if (nrslicesnew != m_Nrslices)
 		{
-			nrslices = nrslicesnew;
-			qsb_slicenr->setMaxValue((int)nrslices);
-			qsb_slicenr->setValue(1);
-			shower->slicenr_changed(0);
+			m_Nrslices = nrslicesnew;
+			m_QsbSlicenr->setMaxValue((int)m_Nrslices);
+			m_QsbSlicenr->setValue(1);
+			m_Shower->SlicenrChanged(0);
 		}
 		else
-			shower->bmp_changed();
+			m_Shower->BmpChanged();
 
-		qsb_slicenr->setFixedWidth(shower->size().width());
+		m_QsbSlicenr->setFixedWidth(m_Shower->size().width());
 	}
 }
 
-void SliceViewerWidget::tissue_changed() { shower->tissue_changed(); }
+void SliceViewerWidget::TissueChanged() { m_Shower->TissueChanged(); }
 
-void SliceViewerWidget::tissuevisible_changed()
+void SliceViewerWidget::TissuevisibleChanged()
 {
-	shower->set_tissuevisible(cb_tissuevisible->isChecked());
+	m_Shower->SetTissuevisible(m_CbTissuevisible->isChecked());
 }
 
-void SliceViewerWidget::workorbmp_changed()
+void SliceViewerWidget::WorkorbmpChanged()
 {
-	if (rb_bmp->isChecked())
+	if (m_RbBmp->isChecked())
 	{
-		shower->set_bmporwork(true);
+		m_Shower->SetBmporwork(true);
 	}
 	else
 	{
-		shower->set_bmporwork(false);
+		m_Shower->SetBmporwork(false);
 	}
 }
 
-void SliceViewerWidget::thickness_changed(float thickness1)
+void SliceViewerWidget::ThicknessChanged(float thickness1)
 {
-	shower->thickness_changed(thickness1);
+	m_Shower->ThicknessChanged(thickness1);
 }
 
-void SliceViewerWidget::pixelsize_changed(Pair pixelsize1)
+void SliceViewerWidget::PixelsizeChanged(Pair pixelsize1)
 {
-	shower->pixelsize_changed(pixelsize1);
+	m_Shower->PixelsizeChanged(pixelsize1);
 }
 
-void SliceViewerWidget::xyexists_changed(bool on)
+void SliceViewerWidget::XyexistsChanged(bool on)
 {
-	cb_xyposvisible->setEnabled(on);
+	m_CbXyposvisible->setEnabled(on);
 	if (on)
 	{
-		shower->set_xyposvisible(cb_xyposvisible->isChecked());
+		m_Shower->SetXyposvisible(m_CbXyposvisible->isChecked());
 	}
 }
 
-void SliceViewerWidget::zpos_changed() { shower->zpos_changed(); }
+void SliceViewerWidget::ZposChanged() { m_Shower->ZposChanged(); }
 
-void SliceViewerWidget::xypos_changed(int i) { shower->xypos_changed(i); }
+void SliceViewerWidget::XyposChanged(int i) { m_Shower->XyposChanged(i); }
 
-void SliceViewerWidget::xyposvisible_changed()
+void SliceViewerWidget::XyposvisibleChanged()
 {
-	shower->set_xyposvisible(cb_xyposvisible->isChecked());
+	m_Shower->SetXyposvisible(m_CbXyposvisible->isChecked());
 }
 
-void SliceViewerWidget::zposvisible_changed()
+void SliceViewerWidget::ZposvisibleChanged()
 {
-	shower->set_zposvisible(cb_zposvisible->isChecked());
+	m_Shower->SetZposvisible(m_CbZposvisible->isChecked());
 }
 
-void SliceViewerWidget::set_zoom(double z)
+void SliceViewerWidget::SetZoom(double z)
 {
-	shower->set_zoom(z);
+	m_Shower->SetZoom(z);
 }
 
-void SliceViewerWidget::set_scale(float offset1, float factor1,
-		bool bmporwork1)
+void SliceViewerWidget::SetScale(float offset1, float factor1, bool bmporwork1)
 {
-	shower->set_scale(offset1, factor1, bmporwork1);
+	m_Shower->SetScale(offset1, factor1, bmporwork1);
 }
 
-void SliceViewerWidget::set_scaleoffset(float offset1, bool bmporwork1)
+void SliceViewerWidget::SetScaleoffset(float offset1, bool bmporwork1)
 {
-	shower->set_scaleoffset(offset1, bmporwork1);
+	m_Shower->SetScaleoffset(offset1, bmporwork1);
 }
 
-void SliceViewerWidget::set_scalefactor(float factor1, bool bmporwork1)
+void SliceViewerWidget::SetScalefactor(float factor1, bool bmporwork1)
 {
-	shower->set_scalefactor(factor1, bmporwork1);
+	m_Shower->SetScalefactor(factor1, bmporwork1);
 }
 
-}// namespace iseg
+} // namespace iseg

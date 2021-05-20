@@ -33,17 +33,13 @@
 #include "../../../Data/BorderIterator.h"
 #include "../../IGridEnergy.h"
 
-namespace Gc
-{    
-	namespace Energy
-	{
-        namespace Min
-        {
-            namespace Grid
-            {
-                /***********************************************************************************/
+namespace Gc {
+namespace Energy {
+namespace Min {
+namespace Grid {
+/***********************************************************************************/
 
-                /** Calculate the labeling energy for a given IGridEnergy object and labeling.
+/** Calculate the labeling energy for a given IGridEnergy object and labeling.
                 
                     @param[in] e %Grid energy specification. 
                     @param[in] mask %Grid mask.
@@ -59,79 +55,79 @@ namespace Gc
 
                     @see IGridEnergy.
                 */
-                template <Size N, class T, class L>
-                void LabelingEnergy(const IGridEnergy<N,T,L> &e, 
-                    const System::Collection::IArrayMask<N> &mask,
-                    System::Collection::Array<1,L> &lab, T &edata, T &esmooth)
+template <Size N, class T, class L>
+void LabelingEnergy(const IGridEnergy<N, T, L> & e,
+                    const System::Collection::IArrayMask<N> & mask,
+                    System::Collection::Array<1, L> & lab, T & edata, T & esmooth)
+{
+    // Backward indexes
+    const System::Collection::Array<N, Size> & bw_idx(mask.BackwardIndexes());
+
+    // Get neighbourhood system
+    const Neighbourhood<N, Int32> & nb = e.NbSystem();
+
+    // Get neighbour offsets
+    Math::Algebra::Vector<N, Size> gdim = e.Dimensions();
+    System::Collection::Array<1, Int32> ofs;
+    System::Collection::Array<N, L>::Indexes(gdim, nb, ofs);
+
+    // Get neighbourhood extent
+    Math::Algebra::Vector<N, Size> bleft, bright;
+    nb.Extent(bleft, bright);
+
+    // Create data iterator
+    Data::BorderIterator<N> iter(gdim, bleft, bright);
+    iter.Start(false);
+
+    Math::Algebra::Vector<N, Size> ncur = iter.CurPos();
+    Size bsize;
+    bool border;
+
+    // Get labeling energy
+    Size n1 = 0, n2, n1u = 0, n2u;
+
+    edata = 0;
+    esmooth = 0;
+
+    while (!iter.IsFinished())
+    {
+        border = iter.NextBlock(bsize);
+
+        while (bsize-- > 0)
+        {
+            if (!mask.IsMasked(n1))
+            {
+                // Data cost - unary clique potential
+                edata += e.CliquePotential(n1, lab[n1u]);
+
+                // Smoothness costs - pairwise clique potentials
+                for (Size i = 0; i < nb.Elements() / 2; i++)
                 {
-                    // Backward indexes
-                    const System::Collection::Array<N,Size> &bw_idx(mask.BackwardIndexes());
-
-                    // Get neighbourhood system
-                    const Neighbourhood<N,Int32> &nb = e.NbSystem();
-
-                    // Get neighbour offsets
-                    Math::Algebra::Vector<N,Size> gdim = e.Dimensions();
-                    System::Collection::Array<1,Int32> ofs;
-                    System::Collection::Array<N,L>::Indexes(gdim, nb, ofs);
-
-                    // Get neighbourhood extent
-                    Math::Algebra::Vector<N,Size> bleft, bright;
-                    nb.Extent(bleft, bright);
-
-                    // Create data iterator
-                    Data::BorderIterator<N> iter(gdim, bleft, bright);
-                    iter.Start(false);
-                    
-                    Math::Algebra::Vector<N,Size> ncur = iter.CurPos();
-                    Size bsize;
-                    bool border;
-
-                    // Get labeling energy
-                    Size n1 = 0, n2, n1u = 0, n2u;
-
-                    edata = 0;
-                    esmooth = 0;
-                    
-                    while (!iter.IsFinished())
+                    if (!border || System::Collection::Array<N, L>::IsNeighbourInside(gdim, ncur, nb[i]))
                     {
-                        border = iter.NextBlock(bsize);
+                        n2 = n1 + ofs[i];
 
-                        while (bsize-- > 0)
+                        if (!mask.IsMasked(n2))
                         {
-                            if (!mask.IsMasked(n1))
-                            {
-                                // Data cost - unary clique potential
-                                edata += e.CliquePotential(n1, lab[n1u]);
-
-                                // Smoothness costs - pairwise clique potentials
-                                for (Size i = 0; i < nb.Elements() / 2; i++)
-                                {
-                                    if (!border || System::Collection::Array<N,L>::IsNeighbourInside(gdim, ncur, nb[i]))
-                                    {
-                                        n2 = n1 + ofs[i];
-
-                                        if (!mask.IsMasked(n2))
-                                        {
-                                            n2u = bw_idx[n2];
-                                            esmooth += e.CliquePotential(n1, n2, i, lab[n1u], lab[n2u]);
-                                        }
-                                    }
-                                }
-
-                                n1u++;
-                            }
-
-                            iter.NextPos(ncur);
-                            n1++;
+                            n2u = bw_idx[n2];
+                            esmooth += e.CliquePotential(n1, n2, i, lab[n1u], lab[n2u]);
                         }
                     }
                 }
 
-                /***********************************************************************************/
+                n1u++;
             }
+
+            iter.NextPos(ncur);
+            n1++;
         }
-	}
+    }
 }
+
+/***********************************************************************************/
+}
+}
+}
+} // namespace Gc::Energy::Min::Grid
 
 #endif

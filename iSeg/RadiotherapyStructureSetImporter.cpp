@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,6 +13,8 @@
 #include "StdStringToQString.h"
 #include "TissueInfos.h"
 
+#include "Interface/QtConnect.h"
+
 #include "Core/fillcontour.h"
 
 #include <qfiledialog.h>
@@ -23,9 +25,9 @@
 namespace iseg {
 
 RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadfilename, SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
 {
-	vbox1 = nullptr;
+	m_Vbox1 = nullptr;
 
 	if (loadfilename.isEmpty())
 	{
@@ -33,133 +35,133 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 		return;
 	}
 
-	tissues.clear();
-	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(), tissues);
+	m_Tissues.clear();
+	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(), m_Tissues);
 
-	vecignore.resize(tissues.size());
-	vecpriorities.resize(tissues.size());
-	vectissuenames.resize(tissues.size());
-	vectissuenrs.resize(tissues.size());
-	vecnew.resize(tissues.size());
+	m_Vecignore.resize(m_Tissues.size());
+	m_Vecpriorities.resize(m_Tissues.size());
+	m_Vectissuenames.resize(m_Tissues.size());
+	m_Vectissuenrs.resize(m_Tissues.size());
+	m_Vecnew.resize(m_Tissues.size());
 
 	tissues_size_t tissuenr;
 	std::string namedummy = std::string("");
 	tissues_size_t nrnew = 1;
-	for (size_t i = 0; i < tissues.size(); i++)
+	for (size_t i = 0; i < m_Tissues.size(); i++)
 	{
-		vecignore[i] = false;
-		vecpriorities[i] = i + 1;
-		if (tissues[i]->name != namedummy)
+		m_Vecignore[i] = false;
+		m_Vecpriorities[i] = i + 1;
+		if (m_Tissues[i]->name != namedummy)
 		{
-			vectissuenames[i] = tissues[i]->name;
+			m_Vectissuenames[i] = m_Tissues[i]->name;
 		}
 		else
 		{
 			QString sdummy;
 			sdummy.setNum(nrnew);
-			vectissuenames[i] = std::string("tissue") + sdummy.toAscii().data();
+			m_Vectissuenames[i] = std::string("tissue") + sdummy.toStdString();
 			nrnew++;
 		}
 
 		for (tissuenr = 0;
 				 tissuenr < TissueInfos::GetTissueCount() &&
-				 tissues[i]->name != TissueInfos::GetTissueName(tissuenr + 1);
+				 m_Tissues[i]->name != TissueInfos::GetTissueName(tissuenr + 1);
 				 tissuenr++)
 		{}
 		if (tissuenr == (tissues_size_t)TissueInfos::GetTissueCount())
 		{
-			vecnew[i] = true;
-			vectissuenrs[i] = 0;
+			m_Vecnew[i] = true;
+			m_Vectissuenrs[i] = 0;
 		}
 		else
 		{
-			vecnew[i] = false;
-			vectissuenrs[i] = tissuenr;
+			m_Vecnew[i] = false;
+			m_Vectissuenrs[i] = tissuenr;
 		}
 	}
 
-	vbox1 = new Q3VBox(this);
-	cb_solids = new QComboBox(vbox1);
-	for (size_t i = 0; i < tissues.size(); i++)
+	m_Vbox1 = new Q3VBox(this);
+	m_CbSolids = new QComboBox(m_Vbox1);
+	for (size_t i = 0; i < m_Tissues.size(); i++)
 	{
-		cb_solids->insertItem(QString(tissues[i]->name.c_str()));
+		m_CbSolids->insertItem(QString(m_Tissues[i]->name.c_str()));
 	}
 
-	currentitem = cb_solids->currentItem();
+	m_Currentitem = m_CbSolids->currentItem();
 
-	cb_ignore = new QCheckBox("Ignore", vbox1);
-	cb_ignore->setChecked(vecignore[cb_solids->currentItem()]);
+	m_CbIgnore = new QCheckBox("Ignore", m_Vbox1);
+	m_CbIgnore->setChecked(m_Vecignore[m_CbSolids->currentItem()]);
 
-	hbox1 = new Q3HBox(vbox1);
-	lb_priority = new QLabel(QString("Priority: "), hbox1);
-	sb_priority = new QSpinBox(1, tissues.size(), 1, hbox1);
-	sb_priority->setValue(vecpriorities[cb_solids->currentItem()]);
-	QPushButton* infoButton = new QPushButton(hbox1);
-	infoButton->setText("Info");
+	m_Hbox1 = new Q3HBox(m_Vbox1);
+	m_LbPriority = new QLabel(QString("Priority: "), m_Hbox1);
+	m_SbPriority = new QSpinBox(1, m_Tissues.size(), 1, m_Hbox1);
+	m_SbPriority->setValue(m_Vecpriorities[m_CbSolids->currentItem()]);
+	QPushButton* info_button = new QPushButton(m_Hbox1);
+	info_button->setText("Info");
 
-	cb_new = new QCheckBox("New Tissue", vbox1);
-	cb_new->setChecked(vecnew[cb_solids->currentItem()]);
+	m_CbNew = new QCheckBox("New Tissue", m_Vbox1);
+	m_CbNew->setChecked(m_Vecnew[m_CbSolids->currentItem()]);
 
-	hbox2 = new Q3HBox(vbox1);
-	lb_namele = new QLabel(QString("Name: "), hbox2);
-	le_name =
-			new QLineEdit(vectissuenames[cb_solids->currentItem()].c_str(), hbox2);
+	m_Hbox2 = new Q3HBox(m_Vbox1);
+	m_LbNamele = new QLabel(QString("Name: "), m_Hbox2);
+	m_LeName =
+			new QLineEdit(m_Vectissuenames[m_CbSolids->currentItem()].c_str(), m_Hbox2);
 
-	hbox3 = new Q3HBox(vbox1);
-	lb_namecb = new QLabel(QString("Name: "), hbox3);
-	cb_names = new QComboBox(hbox3);
+	m_Hbox3 = new Q3HBox(m_Vbox1);
+	m_LbNamecb = new QLabel(QString("Name: "), m_Hbox3);
+	m_CbNames = new QComboBox(m_Hbox3);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
 	{
-		cb_names->insertItem(ToQ(TissueInfos::GetTissueName(i)));
+		m_CbNames->insertItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
-	cb_names->setCurrentItem(vectissuenrs[cb_solids->currentItem()]);
+	m_CbNames->setCurrentItem(m_Vectissuenrs[m_CbSolids->currentItem()]);
 
-	hbox4 = new Q3HBox(vbox1);
-	pb_ok = new QPushButton("OK", hbox4);
-	pb_cancel = new QPushButton("Cancel", hbox4);
+	m_Hbox4 = new Q3HBox(m_Vbox1);
+	m_PbOk = new QPushButton("OK", m_Hbox4);
+	m_PbCancel = new QPushButton("Cancel", m_Hbox4);
 
-	vbox1->setFixedSize(vbox1->sizeHint());
-	setFixedSize(vbox1->size());
+	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
+	setFixedSize(m_Vbox1->size());
 
-	updatevisibility();
+	Updatevisibility();
 
-	connect(cb_solids, SIGNAL(activated(int)), this, SLOT(solid_changed(int)));
-	connect(pb_cancel, SIGNAL(clicked()), this, SLOT(close()));
-	connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
-	connect(cb_ignore, SIGNAL(clicked()), this, SLOT(ignore_changed()));
-	connect(pb_ok, SIGNAL(clicked()), this, SLOT(ok_pressed()));
-	connect(infoButton, SIGNAL(clicked()), this, SLOT(show_priorityInfo()));
+	QObject_connect(m_CbSolids, SIGNAL(activated(int)), this, SLOT(SolidChanged(int)));
+	QObject_connect(m_PbCancel, SIGNAL(clicked()), this, SLOT(close()));
+	QObject_connect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
+	QObject_connect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
+	QObject_connect(m_PbOk, SIGNAL(clicked()), this, SLOT(OkPressed()));
+	QObject_connect(info_button, SIGNAL(clicked()), this, SLOT(ShowPriorityInfo()));
 }
 
-RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() {}
+RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() = default;
 
-void RadiotherapyStructureSetImporter::solid_changed(int i)
+void RadiotherapyStructureSetImporter::SolidChanged(int i)
 {
-	storeparams();
-	disconnect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
-	disconnect(cb_ignore, SIGNAL(clicked()), this, SLOT(ignore_changed()));
-	currentitem = i;
-	cb_ignore->setChecked(vecignore[i]);
-	sb_priority->setValue(vecpriorities[i]);
-	cb_new->setChecked(vecnew[i]);
-	le_name->setText(vectissuenames[i].c_str());
-	cb_names->setCurrentItem(vectissuenrs[i]);
-	connect(cb_new, SIGNAL(clicked()), this, SLOT(new_changed()));
-	connect(cb_ignore, SIGNAL(clicked()), this, SLOT(ignore_changed()));
-	updatevisibility();
+	Storeparams();
+	QObject_disconnect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
+	QObject_disconnect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
+	m_Currentitem = i;
+	m_CbIgnore->setChecked(m_Vecignore[i]);
+	m_SbPriority->setValue(m_Vecpriorities[i]);
+	m_CbNew->setChecked(m_Vecnew[i]);
+	m_LeName->setText(m_Vectissuenames[i].c_str());
+	m_CbNames->setCurrentItem(m_Vectissuenrs[i]);
+	QObject_connect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
+	QObject_connect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
+	Updatevisibility();
 }
 
-void RadiotherapyStructureSetImporter::new_changed()
+void RadiotherapyStructureSetImporter::NewChanged()
 {
-	storeparams();
-	updatevisibility();
+	Storeparams();
+	Updatevisibility();
 }
 
-void RadiotherapyStructureSetImporter::ok_pressed()
+void RadiotherapyStructureSetImporter::OkPressed()
 {
-	storeparams();
+	Storeparams();
 
-	bool* mask = new bool[handler3D->return_area()];
+	bool* mask = new bool[m_Handler3D->ReturnArea()];
 	if (mask == nullptr)
 	{
 		QMessageBox::about(this, "Warning", "Not enough memory");
@@ -167,9 +169,9 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	}
 
 	tissues_size_t nrnew = 0;
-	for (size_t i = 0; i < tissues.size(); i++)
+	for (size_t i = 0; i < m_Tissues.size(); i++)
 	{
-		if (vecignore[i] == false && !vectissuenames[i].empty() && vecnew[i] == true)
+		if (m_Vecignore[i] == false && !m_Vectissuenames[i].empty() && m_Vecnew[i] == true)
 			nrnew++;
 	}
 	if (nrnew >= TISSUES_SIZE_MAX - 1 - TissueInfos::GetTissueCount())
@@ -179,13 +181,13 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 	}
 
 	Pair p;
-	p = handler3D->get_pixelsize();
-	float thick = handler3D->get_slicethickness();
+	p = m_Handler3D->GetPixelsize();
+	float thick = m_Handler3D->GetSlicethickness();
 	float disp[3];
-	handler3D->get_displacement(disp);
+	m_Handler3D->GetDisplacement(disp);
 	float dc[6];
-	handler3D->get_direction_cosines(dc);
-	unsigned short pixel_extents[2] = {handler3D->width(), handler3D->height()};
+	m_Handler3D->GetDirectionCosines(dc);
+	unsigned short pixel_extents[2] = {m_Handler3D->Width(), m_Handler3D->Height()};
 	float pixel_size[2] = {p.high, p.low};
 
 	ISEG_INFO("RTStruct import: thickness = " << thick);
@@ -196,43 +198,43 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 		return;
 	}
 
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this);
+	DataSelection data_selection;
+	data_selection.allSlices = true;
+	data_selection.tissues = true;
+	emit BeginDatachange(data_selection, this);
 
 	bool error = false;
 	tissues_size_t tissuenr;
 	std::string namedummy;
-	for (int i = 1; i <= tissues.size(); i++) // i is priority
+	for (int i = 1; i <= m_Tissues.size(); i++) // i is priority
 	{
 		if (error)
 			break;
 
-		gdcmvtk_rtstruct::tissuevec::iterator it = tissues.begin();
+		gdcmvtk_rtstruct::tissuevec::iterator it = m_Tissues.begin();
 		int j = 0;
-		while (vecpriorities[j] != i) // j is tissue index, processed in order of priority
+		while (m_Vecpriorities[j] != i) // j is tissue index, processed in order of priority
 			j++, it++;
 
-		if (vecignore[j] == false && ((!vecnew[j]) || (!vectissuenames[j].empty())))
+		if (m_Vecignore[j] == false && ((!m_Vecnew[j]) || (!m_Vectissuenames[j].empty())))
 		{
 			const auto& rtstruct_i = *it;
 
-			if (vecnew[j])
+			if (m_Vecnew[j])
 			{
-				TissueInfo tissueInfo;
-				tissueInfo.name = vectissuenames[j].c_str();
-				tissueInfo.locked = false;
-				tissueInfo.opac = 0.5f;
-				tissueInfo.color[0] = rtstruct_i->color[0];
-				tissueInfo.color[1] = rtstruct_i->color[1];
-				tissueInfo.color[2] = rtstruct_i->color[2];
-				TissueInfos::AddTissue(tissueInfo);
+				TissueInfo tissue_info;
+				tissue_info.m_Name = m_Vectissuenames[j];
+				tissue_info.m_Locked = false;
+				tissue_info.m_Opac = 0.5f;
+				tissue_info.m_Color[0] = rtstruct_i->color[0];
+				tissue_info.m_Color[1] = rtstruct_i->color[1];
+				tissue_info.m_Color[2] = rtstruct_i->color[2];
+				TissueInfos::AddTissue(tissue_info);
 				tissuenr = TissueInfos::GetTissueCount();
 			}
 			else
 			{
-				tissuenr = vectissuenrs[j] + 1;
+				tissuenr = m_Vectissuenrs[j] + 1;
 			}
 
 			size_t pospoints = 0;
@@ -254,8 +256,8 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 					posoutlines++;
 				}
 
-				const int startSL = handler3D->start_slice();
-				const int endSL = handler3D->end_slice();
+				const int start_sl = m_Handler3D->StartSlice();
+				const int end_sl = m_Handler3D->EndSlice();
 
 				float swap_z = dc[0] * dc[4];
 				int slicenr = round(swap_z * (disp[2] - zcoord) / thick);
@@ -263,18 +265,16 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 				if (slicenr < 0 && swap_z > 0.f)
 				{
 					ISEG_WARNING("RTStruct import: strange slice value " << slicenr);
-					slicenr = endSL + slicenr; // TODO this is strange!
+					slicenr = end_sl + slicenr; // TODO this is strange!
 				}
 
 				ISEG_INFO("RTStruct import: importing slice " << slicenr)
 
-				if (slicenr >= startSL && slicenr < endSL)
+				if (slicenr >= start_sl && slicenr < end_sl)
 				{
 					try
 					{
-						fillcontours::fill_contour(mask, pixel_extents, disp,
-								pixel_size, dc, &(points[0]),
-								nrpoints, points.size(), clockwisefill);
+						fillcontours::fill_contour(mask, pixel_extents, disp, pixel_size, dc, &(points[0]), nrpoints, points.size(), clockwisefill);
 					}
 					catch (std::exception& e)
 					{
@@ -282,7 +282,7 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 						error = true;
 						break;
 					}
-					handler3D->add2tissue(tissuenr, mask, static_cast<unsigned short>(slicenr), true);
+					m_Handler3D->Add2tissue(tissuenr, mask, static_cast<unsigned short>(slicenr), true);
 				}
 				else
 				{
@@ -292,77 +292,75 @@ void RadiotherapyStructureSetImporter::ok_pressed()
 		}
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 
 	delete[] mask;
 
 	close();
 }
 
-void RadiotherapyStructureSetImporter::show_priorityInfo()
+void RadiotherapyStructureSetImporter::ShowPriorityInfo()
 {
-	QMessageBox::information(
-			this, "Priority Information",
-			"1) Tissues have been sorted so that higher priority is given to the "
-			"smallest tissues.<br>"
-			"2) The higher number of priority, higher priority will have.");
+	QMessageBox::information(this, "Priority Information", "1) Tissues have been sorted so that higher priority is given to the "
+																												 "smallest tissues.<br>"
+																												 "2) The higher number of priority, higher priority will have.");
 }
 
-void RadiotherapyStructureSetImporter::ignore_changed()
+void RadiotherapyStructureSetImporter::IgnoreChanged()
 {
-	storeparams();
-	updatevisibility();
+	Storeparams();
+	Updatevisibility();
 }
 
-void RadiotherapyStructureSetImporter::updatevisibility()
+void RadiotherapyStructureSetImporter::Updatevisibility()
 {
-	if (vecignore[cb_solids->currentItem()])
+	if (m_Vecignore[m_CbSolids->currentItem()])
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		cb_new->hide();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_CbNew->hide();
 	}
 	else
 	{
-		hbox1->show();
-		cb_new->show();
-		if (vecnew[cb_solids->currentItem()])
+		m_Hbox1->show();
+		m_CbNew->show();
+		if (m_Vecnew[m_CbSolids->currentItem()])
 		{
-			hbox2->show();
-			hbox3->hide();
+			m_Hbox2->show();
+			m_Hbox3->hide();
 		}
 		else
 		{
-			hbox2->hide();
-			hbox3->show();
+			m_Hbox2->hide();
+			m_Hbox3->show();
 		}
 	}
 }
 
-void RadiotherapyStructureSetImporter::storeparams()
+void RadiotherapyStructureSetImporter::Storeparams()
 {
-	int dummy = vecpriorities[currentitem];
+	int dummy = m_Vecpriorities[m_Currentitem];
 
-	vecnew[currentitem] = cb_new->isChecked();
-	vecignore[currentitem] = cb_ignore->isChecked();
-	vectissuenrs[currentitem] = cb_names->currentItem();
-	vectissuenames[currentitem] = le_name->text().toAscii().data();
+	m_Vecnew[m_Currentitem] = m_CbNew->isChecked();
+	m_Vecignore[m_Currentitem] = m_CbIgnore->isChecked();
+	m_Vectissuenrs[m_Currentitem] = m_CbNames->currentItem();
+	m_Vectissuenames[m_Currentitem] = m_LeName->text().toAscii().data();
 
-	if (dummy != sb_priority->value())
+	if (dummy != m_SbPriority->value())
 	{
-		vecpriorities[currentitem] = sb_priority->value();
+		m_Vecpriorities[m_Currentitem] = m_SbPriority->value();
 		int pos = 0;
-		if (currentitem == 0)
+		if (m_Currentitem == 0)
 			pos = 1;
-		while (vecpriorities[pos] != vecpriorities[currentitem])
+		while (m_Vecpriorities[pos] != m_Vecpriorities[m_Currentitem])
 		{
 			pos++;
-			if (pos == currentitem)
+			if (pos == m_Currentitem)
 				pos++;
 		}
-		vecpriorities[pos] = dummy;
+		m_Vecpriorities[pos] = dummy;
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

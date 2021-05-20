@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,9 +19,8 @@ public:
 	ConfidencePlugin();
 	~ConfidencePlugin();
 
-	std::string name() const override { return "Example Addon 1"; }
-	std::string description() const override { return "Hello World"; }
-	WidgetInterface* create_widget(QWidget* parent, const char* name,
-			Qt::WindowFlags wFlags) const override;
+	std::string Name() const override { return "Example Addon 1"; }
+	std::string Description() const override { return "Hello World"; }
+	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
 };
 }} // namespace iseg::plugin

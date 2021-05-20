@@ -13,7 +13,7 @@ namespace topology {
 template<typename T>
 inline int CountIf(const T& v)
 {
-	static_assert(std::is_same<T,bool>::value, "CountIf argument must be a boolean.");
+	static_assert(std::is_same<T, bool>::value, "CountIf argument must be a boolean.");
 	return (v != 0) ? 1 : 0;
 }
 
@@ -22,10 +22,10 @@ inline int CountIf(const T& v)
 template<typename TNeighborhood, typename TLabel>
 bool EulerInvariant(const TNeighborhood& neighbors, const TLabel label)
 {
-	// For a face-connected set, a vertex, edge, or facet is included 
-	// only if all voxels it is incident to are in the set, and for a 
+	// For a face-connected set, a vertex, edge, or facet is included
+	// only if all voxels it is incident to are in the set, and for a
 	// vertex-connected set it is included if any incident voxels are in the set
-	
+
 	// Here we count only the changes at the center voxel.
 	// ==> If we mark the center as BG, then P, F, E and V are '0'.
 	static const int c = 27 / 2;
@@ -36,38 +36,26 @@ bool EulerInvariant(const TNeighborhood& neighbors, const TLabel label)
 	const int P = 1;
 
 	// Faces - count faces around center voxel
-	const int F = CountIf(neighbors[c - 1] == label) // -x
-			+ CountIf(neighbors[c + 1] == label) // +x
-			+ CountIf(neighbors[c - 3] == label) // -y
-			+ CountIf(neighbors[c + 3] == label) // +y
-			+ CountIf(neighbors[c - 9] == label) // -z
-			+ CountIf(neighbors[c + 9] == label); // +z
+	const int F = CountIf(neighbors[c - 1] == label)		// -x
+								+ CountIf(neighbors[c + 1] == label)	// +x
+								+ CountIf(neighbors[c - 3] == label)	// -y
+								+ CountIf(neighbors[c + 3] == label)	// +y
+								+ CountIf(neighbors[c - 9] == label)	// -z
+								+ CountIf(neighbors[c + 9] == label); // +z
 
 	// Edges - count edges around center voxel
 	int E = 0;
 	{
 		static const short offsets[12][2] = {
-				{-1, -3},
-				{+1, -3},
-				{-1, +3},
-				{+1, +3},
-				{-1, -9},
-				{+1, -9},
-				{-1, +9},
-				{+1, +9},
-				{-3, -9},
-				{+3, -9},
-				{-3, +9},
-				{+3, +9}};
+				{-1, -3}, {+1, -3}, {-1, +3}, {+1, +3}, {-1, -9}, {+1, -9}, {-1, +9}, {+1, +9}, {-3, -9}, {+3, -9}, {-3, +9}, {+3, +9}};
 		for (int i = 0; i < 12; i++)
 		{
 			short o = offsets[i][0];
 			short u = offsets[i][1];
 
-			E += CountIf(
-					neighbors[c + o] == label &&
-					neighbors[c + u] == label &&
-					neighbors[c + o + u] == label);
+			E += CountIf(neighbors[c + o] == label &&
+									 neighbors[c + u] == label &&
+									 neighbors[c + o + u] == label);
 		}
 	}
 
@@ -75,28 +63,20 @@ bool EulerInvariant(const TNeighborhood& neighbors, const TLabel label)
 	int V = 0;
 	{
 		static const short offsets[8][3] = {
-				{-1, -3, -9},
-				{+1, -3, -9},
-				{-1, +3, -9},
-				{+1, +3, -9},
-				{-1, -3, +9},
-				{+1, -3, +9},
-				{-1, +3, +9},
-				{+1, +3, +9}};
+				{-1, -3, -9}, {+1, -3, -9}, {-1, +3, -9}, {+1, +3, -9}, {-1, -3, +9}, {+1, -3, +9}, {-1, +3, +9}, {+1, +3, +9}};
 		for (int i = 0; i < 8; i++)
 		{
 			short x = offsets[i][0];
 			short y = offsets[i][1];
 			short z = offsets[i][2];
 
-			V += CountIf(
-					neighbors[c + x] == label &&
-					neighbors[c + y] == label &&
-					neighbors[c + z] == label &&
-					neighbors[c + x + y] == label &&
-					neighbors[c + x + z] == label &&
-					neighbors[c + y + z] == label &&
-					neighbors[c + x + y + z] == label);
+			V += CountIf(neighbors[c + x] == label &&
+									 neighbors[c + y] == label &&
+									 neighbors[c + z] == label &&
+									 neighbors[c + x + y] == label &&
+									 neighbors[c + x + z] == label &&
+									 neighbors[c + y + z] == label &&
+									 neighbors[c + x + y + z] == label);
 		}
 	}
 
@@ -121,8 +101,7 @@ unsigned ConnectedComponents(const TNeighborhood& neighbors, const TLabel label)
 			{2, 1, 0},
 			{0, 2, 0},
 			{1, 2, 0},
-			{2, 2, 0},
-			//
+			{2, 2, 0}, //
 			{0, 0, 1},
 			{1, 0, 1},
 			{2, 0, 1},
@@ -131,8 +110,7 @@ unsigned ConnectedComponents(const TNeighborhood& neighbors, const TLabel label)
 			{2, 1, 1},
 			{0, 2, 1},
 			{1, 2, 1},
-			{2, 2, 1},
-			//
+			{2, 2, 1}, //
 			{0, 0, 2},
 			{1, 0, 2},
 			{2, 0, 2},
@@ -218,20 +196,11 @@ bool NonmanifoldRemove(const TNeighborhood& neighbors, const TLabel label)
 	static const int c = 27 / 2;
 
 	// test for non-manifold edges around center voxel
-	return (neighbors[c-1]==label && neighbors[c-3]==label && neighbors[c-1-3]!=label)
-		|| (neighbors[c+1]==label && neighbors[c-3]==label && neighbors[c+1-3]!=label)
-		|| (neighbors[c-1]==label && neighbors[c+3]==label && neighbors[c-1+3]!=label)
-		|| (neighbors[c+1]==label && neighbors[c+3]==label && neighbors[c+1+3]!=label)
-		//
-		|| (neighbors[c-1]==label && neighbors[c-9]==label && neighbors[c-1-9]!=label)
-		|| (neighbors[c+1]==label && neighbors[c-9]==label && neighbors[c+1-9]!=label)
-		|| (neighbors[c-1]==label && neighbors[c+9]==label && neighbors[c-1+9]!=label)
-		|| (neighbors[c+1]==label && neighbors[c+9]==label && neighbors[c+1+9]!=label)
-		//
-		|| (neighbors[c-3]==label && neighbors[c-9]==label && neighbors[c-3-9]!=label)
-		|| (neighbors[c+3]==label && neighbors[c-9]==label && neighbors[c+3-9]!=label)
-		|| (neighbors[c-3]==label && neighbors[c+9]==label && neighbors[c-3+9]!=label)
-		|| (neighbors[c+3]==label && neighbors[c+9]==label && neighbors[c+3+9]!=label);
+	return (neighbors[c - 1] == label && neighbors[c - 3] == label && neighbors[c - 1 - 3] != label) || (neighbors[c + 1] == label && neighbors[c - 3] == label && neighbors[c + 1 - 3] != label) || (neighbors[c - 1] == label && neighbors[c + 3] == label && neighbors[c - 1 + 3] != label) || (neighbors[c + 1] == label && neighbors[c + 3] == label && neighbors[c + 1 + 3] != label)
+				 //
+				 || (neighbors[c - 1] == label && neighbors[c - 9] == label && neighbors[c - 1 - 9] != label) || (neighbors[c + 1] == label && neighbors[c - 9] == label && neighbors[c + 1 - 9] != label) || (neighbors[c - 1] == label && neighbors[c + 9] == label && neighbors[c - 1 + 9] != label) || (neighbors[c + 1] == label && neighbors[c + 9] == label && neighbors[c + 1 + 9] != label)
+				 //
+				 || (neighbors[c - 3] == label && neighbors[c - 9] == label && neighbors[c - 3 - 9] != label) || (neighbors[c + 3] == label && neighbors[c - 9] == label && neighbors[c + 3 - 9] != label) || (neighbors[c - 3] == label && neighbors[c + 9] == label && neighbors[c - 3 + 9] != label) || (neighbors[c + 3] == label && neighbors[c + 9] == label && neighbors[c + 3 + 9] != label);
 }
 
 } // namespace topology

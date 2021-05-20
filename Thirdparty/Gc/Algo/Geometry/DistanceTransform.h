@@ -32,17 +32,13 @@
 #include "../../Type.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        /** Digital geometry algorithms. */
-        namespace Geometry
-        {
-            /** Distance transform algorithms. */
-            namespace DistanceTransform
-            {
-                /** Compute distance transform of given mask using the city-block metric.
+namespace Gc {
+namespace Algo {
+/** Digital geometry algorithms. */
+namespace Geometry {
+/** Distance transform algorithms. */
+namespace DistanceTransform {
+/** Compute distance transform of given mask using the city-block metric.
 
                     The computed distance is measured in voxels, no resolution is taken
                     into account.
@@ -54,11 +50,11 @@ namespace Gc
                     @param[out] map The final distance map. The distance of \c zero_val 
                         voxels is set to zero.
                 */
-                template <Size N, class DATA, class T>
-                void GC_DLL_EXPORT CityBlock(const System::Collection::Array<N,DATA> &mask,
-                    DATA zero_val, System::Collection::Array<N,T> &map);
+template <Size N, class DATA, class T>
+void GC_DLL_EXPORT CityBlock(const System::Collection::Array<N, DATA> & mask,
+                             DATA zero_val, System::Collection::Array<N, T> & map);
 
-                /** Compute distance transform of given mask using the chess-board metric.
+/** Compute distance transform of given mask using the chess-board metric.
 
                     The computed distance is measured in voxels, no resolution is taken
                     into account.
@@ -70,26 +66,11 @@ namespace Gc
                     @param[out] map The final distance map. The distance of \c zero_val 
                         voxels is set to zero.
                 */
-                template <Size N, class DATA, class T>
-                void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<N,DATA> &mask,
-                    DATA zero_val, System::Collection::Array<N,T> &map);
+template <Size N, class DATA, class T>
+void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<N, DATA> & mask,
+                              DATA zero_val, System::Collection::Array<N, T> & map);
 
-                /** Compute local distance transform of given mask using the city-block metric.
-
-                    The computed distance is measured in voxels, no resolution is taken
-                    into account. 
-
-                    @param[in] mask Mask image.
-                    @param[in] val Intensity value in the mask image for which their distance
-                        from the nearest voxel with intensity different from \c val is computed.
-                    @param[out] map The final distance map. Its size must be set before computation.
-                        The distance of voxels with intensity different from \c val is left unchanged.
-                */
-                template <Size N, class DATA, class T>
-                void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<N,DATA> &mask,
-                    DATA val, System::Collection::Array<N,T> &map);
-
-                /** Compute local distance transform of given mask using the chess-board metric.
+/** Compute local distance transform of given mask using the city-block metric.
 
                     The computed distance is measured in voxels, no resolution is taken
                     into account. 
@@ -100,13 +81,28 @@ namespace Gc
                     @param[out] map The final distance map. Its size must be set before computation.
                         The distance of voxels with intensity different from \c val is left unchanged.
                 */
-                template <Size N, class DATA, class T>
-                void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<N,DATA> &mask,
-                    DATA val, System::Collection::Array<N,T> &map);
+template <Size N, class DATA, class T>
+void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<N, DATA> & mask,
+                                  DATA val, System::Collection::Array<N, T> & map);
 
-            }
-        }
-    }
+/** Compute local distance transform of given mask using the chess-board metric.
+
+                    The computed distance is measured in voxels, no resolution is taken
+                    into account. 
+
+                    @param[in] mask Mask image.
+                    @param[in] val Intensity value in the mask image for which their distance
+                        from the nearest voxel with intensity different from \c val is computed.
+                    @param[out] map The final distance map. Its size must be set before computation.
+                        The distance of voxels with intensity different from \c val is left unchanged.
+                */
+template <Size N, class DATA, class T>
+void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<N, DATA> & mask,
+                                   DATA val, System::Collection::Array<N, T> & map);
+
+} // namespace DistanceTransform
+} // namespace Geometry
 }
+} // namespace Gc::Algo
 
 #endif

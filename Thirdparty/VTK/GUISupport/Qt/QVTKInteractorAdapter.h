@@ -61,7 +61,7 @@ public:
   // Description:
   // Set the device pixel ration, this defaults to 1, but in Qt 5 can be 2.
   void SetDevicePixelRatio(int ratio, vtkRenderWindowInteractor* iren = nullptr);
-  int GetDevicePixelRatio() { return this->DevicePixelRatio; }
+  int GetDevicePixelRatio() const { return this->DevicePixelRatio; }
 
   // Description:
   // Process a QEvent and send it to the interactor

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,30 +15,27 @@ namespace iseg {
 
 struct Point
 {
-	short px;
-	short py;
+	short px, py; // NOLINT
 };
 
 inline float dist2(Point* p)
 {
-	return (float)(*p).px * (float)(*p).px + (float)(*p).py * (float)(*p).py;
+	return static_cast<float>(p->px) * p->px + static_cast<float>(p->py) * p->py;
 }
-inline float dist(Point* p) { return sqrt(dist2(p)); }
+inline float dist(Point* p) { return std::sqrt(dist2(p)); }
 inline float dist2_b(Point* p1, Point* p2)
 {
 	return (float)((*p1).px - (*p2).px) * (float)((*p1).px - (*p2).px) +
-		   (float)((*p1).py - (*p2).py) * (float)((*p1).py - (*p2).py);
+				 (float)((*p1).py - (*p2).py) * (float)((*p1).py - (*p2).py);
 }
-inline float dist_b(Point* p1, Point* p2) { return sqrt(dist2_b(p1, p2)); }
+inline float dist_b(Point* p1, Point* p2) { return std::sqrt(dist2_b(p1, p2)); }
 inline float scalar(Point* p1, Point* p2)
 {
-	return (float)(*p1).px * (float)(*p2).px +
-		   (float)(*p1).py * (float)(*p2).py;
+	return static_cast<float>(p1->px) * p2->px + static_cast<float>(p1->py) * p2->py;
 }
 inline float cross(Point* p1, Point* p2)
 {
-	return abs((float)(*p1).px * (float)(*p2).py -
-			   (float)(*p1).py * (float)(*p2).px);
+	return std::abs(static_cast<float>(p1->px) * p2->py - static_cast<float>(p1->py) * p2->px);
 }
 
 } // namespace iseg

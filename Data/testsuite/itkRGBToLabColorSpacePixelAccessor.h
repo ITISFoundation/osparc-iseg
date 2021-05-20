@@ -41,16 +41,16 @@ template<class TInput, class TOutput>
 class ITK_EXPORT RGBToLabColorSpacePixelAccessor
 {
 public:
-	/** Standard class typedefs. */
-	typedef RGBToLabColorSpacePixelAccessor Self;
+	/** Standard class type aliases. */
+	using Self = RGBToLabColorSpacePixelAccessor;
 
-	/** External typedef. It defines the external aspect
+	/** External types. It defines the external aspect
 	* that this class will exhibit */
-	typedef Vector<TOutput, 3> ExternalType;
+	using ExternalType = Vector<TOutput, 3>;
 
-	/** Internal typedef. It defines the internal real
+	/** Internal types. It defines the internal real
 	* representation of data */
-	typedef RGBPixel<TInput> InternalType;
+	using InternalType = RGBPixel<TInput>;
 
 	/** Write access to the RGBToLabColorSpace component */
 	inline void Set(InternalType& output, const ExternalType& input) const

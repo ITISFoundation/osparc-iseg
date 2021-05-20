@@ -34,7 +34,7 @@ template <class TInputImage,class TOutputImage>
 typename BinaryThinningImageFilter3D<
   TInputImage,TOutputImage>::OutputImageType * 
 BinaryThinningImageFilter3D<TInputImage,TOutputImage>
-::GetThinning(void)
+::GetThinning()
 {
   return  dynamic_cast< OutputImageType * >(
     this->ProcessObject::GetOutput(0) );
@@ -49,7 +49,7 @@ BinaryThinningImageFilter3D<TInputImage,TOutputImage>
 template <class TInputImage,class TOutputImage>
 void 
 BinaryThinningImageFilter3D<TInputImage,TOutputImage>
-::PrepareData(void) 
+::PrepareData() 
 {
   
   itkDebugMacro(<< "PrepareData Start");
@@ -115,7 +115,7 @@ BinaryThinningImageFilter3D<TInputImage,TOutputImage>
   typename std::vector < IndexType >::iterator simpleBorderPointsIt;
 
   // Define offsets
-  typedef typename NeighborhoodIteratorType::OffsetType OffsetType;
+	using OffsetType = typename NeighborhoodIteratorType::OffsetType;
   OffsetType N   = {{ 0,-1, 0}};  // north
   OffsetType S   = {{ 0, 1, 0}};  // south
   OffsetType E   = {{ 1, 0, 0}};  // east

@@ -21,13 +21,13 @@ namespace itk {
  * Vanderhyde, James. "Topology control of volumetric data." 
  * PhD diss., Georgia Institute of Technology, 2007..
  */
-template<class TInputImage, class TOutputImage, class TConnectedComponentImage=itk::Image<unsigned short,3> >
+template<class TInputImage, class TOutputImage, class TConnectedComponentImage = itk::Image<unsigned short, 3>>
 class /*ITK_TEMPLATE_EXPORT*/ FixTopologyCarveInside : public ImageToImageFilter<TInputImage, TOutputImage>
 {
 public:
 	ITK_DISALLOW_COPY_AND_ASSIGN(FixTopologyCarveInside);
 
-	/** Standard class typedefs. */
+	/** Standard class type aliases. */
 	using Self = FixTopologyCarveInside;
 	using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
 	using Pointer = SmartPointer<Self>;

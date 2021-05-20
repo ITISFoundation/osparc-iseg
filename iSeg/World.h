@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,49 +27,49 @@ namespace iseg {
 class Node
 {
 public:
-	unsigned offset;
-	float intens;
-	float cost;
-	float fcost;
-	bool computed;
-	bool first;
-	Node* prev;
+	unsigned m_Offset;
+	float m_Intens;
+	float m_Cost;
+	float m_Fcost;
+	bool m_Computed;
+	bool m_First;
+	Node* m_Prev;
 	Node(unsigned offset, float intens);
-	Node() {}
-	~Node();
+	Node() = default;
+	~Node() = default;
 };
 
 class PathElement
 {
 public:
-	unsigned offset;
-	bool cross;
-	bool seed;
-	Node* prev;
+	unsigned m_Offset;
+	bool m_Cross;
+	bool m_Seed;
+	Node* m_Prev;
 	PathElement(unsigned offset);
-	PathElement() {}
-	~PathElement();
+	PathElement() = default;
+	~PathElement() = default;
 };
 
 class World
 {
-	Node* nodes;
+	Node* m_Nodes;
 	std::list<Node*>
-			activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
-	std::list<Node*> activelistlowint;
-	std::vector<std::vector<PathElement>> paths;
-	int width;
-	int height;
-	int length;
-	unsigned offx;
-	unsigned offy;
-	unsigned offz;
-	bool solvingarea;
-	int times;
-	std::vector<int> seedsfailed;
-	int rootOneintens;
-	bool firstseedexpanded;
-	int activelistlowintsize;
+			m_Activelist; //list with the active nodes (the ones that have been "touched" but not expanded yet)
+	std::list<Node*> m_Activelistlowint;
+	std::vector<std::vector<PathElement>> m_Paths;
+	int m_Width;
+	int m_Height;
+	int m_Length;
+	unsigned m_Offx;
+	unsigned m_Offy;
+	unsigned m_Offz;
+	bool m_Solvingarea;
+	int m_Times;
+	std::vector<int> m_Seedsfailed;
+	int m_RootOneintens;
+	bool m_Firstseedexpanded;
+	int m_Activelistlowintsize;
 	//		ml::TVirtualVolume<MLuint16>* vInVol;
 	//		ml::TVirtualVolume<MLuint16>* vOutVol;
 
@@ -77,38 +77,35 @@ public:
 	World();
 	~World();
 
-	Vec3 getBBStart() { return _bbStart; };
-	Vec3 getBBEnd() { return _bbEnd; };
-	void setBBStart(Vec3 bbStart) { _bbStart = bbStart; };
-	void setBBEnd(Vec3 bbEnd) { _bbEnd = bbEnd; };
-	bool isValid() { return _isValid; };
+	Vec3 GetBbStart() { return m_BbStart; };
+	Vec3 GetBbEnd() { return m_BbEnd; };
+	void SetBbStart(Vec3 bbStart) { m_BbStart = bbStart; };
+	void SetBbEnd(Vec3 bbEnd) { m_BbEnd = bbEnd; };
+	bool IsValid() const { return m_IsValid; };
 	//		void init(vec3 bbStart, vec3 bbEnd, ml::TVirtualVolume<MLuint16>* vInVol, ml::TVirtualVolume<MLuint16>* vOutVol);
-	void getSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart,
-			Vec3& bbEnd, SlicesHandler* handler3D);
-	bool init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D);
-	void clear();
-	void dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree);
-	void paint(std::vector<Vec3> seeds, Vec3 cross,
-			unsigned short int numofseeds);
-	bool checkdiameter(unsigned currentoff, unsigned prevoff);
-	void solvelargearea();
-	unsigned solvelargearea2();
-	void changeintens(unsigned o);
-	void reduceactivelist();
-	int whoistheparent(std::vector<Vec3> seeds, int parentintens);
-	void outputBranchTree(BranchItem* branchItem, std::string prefix,
-			FILE*& fp);
-	void storingtree(std::vector<BranchItem*> children, BranchItem* rootOne);
-	void set3dslicehandler(SlicesHandler* handler3D);
+	void GetSeedBoundingBox(std::vector<Vec3>* seeds, Vec3& bbStart, Vec3& bbEnd, SlicesHandler* handler3D);
+	bool Init(Vec3 bbStart, Vec3 bbEnd, SlicesHandler* handler3D);
+	void Clear();
+	void Dijkstra(std::vector<Vec3> seeds, Vec3 end, BranchTree* _branchTree);
+	void Paint(std::vector<Vec3> seeds, Vec3 cross, unsigned short int numofseeds);
+	bool Checkdiameter(unsigned currentoff, unsigned prevoff);
+	void Solvelargearea();
+	unsigned Solvelargearea2();
+	void Changeintens(unsigned o);
+	void Reduceactivelist();
+	int Whoistheparent(std::vector<Vec3> seeds, int parentintens);
+	void OutputBranchTree(BranchItem* branchItem, std::string prefix, FILE*& fp);
+	void Storingtree(std::vector<BranchItem*> children, BranchItem* rootOne);
+	void Set3dslicehandler(SlicesHandler* handler3D);
 
 private:
-	SlicesHandler* _handler3D;
+	SlicesHandler* m_Handler3D;
 	// start of bounding box
-	Vec3 _bbStart;
+	Vec3 m_BbStart;
 	// end of bounding box
-	Vec3 _bbEnd;
+	Vec3 m_BbEnd;
 	// is class valid/initialized
-	bool _isValid;
+	bool m_IsValid;
 };
 
 } // namespace iseg

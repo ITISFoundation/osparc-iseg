@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,17 +11,17 @@
 
 #include "fillcontour.h"
 
+#include <cmath>
 #include <list>
-#include <math.h>
 #include <vector>
 
 namespace {
 
-struct transition
+struct Transition
 {
-	bool to_inside;
-	float pos;
-	inline bool operator<(const transition& a) const { return pos < a.pos; }
+	bool to_inside; // NOLINT
+	float pos;			// NOLINT
+	inline bool operator<(const Transition& a) const { return pos < a.pos; }
 };
 
 } // namespace
@@ -36,10 +36,10 @@ float get_area(float* points, unsigned int nrpoints)
 	for (unsigned int pos = 0; pos + 5 < nrpoints * 3; pos += 3)
 	{
 		area += (points[pos + 1] + points[pos + 4]) *
-				(points[pos + 3] - points[pos]);
+						(points[pos + 3] - points[pos]);
 	}
 	area += (points[nrpoints * 3 - 2] + points[1]) *
-			(points[0] - points[nrpoints * 3 - 3]);
+					(points[0] - points[nrpoints * 3 - 3]);
 	return area / 2;
 }
 
@@ -126,8 +126,7 @@ int whichquad(float* pt, float* orig)
 	return quad;
 }
 
-bool is_hole(float** points, unsigned int* nrpoints, unsigned int nrcontours,
-			 unsigned int contournr)
+bool is_hole(float** points, unsigned int* nrpoints, unsigned int nrcontours, unsigned int contournr)
 {
 	int nrinside = 0;
 	for (unsigned int i = 0; i < nrcontours; i++)
@@ -141,13 +140,10 @@ bool is_hole(float** points, unsigned int* nrpoints, unsigned int nrcontours,
 	return nrinside % 2;
 }
 
-void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
-				  float* pixel_size, float* direction_cosines, float** points,
-				  unsigned int* nrpoints, unsigned int nrcontours,
-				  bool clockwisefill)
+void fill_contour(bool* array, unsigned short* pixel_extents, float* origin, float* pixel_size, float* direction_cosines, float** points, unsigned int* nrpoints, unsigned int nrcontours, bool clockwisefill)
 {
 	float tol = 0.1 * pixel_size[0];
-	std::vector<std::list<transition>> inouts;
+	std::vector<std::list<Transition>> inouts;
 	inouts.resize(pixel_extents[1]);
 
 	//FILE *fp3=fopen("C:\\test.txt","a");
@@ -180,41 +176,37 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 				y1 = swap_y * points[i][pos + 4];
 				if (y0 != y1)
 				{
-					transition trans;
+					Transition trans;
 					float slope = (x0 - x1) / (y0 - y1);
 					if (y0 > y1)
 					{
 						trans.to_inside = false;
-						begin_h = (unsigned short)ceil(
-							(y1 - swap_y * origin[1]) / pixel_size[1]);
-						end_h = (unsigned short)floor(
-							(y0 - swap_y * origin[1]) / pixel_size[1]);
+						begin_h = (unsigned short)ceil((y1 - swap_y * origin[1]) / pixel_size[1]);
+						end_h = (unsigned short)floor((y0 - swap_y * origin[1]) / pixel_size[1]);
 						if (end_h >= pixel_extents[1])
 							end_h = pixel_extents[1] - 1;
 						for (unsigned short h = begin_h; h <= end_h; h++)
 						{
 							trans.pos = (x1 - swap_x * origin[0]) + tol +
-										(pixel_size[1] * h +
-										 (swap_y * origin[1] - y1)) *
-											slope;
+													(pixel_size[1] * h +
+															(swap_y * origin[1] - y1)) *
+															slope;
 							inouts.at(h).push_back(trans);
 						}
 					}
 					else
 					{
 						trans.to_inside = true;
-						begin_h = (unsigned short)ceil(
-							(y0 - swap_y * origin[1]) / pixel_size[1]);
-						end_h = (unsigned short)floor(
-							(y1 - swap_y * origin[1]) / pixel_size[1]);
+						begin_h = (unsigned short)ceil((y0 - swap_y * origin[1]) / pixel_size[1]);
+						end_h = (unsigned short)floor((y1 - swap_y * origin[1]) / pixel_size[1]);
 						if (end_h >= pixel_extents[1])
 							end_h = pixel_extents[1] - 1;
 						for (unsigned short h = begin_h; h <= end_h; h++)
 						{
 							trans.pos = (x0 - swap_x * origin[0]) - tol +
-										(pixel_size[1] * h +
-										 (swap_y * origin[1] - y0)) *
-											slope;
+													(pixel_size[1] * h +
+															(swap_y * origin[1] - y0)) *
+															slope;
 							inouts.at(h).push_back(trans);
 						}
 					}
@@ -226,23 +218,23 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 			y1 = swap_y * points[i][3 * nrpoints[i] - 2];
 			if (y1 != y0)
 			{
-				transition trans;
+				Transition trans;
 				float slope = (x1 - x0) / (y1 - y0);
 				if (y1 > y0)
 				{
 					trans.to_inside = false;
 					begin_h = (unsigned short)ceil((y0 - swap_y * origin[1]) /
-												   pixel_size[1]);
+																				 pixel_size[1]);
 					end_h = (unsigned short)floor((y1 - swap_y * origin[1]) /
-												  pixel_size[1]);
+																				pixel_size[1]);
 					if (end_h >= pixel_extents[1])
 						end_h = pixel_extents[1] - 1;
 					for (unsigned short h = begin_h; h <= end_h; h++)
 					{
 						trans.pos =
-							(x0 - swap_x * origin[0]) + tol +
-							(pixel_size[1] * h + (swap_y * origin[1] - y0)) *
-								slope;
+								(x0 - swap_x * origin[0]) + tol +
+								(pixel_size[1] * h + (swap_y * origin[1] - y0)) *
+										slope;
 						inouts.at(h).push_back(trans);
 					}
 				}
@@ -250,17 +242,17 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 				{
 					trans.to_inside = true;
 					begin_h = (unsigned short)ceil((y1 - swap_y * origin[1]) /
-												   pixel_size[1]);
+																				 pixel_size[1]);
 					end_h = (unsigned short)floor((y0 - swap_y * origin[1]) /
-												  pixel_size[1]);
+																				pixel_size[1]);
 					if (end_h >= pixel_extents[1])
 						end_h = pixel_extents[1] - 1;
 					for (unsigned short h = begin_h; h <= end_h; h++)
 					{
 						trans.pos =
-							(x1 - swap_x * origin[0]) - tol +
-							(pixel_size[1] * h + (swap_y * origin[1] - y1)) *
-								slope;
+								(x1 - swap_x * origin[0]) - tol +
+								(pixel_size[1] * h + (swap_y * origin[1] - y1)) *
+										slope;
 						inouts.at(h).push_back(trans);
 					}
 				}
@@ -276,41 +268,37 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 				y1 = swap_y * points[i][pos + 4];
 				if (y0 != y1)
 				{
-					transition trans;
+					Transition trans;
 					float slope = (x0 - x1) / (y0 - y1);
 					if (y0 > y1)
 					{
 						trans.to_inside = true;
-						begin_h = (unsigned short)ceil(
-							(y1 - swap_y * origin[1]) / pixel_size[1]);
-						end_h = (unsigned short)floor(
-							(y0 - swap_y * origin[1]) / pixel_size[1]);
+						begin_h = (unsigned short)ceil((y1 - swap_y * origin[1]) / pixel_size[1]);
+						end_h = (unsigned short)floor((y0 - swap_y * origin[1]) / pixel_size[1]);
 						if (end_h >= pixel_extents[1])
 							end_h = pixel_extents[1] - 1;
 						for (unsigned short h = begin_h; h <= end_h; h++)
 						{
 							trans.pos = (x1 - swap_x * origin[0]) - tol +
-										(pixel_size[1] * h +
-										 (swap_y * origin[1] - y1)) *
-											slope;
+													(pixel_size[1] * h +
+															(swap_y * origin[1] - y1)) *
+															slope;
 							inouts.at(h).push_back(trans);
 						}
 					}
 					else
 					{
 						trans.to_inside = false;
-						begin_h = (unsigned short)ceil(
-							(y0 - swap_y * origin[1]) / pixel_size[1]);
-						end_h = (unsigned short)floor(
-							(y1 - swap_y * origin[1]) / pixel_size[1]);
+						begin_h = (unsigned short)ceil((y0 - swap_y * origin[1]) / pixel_size[1]);
+						end_h = (unsigned short)floor((y1 - swap_y * origin[1]) / pixel_size[1]);
 						if (end_h >= pixel_extents[1])
 							end_h = pixel_extents[1] - 1;
 						for (unsigned short h = begin_h; h <= end_h; h++)
 						{
 							trans.pos = (x0 - swap_x * origin[0]) + tol +
-										(pixel_size[1] * h +
-										 (swap_y * origin[1] - y0)) *
-											slope;
+													(pixel_size[1] * h +
+															(swap_y * origin[1] - y0)) *
+															slope;
 							inouts.at(h).push_back(trans);
 						}
 					}
@@ -322,23 +310,23 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 			y1 = swap_y * points[i][3 * nrpoints[i] - 2];
 			if (y1 != y0)
 			{
-				transition trans;
+				Transition trans;
 				float slope = (x1 - x0) / (y1 - y0);
 				if (y1 > y0)
 				{
 					trans.to_inside = true;
 					begin_h = (unsigned short)ceil((y0 - swap_y * origin[1]) /
-												   pixel_size[1]);
+																				 pixel_size[1]);
 					end_h = (unsigned short)floor((y1 - swap_y * origin[1]) /
-												  pixel_size[1]);
+																				pixel_size[1]);
 					if (end_h >= pixel_extents[1])
 						end_h = pixel_extents[1] - 1;
 					for (unsigned short h = begin_h; h <= end_h; h++)
 					{
 						trans.pos =
-							(x0 - swap_x * origin[0]) - tol +
-							(pixel_size[1] * h + (swap_y * origin[1] - y0)) *
-								slope;
+								(x0 - swap_x * origin[0]) - tol +
+								(pixel_size[1] * h + (swap_y * origin[1] - y0)) *
+										slope;
 						inouts.at(h).push_back(trans);
 					}
 				}
@@ -346,17 +334,17 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 				{
 					trans.to_inside = false;
 					begin_h = (unsigned short)ceil((y1 - swap_y * origin[1]) /
-												   pixel_size[1]);
+																				 pixel_size[1]);
 					end_h = (unsigned short)floor((y0 - swap_y * origin[1]) /
-												  pixel_size[1]);
+																				pixel_size[1]);
 					if (end_h >= pixel_extents[1])
 						end_h = pixel_extents[1] - 1;
 					for (unsigned short h = begin_h; h <= end_h; h++)
 					{
 						trans.pos =
-							(x1 - swap_x * origin[0]) + tol +
-							(pixel_size[1] * h + (swap_y * origin[1] - y1)) *
-								slope;
+								(x1 - swap_x * origin[0]) + tol +
+								(pixel_size[1] * h + (swap_y * origin[1] - y1)) *
+										slope;
 						inouts.at(h).push_back(trans);
 					}
 				}
@@ -369,12 +357,11 @@ void fill_contour(bool* array, unsigned short* pixel_extents, float* origin,
 		inouts.at(h).sort();
 	}
 
-	unsigned long position =
-		pixel_extents[0] * (unsigned long)(pixel_extents[1] - 1);
+	unsigned long position = pixel_extents[0] * (unsigned long)(pixel_extents[1] - 1);
 	for (unsigned short h = 0; h < pixel_extents[1]; h++)
 	{
 		bool status = false;
-		std::list<transition>::iterator it = inouts.at(h).begin();
+		std::list<Transition>::iterator it = inouts.at(h).begin();
 		while (it != inouts.at(h).end() && it->pos < 0)
 		{
 			//status=!status;

@@ -23,7 +23,7 @@ void Property::OnModified(eChangeType change)
 	}
 }
 
-void Property::OnChildModified(Property_ptr child, eChangeType change)
+void Property::OnChildModified(Property_ptr child, eChangeType change) const
 {
 	// signal change
 	if (onModified)
@@ -116,24 +116,24 @@ std::shared_ptr<PropertyGroup> PropertyGroup::Create()
 PropertyEnum::PropertyEnum(const descriptions_type& descriptions /*= descriptions_type()*/, const value_type value /*= kInvalidValue */)
 {
 	ReplaceDescriptions(descriptions);
-	_value = value;
-	_invalid = "#Invalid";
+	m_Value = value;
+	m_Invalid = "#Invalid";
 }
 
-const PropertyEnum::value_type PropertyEnum::kInvalidValue;
+const PropertyEnum::value_type PropertyEnum::k_invalid_value;
 
 PropertyEnum::value_type PropertyEnum::Value() const
 {
-	return _value;
+	return m_Value;
 }
 
 void PropertyEnum::SetValue(const value_type value)
 {
 	bool changed = false;
-	if (_value != value)
+	if (m_Value != value)
 	{
 		changed = true;
-		_value = value;
+		m_Value = value;
 	}
 	if (changed)
 		OnModified(eChangeType::kValueChanged);
@@ -141,37 +141,32 @@ void PropertyEnum::SetValue(const value_type value)
 
 PropertyEnum::description_type PropertyEnum::ValueDescription() const
 {
-	return _ValueDescription();
-}
-
-PropertyEnum::description_type PropertyEnum::_ValueDescription() const
-{
-	auto it = _values.find(_value);
-	if (it != _values.end())
+	auto it = m_Values.find(m_Value);
+	if (it != m_Values.end())
 	{
 		return it->second;
 	}
-	return _invalid;
+	return m_Invalid;
 }
 
 const PropertyEnum::values_type& PropertyEnum::Values() const
 {
-	return _values;
+	return m_Values;
 }
 
 void PropertyEnum::ReplaceValues(values_type const& new_values)
 {
 	bool changed = false;
 	{
-		changed = (new_values != _values);
+		changed = (new_values != m_Values);
 		if (changed)
 		{
-			_values = new_values;
+			m_Values = new_values;
 		}
 	}
 	if (changed)
 	{
-		if (_values.find(_value) == _values.end())
+		if (m_Values.find(m_Value) == m_Values.end())
 		{
 			OnModified(eChangeType::kValueChanged);
 		}
@@ -192,7 +187,7 @@ void PropertyEnum::ReplaceDescriptions(descriptions_type const& new_descr)
 
 void PropertyEnum::SetInvalidDescription(const description_type& descr)
 {
-	_invalid = descr;
+	m_Invalid = descr;
 }
 
 } // namespace iseg

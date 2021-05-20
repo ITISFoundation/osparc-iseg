@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -24,32 +24,30 @@ BOOST_AUTO_TEST_CASE(isegImageAdaptor)
 	std::vector<float> data(slice_shape[0] * slice_shape[1], 1.0);
 	std::vector<float*> slices(12, data.data());
 
-	typedef itk::SliceContiguousImage<float> ImageType;
+	using image_type = itk::SliceContiguousImage<float>;
 
-	ImageType::Pointer image = ImageType::New();
-	ImageType::IndexType start;
+	auto image = image_type::New();
+	image_type::IndexType start;
 	start.Fill(0);
-	ImageType::SizeType size;
+	image_type::SizeType size;
 	size[0] = slice_shape[0];
 	size[1] = slice_shape[1];
 	size[2] = slices.size();
-	ImageType::RegionType region(start, size);
+	image_type::RegionType region(start, size);
 	image->SetRegions(region);
 	// NOT required, unless we want to allocate memory here:
 	// image->Allocate();
 
 	// Set slice pointers
 	bool container_manage_memory = false;
-	ImageType::PixelContainerPointer container = ImageType::PixelContainer::New();
-	container->SetImportPointersForSlices(slices, size[0] * size[1],
-			container_manage_memory);
+	auto container = image_type::PixelContainer::New();
+	container->SetImportPointersForSlices(slices, size[0] * size[1], container_manage_memory);
 	image->SetPixelContainer(container);
 
 	{
-		typedef itk::Image<float, 3> OutputImageType;
-		typedef itk::RecursiveGaussianImageFilter<ImageType, OutputImageType>
-				GaussianFilterType;
-		auto gaussian = GaussianFilterType::New();
+		using output_image_type = itk::Image<float, 3>;
+		using gaussian_filter_type = itk::RecursiveGaussianImageFilter<image_type, output_image_type>;
+		auto gaussian = gaussian_filter_type::New();
 		gaussian->SetSigma(1.0);
 		gaussian->SetInput(image);
 		BOOST_REQUIRE_NO_THROW(gaussian->Update());

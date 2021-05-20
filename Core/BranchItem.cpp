@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,7 +15,7 @@ namespace iseg {
 
 std::vector<unsigned> BranchItem::availablelabels(0);
 
-void BranchItem::init_availablelabels()
+void BranchItem::InitAvailablelabels()
 {
 	availablelabels.clear();
 	for (unsigned i = 60000; i > 0; i--)

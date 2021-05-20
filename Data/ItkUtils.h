@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -21,8 +21,7 @@
 namespace iseg {
 
 template<typename TInputPixel, typename TOutputPixel>
-bool Paste(const itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutputPixel>* destination,
-		size_t startslice, size_t endslice)
+bool Paste(const itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<TOutputPixel>* destination, size_t startslice, size_t endslice)
 {
 	if (source->GetLargestPossibleRegion() ==
 			destination->GetLargestPossibleRegion())
@@ -37,10 +36,10 @@ bool Paste(const itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<T
 		// copy active slices into destination, starting at startslice
 		auto active_region = itk::ImageBase<3>::RegionType(start, size);
 
-		typedef itk::ImageRegionConstIterator<itk::Image<TInputPixel, 3>> image_iterator;
-		typedef itk::ImageRegionIterator<itk::SliceContiguousImage<TOutputPixel>> slice_image_iterator;
-		image_iterator sit(source, active_region);
-		slice_image_iterator dit(destination, active_region);
+		using image_iterator_type = itk::ImageRegionConstIterator<itk::Image<TInputPixel, 3>>;
+		using slice_image_iterator_type = itk::ImageRegionIterator<itk::SliceContiguousImage<TOutputPixel>>;
+		image_iterator_type sit(source, active_region);
+		slice_image_iterator_type dit(destination, active_region);
 
 		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
 		{
@@ -54,7 +53,7 @@ bool Paste(const itk::Image<TInputPixel, 3>* source, itk::SliceContiguousImage<T
 template<class TInputImage, class TOutputImage>
 bool Paste(const TInputImage* source, TOutputImage* destination)
 {
-	using OutputPixel = typename TOutputImage::PixelType;
+	using output_pixel_type = typename TOutputImage::PixelType;
 
 	if (source->GetBufferedRegion().GetSize() == destination->GetBufferedRegion().GetSize())
 	{
@@ -63,7 +62,7 @@ bool Paste(const TInputImage* source, TOutputImage* destination)
 
 		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
 		{
-			dit.Set(static_cast<OutputPixel>(sit.Get()));
+			dit.Set(static_cast<output_pixel_type>(sit.Get()));
 		}
 		return true;
 	}
@@ -73,7 +72,7 @@ bool Paste(const TInputImage* source, TOutputImage* destination)
 template<class TInputImage, class TOutputImage>
 bool Paste(const TInputImage* source, TOutputImage* destination, const typename TInputImage::RegionType& region)
 {
-	using OutputPixel = typename TOutputImage::PixelType;
+	using output_pixel_type = typename TOutputImage::PixelType;
 
 	if (source->GetBufferedRegion().IsInside(region) && destination->GetBufferedRegion().IsInside(region))
 	{
@@ -82,7 +81,7 @@ bool Paste(const TInputImage* source, TOutputImage* destination, const typename 
 
 		for (sit.GoToBegin(), dit.GoToBegin(); !sit.IsAtEnd() && !dit.IsAtEnd(); ++sit, ++dit)
 		{
-			dit.Set(static_cast<OutputPixel>(sit.Get()));
+			dit.Set(static_cast<output_pixel_type>(sit.Get()));
 		}
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,17 +27,16 @@ class BoneSegmentationWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D,
-			QWidget* parent = 0, const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~BoneSegmentationWidget();
+	BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~BoneSegmentationWidget() override;
 	QSize sizeHint() const override;
-	void init() override;
-	void newloaded() override;
+	void Init() override;
+	void NewLoaded() override;
 	std::string GetName() override { return std::string("CT Auto-Bone"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
 	iseg::SlicesHandlerInterface* m_Handler3D;
 	unsigned short m_CurrentSlice;
@@ -50,7 +49,7 @@ private:
 	QLabel* m_LabelEnd;
 	QComboBox* m_MaxFlowAlgorithm;
 	QPushButton* m_Execute;
-	QCheckBox* m_6Connectivity;
+	QCheckBox* m_M6Connectivity;
 	QCheckBox* m_UseSliceRange;
 	QSpinBox* m_Start;
 	QSpinBox* m_End;
@@ -58,7 +57,7 @@ private:
 	itk::ProcessObject* m_CurrentFilter;
 
 private slots:
-	void do_work();
-	void cancel();
-	void showsliders();
+	void DoWork();
+	void Cancel();
+	void Showsliders();
 };

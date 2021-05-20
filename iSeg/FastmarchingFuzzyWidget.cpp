@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -33,100 +33,92 @@ QWidget* add_to_widget(QLayout* layout)
 	widget->setLayout(layout);
 	return widget;
 }
-}
+} // namespace
 
-FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
-		QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	setToolTip(Format(
-			"The Fuzzy tab actually provides access to two different "
-			"segmentation techniques that have a very different "
-			"background but a similar user and interaction interface : "
-			"1) Fuzzy connectedness and 2) a Fast Marching "
-			"implementation of a levelset technique. Both methods "
-			"require a seed point to be specified."));
+	setToolTip(Format("The Fuzzy tab actually provides access to two different "
+										"segmentation techniques that have a very different "
+										"background but a similar user and interaction interface : "
+										"1) Fuzzy connectedness and 2) a Fast Marching "
+										"implementation of a levelset technique. Both methods "
+										"require a seed point to be specified."));
 
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	area = 0;
+	m_Area = 0;
 
-	sl_sigma = new QSlider(Qt::Horizontal, nullptr);
-	sl_sigma->setRange(0, 100);
-	sl_sigma->setValue(int(sigma / sigmamax * 100));
-	sl_thresh = new QSlider(Qt::Horizontal, nullptr);
-	sl_thresh->setRange(0, 100);
+	m_SlSigma = new QSlider(Qt::Horizontal, nullptr);
+	m_SlSigma->setRange(0, 100);
+	m_SlSigma->setValue(int(m_Sigma / m_Sigmamax * 100));
+	m_SlThresh = new QSlider(Qt::Horizontal, nullptr);
+	m_SlThresh->setRange(0, 100);
 
-	sl_m1 = new QSlider(Qt::Horizontal, nullptr);
-	sl_m1->setRange(0, 100);
-	sl_m1->setToolTip(Format("The average gray value of the region to be segmented."));
+	m_SlM1 = new QSlider(Qt::Horizontal, nullptr);
+	m_SlM1->setRange(0, 100);
+	m_SlM1->setToolTip(Format("The average gray value of the region to be segmented."));
 
-	sl_s1 = new QSlider(Qt::Horizontal, nullptr);
-	sl_s1->setRange(0, 100);
-	sl_s1->setToolTip(Format(
-			"A measure of how much the gray values are expected "
-			"to deviate from m1 (standard deviation)."));
+	m_SlS1 = new QSlider(Qt::Horizontal, nullptr);
+	m_SlS1->setRange(0, 100);
+	m_SlS1->setToolTip(Format("A measure of how much the gray values are expected "
+														"to deviate from m1 (standard deviation)."));
 
-	sl_s2 = new QSlider(Qt::Horizontal, nullptr);
-	sl_s2->setRange(0, 100);
-	sl_s2->setToolTip(Format(
-			"Sudden changes larger than s2 are considered to "
-			"indicate boundaries."));
+	m_SlS2 = new QSlider(Qt::Horizontal, nullptr);
+	m_SlS2->setRange(0, 100);
+	m_SlS2->setToolTip(Format("Sudden changes larger than s2 are considered to "
+														"indicate boundaries."));
 
-	rb_fastmarch = new QRadioButton(tr("Fast Marching"));
-	rb_fastmarch->setToolTip(Format(
-			"Fuzzy connectedness computes for each image "
-			"point the likelihood of its belonging to the same region as the "
-			"starting "
-			"point. It achieves this by looking at each possible connecting path "
-			"between the two points and assigning the image point probability as "
-			"identical to the probability of this path lying entirely in the same "
-			"tissue "
-			"as the start point."));
-	rb_fuzzy = new QRadioButton(tr("Fuzzy Connect."));
-	rb_fuzzy->setToolTip(Format(
-			"This tool simulates the evolution of a line (boundary) on a 2D "
-			"image in time. "
-			"The boundary is continuously expanding. The Sigma parameter "
-			"(Gaussian smoothing) controls the impact of noise."));
+	m_RbFastmarch = new QRadioButton(tr("Fast Marching"));
+	m_RbFastmarch->setToolTip(Format("Fuzzy connectedness computes for each image "
+																	 "point the likelihood of its belonging to the same region as the "
+																	 "starting "
+																	 "point. It achieves this by looking at each possible connecting path "
+																	 "between the two points and assigning the image point probability as "
+																	 "identical to the probability of this path lying entirely in the same "
+																	 "tissue "
+																	 "as the start point."));
+	m_RbFuzzy = new QRadioButton(tr("Fuzzy Connect."));
+	m_RbFuzzy->setToolTip(Format("This tool simulates the evolution of a line (boundary) on a 2D "
+															 "image in time. "
+															 "The boundary is continuously expanding. The Sigma parameter "
+															 "(Gaussian smoothing) controls the impact of noise."));
 
-	auto bg_method = make_button_group(this, {rb_fastmarch, rb_fuzzy});
-	rb_fastmarch->setChecked(true);
+	auto bg_method = make_button_group(this, {m_RbFastmarch, m_RbFuzzy});
+	m_RbFastmarch->setChecked(true);
 
-	rb_drag = new QRadioButton(tr("Drag"));
-	rb_drag->setToolTip(Format(
-			"Drag allows the user to drag the mouse (after clicking on "
-			"the start point and keeping the mouse button pressed down) "
-			"specifying the "
-			"extent of the region on the image."));
-	rb_drag->setChecked(true);
-	rb_drag->show();
-	rb_slider = new QRadioButton(tr("Slider"));
-	rb_slider->setToolTip(Format("Increase or decrease the region size."));
+	m_RbDrag = new QRadioButton(tr("Drag"));
+	m_RbDrag->setToolTip(Format("Drag allows the user to drag the mouse (after clicking on "
+															"the start point and keeping the mouse button pressed down) "
+															"specifying the "
+															"extent of the region on the image."));
+	m_RbDrag->setChecked(true);
+	m_RbDrag->show();
+	m_RbSlider = new QRadioButton(tr("Slider"));
+	m_RbSlider->setToolTip(Format("Increase or decrease the region size."));
 
 	auto bg_interact = new QButtonGroup(this);
-	bg_interact->insert(rb_drag);
-	bg_interact->insert(rb_slider);
+	bg_interact->insert(m_RbDrag);
+	bg_interact->insert(m_RbSlider);
 
-	sl_extend = new QSlider(Qt::Horizontal, nullptr);
-	sl_extend->setRange(0, 200);
-	sl_extend->setValue(0);
+	m_SlExtend = new QSlider(Qt::Horizontal, nullptr);
+	m_SlExtend->setRange(0, 200);
+	m_SlExtend->setValue(0);
 
-	sb_thresh = new QSpinBox(10, 100, 10, nullptr);
-	sb_thresh->setValue(30);
-	sb_m1 = new QSpinBox(50, 1000, 50, nullptr);
-	sb_m1->setValue(200);
-	sb_s1 = new QSpinBox(50, 500, 50, nullptr);
-	sb_s1->setValue(100);
-	sb_s2 = new QSpinBox(10, 200, 10, nullptr);
-	sb_s2->setValue(100);
+	m_SbThresh = new QSpinBox(10, 100, 10, nullptr);
+	m_SbThresh->setValue(30);
+	m_SbM1 = new QSpinBox(50, 1000, 50, nullptr);
+	m_SbM1->setValue(200);
+	m_SbS1 = new QSpinBox(50, 500, 50, nullptr);
+	m_SbS1->setValue(100);
+	m_SbS2 = new QSpinBox(10, 200, 10, nullptr);
+	m_SbS2->setValue(100);
 
 	// layout
 	auto method_layout = new QVBoxLayout;
-	method_layout->addWidget(rb_fastmarch);
-	method_layout->addWidget(rb_fuzzy);
+	method_layout->addWidget(m_RbFastmarch);
+	method_layout->addWidget(m_RbFuzzy);
 
 	auto method_area = new QFrame;
 	method_area->setLayout(method_layout);
@@ -134,24 +126,24 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 	method_area->setLineWidth(1);
 
 	auto fm_params = new QFormLayout;
-	fm_params->addRow(tr("Sigma"), sl_sigma);
-	fm_params->addRow(tr("Thresh"), make_hbox({sl_thresh, sb_thresh}));
+	fm_params->addRow(tr("Sigma"), m_SlSigma);
+	fm_params->addRow(tr("Thresh"), make_hbox({m_SlThresh, m_SbThresh}));
 
 	auto fuzzy_params = new QFormLayout;
-	fuzzy_params->addRow(tr("m1"), make_hbox({sl_m1, sb_m1}));
-	fuzzy_params->addRow(tr("s1"), make_hbox({sl_s1, sb_s1}));
-	fuzzy_params->addRow(tr("s2"), make_hbox({sl_s2, sb_s2}));
+	fuzzy_params->addRow(tr("m1"), make_hbox({m_SlM1, m_SbM1}));
+	fuzzy_params->addRow(tr("s1"), make_hbox({m_SlS1, m_SbS1}));
+	fuzzy_params->addRow(tr("s2"), make_hbox({m_SlS2, m_SbS2}));
 
-	params_stack_layout = new QStackedLayout;
-	params_stack_layout->addWidget(add_to_widget(fm_params));
-	params_stack_layout->addWidget(add_to_widget(fuzzy_params));
+	m_ParamsStackLayout = new QStackedLayout;
+	m_ParamsStackLayout->addWidget(add_to_widget(fm_params));
+	m_ParamsStackLayout->addWidget(add_to_widget(fuzzy_params));
 
 	auto interact_layout = new QVBoxLayout;
-	interact_layout->addWidget(rb_drag);
-	interact_layout->addLayout(make_hbox({rb_slider, sl_extend}));
+	interact_layout->addWidget(m_RbDrag);
+	interact_layout->addLayout(make_hbox({m_RbSlider, m_SlExtend}));
 
 	auto params_layout = new QVBoxLayout;
-	params_layout->addLayout(params_stack_layout);
+	params_layout->addLayout(m_ParamsStackLayout);
 	params_layout->addLayout(interact_layout);
 
 	auto top_layout = new QHBoxLayout;
@@ -161,178 +153,176 @@ FastmarchingFuzzyWidget::FastmarchingFuzzyWidget(SlicesHandler* hand3D,
 	setLayout(top_layout);
 
 	// connections
-	connect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
-	connect(sl_extend, SIGNAL(sliderPressed()), this, SLOT(slextend_pressed()));
-	connect(sl_extend, SIGNAL(sliderReleased()), this, SLOT(slextend_released()));
-	connect(sl_sigma, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
-	connect(sl_thresh, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
-	connect(sl_m1, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
-	connect(sl_s1, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
-	connect(sl_s2, SIGNAL(sliderMoved(int)), this, SLOT(slider_changed()));
+	QObject_connect(m_SlExtend, SIGNAL(valueChanged(int)), this, SLOT(SlextendChanged(int)));
+	QObject_connect(m_SlExtend, SIGNAL(sliderPressed()), this, SLOT(SlextendPressed()));
+	QObject_connect(m_SlExtend, SIGNAL(sliderReleased()), this, SLOT(SlextendReleased()));
+	QObject_connect(m_SlSigma, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+	QObject_connect(m_SlThresh, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+	QObject_connect(m_SlM1, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+	QObject_connect(m_SlS1, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+	QObject_connect(m_SlS2, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
 
-	connect(bg_method, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
-	connect(bg_interact, SIGNAL(buttonClicked(int)), this, SLOT(interact_changed()));
+	QObject_connect(bg_method, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged()));
+	QObject_connect(bg_interact, SIGNAL(buttonClicked(int)), this, SLOT(InteractChanged()));
 
-	connect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-	connect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-	connect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-	connect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+	QObject_connect(m_SbThresh, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+	QObject_connect(m_SbM1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+	QObject_connect(m_SbS1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+	QObject_connect(m_SbS2, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
 
-	IFTmarch = nullptr;
-	IFTfuzzy = nullptr;
-	sigma = 1.0f;
-	sigmamax = 5.0f;
-	thresh = 100.0f;
-	m1 = 110.0f;
-	s1 = 20.0f;
-	s2 = 50.0f;
-	extend = 0.5f;
+	m_IfTmarch = nullptr;
+	m_IfTfuzzy = nullptr;
+	m_Sigma = 1.0f;
+	m_Sigmamax = 5.0f;
+	m_Thresh = 100.0f;
+	m_M1 = 110.0f;
+	m_S1 = 20.0f;
+	m_S2 = 50.0f;
+	m_Extend = 0.5f;
 
-	method_changed();
-	spinbox_changed();
-	sl_sigma->setValue(int(sigma * 100 / sigmamax));
+	MethodChanged();
+	SpinboxChanged();
+	m_SlSigma->setValue(int(m_Sigma * 100 / m_Sigmamax));
 }
 
 FastmarchingFuzzyWidget::~FastmarchingFuzzyWidget()
 {
-	if (IFTmarch != nullptr)
-		delete IFTmarch;
-	if (IFTfuzzy != nullptr)
-		delete IFTfuzzy;
+	if (m_IfTmarch != nullptr)
+		delete m_IfTmarch;
+	if (m_IfTfuzzy != nullptr)
+		delete m_IfTfuzzy;
 }
 
-void FastmarchingFuzzyWidget::on_slicenr_changed()
+void FastmarchingFuzzyWidget::OnSlicenrChanged()
 {
-	activeslice = handler3D->active_slice();
-	bmphand_changed(handler3D->get_activebmphandler());
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	BmphandChanged(m_Handler3D->GetActivebmphandler());
 }
 
-void FastmarchingFuzzyWidget::bmphand_changed(bmphandler* bmph)
+void FastmarchingFuzzyWidget::BmphandChanged(Bmphandler* bmph)
 {
-	if (IFTmarch != nullptr)
-		delete IFTmarch;
-	if (IFTfuzzy != nullptr)
-		delete IFTfuzzy;
-	IFTmarch = nullptr;
-	IFTfuzzy = nullptr;
+	if (m_IfTmarch != nullptr)
+		delete m_IfTmarch;
+	if (m_IfTfuzzy != nullptr)
+		delete m_IfTfuzzy;
+	m_IfTmarch = nullptr;
+	m_IfTfuzzy = nullptr;
 
-	bmphand = bmph;
+	m_Bmphand = bmph;
 
-	sl_extend->setEnabled(false);
+	m_SlExtend->setEnabled(false);
 }
 
-void FastmarchingFuzzyWidget::init()
+void FastmarchingFuzzyWidget::Init()
 {
-	if (activeslice != handler3D->active_slice())
+	if (m_Activeslice != m_Handler3D->ActiveSlice())
 	{
-		activeslice = handler3D->active_slice();
-		bmphand = handler3D->get_activebmphandler();
+		m_Activeslice = m_Handler3D->ActiveSlice();
+		m_Bmphand = m_Handler3D->GetActivebmphandler();
 	}
 
-	area = bmphand->return_height() * (unsigned)bmphand->return_width();
+	m_Area = m_Bmphand->ReturnHeight() * (unsigned)m_Bmphand->ReturnWidth();
 
-	if (IFTmarch != nullptr)
-		delete IFTmarch;
-	if (IFTfuzzy != nullptr)
-		delete IFTfuzzy;
-	IFTmarch = nullptr;
-	IFTfuzzy = nullptr;
+	if (m_IfTmarch != nullptr)
+		delete m_IfTmarch;
+	if (m_IfTfuzzy != nullptr)
+		delete m_IfTfuzzy;
+	m_IfTmarch = nullptr;
+	m_IfTfuzzy = nullptr;
 
-	sl_extend->setEnabled(false);
+	m_SlExtend->setEnabled(false);
 
-	hideparams_changed();
+	HideParamsChanged();
 }
 
-void FastmarchingFuzzyWidget::newloaded()
+void FastmarchingFuzzyWidget::NewLoaded()
 {
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 }
 
-void FastmarchingFuzzyWidget::cleanup()
+void FastmarchingFuzzyWidget::Cleanup()
 {
-	if (IFTmarch != nullptr)
-		delete IFTmarch;
-	if (IFTfuzzy != nullptr)
-		delete IFTfuzzy;
-	IFTmarch = nullptr;
-	IFTfuzzy = nullptr;
-	sl_extend->setEnabled(false);
+	if (m_IfTmarch != nullptr)
+		delete m_IfTmarch;
+	if (m_IfTfuzzy != nullptr)
+		delete m_IfTfuzzy;
+	m_IfTmarch = nullptr;
+	m_IfTfuzzy = nullptr;
+	m_SlExtend->setEnabled(false);
 }
 
-void FastmarchingFuzzyWidget::getrange()
+void FastmarchingFuzzyWidget::Getrange()
 {
-	extendmax = 0;
-	for (unsigned i = 0; i < area; i++)
-		if (extendmax < map[i])
-			extendmax = map[i];
+	m_Extendmax = 0;
+	for (unsigned i = 0; i < m_Area; i++)
+		if (m_Extendmax < m_Map[i])
+			m_Extendmax = m_Map[i];
 }
 
-void FastmarchingFuzzyWidget::on_mouse_clicked(Point p)
+void FastmarchingFuzzyWidget::OnMouseClicked(Point p)
 {
-	if (rb_fastmarch->isChecked())
+	if (m_RbFastmarch->isChecked())
 	{
-		if (IFTmarch != nullptr)
-			delete IFTmarch;
+		if (m_IfTmarch != nullptr)
+			delete m_IfTmarch;
 
-		IFTmarch = bmphand->fastmarching_init(p, sigma, thresh);
+		m_IfTmarch = m_Bmphand->FastmarchingInit(p, m_Sigma, m_Thresh);
 
 		//		if(map!=nullptr) free(map);
-		map = IFTmarch->return_pf();
+		m_Map = m_IfTmarch->ReturnPf();
 	}
 	else
 	{
-		if (IFTfuzzy == nullptr)
+		if (m_IfTfuzzy == nullptr)
 		{
-			IFTfuzzy = new ImageForestingTransformAdaptFuzzy;
-			IFTfuzzy->fuzzy_init(bmphand->return_width(),
-					bmphand->return_height(),
-					bmphand->return_bmp(), p, m1, s1, s2);
+			m_IfTfuzzy = new ImageForestingTransformAdaptFuzzy;
+			m_IfTfuzzy->FuzzyInit(m_Bmphand->ReturnWidth(), m_Bmphand->ReturnHeight(), m_Bmphand->ReturnBmp(), p, m_M1, m_S1, m_S2);
 		}
 		else
 		{
-			IFTfuzzy->change_param(m1, s1, s2);
-			IFTfuzzy->change_pt(p);
+			m_IfTfuzzy->ChangeParam(m_M1, m_S1, m_S2);
+			m_IfTfuzzy->ChangePt(p);
 		}
 
 		//		if(map!=nullptr) free(map);
-		map = IFTfuzzy->return_pf();
+		m_Map = m_IfTfuzzy->ReturnPf();
 	}
 
-	if (rb_slider->isChecked())
+	if (m_RbSlider->isChecked())
 	{
-		getrange();
-		if (extend > extendmax)
+		Getrange();
+		if (m_Extend > m_Extendmax)
 		{
-			extend = extendmax;
+			m_Extend = m_Extendmax;
 		}
 
-		sl_extend->setValue(int(extend / extendmax * 200));
-		sl_extend->setEnabled(true);
+		m_SlExtend->setValue(int(m_Extend / m_Extendmax * 200));
+		m_SlExtend->setEnabled(true);
 
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = true;
-		emit begin_datachange(dataSelection, this);
-		execute();
-		emit end_datachange(this);
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = true;
+		emit BeginDatachange(data_selection, this);
+		Execute();
+		emit EndDatachange(this);
 	}
 }
 
-void FastmarchingFuzzyWidget::on_mouse_released(Point p)
+void FastmarchingFuzzyWidget::OnMouseReleased(Point p)
 {
-	if (rb_drag->isChecked())
+	if (m_RbDrag->isChecked())
 	{
-		vpdyn_arg.clear();
-		emit vpdyn_changed(&vpdyn_arg);
-		extend = map[unsigned(bmphand->return_width()) * p.py + p.px];
+		m_VpdynArg.clear();
+		emit VpdynChanged(&m_VpdynArg);
+		m_Extend = m_Map[unsigned(m_Bmphand->ReturnWidth()) * p.py + p.px];
 
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = true;
-		emit begin_datachange(dataSelection, this);
-		execute();
-		emit end_datachange(this);
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = true;
+		emit BeginDatachange(data_selection, this);
+		Execute();
+		emit EndDatachange(this);
 		/*		float *workbits=bmphand->return_work();
 		for(unsigned i=0;i<area;i++) {
 			if(map[i]<extend) workbits=255.0f;
@@ -341,112 +331,112 @@ void FastmarchingFuzzyWidget::on_mouse_released(Point p)
 	}
 }
 
-void FastmarchingFuzzyWidget::on_mouse_moved(Point p)
+void FastmarchingFuzzyWidget::OnMouseMoved(Point p)
 {
-	if (rb_drag->isChecked())
+	if (m_RbDrag->isChecked())
 	{
-		vpdyn_arg.clear();
-		unsigned short width = bmphand->return_width();
-		unsigned short height = bmphand->return_height();
-		extend = map[(unsigned)width * p.py + p.px];
+		m_VpdynArg.clear();
+		unsigned short width = m_Bmphand->ReturnWidth();
+		unsigned short height = m_Bmphand->ReturnHeight();
+		m_Extend = m_Map[(unsigned)width * p.py + p.px];
 
 		Point p;
 
 		unsigned pos = 0;
 
-		if ((map[pos] <= extend && map[pos + 1] > extend) ||
-				(map[pos] <= extend && map[pos + width] > extend))
+		if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+				(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend))
 		{
 			p.px = 0;
 			p.py = 0;
-			vpdyn_arg.push_back(p);
+			m_VpdynArg.push_back(p);
 		}
 		pos++;
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
-			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos - 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend))
+			if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos - 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend))
 			{
 				p.px = j;
 				p.py = 0;
-				vpdyn_arg.push_back(p);
+				m_VpdynArg.push_back(p);
 			}
 			pos++;
 		}
-		if ((map[pos] <= extend && map[pos - 1] > extend) ||
-				(map[pos] <= extend && map[pos + width] > extend))
+		if ((m_Map[pos] <= m_Extend && m_Map[pos - 1] > m_Extend) ||
+				(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend))
 		{
 			p.px = width - 1;
 			p.py = 0;
-			vpdyn_arg.push_back(p);
+			m_VpdynArg.push_back(p);
 		}
 		pos++;
 
 		for (unsigned short i = 1; i + 1 < height; i++)
 		{
-			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+			if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 			{
 				p.px = 0;
 				p.py = i;
-				vpdyn_arg.push_back(p);
+				m_VpdynArg.push_back(p);
 			}
 			pos++;
 			for (unsigned short j = 1; j + 1 < width; j++)
 			{
-				if ((map[pos] <= extend && map[pos + 1] > extend) ||
-						(map[pos] <= extend && map[pos - 1] > extend) ||
-						(map[pos] <= extend && map[pos + width] > extend) ||
-						(map[pos] <= extend && map[pos - width] > extend))
+				if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+						(m_Map[pos] <= m_Extend && m_Map[pos - 1] > m_Extend) ||
+						(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend) ||
+						(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 				{
 					p.px = j;
 					p.py = i;
-					vpdyn_arg.push_back(p);
+					m_VpdynArg.push_back(p);
 				}
 				pos++;
 			}
-			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos + width] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+			if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos + width] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 			{
 				p.px = width - 1;
 				p.py = i;
-				vpdyn_arg.push_back(p);
+				m_VpdynArg.push_back(p);
 			}
 			pos++;
 		}
-		if ((map[pos] <= extend && map[pos + 1] > extend) ||
-				(map[pos] <= extend && map[pos - width] > extend))
+		if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+				(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 		{
 			p.px = 0;
 			p.py = height - 1;
-			vpdyn_arg.push_back(p);
+			m_VpdynArg.push_back(p);
 		}
 		pos++;
 		for (unsigned short j = 1; j + 1 < width; j++)
 		{
-			if ((map[pos] <= extend && map[pos + 1] > extend) ||
-					(map[pos] <= extend && map[pos - 1] > extend) ||
-					(map[pos] <= extend && map[pos - width] > extend))
+			if ((m_Map[pos] <= m_Extend && m_Map[pos + 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos - 1] > m_Extend) ||
+					(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 			{
 				p.px = j;
 				p.py = height - 1;
-				vpdyn_arg.push_back(p);
+				m_VpdynArg.push_back(p);
 			}
 			pos++;
 		}
-		if ((map[pos] <= extend && map[pos - 1] > extend) ||
-				(map[pos] <= extend && map[pos - width] > extend))
+		if ((m_Map[pos] <= m_Extend && m_Map[pos - 1] > m_Extend) ||
+				(m_Map[pos] <= m_Extend && m_Map[pos - width] > m_Extend))
 		{
 			p.px = width - 1;
 			p.py = height - 1;
-			vpdyn_arg.push_back(p);
+			m_VpdynArg.push_back(p);
 		}
 
-		emit vpdyn_changed(&vpdyn_arg);
-		//		execute();
+		emit VpdynChanged(&m_VpdynArg);
+		//		Execute();
 		/*		float *workbits=bmphand->return_work();
 		for(unsigned i=0;i<area;i++) {
 			if(map[i]<extend) workbits=255.0f;
@@ -455,185 +445,180 @@ void FastmarchingFuzzyWidget::on_mouse_moved(Point p)
 	}
 }
 
-void FastmarchingFuzzyWidget::execute()
+void FastmarchingFuzzyWidget::Execute()
 {
-	float* workbits = bmphand->return_work();
-	for (unsigned i = 0; i < area; i++)
+	float* workbits = m_Bmphand->ReturnWork();
+	for (unsigned i = 0; i < m_Area; i++)
 	{
 		//		workbits[i]=map[i];
-		if (map[i] <= extend)
+		if (m_Map[i] <= m_Extend)
 			workbits[i] = 255.0f;
 		else
 			workbits[i] = 0.0f;
 	}
-	bmphand->set_mode(2, false);
+	m_Bmphand->SetMode(2, false);
 }
 
-void FastmarchingFuzzyWidget::slextend_changed(int val)
+void FastmarchingFuzzyWidget::SlextendChanged(int val)
 {
-	extend = val * 0.005f * extendmax;
-	if (rb_slider->isChecked())
-		execute();
-
-	return;
+	m_Extend = val * 0.005f * m_Extendmax;
+	if (m_RbSlider->isChecked())
+		Execute();
 }
 
-void FastmarchingFuzzyWidget::bmp_changed()
+void FastmarchingFuzzyWidget::BmpChanged()
 {
-	bmphand = handler3D->get_activebmphandler();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 	//	sl_extend->setEnabled(false);
-	init();
+	Init();
 }
 
-void FastmarchingFuzzyWidget::method_changed()
+void FastmarchingFuzzyWidget::MethodChanged()
 {
-	if (rb_fastmarch->isChecked())
+	if (m_RbFastmarch->isChecked())
 	{
-		params_stack_layout->setCurrentIndex(0);
+		m_ParamsStackLayout->setCurrentIndex(0);
 	}
 	else
 	{
-		params_stack_layout->setCurrentIndex(1);
+		m_ParamsStackLayout->setCurrentIndex(1);
 	}
 }
 
-void FastmarchingFuzzyWidget::interact_changed()
+void FastmarchingFuzzyWidget::InteractChanged()
 {
-	if (rb_drag->isChecked())
+	if (m_RbDrag->isChecked())
 	{
-		sl_extend->setVisible(false);
+		m_SlExtend->setVisible(false);
 	}
 	else
 	{
-		sl_extend->setVisible(true);
+		m_SlExtend->setVisible(true);
 	}
 }
 
-void FastmarchingFuzzyWidget::spinbox_changed()
+void FastmarchingFuzzyWidget::SpinboxChanged()
 {
-	if (thresh > sb_thresh->value())
+	if (m_Thresh > m_SbThresh->value())
 	{
-		thresh = sb_thresh->value();
-		sl_thresh->setValue(100);
-		if (IFTmarch != nullptr)
+		m_Thresh = m_SbThresh->value();
+		m_SlThresh->setValue(100);
+		if (m_IfTmarch != nullptr)
 		{
-			delete IFTmarch;
-			IFTmarch = nullptr;
+			delete m_IfTmarch;
+			m_IfTmarch = nullptr;
 		}
-		sl_extend->setEnabled(false);
+		m_SlExtend->setEnabled(false);
 	}
 	else
 	{
-		sl_thresh->setValue(int(thresh * 100 / sb_thresh->value()));
+		m_SlThresh->setValue(int(m_Thresh * 100 / m_SbThresh->value()));
 	}
 
-	if (m1 > sb_m1->value())
+	if (m_M1 > m_SbM1->value())
 	{
-		m1 = sb_m1->value();
-		sl_m1->setValue(100);
-		sl_extend->setEnabled(false);
+		m_M1 = m_SbM1->value();
+		m_SlM1->setValue(100);
+		m_SlExtend->setEnabled(false);
 	}
 	else
 	{
-		sl_m1->setValue(int(m1 * 100 / sb_m1->value()));
+		m_SlM1->setValue(int(m_M1 * 100 / m_SbM1->value()));
 	}
 
-	if (s1 > sb_s1->value())
+	if (m_S1 > m_SbS1->value())
 	{
-		s1 = sb_s1->value();
-		sl_s1->setValue(100);
-		sl_extend->setEnabled(false);
+		m_S1 = m_SbS1->value();
+		m_SlS1->setValue(100);
+		m_SlExtend->setEnabled(false);
 	}
 	else
 	{
-		sl_s1->setValue(int(s1 * 100 / sb_s1->value()));
+		m_SlS1->setValue(int(m_S1 * 100 / m_SbS1->value()));
 	}
 
-	if (s2 > sb_s2->value())
+	if (m_S2 > m_SbS2->value())
 	{
-		s2 = sb_s2->value();
-		sl_s2->setValue(100);
-		sl_extend->setEnabled(false);
+		m_S2 = m_SbS2->value();
+		m_SlS2->setValue(100);
+		m_SlExtend->setEnabled(false);
 	}
 	else
 	{
-		sl_s2->setValue(int(s2 * 100 / sb_s2->value()));
+		m_SlS2->setValue(int(m_S2 * 100 / m_SbS2->value()));
 	}
 
-	return;
-}
+	}
 
-void FastmarchingFuzzyWidget::slider_changed()
+void FastmarchingFuzzyWidget::SliderChanged()
 {
-	sigma = sl_sigma->value() * 0.01f * sigmamax;
-	thresh = sl_thresh->value() * 0.01f * sb_thresh->value();
-	m1 = sl_m1->value() * 0.01f * sb_m1->value();
-	s1 = sl_s1->value() * 0.01f * sb_s1->value();
-	s2 = sl_s2->value() * 0.01f * sb_s2->value();
+	m_Sigma = m_SlSigma->value() * 0.01f * m_Sigmamax;
+	m_Thresh = m_SlThresh->value() * 0.01f * m_SbThresh->value();
+	m_M1 = m_SlM1->value() * 0.01f * m_SbM1->value();
+	m_S1 = m_SlS1->value() * 0.01f * m_SbS1->value();
+	m_S2 = m_SlS2->value() * 0.01f * m_SbS2->value();
 
-	if (rb_fastmarch->isChecked() && IFTmarch != nullptr)
+	if (m_RbFastmarch->isChecked() && m_IfTmarch != nullptr)
 	{
-		delete IFTmarch;
-		IFTmarch = nullptr;
+		delete m_IfTmarch;
+		m_IfTmarch = nullptr;
 	}
 
-	sl_extend->setEnabled(false);
-
-	return;
+	m_SlExtend->setEnabled(false);
 }
 
-void FastmarchingFuzzyWidget::slextend_pressed()
+void FastmarchingFuzzyWidget::SlextendPressed()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this);
 }
 
-void FastmarchingFuzzyWidget::slextend_released() { emit end_datachange(this); }
+void FastmarchingFuzzyWidget::SlextendReleased() { emit EndDatachange(this); }
 
 FILE* FastmarchingFuzzyWidget::SaveParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = sl_sigma->value();
+		dummy = m_SlSigma->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_thresh->value();
+		dummy = m_SlThresh->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_m1->value();
+		dummy = m_SlM1->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_s1->value();
+		dummy = m_SlS1->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_s2->value();
+		dummy = m_SlS2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_extend->value();
+		dummy = m_SlExtend->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_thresh->value();
+		dummy = m_SbThresh->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_m1->value();
+		dummy = m_SbM1->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_s1->value();
+		dummy = m_SbS1->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sb_s2->value();
+		dummy = m_SbS2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fastmarch->isChecked());
+		dummy = (int)(m_RbFastmarch->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_fuzzy->isChecked());
+		dummy = (int)(m_RbFuzzy->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_drag->isChecked());
+		dummy = (int)(m_RbDrag->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_slider->isChecked());
+		dummy = (int)(m_RbSlider->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
-		fwrite(&sigma, 1, sizeof(float), fp);
-		fwrite(&thresh, 1, sizeof(float), fp);
-		fwrite(&m1, 1, sizeof(float), fp);
-		fwrite(&s1, 1, sizeof(float), fp);
-		fwrite(&s2, 1, sizeof(float), fp);
-		fwrite(&sigmamax, 1, sizeof(float), fp);
-		fwrite(&extend, 1, sizeof(float), fp);
-		fwrite(&extendmax, 1, sizeof(float), fp);
+		fwrite(&m_Sigma, 1, sizeof(float), fp);
+		fwrite(&m_Thresh, 1, sizeof(float), fp);
+		fwrite(&m_M1, 1, sizeof(float), fp);
+		fwrite(&m_S1, 1, sizeof(float), fp);
+		fwrite(&m_S2, 1, sizeof(float), fp);
+		fwrite(&m_Sigmamax, 1, sizeof(float), fp);
+		fwrite(&m_Extend, 1, sizeof(float), fp);
+		fwrite(&m_Extendmax, 1, sizeof(float), fp);
 	}
 
 	return fp;
@@ -643,67 +628,67 @@ FILE* FastmarchingFuzzyWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		disconnect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
-		disconnect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		disconnect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		disconnect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		disconnect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		QObject_disconnect(m_SlExtend, SIGNAL(valueChanged(int)), this, SLOT(SlextendChanged(int)));
+		QObject_disconnect(m_SbThresh, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_disconnect(m_SbM1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_disconnect(m_SbS1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_disconnect(m_SbS2, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_sigma->setValue(dummy);
+		m_SlSigma->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_thresh->setValue(dummy);
+		m_SlThresh->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_m1->setValue(dummy);
+		m_SlM1->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_s1->setValue(dummy);
+		m_SlS1->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_s2->setValue(dummy);
+		m_SlS2->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_extend->setValue(dummy);
+		m_SlExtend->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_thresh->setValue(dummy);
+		m_SbThresh->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_m1->setValue(dummy);
+		m_SbM1->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_s1->setValue(dummy);
+		m_SbS1->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sb_s2->setValue(dummy);
+		m_SbS2->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_fastmarch->setChecked(dummy > 0);
+		m_RbFastmarch->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_fuzzy->setChecked(dummy > 0);
+		m_RbFuzzy->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_drag->setChecked(dummy > 0);
+		m_RbDrag->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_slider->setChecked(dummy > 0);
+		m_RbSlider->setChecked(dummy > 0);
 
-		fread(&sigma, sizeof(float), 1, fp);
-		fread(&thresh, sizeof(float), 1, fp);
-		fread(&m1, sizeof(float), 1, fp);
-		fread(&s1, sizeof(float), 1, fp);
-		fread(&s2, sizeof(float), 1, fp);
-		fread(&sigmamax, sizeof(float), 1, fp);
-		fread(&extend, sizeof(float), 1, fp);
-		fread(&extendmax, sizeof(float), 1, fp);
+		fread(&m_Sigma, sizeof(float), 1, fp);
+		fread(&m_Thresh, sizeof(float), 1, fp);
+		fread(&m_M1, sizeof(float), 1, fp);
+		fread(&m_S1, sizeof(float), 1, fp);
+		fread(&m_S2, sizeof(float), 1, fp);
+		fread(&m_Sigmamax, sizeof(float), 1, fp);
+		fread(&m_Extend, sizeof(float), 1, fp);
+		fread(&m_Extendmax, sizeof(float), 1, fp);
 
-		method_changed();
-		interact_changed();
+		MethodChanged();
+		InteractChanged();
 
-		connect(sl_extend, SIGNAL(valueChanged(int)), this, SLOT(slextend_changed(int)));
-		connect(sb_thresh, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		connect(sb_m1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		connect(sb_s1, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
-		connect(sb_s2, SIGNAL(valueChanged(int)), this, SLOT(spinbox_changed()));
+		QObject_connect(m_SlExtend, SIGNAL(valueChanged(int)), this, SLOT(SlextendChanged(int)));
+		QObject_connect(m_SbThresh, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_connect(m_SbM1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_connect(m_SbS1, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
+		QObject_connect(m_SbS2, SIGNAL(valueChanged(int)), this, SLOT(SpinboxChanged()));
 	}
 	return fp;
 }
 
-void FastmarchingFuzzyWidget::hideparams_changed()
+void FastmarchingFuzzyWidget::HideParamsChanged()
 {
-	method_changed();
-	interact_changed();
+	MethodChanged();
+	InteractChanged();
 }
 
 } // namespace iseg

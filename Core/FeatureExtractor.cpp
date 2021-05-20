@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,171 +15,168 @@
 
 namespace iseg {
 
-void FeatureExtractor::init(float* bit, Point p1, Point p2, short unsigned w,
-		short unsigned h)
+void FeatureExtractor::Init(float* bit, Point p1, Point p2, short unsigned w, short unsigned h)
 {
-	width = w;
-	height = h;
-	set_bits(bit);
-	set_window(p1, p2);
+	m_Width = w;
+	m_Height = h;
+	SetBits(bit);
+	SetWindow(p1, p2);
 }
 
-void FeatureExtractor::set_bits(float* bit)
+void FeatureExtractor::SetBits(float* bit)
 {
-	bits = bit;
+	m_Bits = bit;
 }
 
-void FeatureExtractor::set_window(Point p1, Point p2)
+void FeatureExtractor::SetWindow(Point p1, Point p2)
 {
-	xmin = std::min(p1.px, p2.px);
-	xmax = std::max(p1.px, p2.px);
-	ymin = std::min(p1.py, p2.py);
-	ymax = std::max(p1.py, p2.py);
-	area = unsigned(ymax - ymin + 1) * (xmax - xmin + 1);
-	valmin = valmax = bits[unsigned(ymin) * width + xmin];
+	m_Xmin = std::min(p1.px, p2.px);
+	m_Xmax = std::max(p1.px, p2.px);
+	m_Ymin = std::min(p1.py, p2.py);
+	m_Ymax = std::max(p1.py, p2.py);
+	m_Area = unsigned(m_Ymax - m_Ymin + 1) * (m_Xmax - m_Xmin + 1);
+	m_Valmin = m_Valmax = m_Bits[unsigned(m_Ymin) * m_Width + m_Xmin];
 
-	average = 0;
-	for (short i = xmin; i <= xmax; i++)
+	m_Average = 0;
+	for (short i = m_Xmin; i <= m_Xmax; i++)
 	{
-		for (short j = ymin; j <= ymax; j++)
+		for (short j = m_Ymin; j <= m_Ymax; j++)
 		{
-			average += bits[unsigned(j) * width + i];
-			valmin = std::min(valmin, bits[unsigned(j) * width + i]);
-			valmax = std::max(valmax, bits[unsigned(j) * width + i]);
+			m_Average += m_Bits[unsigned(j) * m_Width + i];
+			m_Valmin = std::min(m_Valmin, m_Bits[unsigned(j) * m_Width + i]);
+			m_Valmax = std::max(m_Valmax, m_Bits[unsigned(j) * m_Width + i]);
 		}
 	}
 
-	average /= area;
+	m_Average /= m_Area;
 }
 
-float FeatureExtractor::return_average() { return average; }
+float FeatureExtractor::ReturnAverage() const { return m_Average; }
 
-float FeatureExtractor::return_stddev()
+float FeatureExtractor::ReturnStddev()
 {
-	if (area != 1)
+	if (m_Area != 1)
 	{
 		float stddev = 0;
-		for (short i = xmin; i <= xmax; i++)
+		for (short i = m_Xmin; i <= m_Xmax; i++)
 		{
-			for (short j = ymin; j <= ymax; j++)
+			for (short j = m_Ymin; j <= m_Ymax; j++)
 			{
-				stddev += (bits[unsigned(j) * width + i] - average) *
-									(bits[unsigned(j) * width + i] - average);
+				stddev += (m_Bits[unsigned(j) * m_Width + i] - m_Average) *
+									(m_Bits[unsigned(j) * m_Width + i] - m_Average);
 			}
 		}
-		return sqrt(stddev / (area - 1));
+		return sqrt(stddev / (m_Area - 1));
 	}
 	else
 		return 1E10;
 }
 
-void FeatureExtractor::return_extrema(Pair* p)
+void FeatureExtractor::ReturnExtrema(Pair* p) const
 {
-	p->high = valmax;
-	p->low = valmin;
+	p->high = m_Valmax;
+	p->low = m_Valmin;
 }
 
-class feature_extractor_mask
+class FeatureExtractorMask
 {
 public:
-	void init(float* bit, float* mask1, short unsigned w, short unsigned h,
-			float f1);
-	void set_bits(float* bit);
-	void set_mask(float* mask1);
-	void set_f(float f1);
-	float return_average();
-	float return_stddev();
-	void return_extrema(Pair* p);
+	void Init(float* bit, float* mask1, short unsigned w, short unsigned h, float f1);
+	void SetBits(float* bit);
+	void SetMask(float* mask1);
+	void SetF(float f1);
+	float ReturnAverage() const;
+	float ReturnStddev();
+	void ReturnExtrema(Pair* p) const;
 
 private:
-	float f;
-	float* bits;
-	float valmin;
-	float valmax;
-	float average;
-	short unsigned width;
-	short unsigned height;
-	unsigned area;
-	float* mask;
+	float m_F;
+	float* m_Bits;
+	float m_Valmin;
+	float m_Valmax;
+	float m_Average;
+	short unsigned m_Width;
+	short unsigned m_Height;
+	unsigned m_Area;
+	float* m_Mask;
 };
 
-void feature_extractor_mask::init(float* bit, float* mask1, short unsigned w,
-		short unsigned h, float f1)
+void FeatureExtractorMask::Init(float* bit, float* mask1, short unsigned w, short unsigned h, float f1)
 {
-	width = w;
-	height = h;
-	f = f1;
-	set_bits(bit);
-	set_mask(mask1);
+	m_Width = w;
+	m_Height = h;
+	m_F = f1;
+	SetBits(bit);
+	SetMask(mask1);
 }
 
-void feature_extractor_mask::set_bits(float* bit)
+void FeatureExtractorMask::SetBits(float* bit)
 {
-	bits = bit;
+	m_Bits = bit;
 }
 
-void feature_extractor_mask::set_mask(float* mask1)
+void FeatureExtractorMask::SetMask(float* mask1)
 {
-	area = 0;
+	m_Area = 0;
 	unsigned pos = 0;
-	mask = mask1;
-	while (mask[pos] == 0 && pos < unsigned(width) * height)
+	m_Mask = mask1;
+	while (m_Mask[pos] == 0 && pos < unsigned(m_Width) * m_Height)
 		pos++;
-	if (pos < unsigned(width) * height)
+	if (pos < unsigned(m_Width) * m_Height)
 	{
-		valmin = valmax = bits[pos];
-		average = 0;
-		for (; pos < unsigned(width) * height; pos++)
+		m_Valmin = m_Valmax = m_Bits[pos];
+		m_Average = 0;
+		for (; pos < unsigned(m_Width) * m_Height; pos++)
 		{
-			if (mask[pos] != 0)
+			if (m_Mask[pos] != 0)
 			{
-				area++;
-				average += bits[pos];
-				valmin = std::min(valmin, bits[pos]);
-				valmax = std::max(valmax, bits[pos]);
+				m_Area++;
+				m_Average += m_Bits[pos];
+				m_Valmin = std::min(m_Valmin, m_Bits[pos]);
+				m_Valmax = std::max(m_Valmax, m_Bits[pos]);
 			}
 		}
 
-		average /= area;
+		m_Average /= m_Area;
 	}
 	else
 	{
-		average = 0;
-		area = 0;
+		m_Average = 0;
+		m_Area = 0;
 	}
 }
 
-void feature_extractor_mask::set_f(float f1)
+void FeatureExtractorMask::SetF(float f1)
 {
-	f = f1;
-	set_mask(mask);
+	m_F = f1;
+	SetMask(m_Mask);
 }
 
-float feature_extractor_mask::return_average() { return average; }
+float FeatureExtractorMask::ReturnAverage() const { return m_Average; }
 
-float feature_extractor_mask::return_stddev()
+float FeatureExtractorMask::ReturnStddev()
 {
-	if (area > 1)
+	if (m_Area > 1)
 	{
 		float stddev = 0;
-		for (unsigned pos = 0; pos < unsigned(width) * height; pos++)
+		for (unsigned pos = 0; pos < unsigned(m_Width) * m_Height; pos++)
 		{
-			if (mask[pos] != 0)
+			if (m_Mask[pos] != 0)
 			{
-				stddev += (bits[pos] - average) * (bits[pos] - average);
+				stddev += (m_Bits[pos] - m_Average) * (m_Bits[pos] - m_Average);
 			}
 		}
 
-		return sqrt(stddev / (area - 1));
+		return sqrt(stddev / (m_Area - 1));
 	}
 	else
 		return 1E10;
 }
 
-void feature_extractor_mask::return_extrema(Pair* p)
+void FeatureExtractorMask::ReturnExtrema(Pair* p) const
 {
-	p->high = valmax;
-	p->low = valmin;
+	p->high = m_Valmax;
+	p->low = m_Valmin;
 }
 
 } // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,43 +20,43 @@ BOOST_AUTO_TEST_SUITE(Brush_suite);
 BOOST_AUTO_TEST_CASE(brush_test)
 {
 	unsigned w = 512, h = 512;
-	unsigned char BG = 0;
-	unsigned char FG = 1;
+	unsigned char bg = 0;
+	unsigned char fg = 1;
 
 	// uniform spacing, radius = 0
 	{
-		Point p = { 120, 120 };
+		Point p = {120, 120};
 		float radius = 0.0;
-		std::vector<unsigned char> data(w*h, 0);
-		brush(data.data(), w, h, 1.f, 1.f, p, radius, true, FG, BG, [](unsigned char) {return false; });
-		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), FG), 1);
+		std::vector<unsigned char> data(w * h, 0);
+		brush(data.data(), w, h, 1.f, 1.f, p, radius, true, fg, bg, [](unsigned char) { return false; });
+		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), fg), 1);
 	}
 	// uniform spacing, radius = 1
 	{
-		Point p = { 120, 120 };
+		Point p = {120, 120};
 		float radius = 1.0;
-		std::vector<unsigned char> data(w*h, 0);
-		brush(data.data(), w, h, 1.f, 1.f, p, radius, true, FG, BG, [](unsigned char) {return false; });
-		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), FG), 5);
-		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), FG));
+		std::vector<unsigned char> data(w * h, 0);
+		brush(data.data(), w, h, 1.f, 1.f, p, radius, true, fg, bg, [](unsigned char) { return false; });
+		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), fg), 5);
+		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), fg));
 	}
 	// non-uniform spacing, radius = 0
 	{
-		Point p = { 120, 120 };
+		Point p = {120, 120};
 		float radius = 0.0;
-		std::vector<unsigned char> data(w*h, 0);
-		brush(data.data(), w, h, 1.f, 0.2f, p, radius, true, FG, BG, [](unsigned char) {return false; });
-		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), FG), 1);
-		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), FG));
+		std::vector<unsigned char> data(w * h, 0);
+		brush(data.data(), w, h, 1.f, 0.2f, p, radius, true, fg, bg, [](unsigned char) { return false; });
+		BOOST_CHECK_EQUAL(std::count(data.begin(), data.end(), fg), 1);
+		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), fg));
 	}
 	// non-uniform spacing, radius = 1
 	{
-		Point p = { 120, 120 };
+		Point p = {120, 120};
 		float radius = 1.0;
-		std::vector<unsigned char> data(w*h, 0);
-		brush(data.data(), w, h, 1.f, 0.2f, p, radius, true, FG, BG, [](unsigned char) {return false; });
-		BOOST_CHECK_GT(std::count(data.begin(), data.end(), FG), 5);
-		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), FG));
+		std::vector<unsigned char> data(w * h, 0);
+		brush(data.data(), w, h, 1.f, 0.2f, p, radius, true, fg, bg, [](unsigned char) { return false; });
+		BOOST_CHECK_GT(std::count(data.begin(), data.end(), fg), 5);
+		BOOST_TEST_MESSAGE("FG pixels: " << std::count(data.begin(), data.end(), fg));
 	}
 }
 

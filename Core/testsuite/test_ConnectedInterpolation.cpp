@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(Interpolation_test)
 
 	image_type::IndexType start;
 	start.Fill(0);
-	image_type::SizeType  size;
+	image_type::SizeType size;
 	size.Fill(512);
 	image_type::RegionType region(start, size);
 
@@ -47,12 +47,12 @@ BOOST_AUTO_TEST_CASE(Interpolation_test)
 	slice2->SetPixel(idx, 1);
 
 	ConnectedShapeBasedInterpolation myinterpolator;
-	auto slices = myinterpolator.interpolate(slice1, slice2, 2);
+	auto slices = myinterpolator.Interpolate(slice1, slice2, 2);
 
-	for (auto slice: slices)
+	for (const auto& slice : slices)
 	{
 		auto calc = itk::MinimumMaximumImageCalculator<image_type>::New();
-  		calc->SetImage(slice);
+		calc->SetImage(slice);
 		calc->Compute();
 		BOOST_CHECK_EQUAL(calc->GetMaximum(), 255);
 		BOOST_CHECK_GT(calc->GetIndexOfMaximum()[0], 210);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(Interpolation_test)
 // --run_test=iSeg_suite/Interpolation_suite/ResampleFilterBug --log_level=message
 BOOST_AUTO_TEST_CASE(ResampleFilterBug)
 {
-	using image_type = itk::Image<float,3>;
+	using image_type = itk::Image<float, 3>;
 
 	image_type::IndexType input_start = {0, 0, 0};
 	image_type::SizeType input_size = {512, 512, 3};

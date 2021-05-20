@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -61,8 +61,8 @@ namespace {
 
 std::string timestamped(const std::string prefix, const std::string& suffix)
 {
-	auto timeLocal = boost::posix_time::second_clock::local_time();
-	auto tod = boost::posix_time::to_iso_string(timeLocal);
+	auto time_local = boost::posix_time::second_clock::local_time();
+	auto tod = boost::posix_time::to_iso_string(time_local);
 	return prefix + "-" + tod + suffix;
 }
 
@@ -79,32 +79,32 @@ std::pair<std::string, std::string> custom_parser(const std::string& s)
 }
 
 // \brief Redirect VTK errors/warnings to file
-class vtkCustomOutputWindow : public vtkOutputWindow
+class VtkCustomOutputWindow : public vtkOutputWindow
 {
 public:
-	static vtkCustomOutputWindow* New();
-	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream& os, vtkIndent indent) override {}
+	static VtkCustomOutputWindow* New();
+	vtkTypeMacro(VtkCustomOutputWindow, vtkOutputWindow);
+	void PrintSelf(ostream& os, vtkIndent indent) override {}
 
 	// Put the text into the output stream.
-	virtual void DisplayText(const char* msg) override { std::cerr << msg << std::endl; }
+	void DisplayText(const char* msg) override { std::cerr << msg << std::endl; }
 
 protected:
-	vtkCustomOutputWindow() {}
+	VtkCustomOutputWindow() = default;
 
 private:
-	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
-	void operator=(const vtkCustomOutputWindow&);				 // Not implemented.
+	VtkCustomOutputWindow(const VtkCustomOutputWindow&) = delete; 
+	void operator=(const VtkCustomOutputWindow&) = delete;				 
 };
 
-vtkStandardNewMacro(vtkCustomOutputWindow);
+vtkStandardNewMacro(VtkCustomOutputWindow);
 
 } // namespace
 
 #ifdef NDEBUG
 bool _print_debug_log = false;
 #else
-bool _print_debug_log = true;
+bool print_debug_log = true;
 #endif
 
 int main(int argc, char** argv)
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 	}
 
 	// install vtk error handler to avoid stupid popup windows
-	auto eow = vtkCustomOutputWindow::New();
+	auto eow = VtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
 	eow->Delete();
 
@@ -174,8 +174,8 @@ int main(int argc, char** argv)
 	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
 	init_logging(log_file_name, true, debug);
 
-	QDir fileDirectory = fileinfo.dir();
-	ISEG_INFO("fileDirectory = " << fileDirectory.absolutePath().toStdString());
+	QDir file_directory = fileinfo.dir();
+	ISEG_INFO("fileDirectory = " << file_directory.absolutePath().toStdString());
 
 	QDir picpath = fileinfo.dir();
 	ISEG_INFO("picture path = " << picpath.absolutePath().toStdString());
@@ -191,12 +191,12 @@ int main(int argc, char** argv)
 	}
 
 	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
-	QString locationpath = fileDirectory.absPath();
+	QString locationpath = file_directory.absPath();
 	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
 	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
 
 	TissueInfos::InitTissues();
-	BranchItem::init_availablelabels();
+	BranchItem::InitAvailablelabels();
 
 	SlicesHandler slice_handler;
 
@@ -226,10 +226,7 @@ int main(int argc, char** argv)
 #endif
 	app.processEvents();
 
-	MainWindow* mainWindow = new MainWindow(
-			&slice_handler, locationpath, picpath, tmpdir,
-			vm.count("s4l"), nullptr, "MainWindow",
-			Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
+	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), nullptr, "MainWindow", Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	// needed on MacOS, but not WIN32?
 	app.setStyleSheet(
@@ -239,16 +236,16 @@ int main(int argc, char** argv)
 			"QComboBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
 			"QCheckBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
 
-	mainWindow->LoadLoadProj(latestprojpath);
-	mainWindow->LoadAtlas(atlasdir);
-	mainWindow->LoadSettings(settingspath.toAscii().data());
+	main_window->LoadLoadProj(latestprojpath);
+	main_window->LoadAtlas(atlasdir);
+	main_window->LoadSettings(settingspath.toAscii().data());
 	if (vm.count("s4l"))
 	{
-		mainWindow->loadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
+		main_window->LoadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
 	}
 	else if (vm.count("input-file"))
 	{
-		mainWindow->loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
+		main_window->Loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
 	}
 
 #ifdef SHOWSPLASH
@@ -257,6 +254,7 @@ int main(int argc, char** argv)
 	}
 #endif
 
+#ifdef TEST_PROPERTY
 	auto group = PropertyGroup::Create();
 	group->SetDescription("Settings");
 	auto pi = group->Add("Iterations", PropertyInt::Create(5));
@@ -272,22 +270,23 @@ int main(int argc, char** argv)
 		group->DumpTree();
 	}));
 
-	auto dialog = new QDialog(mainWindow);
+	auto dialog = new QDialog(main_window);
 	auto layout = new QVBoxLayout;
 	layout->addWidget(new PropertyWidget(group));
 	dialog->setLayout(layout);
 	dialog->raise();
 	dialog->exec();
 	return 0;
-
-	mainWindow->showMaximized();
-	mainWindow->show();
-
-#ifdef SHOWSPLASH
-	splash_screen.finish(mainWindow);
 #endif
 
-	QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+	main_window->showMaximized();
+	main_window->show();
+
+#ifdef SHOWSPLASH
+	splash_screen.finish(main_window);
+#endif
+
+	QObject_connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
 	return app.exec();
 }

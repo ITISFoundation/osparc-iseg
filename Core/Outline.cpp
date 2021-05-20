@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,74 +13,74 @@
 
 namespace iseg {
 
-void OutlineLine::add_point(Point_type P)
+void OutlineLine::AddPoint(point_type P)
 {
-	line.push_back(P);
+	m_Line.push_back(P);
 }
 
-void OutlineLine::add_points(std::vector<Point_type>* P_vec)
+void OutlineLine::AddPoints(std::vector<point_type>* P_vec)
 {
 	for (auto it = (*P_vec).begin(); it != (*P_vec).end(); it++)
 	{
-		line.push_back(*it);
+		m_Line.push_back(*it);
 	}
 }
 
-void OutlineLine::clear()
+void OutlineLine::Clear()
 {
-	line.clear();
+	m_Line.clear();
 }
 
-unsigned OutlineLine::return_length() { return (unsigned)line.size(); }
+unsigned OutlineLine::ReturnLength() { return (unsigned)m_Line.size(); }
 
-Point_type* OutlineLine::return_line()
+point_type* OutlineLine::ReturnLine()
 {
-	unsigned l = (unsigned)line.size();
-	Point_type* result = (Point_type*)malloc(sizeof(Point_type) * l);
+	unsigned l = (unsigned)m_Line.size();
+	point_type* result = (point_type*)malloc(sizeof(point_type) * l);
 	for (unsigned i = 0; i < l; i++)
 	{
-		result[i].px = line[i].px;
-		result[i].py = line[i].py;
+		result[i].px = m_Line[i].px;
+		result[i].py = m_Line[i].py;
 	}
 	return result;
 }
 
-FILE* OutlineLine::print(FILE* fp)
+FILE* OutlineLine::Print(FILE* fp)
 {
-	unsigned l = (unsigned)line.size();
+	unsigned l = (unsigned)m_Line.size();
 	fprintf(fp, "%u: ", l);
 	//	for(unsigned i=0;i<l;i++) fprintf(fp,"%f,%f ",line[i].px,line[i].py);
 	for (unsigned i = 0; i < l; i++)
-		fprintf(fp, "%i,%i ", line[i].px, line[i].py);
-	/*	for(vector<Point_type>::iterator it=line.begin();it!=line.end();it++)
+		fprintf(fp, "%i,%i ", m_Line[i].px, m_Line[i].py);
+	/*	for(vector<point_type>::iterator it=line.begin();it!=line.end();it++)
 			fprintf(fp,"%f,%f ",(*it).px,(*it).py);*/
 	fprintf(fp, "\n");
 
 	return fp;
 }
 
-FILE* OutlineLine::read(FILE* fp)
+FILE* OutlineLine::Read(FILE* fp)
 {
 	unsigned l;
 	fscanf(fp, "%u: ", &l);
-	Point_type p;
+	point_type p;
 	int i1, i2;
-	line.clear();
+	m_Line.clear();
 	for (unsigned i = 0; i < l; i++)
 	{
 		//		fscanf(fp,"%f,%f ",&p.px,&p.py);
 		fscanf(fp, "%i,%i ", &i1, &i2);
 		p.px = (short)i1;
 		p.py = (short)i2;
-		line.push_back(p);
+		m_Line.push_back(p);
 	}
 
 	return fp;
 }
 
-void OutlineLine::doug_peuck(float epsilon, bool /*closed*/)
+void OutlineLine::DougPeuck(float epsilon, bool /*closed*/)
 {
-	unsigned int n = (unsigned int)line.size();
+	unsigned int n = (unsigned int)m_Line.size();
 	if (n > 2)
 	{
 		std::vector<bool> v1;
@@ -90,43 +90,41 @@ void OutlineLine::doug_peuck(float epsilon, bool /*closed*/)
 			v1[i] = false;
 		v1[0] = true;
 		v1[n - 1] = true;
-		doug_peuck_sub(epsilon, 0, n - 1, &v1);
+		DougPeuckSub(epsilon, 0, n - 1, &v1);
 
-		auto it = line.begin();
+		auto it = m_Line.begin();
 		for (unsigned int i = 0; i < n; i++)
 		{
 			if (!v1[i])
-				it = line.erase(it);
+				it = m_Line.erase(it);
 			else
 				it++;
 		}
 	}
-	return;
 }
 
-void OutlineLine::doug_peuck_sub(float epsilon, const unsigned int p1,
-		const unsigned int p2, std::vector<bool>* v1_p)
+void OutlineLine::DougPeuckSub(float epsilon, const unsigned int p1, const unsigned int p2, std::vector<bool>* v1_p)
 {
 	//	cout << p1<<" "<<p2<<endl;
 	if (p2 <= p1 + 1)
 		return;
 	float dv, l;
 	float max_dist = 0;
-	Point SIJ, SIV;
+	Point sij, siv;
 	unsigned int max_pos = p1;
 
-	SIJ.px = line[p2].px - line[p1].px;
-	SIJ.py = line[p2].py - line[p1].py;
+	sij.px = m_Line[p2].px - m_Line[p1].px;
+	sij.py = m_Line[p2].py - m_Line[p1].py;
 
-	l = dist(&SIJ);
+	l = dist(&sij);
 
 	//	cout << l << endl;
 
 	for (unsigned int i = p1 + 1; i < p2; i++)
 	{
-		SIV.px = line[i].px - line[p1].px;
-		SIV.py = line[i].py - line[p1].py;
-		dv = cross(&SIV, &SIJ) / l;
+		siv.px = m_Line[i].px - m_Line[p1].px;
+		siv.py = m_Line[i].py - m_Line[p1].py;
+		dv = cross(&siv, &sij) / l;
 		//		cout << dv << ":";
 		if (dv > max_dist)
 		{
@@ -139,209 +137,199 @@ void OutlineLine::doug_peuck_sub(float epsilon, const unsigned int p1,
 	if (max_dist > epsilon)
 	{
 		(*v1_p)[max_pos] = true;
-		doug_peuck_sub(epsilon, p1, max_pos, v1_p);
-		doug_peuck_sub(epsilon, max_pos, p2, v1_p);
+		DougPeuckSub(epsilon, p1, max_pos, v1_p);
+		DougPeuckSub(epsilon, max_pos, p2, v1_p);
 	}
 }
 
-void OutlineLine::shift_contour(int dx, int dy)
+void OutlineLine::ShiftContour(int dx, int dy)
 {
-	unsigned l = (unsigned)line.size();
+	unsigned l = (unsigned)m_Line.size();
 	for (unsigned i = 0; i < l; i++)
 	{
-		line[i].px += dx;
-		line[i].py += dy;
+		m_Line[i].px += dx;
+		m_Line[i].py += dy;
 	}
 }
 
 //-------------------------------------------------------------------------------
-OutlineSlice::OutlineSlice() { thickness = 1; }
+OutlineSlice::OutlineSlice() { m_Thickness = 1; }
 
-OutlineSlice::OutlineSlice(float thick) { thickness = thick; }
+OutlineSlice::OutlineSlice(float thick) { m_Thickness = thick; }
 
-void OutlineSlice::add_line(tissues_size_t tissuetype,
-		std::vector<Point_type>* P_vec, bool outer)
+void OutlineSlice::AddLine(tissues_size_t tissuetype, std::vector<point_type>* P_vec, bool outer)
 {
 	OutlineLine ol;
 	//	ol.add_points(P_vec);
 	if (outer)
 	{
-		outer_lines[tissuetype].push_back(ol);
-		(*(--outer_lines[tissuetype].end())).add_points(P_vec);
+		m_OuterLines[tissuetype].push_back(ol);
+		(*(--m_OuterLines[tissuetype].end())).AddPoints(P_vec);
 	}
 	else
 	{
-		inner_lines[tissuetype].push_back(ol);
-		(*(--inner_lines[tissuetype].end())).add_points(P_vec);
+		m_InnerLines[tissuetype].push_back(ol);
+		(*(--m_InnerLines[tissuetype].end())).AddPoints(P_vec);
 	}
 }
 
-void OutlineSlice::add_points(tissues_size_t tissuetype, unsigned short linenr,
-		std::vector<Point_type>* P_vec, bool outer)
+void OutlineSlice::AddPoints(tissues_size_t tissuetype, unsigned short linenr, std::vector<point_type>* P_vec, bool outer)
 {
 	if (outer)
 	{
-		(outer_lines[tissuetype])[linenr].add_points(P_vec);
+		(m_OuterLines[tissuetype])[linenr].AddPoints(P_vec);
 	}
 	else
 	{
-		(inner_lines[tissuetype])[linenr].add_points(P_vec);
+		(m_InnerLines[tissuetype])[linenr].AddPoints(P_vec);
 	}
 }
 
-void OutlineSlice::add_point(tissues_size_t tissuetype, unsigned short linenr,
-		Point_type P, bool outer)
+void OutlineSlice::AddPoint(tissues_size_t tissuetype, unsigned short linenr, point_type P, bool outer)
 {
 	if (outer)
 	{
-		(outer_lines[tissuetype])[linenr].add_point(P);
+		(m_OuterLines[tissuetype])[linenr].AddPoint(P);
 	}
 	else
 	{
-		(inner_lines[tissuetype])[linenr].add_point(P);
+		(m_InnerLines[tissuetype])[linenr].AddPoint(P);
 	}
 }
 
-void OutlineSlice::clear()
+void OutlineSlice::Clear()
 {
-	outer_lines.clear();
-	inner_lines.clear();
+	m_OuterLines.clear();
+	m_InnerLines.clear();
 }
 
-void OutlineSlice::clear(tissues_size_t tissuetype)
+void OutlineSlice::Clear(tissues_size_t tissuetype)
 {
-	outer_lines.erase(tissuetype);
-	inner_lines.erase(tissuetype);
+	m_OuterLines.erase(tissuetype);
+	m_InnerLines.erase(tissuetype);
 }
 
-void OutlineSlice::clear(tissues_size_t tissuetype, unsigned short linenr,
-		bool outer)
+void OutlineSlice::Clear(tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
 	if (outer)
 	{
-		if (outer_lines.find(tissuetype) != outer_lines.end())
+		if (m_OuterLines.find(tissuetype) != m_OuterLines.end())
 		{
-			outer_lines[tissuetype].erase(outer_lines[tissuetype].begin() +
-																		linenr);
+			m_OuterLines[tissuetype].erase(m_OuterLines[tissuetype].begin() +
+																		 linenr);
 		}
 	}
-	else if (inner_lines.find(tissuetype) != inner_lines.end())
+	else if (m_InnerLines.find(tissuetype) != m_InnerLines.end())
 	{
-		inner_lines[tissuetype].erase(inner_lines[tissuetype].begin() + linenr);
+		m_InnerLines[tissuetype].erase(m_InnerLines[tissuetype].begin() + linenr);
 	}
 }
 
-unsigned short OutlineSlice::return_nrlines(tissues_size_t tissuetype,
-		bool outer)
+unsigned short OutlineSlice::ReturnNrlines(tissues_size_t tissuetype, bool outer)
 {
 	if (outer)
 	{
-		if (outer_lines.find(tissuetype) != outer_lines.end())
+		if (m_OuterLines.find(tissuetype) != m_OuterLines.end())
 		{
-			return (unsigned short)(outer_lines[tissuetype].size());
+			return (unsigned short)(m_OuterLines[tissuetype].size());
 		}
 	}
-	else if (inner_lines.find(tissuetype) != inner_lines.end())
+	else if (m_InnerLines.find(tissuetype) != m_InnerLines.end())
 	{
-		return (unsigned short)(inner_lines[tissuetype].size());
+		return (unsigned short)(m_InnerLines[tissuetype].size());
 	}
 	return 0;
 }
 
-unsigned OutlineSlice::return_length(tissues_size_t tissuetype,
-		unsigned short linenr, bool outer)
+unsigned OutlineSlice::ReturnLength(tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
 	if (outer)
 	{
-		if (outer_lines.find(tissuetype) != outer_lines.end())
+		if (m_OuterLines.find(tissuetype) != m_OuterLines.end())
 		{
-			return (
-					unsigned)((outer_lines[tissuetype])[linenr].return_length());
+			return (unsigned)((m_OuterLines[tissuetype])[linenr].ReturnLength());
 		}
 	}
-	else if (inner_lines.find(tissuetype) != inner_lines.end())
+	else if (m_InnerLines.find(tissuetype) != m_InnerLines.end())
 	{
-		return (unsigned)((inner_lines[tissuetype])[linenr].return_length());
+		return (unsigned)((m_InnerLines[tissuetype])[linenr].ReturnLength());
 	}
 	return 0;
 }
 
-Point_type* OutlineSlice::return_line(tissues_size_t tissuetype,
-		unsigned short linenr, bool outer)
+point_type* OutlineSlice::ReturnLine(tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
 	if (outer)
 	{
-		if (outer_lines.find(tissuetype) != outer_lines.end())
+		if (m_OuterLines.find(tissuetype) != m_OuterLines.end())
 		{
-			return outer_lines[tissuetype][linenr].return_line();
+			return m_OuterLines[tissuetype][linenr].ReturnLine();
 		}
 	}
-	else if (inner_lines.find(tissuetype) != inner_lines.end())
+	else if (m_InnerLines.find(tissuetype) != m_InnerLines.end())
 	{
-		return inner_lines[tissuetype][linenr].return_line();
+		return m_InnerLines[tissuetype][linenr].ReturnLine();
 	}
 	return nullptr;
 }
 
-FILE* OutlineSlice::print(FILE* fp, tissues_size_t nr_tissues)
+FILE* OutlineSlice::Print(FILE* fp, tissues_size_t nr_tissues)
 {
-	fprintf(fp, "Thick: %f\n", thickness);
+	fprintf(fp, "Thick: %f\n", m_Thickness);
 
 	if (nr_tissues > 255)
 	{ // Only print tissue indices which contain outlines
 
 		// Collect used tissue indices in ascending order
-		std::set<tissues_size_t> tissueIndices;
-		insert_tissue_indices(tissueIndices);
+		std::set<tissues_size_t> tissue_indices;
+		InsertTissueIndices(tissue_indices);
 
-		tissues_size_t currTissueIdx;
-		std::vector<OutlineLine>::iterator itVec;
-		for (auto itTissueIdx = tissueIndices.begin(); itTissueIdx != tissueIndices.end(); ++itTissueIdx)
+		tissues_size_t curr_tissue_idx;
+		std::vector<OutlineLine>::iterator it_vec;
+		for (auto it_tissue_idx = tissue_indices.begin(); it_tissue_idx != tissue_indices.end(); ++it_tissue_idx)
 		{
-			currTissueIdx = *itTissueIdx;
+			curr_tissue_idx = *it_tissue_idx;
 
 			// Print outer lines
-			if (outer_lines.find(currTissueIdx) != outer_lines.end())
+			if (m_OuterLines.find(curr_tissue_idx) != m_OuterLines.end())
 			{
-				fprintf(fp, "T%u O%u\n", currTissueIdx,
-						(unsigned)outer_lines[currTissueIdx].size());
-				for (itVec = outer_lines[currTissueIdx].begin();
-						 itVec != outer_lines[currTissueIdx].end(); ++itVec)
-					(*itVec).print(fp);
+				fprintf(fp, "T%u O%u\n", curr_tissue_idx, (unsigned)m_OuterLines[curr_tissue_idx].size());
+				for (it_vec = m_OuterLines[curr_tissue_idx].begin();
+						 it_vec != m_OuterLines[curr_tissue_idx].end(); ++it_vec)
+					(*it_vec).Print(fp);
 			}
 			else
 			{
-				fprintf(fp, "T%u O%u\n", currTissueIdx, 0);
+				fprintf(fp, "T%u O%u\n", curr_tissue_idx, 0);
 			}
 
 			// Print inner lines
-			if (inner_lines.find(currTissueIdx) != inner_lines.end())
+			if (m_InnerLines.find(curr_tissue_idx) != m_InnerLines.end())
 			{
-				fprintf(fp, "T%u I%u\n", currTissueIdx,
-						(unsigned)inner_lines[currTissueIdx].size());
-				for (itVec = inner_lines[currTissueIdx].begin();
-						 itVec != inner_lines[currTissueIdx].end(); ++itVec)
-					(*itVec).print(fp);
+				fprintf(fp, "T%u I%u\n", curr_tissue_idx, (unsigned)m_InnerLines[curr_tissue_idx].size());
+				for (it_vec = m_InnerLines[curr_tissue_idx].begin();
+						 it_vec != m_InnerLines[curr_tissue_idx].end(); ++it_vec)
+					(*it_vec).Print(fp);
 			}
 			else
 			{
-				fprintf(fp, "T%u I%u\n", currTissueIdx, 0);
+				fprintf(fp, "T%u I%u\n", curr_tissue_idx, 0);
 			}
 		}
 	}
 	else
 	{ // Print all tissue indices within range of unsigned char
 
-		std::vector<OutlineLine>::iterator itVec;
+		std::vector<OutlineLine>::iterator it_vec;
 		for (unsigned short i = 0; i < 256; ++i)
 		{
 			// Print outer lines
-			if (outer_lines.find(i) != outer_lines.end())
+			if (m_OuterLines.find(i) != m_OuterLines.end())
 			{
-				fprintf(fp, "T%u O%u\n", i, (unsigned)outer_lines[i].size());
-				for (itVec = outer_lines[i].begin();
-						 itVec != outer_lines[i].end(); ++itVec)
-					(*itVec).print(fp);
+				fprintf(fp, "T%u O%u\n", i, (unsigned)m_OuterLines[i].size());
+				for (it_vec = m_OuterLines[i].begin();
+						 it_vec != m_OuterLines[i].end(); ++it_vec)
+					(*it_vec).Print(fp);
 			}
 			else
 			{
@@ -349,12 +337,12 @@ FILE* OutlineSlice::print(FILE* fp, tissues_size_t nr_tissues)
 			}
 
 			// Print inner lines
-			if (inner_lines.find(i) != inner_lines.end())
+			if (m_InnerLines.find(i) != m_InnerLines.end())
 			{
-				fprintf(fp, "T%u I%u\n", i, (unsigned)inner_lines[i].size());
-				for (itVec = inner_lines[i].begin();
-						 itVec != inner_lines[i].end(); ++itVec)
-					(*itVec).print(fp);
+				fprintf(fp, "T%u I%u\n", i, (unsigned)m_InnerLines[i].size());
+				for (it_vec = m_InnerLines[i].begin();
+						 it_vec != m_InnerLines[i].end(); ++it_vec)
+					(*it_vec).Print(fp);
 			}
 			else
 			{
@@ -366,11 +354,11 @@ FILE* OutlineSlice::print(FILE* fp, tissues_size_t nr_tissues)
 	return fp;
 }
 
-FILE* OutlineSlice::read(FILE* fp)
+FILE* OutlineSlice::Read(FILE* fp)
 {
 	unsigned j, l;
 
-	fscanf(fp, "Thick: %f\n", &thickness);
+	fscanf(fp, "Thick: %f\n", &m_Thickness);
 
 	//	for(unsigned i=0;i<nr_tissuetypes;i++){
 	//		fscanf(fp,"T%u O%u\n",&j,&l);
@@ -381,16 +369,16 @@ FILE* OutlineSlice::read(FILE* fp)
 		{
 			OutlineLine ol;
 			//			ol.read(fp);
-			outer_lines[j].push_back(ol);
-			(*(--outer_lines[j].end())).read(fp);
+			m_OuterLines[j].push_back(ol);
+			(*(--m_OuterLines[j].end())).Read(fp);
 		}
 		fscanf(fp, "T%u I%u\n", &j, &l);
 		for (unsigned k = 0; k < l; k++)
 		{
 			OutlineLine ol;
 			//			ol.read(fp);
-			inner_lines[j].push_back(ol);
-			(*(--inner_lines[j].end())).read(fp);
+			m_InnerLines[j].push_back(ol);
+			(*(--m_InnerLines[j].end())).Read(fp);
 		}
 		fphold = fp;
 	}
@@ -399,179 +387,157 @@ FILE* OutlineSlice::read(FILE* fp)
 	return fp;
 }
 
-void OutlineSlice::set_thickness(float thick) { thickness = thick; }
+void OutlineSlice::SetThickness(float thick) { m_Thickness = thick; }
 
-float OutlineSlice::get_thickness() { return thickness; }
+float OutlineSlice::GetThickness() const { return m_Thickness; }
 
-void OutlineSlice::doug_peuck(float epsilon, bool closed)
+void OutlineSlice::DougPeuck(float epsilon, bool closed)
 {
-	TissueOutlineMap_type::iterator itTissue;
-	std::vector<OutlineLine>::iterator itOutline;
-	for (itTissue = outer_lines.begin(); itTissue != outer_lines.end();
-			 ++itTissue)
+	TissueOutlineMap_type::iterator it_tissue;
+	std::vector<OutlineLine>::iterator it_outline;
+	for (it_tissue = m_OuterLines.begin(); it_tissue != m_OuterLines.end();
+			 ++it_tissue)
 	{
-		for (itOutline = itTissue->second.begin();
-				 itOutline != itTissue->second.end(); ++itOutline)
+		for (it_outline = it_tissue->second.begin();
+				 it_outline != it_tissue->second.end(); ++it_outline)
 		{
-			itOutline->doug_peuck(epsilon, closed);
+			it_outline->DougPeuck(epsilon, closed);
 		}
 	}
-	for (itTissue = inner_lines.begin(); itTissue != inner_lines.end();
-			 ++itTissue)
+	for (it_tissue = m_InnerLines.begin(); it_tissue != m_InnerLines.end();
+			 ++it_tissue)
 	{
-		for (itOutline = itTissue->second.begin();
-				 itOutline != itTissue->second.end(); ++itOutline)
+		for (it_outline = it_tissue->second.begin();
+				 it_outline != it_tissue->second.end(); ++it_outline)
 		{
-			itOutline->doug_peuck(epsilon, closed);
+			it_outline->DougPeuck(epsilon, closed);
 		}
 	}
 }
 
-void OutlineSlice::shift_contours(int dx, int dy)
+void OutlineSlice::ShiftContours(int dx, int dy)
 {
-	TissueOutlineMap_type::iterator itTissue;
-	std::vector<OutlineLine>::iterator itOutline;
-	for (itTissue = outer_lines.begin(); itTissue != outer_lines.end();
-			 ++itTissue)
+	TissueOutlineMap_type::iterator it_tissue;
+	std::vector<OutlineLine>::iterator it_outline;
+	for (it_tissue = m_OuterLines.begin(); it_tissue != m_OuterLines.end();
+			 ++it_tissue)
 	{
-		for (itOutline = itTissue->second.begin();
-				 itOutline != itTissue->second.end(); ++itOutline)
+		for (it_outline = it_tissue->second.begin();
+				 it_outline != it_tissue->second.end(); ++it_outline)
 		{
-			itOutline->shift_contour(dx, dy);
+			it_outline->ShiftContour(dx, dy);
 		}
 	}
-	for (itTissue = inner_lines.begin(); itTissue != inner_lines.end();
-			 ++itTissue)
+	for (it_tissue = m_InnerLines.begin(); it_tissue != m_InnerLines.end();
+			 ++it_tissue)
 	{
-		for (itOutline = itTissue->second.begin();
-				 itOutline != itTissue->second.end(); ++itOutline)
+		for (it_outline = it_tissue->second.begin();
+				 it_outline != it_tissue->second.end(); ++it_outline)
 		{
-			itOutline->shift_contour(dx, dy);
+			it_outline->ShiftContour(dx, dy);
 		}
 	}
 }
 
-void OutlineSlice::insert_tissue_indices(std::set<tissues_size_t>& tissueIndices)
+void OutlineSlice::InsertTissueIndices(std::set<tissues_size_t>& tissueIndices)
 {
 	// Inserts tissue indices contained in the outline into the set (ascending order)
-	TissueOutlineMap_type::iterator itTissue;
-	for (itTissue = outer_lines.begin(); itTissue != outer_lines.end();
-			 ++itTissue)
+	TissueOutlineMap_type::iterator it_tissue;
+	for (it_tissue = m_OuterLines.begin(); it_tissue != m_OuterLines.end();
+			 ++it_tissue)
 	{
-		tissueIndices.insert(itTissue->first);
+		tissueIndices.insert(it_tissue->first);
 	}
-	for (itTissue = inner_lines.begin(); itTissue != inner_lines.end();
-			 ++itTissue)
+	for (it_tissue = m_InnerLines.begin(); it_tissue != m_InnerLines.end();
+			 ++it_tissue)
 	{
-		tissueIndices.insert(itTissue->first);
+		tissueIndices.insert(it_tissue->first);
 	}
 }
 
 //-------------------------------------------------------------------------------
 OutlineSlices::OutlineSlices(unsigned nrslices)
 {
-	dx = dy = 1;
-	slices.resize(nrslices);
-	return;
+	m_Dx = m_Dy = 1;
+	m_Slices.resize(nrslices);
 }
 
 OutlineSlices::OutlineSlices()
 {
-	dx = dy = 1;
-	return;
+	m_Dx = m_Dy = 1;
 }
 
 OutlineSlices::OutlineSlices(unsigned nrslices, float thick)
 {
-	slices.resize(nrslices);
+	m_Slices.resize(nrslices);
 	for (unsigned i = 0; i < nrslices; i++)
-		slices[i].set_thickness(thick);
-	return;
+		m_Slices[i].SetThickness(thick);
 }
 
-void OutlineSlices::set_sizenr(unsigned nrslices)
+void OutlineSlices::SetSizenr(unsigned nrslices)
 {
-	slices.resize(nrslices);
-	return;
+	m_Slices.resize(nrslices);
 }
 
-void OutlineSlices::clear()
+void OutlineSlices::Clear()
 {
-	for (unsigned i = 0; i < (unsigned)slices.size(); i++)
-		slices[i].clear();
-	return;
+	for (unsigned i = 0; i < (unsigned)m_Slices.size(); i++)
+		m_Slices[i].Clear();
 }
 
-void OutlineSlices::clear(tissues_size_t tissuetype)
+void OutlineSlices::Clear(tissues_size_t tissuetype)
 {
-	for (unsigned i = 0; i < (unsigned)slices.size(); i++)
-		slices[i].clear(tissuetype);
-	return;
+	for (unsigned i = 0; i < (unsigned)m_Slices.size(); i++)
+		m_Slices[i].Clear(tissuetype);
 }
 
-void OutlineSlices::clear_slice(unsigned slicenr)
+void OutlineSlices::ClearSlice(unsigned slicenr)
 {
-	slices[slicenr].clear();
-	return;
+	m_Slices[slicenr].Clear();
 }
 
-void OutlineSlices::clear_slice(unsigned slicenr, tissues_size_t tissuetype,
-		unsigned short linenr, bool outer)
+void OutlineSlices::ClearSlice(unsigned slicenr, tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
-	slices[slicenr].clear(tissuetype, linenr, outer);
-	return;
+	m_Slices[slicenr].Clear(tissuetype, linenr, outer);
 }
 
-void OutlineSlices::add_line(unsigned slicenr, tissues_size_t tissuetype,
-		std::vector<Point_type>* P_vec, bool outer)
+void OutlineSlices::AddLine(unsigned slicenr, tissues_size_t tissuetype, std::vector<point_type>* P_vec, bool outer)
 {
-	slices[slicenr].add_line(tissuetype, P_vec, outer);
-	return;
+	m_Slices[slicenr].AddLine(tissuetype, P_vec, outer);
 }
 
-void OutlineSlices::add_points(unsigned slicenr, tissues_size_t tissuetype,
-		unsigned short linenr, std::vector<Point_type>* P_vec,
-		bool outer)
+void OutlineSlices::AddPoints(unsigned slicenr, tissues_size_t tissuetype, unsigned short linenr, std::vector<point_type>* P_vec, bool outer)
 {
-	slices[slicenr].add_points(tissuetype, linenr, P_vec, outer);
-	return;
+	m_Slices[slicenr].AddPoints(tissuetype, linenr, P_vec, outer);
 }
 
-void OutlineSlices::add_point(unsigned slicenr, tissues_size_t tissuetype,
-		unsigned short linenr, Point_type P, bool outer)
+void OutlineSlices::AddPoint(unsigned slicenr, tissues_size_t tissuetype, unsigned short linenr, point_type P, bool outer)
 {
-	slices[slicenr].add_point(tissuetype, linenr, P, outer);
-	return;
+	m_Slices[slicenr].AddPoint(tissuetype, linenr, P, outer);
 }
 
-unsigned OutlineSlices::return_nrslices() { return (unsigned)slices.size(); }
+unsigned OutlineSlices::ReturnNrslices() { return (unsigned)m_Slices.size(); }
 
-unsigned short OutlineSlices::return_nrlines(unsigned slicenr,
-		tissues_size_t tissuetype,
-		bool outer)
+unsigned short OutlineSlices::ReturnNrlines(unsigned slicenr, tissues_size_t tissuetype, bool outer)
 {
-	return slices[slicenr].return_nrlines(tissuetype, outer);
+	return m_Slices[slicenr].ReturnNrlines(tissuetype, outer);
 }
 
-unsigned OutlineSlices::return_length(unsigned slicenr,
-		tissues_size_t tissuetype,
-		unsigned short linenr, bool outer)
+unsigned OutlineSlices::ReturnLength(unsigned slicenr, tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
-	return slices[slicenr].return_length(tissuetype, linenr, outer);
+	return m_Slices[slicenr].ReturnLength(tissuetype, linenr, outer);
 }
 
-Point_type* OutlineSlices::return_line(unsigned slicenr,
-		tissues_size_t tissuetype,
-		unsigned short linenr, bool outer)
+point_type* OutlineSlices::ReturnLine(unsigned slicenr, tissues_size_t tissuetype, unsigned short linenr, bool outer)
 {
-	return slices[slicenr].return_line(tissuetype, linenr, outer);
+	return m_Slices[slicenr].ReturnLine(tissuetype, linenr, outer);
 }
 
-int OutlineSlices::print(const char* filename, tissues_size_t nr_tissues)
+int OutlineSlices::Print(const char* filename, tissues_size_t nr_tissues)
 {
-	unsigned nr_slices = (unsigned)slices.size();
+	unsigned nr_slices = (unsigned)m_Slices.size();
 
-	FILE* fp = printprologue(filename, nr_slices, nr_tissues);
+	FILE* fp = Printprologue(filename, nr_slices, nr_tissues);
 
 	if (fp == nullptr)
 		return 0;
@@ -579,15 +545,14 @@ int OutlineSlices::print(const char* filename, tissues_size_t nr_tissues)
 	for (unsigned i = 0; i < nr_slices; i++)
 	{
 		fprintf(fp, "S%u\n", i);
-		slices[i].print(fp, nr_tissues);
+		m_Slices[i].Print(fp, nr_tissues);
 	}
 
 	fclose(fp);
 	return 1;
 }
 
-FILE* OutlineSlices::printprologue(const char* filename, unsigned nr_slices,
-		tissues_size_t nr_tissues)
+FILE* OutlineSlices::Printprologue(const char* filename, unsigned nr_slices, tissues_size_t nr_tissues) const
 {
 	FILE* fp;
 
@@ -599,26 +564,24 @@ FILE* OutlineSlices::printprologue(const char* filename, unsigned nr_slices,
 			fprintf(fp, "V%u\n", 1);
 		}
 		fprintf(fp, "NS%u\n", nr_slices);
-		fprintf(fp, "PS%f %f\n", dx, dy);
+		fprintf(fp, "PS%f %f\n", m_Dx, m_Dy);
 	}
 
 	return fp;
 }
 
-FILE* OutlineSlices::printsection(FILE* fp, unsigned startslice,
-		unsigned endslice, unsigned offset,
-		tissues_size_t nr_tissues)
+FILE* OutlineSlices::Printsection(FILE* fp, unsigned startslice, unsigned endslice, unsigned offset, tissues_size_t nr_tissues)
 {
 	for (unsigned i = startslice; i <= endslice; i++)
 	{
 		fprintf(fp, "S%u\n", i + offset);
-		slices[i].print(fp, nr_tissues);
+		m_Slices[i].Print(fp, nr_tissues);
 	}
 
 	return fp;
 }
 
-int OutlineSlices::read(const char* filename)
+int OutlineSlices::Read(const char* filename)
 {
 	FILE* fp;
 
@@ -646,78 +609,74 @@ int OutlineSlices::read(const char* filename)
 		fscanf(fp, "S%u\n", &j);
 	}
 
-	fscanf(fp, "PS%f %f\n", &dx, &dy);
-	slices.clear();
-	slices.resize(j);
+	fscanf(fp, "PS%f %f\n", &m_Dx, &m_Dy);
+	m_Slices.clear();
+	m_Slices.resize(j);
 
 	for (unsigned i = 0; i < j; i++)
 	{
 		fscanf(fp, "S%u\n", &k);
-		slices[i].read(fp);
+		m_Slices[i].Read(fp);
 	}
 
 	fclose(fp);
 	return 1;
 }
 
-void OutlineSlices::set_thickness(float thick, unsigned slicenr)
+void OutlineSlices::SetThickness(float thick, unsigned slicenr)
 {
-	slices[slicenr].set_thickness(thick);
-	return;
+	m_Slices[slicenr].SetThickness(thick);
 }
 
-void OutlineSlices::set_thickness(float thick)
+void OutlineSlices::SetThickness(float thick)
 {
-	for (unsigned i = 0; i < (unsigned)slices.size(); i++)
-		slices[i].set_thickness(thick);
-	return;
+	for (unsigned i = 0; i < (unsigned)m_Slices.size(); i++)
+		m_Slices[i].SetThickness(thick);
 }
 
-void OutlineSlices::set_pixelsize(float dx1, float dy1)
+void OutlineSlices::SetPixelsize(float dx1, float dy1)
 {
-	dx = dx1;
-	dy = dy1;
+	m_Dx = dx1;
+	m_Dy = dy1;
 }
 
-float OutlineSlices::get_thickness(unsigned slicenr)
+float OutlineSlices::GetThickness(unsigned slicenr)
 {
-	return slices[slicenr].get_thickness();
+	return m_Slices[slicenr].GetThickness();
 }
 
-Point_type2 OutlineSlices::get_pixelsize()
+PointType2 OutlineSlices::GetPixelsize() const
 {
-	Point_type2 p;
-	p.px = dx;
-	p.py = dy;
+	PointType2 p;
+	p.px = m_Dx;
+	p.py = m_Dy;
 	return p;
 }
 
-void OutlineSlices::doug_peuck(float epsilon, bool closed)
+void OutlineSlices::DougPeuck(float epsilon, bool closed)
 {
-	unsigned n = (unsigned)slices.size();
+	unsigned n = (unsigned)m_Slices.size();
 	for (unsigned i = 0; i < n; i++)
 	{
-		slices[i].doug_peuck(epsilon, closed);
-	}
-
-	return;
-}
-
-void OutlineSlices::shift_contours(int dx, int dy)
-{
-	unsigned n = (unsigned)slices.size();
-	for (unsigned i = 0; i < n; i++)
-	{
-		slices[i].shift_contours(dx, dy);
+		m_Slices[i].DougPeuck(epsilon, closed);
 	}
 }
 
-void OutlineSlices::insert_tissue_indices(std::set<tissues_size_t>& tissueIndices)
+void OutlineSlices::ShiftContours(int dx, int dy)
 {
-	unsigned n = (unsigned)slices.size();
+	unsigned n = (unsigned)m_Slices.size();
 	for (unsigned i = 0; i < n; i++)
 	{
-		slices[i].insert_tissue_indices(tissueIndices);
+		m_Slices[i].ShiftContours(dx, dy);
+	}
+}
+
+void OutlineSlices::InsertTissueIndices(std::set<tissues_size_t>& tissueIndices)
+{
+	unsigned n = (unsigned)m_Slices.size();
+	for (unsigned i = 0; i < n; i++)
+	{
+		m_Slices[i].InsertTissueIndices(tissueIndices);
 	}
 }
 

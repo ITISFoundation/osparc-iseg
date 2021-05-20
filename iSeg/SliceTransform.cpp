@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -26,13 +26,13 @@
 namespace iseg {
 
 SliceTransform::SliceTransform(SlicesHandler* hand3D)
-		: originalSource(nullptr), originalTarget(nullptr), originalTissues(nullptr)
+		: m_OriginalSource(nullptr), m_OriginalTarget(nullptr), m_OriginalTissues(nullptr)
 {
-	handler3D = hand3D;
-	activeSlice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Handler3D = hand3D;
+	m_ActiveSlice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	transformSource = transformTarget = transformTissues = true;
+	m_TransformSource = m_TransformTarget = m_TransformTissues = true;
 
 	// Reallocate slice data
 	ReallocateSliceData();
@@ -43,44 +43,44 @@ SliceTransform::SliceTransform(SlicesHandler* hand3D)
 
 SliceTransform::~SliceTransform()
 {
-	if (originalSource != nullptr)
+	if (m_OriginalSource != nullptr)
 	{
-		free(originalSource);
+		free(m_OriginalSource);
 	}
-	if (originalTarget != nullptr)
+	if (m_OriginalTarget != nullptr)
 	{
-		free(originalTarget);
+		free(m_OriginalTarget);
 	}
-	if (originalTissues != nullptr)
+	if (m_OriginalTissues != nullptr)
 	{
-		free(originalTissues);
+		free(m_OriginalTissues);
 	}
 }
 
 void SliceTransform::ReallocateSliceData()
 {
-	if (originalSource != nullptr)
+	if (m_OriginalSource != nullptr)
 	{
-		free(originalSource);
+		free(m_OriginalSource);
 	}
-	if (originalTarget != nullptr)
+	if (m_OriginalTarget != nullptr)
 	{
-		free(originalTarget);
+		free(m_OriginalTarget);
 	}
-	if (originalTissues != nullptr)
+	if (m_OriginalTissues != nullptr)
 	{
-		free(originalTissues);
+		free(m_OriginalTissues);
 	}
 
-	unsigned int area = bmphand->return_area();
-	originalSource = (float*)malloc(sizeof(float) * area);
-	originalTarget = (float*)malloc(sizeof(float) * area);
-	originalTissues = (tissues_size_t*)malloc(sizeof(tissues_size_t) * area);
+	unsigned int area = m_Bmphand->ReturnArea();
+	m_OriginalSource = (float*)malloc(sizeof(float) * area);
+	m_OriginalTarget = (float*)malloc(sizeof(float) * area);
+	m_OriginalTissues = (tissues_size_t*)malloc(sizeof(tissues_size_t) * area);
 }
 
 void SliceTransform::SelectTransformData(bool source, bool target, bool tissues)
 {
-	if (transformSource != source)
+	if (m_TransformSource != source)
 	{
 		if (source)
 		{
@@ -93,10 +93,10 @@ void SliceTransform::SelectTransformData(bool source, bool target, bool tissues)
 			// Source has been disabled --> undo transform
 			CopyToOriginalSlice(true, false, false);
 		}
-		transformSource = source;
+		m_TransformSource = source;
 	}
 
-	if (transformTarget != target)
+	if (m_TransformTarget != target)
 	{
 		if (target)
 		{
@@ -109,10 +109,10 @@ void SliceTransform::SelectTransformData(bool source, bool target, bool tissues)
 			// Target has been disabled --> undo transform
 			CopyToOriginalSlice(false, true, false);
 		}
-		transformTarget = target;
+		m_TransformTarget = target;
 	}
 
-	if (transformTissues != tissues)
+	if (m_TransformTissues != tissues)
 	{
 		if (tissues)
 		{
@@ -125,29 +125,29 @@ void SliceTransform::SelectTransformData(bool source, bool target, bool tissues)
 			// Tissues has been disabled --> undo transform
 			CopyToOriginalSlice(false, false, true);
 		}
-		transformTissues = tissues;
+		m_TransformTissues = tissues;
 	}
 }
 
 void SliceTransform::ActiveSliceChanged()
 {
 	// Undo transform for previously active slice
-	CopyToOriginalSlice(transformSource, transformTarget, transformTissues);
+	CopyToOriginalSlice(m_TransformSource, m_TransformTarget, m_TransformTissues);
 
 	// Get new active slice
-	activeSlice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
-	CopyFromOriginalSlice(transformSource, transformTarget, transformTissues);
+	m_ActiveSlice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	CopyFromOriginalSlice(m_TransformSource, m_TransformTarget, m_TransformTissues);
 
 	// Apply transform
-	ApplyTransform(transformSource, transformTarget, transformTissues);
+	ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 }
 
 void SliceTransform::NewDataLoaded()
 {
 	// Get new active slice
-	activeSlice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_ActiveSlice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
 	// Reallocate slice data
 	ReallocateSliceData();
@@ -160,30 +160,29 @@ void SliceTransform::Execute(bool allSlices)
 {
 	if (allSlices)
 	{
-		for (unsigned short slice = handler3D->start_slice();
-				 slice < handler3D->end_slice(); ++slice)
+		for (unsigned short slice = m_Handler3D->StartSlice();
+				 slice < m_Handler3D->EndSlice(); ++slice)
 		{
 			// Active slice has already been transformed
-			if (slice == activeSlice)
+			if (slice == m_ActiveSlice)
 			{
 				continue;
 			}
 
 			// Activate and get current slice
-			handler3D->set_active_slice(slice);
-			bmphand = handler3D->get_activebmphandler();
+			m_Handler3D->SetActiveSlice(slice);
+			m_Bmphand = m_Handler3D->GetActivebmphandler();
 
 			// Get copy of original slice data
-			CopyFromOriginalSlice(transformSource, transformTarget,
-					transformTissues);
+			CopyFromOriginalSlice(m_TransformSource, m_TransformTarget, m_TransformTissues);
 
 			// Apply transform
-			ApplyTransform(transformSource, transformTarget, transformTissues);
+			ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 		}
 
 		// Restore previously active slice
-		handler3D->set_active_slice(activeSlice);
-		bmphand = handler3D->get_activebmphandler();
+		m_Handler3D->SetActiveSlice(m_ActiveSlice);
+		m_Bmphand = m_Handler3D->GetActivebmphandler();
 
 		// Reset transformation
 		Initialize();
@@ -198,7 +197,7 @@ void SliceTransform::Execute(bool allSlices)
 void SliceTransform::Cancel()
 {
 	// Copy original image data back to slice
-	CopyToOriginalSlice(transformSource, transformTarget, transformTissues);
+	CopyToOriginalSlice(m_TransformSource, m_TransformTarget, m_TransformTissues);
 
 	// Reset transformation matrix to identity
 	ResetTransformMatrix();
@@ -207,17 +206,17 @@ void SliceTransform::Cancel()
 void SliceTransform::Translate(int offsetX, int offsetY, bool apply)
 {
 	// Right multiply backtransform matrix with inverse translation matrix
-	transformMatrix[2] -=
-			transformMatrix[0] * offsetX + transformMatrix[1] * offsetY;
-	transformMatrix[5] -=
-			transformMatrix[3] * offsetX + transformMatrix[4] * offsetY;
-	transformMatrix[8] -=
-			transformMatrix[6] * offsetX + transformMatrix[7] * offsetY;
+	m_TransformMatrix[2] -=
+			m_TransformMatrix[0] * offsetX + m_TransformMatrix[1] * offsetY;
+	m_TransformMatrix[5] -=
+			m_TransformMatrix[3] * offsetX + m_TransformMatrix[4] * offsetY;
+	m_TransformMatrix[8] -=
+			m_TransformMatrix[6] * offsetX + m_TransformMatrix[7] * offsetY;
 
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
@@ -227,23 +226,23 @@ void SliceTransform::Rotate(double angle, int centerX, int centerY, bool apply)
 	Translate(-centerX, -centerY, false);
 
 	// Right multiply backtransform matrix with inverse rotation matrix
-	double cosPhi = std::cos(-(M_PI * angle) / 180.0);
-	double sinPhi = std::sin(-(M_PI * angle) / 180.0);
+	double cos_phi = std::cos(-(M_PI * angle) / 180.0);
+	double sin_phi = std::sin(-(M_PI * angle) / 180.0);
 
-	double tmp1 = transformMatrix[0];
-	double tmp2 = transformMatrix[1];
-	transformMatrix[0] = tmp1 * cosPhi + tmp2 * sinPhi;
-	transformMatrix[1] = tmp2 * cosPhi - tmp1 * sinPhi;
+	double tmp1 = m_TransformMatrix[0];
+	double tmp2 = m_TransformMatrix[1];
+	m_TransformMatrix[0] = tmp1 * cos_phi + tmp2 * sin_phi;
+	m_TransformMatrix[1] = tmp2 * cos_phi - tmp1 * sin_phi;
 
-	tmp1 = transformMatrix[3];
-	tmp2 = transformMatrix[4];
-	transformMatrix[3] = tmp1 * cosPhi + tmp2 * sinPhi;
-	transformMatrix[4] = tmp2 * cosPhi - tmp1 * sinPhi;
+	tmp1 = m_TransformMatrix[3];
+	tmp2 = m_TransformMatrix[4];
+	m_TransformMatrix[3] = tmp1 * cos_phi + tmp2 * sin_phi;
+	m_TransformMatrix[4] = tmp2 * cos_phi - tmp1 * sin_phi;
 
-	tmp1 = transformMatrix[6];
-	tmp2 = transformMatrix[7];
-	transformMatrix[6] = tmp1 * cosPhi + tmp2 * sinPhi;
-	transformMatrix[7] = tmp2 * cosPhi - tmp1 * sinPhi;
+	tmp1 = m_TransformMatrix[6];
+	tmp2 = m_TransformMatrix[7];
+	m_TransformMatrix[6] = tmp1 * cos_phi + tmp2 * sin_phi;
+	m_TransformMatrix[7] = tmp2 * cos_phi - tmp1 * sin_phi;
 
 	// Translate center back
 	Translate(centerX, centerY, false);
@@ -251,23 +250,22 @@ void SliceTransform::Rotate(double angle, int centerX, int centerY, bool apply)
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
-void SliceTransform::Scale(double factorX, double factorY, int centerX,
-		int centerY, bool apply)
+void SliceTransform::Scale(double factorX, double factorY, int centerX, int centerY, bool apply)
 {
 	// Translate center to origin
 	Translate(-centerX, -centerY, false);
 
 	// Right multiply backtransform matrix with inverse scale matrix
-	transformMatrix[0] /= factorX;
-	transformMatrix[1] /= factorY;
-	transformMatrix[3] /= factorX;
-	transformMatrix[4] /= factorY;
-	transformMatrix[6] /= factorX;
-	transformMatrix[7] /= factorY;
+	m_TransformMatrix[0] /= factorX;
+	m_TransformMatrix[1] /= factorY;
+	m_TransformMatrix[3] /= factorX;
+	m_TransformMatrix[4] /= factorY;
+	m_TransformMatrix[6] /= factorX;
+	m_TransformMatrix[7] /= factorY;
 
 	// Translate center back
 	Translate(centerX, centerY, false);
@@ -275,12 +273,11 @@ void SliceTransform::Scale(double factorX, double factorY, int centerX,
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
-void SliceTransform::Shear(double angle, bool shearXAxis, int axisPosition,
-		bool apply)
+void SliceTransform::Shear(double angle, bool shearXAxis, int axisPosition, bool apply)
 {
 	if (shearXAxis)
 	{
@@ -289,9 +286,9 @@ void SliceTransform::Shear(double angle, bool shearXAxis, int axisPosition,
 
 		// Right multiply backtransform matrix with inverse shear matrix
 		double k = std::tan(-(M_PI * angle) / 180.0);
-		transformMatrix[0] += transformMatrix[1] * k;
-		transformMatrix[3] += transformMatrix[4] * k;
-		transformMatrix[6] += transformMatrix[7] * k;
+		m_TransformMatrix[0] += m_TransformMatrix[1] * k;
+		m_TransformMatrix[3] += m_TransformMatrix[4] * k;
+		m_TransformMatrix[6] += m_TransformMatrix[7] * k;
 
 		// Translate x-axis back
 		Translate(axisPosition, 0, false);
@@ -303,9 +300,9 @@ void SliceTransform::Shear(double angle, bool shearXAxis, int axisPosition,
 
 		// Right multiply backtransform matrix with inverse shear matrix
 		double k = std::tan(-(M_PI * angle) / 180.0);
-		transformMatrix[1] += transformMatrix[0] * k;
-		transformMatrix[4] += transformMatrix[3] * k;
-		transformMatrix[7] += transformMatrix[6] * k;
+		m_TransformMatrix[1] += m_TransformMatrix[0] * k;
+		m_TransformMatrix[4] += m_TransformMatrix[3] * k;
+		m_TransformMatrix[7] += m_TransformMatrix[6] * k;
 
 		// Translate y-axis back
 		Translate(0, axisPosition, false);
@@ -314,7 +311,7 @@ void SliceTransform::Shear(double angle, bool shearXAxis, int axisPosition,
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
@@ -326,9 +323,9 @@ void SliceTransform::Flip(bool flipXAxis, int axisPosition, bool apply)
 		Translate(-axisPosition, 0, false);
 
 		// Right multiply backtransform matrix with flip matrix
-		transformMatrix[0] = -transformMatrix[0];
-		transformMatrix[3] = -transformMatrix[3];
-		transformMatrix[6] = -transformMatrix[6];
+		m_TransformMatrix[0] = -m_TransformMatrix[0];
+		m_TransformMatrix[3] = -m_TransformMatrix[3];
+		m_TransformMatrix[6] = -m_TransformMatrix[6];
 
 		// Translate x-axis back
 		Translate(axisPosition, 0, false);
@@ -339,9 +336,9 @@ void SliceTransform::Flip(bool flipXAxis, int axisPosition, bool apply)
 		Translate(0, -axisPosition, false);
 
 		// Right multiply backtransform matrix with flip matrix
-		transformMatrix[1] = -transformMatrix[1];
-		transformMatrix[4] = -transformMatrix[4];
-		transformMatrix[7] = -transformMatrix[7];
+		m_TransformMatrix[1] = -m_TransformMatrix[1];
+		m_TransformMatrix[4] = -m_TransformMatrix[4];
+		m_TransformMatrix[7] = -m_TransformMatrix[7];
 
 		// Translate y-axis back
 		Translate(0, axisPosition, false);
@@ -350,65 +347,65 @@ void SliceTransform::Flip(bool flipXAxis, int axisPosition, bool apply)
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
 void SliceTransform::Matrix(double* inverseMatrix, bool apply)
 {
 	// Right multiply backtransform matrix with input matrix
-	double tmp1 = transformMatrix[0];
-	double tmp2 = transformMatrix[1];
-	double tmp3 = transformMatrix[2];
-	transformMatrix[0] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
-											 tmp3 * inverseMatrix[6];
-	transformMatrix[1] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
-											 tmp3 * inverseMatrix[7];
-	transformMatrix[2] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
-											 tmp3 * inverseMatrix[8];
+	double tmp1 = m_TransformMatrix[0];
+	double tmp2 = m_TransformMatrix[1];
+	double tmp3 = m_TransformMatrix[2];
+	m_TransformMatrix[0] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
+												 tmp3 * inverseMatrix[6];
+	m_TransformMatrix[1] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
+												 tmp3 * inverseMatrix[7];
+	m_TransformMatrix[2] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
+												 tmp3 * inverseMatrix[8];
 
-	tmp1 = transformMatrix[3];
-	tmp2 = transformMatrix[4];
-	tmp3 = transformMatrix[5];
-	transformMatrix[3] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
-											 tmp3 * inverseMatrix[6];
-	transformMatrix[4] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
-											 tmp3 * inverseMatrix[7];
-	transformMatrix[5] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
-											 tmp3 * inverseMatrix[8];
+	tmp1 = m_TransformMatrix[3];
+	tmp2 = m_TransformMatrix[4];
+	tmp3 = m_TransformMatrix[5];
+	m_TransformMatrix[3] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
+												 tmp3 * inverseMatrix[6];
+	m_TransformMatrix[4] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
+												 tmp3 * inverseMatrix[7];
+	m_TransformMatrix[5] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
+												 tmp3 * inverseMatrix[8];
 
-	tmp1 = transformMatrix[6];
-	tmp2 = transformMatrix[7];
-	tmp3 = transformMatrix[8];
-	transformMatrix[6] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
-											 tmp3 * inverseMatrix[6];
-	transformMatrix[7] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
-											 tmp3 * inverseMatrix[7];
-	transformMatrix[8] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
-											 tmp3 * inverseMatrix[8];
+	tmp1 = m_TransformMatrix[6];
+	tmp2 = m_TransformMatrix[7];
+	tmp3 = m_TransformMatrix[8];
+	m_TransformMatrix[6] = tmp1 * inverseMatrix[0] + tmp2 * inverseMatrix[3] +
+												 tmp3 * inverseMatrix[6];
+	m_TransformMatrix[7] = tmp1 * inverseMatrix[1] + tmp2 * inverseMatrix[4] +
+												 tmp3 * inverseMatrix[7];
+	m_TransformMatrix[8] = tmp1 * inverseMatrix[2] + tmp2 * inverseMatrix[5] +
+												 tmp3 * inverseMatrix[8];
 
 	// Apply transform to data
 	if (apply)
 	{
-		ApplyTransform(transformSource, transformTarget, transformTissues);
+		ApplyTransform(m_TransformSource, m_TransformTarget, m_TransformTissues);
 	}
 }
 
 bool SliceTransform::GetIsIdentityTransform()
 {
 	// Returns whether the transform is approximately an identity transform
-	double sqrSum = 0.0;
-	sqrSum += transformMatrix[1] * transformMatrix[1];
-	sqrSum += transformMatrix[2] * transformMatrix[2];
-	sqrSum += transformMatrix[3] * transformMatrix[3];
-	sqrSum += transformMatrix[5] * transformMatrix[5];
-	sqrSum += transformMatrix[6] * transformMatrix[6];
-	sqrSum += transformMatrix[7] * transformMatrix[7];
-	sqrSum += (transformMatrix[0] / transformMatrix[8] - 1.0) *
-						(transformMatrix[0] / transformMatrix[8] - 1.0);
-	sqrSum += (transformMatrix[4] / transformMatrix[8] - 1.0) *
-						(transformMatrix[4] / transformMatrix[8] - 1.0);
-	return (sqrSum < 1.0E-06);
+	double sqr_sum = 0.0;
+	sqr_sum += m_TransformMatrix[1] * m_TransformMatrix[1];
+	sqr_sum += m_TransformMatrix[2] * m_TransformMatrix[2];
+	sqr_sum += m_TransformMatrix[3] * m_TransformMatrix[3];
+	sqr_sum += m_TransformMatrix[5] * m_TransformMatrix[5];
+	sqr_sum += m_TransformMatrix[6] * m_TransformMatrix[6];
+	sqr_sum += m_TransformMatrix[7] * m_TransformMatrix[7];
+	sqr_sum += (m_TransformMatrix[0] / m_TransformMatrix[8] - 1.0) *
+						 (m_TransformMatrix[0] / m_TransformMatrix[8] - 1.0);
+	sqr_sum += (m_TransformMatrix[4] / m_TransformMatrix[8] - 1.0) *
+						 (m_TransformMatrix[4] / m_TransformMatrix[8] - 1.0);
+	return (sqr_sum < 1.0E-06);
 }
 
 void SliceTransform::Initialize()
@@ -417,7 +414,7 @@ void SliceTransform::Initialize()
 	ResetTransformMatrix();
 
 	// Copy original slice to internal data structures
-	CopyFromOriginalSlice(transformSource, transformTarget, transformTissues);
+	CopyFromOriginalSlice(m_TransformSource, m_TransformTarget, m_TransformTissues);
 }
 
 void SliceTransform::ResetTransformMatrix()
@@ -425,35 +422,33 @@ void SliceTransform::ResetTransformMatrix()
 	// Initialize transform matrix (homogeneous coordinates)
 	for (unsigned int i = 0; i < 9; ++i)
 	{
-		transformMatrix[i] = 0.0;
+		m_TransformMatrix[i] = 0.0;
 	}
-	transformMatrix[0] = transformMatrix[4] = transformMatrix[8] = 1.0;
+	m_TransformMatrix[0] = m_TransformMatrix[4] = m_TransformMatrix[8] = 1.0;
 }
 
 void SliceTransform::GetTransformMatrix(double* copyToMatrix)
 {
 	for (unsigned short i = 0; i < 9; ++i)
 	{
-		copyToMatrix[i] = transformMatrix[i];
+		copyToMatrix[i] = m_TransformMatrix[i];
 	}
 }
 
-void SliceTransform::CopyFromOriginalSlice(bool source, bool target,
-		bool tissues)
+void SliceTransform::CopyFromOriginalSlice(bool source, bool target, bool tissues)
 {
 	// Copy original slice data
 	if (source)
 	{
-		bmphand->copy_bmp(originalSource);
+		m_Bmphand->CopyBmp(m_OriginalSource);
 	}
 	if (target)
 	{
-		bmphand->copy_work(originalTarget);
+		m_Bmphand->CopyWork(m_OriginalTarget);
 	}
 	if (tissues)
 	{
-		bmphand->copy_tissue(handler3D->active_tissuelayer(),
-				originalTissues);
+		m_Bmphand->CopyTissue(m_Handler3D->ActiveTissuelayer(), m_OriginalTissues);
 	}
 }
 
@@ -462,33 +457,31 @@ void SliceTransform::CopyToOriginalSlice(bool source, bool target, bool tissues)
 	// Copy original image data back to slice
 	if (source)
 	{
-		bmphand->copy2bmp(originalSource, bmphand->return_mode(true));
+		m_Bmphand->Copy2bmp(m_OriginalSource, m_Bmphand->ReturnMode(true));
 	}
 	if (target)
 	{
-		bmphand->copy2work(originalTarget, bmphand->return_mode(false));
+		m_Bmphand->Copy2work(m_OriginalTarget, m_Bmphand->ReturnMode(false));
 	}
 	if (tissues)
 	{
-		bmphand->copy2tissue(handler3D->active_tissuelayer(),
-				originalTissues);
+		m_Bmphand->Copy2tissue(m_Handler3D->ActiveTissuelayer(), m_OriginalTissues);
 	}
 }
 
 void SliceTransform::SwapDataPointers()
 {
-	if (transformSource)
+	if (m_TransformSource)
 	{
-		originalSource = bmphand->swap_bmp_pointer(originalSource);
+		m_OriginalSource = m_Bmphand->SwapBmpPointer(m_OriginalSource);
 	}
-	if (transformTarget)
+	if (m_TransformTarget)
 	{
-		originalTarget = bmphand->swap_work_pointer(originalTarget);
+		m_OriginalTarget = m_Bmphand->SwapWorkPointer(m_OriginalTarget);
 	}
-	if (transformTissues)
+	if (m_TransformTissues)
 	{
-		originalTissues = bmphand->swap_tissues_pointer(
-				handler3D->active_tissuelayer(), originalTissues);
+		m_OriginalTissues = m_Bmphand->SwapTissuesPointer(m_Handler3D->ActiveTissuelayer(), m_OriginalTissues);
 	}
 }
 
@@ -503,58 +496,58 @@ void SliceTransform::ApplyTransform(bool source, bool target, bool tissues)
 
 	// transformMatrix * original --> preview
 	double a, b, c;
-	int xTr, yTr;
-	unsigned short width = bmphand->return_width();
-	unsigned short height = bmphand->return_height();
-	float* sourcePtr = bmphand->return_bmp();
-	float* targetPtr = bmphand->return_work();
-	tissues_size_t* tissuesPtr =
-			bmphand->return_tissues(handler3D->active_tissuelayer());
+	int x_tr, y_tr;
+	unsigned short width = m_Bmphand->ReturnWidth();
+	unsigned short height = m_Bmphand->ReturnHeight();
+	float* source_ptr = m_Bmphand->ReturnBmp();
+	float* target_ptr = m_Bmphand->ReturnWork();
+	tissues_size_t* tissues_ptr =
+			m_Bmphand->ReturnTissues(m_Handler3D->ActiveTissuelayer());
 	for (unsigned int y = 0; y < height; ++y)
 	{
 		for (unsigned int x = 0; x < width; ++x)
 		{
 			// Transform in homogeneous coordinates
-			a = transformMatrix[0] * x + transformMatrix[1] * y +
-					transformMatrix[2];
-			b = transformMatrix[3] * x + transformMatrix[4] * y +
-					transformMatrix[5];
-			c = transformMatrix[6] * x + transformMatrix[7] * y +
-					transformMatrix[8];
+			a = m_TransformMatrix[0] * x + m_TransformMatrix[1] * y +
+					m_TransformMatrix[2];
+			b = m_TransformMatrix[3] * x + m_TransformMatrix[4] * y +
+					m_TransformMatrix[5];
+			c = m_TransformMatrix[6] * x + m_TransformMatrix[7] * y +
+					m_TransformMatrix[8];
 
-			xTr = (int)round(a / c);
-			yTr = (int)round(b / c);
-			if (xTr >= 0 && yTr >= 0 && xTr < width && yTr < height)
+			x_tr = (int)round(a / c);
+			y_tr = (int)round(b / c);
+			if (x_tr >= 0 && y_tr >= 0 && x_tr < width && y_tr < height)
 			{
 				if (source)
 				{
-					sourcePtr[y * width + x] =
-							originalSource[yTr * width + xTr];
+					source_ptr[y * width + x] =
+							m_OriginalSource[y_tr * width + x_tr];
 				}
 				if (target)
 				{
-					targetPtr[y * width + x] =
-							originalTarget[yTr * width + xTr];
+					target_ptr[y * width + x] =
+							m_OriginalTarget[y_tr * width + x_tr];
 				}
 				if (tissues)
 				{
-					tissuesPtr[y * width + x] =
-							originalTissues[yTr * width + xTr];
+					tissues_ptr[y * width + x] =
+							m_OriginalTissues[y_tr * width + x_tr];
 				}
 			}
 			else
 			{
 				if (source)
 				{
-					sourcePtr[y * width + x] = 0.0f;
+					source_ptr[y * width + x] = 0.0f;
 				}
 				if (target)
 				{
-					targetPtr[y * width + x] = 0.0f;
+					target_ptr[y * width + x] = 0.0f;
 				}
 				if (tissues)
 				{
-					tissuesPtr[y * width + x] = 0;
+					tissues_ptr[y * width + x] = 0;
 				}
 			}
 		}
@@ -565,41 +558,41 @@ void SliceTransform::ApplyTransformAll()
 {
 	// transformMatrix * original --> preview
 	double a, b, c;
-	int xTr, yTr;
-	unsigned short width = bmphand->return_width();
-	unsigned short height = bmphand->return_height();
-	float* sourcePtr = bmphand->return_bmp();
-	float* targetPtr = bmphand->return_work();
-	tissues_size_t* tissuesPtr =
-			bmphand->return_tissues(handler3D->active_tissuelayer());
+	int x_tr, y_tr;
+	unsigned short width = m_Bmphand->ReturnWidth();
+	unsigned short height = m_Bmphand->ReturnHeight();
+	float* source_ptr = m_Bmphand->ReturnBmp();
+	float* target_ptr = m_Bmphand->ReturnWork();
+	tissues_size_t* tissues_ptr =
+			m_Bmphand->ReturnTissues(m_Handler3D->ActiveTissuelayer());
 	for (unsigned int y = 0; y < height; ++y)
 	{
 		for (unsigned int x = 0; x < width; ++x)
 		{
 			// Transform in homogeneous coordinates
-			a = transformMatrix[0] * x + transformMatrix[1] * y +
-					transformMatrix[2];
-			b = transformMatrix[3] * x + transformMatrix[4] * y +
-					transformMatrix[5];
-			c = transformMatrix[6] * x + transformMatrix[7] * y +
-					transformMatrix[8];
+			a = m_TransformMatrix[0] * x + m_TransformMatrix[1] * y +
+					m_TransformMatrix[2];
+			b = m_TransformMatrix[3] * x + m_TransformMatrix[4] * y +
+					m_TransformMatrix[5];
+			c = m_TransformMatrix[6] * x + m_TransformMatrix[7] * y +
+					m_TransformMatrix[8];
 
-			xTr = (int)round(a / c);
-			yTr = (int)round(b / c);
-			if (xTr >= 0 && yTr >= 0 && xTr < width && yTr < height)
+			x_tr = (int)round(a / c);
+			y_tr = (int)round(b / c);
+			if (x_tr >= 0 && y_tr >= 0 && x_tr < width && y_tr < height)
 			{
-				sourcePtr[y * width + x] = originalSource[yTr * width + xTr];
-				targetPtr[y * width + x] = originalTarget[yTr * width + xTr];
-				tissuesPtr[y * width + x] = originalTissues[yTr * width + xTr];
+				source_ptr[y * width + x] = m_OriginalSource[y_tr * width + x_tr];
+				target_ptr[y * width + x] = m_OriginalTarget[y_tr * width + x_tr];
+				tissues_ptr[y * width + x] = m_OriginalTissues[y_tr * width + x_tr];
 			}
 			else
 			{
-				sourcePtr[y * width + x] = 0.0f;
-				targetPtr[y * width + x] = 0.0f;
-				tissuesPtr[y * width + x] = 0;
+				source_ptr[y * width + x] = 0.0f;
+				target_ptr[y * width + x] = 0.0f;
+				tissues_ptr[y * width + x] = 0;
 			}
 		}
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

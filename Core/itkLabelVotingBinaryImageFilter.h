@@ -16,6 +16,16 @@
  *
  *=========================================================================*/
 
+/*
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * 
+ * This file is part of iSEG
+ * (see https://github.com/ITISFoundation/osparc-iseg).
+ * 
+ * This software is released under the MIT License.
+ *  https://opensource.org/licenses/MIT
+ */
+
 // \author Bryn Lloyd
 // \note Code modified from itkVotingBinaryImageFilter.h/hxx
 
@@ -26,8 +36,7 @@
 #include "itkConstantBoundaryCondition.h"
 #include "itkImageToImageFilter.h"
 
-namespace itk
-{
+namespace itk {
 /** \class LabelVotingBinaryImageFilter
  * \brief Applies a voting operation in a neighborhood of each pixel.
  *
@@ -41,96 +50,88 @@ namespace itk
  * \ingroup IntensityImageFilters
  * \ingroup ITKLabelVoting
  */
-template< typename TInputImage, typename TOutputImage >
-class ITK_TEMPLATE_EXPORT LabelVotingBinaryImageFilter:
-  public ImageToImageFilter< TInputImage, TOutputImage >
+template<typename TInputImage, typename TOutputImage>
+class ITK_TEMPLATE_EXPORT LabelVotingBinaryImageFilter : public ImageToImageFilter<TInputImage, TOutputImage>
 {
 public:
-  /** Extract dimension from input and output image. */
-  itkStaticConstMacro(InputImageDimension, unsigned int,
-                      TInputImage::ImageDimension);
-  itkStaticConstMacro(OutputImageDimension, unsigned int,
-                      TOutputImage::ImageDimension);
+	/** Extract dimension from input and output image. */
+	itkStaticConstMacro(InputImageDimension, unsigned int, TInputImage::ImageDimension);
+	itkStaticConstMacro(OutputImageDimension, unsigned int, TOutputImage::ImageDimension);
 
-  /** Convenient typedefs for simplifying declarations. */
-  typedef TInputImage  InputImageType;
-  typedef TOutputImage OutputImageType;
+	/** Convenient type aliases for simplifying declarations. */
+	using InputImageType = TInputImage;
+	using OutputImageType = TOutputImage;
 
-  /** Standard class typedefs. */
-  typedef LabelVotingBinaryImageFilter                               Self;
-  typedef ImageToImageFilter< InputImageType, OutputImageType > Superclass;
-  typedef SmartPointer< Self >                                  Pointer;
-  typedef SmartPointer< const Self >                            ConstPointer;
+	/** Standard class type aliases. */
+	using Self = LabelVotingBinaryImageFilter;
+	using Superclass = ImageToImageFilter<InputImageType, OutputImageType>;
+	using Pointer = SmartPointer<Self>;
+	using ConstPointer = SmartPointer<const Self>;
 
-  /** Method for creation through the object factory. */
-  itkNewMacro(Self);
+	/** Method for creation through the object factory. */
+	itkNewMacro(Self);
 
-  /** Run-time type information (and related methods). */
-  itkTypeMacro(LabelVotingBinaryImageFilter, ImageToImageFilter);
+	/** Run-time type information (and related methods). */
+	itkTypeMacro(LabelVotingBinaryImageFilter, ImageToImageFilter);
 
-  /** Image typedef support. */
-  typedef typename InputImageType::PixelType  InputPixelType;
-  typedef typename OutputImageType::PixelType OutputPixelType;
+	/** Image type support. */
+	using InputPixelType = typename InputImageType::PixelType;
+	using OutputPixelType = typename OutputImageType::PixelType;
 
-  typedef typename InputImageType::RegionType  InputImageRegionType;
-  typedef typename OutputImageType::RegionType OutputImageRegionType;
+	using InputImageRegionType = typename InputImageType::RegionType;
+	using OutputImageRegionType = typename OutputImageType::RegionType;
 
-  typedef typename InputImageType::SizeType InputSizeType;
+	using InputSizeType = typename InputImageType::SizeType;
 
-  /** Set the radius of the neighborhood used to compute the median. */
-  itkSetMacro(Radius, InputSizeType);
+	/** Set the radius of the neighborhood used to compute the median. */
+	itkSetMacro(Radius, InputSizeType);
 
-  /** Get the radius of the neighborhood used to compute the median */
-  itkGetConstReferenceMacro(Radius, InputSizeType);
+	/** Get the radius of the neighborhood used to compute the median */
+	itkGetConstReferenceMacro(Radius, InputSizeType);
 
-  /** Set the value associated with the Foreground (or the object) on
+	/** Set the value associated with the Foreground (or the object) on
       the binary input image and the Background . */
-  itkSetMacro(BackgroundValue, InputPixelType);
-  itkSetMacro(ForegroundValue, InputPixelType);
+	itkSetMacro(BackgroundValue, InputPixelType);
+	itkSetMacro(ForegroundValue, InputPixelType);
 
-  /** Get the value associated with the Foreground (or the object) on the
+	/** Get the value associated with the Foreground (or the object) on the
       binary input image and the Background . */
-  itkGetConstReferenceMacro(BackgroundValue, InputPixelType);
-  itkGetConstReferenceMacro(ForegroundValue, InputPixelType);
+	itkGetConstReferenceMacro(BackgroundValue, InputPixelType);
+	itkGetConstReferenceMacro(ForegroundValue, InputPixelType);
 
-  /** Threshold above which a pixel can be assigned to max. voted neighbor */
-  itkGetConstReferenceMacro(MajorityThreshold, unsigned int);
-  itkSetMacro(MajorityThreshold, unsigned int);
+	/** Threshold above which a pixel can be assigned to max. voted neighbor */
+	itkGetConstReferenceMacro(MajorityThreshold, unsigned int);
+	itkSetMacro(MajorityThreshold, unsigned int);
 
-  /** Threshold for minimum number of neighbors (of specific type) required for assignment */
-  itkGetConstReferenceMacro(VotingThreshold, unsigned int);
-  itkSetMacro(VotingThreshold, unsigned int);
+	/** Threshold for minimum number of neighbors (of specific type) required for assignment */
+	itkGetConstReferenceMacro(VotingThreshold, unsigned int);
+	itkSetMacro(VotingThreshold, unsigned int);
 
-  /** Returns the number of pixels that changed when the filter was executed. */
-  itkGetConstReferenceMacro(NumberOfPixelsChanged, SizeValueType);
+	/** Returns the number of pixels that changed when the filter was executed. */
+	itkGetConstReferenceMacro(NumberOfPixelsChanged, SizeValueType);
 
-  /** LabelVotingBinaryImageFilter needs a larger input requested region than
+	/** LabelVotingBinaryImageFilter needs a larger input requested region than
    * the output requested region.  As such, LabelVotingBinaryImageFilter needs
    * to provide an implementation for GenerateInputRequestedRegion()
    * in order to inform the pipeline execution model.
    *
    * \sa ImageToImageFilter::GenerateInputRequestedRegion() */
-  virtual void GenerateInputRequestedRegion() override;
+	void GenerateInputRequestedRegion() override;
 
 #ifdef ITK_USE_CONCEPT_CHECKING
-  // Begin concept checking
-  itkConceptMacro( InputEqualityComparableCheck,
-                   ( Concept::EqualityComparable< InputPixelType > ) );
-  itkConceptMacro( IntConvertibleToInputCheck,
-                   ( Concept::Convertible< int, InputPixelType > ) );
-  itkConceptMacro( InputConvertibleToOutputCheck,
-                   ( Concept::Convertible< InputPixelType, OutputPixelType > ) );
-  itkConceptMacro( SameDimensionCheck,
-                   ( Concept::SameDimension< InputImageDimension, OutputImageDimension > ) );
-  itkConceptMacro( InputOStreamWritableCheck,
-                   ( Concept::OStreamWritable< InputPixelType > ) );
-  // End concept checking
+	// Begin concept checking
+	itkConceptMacro(InputEqualityComparableCheck, (Concept::EqualityComparable<InputPixelType>));
+	itkConceptMacro(IntConvertibleToInputCheck, (Concept::Convertible<int, InputPixelType>));
+	itkConceptMacro(InputConvertibleToOutputCheck, (Concept::Convertible<InputPixelType, OutputPixelType>));
+	itkConceptMacro(SameDimensionCheck, (Concept::SameDimension<InputImageDimension, OutputImageDimension>));
+	itkConceptMacro(InputOStreamWritableCheck, (Concept::OStreamWritable<InputPixelType>));
+	// End concept checking
 #endif
 
 protected:
-  LabelVotingBinaryImageFilter();
-  virtual ~LabelVotingBinaryImageFilter() {}
-  void PrintSelf(std::ostream & os, Indent indent) const override;
+	LabelVotingBinaryImageFilter();
+	~LabelVotingBinaryImageFilter() override {}
+	void PrintSelf(std::ostream& os, Indent indent) const override;
 
 	/** LabelVotingBinaryImageFilter can be implemented as a multithreaded filter.
    * Therefore, this implementation provides a ThreadedGenerateData()
@@ -146,30 +147,30 @@ protected:
 
 	/** Methods to be called before and after the invokation of
   * ThreadedGenerateData(). */
-  void BeforeThreadedGenerateData() override;
+	void BeforeThreadedGenerateData() override;
 
-  void AfterThreadedGenerateData() override;
+	void AfterThreadedGenerateData() override;
 
 private:
-  ITK_DISALLOW_COPY_AND_ASSIGN(LabelVotingBinaryImageFilter);
+	ITK_DISALLOW_COPY_AND_ASSIGN(LabelVotingBinaryImageFilter);
 
-  InputSizeType m_Radius;
+	InputSizeType m_Radius;
 
-  InputPixelType m_ForegroundValue;
-  InputPixelType m_BackgroundValue;
+	InputPixelType m_ForegroundValue;
+	InputPixelType m_BackgroundValue;
 
-  unsigned int m_MajorityThreshold = 1;
-  unsigned int m_VotingThreshold = 1;
+	unsigned int m_MajorityThreshold = 1;
+	unsigned int m_VotingThreshold = 1;
 
-  SizeValueType m_NumberOfPixelsChanged = 0;
+	SizeValueType m_NumberOfPixelsChanged = 0;
 
-  // Auxiliary array for multi-threading
+	// Auxiliary array for multi-threading
 	std::atomic<SizeValueType> m_Count;
 };
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#include "itkLabelVotingBinaryImageFilter.hxx"
+#	include "itkLabelVotingBinaryImageFilter.hxx"
 #endif
 
 #endif

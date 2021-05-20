@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -25,7 +25,8 @@ void quit(const std::string& msg, const int code)
 void error(const std::string& msg, const int code)
 {
 	const std::string msg2 = "Tools::error() : " + msg;
-	std::cerr << "\n" << msg2 << "\n";
+	std::cerr << "\n"
+						<< msg2 << "\n";
 	if (flog.is_open())
 		flog.close();
 	exit(code);
@@ -34,7 +35,8 @@ void error(const std::string& msg, const int code)
 void warning(const std::string& msg)
 {
 	const std::string msg2 = "Tools::warning() : " + msg;
-	std::cerr << "\n" << msg2 << "\n\n";
+	std::cerr << "\n"
+						<< msg2 << "\n\n";
 }
 
 bool interceptOutput(const std::string& logname)

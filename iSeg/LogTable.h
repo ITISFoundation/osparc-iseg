@@ -9,42 +9,42 @@ class QLogTable : public QAbstractScrollArea
 	Q_OBJECT
 
 public:
-	enum Limit {
+	enum eLimit {
 		NoLimit = -1
 	};
 
-	QLogTable(int numCols, QWidget* parent = 0);
-	~QLogTable();
+	QLogTable(int numCols, QWidget* parent = nullptr);
+	~QLogTable() override;
 
-	void setLimit(int l);
+	void SetLimit(int l);
 	void setFont(QFont&);
-	void setColumnsNumber(int);
+	void SetColumnsNumber(int);
 
 	friend QTextStream& operator<<(QTextStream&, const QLogTable&);
 
 protected:
-	virtual void paintEvent(QPaintEvent* event);
-	virtual void resizeEvent(QResizeEvent* event);
-	virtual void keyPressEvent(QKeyEvent* e);
-	virtual void paint(QPainter* p, QPaintEvent* e);
+	void paintEvent(QPaintEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	void keyPressEvent(QKeyEvent* e) override;
+	virtual void Paint(QPainter* p, QPaintEvent* e);
 
-	void updateScrollbar();
+	void UpdateScrollbar();
 
 public slots:
-	void clearBuffer();
-	void appendRow(const QStringList&);
+	void ClearBuffer();
+	void AppendRow(const QStringList&);
 
 protected:
-	QList<QList<QString>>* content; // widget data
-	int* colWidth;									// columns width
-	QFont curFont;									// current font
-	int rowHeight;									// column height get from curFont (internally used)
-	int numberOfLines;							// number of lines/rows
-	int numberOfColumns;						// number of columns
-	int limit;											// limit for number of lines (not implemented)
+	QList<QList<QString>>* m_Content; // widget data
+	int* m_ColWidth;									// columns width
+	QFont m_CurFont;									// current font
+	int m_RowHeight;									// column height get from curFont (internally used)
+	int m_NumberOfLines;							// number of lines/rows
+	int m_NumberOfColumns;						// number of columns
+	int m_Limit;											// limit for number of lines (not implemented)
 
 private:
-	void manageLimit();
+	void ManageLimit();
 };
 
 #endif // QLOGTEXT_H

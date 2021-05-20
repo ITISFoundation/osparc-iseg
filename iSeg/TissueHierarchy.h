@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -24,7 +24,7 @@ public:
 	~TissueHierarchyItem();
 
 	// Accessors
-	bool GetIsFolder();
+	bool GetIsFolder() const;
 	QString GetName();
 	TissueHierarchyItem* GetParent();
 	unsigned int GetChildCount();
@@ -33,72 +33,70 @@ public:
 	// Modifiers
 	void AddChild(TissueHierarchyItem* child);
 	void UpdateTissuesRecursively();
-	void UpdateTissueNameRecursively(const QString& oldName,
-									 const QString& newName);
+	void UpdateTissueNameRecursively(const QString& oldName, const QString& newName);
 
 private:
 	void SetParent(TissueHierarchyItem* parentItem);
 
 private:
-	bool isFolder;
-	QString name;
-	TissueHierarchyItem* parent;
-	std::vector<TissueHierarchyItem*> children;
+	bool m_IsFolder;
+	QString m_Name;
+	TissueHierarchyItem* m_Parent;
+	std::vector<TissueHierarchyItem*> m_Children;
 };
 
 class TissueHiearchy
 {
 public:
-	TissueHiearchy() { initialize(); }
-	void initialize();
+	TissueHiearchy() { Initialize(); }
+	void Initialize();
 
-	TissueHierarchyItem* create_default_hierarchy();
+	TissueHierarchyItem* CreateDefaultHierarchy();
 
-	std::vector<TissueHierarchyItem*>& hierarchies() { return hierarchyTrees; }
+	std::vector<TissueHierarchyItem*>& Hierarchies() { return m_HierarchyTrees; }
 
-	TissueHierarchyItem* selected_hierarchy();
-	void set_selected_hierarchy(TissueHierarchyItem* h);
+	TissueHierarchyItem* SelectedHierarchy();
+	void SetSelectedHierarchy(TissueHierarchyItem* h);
 
-	QString& selected_hierarchy_name()
+	QString& SelectedHierarchyName()
 	{
-		return hierarchyNames.at(selectedHierarchy);
+		return m_HierarchyNames.at(m_SelectedHierarchy);
 	}
 
-	bool remove_current_hierarchy();
+	bool RemoveCurrentHierarchy();
 
-	bool set_hierarchy(unsigned short index);
-	unsigned short get_selected_hierarchy();
-	unsigned short get_hierarchy_count();
-	std::vector<QString>* get_hierarchy_names_ptr();
-	QString get_current_hierarchy_name();
-	void reset_default_hierarchy();
+	bool SetHierarchy(unsigned short index);
+	unsigned short GetSelectedHierarchy() const;
+	unsigned short GetHierarchyCount();
+	std::vector<QString>* GetHierarchyNamesPtr();
+	QString GetCurrentHierarchyName();
+	void ResetDefaultHierarchy();
 
-	void add_new_hierarchy(const QString& name);
-	void add_new_hierarchy(const QString& name, TissueHierarchyItem* hierarchy);
+	void AddNewHierarchy(const QString& name);
+	void AddNewHierarchy(const QString& name, TissueHierarchyItem* hierarchy);
 
-	void update_hierarchies();
+	void UpdateHierarchies();
 
 	// File IO
 	FILE* SaveParams(FILE* fp, int version);
 	FILE* LoadParams(FILE* fp, int version);
 
-	FILE* load_hierarchy(FILE* fp);
-	FILE* save_hierarchy(FILE* fp, unsigned short idx);
+	FILE* LoadHierarchy(FILE* fp);
+	FILE* SaveHierarchy(FILE* fp, unsigned short idx);
 
-	bool load_hierarchy(const QString& path);
-	bool save_hierarchy_as(const QString& name, const QString& path);
+	bool LoadHierarchy(const QString& path);
+	bool SaveHierarchyAs(const QString& name, const QString& path);
 
 protected:
-	void write_children_recursively(TissueHierarchyItem* parent,
-									QXmlStreamWriter* xmlStream);
+	void WriteChildrenRecursively(TissueHierarchyItem* parent, QXmlStreamWriter* xmlStream);
 
-	FILE* save_hierarchy_item(FILE* fp, TissueHierarchyItem* item);
-	FILE* load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent);
+	FILE* SaveHierarchyItem(FILE* fp, TissueHierarchyItem* item);
+	FILE* LoadHierarchyItem(FILE* fp, TissueHierarchyItem* parent);
 
 private:
-	unsigned short selectedHierarchy;
-	std::vector<QString> hierarchyNames;
-	std::vector<TissueHierarchyItem*> hierarchyTrees;
+	unsigned short m_SelectedHierarchy;
+	std::vector<QString> m_HierarchyNames;
+	std::vector<TissueHierarchyItem*> m_HierarchyTrees;
 };
 
 } // namespace iseg

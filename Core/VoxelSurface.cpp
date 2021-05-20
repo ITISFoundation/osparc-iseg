@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,8 +11,8 @@
 
 #include "VoxelSurface.h"
 
-#include "Data/Transform.h"
 #include "Data/ImageToITK.h"
+#include "Data/Transform.h"
 
 #include <vtkBoundingBox.h>
 #include <vtkCutter.h>
@@ -31,9 +31,9 @@
 #include <vtkTriangle.h>
 #include <vtkUnsignedCharArray.h>
 
-#include <itkPolyLineParametricPath.h>
-#include <itkPathIterator.h>
 #include <itkImage.h>
+#include <itkPathIterator.h>
+#include <itkPolyLineParametricPath.h>
 
 namespace iseg {
 
@@ -62,8 +62,7 @@ float round_me_dn(float n, const float to_what)
 }
 
 template<typename TImage>
-VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<double, 3>>& polyline, 
-		TImage* label_field, float label, int startslice, int endslice)
+VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<double, 3>>& polyline, TImage* label_field, float label, int startslice, int endslice)
 {
 	using label_field_type = TImage;
 	using path_type = itk::PolyLineParametricPath<3>;
@@ -90,7 +89,7 @@ VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<do
 		}
 		else if (p0in || p1in)
 		{
-		ret = VoxelSurface::kPartial;
+			ret = VoxelSurface::kPartial;
 
 			if (p1in) // reduce to one case
 			{
@@ -102,7 +101,7 @@ VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<do
 
 			// do iterative bisection to find point close (and inside) to boundary
 			itk::Point<double, 3> pnew;
-			for (int iter=0; iter<10; iter++)
+			for (int iter = 0; iter < 10; iter++)
 			{
 				if (p0 != p1)
 				{
@@ -133,9 +132,7 @@ VoxelSurface::eSurfaceImageOverlap voxelPolyline(const std::vector<itk::Point<do
 	return ret;
 }
 
-VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** slices, const unsigned dims[3],
-		const float spacing[3], const Transform& transform,
-		float label, unsigned startslice, unsigned endslice)
+VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** slices, const unsigned dims[3], const float spacing[3], const Transform& transform, float label, unsigned startslice, unsigned endslice)
 {
 	// instead of applying the transform to the image, we inverse transform the surface
 	auto m = to_double(transform);
@@ -149,9 +146,7 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 	vtkBoundingBox surface_bb(points->GetBounds());
 
 	// image wo transform
-	vtkBoundingBox image_bb(0, (dims[0] - 1) * spacing[0], 0,
-			(dims[1] - 1) * spacing[1], 0,
-			(dims[2] - 1) * spacing[2]);
+	vtkBoundingBox image_bb(0, (dims[0] - 1) * spacing[0], 0, (dims[1] - 1) * spacing[1], 0, (dims[2] - 1) * spacing[2]);
 
 	VoxelSurface::eSurfaceImageOverlap result = VoxelSurface::kNone;
 	if (image_bb.Contains(surface_bb))
@@ -180,16 +175,16 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 	for (int z = zbegin; z < zend; z++)
 	{
 		// REMEMBER: image is NOT transformed
-		auto zPos = z * spacing[2];
+		auto z_pos = z * spacing[2];
 
 		// do not even try cutting if we are out of the surface bounding box
-		if (zPos < surface_bb.GetBound(4) || zPos > surface_bb.GetBound(5))
+		if (z_pos < surface_bb.GetBound(4) || z_pos > surface_bb.GetBound(5))
 			continue;
 
 		// place the cutter plane
 		vtkNew<vtkPlane> plane;
 		plane->SetNormal(0, 0, 1);
-		plane->SetOrigin(0, 0, zPos);
+		plane->SetOrigin(0, 0, z_pos);
 
 		// cut the surface with the plane
 		vtkNew<vtkCutter> cutter;
@@ -204,11 +199,11 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 		vtkPolyData* contour = stripper->GetOutput();
 
 		// check whether there is any contour
-		auto c_numberOfLines = contour->GetNumberOfLines();
-		if (c_numberOfLines > 0)
+		auto c_number_of_lines = contour->GetNumberOfLines();
+		if (c_number_of_lines > 0)
 		{
 			// create a 2D black image of the same size of the contour
-			vtkNew<vtkImageData> imageData;
+			vtkNew<vtkImageData> image_data;
 
 			vtkBoundingBox ct_bounds;
 			{
@@ -230,11 +225,11 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 			}
 			const double* ct_origin = ct_bounds.GetMinPoint();
 
-			imageData->SetDimensions(ct_dim[0], ct_dim[1], 1);
-			imageData->SetSpacing(spacing[0], spacing[1], spacing[2]);
-			imageData->SetOrigin(ct_origin[0], ct_origin[1], ct_origin[2]);
-			imageData->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
-			vtkUnsignedCharArray* scalars = vtkUnsignedCharArray::SafeDownCast(imageData->GetPointData()->GetScalars());
+			image_data->SetDimensions(ct_dim[0], ct_dim[1], 1);
+			image_data->SetSpacing(spacing[0], spacing[1], spacing[2]);
+			image_data->SetOrigin(ct_origin[0], ct_origin[1], ct_origin[2]);
+			image_data->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+			vtkUnsignedCharArray* scalars = vtkUnsignedCharArray::SafeDownCast(image_data->GetPointData()->GetScalars());
 
 			// Fill the image with foreground voxel values
 			unsigned char inval = 255;
@@ -254,15 +249,15 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 			vtkNew<vtkPolyDataToImageStencil> pol2stenc;
 			pol2stenc->SetTolerance(0); // important if extruder->SetVector(0, 0, 1) !!!
 			pol2stenc->SetInputConnection(extruder->GetOutputPort());
-			pol2stenc->SetOutputOrigin(imageData->GetOrigin());
-			pol2stenc->SetOutputSpacing(imageData->GetSpacing());
-			pol2stenc->SetOutputWholeExtent(imageData->GetExtent());
+			pol2stenc->SetOutputOrigin(image_data->GetOrigin());
+			pol2stenc->SetOutputSpacing(image_data->GetSpacing());
+			pol2stenc->SetOutputWholeExtent(image_data->GetExtent());
 			pol2stenc->Update();
 
 			// Paste the Contour PolyData on the black image
 			// Cut the corresponding white image and set the background:
 			vtkNew<vtkImageStencil> imgstenc;
-			imgstenc->SetInputData(imageData.Get());
+			imgstenc->SetInputData(image_data.Get());
 			imgstenc->SetStencilConnection(pol2stenc->GetOutputPort());
 			imgstenc->ReverseStencilOff();
 			imgstenc->SetBackgroundValue(outval);
@@ -270,7 +265,7 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 
 			// Add or overwrite the white pixels in the working array
 			vtkImageData* out = imgstenc->GetOutput();
-			float* workBits = slices[z];
+			float* work_bits = slices[z];
 			if (out->GetNumberOfPoints() > 0)
 			{
 				int offset_x = (int)floor(abs(ct_origin[0] / spacing[0]) + 0.5);
@@ -288,7 +283,7 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 							int ds_y = offset_y + ct_y;
 
 							int index = ds_x + ds_y * (dims[0]);
-							workBits[index] = label;
+							work_bits[index] = label;
 						}
 					}
 				}
@@ -301,10 +296,7 @@ VoxelSurface::eSurfaceImageOverlap voxelSurface(vtkPolyData* surface, float** sl
 
 } // namespace
 
-VoxelSurface::eSurfaceImageOverlap VoxelSurface::Voxelize(vtkPolyData* polydata, 
-		std::vector<float*>& all_slices, const unsigned dims[3],
-		const Vec3& spacing, const Transform& transform,
-		unsigned startslice, unsigned endslice) const
+VoxelSurface::eSurfaceImageOverlap VoxelSurface::Voxelize(vtkPolyData* polydata, std::vector<float*>& all_slices, const unsigned dims[3], const Vec3& spacing, const Transform& transform, unsigned startslice, unsigned endslice) const
 {
 	eSurfaceImageOverlap res = kNone;
 	if (polydata->GetNumberOfPolys() != 0)
@@ -318,23 +310,20 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Voxelize(vtkPolyData* polydata,
 
 		vtkIdType npts, *pts;
 		vtkCellArray* lines = polydata->GetLines();
-		for (lines->InitTraversal(); lines->GetNextCell(npts, pts); )
+		for (lines->InitTraversal(); lines->GetNextCell(npts, pts);)
 		{
-			std::vector<itk::Point<double,3>> line(npts);
-			for (vtkIdType i=0; i<npts; ++i)
+			std::vector<itk::Point<double, 3>> line(npts);
+			for (vtkIdType i = 0; i < npts; ++i)
 			{
 				polydata->GetPoint(pts[i], line[i].GetDataPointer());
 			}
 			res = std::max(res, voxelPolyline<image_type>(line, image, m_ForeGroundValue, startslice, endslice));
 		}
-	}	
+	}
 	return res;
 }
 
-VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface, 
-		std::vector<float*>& all_slices, const unsigned dims[3], 
-		const Vec3& spacing, const Transform& transform, 
-		unsigned startslice, unsigned endslice, double rel_tolerance)
+VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface, std::vector<float*>& all_slices, const unsigned dims[3], const Vec3& spacing, const Transform& transform, unsigned startslice, unsigned endslice, double rel_tolerance) const
 {
 	// instead of applying the transform to the image, we inverse transform the surface
 	auto m = to_double(transform);
@@ -349,9 +338,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface,
 	vtkBoundingBox surface_bb(points->GetBounds());
 
 	// image wo transform
-	vtkBoundingBox image_bb(0, (dims[0] - 1) * spacing[0], 0,
-			(dims[1] - 1) * spacing[1], 0,
-			(dims[2] - 1) * spacing[2]);
+	vtkBoundingBox image_bb(0, (dims[0] - 1) * spacing[0], 0, (dims[1] - 1) * spacing[1], 0, (dims[2] - 1) * spacing[2]);
 
 	eSurfaceImageOverlap result = kNone;
 	if (image_bb.Contains(surface_bb))
@@ -394,7 +381,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface,
 				double pa[3] = {};
 				double pe[3] = {};
 				unsigned int ijk[3] = {};
-				int subId;
+				int sub_id;
 				double t, x[3], pcoords[3];
 
 				pa[dir[2]] = bbi[dir[2] * 2] * spacing[dir[2]];
@@ -408,7 +395,7 @@ VoxelSurface::eSurfaceImageOverlap VoxelSurface::Intersect(vtkPolyData* surface,
 						pa[dir[0]] = pe[dir[0]] = i * spacing[dir[0]];
 						pa[dir[1]] = pe[dir[1]] = j * spacing[dir[1]];
 
-						if (cell->IntersectWithLine(pa, pe, tol, t, x, pcoords, subId) != 0)
+						if (cell->IntersectWithLine(pa, pe, tol, t, x, pcoords, sub_id) != 0)
 						{
 							ijk[dir[0]] = i;
 							ijk[dir[1]] = j;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -10,75 +10,75 @@
 #include "Precompiled.h"
 
 #include "ActiveSlicesConfigDialog.h"
-
 #include "SlicesHandler.h"
+
+#include "Interface/QtConnect.h"
 
 #include <QFormLayout>
 
 namespace iseg {
 
-ActiveSlicesConfigDialog::ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent,
-												   const char* name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+ActiveSlicesConfigDialog::ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
 {
-	sb_start = new QSpinBox(1, (int)handler3D->num_slices(), 1, nullptr);
-	sb_start->setValue((int)handler3D->start_slice() + 1);
+	m_SbStart = new QSpinBox(1, (int)m_Handler3D->NumSlices(), 1, nullptr);
+	m_SbStart->setValue((int)m_Handler3D->StartSlice() + 1);
 
-	sb_end = new QSpinBox(1, (int)handler3D->num_slices(), 1, nullptr);
-	sb_end->setValue((int)handler3D->end_slice());
+	m_SbEnd = new QSpinBox(1, (int)m_Handler3D->NumSlices(), 1, nullptr);
+	m_SbEnd->setValue((int)m_Handler3D->EndSlice());
 
-	pb_ok = new QPushButton("OK");
-	pb_close = new QPushButton("Cancel");
+	m_PbOk = new QPushButton("OK");
+	m_PbClose = new QPushButton("Cancel");
 
 	// layout
 	auto layout = new QFormLayout;
-	layout->addRow(tr("Start slice"), sb_start);
-	layout->addRow(tr("End slice"), sb_end);
-	layout->addRow(pb_ok, pb_close);
+	layout->addRow(tr("Start slice"), m_SbStart);
+	layout->addRow(tr("End slice"), m_SbEnd);
+	layout->addRow(m_PbOk, m_PbClose);
 
 	setLayout(layout);
 
 	// connections
-	connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
-	connect(pb_ok, SIGNAL(clicked()), this, SLOT(ok_pressed()));
-	connect(sb_start, SIGNAL(valueChanged(int)), this, SLOT(startslice_changed(int)));
-	connect(sb_end, SIGNAL(valueChanged(int)), this, SLOT(endslice_changed(int)));
+	QObject_connect(m_PbClose, SIGNAL(clicked()), this, SLOT(close()));
+	QObject_connect(m_PbOk, SIGNAL(clicked()), this, SLOT(OkPressed()));
+	QObject_connect(m_SbStart, SIGNAL(valueChanged(int)), this, SLOT(StartsliceChanged(int)));
+	QObject_connect(m_SbEnd, SIGNAL(valueChanged(int)), this, SLOT(EndsliceChanged(int)));
 }
 
-void ActiveSlicesConfigDialog::ok_pressed()
+void ActiveSlicesConfigDialog::OkPressed()
 {
-	if (sb_start->value() > sb_end->value())
+	if (m_SbStart->value() > m_SbEnd->value())
 		return;
 
-	handler3D->set_startslice(sb_start->value() - 1);
-	handler3D->set_endslice(sb_end->value());
+	m_Handler3D->SetStartslice(m_SbStart->value() - 1);
+	m_Handler3D->SetEndslice(m_SbEnd->value());
 
 	close();
 }
 
-void ActiveSlicesConfigDialog::startslice_changed(int startslice1)
+void ActiveSlicesConfigDialog::StartsliceChanged(int startslice1)
 {
-	if (startslice1 > sb_end->value())
+	if (startslice1 > m_SbEnd->value())
 	{
 		//sb_end->setValue(startslice1);
-		pb_ok->setEnabled(false);
+		m_PbOk->setEnabled(false);
 	}
 	else
 	{
-		pb_ok->setEnabled(true);
+		m_PbOk->setEnabled(true);
 	}
 }
 
-void ActiveSlicesConfigDialog::endslice_changed(int endslice1)
+void ActiveSlicesConfigDialog::EndsliceChanged(int endslice1)
 {
-	if (endslice1 < sb_start->value())
+	if (endslice1 < m_SbStart->value())
 	{
-		pb_ok->setEnabled(false);
+		m_PbOk->setEnabled(false);
 	}
 	else
 	{
-		pb_ok->setEnabled(true);
+		m_PbOk->setEnabled(true);
 	}
 }
 
-}// namespace iseg
+} // namespace iseg

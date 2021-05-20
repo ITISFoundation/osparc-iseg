@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -22,44 +22,44 @@ class ISEG_CORE_API SliceProvider
 public:
 	SliceProvider(unsigned area1);
 	~SliceProvider();
-	unsigned return_area();
-	unsigned short return_nrslices();
-	float* give_me();
-	void merge(SliceProvider* sp);
-	void take_back(float* slice);
+	unsigned ReturnArea() const;
+	unsigned short ReturnNrslices();
+	float* GiveMe();
+	void Merge(SliceProvider* sp);
+	void TakeBack(float* slice);
 
 private:
-	unsigned area;
-	std::stack<float*> slicestack;
+	unsigned m_Area;
+	std::stack<float*> m_Slicestack;
 };
 
-struct spobj
+struct Spobj
 {
-	unsigned area;
-	SliceProvider* spp;
-	unsigned short installnr;
+	unsigned m_Area;
+	SliceProvider* m_Spp;
+	unsigned short m_Installnr;
 };
 
 class ISEG_CORE_API SliceProviderInstaller
 {
 public:
-	static SliceProviderInstaller* getinst();
-	void return_instance();
-	SliceProvider* install(unsigned area);
-	void uninstall(SliceProvider* sp);
-	bool unused();
+	static SliceProviderInstaller* Getinst();
+	void ReturnInstance();
+	SliceProvider* Install(unsigned area);
+	void Uninstall(SliceProvider* sp);
+	bool Unused();
 	~SliceProviderInstaller();
 
-	void report() const;
+	void Report() const;
 
 private:
 	static SliceProviderInstaller* inst;
 	static unsigned short counter;
-	std::list<spobj> splist;
-	bool delete_unused = true;
-	SliceProviderInstaller(){};
-	SliceProviderInstaller(SliceProviderInstaller const&);
-	SliceProviderInstaller& operator=(SliceProviderInstaller const& rhs);
+	std::list<Spobj> m_Splist;
+	bool m_DeleteUnused = true;
+	SliceProviderInstaller() = default;
+	SliceProviderInstaller(SliceProviderInstaller const&) = delete;
+	SliceProviderInstaller& operator=(SliceProviderInstaller const& rhs) = delete;
 	class Waechter
 	{
 	public:

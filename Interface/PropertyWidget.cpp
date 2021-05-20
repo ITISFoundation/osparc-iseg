@@ -20,8 +20,8 @@
 
 namespace iseg {
 
-static const int CHILD_INDENT = 8;
-static const int ROW_HEIGHT = 20;
+static const int child_indent = 8;
+static const int row_height = 20;
 
 PropertyWidget::PropertyWidget(Property_ptr p, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
@@ -31,21 +31,21 @@ PropertyWidget::PropertyWidget(Property_ptr p, QWidget* parent, const char* name
 
 void PropertyWidget::setProperty(Property_ptr p)
 {
-	if (p && p != _property)
+	if (p && p != m_Property)
 	{
-		_property = p;
+		m_Property = p;
 
-		_widgetPropertyMap.clear();
-		_collapseButtonLayoutMap.clear();
+		m_WidgetPropertyMap.clear();
+		m_CollapseButtonLayoutMap.clear();
 
 		auto layout = new QVBoxLayout(this);
-		build(_property, layout);
+		Build(m_Property, layout);
 		layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
 		setLayout(layout);
 	}
 }
 
-QWidget* PropertyWidget::makePropertyUI(Property& prop)
+QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 {
 	const auto make_line_edit = [this](const Property& prop) {
 		// generic attributes
@@ -53,7 +53,7 @@ QWidget* PropertyWidget::makePropertyUI(Property& prop)
 		edit->setToolTip(QString::fromStdString(prop.ToolTip()));
 		edit->setEnabled(prop.Enabled());
 		edit->setVisible(prop.Visible());
-		QObject::connect(edit, SIGNAL(editingFinished()), this, SLOT(edited()));
+		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
 		return edit;
 	};
 
@@ -85,7 +85,7 @@ QWidget* PropertyWidget::makePropertyUI(Property& prop)
 		checkbox->setChecked(p->Value());
 		checkbox->setStyleSheet("QCheckBox::indicator {width: 13px; height: 13px; }");
 		// connect to signal
-		QObject::connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(edited()));
+		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
 		return checkbox;
 	}
 	case Property::kButton: {
@@ -93,7 +93,7 @@ QWidget* PropertyWidget::makePropertyUI(Property& prop)
 		auto button = new QPushButton(QString::fromStdString(p->ButtonText()));
 		button->setAutoDefault(false);
 		// connect to signal
-		QObject::connect(button, SIGNAL(released()), this, SLOT(edited()));
+		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 		return button;
 	}
 	default:
@@ -101,14 +101,14 @@ QWidget* PropertyWidget::makePropertyUI(Property& prop)
 	}
 }
 
-void PropertyWidget::build(Property_ptr prop, QBoxLayout* layout)
+void PropertyWidget::Build(Property_ptr prop, QBoxLayout* layout)
 {
 	const auto label_text = prop->Description().empty() ? prop->Name() : prop->Description();
-	auto field = makePropertyUI(*prop);
-	field->setMaximumHeight(ROW_HEIGHT);
+	auto field = MakePropertyUi(*prop);
+	field->setMaximumHeight(row_height);
 
 	// for callbacks
-	_widgetPropertyMap[field] = prop;
+	m_WidgetPropertyMap[field] = prop;
 
 	if (prop->Type() == Property::kGroup)
 	{
@@ -120,10 +120,10 @@ void PropertyWidget::build(Property_ptr prop, QBoxLayout* layout)
 		collapse_button->setCheckable(true);
 		collapse_button->setChecked(true);
 		collapse_button->setIconSize(QSize(5, 5));
-		collapse_button->setMaximumHeight(ROW_HEIGHT);
+		collapse_button->setMaximumHeight(row_height);
 
 		auto label = new QLabel(QString::fromStdString(label_text));
-		label->setMaximumHeight(ROW_HEIGHT);
+		label->setMaximumHeight(row_height);
 
 		auto header_hbox = new QHBoxLayout;
 		header_hbox->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
@@ -142,9 +142,9 @@ void PropertyWidget::build(Property_ptr prop, QBoxLayout* layout)
 			header_line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 			//child_vbox->addWidget(header_line);
 
-			for (auto p : prop->Properties())
+			for (const auto& p : prop->Properties())
 			{
-				build(p, child_vbox);
+				Build(p, child_vbox);
 			}
 		}
 		auto child_area = new QWidget;
@@ -153,14 +153,14 @@ void PropertyWidget::build(Property_ptr prop, QBoxLayout* layout)
 		auto collapse_vbox = new QVBoxLayout;
 		collapse_vbox->addLayout(header_hbox);
 		collapse_vbox->addWidget(child_area);
-		collapse_vbox->setContentsMargins(CHILD_INDENT, 0, 0, 0);
+		collapse_vbox->setContentsMargins(child_indent, 0, 0, 0);
 		collapse_vbox->setSpacing(0);
 
-		_collapseButtonLayoutMap[collapse_button] = collapse_vbox;
+		m_CollapseButtonLayoutMap[collapse_button] = collapse_vbox;
 
 		layout->addLayout(collapse_vbox);
 
-		QObject::connect(collapse_button, SIGNAL(clicked(bool)), this, SLOT(toggleCollapsable(bool)));
+		QObject_connect(collapse_button, SIGNAL(clicked(bool)), this, SLOT(ToggleCollapsable(bool)));
 	}
 	else
 	{
@@ -176,19 +176,19 @@ void PropertyWidget::build(Property_ptr prop, QBoxLayout* layout)
 		hbox->addWidget(label);
 		hbox->addWidget(field);
 		hbox->setSpacing(2);
-		hbox->setContentsMargins(CHILD_INDENT, 0, 0, 0);
+		hbox->setContentsMargins(child_indent, 0, 0, 0);
 
 		layout->addLayout(hbox);
 	}
 }
 
-void PropertyWidget::toggleCollapsable(bool checked)
+void PropertyWidget::ToggleCollapsable(bool checked)
 {
 	if (auto btn = dynamic_cast<QToolButton*>(QObject::sender()))
 	{
 		btn->setArrowType(checked ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
 
-		if (auto layout = _collapseButtonLayoutMap[btn])
+		if (auto layout = m_CollapseButtonLayoutMap[btn])
 		{
 			auto last_item = layout->count() - 1;
 			if (auto w = layout->itemAt(last_item)->widget())
@@ -199,7 +199,7 @@ void PropertyWidget::toggleCollapsable(bool checked)
 				animation->setEndValue(checked ? w->sizeHint().height() : 0);
 				animation->start();
 
-				QObject::connect(animation, SIGNAL(finished()), this, SLOT(update()));
+				QObject_connect(animation, SIGNAL(finished()), this, SLOT(update()));
 			}
 		}
 	}
@@ -207,38 +207,38 @@ void PropertyWidget::toggleCollapsable(bool checked)
 
 namespace {
 template<typename T>
-struct type
+struct Type
 {
 };
 
-double toType(QString const& q, type<double>)
+double toType(QString const& q, Type<double>)
 {
 	return q.toDouble();
 }
 
-int toType(QString const& q, type<int>)
+int toType(QString const& q, Type<int>)
 {
 	return q.toInt();
 }
 
-std::string toType(QString const& q, type<std::string>)
+std::string toType(QString const& q, Type<std::string>)
 {
 	return q.toStdString();
 }
 
 template<typename T>
 auto toType(QString const& q)
-		-> decltype(toType(q, type<T>{}))
+		-> decltype(toType(q, Type<T>{}))
 {
-	return toType(q, type<T>{});
+	return toType(q, Type<T>{});
 }
 } // namespace
 
-void PropertyWidget::edited()
+void PropertyWidget::Edited()
 {
 	if (auto w = dynamic_cast<QWidget*>(QObject::sender()))
 	{
-		if (auto prop = std::dynamic_pointer_cast<Property>(_widgetPropertyMap[w].lock()))
+		if (auto prop = std::dynamic_pointer_cast<Property>(m_WidgetPropertyMap[w].lock()))
 		{
 			switch (prop->Type())
 			{
@@ -250,7 +250,7 @@ void PropertyWidget::edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						onPropertyEdited(prop);
+						OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -263,7 +263,7 @@ void PropertyWidget::edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						onPropertyEdited(prop);
+						OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -276,7 +276,7 @@ void PropertyWidget::edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						onPropertyEdited(prop);
+						OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -289,7 +289,7 @@ void PropertyWidget::edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						onPropertyEdited(prop);
+						OnPropertyEdited(prop);
 					}
 				}
 				break;

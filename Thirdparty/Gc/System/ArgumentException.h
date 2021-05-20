@@ -30,35 +30,33 @@
 
 #include "Exception.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+/** Generic exception class for invalid method arguments. */
+class ArgumentException
+    : public Exception
 {
-    namespace System
-    {
-        /** Generic exception class for invalid method arguments. */
-        class ArgumentException 
-            : public Exception
-        {
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            ArgumentException(const char *func, Int32 line)
-                : Exception(func, line, "Invalid argument passed.")
-            {}
+    ArgumentException(const char * func, Int32 line)
+        : Exception(func, line, "Invalid argument passed.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            ArgumentException(const char *func, Int32 line, const std::string &msg)
-                : Exception(func, line, msg)
-            {}
-        };
-    }
+    ArgumentException(const char * func, Int32 line, const std::string & msg)
+        : Exception(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::System
 
 #endif

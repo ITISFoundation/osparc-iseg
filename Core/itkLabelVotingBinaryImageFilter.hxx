@@ -128,8 +128,8 @@ LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 		inline void clear(){ m_Data.clear(); }
 		inline void reserve(size_t sz) { m_Data.reserve(sz); }
 
-		inline iterator begin() { return m_Data.begin(); }
-		inline iterator end() { return m_Data.end(); }
+		iterator begin() { return m_Data.begin(); }
+		iterator end() { return m_Data.end(); }
 
 		inline V &operator[](const K &key)
 		{

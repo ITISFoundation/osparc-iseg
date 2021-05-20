@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "Data/ItkUtils.h"
 #include "Data/ItkProgressObserver.h"
+#include "Data/ItkUtils.h"
 #include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryDilateImageFilter.h>
@@ -35,8 +35,8 @@ itk::FlatStructuringElement<Dimension> MakeBall(const typename itk::ImageBase<Di
 template<unsigned int Dimension>
 itk::FlatStructuringElement<Dimension> MakeBall(const itk::Size<Dimension>& radius)
 {
-	bool radiusIsParametric = true;
-	return itk::FlatStructuringElement<Dimension>::Ball(radius, radiusIsParametric);
+	bool radius_is_parametric = true;
+	return itk::FlatStructuringElement<Dimension>::Ball(radius, radius_is_parametric);
 }
 
 enum eOperation {
@@ -48,10 +48,7 @@ enum eOperation {
 
 template<class TInputImage, class TOutputImage = itk::Image<unsigned char, TInputImage::ImageDimension>>
 typename TOutputImage::Pointer
-		MorphologicalOperation(typename TInputImage::Pointer input,
-				boost::variant<int, float> radius, eOperation operation,
-				const typename TInputImage::RegionType& requested_region, 
-				iseg::ProgressInfo* progress = nullptr)
+		MorphologicalOperation(typename TInputImage::Pointer input, boost::variant<int, float> radius, eOperation operation, const typename TInputImage::RegionType& requested_region, iseg::ProgressInfo* progress = nullptr)
 {
 	using input_image_type = TInputImage;
 	using image_type = TOutputImage;
@@ -62,7 +59,7 @@ typename TOutputImage::Pointer
 	class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<Dimension>>
 	{
 	public:
-		explicit MyVisitor(const spacing_type& spacing) : _spacing(spacing) {}
+		explicit MyVisitor(const spacing_type& spacing) : m_Spacing(spacing) {}
 
 		itk::FlatStructuringElement<Dimension> operator()(int r) const
 		{
@@ -74,11 +71,11 @@ typename TOutputImage::Pointer
 
 		itk::FlatStructuringElement<Dimension> operator()(float r) const
 		{
-			return iseg::MakeBall<Dimension>(_spacing, static_cast<double>(r));
+			return iseg::MakeBall<Dimension>(m_Spacing, static_cast<double>(r));
 		}
 
 	private:
-		spacing_type _spacing;
+		spacing_type m_Spacing;
 	};
 
 	auto ball = boost::apply_visitor(MyVisitor(input->GetSpacing()), radius);
@@ -132,7 +129,7 @@ typename TOutputImage::Pointer
 	{
 		auto observer = iseg::ItkProgressObserver::New();
 		observer->SetProgressInfo(progress);
-		for (auto filter : filters)
+		for (const auto& filter : filters)
 			filter->AddObserver(itk::ProgressEvent(), observer);
 	}
 
@@ -143,8 +140,7 @@ typename TOutputImage::Pointer
 
 /** \brief Do morpological operation on target image
 */
-void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
-		boost::variant<int, float> radius, eOperation operation, bool true3d, iseg::ProgressInfo* progress)
+void MorphologicalOperation(iseg::SlicesHandlerInterface* handler, boost::variant<int, float> radius, eOperation operation, bool true3d, iseg::ProgressInfo* progress)
 {
 	iseg::SlicesHandlerITKInterface itkhandler(handler);
 	if (true3d)
@@ -162,12 +158,12 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
 		using input_type = itk::Image<float, 2>;
 		using output_type = itk::Image<unsigned char, 2>;
 
-		size_t startslice = handler->start_slice();
-		size_t endslice = handler->end_slice();
+		size_t startslice = handler->StartSlice();
+		size_t endslice = handler->EndSlice();
 
 		if (progress)
 		{
-			progress->setNumberOfSteps(endslice-startslice);
+			progress->SetNumberOfSteps(endslice - startslice);
 		}
 
 #pragma omp parallel for
@@ -180,10 +176,10 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler,
 
 			if (progress)
 			{
-				progress->increment();
+				progress->Increment();
 			}
 		}
 	}
 }
 
-} // namespace morpho
+} // namespace iseg

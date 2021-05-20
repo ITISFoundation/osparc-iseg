@@ -116,7 +116,7 @@
 #define GC_CORE_H
 
 #if defined(_MSC_VER)
-    // Shared library under MS environment, shall we export or import?	
+    // Shared library under MS environment, shall we export or import?
     #if defined(GC_SHOULD_EXPORT)
         #define GC_DLL_EXPORT __declspec(dllexport)
     #else

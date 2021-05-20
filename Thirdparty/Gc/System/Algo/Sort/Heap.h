@@ -32,16 +32,12 @@
 #include "../Iterator.h"
 #include "../Predicate.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        namespace Algo
-        {
-            /** %Data sorting algorithms. */
-            namespace Sort
-            {
-                /** Heap sort algorithm. 
+namespace Gc {
+namespace System {
+namespace Algo {
+/** %Data sorting algorithms. */
+namespace Sort {
+/** Heap sort algorithm. 
                 
                     Sorts elements from the smallest to the largest using heap sort
                     algorithm.
@@ -50,51 +46,51 @@ namespace Gc
                     @param[in] end Random access iterator pointing to the end of the sequence.
                     @param[in] pred Comparison predicate.
                 */
-                template <class RanIter, class Pred>
-                void Heap(RanIter begin, RanIter end, Pred pred)
-                {
-                    Size n = (end - begin), parent = n/2, index, child;
-                    typename IteratorTraits<RanIter>::ValueType temp; 
+template <class RanIter, class Pred>
+void Heap(RanIter begin, RanIter end, Pred pred)
+{
+    Size n = (end - begin), parent = n / 2, index, child;
+    typename IteratorTraits<RanIter>::ValueType temp;
 
-                    while (n > 1)
-                    { 
-                        if (parent) 
-                        { 
-                            temp = begin[--parent];
-                        } 
-                        else 
-                        {            
-                            n--;
-                            temp = begin[n];
-                            begin[n] = begin[0];
-                        }
+    while (n > 1)
+    {
+        if (parent)
+        {
+            temp = begin[--parent];
+        }
+        else
+        {
+            n--;
+            temp = begin[n];
+            begin[n] = begin[0];
+        }
 
-                        index = parent;
-                        child = index * 2 + 1;
-                        while (child < n) 
-                        {
-                            if (child + 1 < n && pred(begin[child], begin[child + 1])) 
-                            {
-                                child++;
-                            }
+        index = parent;
+        child = index * 2 + 1;
+        while (child < n)
+        {
+            if (child + 1 < n && pred(begin[child], begin[child + 1]))
+            {
+                child++;
+            }
 
-                            if (pred(temp, begin[child])) 
-                            {
-                                begin[index] = begin[child];
-                                index = child;
-                                child = index * 2 + 1;
-                            } 
-                            else 
-                            {
-                                break;
-                            }
-                        }
+            if (pred(temp, begin[child]))
+            {
+                begin[index] = begin[child];
+                index = child;
+                child = index * 2 + 1;
+            }
+            else
+            {
+                break;
+            }
+        }
 
-                        begin[index] = temp; 
-                    }
-                }
+        begin[index] = temp;
+    }
+}
 
-                /** Heap sort algorithm. 
+/** Heap sort algorithm. 
                 
                     Sorts elements from the smallest to the largest using heap sort
                     algorithm and System::Algo::Predicate::Less.
@@ -102,14 +98,14 @@ namespace Gc
                     @param[in] begin Random access iterator pointing to the first element.
                     @param[in] end Random access iterator pointing to the end of the sequence.
                 */
-                template <class RanIter>
-                void Heap(RanIter begin, RanIter end)
-                {                    
-                    Heap(begin, end, Predicate::Less<typename IteratorTraits<RanIter>::ValueType>());
-                }
-            }
-        }
-    }
+template <class RanIter>
+void Heap(RanIter begin, RanIter end)
+{
+    Heap(begin, end, Predicate::Less<typename IteratorTraits<RanIter>::ValueType>());
 }
+} // namespace Sort
+}
+}
+} // namespace Gc::System::Algo
 
 #endif

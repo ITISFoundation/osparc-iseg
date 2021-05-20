@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -12,12 +12,12 @@
 /// Common definitions for iSeg project.
 namespace iseg {
 
-enum EndUndoAction {
+enum eEndUndoAction {
 	NoUndo,
 	EndUndo,
 	MergeUndo,
 	AbortUndo,
-	ClearUndo,
+	ClearUndo
 };
 
 struct DataSelection
@@ -33,21 +33,21 @@ struct DataSelection
 		tissueHierarchy = tissueHierarchy || other.tissueHierarchy;
 	}
 
-	inline bool DataSelected()
+	inline bool DataSelected() const
 	{
 		return bmp || work || tissues || vvm || limits || marks || tissueHierarchy;
 	}
 
-	bool bmp = false;
-	bool work = false;
-	bool tissues = false;
-	bool vvm = false;
-	bool limits = false;
-	bool marks = false;
-	bool tissueHierarchy = false;
+	bool bmp = false;							// NOLINT
+	bool work = false;						// NOLINT
+	bool tissues = false;					// NOLINT
+	bool vvm = false;							// NOLINT
+	bool limits = false;					// NOLINT
+	bool marks = false;						// NOLINT
+	bool tissueHierarchy = false; // NOLINT
 
-	bool allSlices = false;
-	unsigned short sliceNr = 0;
+	bool allSlices = false;			// NOLINT
+	unsigned short sliceNr = 0; // NOLINT
 };
 
 } // namespace iseg

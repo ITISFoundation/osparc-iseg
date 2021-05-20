@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -21,91 +21,89 @@
 #include <algorithm>
 #include <sstream>
 
-ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	activeslice = handler3D->active_slice();
+	m_Activeslice = m_Handler3D->ActiveSlice();
 
-	setToolTip(Format(
-			"Segment pixels with similar statistics using region growing. At least one seed point is needed."));
+	setToolTip(Format("Segment pixels with similar statistics using region growing. At least one seed point is needed."));
 
-	all_slices = new QCheckBox;
+	m_AllSlices = new QCheckBox;
 
-	iterations = new QSpinBox(0, 50, 1, nullptr);
-	iterations->setValue(1);
-	iterations->setToolTip(Format("Number of growing iterations (each time image statistics of current region are recomputed)."));
+	m_Iterations = new QSpinBox(0, 50, 1, nullptr);
+	m_Iterations->setValue(1);
+	m_Iterations->setToolTip(Format("Number of growing iterations (each time image statistics of current region are recomputed)."));
 
-	multiplier = new QLineEdit(QString::number(2.5));
-	multiplier->setValidator(new QDoubleValidator(1.0, 1e6, 2));
-	multiplier->setToolTip(Format("The confidence interval is the mean plus or minus the 'Multiplier' times the standard deviation."));
+	m_Multiplier = new QLineEdit(QString::number(2.5));
+	m_Multiplier->setValidator(new QDoubleValidator(1.0, 1e6, 2));
+	m_Multiplier->setToolTip(Format("The confidence interval is the mean plus or minus the 'Multiplier' times the standard deviation."));
 
-	radius = new QSpinBox(1, 10, 1, nullptr);
-	radius->setValue(2);
-	radius->setToolTip(Format("The neighborhood side of the initial seed points used to compute the image statistics."));
+	m_Radius = new QSpinBox(1, 10, 1, nullptr);
+	m_Radius->setValue(2);
+	m_Radius->setToolTip(Format("The neighborhood side of the initial seed points used to compute the image statistics."));
 
-	clear_seeds = new QPushButton("Clear seeds");
-	execute_button = new QPushButton("Execute");
+	m_ClearSeeds = new QPushButton("Clear seeds");
+	m_ExecuteButton = new QPushButton("Execute");
 
 	auto layout = new QFormLayout;
-	layout->addRow(QString("Apply to all slices"), all_slices);
-	layout->addRow(QString("Iterations"), iterations);
-	layout->addRow(QString("Multiplier"), multiplier);
-	layout->addRow(QString("Neighborhood radius"), radius);
-	layout->addRow(clear_seeds);
-	layout->addRow(execute_button);
+	layout->addRow(QString("Apply to all slices"), m_AllSlices);
+	layout->addRow(QString("Iterations"), m_Iterations);
+	layout->addRow(QString("Multiplier"), m_Multiplier);
+	layout->addRow(QString("Neighborhood radius"), m_Radius);
+	layout->addRow(m_ClearSeeds);
+	layout->addRow(m_ExecuteButton);
 	setLayout(layout);
 
-	QObject::connect(clear_seeds, SIGNAL(clicked()), this, SLOT(clearmarks()));
-	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
+	QObject_connect(m_ClearSeeds, SIGNAL(clicked()), this, SLOT(Clearmarks()));
+	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(DoWork()));
 }
 
-void ConfidenceWidget::on_slicenr_changed()
+void ConfidenceWidget::OnSlicenrChanged()
 {
-	activeslice = handler3D->active_slice();
+	m_Activeslice = m_Handler3D->ActiveSlice();
 
-	std::vector<iseg::Point> vp = vpdyn[activeslice];
-	emit vpdyn_changed(&vp);
+	std::vector<iseg::Point> vp = m_Vpdyn[m_Activeslice];
+	emit VpdynChanged(&vp);
 }
 
-void ConfidenceWidget::init()
+void ConfidenceWidget::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
-void ConfidenceWidget::newloaded()
+void ConfidenceWidget::NewLoaded()
 {
-	clearmarks();
-	on_slicenr_changed();
+	Clearmarks();
+	OnSlicenrChanged();
 }
 
-void ConfidenceWidget::cleanup()
+void ConfidenceWidget::Cleanup()
 {
-	clearmarks();
+	Clearmarks();
 }
 
-void ConfidenceWidget::clearmarks()
+void ConfidenceWidget::Clearmarks()
 {
-	vpdyn.clear();
+	m_Vpdyn.clear();
 
 	std::vector<iseg::Point> empty;
-	emit vpdyn_changed(&empty);
+	emit VpdynChanged(&empty);
 }
 
-void ConfidenceWidget::on_mouse_clicked(iseg::Point p)
+void ConfidenceWidget::OnMouseClicked(iseg::Point p)
 {
-	vpdyn[activeslice].push_back(p);
+	m_Vpdyn[m_Activeslice].push_back(p);
 
-	if (!all_slices->isChecked())
+	if (!m_AllSlices->isChecked())
 	{
-		do_work();
+		DoWork();
 	}
 }
 
-void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
+void ConfidenceWidget::GetSeeds(std::vector<itk::Index<2>>& seeds)
 {
-	auto vp = vpdyn[activeslice];
+	auto vp = m_Vpdyn[m_Activeslice];
 	for (auto p : vp)
 	{
 		itk::Index<2> idx;
@@ -115,10 +113,10 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<2>>& seeds)
 	}
 }
 
-void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
+void ConfidenceWidget::GetSeeds(std::vector<itk::Index<3>>& seeds)
 {
-	auto start_slice = handler3D->start_slice();
-	for (auto slice : vpdyn)
+	auto start_slice = m_Handler3D->StartSlice();
+	for (const auto& slice : m_Vpdyn)
 	{
 		for (auto p : slice.second)
 		{
@@ -131,27 +129,27 @@ void ConfidenceWidget::get_seeds(std::vector<itk::Index<3>>& seeds)
 	}
 }
 
-void ConfidenceWidget::do_work()
+void ConfidenceWidget::DoWork()
 {
-	iseg::SlicesHandlerITKInterface itk_handler(handler3D);
-	if (all_slices->isChecked())
+	iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
+	if (m_AllSlices->isChecked())
 	{
 		using input_type = itk::SliceContiguousImage<float>;
 		auto source = itk_handler.GetSource(true);
 		auto target = itk_handler.GetTarget(true);
-		do_work_nd<input_type>(source, target);
+		DoWorkNd<input_type>(source, target);
 	}
 	else
 	{
 		using input_type = itk::Image<float, 2>;
 		auto source = itk_handler.GetSourceSlice();
 		auto target = itk_handler.GetTargetSlice();
-		do_work_nd<input_type>(source, target);
+		DoWorkNd<input_type>(source, target);
 	}
 }
 
 template<typename TInput>
-void ConfidenceWidget::do_work_nd(TInput* source, TInput* target)
+void ConfidenceWidget::DoWorkNd(TInput* source, TInput* target)
 {
 	itkStaticConstMacro(ImageDimension, unsigned int, TInput::ImageDimension);
 	using input_type = TInput;
@@ -159,43 +157,43 @@ void ConfidenceWidget::do_work_nd(TInput* source, TInput* target)
 	using mask_type = itk::Image<unsigned char, ImageDimension>;
 
 	auto smoothing = itk::CurvatureFlowImageFilter<input_type, real_type>::New();
-	auto confidenceConnected = itk::ConfidenceConnectedImageFilter<real_type, mask_type>::New();
+	auto confidence_connected = itk::ConfidenceConnectedImageFilter<real_type, mask_type>::New();
 
 	// connect pipeline
 	smoothing->SetInput(source);
-	confidenceConnected->SetInput(smoothing->GetOutput());
+	confidence_connected->SetInput(smoothing->GetOutput());
 
 	// set parameters
 	smoothing->SetNumberOfIterations(2);
 	smoothing->SetTimeStep(0.05);
-	confidenceConnected->SetMultiplier(multiplier->text().toDouble());
-	confidenceConnected->SetNumberOfIterations(iterations->value());
-	confidenceConnected->SetInitialNeighborhoodRadius(radius->value());
-	confidenceConnected->SetReplaceValue(255);
+	confidence_connected->SetMultiplier(m_Multiplier->text().toDouble());
+	confidence_connected->SetNumberOfIterations(m_Iterations->value());
+	confidence_connected->SetInitialNeighborhoodRadius(m_Radius->value());
+	confidence_connected->SetReplaceValue(255);
 
 	std::vector<typename input_type::IndexType> seeds;
-	get_seeds(seeds);
+	GetSeeds(seeds);
 	for (auto idx : seeds)
 	{
-		confidenceConnected->AddSeed(idx);
+		confidence_connected->AddSeed(idx);
 	}
 
 	try
 	{
-		confidenceConnected->Update();
+		confidence_connected->Update();
 	}
 	catch (itk::ExceptionObject)
 	{
 		return;
 	}
 
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = all_slices->isChecked();
-	dataSelection.sliceNr = activeslice;
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
+	iseg::DataSelection data_selection;
+	data_selection.allSlices = m_AllSlices->isChecked();
+	data_selection.sliceNr = m_Activeslice;
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this);
 
-	iseg::Paste<mask_type, input_type>(confidenceConnected->GetOutput(), target);
+	iseg::Paste<mask_type, input_type>(confidence_connected->GetOutput(), target);
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }

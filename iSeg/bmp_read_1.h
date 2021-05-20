@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -31,106 +31,106 @@ class SliceProviderInstaller;
 const unsigned int unvisited = 222222;
 const float f_tol = 0.00001f;
 
-typedef struct
+struct Basin
 {
-	unsigned g;
-	unsigned r;
-	unsigned l;
-} basin;
+	unsigned m_G;
+	unsigned m_R;
+	unsigned m_L;
+};
 
-typedef struct
+struct MergeEvent
 {
-	unsigned k;
-	unsigned a;
-	unsigned g;
-} merge_event;
+	unsigned m_K;
+	unsigned m_A;
+	unsigned m_G;
+};
 
-typedef struct
+struct WshedObj
 {
-	std::vector<basin> B;
-	std::vector<merge_event> M;
-	std::vector<Point> marks;
-} wshed_obj;
+	std::vector<Basin> m_B;
+	std::vector<MergeEvent> m_M;
+	std::vector<Point> m_Marks;
+};
 
-class bmphandler
+class Bmphandler
 {
 public:
-	bmphandler();
-	bmphandler(const bmphandler& object);
-	~bmphandler();
+	Bmphandler();
+	Bmphandler(const Bmphandler& object);
+	~Bmphandler();
 
-	float* copy_work();
-	float* copy_bmp();
-	tissues_size_t* copy_tissue(tissuelayers_size_t idx);
-	void copy_work(float* output);
-	void copy_bmp(float* output);
-	void copy_tissue(tissuelayers_size_t idx, tissues_size_t* output);
-	float* return_bmp();
-	const float* return_bmp() const;
-	float* return_work();
-	const float* return_work() const;
-	tissues_size_t* return_tissues(tissuelayers_size_t idx);
-	const tissues_size_t* return_tissues(tissuelayers_size_t idx) const;
-	float* return_help();
-	float** return_bmpfield();
-	float** return_workfield();
-	tissues_size_t** return_tissuefield(tissuelayers_size_t idx);
+	float* CopyWork();
+	float* CopyBmp();
+	tissues_size_t* CopyTissue(tissuelayers_size_t idx);
+	void CopyWork(float* output);
+	void CopyBmp(float* output);
+	void CopyTissue(tissuelayers_size_t idx, tissues_size_t* output);
+	float* ReturnBmp();
+	const float* ReturnBmp() const;
+	float* ReturnWork();
+	const float* ReturnWork() const;
+	tissues_size_t* ReturnTissues(tissuelayers_size_t idx);
+	const tissues_size_t* ReturnTissues(tissuelayers_size_t idx) const;
+	float* ReturnHelp();
+	float** ReturnBmpfield();
+	float** ReturnWorkfield();
+	tissues_size_t** ReturnTissuefield(tissuelayers_size_t idx);
 
-	std::vector<Mark>* return_marks();
-	void copy2marks(std::vector<Mark>* marks1);
-	void get_add_labels(std::vector<Mark>* labels);
-	void get_labels(std::vector<Mark>* labels);
-	void clear_tissue(tissuelayers_size_t idx);
-	bool has_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
-	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override);
-	void add2tissue_connected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override);
-	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f, bool override);
-	void add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, bool* mask, bool override);
-	void add2tissue_thresh(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
-	void subtract_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
-	void subtract_tissue_connected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
-	void subtract_tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f);
-	void change2mask_connectedtissue(tissuelayers_size_t idx, bool* mask, Point p, bool addorsub);
-	void change2mask_connectedwork(bool* mask, Point p, bool addorsub);
-	void tissue2work(tissuelayers_size_t idx, const std::vector<float>& mask);
-	void tissue2work(tissuelayers_size_t idx);
-	void work2tissue(tissuelayers_size_t idx);
-	void cleartissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
-	void cleartissues(tissuelayers_size_t idx);
-	void cleartissuesall();
-	void cap_tissue(tissues_size_t maxval);
-	void set_bmp(float* bits, unsigned char mode);
-	void set_work(float* bits, unsigned char mode);
-	void set_tissue(tissuelayers_size_t idx, tissues_size_t* bits);
-	float* swap_bmp_pointer(float* bits);
-	float* swap_work_pointer(float* bits);
-	tissues_size_t* swap_tissues_pointer(tissuelayers_size_t idx, tissues_size_t* bits);
-	void copy2bmp(float* bits, unsigned char mode);
-	void copy2work(float* bits, unsigned char mode);
-	void copy2work(float* bits, bool* mask, unsigned char mode);
-	void copy2tissue(tissuelayers_size_t idx, tissues_size_t* bits);
-	void copy2tissue(tissuelayers_size_t idx, tissues_size_t* bits, bool* mask);
-	void copyfrombmp(float* bits);
-	void copyfromwork(float* bits);
-	void copyfromtissue(tissuelayers_size_t idx, tissues_size_t* bits);
+	std::vector<Mark>* ReturnMarks();
+	void Copy2marks(std::vector<Mark>* marks1);
+	void GetAddLabels(std::vector<Mark>* labels);
+	void GetLabels(std::vector<Mark>* labels);
+	void ClearTissue(tissuelayers_size_t idx);
+	bool HasTissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
+	void Add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override);
+	void Add2tissueConnected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p, bool override);
+	void Add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f, bool override);
+	void Add2tissue(tissuelayers_size_t idx, tissues_size_t tissuetype, bool* mask, bool override);
+	void Add2tissueThresh(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
+	void SubtractTissue(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
+	void SubtractTissueConnected(tissuelayers_size_t idx, tissues_size_t tissuetype, Point p);
+	void SubtractTissue(tissuelayers_size_t idx, tissues_size_t tissuetype, float f);
+	void Change2maskConnectedtissue(tissuelayers_size_t idx, bool* mask, Point p, bool addorsub);
+	void Change2maskConnectedwork(bool* mask, Point p, bool addorsub);
+	void Tissue2work(tissuelayers_size_t idx, const std::vector<float>& mask);
+	void Tissue2work(tissuelayers_size_t idx);
+	void Work2tissue(tissuelayers_size_t idx);
+	void Cleartissue(tissuelayers_size_t idx, tissues_size_t tissuetype);
+	void Cleartissues(tissuelayers_size_t idx);
+	void Cleartissuesall();
+	void CapTissue(tissues_size_t maxval);
+	void SetBmp(float* bits, unsigned char mode);
+	void SetWork(float* bits, unsigned char mode);
+	void SetTissue(tissuelayers_size_t idx, tissues_size_t* bits);
+	float* SwapBmpPointer(float* bits);
+	float* SwapWorkPointer(float* bits);
+	tissues_size_t* SwapTissuesPointer(tissuelayers_size_t idx, tissues_size_t* bits);
+	void Copy2bmp(float* bits, unsigned char mode);
+	void Copy2work(float* bits, unsigned char mode);
+	void Copy2work(float* bits, bool* mask, unsigned char mode);
+	void Copy2tissue(tissuelayers_size_t idx, tissues_size_t* bits);
+	void Copy2tissue(tissuelayers_size_t idx, tissues_size_t* bits, bool* mask);
+	void Copyfrombmp(float* bits);
+	void Copyfromwork(float* bits);
+	void Copyfromtissue(tissuelayers_size_t idx, tissues_size_t* bits);
 #ifdef TISSUES_SIZE_TYPEDEF
-	void copyfromtissue(tissuelayers_size_t idx, unsigned char* bits);
+	void Copyfromtissue(tissuelayers_size_t idx, unsigned char* bits);
 #endif // TISSUES_SIZE_TYPEDEF
-	void copyfromtissuepadded(tissuelayers_size_t idx, tissues_size_t* bits, unsigned short padding);
-	void clear_bmp();
-	void clear_work();
-	void bmp_sum();
-	void bmp_add(float f);
-	void bmp_diff();
-	void bmp_mult();
-	void bmp_mult(float f);
-	void bmp_abs();
-	void bmp_neg();
-	void bmp_overlay(float alpha);
-	void transparent_add(float* pict2);
-	void newbmp(unsigned short width1, unsigned short height1, bool init = true);
-	void newbmp(unsigned short width1, unsigned short height1, float* bits);
-	void freebmp();
+	void Copyfromtissuepadded(tissuelayers_size_t idx, tissues_size_t* bits, unsigned short padding);
+	void ClearBmp();
+	void ClearWork();
+	void BmpSum();
+	void BmpAdd(float f);
+	void BmpDiff();
+	void BmpMult();
+	void BmpMult(float f);
+	void BmpAbs();
+	void BmpNeg();
+	void BmpOverlay(float alpha);
+	void TransparentAdd(float* pict2);
+	void Newbmp(unsigned short width1, unsigned short height1, bool init = true);
+	void Newbmp(unsigned short width1, unsigned short height1, float* bits);
+	void Freebmp();
 	static int CheckBMPDepth(const char* filename);
 	void SetConverterFactors(int redFactor, int greenFactor, int blueFactor);
 	int LoadDIBitmap(const char* filename);
@@ -147,319 +147,276 @@ public:
 	bool LoadDICOM(const char* filename, Point p, unsigned short dx, unsigned short dy);
 	bool ReloadDICOM(const char* filename);
 	bool ReloadDICOM(const char* filename, Point p);
-	FILE* save_proj(FILE* fp, bool inclpics = true);
-	FILE* save_stack(FILE* fp);
-	FILE* load_proj(FILE* fp, int tissuesVersion, bool inclpics = true, bool init = true);
-	FILE* load_stack(FILE* fp);
+	FILE* SaveProj(FILE* fp, bool inclpics = true);
+	FILE* SaveStack(FILE* fp) const;
+	FILE* LoadProj(FILE* fp, int tissuesVersion, bool inclpics = true, bool init = true);
+	FILE* LoadStack(FILE* fp);
 	int SaveDIBitmap(const char* filename);
 	int SaveWorkBitmap(const char* filename);
 	int SaveTissueBitmap(tissuelayers_size_t idx, const char* filename);
-	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-			unsigned bitdepth, unsigned short slicenr);
-	int ReadRaw(const char* filename, short unsigned w, short unsigned h,
-			unsigned bitdepth, unsigned short slicenr, Point p,
-			unsigned short dx, unsigned short dy);
+	int ReadRaw(const char* filename, short unsigned w, short unsigned h, unsigned bitdepth, unsigned short slicenr);
+	int ReadRaw(const char* filename, short unsigned w, short unsigned h, unsigned bitdepth, unsigned short slicenr, Point p, unsigned short dx, unsigned short dy);
 	int ReloadRaw(const char* filename, unsigned bitdepth, unsigned slicenr);
-	int ReloadRaw(const char* filename, short unsigned w, short unsigned h,
-			unsigned bitdepth, unsigned slicenr, Point p);
-	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-			unsigned short slicenr);
-	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h,
-			unsigned short slicenr, Point p, unsigned short dx,
-			unsigned short dy);
+	int ReloadRaw(const char* filename, short unsigned w, short unsigned h, unsigned bitdepth, unsigned slicenr, Point p);
+	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h, unsigned short slicenr);
+	int ReadRawFloat(const char* filename, short unsigned w, short unsigned h, unsigned short slicenr, Point p, unsigned short dx, unsigned short dy);
 	int ReloadRawFloat(const char* filename, unsigned slicenr);
-	static float* ReadRawFloat(const char* filename, unsigned slicenr,
-			unsigned int area);
-	int ReloadRawFloat(const char* filename, short unsigned w, short unsigned h,
-			unsigned slicenr, Point p);
-	int ReloadRawTissues(const char* filename, unsigned bitdepth,
-			unsigned slicenr);
-	int ReloadRawTissues(const char* filename, short unsigned w,
-			short unsigned h, unsigned bitdepth, unsigned slicenr,
-			Point p);
+	static float* ReadRawFloat(const char* filename, unsigned slicenr, unsigned int area);
+	int ReloadRawFloat(const char* filename, short unsigned w, short unsigned h, unsigned slicenr, Point p);
+	int ReloadRawTissues(const char* filename, unsigned bitdepth, unsigned slicenr);
+	int ReloadRawTissues(const char* filename, short unsigned w, short unsigned h, unsigned bitdepth, unsigned slicenr, Point p);
 	int SaveBmpRaw(const char* filename);
 	int SaveWorkRaw(const char* filename);
 	int SaveTissueRaw(tissuelayers_size_t idx, const char* filename);
 	int ReadAvw(const char* filename, short unsigned i);
-	void work2bmp();
-	void bmp2work();
-	void swap_bmpwork();
-	void swap_bmphelp();
-	void swap_workhelp();
-	unsigned int make_histogram(bool includeoutofrange);
-	unsigned int make_histogram(float* mask, float f, bool includeoutofrange);
-	unsigned int make_histogram(Point p, unsigned short dx, unsigned short dy, bool includeoutofrange);
-	unsigned int* return_histogram();
-	float* find_modal(unsigned int thresh1, float thresh2);
-	void print_info();
-	void print_histogram();
-	unsigned int return_area();
-	unsigned int return_width();
-	unsigned int return_height();
-	void threshold(float* thresholds);
-	void threshold(float* thresholds, Point p, unsigned short dx, unsigned short dy);
-	void convolute(float* mask, unsigned short direction); // x: 0, y: 1, xy: 2
-	void scale_colors(Pair p);
-	void crop_colors();
-	void get_range(Pair* pp);
-	void get_rangetissue(tissuelayers_size_t idx, tissues_size_t* pp);
-	void get_bmprange(Pair* pp);
-	void gaussian(float sigma);
-	void average(unsigned short n);
-	void laplacian();
-	void laplacian1();
-	void sobel();
-	void sobel_finer();
-	void sobelxy(float** sobelx, float** sobely);
-	void median_interquartile(bool median);
-	void median_interquartile(float* median, float* iq);
-	void sigmafilter(float sigma, unsigned short nx, unsigned short ny);
-	void compacthist();
-	void moment_line();
-	void gauss_line(float sigma);
-	void gauss_sharpen(float sigma);
-	void canny_line(float sigma, float thresh_low, float thresh_high);
-	void subthreshold(int n1, int n2, unsigned int thresh1, float thresh2, float sigma);
-	void convolute_hist(float* mask);
-	void gaussian_hist(float sigma);
-	float* direction_map(float* sobelx, float* sobely);
-	void nonmaximum_supr(float* direct_map);
-	void hysteretic(float thresh_low, float thresh_high, bool connectivity, float set_to);
-	void hysteretic(float thresh_low, float thresh_high, bool connectivity, float* mask, float f, float set_to);
-	void double_hysteretic(float thresh_low_l, float thresh_low_h, float thresh_high_l, float thresh_high_h, bool connectivity, float set_to);
-	void double_hysteretic(float thresh_low_l, float thresh_low_h, float thresh_high_l, float thresh_high_h, bool connectivity, float* mask, float f, float set_to);
-	void thresholded_growing(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to);
-	void thresholded_growing(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to, std::vector<Point>* limits1);
-	void thresholded_growinglimit(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to);
-	void thresholded_growing(Point p, float threshfactor_low, float threshfactor_high, bool connectivity, float set_to, Pair* tp);
-	void thresholded_growing(float thresh_low, float thresh_high, bool connectivity, float* mask, float f, float set_to);
-	void distance_map(bool connectivity);
-	void distance_map(bool connectivity, float f, short unsigned levlset); //0:outside,1:inside,2:both
-	void dead_reckoning();
-	unsigned* dead_reckoning(float f);
-	unsigned* dead_reckoning_squared(float f);
-	void IFT_distance1(float f);
-	void erosion(int n, bool connectivity);
-	void erosion1(int n, bool connectivity);
-	void dilation(int n, bool connectivity);
-	void closure(int n, bool connectivity);
-	void open(int n, bool connectivity);
-	void erasework(bool* mask);
-	void erasetissue(tissuelayers_size_t idx, bool* mask);
-	void floodwork(bool* mask);
-	void floodtissue(tissuelayers_size_t idx, bool* mask);
-	void mark_border(bool connectivity);
-	void aniso_diff(float dt, int n, float (*f)(float, float), float k, float restraint);
-	void cont_anisodiff(float dt, int n, float (*f)(float, float), float k, float restraint);
-	unsigned* watershed(bool connectivity);
-	unsigned* watershed_sobel(bool connectivity);
-	void construct_regions(unsigned h, unsigned* wshed);
-	void add_mark(Point p, unsigned label, std::string str = "");
-	bool remove_mark(Point p, unsigned radius);
-	void clear_marks();
-	void n_moment(short unsigned n, short unsigned p);
-	void n_moment_sigma(short unsigned n, short unsigned p, float sigma);
-	void zero_crossings(bool connectivity);
-	void zero_crossings(float thresh, bool connectivity);
-	void laplacian_zero(float sigma, float thresh, bool connectivity);
-	void to_bmpgrey(float* p_bits);
-	void connected_components(bool connectivity);
-	void connected_components(bool connectivity, std::set<float>& components);
-	void fill_gaps(short unsigned n, bool connectivity);
-	void fill_gapstissue(tissuelayers_size_t idx, short unsigned n, bool connectivity);
-	void wshed2work(unsigned* Y);
-	void labels2work(unsigned* Y, unsigned lnr);
+	void Work2bmp();
+	void Bmp2work();
+	void SwapBmpwork();
+	void SwapBmphelp();
+	void SwapWorkhelp();
+	unsigned int MakeHistogram(bool includeoutofrange);
+	unsigned int MakeHistogram(float* mask, float f, bool includeoutofrange);
+	unsigned int MakeHistogram(Point p, unsigned short dx, unsigned short dy, bool includeoutofrange);
+	unsigned int* ReturnHistogram();
+	float* FindModal(unsigned int thresh1, float thresh2);
+	void PrintInfo() const;
+	void PrintHistogram();
+	unsigned int ReturnArea() const;
+	unsigned int ReturnWidth() const;
+	unsigned int ReturnHeight() const;
+	void Threshold(float* thresholds);
+	void Threshold(float* thresholds, Point p, unsigned short dx, unsigned short dy);
+	void Convolute(float* mask, unsigned short direction); // x: 0, y: 1, xy: 2
+	void ScaleColors(Pair p);
+	void CropColors();
+	void GetRange(Pair* pp);
+	void GetRangetissue(tissuelayers_size_t idx, tissues_size_t* pp);
+	void GetBmprange(Pair* pp);
+	void Gaussian(float sigma);
+	void Average(unsigned short n);
+	void Laplacian();
+	void Laplacian1();
+	void Sobel();
+	void SobelFiner();
+	void Sobelxy(float** sobelx, float** sobely);
+	void MedianInterquartile(bool median);
+	void MedianInterquartile(float* median, float* iq);
+	void Sigmafilter(float sigma, unsigned short nx, unsigned short ny);
+	void Compacthist();
+	void MomentLine();
+	void GaussLine(float sigma);
+	void GaussSharpen(float sigma);
+	void CannyLine(float sigma, float thresh_low, float thresh_high);
+	void Subthreshold(int n1, int n2, unsigned int thresh1, float thresh2, float sigma);
+	void ConvoluteHist(float* mask);
+	void GaussianHist(float sigma);
+	float* DirectionMap(float* sobelx, float* sobely);
+	void NonmaximumSupr(float* direct_map);
+	void Hysteretic(float thresh_low, float thresh_high, bool connectivity, float set_to);
+	void Hysteretic(float thresh_low, float thresh_high, bool connectivity, float* mask, float f, float set_to);
+	void DoubleHysteretic(float thresh_low_l, float thresh_low_h, float thresh_high_l, float thresh_high_h, bool connectivity, float set_to);
+	void DoubleHysteretic(float thresh_low_l, float thresh_low_h, float thresh_high_l, float thresh_high_h, bool connectivity, float* mask, float f, float set_to);
+	void ThresholdedGrowing(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to);
+	void ThresholdedGrowing(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to, std::vector<Point>* limits1);
+	void ThresholdedGrowinglimit(Point p, float thresh_low, float thresh_high, bool connectivity, float set_to);
+	void ThresholdedGrowing(Point p, float threshfactor_low, float threshfactor_high, bool connectivity, float set_to, Pair* tp);
+	void ThresholdedGrowing(float thresh_low, float thresh_high, bool connectivity, float* mask, float f, float set_to);
+	void DistanceMap(bool connectivity);
+	void DistanceMap(bool connectivity, float f, short unsigned levlset); //0:outside,1:inside,2:both
+	void DeadReckoning();
+	unsigned* DeadReckoning(float f);
+	unsigned* DeadReckoningSquared(float f);
+	void IftDistance1(float f);
+	void Erosion(int n, bool connectivity);
+	void Erosion1(int n, bool connectivity);
+	void Dilation(int n, bool connectivity);
+	void Closure(int n, bool connectivity);
+	void Open(int n, bool connectivity);
+	void Erasework(bool* mask);
+	void Erasetissue(tissuelayers_size_t idx, bool* mask);
+	void Floodwork(bool* mask);
+	void Floodtissue(tissuelayers_size_t idx, bool* mask);
+	void MarkBorder(bool connectivity);
+	void AnisoDiff(float dt, int n, float (*f)(float, float), float k, float restraint);
+	void ContAnisodiff(float dt, int n, float (*f)(float, float), float k, float restraint);
+	unsigned* Watershed(bool connectivity);
+	unsigned* WatershedSobel(bool connectivity);
+	void ConstructRegions(unsigned h, unsigned* wshed);
+	void AddMark(Point p, unsigned label, std::string str = "");
+	bool RemoveMark(Point p, unsigned radius);
+	void ClearMarks();
+	void NMoment(short unsigned n, short unsigned p);
+	void NMomentSigma(short unsigned n, short unsigned p, float sigma);
+	void ZeroCrossings(bool connectivity);
+	void ZeroCrossings(float thresh, bool connectivity);
+	void LaplacianZero(float sigma, float thresh, bool connectivity);
+	void ToBmpgrey(float* p_bits) const;
+	void ConnectedComponents(bool connectivity);
+	void ConnectedComponents(bool connectivity, std::set<float>& components);
+	void FillGaps(short unsigned n, bool connectivity);
+	void FillGapstissue(tissuelayers_size_t idx, short unsigned n, bool connectivity);
+	void Wshed2work(unsigned* Y);
+	void Labels2work(unsigned* Y, unsigned lnr);
 	//		change_island, remove_island s. 3D-slicer
 	//		registration: manual, mutual information s. 3D-slicer
-	void get_tissuecontours(tissuelayers_size_t idx, tissues_size_t f,
-			std::vector<std::vector<Point>>* outer_line,
-			std::vector<std::vector<Point>>* inner_line,
-			int minsize);
-	void get_tissuecontours2_xmirrored(
-			tissuelayers_size_t idx, tissues_size_t f,
-			std::vector<std::vector<Point>>* outer_line,
-			std::vector<std::vector<Point>>* inner_line, int minsize);
-	void get_tissuecontours2_xmirrored(
-			tissuelayers_size_t idx, tissues_size_t f,
-			std::vector<std::vector<Point>>* outer_line,
-			std::vector<std::vector<Point>>* inner_line, int minsize,
-			float disttol);
-	void get_contours(float f, std::vector<std::vector<Point>>* outer_line,
-			std::vector<std::vector<Point>>* inner_line, int minsize);
-	void get_contours(Point p, std::vector<std::vector<Point>>* outer_line,
-			std::vector<std::vector<Point>>* inner_line, int minsize);
-	void load_line(std::vector<Point>* vec_pt);
-	void presimplify_line(float d);
-	void dougpeuck_line(float epsilon);
-	void plot_line();
-	float bmp_pt(Point p);
-	float work_pt(Point p);
-	tissues_size_t tissues_pt(tissuelayers_size_t idx, Point p);
-	void set_work_pt(Point p, float f);
-	void set_bmp_pt(Point p, float f);
-	void set_tissue_pt(tissuelayers_size_t idx, Point p, tissues_size_t f);
-	void rgIFT(float* lb_map, float thresh);
-	ImageForestingTransformRegionGrowing* IFTrg_init(float* lb_map);
-	ImageForestingTransformLivewire* livewireinit(Point p);
-	void fill_contour(std::vector<Point>* vp, bool continuous);
-	void adaptive_fuzzy(Point p, float m1, float s1, float s2, float thresh);
-	void fast_marching(Point p, float sigma, float thresh);
-	ImageForestingTransformFastMarching* fastmarching_init(Point p, float sigma, float thresh);
-	void classify(short nrclasses, short dim, float** bits, float* weights, float* centers, float maxdist);
-	void em(short nrtissues, short dim, float** bits, float* weights, unsigned int iternr, unsigned int converge);
-	void kmeans(short nrtissues, short dim, float** bits, float* weights, unsigned int iternr, unsigned int converge);
-	void kmeans_mhd(short nrtissues, short dim,
-			std::vector<std::string> mhdfiles, unsigned short slicenr,
-			float* weights, unsigned int iternr, unsigned int converge);
-	void kmeans_png(short nrtissues, short dim,
-			std::vector<std::string> pngfiles,
-			std::vector<int> exctractChannel, unsigned short slicenr,
-			float* weights, unsigned int iternr, unsigned int converge,
-			const std::string initCentersFile = "");
-	void gamma_mhd(short nrtissues, short dim,
-			std::vector<std::string> mhdfiles, unsigned short slicenr,
-			float* weights, float** centers, float* tol_f, float* tol_d,
-			Pair pixelsize);
-	void cannylevelset(float* initlev, float f, float sigma, float thresh_low,
-			float thresh_high, float epsilon, float stepsize,
-			unsigned nrsteps, unsigned reinitfreq);
-	void threshlevelset(float thresh_low, float thresh_high, float epsilon,
-			float stepsize, unsigned nrsteps, unsigned reinitfreq);
-	float extract_feature(Point p1, Point p2);
-	float extract_featurework(Point p1, Point p2);
-	float return_stdev();
-	Pair return_extrema();
-	unsigned pushstack_bmp();
-	unsigned pushstack_work();
-	unsigned pushstack_help();
-	unsigned pushstack_tissue(tissuelayers_size_t idx, tissues_size_t tissuenr);
-	bool savestack(unsigned i, const char* filename);
-	unsigned loadstack(const char* filename);
-	void removestack(unsigned i);
-	float* getstack(unsigned i, unsigned char& mode);
-	void getstack_bmp(unsigned i);
-	void getstack_work(unsigned i);
-	void getstack_help(unsigned i);
-	void getstack_tissue(tissuelayers_size_t idx, unsigned i, tissues_size_t tissuenr, bool override);
-	void popstack_bmp();
-	void popstack_work();
-	void popstack_help();
-	void clear_stack();
-	bool isloaded();
-	void correct_outline(float f, std::vector<Point>* newline);
-	void correct_outlinetissue(tissuelayers_size_t idx, tissues_size_t f1, std::vector<Point>* newline);
-	void brush(float f, Point p, int radius, bool draw);
-	void brush(float f, Point p, float radius, float dx, float dy, bool draw);
-	void brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p, int radius, bool draw, tissues_size_t f1);
-	void brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p, float radius, float dx, float dy, bool draw, tissues_size_t f1);
-	void fill_holes(float f, int minsize);
-	void fill_holestissue(tissuelayers_size_t idx, tissues_size_t f, int minsize);
-	void remove_islands(float f, int minsize);
-	void remove_islandstissue(tissuelayers_size_t idx, tissues_size_t f, int minsize);
-	float add_skin(unsigned i);
-	void add_skin(unsigned i, float setto);
-	void add_skintissue(tissuelayers_size_t idx, unsigned i4, tissues_size_t setto);
-	float add_skin_outside(unsigned i);
-	void add_skin_outside(unsigned i, float setto);
-	void add_skintissue_outside(tissuelayers_size_t idx, unsigned i4, tissues_size_t setto);
-	bool value_at_boundary(float value);
-	bool tissuevalue_at_boundary(tissuelayers_size_t idx, tissues_size_t value);
-	void fill_skin(int thicknessX, int thicknessY, tissues_size_t backgroundID, tissues_size_t skinID);
-	void flood_exterior(float setto);
-	void flood_exteriortissue(tissuelayers_size_t idx, tissues_size_t setto);
-	void fill_unassigned(float setto);
-	void fill_unassigned();
-	void fill_unassignedtissue(tissuelayers_size_t idx, tissues_size_t setto);
-	void add_vm(std::vector<Mark>* vm1);
-	void clear_vvm();
-	bool del_vm(Point p, short radius);
-	std::vector<std::vector<Mark>>* return_vvm();
-	unsigned return_vvmmaxim();
-	void copy2vvm(std::vector<std::vector<Mark>>* vvm1);
-	void add_limit(std::vector<Point>* vp1);
-	void clear_limits();
-	bool del_limit(Point p, short radius);
-	std::vector<std::vector<Point>>* return_limits();
-	void copy2limits(std::vector<std::vector<Point>>* limits1);
-	void map_tissue_indices(const std::vector<tissues_size_t>& indexMap);
-	void remove_tissue(tissues_size_t tissuenr);
-	void group_tissues(tissuelayers_size_t idx,
-			std::vector<tissues_size_t>& olds,
-			std::vector<tissues_size_t>& news);
-	unsigned char return_mode(bool bmporwork);
-	void set_mode(unsigned char mode, bool bmporwork);
-	bool print_amascii_slice(tissuelayers_size_t idx, std::ofstream& streamname);
-	bool print_vtkascii_slice(tissuelayers_size_t idx, std::ofstream& streamname);
-	bool print_vtkbinary_slice(tissuelayers_size_t idx, std::ofstream& streamname);
-	void shifttissue();
-	void shiftbmp();
-	unsigned long return_workpixelcount(float f);
-	unsigned long return_tissuepixelcount(tissuelayers_size_t idx, tissues_size_t c);
-	void swap(bmphandler& bmph);
-	bool get_extent(tissuelayers_size_t idx, tissues_size_t tissuenr, unsigned short extent[2][2]);
-	bool unwrap(float jumpratio, float range = 0, float shift = 0);
+	void GetTissuecontours(tissuelayers_size_t idx, tissues_size_t f, std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line, int minsize);
+	void GetTissuecontours2Xmirrored(tissuelayers_size_t idx, tissues_size_t f, std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line, int minsize);
+	void GetTissuecontours2Xmirrored(tissuelayers_size_t idx, tissues_size_t f, std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line, int minsize, float disttol);
+	void GetContours(float f, std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line, int minsize);
+	void GetContours(Point p, std::vector<std::vector<Point>>* outer_line, std::vector<std::vector<Point>>* inner_line, int minsize);
+	void LoadLine(std::vector<Point>* vec_pt);
+	void PresimplifyLine(float d);
+	void DougpeuckLine(float epsilon);
+	void PlotLine();
+	float BmpPt(Point p);
+	float WorkPt(Point p);
+	tissues_size_t TissuesPt(tissuelayers_size_t idx, Point p);
+	void SetWorkPt(Point p, float f);
+	void SetBmpPt(Point p, float f);
+	void SetTissuePt(tissuelayers_size_t idx, Point p, tissues_size_t f);
+	void RgIft(float* lb_map, float thresh);
+	ImageForestingTransformRegionGrowing* IfTrgInit(float* lb_map);
+	ImageForestingTransformLivewire* Livewireinit(Point p);
+	void FillContour(std::vector<Point>* vp, bool continuous);
+	void AdaptiveFuzzy(Point p, float m1, float s1, float s2, float thresh);
+	void FastMarching(Point p, float sigma, float thresh);
+	ImageForestingTransformFastMarching* FastmarchingInit(Point p, float sigma, float thresh);
+	void Classify(short nrclasses, short dim, float** bits, float* weights, float* centers, float maxdist);
+	void Em(short nrtissues, short dim, float** bits, float* weights, unsigned int iternr, unsigned int converge);
+	void Kmeans(short nrtissues, short dim, float** bits, float* weights, unsigned int iternr, unsigned int converge);
+	void KmeansMhd(short nrtissues, short dim, std::vector<std::string> mhdfiles, unsigned short slicenr, float* weights, unsigned int iternr, unsigned int converge);
+	void KmeansPng(short nrtissues, short dim, std::vector<std::string> pngfiles, std::vector<int> exctractChannel, unsigned short slicenr, float* weights, unsigned int iternr, unsigned int converge, const std::string initCentersFile = "");
+	void GammaMhd(short nrtissues, short dim, std::vector<std::string> mhdfiles, unsigned short slicenr, float* weights, float** centers, float* tol_f, float* tol_d, Pair pixelsize);
+	void Cannylevelset(float* initlev, float f, float sigma, float thresh_low, float thresh_high, float epsilon, float stepsize, unsigned nrsteps, unsigned reinitfreq);
+	void Threshlevelset(float thresh_low, float thresh_high, float epsilon, float stepsize, unsigned nrsteps, unsigned reinitfreq);
+	float ExtractFeature(Point p1, Point p2);
+	float ExtractFeaturework(Point p1, Point p2);
+	float ReturnStdev();
+	Pair ReturnExtrema();
+	unsigned PushstackBmp();
+	unsigned PushstackWork();
+	unsigned PushstackHelp();
+	unsigned PushstackTissue(tissuelayers_size_t idx, tissues_size_t tissuenr);
+	bool Savestack(unsigned i, const char* filename);
+	unsigned Loadstack(const char* filename);
+	void Removestack(unsigned i);
+	float* Getstack(unsigned i, unsigned char& mode);
+	void GetstackBmp(unsigned i);
+	void GetstackWork(unsigned i);
+	void GetstackHelp(unsigned i);
+	void GetstackTissue(tissuelayers_size_t idx, unsigned i, tissues_size_t tissuenr, bool override);
+	void PopstackBmp();
+	void PopstackWork();
+	void PopstackHelp();
+	void ClearStack();
+	bool Isloaded() const;
+	void CorrectOutline(float f, std::vector<Point>* newline);
+	void CorrectOutlinetissue(tissuelayers_size_t idx, tissues_size_t f1, std::vector<Point>* newline);
+	void Brush(float f, Point p, int radius, bool draw);
+	void Brush(float f, Point p, float radius, float dx, float dy, bool draw);
+	void Brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p, int radius, bool draw, tissues_size_t f1);
+	void Brushtissue(tissuelayers_size_t idx, tissues_size_t f, Point p, float radius, float dx, float dy, bool draw, tissues_size_t f1);
+	void FillHoles(float f, int minsize);
+	void FillHolestissue(tissuelayers_size_t idx, tissues_size_t f, int minsize);
+	void RemoveIslands(float f, int minsize);
+	void RemoveIslandstissue(tissuelayers_size_t idx, tissues_size_t f, int minsize);
+	float AddSkin(unsigned i);
+	void AddSkin(unsigned i, float setto);
+	void AddSkintissue(tissuelayers_size_t idx, unsigned i4, tissues_size_t setto);
+	float AddSkinOutside(unsigned i);
+	void AddSkinOutside(unsigned i, float setto);
+	void AddSkintissueOutside(tissuelayers_size_t idx, unsigned i4, tissues_size_t setto);
+	bool ValueAtBoundary(float value);
+	bool TissuevalueAtBoundary(tissuelayers_size_t idx, tissues_size_t value);
+	void FillSkin(int thicknessX, int thicknessY, tissues_size_t backgroundID, tissues_size_t skinID);
+	void FloodExterior(float setto);
+	void FloodExteriortissue(tissuelayers_size_t idx, tissues_size_t setto);
+	void FillUnassigned(float setto);
+	void FillUnassigned();
+	void FillUnassignedtissue(tissuelayers_size_t idx, tissues_size_t setto);
+	void AddVm(std::vector<Mark>* vm1);
+	void ClearVvm();
+	bool DelVm(Point p, short radius);
+	std::vector<std::vector<Mark>>* ReturnVvm();
+	unsigned ReturnVvmmaxim() const;
+	void Copy2vvm(std::vector<std::vector<Mark>>* vvm1);
+	void AddLimit(std::vector<Point>* vp1);
+	void ClearLimits();
+	bool DelLimit(Point p, short radius);
+	std::vector<std::vector<Point>>* ReturnLimits();
+	void Copy2limits(std::vector<std::vector<Point>>* limits1);
+	void MapTissueIndices(const std::vector<tissues_size_t>& indexMap);
+	void RemoveTissue(tissues_size_t tissuenr);
+	void GroupTissues(tissuelayers_size_t idx, std::vector<tissues_size_t>& olds, std::vector<tissues_size_t>& news);
+	unsigned char ReturnMode(bool bmporwork) const;
+	void SetMode(unsigned char mode, bool bmporwork);
+	bool PrintAmasciiSlice(tissuelayers_size_t idx, std::ofstream& streamname);
+	bool PrintVtkasciiSlice(tissuelayers_size_t idx, std::ofstream& streamname);
+	bool PrintVtkbinarySlice(tissuelayers_size_t idx, std::ofstream& streamname);
+	void Shifttissue();
+	void Shiftbmp();
+	unsigned long ReturnWorkpixelcount(float f);
+	unsigned long ReturnTissuepixelcount(tissuelayers_size_t idx, tissues_size_t c);
+	void Swap(Bmphandler& bmph);
+	bool GetExtent(tissuelayers_size_t idx, tissues_size_t tissuenr, unsigned short extent[2][2]);
+	bool Unwrap(float jumpratio, float range = 0, float shift = 0);
 
-	int ConvertImageTo8BitBMP(const char* filename, unsigned char*& bits_tmp);
-	int ConvertPNGImageTo8BitBMP(const char* filename,
-			unsigned char*& bits_tmp);
-	void SetRGBtoGrayScaleFactors(double newRedFactor, double newGreenFactor,
-			double newBlueFactor);
-	void mergetissue(tissues_size_t tissuetype, tissuelayers_size_t idx);
+	int ConvertImageTo8BitBMP(const char* filename, unsigned char*& bits_tmp) const;
+	int ConvertPNGImageTo8BitBMP(const char* filename, unsigned char*& bits_tmp) const;
+	void SetRGBtoGrayScaleFactors(double newRedFactor, double newGreenFactor, double newBlueFactor);
+	void Mergetissue(tissues_size_t tissuetype, tissuelayers_size_t idx);
 
 protected:
 	static std::list<unsigned> stackindex;
 	static unsigned stackcounter;
-	Contour contour;
-	std::vector<Mark> marks;
-	short unsigned width;
-	short unsigned height;
-	unsigned int area;
-	inline unsigned int pt2coord(Point p);
-	float* make_gaussfilter(float sigma, int n);
-	float* make_laplacianfilter();
-	unsigned deepest_con_bas(unsigned k);
-	void cond_merge(unsigned m, unsigned h);
-	unsigned label_lookup(unsigned i, unsigned* wshed);
-	int SaveDIBitmap(const char* filename, float* p_bits);
-	int SaveRaw(const char* filename, float* p_bits);
-	void bucketsort(std::vector<unsigned int>* sorted, float* p_bits);
-	void set_marker(unsigned* wshed);
-	float base_connection(float c, std::vector<float>* maps);
-	void hysteretic_growth(float* pict, std::vector<int>* s, unsigned short w,
-			unsigned short h, bool connectivity, float set_to);
-	void hysteretic_growth(float* pict, std::vector<int>* s, unsigned short w,
-			unsigned short h, bool connectivity, float set_to,
-			int nr);
+	Contour m_Contour;
+	std::vector<Mark> m_Marks;
+	short unsigned m_Width;
+	short unsigned m_Height;
+	unsigned int m_Area;
+	inline unsigned int Pt2coord(Point p) const;
+	float* MakeGaussfilter(float sigma, int n);
+	float* MakeLaplacianfilter();
+	unsigned DeepestConBas(unsigned k);
+	void CondMerge(unsigned m, unsigned h);
+	unsigned LabelLookup(unsigned i, unsigned* wshed);
+	int SaveDIBitmap(const char* filename, float* p_bits) const;
+	int SaveRaw(const char* filename, float* p_bits) const;
+	void Bucketsort(std::vector<unsigned int>* sorted, float* p_bits) const;
+	void SetMarker(unsigned* wshed);
+	float BaseConnection(float c, std::vector<float>* maps);
+	void HystereticGrowth(float* pict, std::vector<int>* s, unsigned short w, unsigned short h, bool connectivity, float set_to);
+	void HystereticGrowth(float* pict, std::vector<int>* s, unsigned short w, unsigned short h, bool connectivity, float set_to, int nr);
 	template<typename T, typename F>
-	void _brush(T* data, T f, Point p, int radius, bool draw, T f1, F);
+	void Brush(T* data, T f, Point p, int radius, bool draw, T f1, F);
 	template<typename T, typename F>
-	void _brush(T* data, T f, Point p, float radius, float dx, float dy, bool draw, T f1, F);
+	void Brush(T* data, T f, Point p, float radius, float dx, float dy, bool draw, T f1, F);
 
 private:
-	unsigned int histogram[256];
-	float* bmp_bits;
-	float* work_bits;
-	float* help_bits;
-	std::vector<tissues_size_t*> tissuelayers;
-	wshed_obj wshedobj;
-	bool bmp_is_grey;
-	bool work_is_grey;
-	bool loaded;
-	bool ownsliceprovider;
-	FeatureExtractor fextract;
+	unsigned int m_Histogram[256];
+	float* m_BmpBits;
+	float* m_WorkBits;
+	float* m_HelpBits;
+	std::vector<tissues_size_t*> m_Tissuelayers;
+	WshedObj m_Wshedobj;
+	bool m_BmpIsGrey;
+	bool m_WorkIsGrey;
+	bool m_Loaded;
+	bool m_Ownsliceprovider;
+	FeatureExtractor m_Fextract;
 	static std::list<float*> bits_stack;
 	static std::list<unsigned char> mode_stack;
-	SliceProvider* sliceprovide;
-	SliceProviderInstaller* sliceprovide_installer;
-	std::vector<std::vector<Mark>> vvm;
-	unsigned maxim_store;
-	std::vector<std::vector<Point>> limits;
-	unsigned char mode1;
-	unsigned char mode2;
+	SliceProvider* m_Sliceprovide;
+	SliceProviderInstaller* m_SliceprovideInstaller;
+	std::vector<std::vector<Mark>> m_Vvm;
+	unsigned m_MaximStore;
+	std::vector<std::vector<Point>> m_Limits;
+	unsigned char m_Mode1;
+	unsigned char m_Mode2;
 
-	double redFactor;
-	double greenFactor;
-	double blueFactor;
+	double m_RedFactor;
+	double m_GreenFactor;
+	double m_BlueFactor;
 };
 
 } // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,58 +15,58 @@
 
 namespace iseg {
 
-SliceProvider::SliceProvider(unsigned area1) { area = area1; }
+SliceProvider::SliceProvider(unsigned area1) { m_Area = area1; }
 
 SliceProvider::~SliceProvider()
 {
-	while (!slicestack.empty())
+	while (!m_Slicestack.empty())
 	{
-		free(slicestack.top());
-		slicestack.pop();
+		free(m_Slicestack.top());
+		m_Slicestack.pop();
 	}
 }
 
-float* SliceProvider::give_me()
+float* SliceProvider::GiveMe()
 {
-	if (slicestack.empty())
+	if (m_Slicestack.empty())
 	{
-		return (float*)malloc(sizeof(float) * area);
+		return (float*)malloc(sizeof(float) * m_Area);
 	}
 	else
 	{
-		float* result = slicestack.top();
-		slicestack.pop();
+		float* result = m_Slicestack.top();
+		m_Slicestack.pop();
 		return result;
 	}
 }
 
-void SliceProvider::take_back(float* slice)
+void SliceProvider::TakeBack(float* slice)
 {
 	if (slice != nullptr)
-		slicestack.push(slice);
+		m_Slicestack.push(slice);
 }
 
-void SliceProvider::merge(SliceProvider* sp)
+void SliceProvider::Merge(SliceProvider* sp)
 {
-	if (area == sp->return_area())
+	if (m_Area == sp->ReturnArea())
 	{
-		while (!slicestack.empty())
-			sp->take_back(give_me());
+		while (!m_Slicestack.empty())
+			sp->TakeBack(GiveMe());
 	}
 }
 
-unsigned SliceProvider::return_area() { return area; }
+unsigned SliceProvider::ReturnArea() const { return m_Area; }
 
-unsigned short SliceProvider::return_nrslices()
+unsigned short SliceProvider::ReturnNrslices()
 {
-	return (unsigned short)slicestack.size();
+	return (unsigned short)m_Slicestack.size();
 }
 
 SliceProviderInstaller* SliceProviderInstaller::inst = nullptr;
 
 unsigned short SliceProviderInstaller::counter = 0;
 
-SliceProviderInstaller* SliceProviderInstaller::getinst()
+SliceProviderInstaller* SliceProviderInstaller::Getinst()
 {
 	static Waechter w;
 	if (inst == nullptr)
@@ -76,50 +76,50 @@ SliceProviderInstaller* SliceProviderInstaller::getinst()
 	return inst;
 }
 
-void SliceProviderInstaller::return_instance()
+void SliceProviderInstaller::ReturnInstance()
 {
 	//	if(--counter==0) ~sliceprovider_installer();
 	//	if(--counter==0) delete this;
 	--counter;
 }
 
-bool SliceProviderInstaller::unused() { return counter == 0; }
+bool SliceProviderInstaller::Unused() { return counter == 0; }
 
-SliceProvider* SliceProviderInstaller::install(unsigned area1)
+SliceProvider* SliceProviderInstaller::Install(unsigned area1)
 {
-	auto it = splist.begin();
+	auto it = m_Splist.begin();
 
-	while (it != splist.end() && (it->area != area1))
+	while (it != m_Splist.end() && (it->m_Area != area1))
 		it++;
 
-	if (it != splist.end())
+	if (it != m_Splist.end())
 	{
-		it->installnr++;
-		return it->spp;
+		it->m_Installnr++;
+		return it->m_Spp;
 	}
 	else
 	{
-		spobj spobj1;
-		spobj1.installnr = 1;
-		spobj1.area = area1;
-		spobj1.spp = new SliceProvider(area1);
-		splist.push_back(spobj1);
-		return spobj1.spp;
+		Spobj spobj1;
+		spobj1.m_Installnr = 1;
+		spobj1.m_Area = area1;
+		spobj1.m_Spp = new SliceProvider(area1);
+		m_Splist.push_back(spobj1);
+		return spobj1.m_Spp;
 	}
 }
 
-void SliceProviderInstaller::uninstall(SliceProvider* sp)
+void SliceProviderInstaller::Uninstall(SliceProvider* sp)
 {
-	auto it = splist.begin();
-	while (it != splist.end() && (it->area != sp->return_area()))
+	auto it = m_Splist.begin();
+	while (it != m_Splist.end() && (it->m_Area != sp->ReturnArea()))
 		it++;
 
-	if (it != splist.end())
+	if (it != m_Splist.end())
 	{
-		if (--(it->installnr) == 0 && delete_unused)
+		if (--(it->m_Installnr) == 0 && m_DeleteUnused)
 		{
-			delete (it->spp);
-			splist.erase(it);
+			delete (it->m_Spp);
+			m_Splist.erase(it);
 			return;
 		}
 	}
@@ -127,27 +127,27 @@ void SliceProviderInstaller::uninstall(SliceProvider* sp)
 
 SliceProviderInstaller::~SliceProviderInstaller()
 {
-	for (auto it = splist.begin(); it != splist.end(); it++)
+	for (auto it = m_Splist.begin(); it != m_Splist.end(); it++)
 	{
-		free(it->spp);
+		free(it->m_Spp);
 	}
 
 	inst = nullptr;
 }
 
-void SliceProviderInstaller::report() const
+void SliceProviderInstaller::Report() const
 {
 	std::map<int, int> area_counts;
 	std::map<int, int> area_counts_empty;
-	for (auto sp : splist)
+	for (auto sp : m_Splist)
 	{
-		if (sp.installnr)
+		if (sp.m_Installnr)
 		{
-			area_counts[sp.area]++;
+			area_counts[sp.m_Area]++;
 		}
-		else if (sp.spp)
+		else if (sp.m_Spp)
 		{
-			area_counts_empty[sp.area] += sp.spp->return_nrslices();
+			area_counts_empty[sp.m_Area] += sp.m_Spp->ReturnNrslices();
 		}
 	}
 

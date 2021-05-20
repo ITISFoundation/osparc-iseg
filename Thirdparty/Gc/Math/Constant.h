@@ -30,19 +30,16 @@
 
 #include "../Type.h"
 
-namespace Gc
-{
-    namespace Math
-    {
-        /** Mathematical constants. */
-        namespace Constant
-        {
-            /** \f$ \pi \f$ number. */
-            const Float64 Pi = 3.14159265358979323846;
-            /** Euler number. */
-            const Float64 E = 2.7182818284590452354;
-        }
-    }
+namespace Gc {
+namespace Math {
+/** Mathematical constants. */
+namespace Constant {
+/** \f$ \pi \f$ number. */
+const Float64 Pi = 3.14159265358979323846;
+/** Euler number. */
+const Float64 E = 2.7182818284590452354;
+} // namespace Constant
 }
+} // namespace Gc::Math
 
 #endif

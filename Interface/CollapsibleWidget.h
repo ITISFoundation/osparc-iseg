@@ -22,17 +22,17 @@ class Spoiler : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit Spoiler(const QString& title = "", const int animationDuration = 300, QWidget* parent = 0);
-	void setContentLayout(QLayout* contentLayout);
+	explicit Spoiler(const QString& title = "", const int animationDuration = 300, QWidget* parent = nullptr);
+	void SetContentLayout(QLayout* contentLayout);
 
 private slots:
-	void onCollapse(const bool checked);
+	void OnCollapse(bool checked);
 
 private:
-	QGridLayout mainLayout;
-	QToolButton toggleButton;
-	QFrame headerLine;
-	QParallelAnimationGroup toggleAnimation;
-	QScrollArea contentArea;
-	int animationDuration{300};
+	QGridLayout m_MainLayout;
+	QToolButton m_ToggleButton;
+	QFrame m_HeaderLine;
+	QParallelAnimationGroup m_ToggleAnimation;
+	QScrollArea m_ContentArea;
+	int m_AnimationDuration{300};
 };

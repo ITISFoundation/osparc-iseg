@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,81 +15,81 @@ namespace iseg {
 
 Contour::Contour()
 {
-	n = 0;
+	m_N = 0;
 }
 
 Contour::Contour(std::vector<Point>* Pt_vec)
 {
-	n = (unsigned)(*Pt_vec).size();
-	plist.clear();
-	plist = (*Pt_vec);
+	m_N = (unsigned)(*Pt_vec).size();
+	m_Plist.clear();
+	m_Plist = (*Pt_vec);
 }
 
-void Contour::clear()
+void Contour::Clear()
 {
-	plist.clear();
-	n = 0;
+	m_Plist.clear();
+	m_N = 0;
 }
 
-void Contour::add_point(Point p)
+void Contour::AddPoint(Point p)
 {
-	plist.push_back(p);
+	m_Plist.push_back(p);
 }
 
-void Contour::add_points(std::vector<Point>* Pt_vec)
+void Contour::AddPoints(std::vector<Point>* Pt_vec)
 {
 	for (auto p : *Pt_vec)
-		plist.push_back(p);
-	n = (unsigned)plist.size();
+		m_Plist.push_back(p);
+	m_N = (unsigned)m_Plist.size();
 }
 
-void Contour::print_contour()
+void Contour::PrintContour()
 {
-	for (unsigned int i = 0; i < n; i++)
-		std::cout << plist[i].px << ":" << plist[i].py << " ";
+	for (unsigned int i = 0; i < m_N; i++)
+		std::cout << m_Plist[i].px << ":" << m_Plist[i].py << " ";
 	std::cout << std::endl;
 }
 
-void Contour::doug_peuck(float epsilon, bool /*closed*/)
+void Contour::DougPeuck(float epsilon, bool /*closed*/)
 {
-	if (n > 2)
+	if (m_N > 2)
 	{
 		std::vector<bool> v1;
-		v1.resize(n);
+		v1.resize(m_N);
 
-		for (unsigned int i = 0; i < n; i++)
+		for (unsigned int i = 0; i < m_N; i++)
 			v1[i] = false;
 		v1[0] = true;
-		v1[n - 1] = true;
-		doug_peuck_sub(epsilon, 0, n - 1, &v1);
+		v1[m_N - 1] = true;
+		DougPeuckSub(epsilon, 0, m_N - 1, &v1);
 
-		auto it = plist.begin();
-		for (unsigned int i = 0; i < n; i++)
+		auto it = m_Plist.begin();
+		for (unsigned int i = 0; i < m_N; i++)
 		{
 			if (!v1[i])
-				it = plist.erase(it);
+				it = m_Plist.erase(it);
 			else
 				it++;
 		}
 
-		n = (unsigned)plist.size();
+		m_N = (unsigned)m_Plist.size();
 	}
 }
 
-void Contour::presimplify(float d, bool closed)
+void Contour::Presimplify(float d, bool closed)
 {
 	float d2 = d * d;
-	if (n >= 2)
+	if (m_N >= 2)
 	{
-		auto pit1 = plist.begin();
-		auto pit2 = plist.begin();
+		auto pit1 = m_Plist.begin();
+		auto pit2 = m_Plist.begin();
 
-		while (pit2 != plist.end())
+		while (pit2 != m_Plist.end())
 		{
 			pit2++;
-			while (pit2 != plist.end() && dist2_b(&(*pit1), &(*pit2)) < d2)
+			while (pit2 != m_Plist.end() && dist2_b(&(*pit1), &(*pit2)) < d2)
 			{
-				pit2 = plist.erase(pit2);
+				pit2 = m_Plist.erase(pit2);
 			}
 			pit1 = pit2;
 		}
@@ -97,45 +97,45 @@ void Contour::presimplify(float d, bool closed)
 		if (closed)
 		{
 			pit1--;
-			pit2 = plist.begin();
-			while (pit2 != plist.end() && dist2_b(&(*pit1), &(*pit2)) < d2)
+			pit2 = m_Plist.begin();
+			while (pit2 != m_Plist.end() && dist2_b(&(*pit1), &(*pit2)) < d2)
 			{
-				pit2 = plist.erase(pit2);
+				pit2 = m_Plist.erase(pit2);
 			}
 		}
 
-		n = unsigned(plist.size());
+		m_N = unsigned(m_Plist.size());
 	}
 }
 
-unsigned int Contour::return_n() { return n; }
+unsigned int Contour::ReturnN() const { return m_N; }
 
-void Contour::return_contour(std::vector<Point>* Pt_vec)
+void Contour::ReturnContour(std::vector<Point>* Pt_vec)
 {
 	(*Pt_vec).clear();
-	for (unsigned int i = 0; i < n; i++)
-		(*Pt_vec).push_back(plist[i]);
+	for (unsigned int i = 0; i < m_N; i++)
+		(*Pt_vec).push_back(m_Plist[i]);
 }
 
-void Contour::doug_peuck_sub(float epsilon, const unsigned int p1, const unsigned int p2, std::vector<bool>* v1_p)
+void Contour::DougPeuckSub(float epsilon, const unsigned int p1, const unsigned int p2, std::vector<bool>* v1_p)
 {
 	if (p2 <= p1 + 1)
 		return;
 	float dv, l;
 	float max_dist = 0;
-	Point SIJ, SIV;
+	Point sij, siv;
 	unsigned int max_pos = p1;
 
-	SIJ.px = plist[p2].px - plist[p1].px;
-	SIJ.py = plist[p2].py - plist[p1].py;
+	sij.px = m_Plist[p2].px - m_Plist[p1].px;
+	sij.py = m_Plist[p2].py - m_Plist[p1].py;
 
-	l = dist(&SIJ);
+	l = dist(&sij);
 
 	for (unsigned int i = p1 + 1; i < p2; i++)
 	{
-		SIV.px = plist[i].px - plist[p1].px;
-		SIV.py = plist[i].py - plist[p1].py;
-		dv = cross(&SIV, &SIJ) / l;
+		siv.px = m_Plist[i].px - m_Plist[p1].px;
+		siv.py = m_Plist[i].py - m_Plist[p1].py;
+		dv = cross(&siv, &sij) / l;
 		if (dv > max_dist)
 		{
 			max_dist = dv;
@@ -146,43 +146,39 @@ void Contour::doug_peuck_sub(float epsilon, const unsigned int p1, const unsigne
 	if (max_dist > epsilon)
 	{
 		(*v1_p)[max_pos] = true;
-		doug_peuck_sub(epsilon, p1, max_pos, v1_p);
-		doug_peuck_sub(epsilon, max_pos, p2, v1_p);
+		DougPeuckSub(epsilon, p1, max_pos, v1_p);
+		DougPeuckSub(epsilon, max_pos, p2, v1_p);
 	}
 }
 
-void Contour2::doug_peuck(float epsilon, std::vector<Point>* Pt_vec,
-		std::vector<unsigned>* Meetings_vec,
-		std::vector<Point>* Result_vec)
+void Contour2::DougPeuck(float epsilon, std::vector<Point>* Pt_vec, std::vector<unsigned>* Meetings_vec, std::vector<Point>* Result_vec)
 {
-	n = Pt_vec->size();
-	m = Meetings_vec->size();
-	if (m == 0)
+	m_N = Pt_vec->size();
+	m_M = Meetings_vec->size();
+	if (m_M == 0)
 	{
 		Meetings_vec->push_back(0);
-		m = 1;
+		m_M = 1;
 	}
 
-	if (n > m)
+	if (m_N > m_M)
 	{
 		std::vector<bool> v1;
-		v1.resize(n);
+		v1.resize(m_N);
 
-		for (unsigned int i = 0; i < n; i++)
+		for (unsigned int i = 0; i < m_N; i++)
 			v1[i] = false;
-		for (unsigned int i = 0; i < m; i++)
+		for (unsigned int i = 0; i < m_M; i++)
 			v1[(*Meetings_vec)[i]] = true;
 
-		for (unsigned int i = 0; i + 1 < m; i++)
+		for (unsigned int i = 0; i + 1 < m_M; i++)
 		{
-			doug_peuck_sub(epsilon, Pt_vec, (*Meetings_vec)[i],
-					(*Meetings_vec)[i + 1], &v1);
+			DougPeuckSub(epsilon, Pt_vec, (*Meetings_vec)[i], (*Meetings_vec)[i + 1], &v1);
 		}
-		doug_peuck_sub2(epsilon, Pt_vec, (*Meetings_vec)[m - 1],
-				(*Meetings_vec)[0], &v1);
+		DougPeuckSub2(epsilon, Pt_vec, (*Meetings_vec)[m_M - 1], (*Meetings_vec)[0], &v1);
 
 		Result_vec->clear();
-		for (unsigned int i = 0; i < n; i++)
+		for (unsigned int i = 0; i < m_N; i++)
 		{
 			if (v1[i])
 				Result_vec->push_back((*Pt_vec)[i]);
@@ -190,28 +186,27 @@ void Contour2::doug_peuck(float epsilon, std::vector<Point>* Pt_vec,
 	}
 }
 
-void Contour2::doug_peuck_sub(float epsilon, std::vector<Point>* Pt_vec,
-		unsigned short p1, unsigned short p2, std::vector<bool>* v1_p)
+void Contour2::DougPeuckSub(float epsilon, std::vector<Point>* Pt_vec, unsigned short p1, unsigned short p2, std::vector<bool>* v1_p)
 {
 	if (p2 <= p1 + 1)
 		return;
 	float dv, l;
 	float max_dist = 0;
-	Point SIJ, SIV;
+	Point sij, siv;
 	unsigned int max_pos = p1;
 
-	SIJ.px = (*Pt_vec)[p2].px - (*Pt_vec)[p1].px;
-	SIJ.py = (*Pt_vec)[p2].py - (*Pt_vec)[p1].py;
+	sij.px = (*Pt_vec)[p2].px - (*Pt_vec)[p1].px;
+	sij.py = (*Pt_vec)[p2].py - (*Pt_vec)[p1].py;
 
-	l = dist(&SIJ);
+	l = dist(&sij);
 
-	if (SIJ.px > 0 || (SIJ.px == 0 && SIJ.py > 0))
+	if (sij.px > 0 || (sij.px == 0 && sij.py > 0))
 	{
 		for (unsigned int i = p1 + 1; i < p2; i++)
 		{
-			SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -224,9 +219,9 @@ void Contour2::doug_peuck_sub(float epsilon, std::vector<Point>* Pt_vec,
 	{
 		for (unsigned int i = p2 - 1; i > p1; i--)
 		{
-			SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -239,46 +234,45 @@ void Contour2::doug_peuck_sub(float epsilon, std::vector<Point>* Pt_vec,
 	if (max_dist > epsilon)
 	{
 		(*v1_p)[max_pos] = true;
-		doug_peuck_sub(epsilon, Pt_vec, p1, max_pos, v1_p);
-		doug_peuck_sub(epsilon, Pt_vec, max_pos, p2, v1_p);
+		DougPeuckSub(epsilon, Pt_vec, p1, max_pos, v1_p);
+		DougPeuckSub(epsilon, Pt_vec, max_pos, p2, v1_p);
 	}
 }
 
-void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
-		unsigned short p1, unsigned short p2, std::vector<bool>* v1_p)
+void Contour2::DougPeuckSub2(float epsilon, std::vector<Point>* Pt_vec, unsigned short p1, unsigned short p2, std::vector<bool>* v1_p)
 {
-	if ((p2 == 0 && p1 + 1 == n) || p1 < p2)
+	if ((p2 == 0 && p1 + 1 == m_N) || p1 < p2)
 		return;
 
 	float dv, l;
 	float max_dist = 0;
-	Point SIJ, SIV;
+	Point sij, siv;
 
 	if (p1 == p2)
 	{
-		if (n > 2)
+		if (m_N > 2)
 		{
 			unsigned short p3, p4;
-			if ((unsigned int)(p1 + 1) < n)
+			if ((unsigned int)(p1 + 1) < m_N)
 				p3 = p1 + 1;
 			else
 				p3 = 0;
 			if (p1 == 0)
-				p4 = n - 1;
+				p4 = m_N - 1;
 			else
 				p4 = p1 - 1;
 			unsigned int max_pos = p1;
 			float epsilon1 = epsilon * epsilon;
 
-			SIJ.px = (*Pt_vec)[p4].px - (*Pt_vec)[p3].px;
-			SIJ.py = (*Pt_vec)[p4].py - (*Pt_vec)[p3].py;
-			if (SIJ.px > 0 || (SIJ.px == 0 && SIJ.py > 0))
+			sij.px = (*Pt_vec)[p4].px - (*Pt_vec)[p3].px;
+			sij.py = (*Pt_vec)[p4].py - (*Pt_vec)[p3].py;
+			if (sij.px > 0 || (sij.px == 0 && sij.py > 0))
 			{
-				for (unsigned int i = p1 + 1; i < n; i++)
+				for (unsigned int i = p1 + 1; i < m_N; i++)
 				{
-					SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-					SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-					dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+					siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+					siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+					dv = float(siv.px * siv.px + siv.py * siv.py);
 					//			if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 					if (dv > max_dist + 0.001)
 					{
@@ -288,9 +282,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 				}
 				for (unsigned int i = 0; i < p2; i++)
 				{
-					SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-					SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-					dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+					siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+					siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+					dv = float(siv.px * siv.px + siv.py * siv.py);
 					//			if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 					if (dv > max_dist + 0.001)
 					{
@@ -305,9 +299,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 				{
 					for (unsigned int i = p2 - 1; i > 0; i--)
 					{
-						SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-						SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-						dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+						siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+						siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+						dv = float(siv.px * siv.px + siv.py * siv.py);
 						//			if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 						if (dv > max_dist + 0.001)
 						{
@@ -315,9 +309,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 							max_pos = i;
 						}
 					}
-					SIV.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
-					SIV.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
-					dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+					siv.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
+					siv.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
+					dv = float(siv.px * siv.px + siv.py * siv.py);
 					//			if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 					if (dv > max_dist + 0.001)
 					{
@@ -325,11 +319,11 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 						max_pos = 0;
 					}
 				}
-				for (unsigned int i = n - 1; i > p1; i--)
+				for (unsigned int i = m_N - 1; i > p1; i--)
 				{
-					SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-					SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-					dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+					siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+					siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+					dv = float(siv.px * siv.px + siv.py * siv.py);
 					//			if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 					if (dv > max_dist + 0.001)
 					{
@@ -344,14 +338,14 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 				if (max_pos < p2)
 				{
 					(*v1_p)[max_pos] = true;
-					doug_peuck_sub2(epsilon, Pt_vec, p1, max_pos, v1_p);
-					doug_peuck_sub(epsilon, Pt_vec, max_pos, p2, v1_p);
+					DougPeuckSub2(epsilon, Pt_vec, p1, max_pos, v1_p);
+					DougPeuckSub(epsilon, Pt_vec, max_pos, p2, v1_p);
 				}
 				else
 				{
 					(*v1_p)[max_pos] = true;
-					doug_peuck_sub(epsilon, Pt_vec, p1, max_pos, v1_p);
-					doug_peuck_sub2(epsilon, Pt_vec, max_pos, p2, v1_p);
+					DougPeuckSub(epsilon, Pt_vec, p1, max_pos, v1_p);
+					DougPeuckSub2(epsilon, Pt_vec, max_pos, p2, v1_p);
 				}
 			}
 
@@ -362,17 +356,17 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 			float epsilon1 = epsilon * epsilon;
 			if (p2 > 0)
 			{
-				SIV.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
-				SIV.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
-				dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+				siv.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
+				siv.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
+				dv = float(siv.px * siv.px + siv.py * siv.py);
 				if (dv > epsilon1)
 					(*v1_p)[0] = true;
 			}
 			else
 			{
-				SIV.px = (*Pt_vec)[1].px - (*Pt_vec)[p1].px;
-				SIV.py = (*Pt_vec)[1].py - (*Pt_vec)[p1].py;
-				dv = float(SIV.px * SIV.px + SIV.py * SIV.py);
+				siv.px = (*Pt_vec)[1].px - (*Pt_vec)[p1].px;
+				siv.py = (*Pt_vec)[1].py - (*Pt_vec)[p1].py;
+				dv = float(siv.px * siv.px + siv.py * siv.py);
 				if (dv > epsilon1)
 					(*v1_p)[1] = true;
 			}
@@ -383,18 +377,18 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 	max_dist = 0;
 	unsigned int max_pos = p1;
 
-	SIJ.px = (*Pt_vec)[p2].px - (*Pt_vec)[p1].px;
-	SIJ.py = (*Pt_vec)[p2].py - (*Pt_vec)[p1].py;
+	sij.px = (*Pt_vec)[p2].px - (*Pt_vec)[p1].px;
+	sij.py = (*Pt_vec)[p2].py - (*Pt_vec)[p1].py;
 
-	l = dist(&SIJ);
+	l = dist(&sij);
 
-	if (SIJ.px > 0 || (SIJ.px == 0 && SIJ.py > 0))
+	if (sij.px > 0 || (sij.px == 0 && sij.py > 0))
 	{
-		for (unsigned int i = p1 + 1; i < n; i++)
+		for (unsigned int i = p1 + 1; i < m_N; i++)
 		{
-			SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -404,9 +398,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 		}
 		for (unsigned int i = 0; i < p2; i++)
 		{
-			SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -421,9 +415,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 		{
 			for (unsigned int i = p2 - 1; i > 0; i--)
 			{
-				SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-				SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-				dv = cross(&SIV, &SIJ) / l;
+				siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+				siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+				dv = cross(&siv, &sij) / l;
 				//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 				if (dv > max_dist + 0.001)
 				{
@@ -431,9 +425,9 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 					max_pos = i;
 				}
 			}
-			SIV.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[0].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[0].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -441,11 +435,11 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 				max_pos = 0;
 			}
 		}
-		for (unsigned int i = n - 1; i > p1; i--)
+		for (unsigned int i = m_N - 1; i > p1; i--)
 		{
-			SIV.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
-			SIV.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
-			dv = cross(&SIV, &SIJ) / l;
+			siv.px = (*Pt_vec)[i].px - (*Pt_vec)[p1].px;
+			siv.py = (*Pt_vec)[i].py - (*Pt_vec)[p1].py;
+			dv = cross(&siv, &sij) / l;
 			//		if(dv>=max_dist-0.001) {max_dist=dv; max_pos=i;}
 			if (dv > max_dist + 0.001)
 			{
@@ -460,14 +454,14 @@ void Contour2::doug_peuck_sub2(float epsilon, std::vector<Point>* Pt_vec,
 		if (max_pos < p2)
 		{
 			(*v1_p)[max_pos] = true;
-			doug_peuck_sub2(epsilon, Pt_vec, p1, max_pos, v1_p);
-			doug_peuck_sub(epsilon, Pt_vec, max_pos, p2, v1_p);
+			DougPeuckSub2(epsilon, Pt_vec, p1, max_pos, v1_p);
+			DougPeuckSub(epsilon, Pt_vec, max_pos, p2, v1_p);
 		}
 		else
 		{
 			(*v1_p)[max_pos] = true;
-			doug_peuck_sub(epsilon, Pt_vec, p1, max_pos, v1_p);
-			doug_peuck_sub2(epsilon, Pt_vec, max_pos, p2, v1_p);
+			DougPeuckSub(epsilon, Pt_vec, p1, max_pos, v1_p);
+			DougPeuckSub2(epsilon, Pt_vec, max_pos, p2, v1_p);
 		}
 	}
 }

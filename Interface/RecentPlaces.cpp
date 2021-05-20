@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,17 +19,13 @@ namespace iseg {
 
 namespace {
 
-std::deque<QString> _list;
+std::deque<QString> list;
 
-QString _getFileName(QWidget* parent,
-		const QString& caption,
-		const QString& dir,
-		const QString& filter,
-		QFileDialog::AcceptMode mode)
+QString _getFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter, QFileDialog::AcceptMode mode)
 {
-	QString last_dir = !dir.isEmpty() ? dir : RecentPlaces::lastDirectory();
+	QString last_dir = !dir.isEmpty() ? dir : RecentPlaces::LastDirectory();
 	QList<QUrl> urls;
-	for (const auto& d : RecentPlaces::recentDirectories())
+	for (const auto& d : RecentPlaces::RecentDirectories())
 	{
 		urls << QUrl::fromLocalFile(d);
 	}
@@ -51,9 +47,7 @@ QString _getFileName(QWidget* parent,
 			auto pos0 = filter.find_first_of('*') + 1;
 			if (std::string::npos != pos0)
 			{
-				auto pos1 = std::min(
-					filter.find_first_of(' ', pos0),
-					filter.find_first_of(')', pos0));
+				auto pos1 = std::min(filter.find_first_of(' ', pos0), filter.find_first_of(')', pos0));
 				if (std::string::npos != pos1)
 				{
 					file_path += QString::fromStdString(filter.substr(pos0, pos1 - pos0));
@@ -61,7 +55,7 @@ QString _getFileName(QWidget* parent,
 			}
 		}
 
-		RecentPlaces::addRecent(file_path);
+		RecentPlaces::AddRecent(file_path);
 		return file_path;
 	}
 	return QString();
@@ -69,7 +63,7 @@ QString _getFileName(QWidget* parent,
 
 } // namespace
 
-void RecentPlaces::addRecent(const QString& path)
+void RecentPlaces::AddRecent(const QString& path)
 {
 	if (path.isEmpty())
 		return;
@@ -77,55 +71,49 @@ void RecentPlaces::addRecent(const QString& path)
 	// get directory
 	// QFileInfo::absolutePath: Returns a file's path absolute path. This doesn't include the file name.
 	QFileInfo fi(path);
-	QString dir = (fi.isDir()==false) ? fi.absolutePath() : path;
+	QString dir = (fi.isDir() == false) ? fi.absolutePath() : path;
 
 	// push to top
-	_list.push_front(dir);
+	list.push_front(dir);
 
 	// remove duplicates (keep first)
 	{
-		auto end = _list.end();
-		for (auto it = _list.begin(); it != end; ++it)
+		auto end = list.end();
+		for (auto it = list.begin(); it != end; ++it)
 		{
 			end = std::remove(it + 1, end, *it);
 		}
-		_list.erase(end, _list.end());
+		list.erase(end, list.end());
 	}
 
 	// keep only last N results
 	const size_t num_places = 5;
-	if (_list.size() > num_places)
+	if (list.size() > num_places)
 	{
-		_list.resize(num_places);
+		list.resize(num_places);
 	}
 }
 
-QString RecentPlaces::lastDirectory()
+QString RecentPlaces::LastDirectory()
 {
-	if (!_list.empty())
-		return _list.front();
+	if (!list.empty())
+		return list.front();
 	return QString::null;
 }
 
-std::deque<QString> RecentPlaces::recentDirectories()
+std::deque<QString> RecentPlaces::RecentDirectories()
 {
-	return _list;
+	return list;
 }
 
-QString RecentPlaces::getOpenFileName(QWidget* parent,
-		const QString& caption,
-		const QString& dir,
-		const QString& filter)
+QString RecentPlaces::GetOpenFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter)
 {
 	return _getFileName(parent, caption, dir, filter, QFileDialog::AcceptOpen);
 }
 
-QString RecentPlaces::getSaveFileName(QWidget* parent,
-		const QString& caption,
-		const QString& dir,
-		const QString& filter)
+QString RecentPlaces::GetSaveFileName(QWidget* parent, const QString& caption, const QString& dir, const QString& filter)
 {
 	return _getFileName(parent, caption, dir, filter, QFileDialog::AcceptSave);
 }
 
-}
+} // namespace iseg

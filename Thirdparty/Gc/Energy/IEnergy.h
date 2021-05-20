@@ -30,12 +30,10 @@
 
 #include "../Type.h"
 
-namespace Gc
-{    
-    /** Classes related to discrete energy functionals and their minimization. */
-	namespace Energy
-	{
-        /** General second order discrete energy class.
+namespace Gc {
+/** Classes related to discrete energy functionals and their minimization. */
+namespace Energy {
+/** General second order discrete energy class.
         
             This class represents a discrete second order energy of the following type:
             \f[
@@ -55,14 +53,14 @@ namespace Gc
 
             @see IGridEnergy.
         */
-	    class IEnergy
-	    {
-        public:
-            /** Virtual destructor. */
-            virtual ~IEnergy()
-            {}
-	    };
-	}
-}
+class IEnergy
+{
+  public:
+    /** Virtual destructor. */
+    virtual ~IEnergy()
+    {}
+};
+} // namespace Energy
+} // namespace Gc
 
 #endif

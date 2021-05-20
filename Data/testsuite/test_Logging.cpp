@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,8 +9,8 @@
 */
 #include "../Logger.h"
 
-#include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <iostream>
 
@@ -28,14 +28,15 @@ BOOST_AUTO_TEST_CASE(Logger_test)
 
 	init_logging(fpath.string(), true);
 
-	ISEG_INFO("This is an info message" << " stream");
+	ISEG_INFO("This is an info message"
+						<< " stream");
 	ISEG_WARNING_MSG("This is a warning message");
 	ISEG_ERROR_MSG("This is an error message");
 
 	std::cout << "This is a cout message\n"; // not captured
 	std::cerr << "This is a cerr message\n";
 
-	Log::close_log_file();
+	Log::CloseLogFile();
 
 	// check number of lines
 	boost::system::error_code ec;

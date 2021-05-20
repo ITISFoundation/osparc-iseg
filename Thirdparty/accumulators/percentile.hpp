@@ -27,7 +27,7 @@ namespace boost { namespace accumulators
 		template<typename Sample>
 		struct percentile_impl : accumulator_base
 		{
-			typedef Sample result_type;
+			using result_type = Sample;
 
 			percentile_impl(dont_care) : isSorted(false) {}
 
@@ -70,7 +70,7 @@ namespace boost { namespace accumulators
 	{
 		struct percentile : depends_on<>
 		{
-			typedef impl::percentile_impl<mpl::_1> impl;
+			using impl = impl::percentile_impl<mpl::_1>;
 		};
 	}
 

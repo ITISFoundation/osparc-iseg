@@ -8,8 +8,8 @@
 FIND_PACKAGE(ITK COMPONENTS 
 		ITKCommon ITKSmoothing ITKRegionGrowing ITKBinaryMathematicalMorphology ITKImageGradient ITKDistanceMap
 		ITKLabelMap ITKVTK ITKCurvatureFlow ITKBiasCorrection ITKImageFeature ITKFastMarching
-		ITKIOImageBase ITKIORAW ITKIOMeta ITKIONIFTI ITKIONRRD ITKIOGDCM
-		ITKIOPNG ITKIOBMP ITKIOTIFF ITKIOJPEG ITKIOVTK ITKReview
+		ITKImageIO
+		ITKReview
 		# ITKSuperPixel
 		REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")

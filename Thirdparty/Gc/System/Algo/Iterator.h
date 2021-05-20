@@ -28,28 +28,25 @@
 #ifndef GC_SYSTEM_ALGO_ITERATOR_H
 #define GC_SYSTEM_ALGO_ITERATOR_H
 
-namespace Gc
-{
-    namespace System
-    {
-        /** Generic data manipulation and computer science algorithms. */
-        namespace Algo
-        {
-            /** Iterator traits. */
-            template <class T>
-            struct IteratorTraits
-            {};
+namespace Gc {
+namespace System {
+/** Generic data manipulation and computer science algorithms. */
+namespace Algo {
+/** Iterator traits. */
+template <class T>
+struct IteratorTraits
+{};
 
-            /** @cond */
-            /** Iterator traits specialization for pointers. */
-            template <class T>
-            struct IteratorTraits<T *>
-            {
-                typedef T ValueType;
-            };
-            /** @endcond */
-        }
-    }
+/** @cond */
+/** Iterator traits specialization for pointers. */
+template <class T>
+struct IteratorTraits<T *>
+{
+    using ValueType = T;
+};
+/** @endcond */
+} // namespace Algo
 }
+} // namespace Gc::System
 
 #endif

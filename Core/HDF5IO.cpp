@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -31,27 +31,27 @@ herr_t H5Ewalk_cb(int n, H5E_error_t* err_desc, void* client_data)
 
 } // namespace
 
-HDF5IO::HDF5IO(int compression) : CompressionLevel(compression) {}
+HDF5IO::HDF5IO(int compression) : m_CompressionLevel(compression) {}
 
-bool HDF5IO::existsValidHdf5(const std::string& fname)
+bool HDF5IO::ExistsValidHdf5(const std::string& fname)
 {
 	htri_t status = H5Fis_hdf5(fname.c_str());
 	return (status > 0);
 }
 
-HDF5IO::handle_id_type HDF5IO::open(const std::string& fname)
+HDF5IO::handle_id_type HDF5IO::Open(const std::string& fname)
 {
-	if (!existsValidHdf5(fname.c_str()))
+	if (!ExistsValidHdf5(fname))
 	{
 		return -1;
 	}
 	return H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 }
 
-HDF5IO::handle_id_type HDF5IO::create(const std::string& fname, bool append)
+HDF5IO::handle_id_type HDF5IO::Create(const std::string& fname, bool append)
 {
 	static_assert(std::is_same<HDF5IO::handle_id_type, hid_t>::value, "hid_t mismatch. this will lead to runtime errors.");
-	if (append && !existsValidHdf5(fname.c_str()))
+	if (append && !ExistsValidHdf5(fname))
 	{
 		append = false;
 	}
@@ -61,12 +61,11 @@ HDF5IO::handle_id_type HDF5IO::create(const std::string& fname, bool append)
 	}
 	else
 	{
-		return H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
-						 H5P_DEFAULT);
+		return H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	}
 }
 
-bool HDF5IO::close(handle_id_type file)
+bool HDF5IO::Close(handle_id_type file)
 {
 	if (file >= 0)
 	{
@@ -76,11 +75,11 @@ bool HDF5IO::close(handle_id_type file)
 	return true;
 }
 
-std::string HDF5IO::dumpErrorStack()
+std::string HDF5IO::DumpErrorStack()
 {
 	std::stringstream ss;
 	ss << "HDF5 error(s):"
-	   << "\r\n";
+		 << "\r\n";
 	H5Ewalk(H5E_WALK_DOWNWARD, H5Ewalk_cb, &ss);
 	return ss.str();
 }

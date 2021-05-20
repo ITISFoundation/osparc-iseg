@@ -22,15 +22,15 @@ void EdgesConnectivity(const std::vector<Tuple>& edges, std::vector<std::vector<
 
 	struct MaxPair
 	{
-		MaxPair() : Max(0) {}
-		void operator()(const Tuple& t) { Max = std::max<Index>(Max, std::max<Index>(detail::get<0>(t), detail::get<1>(t))); }
-		Index Max;
+		MaxPair() : m_Max(0) {}
+		void operator()(const Tuple& t) { m_Max = std::max<Index>(m_Max, std::max<Index>(detail::get<0>(t), detail::get<1>(t))); }
+		Index m_Max;
 	};
-	Index const NN = std::for_each(edges.begin(), edges.end(), MaxPair()).Max + 1;
-	Index const NE = (Index)edges.size();
+	Index const nn = std::for_each(edges.begin(), edges.end(), MaxPair()).Max + 1;
+	Index const ne = (Index)edges.size();
 
-	std::vector<std::vector<Index>> node_edge_list(NN);
-	for (Index i = 0; i < NE; i++)
+	std::vector<std::vector<Index>> node_edge_list(nn);
+	for (Index i = 0; i < ne; i++)
 	{
 		auto n1 = detail::get<0>(edges[i]);
 		auto n2 = detail::get<1>(edges[i]);
@@ -42,10 +42,10 @@ void EdgesConnectivity(const std::vector<Tuple>& edges, std::vector<std::vector<
 	}
 
 	//std::vector<bool> is_node_visited(NN,false);
-	std::vector<bool> is_edge_visited(NE, false);
+	std::vector<bool> is_edge_visited(ne, false);
 	std::vector<Index> edge_queue;
 
-	for (Index i = 0; i < NE; i++)
+	for (Index i = 0; i < ne; i++)
 	{
 		if (is_edge_visited[i])
 			continue;
@@ -68,8 +68,7 @@ void EdgesConnectivity(const std::vector<Tuple>& edges, std::vector<std::vector<
 
 				if (node_edge_list[nid].size() >= 2) // difference compared to "EdgesToPolylines"
 				{
-					auto found = std::find_if(node_edge_list[nid].begin(), node_edge_list[nid].end(),
-							[&is_edge_visited](Index eid) { return !is_edge_visited[eid]; });
+					auto found = std::find_if(node_edge_list[nid].begin(), node_edge_list[nid].end(), [&is_edge_visited](Index eid) { return !is_edge_visited[eid]; });
 					if (found != node_edge_list[nid].end())
 					{
 						edge_queue.push_back(*found);
@@ -101,15 +100,15 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 
 	struct MaxPair
 	{
-		MaxPair() : Max(0) {}
-		void operator()(const Tuple& t) { Max = std::max<Index>(Max, std::max<Index>(detail::get<0>(t), detail::get<1>(t))); }
-		Index Max;
+		MaxPair() : m_Max(0) {}
+		void operator()(const Tuple& t) { m_Max = std::max<Index>(m_Max, std::max<Index>(detail::get<0>(t), detail::get<1>(t))); }
+		Index m_Max;
 	};
-	Index const NN = std::for_each(edges.begin(), edges.end(), MaxPair()).Max + 1;
-	Index const NE = (Index)edges.size();
+	Index const nn = std::for_each(edges.begin(), edges.end(), MaxPair()).Max + 1;
+	Index const ne = (Index)edges.size();
 
-	std::vector<std::vector<Index>> node_edge_list(NN);
-	for (Index i = 0; i < NE; i++)
+	std::vector<std::vector<Index>> node_edge_list(nn);
+	for (Index i = 0; i < ne; i++)
 	{
 		auto n1 = detail::get<0>(edges[i]);
 		auto n2 = detail::get<1>(edges[i]);
@@ -121,10 +120,10 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 	}
 
 	//std::vector<bool> is_node_visited(NN,false);
-	std::vector<bool> is_edge_visited(NE, false);
+	std::vector<bool> is_edge_visited(ne, false);
 	std::vector<Index> edge_queue;
 
-	for (Index i = 0; i < NE; i++)
+	for (Index i = 0; i < ne; i++)
 	{
 		if (is_edge_visited[i])
 			continue;
@@ -147,8 +146,7 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 
 				if (node_edge_list[nid].size() == 2)
 				{
-					auto found = std::find_if(node_edge_list[nid].begin(), node_edge_list[nid].end(),
-							[&is_edge_visited](Index eid) { return !is_edge_visited[eid]; });
+					auto found = std::find_if(node_edge_list[nid].begin(), node_edge_list[nid].end(), [&is_edge_visited](Index eid) { return !is_edge_visited[eid]; });
 					if (found != node_edge_list[nid].end())
 					{
 						edge_queue.push_back(*found);
@@ -168,7 +166,7 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 		processed_edges[0] = true;
 		while (true)
 		{
-			size_t countProcessed = std::count(processed_edges.begin(), processed_edges.end(), true);
+			size_t count_processed = std::count(processed_edges.begin(), processed_edges.end(), true);
 			for (size_t i = 0; i < edge_list.size(); i++)
 			{
 				if (!processed_edges[i])
@@ -190,9 +188,9 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 				}
 			}
 			// stop while loop if we are not making progress (because all are processed, or disconnected edges)
-			if (countProcessed == std::count(processed_edges.begin(), processed_edges.end(), true))
+			if (count_processed == std::count(processed_edges.begin(), processed_edges.end(), true))
 			{
-				assert(countProcessed == processed_edges.size());
+				assert(count_processed == processed_edges.size());
 				break;
 			}
 		}
@@ -200,8 +198,7 @@ void EdgesToPolylines(const std::vector<Tuple>& edges, std::vector<std::vector<I
 		if (polyline.size() >= 2)
 		{
 			std::vector<Index> polyline_vector(polyline.size());
-			std::transform(polyline.begin(), polyline.end(), polyline_vector.begin(),
-					[](Index id) { return id; });
+			std::transform(polyline.begin(), polyline.end(), polyline_vector.begin(), [](Index id) { return id; });
 			polylines.push_back(polyline_vector);
 		}
 	}

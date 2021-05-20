@@ -32,69 +32,68 @@
 #include <string>
 #include "../Type.h"
 
-namespace Gc
-{
-    /** %System related classes. 
+namespace Gc {
+/** %System related classes. 
     
         The reason behind the existence of this namespace is that I don't like
         STL, especially the way it is structured and the functionality it
         offers. This namespace may be in the future separataed into a standalone
         library.
     */
-    namespace System
-    {
-        /** Generic exception class. */
-        class Exception 
-            : public std::exception
-        {
-        private:
-            /** Function in which the exception was thrown. */
-            std::string m_func;
-            /** Line number on which the exception was thrown. */
-            Int32 m_line;
-            /** String describing the exception and its cause. */
-            std::string m_msg;
+namespace System {
+/** Generic exception class. */
+class Exception
+    : public std::exception
+{
+  private:
+    /** Function in which the exception was thrown. */
+    std::string m_func;
+    /** Line number on which the exception was thrown. */
+    Int32 m_line;
+    /** String describing the exception and its cause. */
+    std::string m_msg;
 
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            Exception(const char *func, Int32 line, const std::string &msg)
-                : m_func(func), m_line(line), m_msg(msg)
-            {}
-            
-            /** Destructor */
-            ~Exception() throw()
-            {}
+    Exception(const char * func, Int32 line, const std::string & msg)
+        : m_func(func)
+        , m_line(line)
+        , m_msg(msg)
+    {}
 
-            /** Get the file in which the exception was thrown. */
-            const std::string &Function() const
-            {
-                return m_func;
-            }
+    /** Destructor */
+    ~Exception() throw() override = default;
 
-            /** Get the line number on which the exception was thrown. */
-            Int32 LineNumber() const
-            {
-                return m_line;
-            }
-
-            /** Get the exception error message. */
-            const std::string &Message() const
-            {
-                return m_msg;
-            }
-
-            /** Standard std::exception::what() method overload. */
-            const char *what() const throw()
-            {
-                return m_msg.c_str();
-            }
-        };
+    /** Get the file in which the exception was thrown. */
+    const std::string & Function() const
+    {
+        return m_func;
     }
-}
+
+    /** Get the line number on which the exception was thrown. */
+    Int32 LineNumber() const
+    {
+        return m_line;
+    }
+
+    /** Get the exception error message. */
+    const std::string & Message() const
+    {
+        return m_msg;
+    }
+
+    /** Standard std::exception::what() method overload. */
+    const char * what() const throw() override
+    {
+        return m_msg.c_str();
+    }
+};
+} // namespace System
+} // namespace Gc
 
 #endif

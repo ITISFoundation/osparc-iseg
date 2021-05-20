@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -17,11 +17,11 @@
 
 #include "Data/AddConnected.h"
 #include "Data/ExtractBoundary.h"
-#include "Data/Point.h"
-#include "Data/addLine.h"
-#include "Data/ItkUtils.h"
 #include "Data/ItkProgressObserver.h"
+#include "Data/ItkUtils.h"
+#include "Data/Point.h"
 #include "Data/SlicesHandlerITKInterface.h"
+#include "Data/addLine.h"
 
 #include "Core/SmoothTissues.h"
 #include "Core/itkFixTopologyCarveInside.h"
@@ -44,70 +44,61 @@
 
 namespace iseg {
 
-std::map<QAbstractButton*, int> _widget_page;
+std::map<QAbstractButton*, int> widget_page;
 
 OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	setToolTip(Format(
-			"OutLine Correction routines that can be used to modify "
-			"the result of a segmentation operation and to correct frequently "
-			"occurring segmentation deficiencies."));
+	setToolTip(Format("OutLine Correction routines that can be used to modify "
+										"the result of a segmentation operation and to correct frequently "
+										"occurring segmentation deficiencies."));
 
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
 	// methods
-	olcorr = new QRadioButton(tr("Outline Correction"));
-	olcorr->setToolTip(Format(
-			"Draw an alternative boundary segment for a region.This segment "
-			"will be connected to the region using the shortest possible lines "
-			"and will replace the boundary segment between the connection points."));
-	brush = new QRadioButton(tr("Brush"));
-	brush->setToolTip(Format("Manual correction and segmentation with brush tools."));
+	m_Olcorr = new QRadioButton(tr("Outline Correction"));
+	m_Olcorr->setToolTip(Format("Draw an alternative boundary segment for a region.This segment "
+															"will be connected to the region using the shortest possible lines "
+															"and will replace the boundary segment between the connection points."));
+	m_Brush = new QRadioButton(tr("Brush"));
+	m_Brush->setToolTip(Format("Manual correction and segmentation with brush tools."));
 
-	holefill = new QRadioButton(tr("Fill Holes"));
-	holefill->setToolTip(Format(
-			"Close all holes in the selected region or tissue that have a "
-			"size smaller than the number of pixels specified by the Hole Size option."));
+	m_Holefill = new QRadioButton(tr("Fill Holes"));
+	m_Holefill->setToolTip(Format("Close all holes in the selected region or tissue that have a "
+																"size smaller than the number of pixels specified by the Hole Size option."));
 
-	removeislands = new QRadioButton(tr("Remove Islands"));
-	removeislands->setToolTip(Format(
-			"Remove all islands (speckles and outliers) with the selected "
-			"gray value or tissue assignment."));
+	m_Removeislands = new QRadioButton(tr("Remove Islands"));
+	m_Removeislands->setToolTip(Format("Remove all islands (speckles and outliers) with the selected "
+																		 "gray value or tissue assignment."));
 
-	gapfill = new QRadioButton(tr("Fill Gaps"));
-	gapfill->setToolTip(Format(
-			"Close gaps between multiple disconnected regions having the same "
-			"gray value or belonging to the same tissue."));
+	m_Gapfill = new QRadioButton(tr("Fill Gaps"));
+	m_Gapfill->setToolTip(Format("Close gaps between multiple disconnected regions having the same "
+															 "gray value or belonging to the same tissue."));
 
-	addskin = new QRadioButton(tr("Add Skin"));
-	addskin->setToolTip(Format(
-			"Add a skin layer to a segmentation with a "
-			"specified Thickness (in pixels)."));
+	m_Addskin = new QRadioButton(tr("Add Skin"));
+	m_Addskin->setToolTip(Format("Add a skin layer to a segmentation with a "
+															 "specified Thickness (in pixels)."));
 
-	fillskin = new QRadioButton(tr("Fill Skin"));
-	fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
+	m_Fillskin = new QRadioButton(tr("Fill Skin"));
+	m_Fillskin->setToolTip(Format("Thicken a skin layer to ensure it has a minimum Thickness."));
 
-	allfill = new QRadioButton(tr("Fill All"));
-	allfill->setToolTip(Format(
-			"Make sure that there are no unassigned regions "
-			"inside the segmented model."));
+	m_Allfill = new QRadioButton(tr("Fill All"));
+	m_Allfill->setToolTip(Format("Make sure that there are no unassigned regions "
+															 "inside the segmented model."));
 
-	spherize = new QRadioButton("Spherize");
-	spherize->setToolTip(Format(
-			"Simplify voxel set by making small changes (add/remove voxels),"
-			"which make the voxel set manifold and topologically equivalent to a sphere."));
+	m_Spherize = new QRadioButton("Spherize");
+	m_Spherize->setToolTip(Format("Simplify voxel set by making small changes (add/remove voxels),"
+																"which make the voxel set manifold and topologically equivalent to a sphere."));
 
-	smooth_tissues = new QRadioButton(tr("Smooth Tissues"));
-	smooth_tissues->setToolTip(Format(
-			"This tool smooths all non-locked tissues but does not modify locked tissues."));
+	m_SmoothTissues = new QRadioButton(tr("Smooth Tissues"));
+	m_SmoothTissues->setToolTip(Format("This tool smooths all non-locked tissues but does not modify locked tissues."));
 
-	auto method_radio_buttons = {brush, olcorr, holefill, removeislands, gapfill, addskin, fillskin, allfill, spherize, smooth_tissues};
-	methods = new QButtonGroup(this);
+	auto method_radio_buttons = {m_Brush, m_Olcorr, m_Holefill, m_Removeislands, m_Gapfill, m_Addskin, m_Fillskin, m_Allfill, m_Spherize, m_SmoothTissues};
+	m_Methods = new QButtonGroup(this);
 	for (auto w : method_radio_buttons)
 	{
-		methods->addButton(w);
+		m_Methods->addButton(w);
 	}
 
 	auto method_vbox = new QVBoxLayout;
@@ -123,174 +114,170 @@ OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget*
 	method_area->setLineWidth(1);
 
 	// parameter views
-	olc_params = new OLCorrParamView;
-	brush_params = new BrushParamView;
-	fill_holes_params = new FillHolesParamView;
-	remove_islands_params = new FillHolesParamView;
-	remove_islands_params->_object_size_label->setText("Island size");
-	fill_gaps_params = new FillHolesParamView;
-	fill_gaps_params->_object_size_label->setText("Gap size");
-	add_skin_params = new AddSkinParamView;
-	fill_skin_params = new FillSkinParamView(handler3D);
-	fill_all_params = new FillAllParamView;
-	spherize_params = new SpherizeParamView;
-	smooth_tissues_params = new SmoothTissuesParamView;
+	m_OlcParams = new OLCorrParamView;
+	m_BrushParams = new BrushParamView;
+	m_FillHolesParams = new FillHolesParamView;
+	m_RemoveIslandsParams = new FillHolesParamView;
+	m_RemoveIslandsParams->m_ObjectSizeLabel->setText("Island size");
+	m_FillGapsParams = new FillHolesParamView;
+	m_FillGapsParams->m_ObjectSizeLabel->setText("Gap size");
+	m_AddSkinParams = new AddSkinParamView;
+	m_FillSkinParams = new FillSkinParamView(m_Handler3D);
+	m_FillAllParams = new FillAllParamView;
+	m_SpherizeParams = new SpherizeParamView;
+	m_SmoothTissuesParams = new SmoothTissuesParamView;
 
 	// layouts
-	stacked_params = new QStackedWidget(this);
-	stacked_params->addWidget(brush_params);
-	stacked_params->addWidget(olc_params);
-	stacked_params->addWidget(fill_holes_params);
-	stacked_params->addWidget(remove_islands_params);
-	stacked_params->addWidget(fill_gaps_params);
-	stacked_params->addWidget(add_skin_params);
-	stacked_params->addWidget(fill_skin_params);
-	stacked_params->addWidget(fill_all_params);
-	stacked_params->addWidget(spherize_params);
-	stacked_params->addWidget(smooth_tissues_params);
+	m_StackedParams = new QStackedWidget(this);
+	m_StackedParams->addWidget(m_BrushParams);
+	m_StackedParams->addWidget(m_OlcParams);
+	m_StackedParams->addWidget(m_FillHolesParams);
+	m_StackedParams->addWidget(m_RemoveIslandsParams);
+	m_StackedParams->addWidget(m_FillGapsParams);
+	m_StackedParams->addWidget(m_AddSkinParams);
+	m_StackedParams->addWidget(m_FillSkinParams);
+	m_StackedParams->addWidget(m_FillAllParams);
+	m_StackedParams->addWidget(m_SpherizeParams);
+	m_StackedParams->addWidget(m_SmoothTissuesParams);
 
 	auto top_layout = new QHBoxLayout;
 	top_layout->addWidget(method_area);
-	top_layout->addWidget(stacked_params);
+	top_layout->addWidget(m_StackedParams);
 	setLayout(top_layout);
 
 	// remember QStackedLayout page where parameters of method are added
-	for (int i = 0; i < methods->buttons().size(); ++i)
+	for (int i = 0; i < m_Methods->buttons().size(); ++i)
 	{
-		_widget_page[methods->buttons().at(i)] = i;
+		widget_page[m_Methods->buttons().at(i)] = i;
 	}
 
 	// start with brush tool
-	brush->setChecked(true);
-	stacked_params->setCurrentWidget(brush_params);
+	m_Brush->setChecked(true);
+	m_StackedParams->setCurrentWidget(m_BrushParams);
 
 	// create connections
-	connect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
-	connect(olc_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(brush_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(fill_holes_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(remove_islands_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(fill_gaps_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
-	connect(spherize_params->_select_object, SIGNAL(clicked()), this, SLOT(selectobj_pushed()));
+	QObject_connect(m_Methods, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged()));
+	QObject_connect(m_OlcParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
+	QObject_connect(m_BrushParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
+	QObject_connect(m_FillHolesParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
+	QObject_connect(m_RemoveIslandsParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
+	QObject_connect(m_FillGapsParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
+	QObject_connect(m_SpherizeParams->m_SelectObject, SIGNAL(clicked()), this, SLOT(SelectobjPushed()));
 
-	connect(brush_params->_copy_guide, SIGNAL(clicked()), this, SLOT(copy_guide()));
-	connect(brush_params->_copy_pick_guide, SIGNAL(clicked()), this, SLOT(copy_pick_pushed()));
-	connect(brush_params->_show_guide, SIGNAL(clicked()), this, SLOT(draw_guide()));
-	connect(brush_params->_guide_offset, SIGNAL(valueChanged(int)), this, SLOT(draw_guide()));
+	QObject_connect(m_BrushParams->m_CopyGuide, SIGNAL(clicked()), this, SLOT(CopyGuide()));
+	QObject_connect(m_BrushParams->m_CopyPickGuide, SIGNAL(clicked()), this, SLOT(CopyPickPushed()));
+	QObject_connect(m_BrushParams->m_ShowGuide, SIGNAL(clicked()), this, SLOT(DrawGuide()));
+	QObject_connect(m_BrushParams->m_GuideOffset, SIGNAL(valueChanged(int)), this, SLOT(DrawGuide()));
 
-	connect(fill_holes_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(remove_islands_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(fill_gaps_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(add_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(fill_skin_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(fill_all_params->_execute, SIGNAL(clicked()), this, SLOT(execute_pushed()));
-	connect(spherize_params->_execute, SIGNAL(clicked()), this, SLOT(carve_pushed()));
-	connect(smooth_tissues_params->_execute, SIGNAL(clicked()), this, SLOT(smooth_tissues_pushed()));
+	QObject_connect(m_FillHolesParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_RemoveIslandsParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_FillGapsParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_AddSkinParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_FillSkinParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_FillAllParams->m_Execute, SIGNAL(clicked()), this, SLOT(ExecutePushed()));
+	QObject_connect(m_SpherizeParams->m_Execute, SIGNAL(clicked()), this, SLOT(CarvePushed()));
+	QObject_connect(m_SmoothTissuesParams->m_Execute, SIGNAL(clicked()), this, SLOT(SmoothTissuesPushed()));
 
-	selectobj = false;
+	m_Selectobj = false;
 
-	method_changed();
-	workbits_changed();
+	MethodChanged();
+	WorkbitsChanged();
 }
 
-void OutlineCorrectionWidget::draw_circle(Point p)
+void OutlineCorrectionWidget::DrawCircle(Point p)
 {
-	vpdyn = brush_params->draw_circle(p, spacing[0], spacing[1], bmphand->return_width(), bmphand->return_height());
+	m_Vpdyn = m_BrushParams->DrawCircle(p, m_Spacing[0], m_Spacing[1], m_Bmphand->ReturnWidth(), m_Bmphand->ReturnHeight());
 
-	emit vpdyn_changed(&vpdyn);
-	vpdyn.clear();
+	emit VpdynChanged(&m_Vpdyn);
+	m_Vpdyn.clear();
 }
 
-void OutlineCorrectionWidget::draw_guide()
+void OutlineCorrectionWidget::DrawGuide()
 {
-	if (brush->isChecked() && brush_params->_show_guide->isChecked())
+	if (m_Brush->isChecked() && m_BrushParams->m_ShowGuide->isChecked())
 	{
-		int slice = static_cast<int>(handler3D->active_slice()) + brush_params->_guide_offset->value();
-		unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
+		int slice = static_cast<int>(m_Handler3D->ActiveSlice()) + m_BrushParams->m_GuideOffset->value();
+		unsigned slice_clamped = std::min(std::max(slice, 0), m_Handler3D->NumSlices() - 1);
 		if (slice == slice_clamped)
 		{
 			std::vector<Mark> marks;
-			auto w = handler3D->width();
-			auto h = handler3D->height();
-			if (brush_params->_target->isChecked())
+			auto w = m_Handler3D->Width();
+			auto h = m_Handler3D->Height();
+			if (m_BrushParams->m_Target->isChecked())
 			{
-				Mark m(Mark::WHITE);
-				marks = extract_boundary<Mark, float>(handler3D->target_slices().at(slice_clamped), w, h, m);
+				Mark m(Mark::white);
+				marks = extract_boundary<Mark, float>(m_Handler3D->TargetSlices().at(slice_clamped), w, h, m);
 			}
 			else
 			{
-				Mark m(tissuenr);
-				marks = extract_boundary<Mark, tissues_size_t>(handler3D->tissue_slices(0).at(slice_clamped), w, h, m,
-						[this](tissues_size_t v) { return (v == tissuenr); });
+				Mark m(m_Tissuenr);
+				marks = extract_boundary<Mark, tissues_size_t>(m_Handler3D->TissueSlices(0).at(slice_clamped), w, h, m, [this](tissues_size_t v) { return (v == m_Tissuenr); });
 			}
 
-			emit vm_changed(&marks);
+			emit VmChanged(&marks);
 
 			return;
 		}
 	}
 
 	std::vector<Mark> marks;
-	emit vm_changed(&marks);
+	emit VmChanged(&marks);
 }
 
-void OutlineCorrectionWidget::copy_guide(Point* p)
+void OutlineCorrectionWidget::CopyGuide(Point* p)
 {
-	int slice = static_cast<int>(handler3D->active_slice()) + brush_params->_guide_offset->value();
-	unsigned slice_clamped = std::min(std::max(slice, 0), handler3D->num_slices() - 1);
+	int slice = static_cast<int>(m_Handler3D->ActiveSlice()) + m_BrushParams->m_GuideOffset->value();
+	unsigned slice_clamped = std::min(std::max(slice, 0), m_Handler3D->NumSlices() - 1);
 	if (slice == slice_clamped)
 	{
-		unsigned w = handler3D->width();
-		unsigned h = handler3D->height();
+		unsigned w = m_Handler3D->Width();
+		unsigned h = m_Handler3D->Height();
 
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = brush_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = m_BrushParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		if (dataSelection.work)
+		if (data_selection.work)
 		{
-			auto ref = handler3D->target_slices().at(slice_clamped);
-			auto current = handler3D->target_slices().at(handler3D->active_slice());
+			auto ref = m_Handler3D->TargetSlices().at(slice_clamped);
+			auto current = m_Handler3D->TargetSlices().at(m_Handler3D->ActiveSlice());
 
 			if (p)
 			{
 				unsigned pos = p->px + w * p->py;
-				add_connected_2d(ref, current, w, h, pos, 255.f,
-						[&](unsigned idx) { return (ref[idx] != 0.f); });
+				add_connected_2d(ref, current, w, h, pos, 255.f, [&](unsigned idx) { return (ref[idx] != 0.f); });
 			}
 			else
 			{
-				std::transform(ref, ref + w * h, current, current,
-						[](float r, float c) { return (r != 0.f ? r : c); });
+				std::transform(ref, ref + w * h, current, current, [](float r, float c) { return (r != 0.f ? r : c); });
 			}
 		}
 		else
 		{
-			auto ref = handler3D->tissue_slices(0).at(slice_clamped);
-			auto current = handler3D->tissue_slices(0).at(handler3D->active_slice());
+			auto ref = m_Handler3D->TissueSlices(0).at(slice_clamped);
+			auto current = m_Handler3D->TissueSlices(0).at(m_Handler3D->ActiveSlice());
 
 			if (p)
 			{
 				unsigned pos = p->px + w * p->py;
 				std::vector<tissues_size_t> temp(w * h, 0);
-				add_connected_2d(ref, temp.data(), w, h, pos, tissuenr,
-						[&](unsigned idx) { return ref[idx] == tissuenr; });
+				add_connected_2d(ref, temp.data(), w, h, pos, m_Tissuenr, [&](unsigned idx) { return ref[idx] == m_Tissuenr; });
 
 				std::transform(temp.begin(), temp.end(), current, current, [this](tissues_size_t r, tissues_size_t c) {
-					return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
+					return (r == m_Tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
 				});
 			}
 			else
 			{
 				std::transform(ref, ref + w * h, current, current, [this](tissues_size_t r, tissues_size_t c) {
-					return (r == tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
+					return (r == m_Tissuenr && !TissueInfos::GetTissueLocked(c)) ? r : c;
 				});
 			}
 		}
 
-		emit end_datachange(this);
+		emit EndDatachange(this);
 	}
 	else
 	{
@@ -298,414 +285,413 @@ void OutlineCorrectionWidget::copy_guide(Point* p)
 	}
 }
 
-void OutlineCorrectionWidget::on_mouse_clicked(Point p)
+void OutlineCorrectionWidget::OnMouseClicked(Point p)
 {
 	// update spacing when we start interaction
-	spacing = handler3D->spacing();
+	m_Spacing = m_Handler3D->Spacing();
 
-	if (copy_mode)
+	if (m_CopyMode)
 	{
-		copy_mode = false;
-		copy_guide(&p);
-		brush_params->_copy_pick_guide->setChecked(false);
+		m_CopyMode = false;
+		CopyGuide(&p);
+		m_BrushParams->m_CopyPickGuide->setChecked(false);
 		return;
 	}
-	if (selectobj)
+	if (m_Selectobj)
 	{
-		if (current_params)
+		if (m_CurrentParams)
 		{
-			auto v = bmphand->work_pt(p);
-			current_params->set_object_value(v);
+			auto v = m_Bmphand->WorkPt(p);
+			m_CurrentParams->SetObjectValue(v);
 		}
 		return;
 	}
 
-	if (olcorr->isChecked())
+	if (m_Olcorr->isChecked())
 	{
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = olc_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = m_OlcParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
 
-		vpdyn.clear();
-		last_pt = p;
-		vpdyn.push_back(p);
-		emit begin_datachange(dataSelection, this);
+		m_Vpdyn.clear();
+		m_LastPt = p;
+		m_Vpdyn.push_back(p);
+		emit BeginDatachange(data_selection, this);
 	}
-	else if (brush->isChecked())
+	else if (m_Brush->isChecked())
 	{
-		iseg::DataSelection dataSelection;
-		dataSelection.sliceNr = handler3D->active_slice();
-		dataSelection.work = brush_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
+		DataSelection data_selection;
+		data_selection.sliceNr = m_Handler3D->ActiveSlice();
+		data_selection.work = m_BrushParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
 
-		float const f = get_object_value();
-		float const radius = brush_params->_radius->text().toFloat();
-		last_pt = p;
+		float const f = GetObjectValue();
+		float const radius = m_BrushParams->m_Radius->text().toFloat();
+		m_LastPt = p;
 
-		if (brush_params->_modify->isChecked())
+		if (m_BrushParams->m_Modify->isChecked())
 		{
-			if (brush_params->_target->isChecked())
+			if (m_BrushParams->m_Target->isChecked())
 			{
-				if (bmphand->work_pt(p) == f)
-					draw = true;
+				if (m_Bmphand->WorkPt(p) == f)
+					m_Draw = true;
 				else
-					draw = false;
+					m_Draw = false;
 			}
 			else
 			{
-				if (bmphand->tissues_pt(handler3D->active_tissuelayer(), p) == tissuenr)
+				if (m_Bmphand->TissuesPt(m_Handler3D->ActiveTissuelayer(), p) == m_Tissuenr)
 				{
-					draw = true;
+					m_Draw = true;
 				}
 				else
 				{
-					draw = false;
-					tissuenrnew = bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
+					m_Draw = false;
+					m_Tissuenrnew = m_Bmphand->TissuesPt(m_Handler3D->ActiveTissuelayer(), p);
 				}
 			}
 		}
-		else if (brush_params->_draw->isChecked())
+		else if (m_BrushParams->m_Draw->isChecked())
 		{
-			draw = true;
+			m_Draw = true;
 		}
 		else
 		{
-			draw = false;
-			if (bmphand->tissues_pt(handler3D->active_tissuelayer(), p) == tissuenr)
-				tissuenrnew = 0;
+			m_Draw = false;
+			if (m_Bmphand->TissuesPt(m_Handler3D->ActiveTissuelayer(), p) == m_Tissuenr)
+				m_Tissuenrnew = 0;
 			else
-				tissuenrnew = bmphand->tissues_pt(handler3D->active_tissuelayer(), p);
+				m_Tissuenrnew = m_Bmphand->TissuesPt(m_Handler3D->ActiveTissuelayer(), p);
 		}
 
-		emit begin_datachange(dataSelection, this);
-		if (brush_params->_target->isChecked())
+		emit BeginDatachange(data_selection, this);
+		if (m_BrushParams->m_Target->isChecked())
 		{
-			if (brush_params->_unit_mm->isChecked())
-				bmphand->brush(f, p, radius, spacing[0], spacing[1], draw);
+			if (m_BrushParams->m_UnitMm->isChecked())
+				m_Bmphand->Brush(f, p, radius, m_Spacing[0], m_Spacing[1], m_Draw);
 			else
-				bmphand->brush(f, p, static_cast<int>(radius), draw);
+				m_Bmphand->Brush(f, p, static_cast<int>(radius), m_Draw);
 		}
 		else
 		{
-			auto idx = handler3D->active_tissuelayer();
-			if (brush_params->_unit_mm->isChecked())
-				bmphand->brushtissue(idx, tissuenr, p, radius, spacing[0], spacing[1], draw, tissuenrnew);
+			auto idx = m_Handler3D->ActiveTissuelayer();
+			if (m_BrushParams->m_UnitMm->isChecked())
+				m_Bmphand->Brushtissue(idx, m_Tissuenr, p, radius, m_Spacing[0], m_Spacing[1], m_Draw, m_Tissuenrnew);
 			else
-				bmphand->brushtissue(idx, tissuenr, p, static_cast<int>(radius), draw, tissuenrnew);
+				m_Bmphand->Brushtissue(idx, m_Tissuenr, p, static_cast<int>(radius), m_Draw, m_Tissuenrnew);
 		}
-		emit end_datachange(this, iseg::NoUndo);
+		emit EndDatachange(this, iseg::NoUndo);
 
-		draw_circle(p);
+		DrawCircle(p);
 	}
 }
 
-void OutlineCorrectionWidget::on_mouse_moved(Point p)
+void OutlineCorrectionWidget::OnMouseMoved(Point p)
 {
-	if (!selectobj && !copy_mode)
+	if (!m_Selectobj && !m_CopyMode)
 	{
-		float const f = get_object_value();
-		float const radius = brush_params->_radius->text().toFloat();
+		float const f = GetObjectValue();
+		float const radius = m_BrushParams->m_Radius->text().toFloat();
 
-		if (olcorr->isChecked())
+		if (m_Olcorr->isChecked())
 		{
-			vpdyn.pop_back();
-			addLine(&vpdyn, last_pt, p);
-			last_pt = p;
-			emit vpdyn_changed(&vpdyn);
+			m_Vpdyn.pop_back();
+			addLine(&m_Vpdyn, m_LastPt, p);
+			m_LastPt = p;
+			emit VpdynChanged(&m_Vpdyn);
 		}
-		else if (brush->isChecked())
+		else if (m_Brush->isChecked())
 		{
-			draw_circle(p);
+			DrawCircle(p);
 
 			std::vector<Point> vps;
 			vps.clear();
-			addLine(&vps, last_pt, p);
+			addLine(&vps, m_LastPt, p);
 			for (auto it = ++(vps.begin()); it != vps.end(); it++)
 			{
-				if (brush_params->_target->isChecked())
+				if (m_BrushParams->m_Target->isChecked())
 				{
-					if (brush_params->_unit_mm->isChecked())
-						bmphand->brush(f, *it, radius, spacing[0], spacing[1], draw);
+					if (m_BrushParams->m_UnitMm->isChecked())
+						m_Bmphand->Brush(f, *it, radius, m_Spacing[0], m_Spacing[1], m_Draw);
 					else
-						bmphand->brush(f, *it, static_cast<int>(radius), draw);
+						m_Bmphand->Brush(f, *it, static_cast<int>(radius), m_Draw);
 				}
 				else
 				{
-					auto idx = handler3D->active_tissuelayer();
-					if (brush_params->_unit_mm->isChecked())
-						bmphand->brushtissue(
-								idx, tissuenr, *it, radius, spacing[0], spacing[1], draw, tissuenrnew);
+					auto idx = m_Handler3D->ActiveTissuelayer();
+					if (m_BrushParams->m_UnitMm->isChecked())
+						m_Bmphand->Brushtissue(idx, m_Tissuenr, *it, radius, m_Spacing[0], m_Spacing[1], m_Draw, m_Tissuenrnew);
 					else
-						bmphand->brushtissue(idx, tissuenr, *it, static_cast<int>(radius), draw, tissuenrnew);
+						m_Bmphand->Brushtissue(idx, m_Tissuenr, *it, static_cast<int>(radius), m_Draw, m_Tissuenrnew);
 				}
 			}
-			emit end_datachange(this, iseg::NoUndo);
-			last_pt = p;
+			emit EndDatachange(this, iseg::NoUndo);
+			m_LastPt = p;
 		}
 	}
 }
 
-void OutlineCorrectionWidget::on_mouse_released(Point p)
+void OutlineCorrectionWidget::OnMouseReleased(Point p)
 {
-	if (selectobj || copy_mode)
+	if (m_Selectobj || m_CopyMode)
 	{
-		selectobj = copy_mode = false;
+		m_Selectobj = m_CopyMode = false;
 	}
 	else
 	{
-		float const f = get_object_value();
+		float const f = GetObjectValue();
 
-		if (olcorr->isChecked())
+		if (m_Olcorr->isChecked())
 		{
-			vpdyn.pop_back();
-			addLine(&vpdyn, last_pt, p);
-			if (olc_params->_target->isChecked())
-				bmphand->correct_outline(f, &vpdyn);
+			m_Vpdyn.pop_back();
+			addLine(&m_Vpdyn, m_LastPt, p);
+			if (m_OlcParams->m_Target->isChecked())
+				m_Bmphand->CorrectOutline(f, &m_Vpdyn);
 			else
-				bmphand->correct_outlinetissue(handler3D->active_tissuelayer(), tissuenr, &vpdyn);
-			emit end_datachange(this);
+				m_Bmphand->CorrectOutlinetissue(m_Handler3D->ActiveTissuelayer(), m_Tissuenr, &m_Vpdyn);
+			emit EndDatachange(this);
 
-			vpdyn.clear();
-			emit vpdyn_changed(&vpdyn);
+			m_Vpdyn.clear();
+			emit VpdynChanged(&m_Vpdyn);
 		}
-		else if (brush->isChecked())
+		else if (m_Brush->isChecked())
 		{
-			float const radius = brush_params->_radius->text().toFloat();
+			float const radius = m_BrushParams->m_Radius->text().toFloat();
 
-			vpdyn.clear();
-			addLine(&vpdyn, last_pt, p);
-			if (brush_params->_unit_mm->isChecked())
+			m_Vpdyn.clear();
+			addLine(&m_Vpdyn, m_LastPt, p);
+			if (m_BrushParams->m_UnitMm->isChecked())
 			{
-				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
+				for (auto it = ++(m_Vpdyn.begin()); it != m_Vpdyn.end(); it++)
 				{
-					if (brush_params->_target->isChecked())
+					if (m_BrushParams->m_Target->isChecked())
 					{
-						bmphand->brush(f, *it, radius, spacing[0], spacing[1], draw);
+						m_Bmphand->Brush(f, *it, radius, m_Spacing[0], m_Spacing[1], m_Draw);
 					}
 					else
 					{
-						auto layer = handler3D->active_tissuelayer();
-						bmphand->brushtissue(layer, tissuenr, *it, radius, spacing[0], spacing[1], draw, tissuenrnew);
+						auto layer = m_Handler3D->ActiveTissuelayer();
+						m_Bmphand->Brushtissue(layer, m_Tissuenr, *it, radius, m_Spacing[0], m_Spacing[1], m_Draw, m_Tissuenrnew);
 					}
 				}
 			}
 			else
 			{
 				auto pixel_radius = static_cast<int>(radius);
-				for (auto it = ++(vpdyn.begin()); it != vpdyn.end(); it++)
+				for (auto it = ++(m_Vpdyn.begin()); it != m_Vpdyn.end(); it++)
 				{
-					if (brush_params->_target->isChecked())
+					if (m_BrushParams->m_Target->isChecked())
 					{
-						bmphand->brush(f, *it, pixel_radius, draw);
+						m_Bmphand->Brush(f, *it, pixel_radius, m_Draw);
 					}
 					else
 					{
-						auto layer = handler3D->active_tissuelayer();
-						bmphand->brushtissue(layer, tissuenr, *it, pixel_radius, draw, tissuenrnew);
+						auto layer = m_Handler3D->ActiveTissuelayer();
+						m_Bmphand->Brushtissue(layer, m_Tissuenr, *it, pixel_radius, m_Draw, m_Tissuenrnew);
 					}
 				}
 			}
 
-			emit end_datachange(this);
+			emit EndDatachange(this);
 
-			vpdyn.clear();
-			emit vpdyn_changed(&vpdyn);
+			m_Vpdyn.clear();
+			emit VpdynChanged(&m_Vpdyn);
 		}
 	}
 }
 
-void OutlineCorrectionWidget::method_changed()
+void OutlineCorrectionWidget::MethodChanged()
 {
-	if (_widget_page.count(methods->checkedButton()))
+	if (widget_page.count(m_Methods->checkedButton()))
 	{
-		stacked_params->setCurrentIndex(_widget_page[methods->checkedButton()]);
+		m_StackedParams->setCurrentIndex(widget_page[m_Methods->checkedButton()]);
 	}
 
 	// keep selected object definition across tools
-	auto new_widget = dynamic_cast<ParamViewBase*>(stacked_params->currentWidget());
-	if (current_params)
+	auto new_widget = dynamic_cast<ParamViewBase*>(m_StackedParams->currentWidget());
+	if (m_CurrentParams)
 	{
-		new_widget->set_work(current_params->work());
-		new_widget->set_object_value(current_params->object_value());
+		new_widget->SetWork(m_CurrentParams->Work());
+		new_widget->SetObjectValue(m_CurrentParams->ObjectValue());
 	}
-	current_params = new_widget;
-	current_params->init();
+	m_CurrentParams = new_widget;
+	m_CurrentParams->Init();
 
 	// make sure we are not expecting a mouse click
-	selectobj = false;
+	m_Selectobj = false;
 	// ensure this is reset
-	copy_mode = false;
+	m_CopyMode = false;
 
-	draw_guide();
+	DrawGuide();
 }
 
-void OutlineCorrectionWidget::execute_pushed()
+void OutlineCorrectionWidget::ExecutePushed()
 {
-	float const f = get_object_value();
+	float const f = GetObjectValue();
 
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
 
-	if (holefill->isChecked())
+	if (m_Holefill->isChecked())
 	{
-		dataSelection.allSlices = fill_holes_params->_all_slices->isChecked();
-		dataSelection.work = fill_holes_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		data_selection.allSlices = m_FillHolesParams->m_AllSlices->isChecked();
+		data_selection.work = m_FillHolesParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		auto hole_size = fill_holes_params->_object_size->value();
-		if (dataSelection.allSlices)
+		auto hole_size = m_FillHolesParams->m_ObjectSize->value();
+		if (data_selection.allSlices)
 		{
-			if (dataSelection.work)
-				handler3D->fill_holes(f, hole_size);
+			if (data_selection.work)
+				m_Handler3D->FillHoles(f, hole_size);
 			else
-				handler3D->fill_holestissue(tissuenr, hole_size);
+				m_Handler3D->FillHolestissue(m_Tissuenr, hole_size);
 		}
 		else
 		{
-			if (dataSelection.work)
-				bmphand->fill_holes(f, hole_size);
+			if (data_selection.work)
+				m_Bmphand->FillHoles(f, hole_size);
 			else
-				bmphand->fill_holestissue(handler3D->active_tissuelayer(), tissuenr, hole_size);
+				m_Bmphand->FillHolestissue(m_Handler3D->ActiveTissuelayer(), m_Tissuenr, hole_size);
 		}
 	}
-	else if (removeislands->isChecked())
+	else if (m_Removeislands->isChecked())
 	{
-		dataSelection.allSlices = remove_islands_params->_all_slices->isChecked();
-		dataSelection.work = remove_islands_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		data_selection.allSlices = m_RemoveIslandsParams->m_AllSlices->isChecked();
+		data_selection.work = m_RemoveIslandsParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		auto island_size = remove_islands_params->_object_size->value();
-		if (dataSelection.allSlices)
+		auto island_size = m_RemoveIslandsParams->m_ObjectSize->value();
+		if (data_selection.allSlices)
 		{
-			if (dataSelection.work)
-				handler3D->remove_islands(f, island_size);
+			if (data_selection.work)
+				m_Handler3D->RemoveIslands(f, island_size);
 			else
-				handler3D->remove_islandstissue(tissuenr, island_size);
+				m_Handler3D->RemoveIslandstissue(m_Tissuenr, island_size);
 		}
 		else
 		{
-			if (dataSelection.work)
-				bmphand->remove_islands(f, island_size);
+			if (data_selection.work)
+				m_Bmphand->RemoveIslands(f, island_size);
 			else
-				bmphand->remove_islandstissue(handler3D->active_tissuelayer(), tissuenr, island_size);
+				m_Bmphand->RemoveIslandstissue(m_Handler3D->ActiveTissuelayer(), m_Tissuenr, island_size);
 		}
 	}
-	else if (gapfill->isChecked())
+	else if (m_Gapfill->isChecked())
 	{
-		dataSelection.allSlices = fill_gaps_params->_all_slices->isChecked();
-		dataSelection.work = fill_gaps_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		data_selection.allSlices = m_FillGapsParams->m_AllSlices->isChecked();
+		data_selection.work = m_FillGapsParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		auto gap_size = fill_gaps_params->_object_size->value();
-		if (dataSelection.allSlices)
+		auto gap_size = m_FillGapsParams->m_ObjectSize->value();
+		if (data_selection.allSlices)
 		{
-			if (dataSelection.work)
-				handler3D->fill_gaps(gap_size, false);
+			if (data_selection.work)
+				m_Handler3D->FillGaps(gap_size, false);
 			else
-				handler3D->fill_gapstissue(gap_size, false);
+				m_Handler3D->FillGapstissue(gap_size, false);
 		}
 		else
 		{
-			if (dataSelection.work)
-				bmphand->fill_gaps(gap_size, false);
+			if (data_selection.work)
+				m_Bmphand->FillGaps(gap_size, false);
 			else
-				bmphand->fill_gapstissue(handler3D->active_tissuelayer(), gap_size, false);
+				m_Bmphand->FillGapstissue(m_Handler3D->ActiveTissuelayer(), gap_size, false);
 		}
 	}
-	else if (addskin->isChecked())
+	else if (m_Addskin->isChecked())
 	{
-		dataSelection.allSlices = add_skin_params->_all_slices->isChecked();
-		dataSelection.work = add_skin_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		data_selection.allSlices = m_AddSkinParams->m_AllSlices->isChecked();
+		data_selection.work = m_AddSkinParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		auto radius = add_skin_params->_thickness->text().toFloat();
-		auto mm_unit = add_skin_params->_unit_mm->isChecked();
-		auto outside = add_skin_params->_outside->isChecked();
+		auto radius = m_AddSkinParams->m_Thickness->text().toFloat();
+		auto mm_unit = m_AddSkinParams->m_UnitMm->isChecked();
+		auto outside = m_AddSkinParams->m_Outside->isChecked();
 
-		int const rx = mm_unit ? static_cast<int>(radius / spacing[0] + 0.1f) : radius;
-		int const ry = mm_unit ? static_cast<int>(radius / spacing[1] + 0.1f) : radius;
-		int const rz = mm_unit ? static_cast<int>(radius / spacing[2] + 0.1f) : radius;
-		bool atBoundary = false;
+		int const rx = mm_unit ? static_cast<int>(radius / m_Spacing[0] + 0.1f) : radius;
+		int const ry = mm_unit ? static_cast<int>(radius / m_Spacing[1] + 0.1f) : radius;
+		int const rz = mm_unit ? static_cast<int>(radius / m_Spacing[2] + 0.1f) : radius;
+		bool at_boundary = false;
 		if (outside)
 		{
-			if (dataSelection.allSlices)
+			if (data_selection.allSlices)
 			{
 				if (mm_unit)
 				{
 					// \warning creates block shaped kernel, instead of ellipsoid
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = handler3D->add_skin3D_outside2(rx, ry, rz);
-						atBoundary = handler3D->value_at_boundary3D(setto);
+						float setto = m_Handler3D->AddSkin3DOutside2(rx, ry, rz);
+						at_boundary = m_Handler3D->ValueAtBoundary3D(setto);
 					}
 					else
 					{
-						handler3D->add_skintissue3D_outside2(rx, ry, rz, tissuenr);
-						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
+						m_Handler3D->AddSkintissue3DOutside2(rx, ry, rz, m_Tissuenr);
+						at_boundary = m_Handler3D->TissuevalueAtBoundary3D(m_Tissuenr);
 					}
 				}
 				else
 				{
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = handler3D->add_skin3D_outside(rx);
-						atBoundary = handler3D->value_at_boundary3D(setto);
+						float setto = m_Handler3D->AddSkin3DOutside(rx);
+						at_boundary = m_Handler3D->ValueAtBoundary3D(setto);
 					}
 					else
 					{
-						handler3D->add_skintissue3D_outside(rx, tissuenr);
-						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
+						m_Handler3D->AddSkintissue3DOutside(rx, m_Tissuenr);
+						at_boundary = m_Handler3D->TissuevalueAtBoundary3D(m_Tissuenr);
 					}
 				}
 			}
 			else // active slice
 			{
-				if (dataSelection.work)
+				if (data_selection.work)
 				{
-					float setto = bmphand->add_skin_outside(rx);
-					atBoundary = bmphand->value_at_boundary(setto);
+					float setto = m_Bmphand->AddSkinOutside(rx);
+					at_boundary = m_Bmphand->ValueAtBoundary(setto);
 				}
 				else
 				{
-					bmphand->add_skintissue_outside(handler3D->active_tissuelayer(), rx, tissuenr);
-					atBoundary = bmphand->tissuevalue_at_boundary(handler3D->active_tissuelayer(), tissuenr);
+					m_Bmphand->AddSkintissueOutside(m_Handler3D->ActiveTissuelayer(), rx, m_Tissuenr);
+					at_boundary = m_Bmphand->TissuevalueAtBoundary(m_Handler3D->ActiveTissuelayer(), m_Tissuenr);
 				}
 			}
 		}
 		else
 		{
-			if (dataSelection.allSlices)
+			if (data_selection.allSlices)
 			{
 				if (mm_unit)
 				{
 					// \warning creates block shaped kernel, instead of ellipsoid
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = handler3D->add_skin3D(rx, ry, rz);
-						atBoundary = handler3D->value_at_boundary3D(setto);
+						float setto = m_Handler3D->AddSkin3D(rx, ry, rz);
+						at_boundary = m_Handler3D->ValueAtBoundary3D(setto);
 					}
 					else
 					{
-						handler3D->add_skintissue3D(rx, ry, rz, tissuenr);
-						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
+						m_Handler3D->AddSkintissue3D(rx, ry, rz, m_Tissuenr);
+						at_boundary = m_Handler3D->TissuevalueAtBoundary3D(m_Tissuenr);
 					}
 				}
 				else
 				{
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = handler3D->add_skin3D(rx);
-						atBoundary = handler3D->value_at_boundary3D(setto);
+						float setto = m_Handler3D->AddSkin3D(rx);
+						at_boundary = m_Handler3D->ValueAtBoundary3D(setto);
 					}
 					else
 					{
-						handler3D->add_skintissue3D(rx, ry, rz, tissuenr);
-						atBoundary = handler3D->tissuevalue_at_boundary3D(tissuenr);
+						m_Handler3D->AddSkintissue3D(rx, ry, rz, m_Tissuenr);
+						at_boundary = m_Handler3D->TissuevalueAtBoundary3D(m_Tissuenr);
 					}
 				}
 			}
@@ -714,160 +700,164 @@ void OutlineCorrectionWidget::execute_pushed()
 				if (mm_unit)
 				{
 					// \warning if spacing is anisotropic, skin thickness will be non-uniform
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = bmphand->add_skin(rx);
-						atBoundary = bmphand->value_at_boundary(setto);
+						float setto = m_Bmphand->AddSkin(rx);
+						at_boundary = m_Bmphand->ValueAtBoundary(setto);
 					}
 					else
 					{
-						bmphand->add_skintissue(handler3D->active_tissuelayer(), rx, tissuenr);
-						atBoundary = bmphand->tissuevalue_at_boundary(handler3D->active_tissuelayer(), tissuenr);
+						m_Bmphand->AddSkintissue(m_Handler3D->ActiveTissuelayer(), rx, m_Tissuenr);
+						at_boundary = m_Bmphand->TissuevalueAtBoundary(m_Handler3D->ActiveTissuelayer(), m_Tissuenr);
 					}
 				}
 				else
 				{
-					if (dataSelection.work)
+					if (data_selection.work)
 					{
-						float setto = bmphand->add_skin(rx);
-						atBoundary = bmphand->value_at_boundary(setto);
+						float setto = m_Bmphand->AddSkin(rx);
+						at_boundary = m_Bmphand->ValueAtBoundary(setto);
 					}
 					else
 					{
-						bmphand->add_skintissue(handler3D->active_tissuelayer(), rx, tissuenr);
-						atBoundary = bmphand->tissuevalue_at_boundary(handler3D->active_tissuelayer(), tissuenr);
+						m_Bmphand->AddSkintissue(m_Handler3D->ActiveTissuelayer(), rx, m_Tissuenr);
+						at_boundary = m_Bmphand->TissuevalueAtBoundary(m_Handler3D->ActiveTissuelayer(), m_Tissuenr);
 					}
 				}
 			}
 		}
-		if (atBoundary)
+		if (at_boundary)
 		{
-			QMessageBox::information(this, "iSeg",
-					"Information:\nThe skin partially touches "
-					"or\nintersects with the boundary.");
+			QMessageBox::information(this, "iSeg", "Information:\nThe skin partially touches "
+																						 "or\nintersects with the boundary.");
 		}
 	}
-	else if (fillskin->isChecked())
+	else if (m_Fillskin->isChecked())
 	{
-		float mm_rad = fill_skin_params->_thickness->text().toFloat();
-		bool mm_unit = fill_skin_params->_unit_mm->isChecked();
-		int const xThick = mm_unit ? static_cast<int>(mm_rad / spacing[0] + 0.1f) : mm_rad;
-		int const yThick = mm_unit ? static_cast<int>(mm_rad / spacing[1] + 0.1f) : mm_rad;
-		int const zThick = mm_unit ? static_cast<int>(mm_rad / spacing[2] + 0.1f) : mm_rad;
+		float mm_rad = m_FillSkinParams->m_Thickness->text().toFloat();
+		bool mm_unit = m_FillSkinParams->m_UnitMm->isChecked();
+		int const x_thick = mm_unit ? static_cast<int>(mm_rad / m_Spacing[0] + 0.1f) : mm_rad;
+		int const y_thick = mm_unit ? static_cast<int>(mm_rad / m_Spacing[1] + 0.1f) : mm_rad;
+		int const z_thick = mm_unit ? static_cast<int>(mm_rad / m_Spacing[2] + 0.1f) : mm_rad;
 
-		auto selectedBackgroundID = fill_skin_params->_background_value->text().toInt();
-		auto selectedSkinID = fill_skin_params->_skin_value->text().toInt();
-		if (fill_skin_params->_all_slices->isChecked())
-			handler3D->fill_skin_3d(xThick, yThick, zThick, selectedBackgroundID, selectedSkinID);
+		auto selected_background_id = m_FillSkinParams->m_BackgroundValue->text().toInt();
+		auto selected_skin_id = m_FillSkinParams->m_SkinValue->text().toInt();
+		if (m_FillSkinParams->m_AllSlices->isChecked())
+			m_Handler3D->FillSkin3d(x_thick, y_thick, z_thick, selected_background_id, selected_skin_id);
 		else
-			bmphand->fill_skin(xThick, yThick, selectedBackgroundID, selectedSkinID);
+			m_Bmphand->FillSkin(x_thick, y_thick, selected_background_id, selected_skin_id);
 	}
-	else if (allfill->isChecked())
+	else if (m_Allfill->isChecked())
 	{
-		dataSelection.allSlices = fill_all_params->_all_slices->isChecked();
-		dataSelection.work = fill_all_params->_target->isChecked();
-		dataSelection.tissues = !dataSelection.work;
-		emit begin_datachange(dataSelection, this);
+		data_selection.allSlices = m_FillAllParams->m_AllSlices->isChecked();
+		data_selection.work = m_FillAllParams->m_Target->isChecked();
+		data_selection.tissues = !data_selection.work;
+		emit BeginDatachange(data_selection, this);
 
-		if (dataSelection.allSlices)
+		if (data_selection.allSlices)
 		{
-			if (dataSelection.work)
-				handler3D->fill_unassigned();
+			if (data_selection.work)
+				m_Handler3D->FillUnassigned();
 			else
-				handler3D->fill_unassignedtissue(tissuenr);
+				m_Handler3D->FillUnassignedtissue(m_Tissuenr);
 		}
 		else
 		{
-			if (dataSelection.work)
-				bmphand->fill_unassigned();
+			if (data_selection.work)
+				m_Bmphand->FillUnassigned();
 			else
-				bmphand->fill_unassignedtissue(handler3D->active_tissuelayer(), tissuenr);
+				m_Bmphand->FillUnassignedtissue(m_Handler3D->ActiveTissuelayer(), m_Tissuenr);
 		}
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
-void OutlineCorrectionWidget::selectobj_pushed()
+void OutlineCorrectionWidget::SelectobjPushed()
 {
-	selectobj = true;
+	m_Selectobj = true;
 }
 
-void OutlineCorrectionWidget::copy_pick_pushed()
+void OutlineCorrectionWidget::CopyPickPushed()
 {
-	selectobj = true;
-	copy_mode = true;
-	brush_params->_copy_pick_guide->setChecked(true);
+	m_Selectobj = true;
+	m_CopyMode = true;
+	m_BrushParams->m_CopyPickGuide->setChecked(true);
 }
 
-void OutlineCorrectionWidget::workbits_changed()
+void OutlineCorrectionWidget::WorkbitsChanged()
 {
-	float const f = get_object_value();
+	float const f = GetObjectValue();
 
-	bmphand = handler3D->get_activebmphandler();
-	float* workbits = bmphand->return_work();
-	unsigned area = unsigned(bmphand->return_width()) * bmphand->return_height();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	float* workbits = m_Bmphand->ReturnWork();
+	unsigned area = unsigned(m_Bmphand->ReturnWidth()) * m_Bmphand->ReturnHeight();
 	unsigned i = 0;
 	while (i < area && workbits[i] != f)
 		i++;
 	if (i == area)
 	{
 		Pair p;
-		bmphand->get_range(&p);
+		m_Bmphand->GetRange(&p);
 		if (p.high > p.low)
 		{
-			current_params->set_object_value(p.high);
+			m_CurrentParams->SetObjectValue(p.high);
 		}
 	}
 }
 
-void OutlineCorrectionWidget::on_slicenr_changed()
+void OutlineCorrectionWidget::OnSlicenrChanged()
 {
-	if (activeslice != handler3D->active_slice())
+	if (m_Activeslice != m_Handler3D->ActiveSlice())
 	{
-		activeslice = handler3D->active_slice();
-		bmphand_changed(handler3D->get_activebmphandler());
+		m_Activeslice = m_Handler3D->ActiveSlice();
+		BmphandChanged(m_Handler3D->GetActivebmphandler());
 	}
 	else
 	{
-		workbits_changed();
+		WorkbitsChanged();
 	}
-	draw_guide();
+	DrawGuide();
 }
 
-void OutlineCorrectionWidget::bmphand_changed(bmphandler* bmph)
+void OutlineCorrectionWidget::BmphandChanged(Bmphandler* bmph)
 {
-	bmphand = bmph;
-	workbits_changed();
+	m_Bmphand = bmph;
+	WorkbitsChanged();
 }
 
-void OutlineCorrectionWidget::init()
+void OutlineCorrectionWidget::WorkChanged()
 {
-	on_slicenr_changed();
-	hideparams_changed();
-	spacing = handler3D->spacing();
+	WorkbitsChanged();
 }
 
-void OutlineCorrectionWidget::newloaded()
+void OutlineCorrectionWidget::Init()
 {
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
-	spacing = handler3D->spacing();
-	draw_guide();
+	OnSlicenrChanged();
+	HideParamsChanged();
+	m_Spacing = m_Handler3D->Spacing();
 }
 
-void OutlineCorrectionWidget::on_tissuenr_changed(int tissuenr1)
+void OutlineCorrectionWidget::NewLoaded()
 {
-	tissuenr = (tissues_size_t)(tissuenr1 + 1);
-	draw_guide();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	m_Spacing = m_Handler3D->Spacing();
+	DrawGuide();
 }
 
-void OutlineCorrectionWidget::cleanup()
+void OutlineCorrectionWidget::OnTissuenrChanged(int tissuenr1)
 {
-	vpdyn.clear();
-	emit vpdyn_changed(&vpdyn);
+	m_Tissuenr = (tissues_size_t)(tissuenr1 + 1);
+	DrawGuide();
+}
+
+void OutlineCorrectionWidget::Cleanup()
+{
+	m_Vpdyn.clear();
+	emit VpdynChanged(&m_Vpdyn);
 	std::vector<Mark> vm;
-	emit vm_changed(&vm);
+	emit VmChanged(&vm);
 }
 
 FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
@@ -875,43 +865,43 @@ FILE* OutlineCorrectionWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = static_cast<int>(brush_params->_radius->text().toFloat());
+		dummy = static_cast<int>(m_BrushParams->m_Radius->text().toFloat());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = fill_holes_params->_object_size->value();
+		dummy = m_FillHolesParams->m_ObjectSize->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = fill_gaps_params->_object_size->value();
+		dummy = m_FillGapsParams->m_ObjectSize->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush->isChecked());
+		dummy = (int)(m_Brush->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(olcorr->isChecked());
+		dummy = (int)(m_Olcorr->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(holefill->isChecked() || removeislands->isChecked());
+		dummy = (int)(m_Holefill->isChecked() || m_Removeislands->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(gapfill->isChecked());
+		dummy = (int)(m_Gapfill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(allfill->isChecked());
+		dummy = (int)(m_Allfill->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(addskin->isChecked());
+		dummy = (int)(m_Addskin->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(fillskin->isChecked());
+		dummy = (int)(m_Fillskin->isChecked());
 		//fwrite(&(dummy), 1,sizeof(int), fp);
-		dummy = (current_params->work() ? 0 : 1);
+		dummy = (m_CurrentParams->Work() ? 0 : 1);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (current_params->work() ? 1 : 0);
+		dummy = (m_CurrentParams->Work() ? 1 : 0);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_erase->isChecked());
+		dummy = (int)(m_BrushParams->m_Erase->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_draw->isChecked());
+		dummy = (int)(m_BrushParams->m_Draw->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(brush_params->_modify->isChecked());
+		dummy = (int)(m_BrushParams->m_Modify->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(smooth_tissues->isChecked());
+		dummy = (int)(m_SmoothTissues->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(add_skin_params->_inside->isChecked());
+		dummy = (int)(m_AddSkinParams->m_Inside->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(add_skin_params->_outside->isChecked());
+		dummy = (int)(m_AddSkinParams->m_Outside->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(fill_holes_params->_all_slices->isChecked());
+		dummy = (int)(m_FillHolesParams->m_AllSlices->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -922,117 +912,117 @@ FILE* OutlineCorrectionWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		disconnect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+		QObject_disconnect(m_Methods, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged()));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		brush_params->_radius->setText(QString::number(dummy));
+		m_BrushParams->m_Radius->setText(QString::number(dummy));
 		fread(&dummy, sizeof(int), 1, fp);
-		fill_holes_params->_object_size->setValue(dummy);
+		m_FillHolesParams->m_ObjectSize->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		fill_gaps_params->_object_size->setValue(dummy);
+		m_FillGapsParams->m_ObjectSize->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush->setChecked(dummy != 0);
+		m_Brush->setChecked(dummy != 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		olcorr->setChecked(dummy > 0);
+		m_Olcorr->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		holefill->setChecked(dummy > 0);
+		m_Holefill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		gapfill->setChecked(dummy > 0);
+		m_Gapfill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		allfill->setChecked(dummy > 0);
+		m_Allfill->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		addskin->setChecked(dummy > 0);
+		m_Addskin->setChecked(dummy > 0);
 
 		//fread(&dummy,sizeof(int), 1, fp);
-		fillskin->setChecked(false);
+		m_Fillskin->setChecked(false);
 
 		fread(&dummy, sizeof(int), 1, fp);
 		// tissue & work is exclusive;
 		fread(&dummy, sizeof(int), 1, fp);
-		current_params->set_work(dummy != 0);
+		m_CurrentParams->SetWork(dummy != 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush_params->_erase->setChecked(dummy > 0);
+		m_BrushParams->m_Erase->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush_params->_draw->setChecked(dummy > 0);
+		m_BrushParams->m_Draw->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		brush_params->_modify->setChecked(dummy > 0);
+		m_BrushParams->m_Modify->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		smooth_tissues->setChecked(dummy > 0); //BL used to be 'adapt'
+		m_SmoothTissues->setChecked(dummy > 0); //BL used to be 'adapt'
 		fread(&dummy, sizeof(int), 1, fp);
-		add_skin_params->_inside->setChecked(dummy > 0);
+		m_AddSkinParams->m_Inside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		add_skin_params->_outside->setChecked(dummy > 0);
+		m_AddSkinParams->m_Outside->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		fill_holes_params->_all_slices->setChecked(dummy > 0);
+		m_FillHolesParams->m_AllSlices->setChecked(dummy > 0);
 
-		method_changed();
+		MethodChanged();
 
-		connect(methods, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
+		QObject_connect(m_Methods, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged()));
 	}
 	return fp;
 }
 
-void OutlineCorrectionWidget::hideparams_changed() { method_changed(); }
+void OutlineCorrectionWidget::HideParamsChanged() { MethodChanged(); }
 
-float OutlineCorrectionWidget::get_object_value() const
+float OutlineCorrectionWidget::GetObjectValue() const
 {
-	if (current_params)
+	if (m_CurrentParams)
 	{
-		return current_params->object_value();
+		return m_CurrentParams->ObjectValue();
 	}
 	return 0.f;
 }
 
-void OutlineCorrectionWidget::carve_pushed()
+void OutlineCorrectionWidget::CarvePushed()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true;
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
+	DataSelection data_selection;
+	data_selection.allSlices = true;
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this);
 
 	using label_image_type = itk::SliceContiguousImage<unsigned short>;
 	using target_image_type = itk::SliceContiguousImage<float>;
 	using image_type = itk::Image<unsigned char, 3>;
 
-	SlicesHandlerITKInterface wrapper(handler3D);
+	SlicesHandlerITKInterface wrapper(m_Handler3D);
 	auto tissues = wrapper.GetTissues(true);
 	auto target = wrapper.GetTarget(true);
 
-	const unsigned char FG = 255;
+	const unsigned char fg = 255;
 
 	image_type::Pointer input;
-	if (spherize_params->work())
+	if (m_SpherizeParams->Work())
 	{
 		auto threshold = itk::BinaryThresholdImageFilter<target_image_type, image_type>::New();
 		threshold->SetInput(target);
-		threshold->SetLowerThreshold(spherize_params->object_value());
-		threshold->SetUpperThreshold(spherize_params->object_value());
-		threshold->SetInsideValue(FG);
+		threshold->SetLowerThreshold(m_SpherizeParams->ObjectValue());
+		threshold->SetUpperThreshold(m_SpherizeParams->ObjectValue());
+		threshold->SetInsideValue(fg);
 		threshold->SetOutsideValue(0);
 		threshold->Update();
 		input = threshold->GetOutput();
 	}
-	else if (handler3D->tissue_selection().size() == 1)
+	else if (m_Handler3D->TissueSelection().size() == 1)
 	{
-		auto selected_tissue = handler3D->tissue_selection().front();
+		auto selected_tissue = m_Handler3D->TissueSelection().front();
 
 		auto threshold = itk::BinaryThresholdImageFilter<label_image_type, image_type>::New();
 		threshold->SetInput(tissues);
 		threshold->SetLowerThreshold(selected_tissue);
 		threshold->SetUpperThreshold(selected_tissue);
-		threshold->SetInsideValue(FG);
+		threshold->SetInsideValue(fg);
 		threshold->SetOutsideValue(0);
 		threshold->Update();
 		input = threshold->GetOutput();
 	}
 
 	image_type::Pointer output;
-	if (spherize_params->_carve_inside->isChecked())
+	if (m_SpherizeParams->m_CarveInside->isChecked())
 	{
 		auto carve = itk::FixTopologyCarveInside<image_type, image_type>::New();
 		carve->SetInput(input);
-		carve->SetInsideValue(FG);
+		carve->SetInsideValue(fg);
 		carve->SetOutsideValue(0);
 		carve->Update();
 		output = carve->GetOutput();
@@ -1041,7 +1031,7 @@ void OutlineCorrectionWidget::carve_pushed()
 	{
 		auto carve = itk::FixTopologyCarveOutside<image_type, image_type>::New();
 		carve->SetInput(input);
-		carve->SetInsideValue(FG);
+		carve->SetInsideValue(fg);
 		carve->SetOutsideValue(0);
 		carve->Update();
 		output = carve->GetOutput();
@@ -1050,50 +1040,46 @@ void OutlineCorrectionWidget::carve_pushed()
 	if (output)
 	{
 		iseg::Paste<image_type, target_image_type>(output, target);
-		handler3D->set_modeall(eScaleMode::kFixedRange, false);
+		m_Handler3D->SetModeall(eScaleMode::kFixedRange, false);
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
-// \note this is maybe a model of how execute callbacks could be implemented in the future, instead of all via code in bmphandler/slicehandler...
-void OutlineCorrectionWidget::smooth_tissues_pushed()
+// \note this is maybe a model of how execute callbacks could be implemented in the future, instead of all via code in Bmphandler/slicehandler...
+void OutlineCorrectionWidget::SmoothTissuesPushed()
 {
-	size_t start_slice = handler3D->start_slice();
-	size_t end_slice = handler3D->end_slice();
+	size_t start_slice = m_Handler3D->StartSlice();
+	size_t end_slice = m_Handler3D->EndSlice();
 
-	if (smooth_tissues_params->_active_slice->isChecked())
+	if (m_SmoothTissuesParams->m_ActiveSlice->isChecked())
 	{
-		start_slice = handler3D->active_slice();
+		start_slice = m_Handler3D->ActiveSlice();
 		end_slice = start_slice + 1;
 	}
 
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.allSlices = !smooth_tissues_params->_active_slice->isChecked();
-	dataSelection.tissues = true;
-	emit begin_datachange(dataSelection, this);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.allSlices = !m_SmoothTissuesParams->m_ActiveSlice->isChecked();
+	data_selection.tissues = true;
+	emit BeginDatachange(data_selection, this);
 
 	ProgressDialog progress("Smooth tissues", this);
-	int const split_limit = smooth_tissues_params->_split_limit->text().toInt();
+	int const split_limit = m_SmoothTissuesParams->m_SplitLimit->text().toInt();
 	if (end_slice > start_slice + split_limit &&
-			smooth_tissues_params->_3D->isChecked())
+			m_SmoothTissuesParams->m_3D->isChecked())
 	{
 		for (size_t i = start_slice; i < end_slice; i += split_limit)
 		{
-			SmoothTissues(handler3D, i, std::min(i + split_limit, end_slice),
-					smooth_tissues_params->_sigma->text().toDouble(),
-					smooth_tissues_params->_3D->isChecked(), &progress);
+			SmoothTissues(m_Handler3D, i, std::min(i + split_limit, end_slice), m_SmoothTissuesParams->m_Sigma->text().toDouble(), m_SmoothTissuesParams->m_3D->isChecked(), &progress);
 		}
 	}
 	else
 	{
-		SmoothTissues(handler3D, start_slice, end_slice,
-				smooth_tissues_params->_sigma->text().toDouble(),
-				smooth_tissues_params->_3D->isChecked(), &progress);
+		SmoothTissues(m_Handler3D, start_slice, end_slice, m_SmoothTissuesParams->m_Sigma->text().toDouble(), m_SmoothTissuesParams->m_3D->isChecked(), &progress);
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
 } // namespace iseg

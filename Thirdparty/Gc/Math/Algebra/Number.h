@@ -31,79 +31,76 @@
 #include "../../Type.h"
 #include "../Basic.h"
 
-namespace Gc
+namespace Gc {
+namespace Math {
+namespace Algebra {
+/** Greates common divisor. */
+template <class T>
+T Gcd(T a, T b)
 {
-    namespace Math
+    a = Abs(a);
+    b = Abs(b);
+
+    while (b != 0)
     {
-        namespace Algebra
-        {
-            /** Greates common divisor. */
-            template <class T>
-            T Gcd (T a, T b)
-            {
-                a = Abs(a);
-                b = Abs(b);
-
-                while (b != 0)
-                {
-                    T t = b;
-                    b = a % b;
-                    a = t;
-                }
-
-                return a;
-            }
-
-            /** Greates common divisor. */
-            template <class T>
-            T Gcd (T a, T b, T c)
-            {
-                return Gcd(a, Gcd(b,c));
-            }
-
-            /** Greates common divisor. */
-            template <class T>
-            T Gcd (const T *v, Size sz)
-            {
-                T t = 0;
-
-                for (Size i = 0; i < sz; i++)
-                {
-                    t = Gcd(t, v[i]);
-                }
-
-                return t;
-            }
-
-            /** Least common multiple. */
-            template <class T>
-            T Lcm (T a, T b)
-            {
-                return (a / Gcd(a,b)) * b;
-            }
-
-            /** Least common multiple. */
-            template <class T>
-            T Lcm (T a, T b, T c)
-            {     
-                return Lcm(a, Lcm(b,c));
-            }
-
-            /** Least common multiple. */
-            template <class T>
-            T Lcm (const T *v, Size sz)
-            {
-                T t = 1;
-
-                for (Size i = 0; i < sz; i++)
-                {
-                    t = Lcm(t, v[i]);
-                }
-
-                return t;
-            }
-        }
+        T t = b;
+        b = a % b;
+        a = t;
     }
+
+    return a;
 }
+
+/** Greates common divisor. */
+template <class T>
+T Gcd(T a, T b, T c)
+{
+    return Gcd(a, Gcd(b, c));
+}
+
+/** Greates common divisor. */
+template <class T>
+T Gcd(const T * v, Size sz)
+{
+    T t = 0;
+
+    for (Size i = 0; i < sz; i++)
+    {
+        t = Gcd(t, v[i]);
+    }
+
+    return t;
+}
+
+/** Least common multiple. */
+template <class T>
+T Lcm(T a, T b)
+{
+    return (a / Gcd(a, b)) * b;
+}
+
+/** Least common multiple. */
+template <class T>
+T Lcm(T a, T b, T c)
+{
+    return Lcm(a, Lcm(b, c));
+}
+
+/** Least common multiple. */
+template <class T>
+T Lcm(const T * v, Size sz)
+{
+    T t = 1;
+
+    for (Size i = 0; i < sz; i++)
+    {
+        t = Lcm(t, v[i]);
+    }
+
+    return t;
+}
+}
+}
+} // namespace Gc::Math::Algebra
 
 #endif

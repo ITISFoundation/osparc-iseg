@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,7 +20,7 @@ class QStackedWidget;
 namespace iseg {
 
 class SlicesHandler;
-class bmphandler;
+class Bmphandler;
 class ParamViewBase;
 class OLCorrParamView;
 class BrushParamView;
@@ -37,86 +37,84 @@ class OutlineCorrectionWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~OutlineCorrectionWidget() {}
-	void cleanup() override;
+	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~OutlineCorrectionWidget() override = default;
+	void Cleanup() override;
 
-	void init() override;
-	void newloaded() override;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("OLC"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("olc.png"))); }
 
-	void bmphand_changed(bmphandler* bmph);
+	void BmphandChanged(Bmphandler* bmph);
 
 private:
-	void on_tissuenr_changed(int i) override;
-	void on_slicenr_changed() override;
+	void OnTissuenrChanged(int i) override;
+	void OnSlicenrChanged() override;
 
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_released(Point p) override;
-	void on_mouse_moved(Point p) override;
+	void OnMouseClicked(Point p) override;
+	void OnMouseReleased(Point p) override;
+	void OnMouseMoved(Point p) override;
+	void WorkChanged() override;
 
-	void draw_circle(Point p);
+	void DrawCircle(Point p);
 
-	float get_object_value() const;
+	float GetObjectValue() const;
+	void WorkbitsChanged();
 
 	// parameter view
-	QButtonGroup* methods;
-	QRadioButton* olcorr;
-	QRadioButton* brush;
-	QRadioButton* holefill;
-	QRadioButton* removeislands;
-	QRadioButton* gapfill;
-	QRadioButton* addskin;
-	QRadioButton* fillskin;
-	QRadioButton* allfill;
-	QRadioButton* spherize;
-	QRadioButton* smooth_tissues;
+	QButtonGroup* m_Methods;
+	QRadioButton* m_Olcorr;
+	QRadioButton* m_Brush;
+	QRadioButton* m_Holefill;
+	QRadioButton* m_Removeislands;
+	QRadioButton* m_Gapfill;
+	QRadioButton* m_Addskin;
+	QRadioButton* m_Fillskin;
+	QRadioButton* m_Allfill;
+	QRadioButton* m_Spherize;
+	QRadioButton* m_SmoothTissues;
 
-	ParamViewBase* current_params = nullptr;
-	QStackedWidget* stacked_params;
-	OLCorrParamView* olc_params;
-	BrushParamView* brush_params;
-	FillHolesParamView* fill_holes_params;
-	FillHolesParamView* remove_islands_params;
-	FillHolesParamView* fill_gaps_params;
-	AddSkinParamView* add_skin_params;
-	FillSkinParamView* fill_skin_params;
-	FillAllParamView* fill_all_params;
-	SpherizeParamView* spherize_params;
-	SmoothTissuesParamView* smooth_tissues_params;
+	ParamViewBase* m_CurrentParams = nullptr;
+	QStackedWidget* m_StackedParams;
+	OLCorrParamView* m_OlcParams;
+	BrushParamView* m_BrushParams;
+	FillHolesParamView* m_FillHolesParams;
+	FillHolesParamView* m_RemoveIslandsParams;
+	FillHolesParamView* m_FillGapsParams;
+	AddSkinParamView* m_AddSkinParams;
+	FillSkinParamView* m_FillSkinParams;
+	FillAllParamView* m_FillAllParams;
+	SpherizeParamView* m_SpherizeParams;
+	SmoothTissuesParamView* m_SmoothTissuesParams;
 
 	// member/state variables
-	tissues_size_t tissuenr;
-	tissues_size_t tissuenrnew;
-	bool draw;
-	bool selectobj;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	Vec3 spacing;
-	Point last_pt;
+	tissues_size_t m_Tissuenr;
+	tissues_size_t m_Tissuenrnew;
+	bool m_Draw;
+	bool m_Selectobj;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
+	Vec3 m_Spacing;
+	Point m_LastPt;
 
-	std::vector<Point> vpdyn;
-	bool dontundo;
-	bool copy_mode = false;
-
-public slots:
-	void workbits_changed();
+	std::vector<Point> m_Vpdyn;
+	bool m_Dontundo;
+	bool m_CopyMode = false;
 
 private slots:
-	void method_changed();
-	void execute_pushed();
-	void selectobj_pushed();
-	void draw_guide();
-	void copy_guide(Point* p = nullptr);
-	void copy_pick_pushed();
-	void carve_pushed();
-	void smooth_tissues_pushed();
+	void MethodChanged();
+	void ExecutePushed();
+	void SelectobjPushed();
+	void DrawGuide();
+	void CopyGuide(Point* p = nullptr);
+	void CopyPickPushed();
+	void CarvePushed();
+	void SmoothTissuesPushed();
 };
 
 } // namespace iseg

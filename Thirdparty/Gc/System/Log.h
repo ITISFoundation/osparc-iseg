@@ -32,71 +32,68 @@
 #include "../Core.h"
 #include "../Type.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        /** Logging functionality. 
+namespace Gc {
+namespace System {
+/** Logging functionality. 
         
             This class is used by the library for logging purposes and
             all its output goes through it. It can be used to redirect
             the output by specifying user log target. When no logging 
             target is specified standard C output is used.
         */
-        class GC_DLL_EXPORT Log
-        {
-        public:
-            /** %Log target interface. */
-            class ITarget
-            {
-            public:
-                /** Virtual destructor. */
-                virtual ~ITarget()
-                {}
+class GC_DLL_EXPORT Log
+{
+  public:
+    /** %Log target interface. */
+    class ITarget
+    {
+      public:
+        /** Virtual destructor. */
+        virtual ~ITarget() = default;
 
-                /** %Log message. */
-                virtual void Message(const std::string &str) = 0;
+        /** %Log message. */
+        virtual void Message(const std::string & str) = 0;
 
-                /** %Log warning. */
-                virtual void Warning(const std::string &str) = 0;
+        /** %Log warning. */
+        virtual void Warning(const std::string & str) = 0;
 
-                /** %Log error. */
-                virtual void Error(const std::string &str) = 0;
-            };
+        /** %Log error. */
+        virtual void Error(const std::string & str) = 0;
+    };
 
-        private:
-            /** Active logging target. */
-            static ITarget *ms_target;
+  private:
+    /** Active logging target. */
+    static ITarget * ms_target;
 
-        public:
-            /** %Log message. */
-            static void Message(const std::string &str);
+  public:
+    /** %Log message. */
+    static void Message(const std::string & str);
 
-            /** %Log warning. */
-            static void Warning(const std::string &str);
+    /** %Log warning. */
+    static void Warning(const std::string & str);
 
-            /** %Log error. */
-            static void Error(const std::string &str);
+    /** %Log error. */
+    static void Error(const std::string & str);
 
-            /** Get current target. */
-            static ITarget *Target()
-            {
-                return ms_target;    
-            }
+    /** Get current target. */
+    static ITarget * Target()
+    {
+        return ms_target;
+    }
 
-            /** Set the logging target. 
+    /** Set the logging target. 
             
                 @param[in] target New logging target. Use NULL to
                     redirect the logging back to standard C streams.
 
                 @warning The target is not deleted automatically.
             */
-            static void SetTarget(ITarget *target)
-            {
-                ms_target = target;
-            }
-        };
+    static void SetTarget(ITarget * target)
+    {
+        ms_target = target;
     }
+};
 }
+} // namespace Gc::System
 
 #endif

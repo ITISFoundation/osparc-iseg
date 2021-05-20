@@ -34,15 +34,11 @@
 #include "../../IGridEnergy.h"
 #include "../../../Flow/IGridMaxFlow.h"
 
-namespace Gc
-{    
-	namespace Energy
-	{
-        namespace Min
-        {
-            namespace Grid
-            {
-                /** Minimize energy corresponding to a given grid labeling problem
+namespace Gc {
+namespace Energy {
+namespace Min {
+namespace Grid {
+/** Minimize energy corresponding to a given grid labeling problem
                     using the \f$\alpha\f$-expansion method.                
 
                     This method is based on the following papers:
@@ -79,15 +75,15 @@ namespace Gc
 
                     @see IGridEnergy.
                 */
-                template <Size N, class T, class L>
-                T GC_DLL_EXPORT AlphaExpansion(const IGridEnergy<N,T,L> &e, 
-                    const System::Collection::IArrayMask<N> &mask,
-                    Flow::IGridMaxFlow<N,T,T,T> &mf,
-                    Size &max_iter, 
-                    System::Collection::Array<1,L> &lab);
-            }
-        }
-	}
+template <Size N, class T, class L>
+T GC_DLL_EXPORT AlphaExpansion(const IGridEnergy<N, T, L> & e,
+                               const System::Collection::IArrayMask<N> & mask,
+                               Flow::IGridMaxFlow<N, T, T, T> & mf,
+                               Size & max_iter,
+                               System::Collection::Array<1, L> & lab);
 }
+}
+}
+} // namespace Gc::Energy::Min::Grid
 
 #endif

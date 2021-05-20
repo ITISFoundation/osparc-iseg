@@ -33,16 +33,12 @@
 #include "../../IMaxFlow.h"
 #include "../../../System/Collection/Array.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace General
-        {
-            /** Maximum flow computation methods from Push-relabel family. */
-            namespace PushRelabel
-            {
-                /** Implementation of Push-Relabel maximum flow algorithm for general directed graphs
+namespace Gc {
+namespace Flow {
+namespace General {
+/** Maximum flow computation methods from Push-relabel family. */
+namespace PushRelabel {
+/** Implementation of Push-Relabel maximum flow algorithm for general directed graphs
                     with FIFO selection rule.
 
                     This method is commonly referred to as <b>F_PRF</b> and its description can be found
@@ -84,121 +80,119 @@ namespace Gc
 
                     @see HighestLevel, FifoGap
                 */
-		        template <class TFLOW, class TCAP>
-		        class GC_DLL_EXPORT Fifo 
-                    : public IMaxFlow<TFLOW,TFLOW,TCAP>
-		        {
-                private:
-                    // Forward declaration
-			        struct Node;
+template <class TFLOW, class TCAP>
+class GC_DLL_EXPORT Fifo
+    : public IMaxFlow<TFLOW, TFLOW, TCAP>
+{
+  private:
+    // Forward declaration
+    struct Node;
 
-                    /** Structure for storing arcs in the network. */
-			        struct Arc
-			        {
-                        /** Residual capacity. */
-				        TCAP m_res_cap;
-                        /** Pointer to the next arc with the same tail. */
-				        Arc *m_next;
-                        /** Pointer to the arc going in the opposite direction. */
-				        Arc *m_sister;
-                        /** Pointer to the head node of this arc. */
-				        Node *m_head;
-			        };
+    /** Structure for storing arcs in the network. */
+    struct Arc
+    {
+        /** Residual capacity. */
+        TCAP m_res_cap;
+        /** Pointer to the next arc with the same tail. */
+        Arc * m_next;
+        /** Pointer to the arc going in the opposite direction. */
+        Arc * m_sister;
+        /** Pointer to the head node of this arc. */
+        Node * m_head;
+    };
 
-                    /** Structure used for storing nodes in the network */
-			        struct Node
-			        {
-                        /** Pointer to the first arc going from this node. */
-				        Arc *m_first;
-                        /** Currently processed arc. */
-				        Arc *m_current;
-                        /** Node excess. */
-                        TFLOW m_excess;
-                        /** Node rank (distance to the sink). */
-                        Size m_rank;
-                        /** Next active node in the FIFO queue. */
-                        Node *m_fifo_succ;
-			        };
+    /** Structure used for storing nodes in the network */
+    struct Node
+    {
+        /** Pointer to the first arc going from this node. */
+        Arc * m_first;
+        /** Currently processed arc. */
+        Arc * m_current;
+        /** Node excess. */
+        TFLOW m_excess;
+        /** Node rank (distance to the sink). */
+        Size m_rank;
+        /** Next active node in the FIFO queue. */
+        Node * m_fifo_succ;
+    };
 
-                    /** The array of nodes. */
-                    System::Collection::Array<1,Node> m_node_list;
-                    /** Node queue used during global update of ranks. */
-                    System::Collection::Array<1,Node *> m_node_queue;
-                    /** First active node in the FIFO queue. */
-                    Node *m_fifo_first;
-                    /** Last active node in the FIFO queue. */
-                    Node *m_fifo_last;
-                    /** The array of arcs. */
-                    System::Collection::Array<1,Arc> m_arc_list;
-                    /** Node count. */
-			        Size m_nodes;
-                    /** Arc count. */
-			        Size m_arcs;
-                    /** Global update frequency. */
-                    double m_glob_rel_freq;
-                    /** Total flow */
-                    TFLOW m_flow;
+    /** The array of nodes. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Node queue used during global update of ranks. */
+    System::Collection::Array<1, Node *> m_node_queue;
+    /** First active node in the FIFO queue. */
+    Node * m_fifo_first;
+    /** Last active node in the FIFO queue. */
+    Node * m_fifo_last;
+    /** The array of arcs. */
+    System::Collection::Array<1, Arc> m_arc_list;
+    /** Node count. */
+    Size m_nodes = 0;
+    /** Arc count. */
+    Size m_arcs = 0;
+    /** Global update frequency. */
+    double m_glob_rel_freq = 0.4;
+    /** Total flow */
+    TFLOW m_flow;
 
-                    /** Current stage. Used to check correct method calling order. */
-                    Uint8 m_stage;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		        public:
-			        /** Constructor. */
-			        Fifo()
-				        : m_nodes(0), m_arcs(0), m_glob_rel_freq(0.4), m_stage(0)
-			        {}
+  public:
+    /** Constructor. */
+    Fifo() = default;
 
-			        /** Destructor. */
-			        virtual ~Fifo ()
-			        {
-				        Dispose();
-			        }
+    /** Destructor. */
+    ~Fifo() override
+    {
+        Dispose();
+    }
 
-    			    virtual void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs);
-    
-	    		    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap);
+    void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs) override;
 
-		    	    virtual void SetTerminalArcCap(Size node, TFLOW csrc, TFLOW csnk);
+    void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) override;
 
-			        virtual TFLOW FindMaxFlow();
+    void SetTerminalArcCap(Size node, TFLOW csrc, TFLOW csnk) override;
 
-			        virtual Origin NodeOrigin(Size node) const;
+    TFLOW FindMaxFlow() override;
 
-			        virtual void Dispose();
+    Origin NodeOrigin(Size node) const override;
 
-                    /** Set the global update frequency.
+    void Dispose() override;
+
+    /** Set the global update frequency.
 
                         Global update is performed whenever the number of relabelings
                         exceeds the number of nodes times the global update frequency.
                     
                         @param[in] new_freq New global update frequency.
                     */
-                    void SetGlobalUpdateFrequency(double new_freq)
-                    {
-                        m_glob_rel_freq = new_freq;
-                    }
+    void SetGlobalUpdateFrequency(double new_freq)
+    {
+        m_glob_rel_freq = new_freq;
+    }
 
-                    /** Get global update frequency.
+    /** Get global update frequency.
                     
                         @return Current global update frequency.
                     */
-                    double GlobalUpdateFrequency()
-                    {
-                        return m_glob_rel_freq;
-                    }
+    double GlobalUpdateFrequency()
+    {
+        return m_glob_rel_freq;
+    }
 
-		        private:
-                    /** Global update of node ranks. 
+  private:
+    /** Global update of node ranks. 
                     
                         Performed using breadth-first search from the sink. This method has
                         to be performed regularly as it has drastical impact on the running
                         time of the algorithm.
                     */
-                    void GlobalUpdate();
-		        };
-            }
-        }
-	}
+    void GlobalUpdate();
+};
+} // namespace PushRelabel
 }
+}
+} // namespace Gc::Flow::General
 
 #endif

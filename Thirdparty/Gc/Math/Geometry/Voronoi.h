@@ -33,35 +33,32 @@
 #include "../Algebra/Vector.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-    namespace Math
-    {
-        namespace Geometry
-        {
-            /** Calculate spherical Voronoi diagram. 
+namespace Gc {
+namespace Math {
+namespace Geometry {
+/** Calculate spherical Voronoi diagram. 
 
                 Calculates the Voronoi diagram on 2-D unit sphere surface manifold.
             
                 @param[in] points List of points lying on a unit sphere.
                 @param[out] vd Area sizes of the spherical voronoi cell corresponding to given points.
             */
-            template <class T>
-            void GC_DLL_EXPORT HypersphereVoronoiDiagram(const System::Collection::Array<1,Algebra::Vector<3,T> > &points, 
-                System::Collection::Array<1,T> &vd);
+template <class T>
+void GC_DLL_EXPORT HypersphereVoronoiDiagram(const System::Collection::Array<1, Algebra::Vector<3, T>> & points,
+                                             System::Collection::Array<1, T> & vd);
 
-            /** Calculate circular Voronoi diagram.
+/** Calculate circular Voronoi diagram.
 
                 Calculates the Voronoi diagram on 1-D unit circle manifold.
             
                 @param[in] points List of points lying on a unit circle.
                 @param[out] vd Lengths of the circular voronoi cell corresponding to given points.
             */
-            template <class T>
-            void GC_DLL_EXPORT HypersphereVoronoiDiagram(const System::Collection::Array<1,Algebra::Vector<2,T> > &points, 
-                System::Collection::Array<1,T> &vd);
-        }
-    }
+template <class T>
+void GC_DLL_EXPORT HypersphereVoronoiDiagram(const System::Collection::Array<1, Algebra::Vector<2, T>> & points,
+                                             System::Collection::Array<1, T> & vd);
 }
+}
+} // namespace Gc::Math::Geometry
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,7 +19,6 @@ namespace iseg {
 
 class SlicesHandlerInterface;
 
-ISEG_CORE_API size_t VotingReplaceLabel(SlicesHandlerInterface* handler, tissues_size_t foreground, tissues_size_t background,
-		std::array<unsigned int, 3> iradius, unsigned int majority_threshold, unsigned int max_iterations);
+ISEG_CORE_API size_t VotingReplaceLabel(SlicesHandlerInterface* handler, tissues_size_t foreground, tissues_size_t background, std::array<unsigned int, 3> iradius, unsigned int majority_threshold, unsigned int max_iterations);
 
 } // namespace iseg

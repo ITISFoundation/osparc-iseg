@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,48 +18,45 @@
 namespace iseg {
 
 class SlicesHandler;
-class bmphandler;
+class Bmphandler;
 
 class WatershedWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	WatershedWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~WatershedWidget();
-	void init() override;
-	void newloaded() override;
+	WatershedWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~WatershedWidget() override;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	std::string GetName() override { return std::string("Watershed"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("watershed.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
+	void MarksChanged() override;
 
-	void recalc1();
+	void Recalc1();
 
-	unsigned int* usp;
-	int sbh_old;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
+	unsigned int* m_Usp;
+	int m_SbhOld;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
 
-	QSpinBox* sb_h;
-	QSlider* sl_h;
-	QPushButton* btn_exec;
-
-public slots:
-	void marks_changed();
+	QSpinBox* m_SbH;
+	QSlider* m_SlH;
+	QPushButton* m_BtnExec;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void hsl_changed();
-	void slider_pressed();
-	void slider_released();
-	void hsb_changed(int value);
-	void execute();
-	void recalc();
+	void BmphandChanged(Bmphandler* bmph);
+	void HslChanged();
+	void SliderPressed();
+	void SliderReleased();
+	void HsbChanged(int value);
+	void Execute();
+	void Recalc();
 };
 
 } // namespace iseg

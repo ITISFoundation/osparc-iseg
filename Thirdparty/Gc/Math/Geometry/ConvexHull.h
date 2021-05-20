@@ -33,34 +33,31 @@
 #include "../Algebra/Vector.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-    namespace Math
-    {
-        /** Geometrical algorithms. */
-        namespace Geometry
-        {
-            /** Calculate convex hull of given set of points in 3D space. 
+namespace Gc {
+namespace Math {
+/** Geometrical algorithms. */
+namespace Geometry {
+/** Calculate convex hull of given set of points in 3D space. 
             
                 @param[in] points Set of points in 3D space.
                 @param[out] hull Array of triangles constituting the convex hull. Each triangle
                     consists of three indexes to \c points array.
             */
-            template <class T>
-            void GC_DLL_EXPORT ConvexHull (const System::Collection::Array<1,Algebra::Vector<3,T> > &points, 
-                System::Collection::Array<1,System::Collection::Tuple<3,Size> > &hull);
+template <class T>
+void GC_DLL_EXPORT ConvexHull(const System::Collection::Array<1, Algebra::Vector<3, T>> & points,
+                              System::Collection::Array<1, System::Collection::Tuple<3, Size>> & hull);
 
-            /** Calculate convex hull of given set of points in 2D space. 
+/** Calculate convex hull of given set of points in 2D space. 
                         
                 @param[in] points Set of points in 2D space.
                 @param[out] hull Array of lines constituting the convex hull. Each line
                     consists of two indexes to \c points array.            
             */
-            template <class T>
-            void GC_DLL_EXPORT ConvexHull (const System::Collection::Array<1,Algebra::Vector<2,T> > &points, 
-                System::Collection::Array<1,System::Collection::Tuple<2,Size> > &hull);
-        }
-    }
+template <class T>
+void GC_DLL_EXPORT ConvexHull(const System::Collection::Array<1, Algebra::Vector<2, T>> & points,
+                              System::Collection::Array<1, System::Collection::Tuple<2, Size>> & hull);
+} // namespace Geometry
 }
+} // namespace Gc::Math
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -102,11 +102,11 @@ public:
 
 private:
 	GraphCutLabelSeparator();
-	virtual ~GraphCutLabelSeparator() {}
-	virtual void GenerateData() override;
+	~GraphCutLabelSeparator() override {}
+	void GenerateData() override;
 
 private:
-	typedef Gc::Flow::IGridMaxFlow<NDimension, Gc::Float32, Gc::Float32, Gc::Float32> GraphType;
+	using GraphType = Gc::Flow::IGridMaxFlow<NDimension, Gc::Float32, Gc::Float32, Gc::Float32>;
 
 	void InitializeGraph(GraphType*, ProgressReporter& progress);
 

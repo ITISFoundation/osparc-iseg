@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,8 +15,8 @@
 
 #include "Data/ItkUtils.h"
 #include "Data/Point.h"
-#include "Data/SlicesHandlerITKInterface.h"
 #include "Data/ScopedTimer.h"
+#include "Data/SlicesHandlerITKInterface.h"
 
 #include "Core/BinaryThinningImageFilter.h"
 #include "Core/ImageConnectivtyGraph.h"
@@ -41,117 +41,110 @@
 
 namespace iseg {
 
-EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	setToolTip(
-			Format("Various edge extraction routines. These are mostly useful "
-						 "as part of other segmentation techniques."));
+	setToolTip(Format("Various edge extraction routines. These are mostly useful "
+										"as part of other segmentation techniques."));
 
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	hboxoverall = new Q3HBox(this);
-	hboxoverall->setMargin(8);
-	vboxmethods = new Q3VBox(hboxoverall);
-	vbox1 = new Q3VBox(hboxoverall);
-	hbox1 = new Q3HBox(vbox1);
-	hbox2 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-	hbox4 = new Q3HBox(vbox1);
-	btn_exec = new QPushButton("Execute", vbox1);
+	m_Hboxoverall = new Q3HBox(this);
+	m_Hboxoverall->setMargin(8);
+	m_Vboxmethods = new Q3VBox(m_Hboxoverall);
+	m_Vbox1 = new Q3VBox(m_Hboxoverall);
+	m_Hbox1 = new Q3HBox(m_Vbox1);
+	m_Hbox2 = new Q3HBox(m_Vbox1);
+	m_Hbox3 = new Q3HBox(m_Vbox1);
+	m_Hbox4 = new Q3HBox(m_Vbox1);
+	m_BtnExec = new QPushButton("Execute", m_Vbox1);
 
-	txt_sigmal = new QLabel("Sigma: 0 ", hbox1);
-	sl_sigma = new QSlider(Qt::Horizontal, hbox1);
-	sl_sigma->setRange(1, 100);
-	sl_sigma->setValue(30);
-	txt_sigma2 = new QLabel(" 5", hbox1);
+	m_TxtSigmal = new QLabel("Sigma: 0 ", m_Hbox1);
+	m_SlSigma = new QSlider(Qt::Horizontal, m_Hbox1);
+	m_SlSigma->setRange(1, 100);
+	m_SlSigma->setValue(30);
+	m_TxtSigma2 = new QLabel(" 5", m_Hbox1);
 
-	txt_thresh11 = new QLabel("Thresh: 0 ", hbox2);
-	sl_thresh1 = new QSlider(Qt::Horizontal, hbox2);
-	sl_thresh1->setRange(1, 100);
-	sl_thresh1->setValue(20);
-	txt_thresh12 = new QLabel(" 150", hbox2);
+	m_TxtThresh11 = new QLabel("Thresh: 0 ", m_Hbox2);
+	m_SlThresh1 = new QSlider(Qt::Horizontal, m_Hbox2);
+	m_SlThresh1->setRange(1, 100);
+	m_SlThresh1->setValue(20);
+	m_TxtThresh12 = new QLabel(" 150", m_Hbox2);
 
-	txt_thresh21 = new QLabel("Thresh high: 0 ", hbox3);
-	sl_thresh2 = new QSlider(Qt::Horizontal, hbox3);
-	sl_thresh2->setRange(1, 100);
-	sl_thresh2->setValue(80);
-	txt_thresh22 = new QLabel(" 150", hbox3);
+	m_TxtThresh21 = new QLabel("Thresh high: 0 ", m_Hbox3);
+	m_SlThresh2 = new QSlider(Qt::Horizontal, m_Hbox3);
+	m_SlThresh2->setRange(1, 100);
+	m_SlThresh2->setValue(80);
+	m_TxtThresh22 = new QLabel(" 150", m_Hbox3);
 
-	cb_3d = new QCheckBox(QString("3D thinning"), hbox4);
-	btn_export_centerlines = new QPushButton(QString("Export"), hbox4);
+	m_Cb3d = new QCheckBox(QString("3D thinning"), m_Hbox4);
+	m_BtnExportCenterlines = new QPushButton(QString("Export"), m_Hbox4);
 
-	rb_sobel = new QRadioButton(QString("Sobel"), vboxmethods);
-	rb_laplacian = new QRadioButton(QString("Laplacian"), vboxmethods);
-	rb_interquartile = new QRadioButton(QString("Interquart."), vboxmethods);
-	rb_momentline = new QRadioButton(QString("Moment"), vboxmethods);
-	rb_gaussline = new QRadioButton(QString("Gauss"), vboxmethods);
-	rb_canny = new QRadioButton(QString("Canny"), vboxmethods);
-	rb_laplacianzero = new QRadioButton(QString("Lapl. Zero"), vboxmethods);
-	rb_centerlines = new QRadioButton(QString("Centerlines"), vboxmethods);
+	m_RbSobel = new QRadioButton(QString("Sobel"), m_Vboxmethods);
+	m_RbLaplacian = new QRadioButton(QString("Laplacian"), m_Vboxmethods);
+	m_RbInterquartile = new QRadioButton(QString("Interquart."), m_Vboxmethods);
+	m_RbMomentline = new QRadioButton(QString("Moment"), m_Vboxmethods);
+	m_RbGaussline = new QRadioButton(QString("Gauss"), m_Vboxmethods);
+	m_RbCanny = new QRadioButton(QString("Canny"), m_Vboxmethods);
+	m_RbLaplacianzero = new QRadioButton(QString("Lapl. Zero"), m_Vboxmethods);
+	m_RbCenterlines = new QRadioButton(QString("Centerlines"), m_Vboxmethods);
 
-	modegroup = new QButtonGroup(this);
+	m_Modegroup = new QButtonGroup(this);
 	//	modegroup->hide();
-	modegroup->insert(rb_sobel);
-	modegroup->insert(rb_laplacian);
-	modegroup->insert(rb_interquartile);
-	modegroup->insert(rb_momentline);
-	modegroup->insert(rb_gaussline);
-	modegroup->insert(rb_canny);
-	modegroup->insert(rb_laplacianzero);
-	modegroup->insert(rb_centerlines);
-	rb_sobel->setChecked(TRUE);
+	m_Modegroup->insert(m_RbSobel);
+	m_Modegroup->insert(m_RbLaplacian);
+	m_Modegroup->insert(m_RbInterquartile);
+	m_Modegroup->insert(m_RbMomentline);
+	m_Modegroup->insert(m_RbGaussline);
+	m_Modegroup->insert(m_RbCanny);
+	m_Modegroup->insert(m_RbLaplacianzero);
+	m_Modegroup->insert(m_RbCenterlines);
+	m_RbSobel->setChecked(TRUE);
 
 	// 2018.02.14: fix options view is too narrow
-	vbox1->setMinimumWidth(std::max(300, vbox1->sizeHint().width()));
+	m_Vbox1->setMinimumWidth(std::max(300, m_Vbox1->sizeHint().width()));
 
-	vboxmethods->setMargin(5);
-	vbox1->setMargin(5);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
+	m_Vboxmethods->setMargin(5);
+	m_Vbox1->setMargin(5);
+	m_Vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+	m_Vboxmethods->setLineWidth(1);
 
 	// 	vboxmethods->setFixedSize(vboxmethods->sizeHint());
 	// 	hboxoverall->setFixedSize(hboxoverall->sizeHint());
 	//	setFixedSize(vbox1->size());
 
-	method_changed(0);
+	MethodChanged(0);
 
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-			SLOT(method_changed(int)));
-	QObject::connect(btn_exec, SIGNAL(clicked()), this, SLOT(execute()));
-	QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-			SLOT(slider_changed(int)));
-	QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-			SLOT(slider_changed(int)));
-	QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-			SLOT(slider_changed(int)));
+	QObject_connect(m_Modegroup, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged(int)));
+	QObject_connect(m_BtnExec, SIGNAL(clicked()), this, SLOT(Execute()));
+	QObject_connect(m_SlSigma, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+	QObject_connect(m_SlThresh1, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+	QObject_connect(m_SlThresh2, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
 
-	QObject::connect(btn_export_centerlines, SIGNAL(clicked()), this, SLOT(export_centerlines()));
+	QObject_connect(m_BtnExportCenterlines, SIGNAL(clicked()), this, SLOT(ExportCenterlines()));
 }
 
 EdgeWidget::~EdgeWidget()
+= default;
+
+void EdgeWidget::OnSlicenrChanged()
 {
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	BmphandChanged(m_Handler3D->GetActivebmphandler());
 }
 
-void EdgeWidget::on_slicenr_changed()
+void EdgeWidget::BmphandChanged(Bmphandler* bmph)
 {
-	activeslice = handler3D->active_slice();
-	bmphand_changed(handler3D->get_activebmphandler());
+	m_Bmphand = bmph;
 }
 
-void EdgeWidget::bmphand_changed(bmphandler* bmph)
-{
-	bmphand = bmph;
-}
-
-void EdgeWidget::export_centerlines()
+void EdgeWidget::ExportCenterlines()
 {
 	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
 	if (!savefilename.isEmpty())
 	{
-		SlicesHandlerITKInterface wrapper(handler3D);
+		SlicesHandlerITKInterface wrapper(m_Handler3D);
 		auto target = wrapper.GetTarget(true);
 
 		using input_type = itk::SliceContiguousImage<float>;
@@ -191,79 +184,77 @@ void EdgeWidget::export_centerlines()
 	}
 }
 
-void EdgeWidget::execute()
+void EdgeWidget::Execute()
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = handler3D->active_slice();
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this);
 
-	if (rb_sobel->isChecked())
+	if (m_RbSobel->isChecked())
 	{
-		bmphand->sobel();
+		m_Bmphand->Sobel();
 	}
-	else if (rb_laplacian->isChecked())
+	else if (m_RbLaplacian->isChecked())
 	{
-		bmphand->laplacian1();
+		m_Bmphand->Laplacian1();
 	}
-	else if (rb_interquartile->isChecked())
+	else if (m_RbInterquartile->isChecked())
 	{
-		bmphand->median_interquartile(false);
+		m_Bmphand->MedianInterquartile(false);
 	}
-	else if (rb_momentline->isChecked())
+	else if (m_RbMomentline->isChecked())
 	{
-		bmphand->moment_line();
+		m_Bmphand->MomentLine();
 	}
-	else if (rb_gaussline->isChecked())
+	else if (m_RbGaussline->isChecked())
 	{
-		bmphand->gauss_line(sl_sigma->value() * 0.05f);
+		m_Bmphand->GaussLine(m_SlSigma->value() * 0.05f);
 	}
-	else if (rb_canny->isChecked())
+	else if (m_RbCanny->isChecked())
 	{
-		bmphand->canny_line(sl_sigma->value() * 0.05f,
-				sl_thresh1->value() * 1.5f,
-				sl_thresh2->value() * 1.5f);
+		m_Bmphand->CannyLine(m_SlSigma->value() * 0.05f, m_SlThresh1->value() * 1.5f, m_SlThresh2->value() * 1.5f);
 	}
-	else if (rb_centerlines->isChecked())
+	else if (m_RbCenterlines->isChecked())
 	{
 		try
 		{
 			ScopedTimer timer("Skeletonization");
-			if (cb_3d->isChecked())
+			if (m_Cb3d->isChecked())
 			{
 				using input_type = itk::SliceContiguousImage<float>;
 				using output_type = itk::Image<unsigned char, 3>;
 
-				SlicesHandlerITKInterface wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(m_Handler3D);
 				auto target = wrapper.GetTarget(true);
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
-				iseg::DataSelection dataSelection;
-				dataSelection.allSlices = true;
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
+				DataSelection data_selection;
+				data_selection.allSlices = true;
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
 
 				iseg::Paste<output_type, input_type>(skeleton, target);
 
-				emit end_datachange(this);
+				emit EndDatachange(this);
 			}
 			else
 			{
 				using input_type = itk::Image<float, 2>;
 				using output_type = itk::Image<unsigned char, 2>;
 
-				SlicesHandlerITKInterface wrapper(handler3D);
+				SlicesHandlerITKInterface wrapper(m_Handler3D);
 				auto target = wrapper.GetTargetSlice();
 				auto skeleton = BinaryThinning<input_type, output_type>(target, 0.001f);
 
-				iseg::DataSelection dataSelection;
-				dataSelection.sliceNr = handler3D->active_slice();
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
+				DataSelection data_selection;
+				data_selection.sliceNr = m_Handler3D->ActiveSlice();
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
 
 				iseg::Paste<output_type, input_type>(skeleton, target);
 
-				emit end_datachange(this);
+				emit EndDatachange(this);
 			}
 		}
 		catch (itk::ExceptionObject& e)
@@ -277,152 +268,151 @@ void EdgeWidget::execute()
 	}
 	else
 	{
-		bmphand->laplacian_zero(sl_sigma->value() * 0.05f,
-				sl_thresh1->value() * 0.5f, false);
+		m_Bmphand->LaplacianZero(m_SlSigma->value() * 0.05f, m_SlThresh1->value() * 0.5f, false);
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
-void EdgeWidget::method_changed(int)
+void EdgeWidget::MethodChanged(int)
 {
 	if (hideparams)
 	{
-		if (!rb_laplacian->isChecked())
+		if (!m_RbLaplacian->isChecked())
 		{
-			rb_laplacian->hide();
+			m_RbLaplacian->hide();
 		}
-		if (!rb_interquartile->isChecked())
+		if (!m_RbInterquartile->isChecked())
 		{
-			rb_interquartile->hide();
+			m_RbInterquartile->hide();
 		}
-		if (!rb_momentline->isChecked())
+		if (!m_RbMomentline->isChecked())
 		{
-			rb_momentline->hide();
+			m_RbMomentline->hide();
 		}
-		if (!rb_gaussline->isChecked())
+		if (!m_RbGaussline->isChecked())
 		{
-			rb_gaussline->hide();
+			m_RbGaussline->hide();
 		}
-		if (!rb_gaussline->isChecked())
+		if (!m_RbGaussline->isChecked())
 		{
-			rb_laplacianzero->hide();
+			m_RbLaplacianzero->hide();
 		}
 	}
 	else
 	{
-		rb_laplacian->show();
-		rb_interquartile->show();
-		rb_momentline->show();
-		rb_gaussline->show();
-		rb_laplacianzero->show();
+		m_RbLaplacian->show();
+		m_RbInterquartile->show();
+		m_RbMomentline->show();
+		m_RbGaussline->show();
+		m_RbLaplacianzero->show();
 	}
 
-	if (rb_sobel->isChecked())
+	if (m_RbSobel->isChecked())
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_laplacian->isChecked())
+	else if (m_RbLaplacian->isChecked())
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_interquartile->isChecked())
+	else if (m_RbInterquartile->isChecked())
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_momentline->isChecked())
+	else if (m_RbMomentline->isChecked())
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_gaussline->isChecked())
+	else if (m_RbGaussline->isChecked())
 	{
 		if (hideparams)
-			hbox1->hide();
+			m_Hbox1->hide();
 		else
-			hbox1->show();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+			m_Hbox1->show();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_canny->isChecked())
+	else if (m_RbCanny->isChecked())
 	{
-		txt_thresh11->setText("Thresh low:  0 ");
-		txt_thresh12->setText(" 150");
+		m_TxtThresh11->setText("Thresh low:  0 ");
+		m_TxtThresh12->setText(" 150");
 		if (hideparams)
-			hbox1->hide();
+			m_Hbox1->hide();
 		else
-			hbox1->show();
+			m_Hbox1->show();
 		if (hideparams)
-			hbox2->hide();
+			m_Hbox2->hide();
 		else
-			hbox2->show();
+			m_Hbox2->show();
 		if (hideparams)
-			hbox3->hide();
+			m_Hbox3->hide();
 		else
-			hbox3->show();
-		hbox4->hide();
-		btn_exec->show();
+			m_Hbox3->show();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
-	else if (rb_centerlines->isChecked())
+	else if (m_RbCenterlines->isChecked())
 	{
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
-		hbox4->show();
-		btn_exec->show();
+		m_Hbox1->hide();
+		m_Hbox2->hide();
+		m_Hbox3->hide();
+		m_Hbox4->show();
+		m_BtnExec->show();
 	}
 	else
 	{
-		txt_thresh11->setText("Thresh: 0 ");
-		txt_thresh12->setText(" 50");
+		m_TxtThresh11->setText("Thresh: 0 ");
+		m_TxtThresh12->setText(" 50");
 		if (hideparams)
-			hbox1->hide();
+			m_Hbox1->hide();
 		else
-			hbox1->show();
+			m_Hbox1->show();
 		if (hideparams)
-			hbox2->hide();
+			m_Hbox2->hide();
 		else
-			hbox2->show();
-		hbox3->hide();
-		hbox4->hide();
-		btn_exec->show();
+			m_Hbox2->show();
+		m_Hbox3->hide();
+		m_Hbox4->hide();
+		m_BtnExec->show();
 	}
 }
 
-void EdgeWidget::slider_changed(int newval)
+void EdgeWidget::SliderChanged(int newval)
 {
-	execute();
+	Execute();
 }
 
-QSize EdgeWidget::sizeHint() const { return vbox1->sizeHint(); }
+QSize EdgeWidget::sizeHint() const { return m_Vbox1->sizeHint(); }
 
-void EdgeWidget::newloaded()
+void EdgeWidget::NewLoaded()
 {
-	activeslice = handler3D->active_slice();
-	bmphand = handler3D->get_activebmphandler();
+	m_Activeslice = m_Handler3D->ActiveSlice();
+	m_Bmphand = m_Handler3D->GetActivebmphandler();
 }
 
-void EdgeWidget::init()
+void EdgeWidget::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
 FILE* EdgeWidget::SaveParams(FILE* fp, int version)
@@ -430,25 +420,25 @@ FILE* EdgeWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = sl_sigma->value();
+		dummy = m_SlSigma->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_thresh1->value();
+		dummy = m_SlThresh1->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = sl_thresh2->value();
+		dummy = m_SlThresh2->value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_sobel->isChecked());
+		dummy = (int)(m_RbSobel->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_laplacian->isChecked());
+		dummy = (int)(m_RbLaplacian->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_interquartile->isChecked());
+		dummy = (int)(m_RbInterquartile->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_momentline->isChecked());
+		dummy = (int)(m_RbMomentline->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_gaussline->isChecked());
+		dummy = (int)(m_RbGaussline->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_canny->isChecked());
+		dummy = (int)(m_RbCanny->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_laplacianzero->isChecked());
+		dummy = (int)(m_RbLaplacianzero->isChecked());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 	}
 
@@ -459,51 +449,43 @@ FILE* EdgeWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed(int)));
-		QObject::disconnect(sl_sigma, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
-		QObject::disconnect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
-		QObject::disconnect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
+		QObject_disconnect(m_Modegroup, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged(int)));
+		QObject_disconnect(m_SlSigma, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+		QObject_disconnect(m_SlThresh1, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+		QObject_disconnect(m_SlThresh2, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
 
 		int dummy;
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_sigma->setValue(dummy);
+		m_SlSigma->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_thresh1->setValue(dummy);
+		m_SlThresh1->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		sl_thresh2->setValue(dummy);
+		m_SlThresh2->setValue(dummy);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_sobel->setChecked(dummy > 0);
+		m_RbSobel->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_laplacian->setChecked(dummy > 0);
+		m_RbLaplacian->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_interquartile->setChecked(dummy > 0);
+		m_RbInterquartile->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_momentline->setChecked(dummy > 0);
+		m_RbMomentline->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_gaussline->setChecked(dummy > 0);
+		m_RbGaussline->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_canny->setChecked(dummy > 0);
+		m_RbCanny->setChecked(dummy > 0);
 		fread(&dummy, sizeof(int), 1, fp);
-		rb_laplacianzero->setChecked(dummy > 0);
+		m_RbLaplacianzero->setChecked(dummy > 0);
 
-		method_changed(0);
+		MethodChanged(0);
 
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed(int)));
-		QObject::connect(sl_sigma, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
-		QObject::connect(sl_thresh1, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
-		QObject::connect(sl_thresh2, SIGNAL(valueChanged(int)), this,
-				SLOT(slider_changed(int)));
+		QObject_connect(m_Modegroup, SIGNAL(buttonClicked(int)), this, SLOT(MethodChanged(int)));
+		QObject_connect(m_SlSigma, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+		QObject_connect(m_SlThresh1, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
+		QObject_connect(m_SlThresh2, SIGNAL(valueChanged(int)), this, SLOT(SliderChanged(int)));
 	}
 	return fp;
 }
 
-void EdgeWidget::hideparams_changed() { method_changed(0); }
+void EdgeWidget::HideParamsChanged() { MethodChanged(0); }
 
-}// namespace iseg
+} // namespace iseg

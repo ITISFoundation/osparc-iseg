@@ -32,13 +32,10 @@
 #include "../IMaxFlow.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace General
-        {
-            /** Implementation of Boykov/Kolmogorov maximum flow algorithm on general directed graphs.
+namespace Gc {
+namespace Flow {
+namespace General {
+/** Implementation of Boykov/Kolmogorov maximum flow algorithm on general directed graphs.
 
                 Description of this algorithm can be found in:
                 - Youri Boykov, Vladimir Kolmogorov: <em>An Experimental Comparison of 
@@ -70,162 +67,159 @@ namespace Gc
 
                 @see Kohli
             */
-		    template <class TFLOW, class TTCAP, class TCAP>
-		    class GC_DLL_EXPORT BoykovKolmogorov 
-                : public IMaxFlow<TFLOW,TTCAP,TCAP>
-		    {
-            private:
-                // Forward declaration
-			    struct Node;
+template <class TFLOW, class TTCAP, class TCAP>
+class GC_DLL_EXPORT BoykovKolmogorov
+    : public IMaxFlow<TFLOW, TTCAP, TCAP>
+{
+  private:
+    // Forward declaration
+    struct Node;
 
-                /** First-in-first-out queue structure */
-                struct Queue
-                {
-                    /** First node in the queue */
-                    Node *m_first;
-                    /** Last node in the queue */
-                    Node *m_last;
-                };
+    /** First-in-first-out queue structure */
+    struct Queue
+    {
+        /** First node in the queue */
+        Node * m_first;
+        /** Last node in the queue */
+        Node * m_last;
+    };
 
-                /** Structure used for storing arcs in the network. */
-			    struct Arc
-			    {
-                    /** Residual capacity. */
-				    TCAP m_res_cap;
-                    /** Pointer to the next arc with the same tail. */
-				    Arc *m_next;
-                    /** Pointer to the arc going in the opposite direction. */
-				    Arc *m_sister;
-                    /** Pointer to the head node. */
-				    Node *m_head;
-			    };
+    /** Structure used for storing arcs in the network. */
+    struct Arc
+    {
+        /** Residual capacity. */
+        TCAP m_res_cap;
+        /** Pointer to the next arc with the same tail. */
+        Arc * m_next;
+        /** Pointer to the arc going in the opposite direction. */
+        Arc * m_sister;
+        /** Pointer to the head node. */
+        Node * m_head;
+    };
 
-                /** Structure used for storing nodes in the network. */
-			    struct Node
-			    {
-                    /** Pointer to the first arc going from this node. */
-				    Arc *m_first;
-                    /** Pointer to the arc going to this node from its parent node. */
-				    Arc *m_parent;
-                    /** Next active node. When this is not NULL, then node is active. */
-                    Node *m_next_active;
-                    /** Next orphan node. When this is not NULL, then node is orphan. */
-                    Node *m_next_orphan;
-                    /** Residual capacity of the terminal arcs */
-                    TTCAP m_tr_cap;
-                    /** Timestamp when distance was computed. */
-				    Size m_ts;
-                    /** Distance to the terminal */
-                    Size m_dist;
-                    /** Node origin - source, sink or free */
-                    Uint8 m_origin;
-			    };
+    /** Structure used for storing nodes in the network. */
+    struct Node
+    {
+        /** Pointer to the first arc going from this node. */
+        Arc * m_first;
+        /** Pointer to the arc going to this node from its parent node. */
+        Arc * m_parent;
+        /** Next active node. When this is not NULL, then node is active. */
+        Node * m_next_active;
+        /** Next orphan node. When this is not NULL, then node is orphan. */
+        Node * m_next_orphan;
+        /** Residual capacity of the terminal arcs */
+        TTCAP m_tr_cap;
+        /** Timestamp when distance was computed. */
+        Size m_ts;
+        /** Distance to the terminal */
+        Size m_dist;
+        /** Node origin - source, sink or free */
+        Uint8 m_origin;
+    };
 
-                /** Node array. */
-                System::Collection::Array<1,Node> m_node_list;
-                /** Arc count. */
-			    Size m_arcs;
-                /** Arc array. */
-                System::Collection::Array<1,Arc> m_arc_list;
+    /** Node array. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Arc count. */
+    Size m_arcs = 0;
+    /** Arc array. */
+    System::Collection::Array<1, Arc> m_arc_list;
 
-                /** Total flow */
-                TFLOW m_flow;
-                /** Global time counter */
-                Size m_time;
+    /** Total flow */
+    TFLOW m_flow;
+    /** Global time counter */
+    Size m_time;
 
-                /** Source tree active nodes */
-                Queue m_q_active;
-                /** Queue of orphans */
-                Queue m_q_orphan;
+    /** Source tree active nodes */
+    Queue m_q_active;
+    /** Queue of orphans */
+    Queue m_q_orphan;
 
-                /** Current stage. Used to check correct method calling order. */
-                Uint8 m_stage;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		    public:
-			    /** Constructor */
-			    BoykovKolmogorov()
-                    : m_arcs(0), m_stage(0)
-			    {}
+  public:
+    /** Constructor */
+    BoykovKolmogorov() = default;
 
-			    /** Destructor */
-			    virtual ~BoykovKolmogorov()
-			    {}
+    /** Destructor */
+    ~BoykovKolmogorov() override = default;
 
-			    virtual void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs);
+    void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs) override;
 
-			    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap);
+    void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) override;
 
-			    virtual void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk);
+    void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk) override;
 
-			    virtual TFLOW FindMaxFlow();
+    TFLOW FindMaxFlow() override;
 
-			    virtual Origin NodeOrigin(Size node) const;
+    Origin NodeOrigin(Size node) const override;
 
-			    virtual void Dispose();
+    void Dispose() override;
 
-            private:
-                /** Grow source and sink trees until an augmenting path is found.
+  private:
+    /** Grow source and sink trees until an augmenting path is found.
 
                     @return Arc joining the source and sink trees.
                 */
-                Arc *GrowTrees();
+    Arc * GrowTrees();
 
-                /** Augment flow across given path.
+    /** Augment flow across given path.
 
                     @param[in] joint Arc joining the source and sink trees.
                 */
-                void Augment(Arc *joint);
+    void Augment(Arc * joint);
 
-                /** Adopt orphan nodes. 
+    /** Adopt orphan nodes. 
                 
                     @param[in] timestamp Current timestamp.
                 */
-                void AdoptOrphans();
+    void AdoptOrphans();
 
-                /** Add node to the queue of active nodes.
+    /** Add node to the queue of active nodes.
                     
                     @param[in] node Node to be added.
                 */
-                void AddToActive(Node *node)
-                {
-                    if (node->m_next_active == NULL)
-                    {
-                        if (m_q_active.m_last != NULL)
-                        {
-                            m_q_active.m_last->m_next_active = node;
-                        }
-                        else
-                        {
-                            m_q_active.m_first = node;                        
-                        }
-                        m_q_active.m_last = node;
-                        node->m_next_active = node; // Mark as active
-                    }
-                }
-
-                /** Add node to the queue of orphan nodes.
-                    
-                    @param[in] node Node to be added.
-                */
-                void AddToOrphans(Node *node)
-                {
-                    if (node->m_next_orphan == NULL)
-                    {                    
-                        if (m_q_orphan.m_last != NULL)
-                        {
-                            m_q_orphan.m_last->m_next_orphan = node;
-                        }
-                        else
-                        {
-                            m_q_orphan.m_first = node;
-                        }
-                        m_q_orphan.m_last = node;
-                        node->m_next_orphan = node; // Mark as orphan
-                    }
-                }
-            };
+    void AddToActive(Node * node)
+    {
+        if (node->m_next_active == nullptr)
+        {
+            if (m_q_active.m_last != nullptr)
+            {
+                m_q_active.m_last->m_next_active = node;
+            }
+            else
+            {
+                m_q_active.m_first = node;
+            }
+            m_q_active.m_last = node;
+            node->m_next_active = node; // Mark as active
         }
-	}
+    }
+
+    /** Add node to the queue of orphan nodes.
+                    
+                    @param[in] node Node to be added.
+                */
+    void AddToOrphans(Node * node)
+    {
+        if (node->m_next_orphan == nullptr)
+        {
+            if (m_q_orphan.m_last != nullptr)
+            {
+                m_q_orphan.m_last->m_next_orphan = node;
+            }
+            else
+            {
+                m_q_orphan.m_first = node;
+            }
+            m_q_orphan.m_last = node;
+            node->m_next_orphan = node; // Mark as orphan
+        }
+    }
+};
 }
+}
+} // namespace Gc::Flow::General
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,8 +18,8 @@ namespace iseg {
 Atlas::Atlas()
 {
 	for (int i = 0; i < maxnr; i++)
-		m_atlasfilename[i] = QString("");
-	m_atlasdir = QDir("");
+		m_MAtlasfilename[i] = QString("");
+	m_MAtlasdir = QDir("");
 }
 
 } // namespace iseg

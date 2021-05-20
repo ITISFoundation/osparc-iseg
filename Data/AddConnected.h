@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,9 +19,9 @@ void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, u
 {
 	//T1 f = work_bits[position];
 
-	const unsigned char kObject = 1;
-	const unsigned char kBackground = 0;
-	const unsigned char kWritable = -1;
+	const unsigned char k_object = 1;
+	const unsigned char k_background = 0;
+	const unsigned char k_writable = -1;
 	const unsigned area = width * height;
 	std::vector<unsigned char> results(area + 2 * width + 2 * height + 4);
 
@@ -34,11 +34,11 @@ void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, u
 			//if (work_bits[i1] == f && (tissues[i1] == 0 || (override && !TissueInfos::GetTissueLocked(tissues[i1]))))
 			if (writable(i1))
 			{
-				results[i] = kWritable;
+				results[i] = k_writable;
 			}
 			else
 			{
-				results[i] = kBackground;
+				results[i] = k_background;
 			}
 		}
 	}
@@ -50,8 +50,8 @@ void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, u
 
 	std::vector<unsigned> s;
 	s.push_back(position % width + 1 + (position / width + 1) * (width + 2));
-	if (results[s.back()] == kWritable)
-		results[s.back()] = kObject;
+	if (results[s.back()] == k_writable)
+		results[s.back()] = k_object;
 
 	unsigned w = width + 2;
 
@@ -59,24 +59,24 @@ void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, u
 	{
 		i = s.back();
 		s.pop_back();
-		if (results[i - 1] == kWritable)
+		if (results[i - 1] == k_writable)
 		{
-			results[i - 1] = kObject;
+			results[i - 1] = k_object;
 			s.push_back(i - 1);
 		}
-		if (results[i + 1] == kWritable)
+		if (results[i + 1] == k_writable)
 		{
-			results[i + 1] = kObject;
+			results[i + 1] = k_object;
 			s.push_back(i + 1);
 		}
-		if (results[i - w] == kWritable)
+		if (results[i - w] == k_writable)
 		{
-			results[i - w] = kObject;
+			results[i - w] = k_object;
 			s.push_back(i - w);
 		}
-		if (results[i + w] == kWritable)
+		if (results[i + w] == k_writable)
 		{
-			results[i + w] = kObject;
+			results[i + w] = k_object;
 			s.push_back(i + w);
 		}
 	}
@@ -87,7 +87,7 @@ void add_connected_2d(T1* source, T2* target, unsigned width, unsigned height, u
 	{
 		for (unsigned k = 0; k < width; k++, i++, i2++)
 		{
-			if (results[i] == kObject)
+			if (results[i] == k_object)
 			{
 				target[i2] = new_value;
 			}

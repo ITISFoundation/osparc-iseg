@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -37,60 +37,59 @@ class SaveOutlinesWidget : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-					   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~SaveOutlinesWidget();
+	SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~SaveOutlinesWidget() override;
 
 private:
-	SlicesHandler* handler3D;
+	SlicesHandler* m_Handler3D;
 	//	char *filename;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3HBox* hbox5;
-	Q3HBox* hbox6;
-	Q3HBox* hbox7;
-	Q3HBox* hbox8;
-	Q3HBox* hbox9;
-	Q3HBox* hboxslicesbetween;
-	Q3VBox* vbox1;
-	QListWidget* lbo_tissues;
-	QPushButton* pb_file;
-	QPushButton* pb_exec;
-	QPushButton* pb_close;
-	QLineEdit* le_file;
-	QButtonGroup* filetype;
-	QButtonGroup* simplif;
-	QRadioButton* rb_line;
-	QRadioButton* rb_triang;
-	QRadioButton* rb_none;
-	QRadioButton* rb_dougpeuck;
-	QRadioButton* rb_dist;
-	QLabel* lb_simplif;
-	QLabel* lb_file;
-	QLabel* lb_dist;
-	QLabel* lb_f1;
-	QLabel* lb_f2;
-	QLabel* lb_minsize;
-	QLabel* lb_between;
-	QSpinBox* sb_dist;
-	QSpinBox* sb_minsize;
-	QSpinBox* sb_between;
-	QSlider* sl_f;
-	QSpinBox* sb_topextrusion;
-	QSpinBox* sb_bottomextrusion;
-	QLabel* lb_topextrusion;
-	QLabel* lb_bottomextrusion;
-	QCheckBox* cb_extrusion;
-	QCheckBox* cb_smooth;
-	QCheckBox* cb_marchingcubes;
+	Q3HBox* m_Hbox1;
+	Q3HBox* m_Hbox2;
+	Q3HBox* m_Hbox3;
+	Q3HBox* m_Hbox4;
+	Q3HBox* m_Hbox5;
+	Q3HBox* m_Hbox6;
+	Q3HBox* m_Hbox7;
+	Q3HBox* m_Hbox8;
+	Q3HBox* m_Hbox9;
+	Q3HBox* m_Hboxslicesbetween;
+	Q3VBox* m_Vbox1;
+	QListWidget* m_LboTissues;
+	QPushButton* m_PbFile;
+	QPushButton* m_PbExec;
+	QPushButton* m_PbClose;
+	QLineEdit* m_LeFile;
+	QButtonGroup* m_Filetype;
+	QButtonGroup* m_Simplif;
+	QRadioButton* m_RbLine;
+	QRadioButton* m_RbTriang;
+	QRadioButton* m_RbNone;
+	QRadioButton* m_RbDougpeuck;
+	QRadioButton* m_RbDist;
+	QLabel* m_LbSimplif;
+	QLabel* m_LbFile;
+	QLabel* m_LbDist;
+	QLabel* m_LbF1;
+	QLabel* m_LbF2;
+	QLabel* m_LbMinsize;
+	QLabel* m_LbBetween;
+	QSpinBox* m_SbDist;
+	QSpinBox* m_SbMinsize;
+	QSpinBox* m_SbBetween;
+	QSlider* m_SlF;
+	QSpinBox* m_SbTopextrusion;
+	QSpinBox* m_SbBottomextrusion;
+	QLabel* m_LbTopextrusion;
+	QLabel* m_LbBottomextrusion;
+	QCheckBox* m_CbExtrusion;
+	QCheckBox* m_CbSmooth;
+	QCheckBox* m_CbMarchingcubes;
 
 private slots:
-	void mode_changed();
-	void simplif_changed();
-	void file_pushed();
-	void save_pushed();
+	void ModeChanged();
+	void SimplifChanged();
+	void FilePushed();
+	void SavePushed();
 };
 
 } // namespace iseg

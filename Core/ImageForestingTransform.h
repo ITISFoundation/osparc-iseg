@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,255 +18,252 @@
 
 namespace iseg {
 
-struct coef
+struct Coef
 {
-	unsigned short a;
-	float b;
-	float c;
+	unsigned short m_A;
+	float m_B;
+	float m_C;
 };
 
-inline bool operator!=(coef c, unsigned short f) { return c.a != f; }
+inline bool operator!=(Coef c, unsigned short f) { return c.m_A != f; }
 
 template<typename T>
 class ImageForestingTransform
 {
 public:
-	void IFTinit(unsigned short w, unsigned short h, float* E_bit,
-			float* directivity_bit, T* lbl, bool connectivity)
+	void IFTinit(unsigned short w, unsigned short h, float* E_bit, float* directivity_bit, T* lbl, bool connectivity)
 	{
-		width = w;
-		height = h;
-		area = (unsigned)width * height;
-		parent = (unsigned*)malloc(sizeof(unsigned) * area);
-		pf = (float*)malloc(sizeof(float) * area);
-		Q = new IndexPriorityQueue(area, pf);
-		processed = (bool*)malloc(sizeof(bool) * area);
-		lb = (T*)malloc(sizeof(T) * area);
-		directivity_bits = (float*)malloc(sizeof(float) * area);
-		E_bits = (float*)malloc(sizeof(float) * area);
-		for (unsigned i = 0; i < area; i++)
+		m_Width = w;
+		m_Height = h;
+		m_Area = (unsigned)m_Width * m_Height;
+		m_Parent = (unsigned*)malloc(sizeof(unsigned) * m_Area);
+		m_Pf = (float*)malloc(sizeof(float) * m_Area);
+		m_Q = new IndexPriorityQueue(m_Area, m_Pf);
+		m_Processed = (bool*)malloc(sizeof(bool) * m_Area);
+		m_Lb = (T*)malloc(sizeof(T) * m_Area);
+		m_DirectivityBits = (float*)malloc(sizeof(float) * m_Area);
+		m_EBits = (float*)malloc(sizeof(float) * m_Area);
+		for (unsigned i = 0; i < m_Area; i++)
 		{
-			directivity_bits[i] = directivity_bit[i];
+			m_DirectivityBits[i] = directivity_bit[i];
 		}
 
-		reinit(lbl, E_bit, connectivity);
+		Reinit(lbl, E_bit, connectivity);
 	}
-	void reinit(T* lbl, bool connectivity)
+	void Reinit(T* lbl, bool connectivity)
 	{
-		for (unsigned i = 0; i < area; i++)
+		for (unsigned i = 0; i < m_Area; i++)
 		{
-			lb[i] = lbl[i];
-			processed[i] = false;
-			parent[i] = area;
-			if (lb[i] != 0)
+			m_Lb[i] = lbl[i];
+			m_Processed[i] = false;
+			m_Parent[i] = m_Area;
+			if (m_Lb[i] != 0)
 			{
-				Q->insert(i, 0);
+				m_Q->Insert(i, 0);
 			}
 			else
 			{
-				pf[i] = 1E10;
+				m_Pf[i] = 1E10;
 			}
 		}
 
 		unsigned position;
 
-		while (!Q->empty())
+		while (!m_Q->Empty())
 		{
-			position = Q->pop();
+			position = m_Q->Pop();
 
-			processed[position] = true;
+			m_Processed[position] = true;
 
-			if (position % width != 0)
-				update_step(position, position - 1, 270);
-			if ((position + 1) % width != 0)
-				update_step(position, position + 1, 270);
-			if (position >= width)
-				update_step(position, position - width, 180);
-			if (position < area - width)
-				update_step(position, position + width, 180);
+			if (position % m_Width != 0)
+				UpdateStep(position, position - 1, 270);
+			if ((position + 1) % m_Width != 0)
+				UpdateStep(position, position + 1, 270);
+			if (position >= m_Width)
+				UpdateStep(position, position - m_Width, 180);
+			if (position < m_Area - m_Width)
+				UpdateStep(position, position + m_Width, 180);
 			if (connectivity)
 			{
-				if (position >= width && position % width != 0)
-					update_step(position, position - width - 1, 225);
-				if ((position + 1) % width != 0 && position >= width)
-					update_step(position, position - width + 1, 135);
-				if (position < area - width && position % width != 0)
-					update_step(position, position + width - 1, 135);
-				if (position < area - width && (position + 1) % width != 0)
-					update_step(position, position + width + 1, 225);
+				if (position >= m_Width && position % m_Width != 0)
+					UpdateStep(position, position - m_Width - 1, 225);
+				if ((position + 1) % m_Width != 0 && position >= m_Width)
+					UpdateStep(position, position - m_Width + 1, 135);
+				if (position < m_Area - m_Width && position % m_Width != 0)
+					UpdateStep(position, position + m_Width - 1, 135);
+				if (position < m_Area - m_Width && (position + 1) % m_Width != 0)
+					UpdateStep(position, position + m_Width + 1, 225);
 			}
 		}
 	}
-	void reinit(T* lbl, bool connectivity, std::vector<unsigned> pts)
+	void Reinit(T* lbl, bool connectivity, std::vector<unsigned> pts)
 	{
 		std::vector<unsigned>::iterator it = pts.begin();
-		for (unsigned i = 0; i < area; i++)
+		for (unsigned i = 0; i < m_Area; i++)
 		{
-			lb[i] = lbl[i];
-			processed[i] = false;
-			parent[i] = area;
-			if (lb[i] != 0)
+			m_Lb[i] = lbl[i];
+			m_Processed[i] = false;
+			m_Parent[i] = m_Area;
+			if (m_Lb[i] != 0)
 			{
-				Q->insert(i, 0);
+				m_Q->Insert(i, 0);
 			}
 			else
 			{
-				pf[i] = 1E10;
+				m_Pf[i] = 1E10;
 			}
 		}
 
 		unsigned position;
 
-		while (!Q->empty() && it != pts.end())
+		while (!m_Q->Empty() && it != pts.end())
 		{
-			position = Q->pop();
+			position = m_Q->Pop();
 
-			processed[position] = true;
+			m_Processed[position] = true;
 			if (position == *it)
 			{
 				it++;
-				while (it != pts.end() && processed[*it])
+				while (it != pts.end() && m_Processed[*it])
 					it++;
 			}
 
-			if (position % width != 0)
-				update_step(position, position - 1, 270);
-			if ((position + 1) % width != 0)
-				update_step(position, position + 1, 270);
-			if (position >= width)
-				update_step(position, position - width, 180);
-			if (position < area - width)
-				update_step(position, position + width, 180);
+			if (position % m_Width != 0)
+				UpdateStep(position, position - 1, 270);
+			if ((position + 1) % m_Width != 0)
+				UpdateStep(position, position + 1, 270);
+			if (position >= m_Width)
+				UpdateStep(position, position - m_Width, 180);
+			if (position < m_Area - m_Width)
+				UpdateStep(position, position + m_Width, 180);
 			if (connectivity)
 			{
-				if (position >= width && position % width != 0)
-					update_step(position, position - width - 1, 225);
-				if ((position + 1) % width != 0 && position >= width)
-					update_step(position, position - width + 1, 135);
-				if (position < area - width && position % width != 0)
-					update_step(position, position + width - 1, 135);
-				if (position < area - width && (position + 1) % width != 0)
-					update_step(position, position + width + 1, 225);
+				if (position >= m_Width && position % m_Width != 0)
+					UpdateStep(position, position - m_Width - 1, 225);
+				if ((position + 1) % m_Width != 0 && position >= m_Width)
+					UpdateStep(position, position - m_Width + 1, 135);
+				if (position < m_Area - m_Width && position % m_Width != 0)
+					UpdateStep(position, position + m_Width - 1, 135);
+				if (position < m_Area - m_Width && (position + 1) % m_Width != 0)
+					UpdateStep(position, position + m_Width + 1, 225);
 			}
 		}
 
-		Q->clear();
+		m_Q->Clear();
 	}
-	void reinit(T* lbl, float* E_bit, bool connectivity)
+	void Reinit(T* lbl, float* E_bit, bool connectivity)
 	{
-		if (E_bits != E_bit)
+		if (m_EBits != E_bit)
 		{
-			for (unsigned i = 0; i < area; i++)
+			for (unsigned i = 0; i < m_Area; i++)
 			{
-				E_bits[i] = E_bit[i];
+				m_EBits[i] = E_bit[i];
 			}
 		}
 
-		reinit(lbl, connectivity);
+		Reinit(lbl, connectivity);
 	}
-	void reinit(T* lbl, float* E_bit, bool connectivity, std::vector<unsigned> pts)
+	void Reinit(T* lbl, float* E_bit, bool connectivity, std::vector<unsigned> pts)
 	{
-		if (E_bits != E_bit)
+		if (m_EBits != E_bit)
 		{
-			for (unsigned i = 0; i < area; i++)
+			for (unsigned i = 0; i < m_Area; i++)
 			{
-				E_bits[i] = E_bit[i];
+				m_EBits[i] = E_bit[i];
 			}
 		}
 
-		reinit(lbl, connectivity, pts);
+		Reinit(lbl, connectivity, pts);
 	}
-	float* return_pf() { return pf; }
-	T* return_lb() { return lb; }
-	void return_path(Point p, std::vector<Point>* Pt_vec)
+	float* ReturnPf() { return m_Pf; }
+	T* ReturnLb() { return m_Lb; }
+	void ReturnPath(Point p, std::vector<Point>* Pt_vec)
 	{
 		Point p1;
 		Pt_vec->clear();
 		Pt_vec->push_back(p);
-		unsigned pos = (unsigned)width * p.py + p.px;
-		while ((pos = parent[pos]) != area)
+		unsigned pos = (unsigned)m_Width * p.py + p.px;
+		while ((pos = m_Parent[pos]) != m_Area)
 		{
-			p1.px = pos % width;
-			p1.py = pos / width;
+			p1.px = pos % m_Width;
+			p1.py = pos / m_Width;
 			Pt_vec->push_back(p1);
 		}
 	}
-	void return_path(unsigned p, std::vector<unsigned>* Pt_vec)
+	void ReturnPath(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
 		Pt_vec->clear();
 		unsigned pos = p;
 		Pt_vec->push_back(pos);
-		while ((pos = parent[pos]) != area)
+		while ((pos = m_Parent[pos]) != m_Area)
 		{
 			Pt_vec->push_back(pos);
 		}
 	}
-	void append_path(unsigned p, std::vector<unsigned>* Pt_vec)
+	void AppendPath(unsigned p, std::vector<unsigned>* Pt_vec)
 	{
 		unsigned pos = p;
 		Pt_vec->push_back(pos);
-		while ((pos = parent[pos]) != area)
+		while ((pos = m_Parent[pos]) != m_Area)
 		{
 			Pt_vec->push_back(pos);
 		}
-
-		return;
 	}
 	virtual ~ImageForestingTransform()
 	{
-		free(pf);
-		free(lb);
-		free(parent);
-		free(processed);
-		free(E_bits);
-		free(directivity_bits);
-		free(Q);
+		free(m_Pf);
+		free(m_Lb);
+		free(m_Parent);
+		free(m_Processed);
+		free(m_EBits);
+		free(m_DirectivityBits);
+		free(m_Q);
 	}
 
 protected:
-	float* pf; //path-function value
-	float* directivity_bits;
-	float* E_bits;
-	T* lb;
-	bool* processed;
-	short unsigned width;
-	short unsigned height;
-	unsigned area;
+	float* m_Pf; //path-function value
+	float* m_DirectivityBits;
+	float* m_EBits;
+	T* m_Lb;
+	bool* m_Processed;
+	short unsigned m_Width;
+	short unsigned m_Height;
+	unsigned m_Area;
 
 private:
-	IndexPriorityQueue* Q;
-	unsigned* parent;
-	inline void update_step(unsigned p, unsigned q, float direction)
+	IndexPriorityQueue* m_Q;
+	unsigned* m_Parent;
+	inline void UpdateStep(unsigned p, unsigned q, float direction)
 	{
 		float tmp;
-		if (!processed[q])
+		if (!m_Processed[q])
 		{
-			tmp = compute_pf(p, q, direction);
-			if (tmp < pf[q])
+			tmp = ComputePf(p, q, direction);
+			if (tmp < m_Pf[q])
 			{
-				parent[q] = p;
-				if (Q->in_queue(q))
+				m_Parent[q] = p;
+				if (m_Q->InQueue(q))
 				{
-					recompute_lb(p, q);
-					Q->make_smaller(q, tmp);
+					RecomputeLb(p, q);
+					m_Q->MakeSmaller(q, tmp);
 				}
 				else
 				{
-					compute_lb(p, q);
-					Q->insert(q, tmp);
+					ComputeLb(p, q);
+					m_Q->Insert(q, tmp);
 				}
 			}
 		}
 	}
-	virtual inline void compute_lb(unsigned p, unsigned q)
+	virtual inline void ComputeLb(unsigned p, unsigned q)
 	{
-		lb[q] = lb[p];
+		m_Lb[q] = m_Lb[p];
 	}
-	virtual inline void recompute_lb(unsigned p, unsigned q)
+	virtual inline void RecomputeLb(unsigned p, unsigned q)
 	{
-		lb[q] = lb[p];
+		m_Lb[q] = m_Lb[p];
 	}
-	virtual inline float compute_pf(unsigned p, unsigned q, float direction)
+	virtual inline float ComputePf(unsigned p, unsigned q, float direction)
 	{
 		return 1;
 	}
@@ -276,17 +273,15 @@ class ImageForestingTransformRegionGrowing
 		: public ImageForestingTransform<float>
 {
 public:
-	void rg_init(unsigned short w, unsigned short h, float* gradient,
-			float* lbl)
+	void RgInit(unsigned short w, unsigned short h, float* gradient, float* lbl)
 	{
 		IFTinit(w, h, gradient, gradient, lbl, false);
-		return;
 	}
 
 private:
 	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		return std::max(pf[p], std::abs(E_bits[p] - E_bits[q]));
+		return std::max(m_Pf[p], std::abs(m_EBits[p] - m_EBits[q]));
 	}
 };
 
@@ -294,45 +289,41 @@ class ImageForestingTransformLivewire
 		: public ImageForestingTransform<unsigned short>
 {
 public:
-	void lw_init(unsigned short w, unsigned short h, float* E_bits,
-			float* direction, Point p)
+	void LwInit(unsigned short w, unsigned short h, float* E_bits, float* direction, Point p)
 	{
-		lbl = (unsigned short*)malloc((unsigned)w * h * sizeof(unsigned short));
+		m_Lbl = (unsigned short*)malloc((unsigned)w * h * sizeof(unsigned short));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
-			lbl[i] = 0;
-		pt = p.px + p.py * w;
-		lbl[pt] = 1;
-		IFTinit(w, h, E_bits, direction, lbl, true);
-		return;
+			m_Lbl[i] = 0;
+		m_Pt = p.px + p.py * w;
+		m_Lbl[m_Pt] = 1;
+		IFTinit(w, h, E_bits, direction, m_Lbl, true);
 	}
-	void change_pt(Point p)
+	void ChangePt(Point p)
 	{
-		lbl[pt] = 0;
-		pt = p.px + p.py * width;
-		lbl[pt] = 1;
-		reinit(lbl, E_bits, true);
-		return;
+		m_Lbl[m_Pt] = 0;
+		m_Pt = p.px + p.py * m_Width;
+		m_Lbl[m_Pt] = 1;
+		Reinit(m_Lbl, m_EBits, true);
 	}
-	void change_pt(unsigned p, std::vector<unsigned> pts)
+	void ChangePt(unsigned p, std::vector<unsigned> pts)
 	{
-		lbl[pt] = 0;
-		pt = p;
-		lbl[pt] = 1;
-		reinit(lbl, E_bits, true, pts);
-		return;
+		m_Lbl[m_Pt] = 0;
+		m_Pt = p;
+		m_Lbl[m_Pt] = 1;
+		Reinit(m_Lbl, m_EBits, true, pts);
 	}
-	~ImageForestingTransformLivewire() { free(lbl); }
+	~ImageForestingTransformLivewire() override { free(m_Lbl); }
 
 private:
-	unsigned short* lbl;
-	unsigned pt;
+	unsigned short* m_Lbl;
+	unsigned m_Pt;
 	inline float compute_pf(unsigned p, unsigned q, float direction)
 	{
-		return E_bits[q] + pf[p] +
-					 (abs(direction + directivity_bits[p] -
-								floor((direction + directivity_bits[p]) / 180) * 180 - 90) +
-							 abs(direction + directivity_bits[q] -
-									 floor((direction + directivity_bits[q]) / 180) * 180 -
+		return m_EBits[q] + m_Pf[p] +
+					 (abs(direction + m_DirectivityBits[p] -
+								floor((direction + m_DirectivityBits[p]) / 180) * 180 - 90) +
+							 abs(direction + m_DirectivityBits[q] -
+									 floor((direction + m_DirectivityBits[q]) / 180) * 180 -
 									 90)) *
 							 0.14f / 270;
 	}
@@ -341,93 +332,89 @@ private:
 class ImageForestingTransformAdaptFuzzy : public ImageForestingTransform<float>
 {
 public:
-	void fuzzy_init(unsigned short w, unsigned short h, float* E_bits, Point p,
-			float fm1, float fs1, float fs2)
+	void FuzzyInit(unsigned short w, unsigned short h, float* E_bits, Point p, float fm1, float fs1, float fs2)
 	{
-		m1 = 2 * fm1;
-		s1 = -1 / (fs1 * fs1 * 8);
-		s2 = -1 / (fs2 * 2);
-		lbl = (float*)malloc((unsigned)w * h * sizeof(float));
+		m_M1 = 2 * fm1;
+		m_S1 = -1 / (fs1 * fs1 * 8);
+		m_S2 = -1 / (fs2 * 2);
+		m_Lbl = (float*)malloc((unsigned)w * h * sizeof(float));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
-			lbl[i] = 0;
-		pt = p.px + p.py * (unsigned)w;
-		lbl[pt] = 1;
-		IFTinit(w, h, E_bits, E_bits, lbl, false);
+			m_Lbl[i] = 0;
+		m_Pt = p.px + p.py * (unsigned)w;
+		m_Lbl[m_Pt] = 1;
+		IFTinit(w, h, E_bits, E_bits, m_Lbl, false);
 	}
-	void change_pt(Point p)
+	void ChangePt(Point p)
 	{
-		lbl[pt] = 0;
-		pt = p.px + p.py * width;
-		lbl[pt] = 1;
-		reinit(lbl, true);
-		return;
+		m_Lbl[m_Pt] = 0;
+		m_Pt = p.px + p.py * m_Width;
+		m_Lbl[m_Pt] = 1;
+		Reinit(m_Lbl, true);
 	}
-	void change_param(float fm1, float fs1, float fs2)
+	void ChangeParam(float fm1, float fs1, float fs2)
 	{
-		m1 = 2 * fm1;
-		s1 = -1 / (fs1 * fs1 * 8);
-		s2 = -1 / (fs2 * 2);
+		m_M1 = 2 * fm1;
+		m_S1 = -1 / (fs1 * fs1 * 8);
+		m_S2 = -1 / (fs2 * 2);
 	}
 
-	~ImageForestingTransformAdaptFuzzy() { free(lbl); }
+	~ImageForestingTransformAdaptFuzzy() override { free(m_Lbl); }
 
 private:
-	unsigned pt;
-	float m1, s1, s2;
-	float* lbl;
+	unsigned m_Pt;
+	float m_M1, m_S1, m_S2;
+	float* m_Lbl;
 	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		float h1 = exp((E_bits[p] + E_bits[q] - m1) *
-									 (E_bits[p] + E_bits[q] - m1) * s1);
-		float h2 = exp((E_bits[p] - E_bits[q]) * (E_bits[p] - E_bits[q]) * s2);
-		return std::max(pf[p], 1 - (h1 * h1 + h2 * h2) / (h1 + h2));
+		float h1 = exp((m_EBits[p] + m_EBits[q] - m_M1) *
+									 (m_EBits[p] + m_EBits[q] - m_M1) * m_S1);
+		float h2 = exp((m_EBits[p] - m_EBits[q]) * (m_EBits[p] - m_EBits[q]) * m_S2);
+		return std::max(m_Pf[p], 1 - (h1 * h1 + h2 * h2) / (h1 + h2));
 	}
 };
 
-class ImageForestingTransformFastMarching : public ImageForestingTransform<coef>
+class ImageForestingTransformFastMarching : public ImageForestingTransform<Coef>
 {
 public:
-	void fastmarch_init(unsigned short w, unsigned short h, float* E_bits,
-			float* lbl)
+	void FastmarchInit(unsigned short w, unsigned short h, float* E_bits, float* lbl)
 	{
-		Ebits = (float*)malloc((unsigned)w * h * sizeof(float));
-		lb1 = (coef*)malloc((unsigned)w * h * sizeof(coef));
+		m_Ebits = (float*)malloc((unsigned)w * h * sizeof(float));
+		m_Lb1 = (Coef*)malloc((unsigned)w * h * sizeof(Coef));
 		for (unsigned i = 0; i < unsigned(w) * h; i++)
 		{
 			if (E_bits[i] != 0)
-				Ebits[i] = 1 / (E_bits[i] * E_bits[i]);
+				m_Ebits[i] = 1 / (E_bits[i] * E_bits[i]);
 			else
-				Ebits[i] = 1E10;
+				m_Ebits[i] = 1E10;
 			if (lbl[i] != 0)
 			{
-				lb1[i].a = 1;
+				m_Lb1[i].m_A = 1;
 			}
 			else
 			{
-				lb1[i].a = 0;
+				m_Lb1[i].m_A = 0;
 			}
-			lb1[i].b = lb1[i].c = 0;
+			m_Lb1[i].m_B = m_Lb1[i].m_C = 0;
 		}
-		IFTinit(w, h, Ebits, Ebits, lb1, false);
-		return;
+		IFTinit(w, h, m_Ebits, m_Ebits, m_Lb1, false);
 	}
-	~ImageForestingTransformFastMarching()
+	~ImageForestingTransformFastMarching() override
 	{
-		free(Ebits);
-		free(lb1);
+		free(m_Ebits);
+		free(m_Lb1);
 	}
 
 private:
-	float* Ebits;
-	coef* lb1;
+	float* m_Ebits;
+	Coef* m_Lb1;
 	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		(lb[q].a)++;
-		lb[q].b += pf[p];
-		lb[q].c += pf[p] * pf[p];
-		float f = (lb[q].b +
-									sqrt(lb[q].b * lb[q].b + E_bits[q] - lb[q].a * lb[q].c)) /
-							(lb[q].a);
+		(m_Lb[q].m_A)++;
+		m_Lb[q].m_B += m_Pf[p];
+		m_Lb[q].m_C += m_Pf[p] * m_Pf[p];
+		float f = (m_Lb[q].m_B +
+									sqrt(m_Lb[q].m_B * m_Lb[q].m_B + m_EBits[q] - m_Lb[q].m_A * m_Lb[q].m_C)) /
+							(m_Lb[q].m_A);
 		return f;
 	}
 	inline void compute_lb(unsigned p, unsigned q)
@@ -438,20 +425,20 @@ private:
 	}
 };
 
-class ImageForestingTransformDistance : public ImageForestingTransform<coef>
+class ImageForestingTransformDistance : public ImageForestingTransform<Coef>
 {
 public:
-	void distance_init(unsigned short w, unsigned short h, float f, float* lbl)
+	void DistanceInit(unsigned short w, unsigned short h, float f, float* lbl)
 	{
-		lbel = (coef*)malloc((unsigned)w * h * sizeof(coef));
+		m_Lbel = (Coef*)malloc((unsigned)w * h * sizeof(Coef));
 		unsigned i = 0;
 		for (unsigned short j = 0; j < h; j++)
 		{
 			for (unsigned short k = 0; k < w; k++)
 			{
-				lbel[i].a = 0;
-				lbel[i].b = float(k); //
-				lbel[i].c = float(j); //
+				m_Lbel[i].m_A = 0;
+				m_Lbel[i].m_B = float(k); //
+				m_Lbel[i].m_C = float(j); //
 				i++;
 			}
 		}
@@ -463,11 +450,11 @@ public:
 			{
 				if (lbl[i] == f && lbl[i1] != f)
 				{
-					lbel[i].a = 1;
+					m_Lbel[i].m_A = 1;
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
-					lbel[i1].a = 1;
+					m_Lbel[i1].m_A = 1;
 				}
 				i++;
 				i1++;
@@ -481,11 +468,11 @@ public:
 			{
 				if (lbl[i] == f && lbl[i1] != f)
 				{
-					lbel[i].a = 1;
+					m_Lbel[i].m_A = 1;
 				}
 				else if (lbl[i1] == f && lbl[i] != f)
 				{
-					lbel[i1].a = 1;
+					m_Lbel[i1].m_A = 1;
 				}
 				i++;
 				i1++;
@@ -495,30 +482,27 @@ public:
 		}
 		//			float f1;
 
-		IFTinit(w, h, lbl, lbl, lbel, false);
-		return;
+		IFTinit(w, h, lbl, lbl, m_Lbel, false);
 	}
-	~ImageForestingTransformDistance() { free(lbel); }
+	~ImageForestingTransformDistance() override { free(m_Lbel); }
 
 private:
-	coef* lbel;
+	Coef* m_Lbel;
 	inline float compute_pf(unsigned p, unsigned q, float /* direction */)
 	{
-		float x = float(q % width);
-		float y = float(q / width);
-		return sqrt((x - lb[p].b) * (x - lb[p].b) + (y - lb[p].c) * (y - lb[p].c));
+		float x = float(q % m_Width);
+		float y = float(q / m_Width);
+		return sqrt((x - m_Lb[p].m_B) * (x - m_Lb[p].m_B) + (y - m_Lb[p].m_C) * (y - m_Lb[p].m_C));
 	}
 	inline void compute_lb(unsigned p, unsigned q)
 	{
-		lb[q].b = lb[p].b;
-		lb[q].c = lb[p].c;
-		return;
+		m_Lb[q].m_B = m_Lb[p].m_B;
+		m_Lb[q].m_C = m_Lb[p].m_C;
 	}
 	inline void recompute_lb(unsigned p, unsigned q)
 	{
-		lb[q].b = lb[p].b;
-		lb[q].c = lb[p].c;
-		return;
+		m_Lb[q].m_B = m_Lb[p].m_B;
+		m_Lb[q].m_C = m_Lb[p].m_C;
 	}
 };
 

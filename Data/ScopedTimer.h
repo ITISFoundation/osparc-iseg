@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,30 +20,30 @@ template<typename TUnit>
 class ScopedTimerT
 {
 public:
-	ScopedTimerT(const std::string& scope_name, const std::string& unit) 
-		: _scope_name(scope_name), _unit(unit)
+	ScopedTimerT(const std::string& scope_name, const std::string& unit)
+			: m_ScopeName(scope_name), m_Unit(unit)
 	{
-		_before = std::chrono::high_resolution_clock::now();
+		m_Before = std::chrono::high_resolution_clock::now();
 	}
 	~ScopedTimerT()
 	{
-		new_scope(_scope_name);
+		NewScope(m_ScopeName);
 	}
 
-	void new_scope(const std::string& scope_name)
+	void NewScope(const std::string& scope_name)
 	{
 		auto const after = std::chrono::high_resolution_clock::now();
-		double count = static_cast<double>(std::chrono::duration_cast<TUnit>(after - _before).count());
-		Log::note("TIMER", "%g %s in %s", count, _unit.c_str(), _scope_name.c_str());
+		double count = static_cast<double>(std::chrono::duration_cast<TUnit>(after - m_Before).count());
+		Log::Note("TIMER", "%g %s in %s", count, m_Unit.c_str(), m_ScopeName.c_str());
 
-		_before = after;
-		_scope_name = scope_name;
+		m_Before = after;
+		m_ScopeName = scope_name;
 	}
 
 private:
-	std::string _scope_name;
-	std::string _unit;
-	std::chrono::high_resolution_clock::time_point _before;
+	std::string m_ScopeName;
+	std::string m_Unit;
+	std::chrono::high_resolution_clock::time_point m_Before;
 };
 
 class ScopedTimer : public ScopedTimerT<std::chrono::seconds>
@@ -60,4 +60,4 @@ public:
 			: ScopedTimerT<std::chrono::milliseconds>(scope_name, "ms") {}
 };
 
-}
+} // namespace iseg

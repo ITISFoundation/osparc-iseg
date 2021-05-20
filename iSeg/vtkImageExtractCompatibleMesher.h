@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -90,23 +90,20 @@ public:
 
 protected:
 	vtkImageExtractCompatibleMesher();
-	~vtkImageExtractCompatibleMesher();
+	~vtkImageExtractCompatibleMesher() override;
 
-	virtual int RequestData(vtkInformation*, vtkInformationVector**,
-			vtkInformationVector*) override;
-	virtual int FillInputPortInformation(int port, vtkInformation* info) override;
-	virtual int FillOutputPortInformation(int port, vtkInformation* info) override;
+	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+	int FillInputPortInformation(int port, vtkInformation* info) override;
+	int FillOutputPortInformation(int port, vtkInformation* info) override;
 
 	// Use a contouring method (similar to discrete marching cubes)
 	// to extract the surfaces between different material regions
 	int ContourSurface(vtkInformationVector**, vtkInformationVector*);
 
-	void ClipVoxel(vtkShortArray* cellScalars, int flip, double spacing[3],
-			vtkIdList* cellIds, vtkPoints* cellPts);
+	void ClipVoxel(vtkShortArray* cellScalars, int flip, double spacing[3], vtkIdList* cellIds, vtkPoints* cellPts);
 
 	// Helper function for ContourSurface
-	void TriangulateVoxel(int cellScalar, int flip, double spacing[3],
-			vtkIdList* cellIds, vtkPoints* cellPts);
+	void TriangulateVoxel(int cellScalar, int flip, double spacing[3], vtkIdList* cellIds, vtkPoints* cellPts);
 
 	// Helper function for ContourSurface
 	int EvaluateLabel(double x[3]);
@@ -156,14 +153,8 @@ protected:
 	//ETX
 
 private:
-	vtkImageExtractCompatibleMesher(
-			const vtkImageExtractCompatibleMesher&);						// Not implemented
-	void operator=(const vtkImageExtractCompatibleMesher&); // Not implemented
-
-	void ClipVoxel_not_used(vtkShortArray* cellScalars, int flip,
-			double spacing[3], vtkIdList* cellIds,
-			vtkPoints* cellPts);
-	int LabelTetra_not_used();
+	vtkImageExtractCompatibleMesher(const vtkImageExtractCompatibleMesher&) = delete; // Not implemented
+	void operator=(const vtkImageExtractCompatibleMesher&) = delete;									 // Not implemented
 };
 
 #endif

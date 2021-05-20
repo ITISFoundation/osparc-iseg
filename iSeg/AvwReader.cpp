@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,20 +11,19 @@
 
 #include "AvwReader.h"
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdlib.h>
 
 #ifndef _WINDOWS
 // #include <linux/types.h>
-#	include <stdint.h>
+#	include <cstdint>
 #else
 #	define uint64_t __int64
 #endif
 
-std::ifstream& ReadLineIntoIStringStream(std::ifstream& file,
-										 std::istringstream& line)
+std::ifstream& ReadLineIntoIStringStream(std::ifstream& file, std::istringstream& line)
 {
 	// Read a line from file into stream. Consider
 	// the following possibilities for newline:
@@ -70,10 +69,7 @@ std::ifstream& ReadLineIntoIStringStream(std::ifstream& file,
 	return file;
 }
 
-bool iseg::avw::ReadHeader(const char* filename, unsigned short& w,
-						   unsigned short& h, unsigned short& nrofslices,
-						   float& dx1, float& dy1, float& thickness1,
-						   datatype& type)
+bool iseg::avw::ReadHeader(const char* filename, unsigned short& w, unsigned short& h, unsigned short& nrofslices, float& dx1, float& dy1, float& thickness1, eDataType& type)
 {
 	bool ok = false;
 
@@ -124,7 +120,7 @@ bool iseg::avw::ReadHeader(const char* filename, unsigned short& w,
 			ReadLineIntoIStringStream(file, line);
 			std::string name;
 			while ((name = ReadNameFromLine(line.str(), '=')) !=
-				   "EndInformation")
+						 "EndInformation")
 			{
 				if (name == "VoxelDepth")
 					thickness1 = ReadValueFromLine<float>(line.str(), '=');
@@ -143,8 +139,7 @@ bool iseg::avw::ReadHeader(const char* filename, unsigned short& w,
 	return ok;
 }
 
-void* iseg::avw::ReadData(const char* filename, unsigned short slicenr,
-						  unsigned short& w, unsigned short& h, datatype& type)
+void* iseg::avw::ReadData(const char* filename, unsigned short slicenr, unsigned short& w, unsigned short& h, eDataType& type)
 {
 	void* returnval = nullptr;
 
@@ -163,7 +158,7 @@ void* iseg::avw::ReadData(const char* filename, unsigned short slicenr,
 		if (dummy_str == "AVW_ImageFile")
 		{
 			uint64_t data_section_start =
-				ReadValueFromLine<uint64_t>(line.str(), ' ');
+					ReadValueFromLine<uint64_t>(line.str(), ' ');
 
 			ReadLineIntoIStringStream(file, line);
 			dummy_str = ReadValueFromLine<std::string>(line.str(), '=');

@@ -1,0 +1,6 @@
+HeaderFilterRegex: '*.x'
+FormatStyle: 'file'
+Checks: '-*,misc-definitions-in-headers,modernize-use-default-member-init'
+CheckOptions:
+  - key: modernize-use-default-member-init.UseAssignment
+    value: 'true'

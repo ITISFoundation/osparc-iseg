@@ -32,13 +32,10 @@
 #include "../../Core.h"
 #include "../../Type.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        namespace Geometry
-        {
-            /** Simple point inspection in 2D.
+namespace Gc {
+namespace Algo {
+namespace Geometry {
+/** Simple point inspection in 2D.
 
                 4-adjacency is considered for the background and 8-adjacency 
                 for the foreground.
@@ -48,9 +45,9 @@ namespace Gc
                     down the first 8 bits code whether the given neighbour is labeled
                     as background = 0 or foreground = 1.
             */
-            bool GC_DLL_EXPORT IsSimplePoint2D(Uint32 nb);
+bool GC_DLL_EXPORT IsSimplePoint2D(Uint32 nb);
 
-            /** Simple point inspection in 3D.
+/** Simple point inspection in 3D.
 
                 6-adjacency is considered for the background and 26-adjacency 
                 for the foreground.
@@ -60,9 +57,9 @@ namespace Gc
                     down the first 26 bits code whether the given neighbour is labeled
                     as background = 0 or foreground = 1.
             */
-            bool GC_DLL_EXPORT IsSimplePoint3D(Uint32 nb);
-        }
-    }
+bool GC_DLL_EXPORT IsSimplePoint3D(Uint32 nb);
 }
+}
+} // namespace Gc::Algo::Geometry
 
 #endif
