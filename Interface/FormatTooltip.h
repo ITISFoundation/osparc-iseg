@@ -18,3 +18,10 @@ inline QString Format(const char* tooltip)
 	fmt += "</html>";
 	return fmt;
 }
+inline QString Format(const std::string& tooltip)
+{
+	QString fmt = "<html>\n";
+	fmt += "<div style=\"width: 400px;\">" + QString::fromStdString(tooltip) + "</div>";
+	fmt += "</html>";
+	return fmt;
+}

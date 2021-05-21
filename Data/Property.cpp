@@ -6,10 +6,18 @@ namespace iseg {
 
 void Property::OnModified(eChangeType change)
 {
-	auto me = shared_from_this();
+	Property_ptr me;
+	try
+	{
+		me = shared_from_this();
+	}
+	catch(const std::exception& e)
+	{
+		ISEG_WARNING_MSG(e.what());
+	}
 
 	// signal change
-	if (onModified && me)
+	if (me)
 	{
 		onModified(me, change);
 	}
@@ -26,10 +34,7 @@ void Property::OnModified(eChangeType change)
 void Property::OnChildModified(Property_ptr child, eChangeType change) const
 {
 	// signal change
-	if (onModified)
-	{
-		onChildModified(child, change);
-	}
+	onChildModified(child, change);
 }
 
 void Property::SetDescription(const std::string& v)
@@ -103,9 +108,9 @@ std::shared_ptr<PropertyString> PropertyString::Create(value_type value)
 	return std::shared_ptr<PropertyString>(new PropertyString(value));
 }
 
-std::shared_ptr<PropertyButton> PropertyButton::Create(value_type value)
+std::shared_ptr<PropertyButton> PropertyButton::Create(const std::string& txt, value_type value)
 {
-	return std::shared_ptr<PropertyButton>(new PropertyButton(value));
+	return std::shared_ptr<PropertyButton>(new PropertyButton(txt, value));
 }
 
 std::shared_ptr<PropertyGroup> PropertyGroup::Create()
@@ -113,10 +118,24 @@ std::shared_ptr<PropertyGroup> PropertyGroup::Create()
 	return std::shared_ptr<PropertyGroup>(new PropertyGroup);
 }
 
-PropertyEnum::PropertyEnum(const descriptions_type& descriptions /*= descriptions_type()*/, const value_type value /*= kInvalidValue */)
+std::shared_ptr<PropertyEnum> PropertyEnum::Create(const descriptions_type& descriptions, const value_type value)
 {
-	ReplaceDescriptions(descriptions);
-	m_Value = value;
+	return std::shared_ptr<PropertyEnum>(new PropertyEnum(descriptions, value));
+}
+
+PropertyEnum::PropertyEnum(const descriptions_type& descriptions, const value_type value)
+		: m_Value(k_invalid_value)
+{
+	values_type values;
+	for (value_type i = 0; i < (value_type)descriptions.size(); ++i)
+		values[i] = descriptions[i];
+	m_Values = values;
+
+	if (m_Values.count(value))
+	{
+		m_Value = value;
+	}
+
 	m_Invalid = "#Invalid";
 }
 
@@ -158,7 +177,7 @@ void PropertyEnum::ReplaceValues(values_type const& new_values)
 {
 	bool changed = false;
 	{
-		changed = (new_values != m_Values);
+		changed = !(new_values == m_Values);
 		if (changed)
 		{
 			m_Values = new_values;

@@ -11,30 +11,31 @@
 
 #include "iSegData.h"
 
+#include "Signals.h"
+#include "SharedPtr.h"
+
 #include <cassert>
 #include <cstdlib>
 #include <functional>
 #include <limits>
 #include <map>
-#include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace iseg {
 
-class Property;
-using Property_ptr = std::shared_ptr<Property>;
-using Property_cptr = std::shared_ptr<const Property>;
-using Property_wptr = std::weak_ptr<Property>;
+ISEG_DECL_CLASS_PTR(Property);
 
 class ISEG_DATA_API Property : public std::enable_shared_from_this<Property>
 {
 public:
-	enum eValueType {
+	enum ePropertyType {
 		kInteger = 0,
 		kReal,
 		kString,
 		kBool,
+		kEnum,
 		kButton,
 		kGroup
 	};
@@ -45,7 +46,7 @@ public:
 		kStateChanged
 	};
 
-	virtual eValueType Type() const = 0;
+	virtual ePropertyType Type() const = 0;
 
 	virtual std::string StringValue() const { return ""; }
 	virtual void SetStringValue(const std::string&) { assert(false && "SetStringValue not implemented for this type"); }
@@ -67,11 +68,11 @@ public:
 
 	const std::vector<Property_ptr>& Properties() const { return m_Properties; }
 
-	using change_callback_type = std::function<void(Property_ptr, eChangeType)>;
+	using change_signal_type = boost::signals2::signal<void(Property_ptr, eChangeType)>;
 
-	change_callback_type onModified; // NOLINT
+	change_signal_type onModified; // NOLINT
 
-	change_callback_type onChildModified; // NOLINT
+	change_signal_type onChildModified; // NOLINT
 
 	void DumpTree() const;
 
@@ -92,7 +93,7 @@ protected:
 	void DumpTree(const Property* p, int indent) const;
 
 	template<typename T>
-	T AddChild(const std::string& name, T v)
+	std::shared_ptr<T> AddChild(const std::string& name, std::shared_ptr<T> v)
 	{
 		m_Properties.push_back(v);
 		v->SetName(name);
@@ -166,7 +167,7 @@ class ISEG_DATA_API PropertyInt : public PropertyTR<int>
 public:
 	static std::shared_ptr<PropertyInt> Create(value_type value, value_type min_value = -std::numeric_limits<value_type>::max(), value_type max_value = std::numeric_limits<value_type>::max());
 
-	eValueType Type() const override { return eValueType::kInteger; }
+	ePropertyType Type() const override { return ePropertyType::kInteger; }
 
 	std::string StringValue() const override { return std::to_string(Value()); }
 	void SetStringValue(const std::string& v) override { SetValue(atoi(v.c_str())); }
@@ -183,7 +184,7 @@ class ISEG_DATA_API PropertyReal : public PropertyTR<double>
 public:
 	static std::shared_ptr<PropertyReal> Create(value_type value, value_type min_value = -std::numeric_limits<value_type>::max(), value_type max_value = std::numeric_limits<value_type>::max());
 
-	eValueType Type() const override { return eValueType::kReal; }
+	ePropertyType Type() const override { return ePropertyType::kReal; }
 
 	std::string StringValue() const override { return std::to_string(Value()); }
 	void SetStringValue(const std::string& v) override { SetValue(atof(v.c_str())); }
@@ -200,7 +201,7 @@ class ISEG_DATA_API PropertyBool : public PropertyT<bool>
 public:
 	static std::shared_ptr<PropertyBool> Create(value_type value);
 
-	eValueType Type() const override { return eValueType::kBool; }
+	ePropertyType Type() const override { return ePropertyType::kBool; }
 
 	std::string StringValue() const override { return Value() ? "True" : "False"; }
 	void SetStringValue(const std::string& v) override { SetValue(v == "True" ? true : false); }
@@ -217,7 +218,7 @@ class ISEG_DATA_API PropertyString : public PropertyT<std::string>
 public:
 	static std::shared_ptr<PropertyString> Create(value_type value);
 
-	eValueType Type() const override { return eValueType::kString; }
+	ePropertyType Type() const override { return ePropertyType::kString; }
 
 	std::string StringValue() const override { return Value(); }
 	void SetStringValue(const std::string& v) override { SetValue(v); }
@@ -234,10 +235,10 @@ class ISEG_DATA_API PropertyButton : public Property
 public:
 	using value_type = std::function<void()>;
 
-	static std::shared_ptr<PropertyButton> Create(value_type value);
+	static std::shared_ptr<PropertyButton> Create(const std::string& txt, value_type value);
 
-	value_type Value() const { return m_Value; }
-	void SetValue(const value_type& v)
+	const value_type& Value() const { return m_Value; }
+	void SetValue(value_type v)
 	{
 		m_Value = v;
 		OnModified(Property::kValueChanged);
@@ -246,14 +247,14 @@ public:
 	const std::string& ButtonText() const { return m_ButtonText; }
 	void SetButtonText(const std::string& v) { m_ButtonText = v; }
 
-	eValueType Type() const override { return eValueType::kButton; }
+	ePropertyType Type() const override { return ePropertyType::kButton; }
 
 protected:
-	PropertyButton(const value_type& value) : m_Value(value) {}
+	PropertyButton(const std::string& txt, value_type value) : m_ButtonText(txt), m_Value(value) {}
 
 private:
-	value_type m_Value;
 	std::string m_ButtonText;
+	value_type m_Value;
 };
 
 class ISEG_DATA_API PropertyEnum : public Property
@@ -268,8 +269,14 @@ public:
 	/// Invalid value type constant
 	static const value_type k_invalid_value = static_cast<value_type>(-1);
 
+	static std::shared_ptr<PropertyEnum> Create(const descriptions_type& descriptions = descriptions_type(), const value_type value = k_invalid_value);
+
 	value_type Value() const;
 	void SetValue(const value_type value);
+
+	std::string StringValue() const override { return ValueDescription(); }
+
+	ePropertyType Type() const override { return ePropertyType::kEnum; }
 
 	/// The map of values and descriptions
 	const values_type& Values() const;
@@ -277,11 +284,10 @@ public:
 	/// Value description
 	description_type ValueDescription() const;
 
-	/*  Replaces all values (i.e. the enum-options) and
-			leaves the actual value (the index) intact. Only sends
-			a modified signal if the current value is not contained
-			in new_values.
- 		*/
+	/// Replaces all values (i.e. the enum-options) and
+	/// leaves the actual value (the index) intact. Only sends
+	/// a modified signal if the current value is not contained
+	/// in new_values.
 	void ReplaceValues(values_type const& new_values);
 	void ReplaceDescriptions(descriptions_type const& new_descr);
 
@@ -289,9 +295,7 @@ public:
 	void SetInvalidDescription(const description_type& descr);
 
 protected:
-	/** Constructor.		
-			Accepts a list of descriptions and the value corresponding to the index of the descriptions.
-		*/
+	/// Constructor. Accepts a list of descriptions and the value corresponding to the index of the descriptions.
 	explicit PropertyEnum(const descriptions_type& descriptions = descriptions_type(), const value_type value = k_invalid_value);
 
 private:
@@ -307,10 +311,10 @@ class ISEG_DATA_API PropertyGroup : public Property
 public:
 	static std::shared_ptr<PropertyGroup> Create();
 
-	eValueType Type() const override { return eValueType::kGroup; }
+	ePropertyType Type() const override { return ePropertyType::kGroup; }
 
-	template<typename T>
-	T Add(const std::string& name, T v)
+	template<typename T, typename std::enable_if<std::is_base_of<Property, T>::value, bool>::type = true>
+	std::shared_ptr<T> Add(const std::string& name, std::shared_ptr<T> v)
 	{
 		return AddChild(name, v);
 	}

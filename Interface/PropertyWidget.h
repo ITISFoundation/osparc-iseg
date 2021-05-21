@@ -9,7 +9,9 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
+
+#include "../Data/SharedPtr.h"
 
 #include <QWidget>
 
@@ -20,9 +22,7 @@ class QBoxLayout;
 
 namespace iseg {
 
-class Property;
-using Property_ptr = std::shared_ptr<Property>;
-using Property_wptr = std::weak_ptr<Property>;
+ISEG_DECL_CLASS_PTR(Property);
 
 /* \brief UI class to display and edit properties
 **/
@@ -32,8 +32,7 @@ class ISEG_INTERFACE_API PropertyWidget : public QWidget
 public:
 	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
-	void setProperty(Property_ptr p);
-	Property_ptr property() { return m_Property; }
+	void SetProperty(Property_ptr p);
 
 signals:
 	void OnPropertyEdited(iseg::Property_ptr);
@@ -46,9 +45,26 @@ private:
 	void Build(Property_ptr p, QBoxLayout* layout);
 	QWidget* MakePropertyUi(Property& prop);
 
+	void UpdateState(QWidget* w, Property_cptr p);
+	void UpdateDescription(QWidget* w, Property_cptr p);
+
 	Property_ptr m_Property;
 	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
 	std::map<QWidget*, QBoxLayout*> m_CollapseButtonLayoutMap;
+};
+
+class QSharedPtrHolder : public QObject
+{
+	Q_OBJECT
+public:
+	QSharedPtrHolder(QObject* parent) : QObject(parent), m_LifeSpan(new char) {}
+	~QSharedPtrHolder() override = default;
+
+	/// Get weak ptr to check if object is alive
+	std::weak_ptr<char> LifeSpan() { return m_LifeSpan; }
+
+private:
+	std::shared_ptr<char> m_LifeSpan;
 };
 
 } // namespace iseg

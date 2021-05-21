@@ -1,16 +1,20 @@
 #include "PropertyWidget.h"
 
 #include "CollapsibleWidget.h"
+#include "FormatTooltip.h"
 
+#include "../Data/Logger.h"
 #include "../Data/Property.h"
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleValidator>
 #include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
 #include <QParallelAnimationGroup>
+#include <QPointer>
 #include <QPropertyAnimation>
 #include <QPushButton>
 #include <QScrollArea>
@@ -26,10 +30,10 @@ static const int row_height = 20;
 PropertyWidget::PropertyWidget(Property_ptr p, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: QWidget(parent, name, wFlags)
 {
-	setProperty(p);
+	SetProperty(p);
 }
 
-void PropertyWidget::setProperty(Property_ptr p)
+void PropertyWidget::SetProperty(Property_ptr p)
 {
 	if (p && p != m_Property)
 	{
@@ -44,15 +48,26 @@ void PropertyWidget::setProperty(Property_ptr p)
 		setLayout(layout);
 	}
 }
+void PropertyWidget::UpdateState(QWidget* w, Property_cptr p)
+{
+	w->setEnabled(p->Enabled());
+	w->setVisible(p->Visible());
+}
+
+void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
+{
+	// description/name ? 
+	w->setToolTip(Format(p->ToolTip()));
+}
 
 QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 {
-	const auto make_line_edit = [this](const Property& prop) {
+	const auto make_line_edit = [this](const Property& p) {
 		// generic attributes
-		auto edit = new QLineEdit;
-		edit->setToolTip(QString::fromStdString(prop.ToolTip()));
-		edit->setEnabled(prop.Enabled());
-		edit->setVisible(prop.Visible());
+		auto edit = new QLineEdit(this);
+		edit->setToolTip(QString::fromStdString(p.ToolTip()));
+		edit->setEnabled(p.Enabled());
+		edit->setVisible(p.Visible());
 		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
 		return edit;
 	};
@@ -60,40 +75,140 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 	switch (prop.Type())
 	{
 	case Property::kInteger: {
-		auto p = dynamic_cast<PropertyInt*>(&prop);
+		auto ptyped = static_cast<const PropertyInt*>(&prop);
 		auto edit = make_line_edit(prop);
-		edit->setText(QString::number(p->Value())); // ? should this be set via Property::StringValue?
-		edit->setValidator(new QIntValidator(p->MinValue(), p->MaxValue()));
+		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
+		edit->setValidator(new QIntValidator(ptyped->MinValue(), ptyped->MaxValue()));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyInt*>(p.get());
+				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(edit, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
 		return edit;
 	}
 	case Property::kReal: {
-		auto p = dynamic_cast<PropertyReal*>(&prop);
+		auto ptyped = static_cast<const PropertyReal*>(&prop);
 		auto edit = make_line_edit(prop);
-		edit->setText(QString::number(p->Value())); // ? should this be set via Property::StringValue?
-		edit->setValidator(new QDoubleValidator(p->MinValue(), p->MaxValue(), 10));
+		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
+		edit->setValidator(new QDoubleValidator(ptyped->MinValue(), ptyped->MaxValue(), 10));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyReal*>(p.get());
+				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(edit, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
 		return edit;
 	}
 	case Property::kString: {
-		auto p = dynamic_cast<PropertyString*>(&prop);
+		auto ptyped = static_cast<const PropertyString*>(&prop);
 		auto edit = make_line_edit(prop);
-		edit->setText(QString::fromStdString(p->Value()));
+		edit->setText(QString::fromStdString(ptyped->Value()));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyString*>(p.get());
+				edit->setText(QString::fromStdString(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(edit, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
 		return edit;
 	}
 	case Property::kBool: {
-		auto p = dynamic_cast<PropertyBool*>(&prop);
-		auto checkbox = new QCheckBox;
-		checkbox->setChecked(p->Value());
+		auto ptyped = static_cast<const PropertyBool*>(&prop);
+		auto checkbox = new QCheckBox(this);
+		checkbox->setChecked(ptyped->Value());
 		checkbox->setStyleSheet("QCheckBox::indicator {width: 13px; height: 13px; }");
-		// connect to signal
 		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(checkbox))->LifeSpan(), [checkbox, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyBool*>(p.get());
+				checkbox->setChecked(ptyped->Value());
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(checkbox, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(checkbox, p);
+			}
+		});
 		return checkbox;
+	}
+	case Property::kEnum: {
+		auto ptyped = static_cast<const PropertyEnum*>(&prop);
+		auto combo = new QComboBox(this);
+		for (auto d : ptyped->Values())
+		{
+			combo->insertItem(QString::fromStdString(d.second), d.first);
+		}
+		combo->setCurrentItem(ptyped->Value());
+		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(combo))->LifeSpan(), [combo, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyEnum*>(p.get());
+				combo->setCurrentItem(ptyped->Value());
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(combo, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(combo, p);
+			}
+		});
+		return combo;
 	}
 	case Property::kButton: {
 		auto p = dynamic_cast<PropertyButton*>(&prop);
-		auto button = new QPushButton(QString::fromStdString(p->ButtonText()));
+		auto button = new QPushButton(QString::fromStdString(p->ButtonText()), this);
 		button->setAutoDefault(false);
-		// connect to signal
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
+
+		Connect(prop.onModified, (new QSharedPtrHolder(button))->LifeSpan(), [button, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(button, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(button, p);
+			}
+		});
 		return button;
 	}
 	default:
@@ -164,16 +279,20 @@ void PropertyWidget::Build(Property_ptr prop, QBoxLayout* layout)
 	}
 	else
 	{
-		auto label = new QLabel(QString::fromStdString(label_text));
-
-		// split at 50%
-		QSizePolicy sp(QSizePolicy::Preferred, QSizePolicy::Preferred);
-		sp.setHorizontalStretch(1);
-		label->setSizePolicy(sp);
-		field->setSizePolicy(sp);
-
 		auto hbox = new QHBoxLayout;
-		hbox->addWidget(label);
+
+		if (prop->Type() != Property::kButton)
+		{
+			auto label = new QLabel(QString::fromStdString(label_text));
+
+			// split at 50%
+			QSizePolicy sp(QSizePolicy::Preferred, QSizePolicy::Preferred);
+			sp.setHorizontalStretch(1);
+			label->setSizePolicy(sp);
+			field->setSizePolicy(sp);
+
+			hbox->addWidget(label);
+		}
 		hbox->addWidget(field);
 		hbox->setSpacing(2);
 		hbox->setContentsMargins(child_indent, 0, 0, 0);
@@ -245,7 +364,7 @@ void PropertyWidget::Edited()
 			case Property::kInteger: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyInt>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyInt>(prop);
 					auto v = toType<int>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -258,7 +377,7 @@ void PropertyWidget::Edited()
 			case Property::kReal: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyReal>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyReal>(prop);
 					auto v = toType<double>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -271,7 +390,7 @@ void PropertyWidget::Edited()
 			case Property::kString: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyString>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyString>(prop);
 					auto v = toType<std::string>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -284,7 +403,7 @@ void PropertyWidget::Edited()
 			case Property::kBool: {
 				if (auto cb = dynamic_cast<QCheckBox*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyBool>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyBool>(prop);
 					auto v = cb->isChecked();
 					if (v != prop_typed->Value())
 					{
@@ -294,8 +413,21 @@ void PropertyWidget::Edited()
 				}
 				break;
 			}
+			case Property::kEnum: {
+				if (auto cb = dynamic_cast<QComboBox*>(w))
+				{
+					auto prop_typed = std::static_pointer_cast<PropertyEnum>(prop);
+					auto v = cb->currentIndex();
+					if (v != prop_typed->Value())
+					{
+						prop_typed->SetValue(v);
+						OnPropertyEdited(prop);
+					}
+				}
+				break;
+			}
 			case Property::kButton: {
-				auto prop_typed = std::dynamic_pointer_cast<PropertyButton>(prop);
+				auto prop_typed = std::static_pointer_cast<PropertyButton>(prop);
 				if (prop_typed->Value())
 				{
 					prop_typed->Value()();

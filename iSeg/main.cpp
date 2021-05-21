@@ -263,12 +263,26 @@ int main(int argc, char** argv)
 	auto child_group = group->Add("Advanced", PropertyGroup::Create());
 	child_group->SetDescription("Advanced Settings");
 	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
-	auto pb = child_group->Add("Use Foo", PropertyBool::Create(true));
+	auto pb = child_group->Add("Enable", PropertyBool::Create(true));
+	auto pb2 = child_group->Add("Visible", PropertyBool::Create(true));
+	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
-	auto pbtn = child_group->Add("Update", PropertyButton::Create([&group]() {
+	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
+	auto group_p = group.get();
+	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [group_p]() {
 		std::cerr << "PropertyButton triggered\n";
-		group->DumpTree();
+		group_p->DumpTree();
 	}));
+
+	iseg::Connect(group->onChildModified, group, [&](Property_ptr p, Property::eChangeType type) {
+		ISEG_INFO(p->Name() << " : " << p->StringValue());
+	});
+	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
+		pbtn->SetEnabled(pb->Value());
+	});
+	iseg::Connect(pb2->onModified, pbtn0, [&](Property_ptr p, Property::eChangeType type) {
+		pbtn0->SetVisible(pb2->Value());
+	});
 
 	auto dialog = new QDialog(main_window);
 	auto layout = new QVBoxLayout;
