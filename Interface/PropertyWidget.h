@@ -53,18 +53,19 @@ private:
 	std::map<QWidget*, QBoxLayout*> m_CollapseButtonLayoutMap;
 };
 
+/* \brief Create a std::shared_ptr/std::weak_ptr with the same lifespan as 'object'
+**/
 class QSharedPtrHolder : public QObject
 {
 	Q_OBJECT
 public:
-	QSharedPtrHolder(QObject* parent) : QObject(parent), m_LifeSpan(new char) {}
+	QSharedPtrHolder(QObject* object) : QObject(object), m_Lifespan(new char) {}
 	~QSharedPtrHolder() override = default;
 
-	/// Get weak ptr to check if object is alive
-	std::weak_ptr<char> LifeSpan() { return m_LifeSpan; }
+	static std::weak_ptr<char> WeakPtr(QObject* object);
 
 private:
-	std::shared_ptr<char> m_LifeSpan;
+	std::shared_ptr<char> m_Lifespan;
 };
 
 } // namespace iseg

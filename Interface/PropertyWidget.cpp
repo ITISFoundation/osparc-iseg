@@ -80,7 +80,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
 		edit->setValidator(new QIntValidator(ptyped->MinValue(), ptyped->MaxValue()));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(edit), [edit, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyInt*>(p.get());
@@ -103,7 +103,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
 		edit->setValidator(new QDoubleValidator(ptyped->MinValue(), ptyped->MaxValue(), 10));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(edit), [edit, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyReal*>(p.get());
@@ -125,7 +125,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		auto edit = make_line_edit(prop);
 		edit->setText(QString::fromStdString(ptyped->Value()));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(edit))->LifeSpan(), [edit, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(edit), [edit, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyString*>(p.get());
@@ -149,7 +149,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		checkbox->setStyleSheet("QCheckBox::indicator {width: 13px; height: 13px; }");
 		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(checkbox))->LifeSpan(), [checkbox, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(checkbox), [checkbox, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyBool*>(p.get());
@@ -176,7 +176,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		combo->setCurrentItem(ptyped->Value());
 		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(combo))->LifeSpan(), [combo, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(combo), [combo, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyEnum*>(p.get());
@@ -199,7 +199,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop)
 		button->setAutoDefault(false);
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 
-		Connect(prop.onModified, (new QSharedPtrHolder(button))->LifeSpan(), [button, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(button), [button, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kStateChanged)
 			{
 				UpdateState(button, p);
@@ -439,6 +439,11 @@ void PropertyWidget::Edited()
 			}
 		}
 	}
+}
+
+std::weak_ptr<char> QSharedPtrHolder::WeakPtr(QObject* parent)
+{
+	return (new QSharedPtrHolder(parent))->m_Lifespan;
 }
 
 } // namespace iseg
