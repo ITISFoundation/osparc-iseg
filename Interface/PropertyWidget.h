@@ -35,7 +35,7 @@ public:
 	void SetProperty(Property_ptr p);
 
 signals:
-	void OnPropertyEdited(iseg::Property_ptr);
+	void OnPropertyEdited(Property_ptr);
 
 private slots:
 	void ToggleCollapsable(bool checked);
@@ -43,14 +43,14 @@ private slots:
 
 private:
 	void Build(Property_ptr p, QBoxLayout* layout);
-	QWidget* MakePropertyUi(Property& prop);
+	QWidget* MakePropertyUi(Property& prop, QWidget* container);
 
 	void UpdateState(QWidget* w, Property_cptr p);
 	void UpdateDescription(QWidget* w, Property_cptr p);
 
 	Property_ptr m_Property;
 	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
-	std::map<QWidget*, QBoxLayout*> m_CollapseButtonLayoutMap;
+	std::map<QWidget*, QWidget*> m_CollapseButtonAreaMap;
 };
 
 /* \brief Create a std::shared_ptr/std::weak_ptr with the same lifespan as 'object'

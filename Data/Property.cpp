@@ -113,9 +113,11 @@ std::shared_ptr<PropertyButton> PropertyButton::Create(const std::string& txt, v
 	return std::shared_ptr<PropertyButton>(new PropertyButton(txt, value));
 }
 
-std::shared_ptr<PropertyGroup> PropertyGroup::Create()
+std::shared_ptr<PropertyGroup> PropertyGroup::Create(const std::string& description)
 {
-	return std::shared_ptr<PropertyGroup>(new PropertyGroup);
+	std::shared_ptr<PropertyGroup> group(new PropertyGroup);
+	group->SetDescription(description);
+	return group;
 }
 
 std::shared_ptr<PropertyEnum> PropertyEnum::Create(const descriptions_type& descriptions, const value_type value)

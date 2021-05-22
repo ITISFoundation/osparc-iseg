@@ -232,9 +232,11 @@ int main(int argc, char** argv)
 	app.setStyleSheet(
 			"QWidget { color: white; }"
 			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
-			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QComboBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QCheckBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
+			"QPushButton:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QLabel:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QLineEdit:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QComboBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QCheckBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
 
 	main_window->LoadLoadProj(latestprojpath);
 	main_window->LoadAtlas(atlasdir);
@@ -268,10 +270,10 @@ int main(int argc, char** argv)
 	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
 	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
-	auto group_p = group.get();
-	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [group_p]() {
+	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [&group, &child_group]() {
 		std::cerr << "PropertyButton triggered\n";
-		group_p->DumpTree();
+		group->DumpTree();
+		child_group->SetEnabled(!child_group->Enabled());
 	}));
 
 	iseg::Connect(group->onChildModified, group, [&](Property_ptr p, Property::eChangeType type) {
@@ -279,8 +281,10 @@ int main(int argc, char** argv)
 	});
 	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
 		pbtn->SetEnabled(pb->Value());
+		pe->SetVisible(pb->Value());
 	});
 	iseg::Connect(pb2->onModified, pbtn0, [&](Property_ptr p, Property::eChangeType type) {
+		pi2->SetEnabled(pb2->Value());
 		pbtn0->SetVisible(pb2->Value());
 	});
 

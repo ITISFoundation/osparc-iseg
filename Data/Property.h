@@ -145,21 +145,21 @@ class PropertyTR : public PropertyT<T>
 public:
 	using value_type = T;
 
-	value_type MinValue() const { return m_MinValue; }
-	void SetMinValue(value_type v) { m_MinValue = v; }
+	value_type Minimum() const { return m_Minimum; }
+	void SetMinimum(value_type v) { m_Minimum = v; }
 
-	value_type MaxValue() const { return m_MaxValue; }
-	void SetMaxValue(value_type v) { m_MaxValue = v; }
+	value_type Maximum() const { return m_Maximum; }
+	void SetMaximum(value_type v) { m_Maximum = v; }
 
 protected:
 	PropertyTR(value_type value, value_type min_value, value_type max_value)
-			: PropertyT<T>(value), m_MinValue(min_value), m_MaxValue(max_value)
+			: PropertyT<T>(value), m_Minimum(min_value), m_Maximum(max_value)
 	{
 	}
 
 private:
-	value_type m_MinValue;
-	value_type m_MaxValue;
+	value_type m_Minimum;
+	value_type m_Maximum;
 };
 
 class ISEG_DATA_API PropertyInt : public PropertyTR<int>
@@ -309,7 +309,7 @@ private:
 class ISEG_DATA_API PropertyGroup : public Property
 {
 public:
-	static std::shared_ptr<PropertyGroup> Create();
+	static std::shared_ptr<PropertyGroup> Create(const std::string& description = {});
 
 	ePropertyType Type() const override { return ePropertyType::kGroup; }
 
