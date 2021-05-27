@@ -291,6 +291,13 @@ public:
 	void ReplaceValues(values_type const& new_values);
 	void ReplaceDescriptions(descriptions_type const& new_descr);
 
+	/// Enable/disable individual options
+	void SetEnabled(value_type index, bool on);
+	bool Enabled(value_type index) const;
+
+	/// Check if any items have been enabled/disabled 
+	bool HasEnabledFlags() const { return !m_Enabled.empty(); }
+
 	/// Set alternative invalid value description
 	void SetInvalidDescription(const description_type& descr);
 
@@ -302,6 +309,8 @@ private:
 	values_type m_Values;
 	/// Currently selected value
 	value_type m_Value;
+	/// Enabled flag
+	std::map<value_type, bool> m_Enabled;
 	/// Invalid value description. Default: L"#Invalid"
 	description_type m_Invalid;
 };

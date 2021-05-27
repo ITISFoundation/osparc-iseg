@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QSpacerItem>
+#include <QStandardItemModel>
 
 #include <iostream>
 
@@ -91,12 +92,12 @@ void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
 
 QWidget* PropertyWidget::MakePropertyUi(Property& prop, QWidget* container)
 {
-	const auto make_line_edit = [this](const Property& p) {
+	const auto make_line_edit = [this, container](const Property& p) {
 		// generic attributes
 		auto edit = new QLineEdit(this);
 		edit->setToolTip(QString::fromStdString(p.ToolTip()));
-		edit->setEnabled(p.Enabled());
-		edit->setVisible(p.Visible());
+		container->setEnabled(p.Enabled());
+		container->setVisible(p.Visible());
 		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
 		return edit;
 	};
@@ -178,6 +179,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QWidget* container)
 		auto checkbox = new QCheckBox(this);
 		checkbox->setChecked(ptyped->Value());
 		checkbox->setStyleSheet("QCheckBox::indicator {width: 13px; height: 13px; }");
+		UpdateState(container, prop.shared_from_this());
 		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
 
 		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(checkbox), [checkbox, container, this](Property_ptr p, Property::eChangeType type) {
@@ -205,6 +207,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QWidget* container)
 			combo->insertItem(QString::fromStdString(d.second), d.first);
 		}
 		combo->setCurrentItem(ptyped->Value());
+		UpdateState(container, prop.shared_from_this());
 		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
 
 		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(combo), [combo, container, this](Property_ptr p, Property::eChangeType type) {
@@ -216,6 +219,19 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QWidget* container)
 			else if (type == Property::eChangeType::kStateChanged)
 			{
 				UpdateState(container, p);
+
+				auto ptyped = static_cast<const PropertyEnum*>(p.get());
+				auto model = qobject_cast<QStandardItemModel*>(combo->model());
+				if (ptyped->HasEnabledFlags() && model)
+				{
+					for (const auto& i : ptyped->Values())
+					{
+						if (auto item = model->item(i.first))
+						{
+							item->setEnabled(ptyped->Enabled(i.first));
+						}
+					}
+				}
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
@@ -228,6 +244,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QWidget* container)
 		auto p = dynamic_cast<PropertyButton*>(&prop);
 		auto button = new QPushButton(QString::fromStdString(p->ButtonText()), this);
 		button->setAutoDefault(false);
+		UpdateState(container, prop.shared_from_this());
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 
 		Connect(prop.onModified, QSharedPtrHolder::WeakPtr(button), [button, container, this](Property_ptr p, Property::eChangeType type) {

@@ -1474,8 +1474,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	{
 		QObject_connect(m_PbTab[i], SIGNAL(clicked()), m_MWidgetSignalMapper, SLOT(map()));
 		m_MWidgetSignalMapper->setMapping(m_PbTab[i], i);
-		QObject_connect(m_MWidgetSignalMapper, SIGNAL(mapped(int)), this, SLOT(PbTabPressed(int)));
 	}
+	QObject_connect(m_MWidgetSignalMapper, SIGNAL(mapped(int)), this, SLOT(PbTabPressed(int)));
 	for (auto widget : m_Tabwidgets)
 	{
 		assert(widget);

@@ -177,6 +177,7 @@ const PropertyEnum::values_type& PropertyEnum::Values() const
 
 void PropertyEnum::ReplaceValues(values_type const& new_values)
 {
+	assert(m_Enabled.empty() && "m_Enabled flags may not be up-to-date");
 	bool changed = false;
 	{
 		changed = !(new_values == m_Values);
@@ -209,6 +210,26 @@ void PropertyEnum::ReplaceDescriptions(descriptions_type const& new_descr)
 void PropertyEnum::SetInvalidDescription(const description_type& descr)
 {
 	m_Invalid = descr;
+}
+
+void PropertyEnum::SetEnabled(value_type index, bool v)
+{
+	const auto found = m_Enabled.find(index);
+	if (found == m_Enabled.end() || found->second != v)
+	{
+		m_Enabled[index] = v;
+		OnModified(eChangeType::kStateChanged);
+	}
+}
+
+bool PropertyEnum::Enabled(value_type index) const
+{
+	const auto found = m_Enabled.find(index);
+	if (found != m_Enabled.end())
+	{
+		return found->second;
+	}
+	return true;
 }
 
 } // namespace iseg

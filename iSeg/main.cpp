@@ -232,6 +232,7 @@ int main(int argc, char** argv)
 	app.setStyleSheet(
 			"QWidget { color: white; }"
 			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
+			"QWidget:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
 			"QPushButton:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
 			"QLabel:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
 			"QLineEdit:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
