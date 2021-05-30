@@ -25,4 +25,10 @@ target_link_libraries(
 		${QT_LIBRARIES}
 )
 
+if (APPLE)
+	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/dark DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/iSeg.app/Contents/MacOS/)
+else()
+	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/dark DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/)
+endif()
+
 vs_set_property(QDarkStyleSheet Thirdparty)
