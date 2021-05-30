@@ -1737,6 +1737,8 @@ QDockWidget::close-button {
   border: 0;
   margin: 0;
   padding: 0;
+  subcontrol-position: right;
+  left: -4px;
   image: url(":/qss_icons/dark/rc/window_close.png");
 }
 
@@ -1756,6 +1758,8 @@ QDockWidget::float-button {
   border: 0;
   margin: 0;
   padding: 0;
+  subcontrol-position: right;
+  left: -20px;
   image: url(":/qss_icons/dark/rc/window_undock.png");
 }
 

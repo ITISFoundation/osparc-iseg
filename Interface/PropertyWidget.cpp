@@ -128,8 +128,8 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* n
 	header_list.append("Value");
 
 	setHeaderLabels(header_list);
-	setColumnWidth(0, 150);
-	setColumnWidth(1, 150);
+	//setColumnWidth(0, 150);
+	//setColumnWidth(1, 150);
 
 	header()->setStretchLastSection(true);
 #if QT_VERSION >= 0x050000

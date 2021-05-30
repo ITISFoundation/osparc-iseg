@@ -141,15 +141,11 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	auto property_view = new PropertyWidget(group);
 	//property_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
-	auto hbox = new QHBoxLayout;
-	hbox->addWidget(property_view);
-	hbox->addStretch();
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
 
-	auto main_layout = new QVBoxLayout;
-	main_layout->addLayout(hbox);
-	main_layout->addStretch();
-
-	setLayout(main_layout);
+	setLayout(layout);
 
 	MethodChanged();
 	SourceChanged();

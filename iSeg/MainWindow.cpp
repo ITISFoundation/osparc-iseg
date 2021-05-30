@@ -630,7 +630,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	}
 
 	m_MethodTab = new QStackedWidget(this);
-	m_MethodTab->setFrameStyle(Q3Frame::Box | Q3Frame::Sunken);
+	m_MethodTab->setFrameStyle(QFrame::Plain);
 	m_MethodTab->setLineWidth(2);
 
 	for (size_t i = 0; i < m_Tabwidgets.size(); i++)
