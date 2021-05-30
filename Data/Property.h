@@ -37,7 +37,8 @@ public:
 		kBool,
 		kEnum,
 		kButton,
-		kGroup
+		kGroup,
+		kePropertyTypeSize
 	};
 
 	enum eChangeType {
