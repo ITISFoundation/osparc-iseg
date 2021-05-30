@@ -17,6 +17,7 @@
 #include "Data/BrushInteraction.h"
 
 #include <algorithm>
+#include <array>
 
 namespace iseg {
 
