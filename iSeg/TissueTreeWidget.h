@@ -11,8 +11,8 @@
 
 #include "../Data/Types.h"
 
-#include <qdir.h>
-#include <qtreewidget.h>
+#include <QDir>
+#include <QTreeWidget>
 
 #include <set>
 

@@ -263,8 +263,7 @@ QTreeWidgetItem* TissueTreeWidget::CreateHierarchyItem(bool isFolder, const QStr
 		new_tissue->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
 		new_tissue->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
 		new_tissue->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-		new_tissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-												 Qt::ItemIsDragEnabled);
+		new_tissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 		return new_tissue;
 	}
 }

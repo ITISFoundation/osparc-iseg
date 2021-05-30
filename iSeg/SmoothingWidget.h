@@ -53,6 +53,7 @@ private:
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
+
 	Q3HBox* m_Hboxoverall;
 	Q3VBox* m_Vboxmethods;
 	Q3HBox* m_Hbox1;

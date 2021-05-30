@@ -6313,7 +6313,7 @@ int GetScalarType<unsigned char>() { return VTK_UNSIGNED_CHAR; }
 template<>
 int GetScalarType<unsigned short>() { return VTK_UNSIGNED_SHORT; }
 
-int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<tissues_size_t>& tissuevec, bool usediscretemc, float ratio, unsigned smoothingiterations, float passBand, float featureAngle)
+int SlicesHandler::ExtractTissueSurfaces(const std::string& filename, std::vector<tissues_size_t>& tissuevec, bool usediscretemc, float ratio, unsigned smoothingiterations, float passBand, float featureAngle)
 {
 	int error_counter = 0;
 	ISEG_INFO_MSG("SlicesHandler::extract_tissue_surfaces");
@@ -6329,8 +6329,7 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 	const char* tissue_name_array_name = "TissueNames"; // don't modify this
 	const char* tissue_color_array_name = "Colors";			// don't modify this
 
-	vtkSmartPointer<vtkImageData> label_field =
-			vtkSmartPointer<vtkImageData>::New();
+	auto label_field = vtkSmartPointer<vtkImageData>::New();
 	label_field->SetExtent(0, (int)Width() + 1, 0, (int)Height() + 1, 0, (int)(m_Endslice - m_Startslice) + 1);
 	Pair ps = GetPixelsize();
 	label_field->SetSpacing(ps.high, ps.low, GetSlicethickness());
@@ -6350,13 +6349,11 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 	// Copy tissue names and colors into labelField
 	//
 	tissues_size_t num_tissues = TissueInfos::GetTissueCount();
-	vtkSmartPointer<vtkStringArray> names_array =
-			vtkSmartPointer<vtkStringArray>::New();
+	auto names_array = vtkSmartPointer<vtkStringArray>::New();
 	names_array->SetNumberOfTuples(num_tissues + 1);
 	names_array->SetName(tissue_name_array_name);
 
-	vtkSmartPointer<vtkFloatArray> color_array =
-			vtkSmartPointer<vtkFloatArray>::New();
+	auto color_array = vtkSmartPointer<vtkFloatArray>::New();
 	color_array->SetNumberOfComponents(3);
 	color_array->SetNumberOfTuples(num_tissues + 1);
 	color_array->SetName(tissue_color_array_name);
@@ -6386,17 +6383,9 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 	{
 		Copyfromtissuepadded(i, &(field[(nr_slice + 1) * (unsigned long long)(Width() + 2) * (Height() + 2)]), padding);
 	}
-	for (unsigned long long i = 0;
-			 i < (unsigned long long)(Width() + 2) * (Height() + 2);
-			 i++)
+	for (std::uint64_t i = 0; i < (std::uint64_t)(Width() + 2) * (Height() + 2); i++)
 		field[i] = 0;
-	for (unsigned long long i = (m_Endslice - m_Startslice + 1) *
-															(unsigned long long)(Width() + 2) *
-															(Height() + 2);
-			 i < (m_Endslice - m_Startslice + 2) *
-							 (unsigned long long)(Width() + 2) *
-							 (Height() + 2);
-			 i++)
+	for (std::uint64_t i = (m_Endslice - m_Startslice + 1) * (std::uint64_t)(Width() + 2) * (Height() + 2); i < (m_Endslice - m_Startslice + 2) * (std::uint64_t)(Width() + 2) * (Height() + 2); i++)
 		field[i] = 0;
 
 	// Check the label field
@@ -6408,14 +6397,10 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 	//
 	// Now extract the surface from the label field
 	//
-	vtkSmartPointer<vtkImageExtractCompatibleMesher> contour =
-			vtkSmartPointer<vtkImageExtractCompatibleMesher>::New();
-	vtkSmartPointer<vtkDiscreteMarchingCubes> cubes =
-			vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
-	vtkSmartPointer<vtkWindowedSincPolyDataFilter> smoother =
-			vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
-	vtkSmartPointer<vtkEdgeCollapse> simplify =
-			vtkSmartPointer<vtkEdgeCollapse>::New();
+	auto contour = vtkSmartPointer<vtkImageExtractCompatibleMesher>::New();
+	auto cubes = vtkSmartPointer<vtkDiscreteMarchingCubes>::New();
+	auto smoother = vtkSmartPointer<vtkWindowedSincPolyDataFilter>::New();
+	auto simplify = vtkSmartPointer<vtkEdgeCollapse>::New();
 
 	vtkPolyData* output = nullptr;
 	if (usediscretemc)
@@ -6486,8 +6471,7 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 		double x0[3] = {cell_bnds[0], cell_bnds[2], cell_bnds[4]};
 		double x1[3] = {cell_bnds[1], cell_bnds[3], cell_bnds[5]};
 		// cellSize is related to current edge length
-		double cell_size =
-				0.5 * std::sqrt(vtkMath::Distance2BetweenPoints(x0, x1));
+		double cell_size = 0.5 * std::sqrt(vtkMath::Distance2BetweenPoints(x0, x1));
 
 		// min edge length -> cellSize  :  no edges will be collapsed, no edge shorter than 0
 		// min edge length -> inf:  all edges will be collapsed, ""
@@ -6563,7 +6547,7 @@ int SlicesHandler::ExtractTissueSurfaces(const QString& filename, std::vector<ti
 	// Write output to file
 	//
 	vtkNew<vtkGenericDataSetWriter> writer;
-	writer->SetFileName(filename.toAscii().data());
+	writer->SetFileName(filename.c_str());
 	writer->SetInputConnection(transform_filter->GetOutputPort());
 	writer->SetMaterialArrayName(tissue_index_array_name);
 	writer->Write();

@@ -402,7 +402,7 @@ void MeasurementWidget::OnMouseClicked(Point p)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = ToQ(TissueInfos::GetTissueName(tnr));
-			QString note = QString("");
+			QString note = "";
 			if (!(m_Handler3D->StartSlice() == 0 && m_Handler3D->EndSlice() == m_Handler3D->NumSlices()))
 			{
 				note = QString("\nCalculated for active slices only.");
@@ -428,7 +428,7 @@ void MeasurementWidget::OnMouseClicked(Point p)
 				tissuename1 = QString("-");
 			else
 				tissuename1 = ToQ(TissueInfos::GetTissueName(tnr));
-			QString note = QString("");
+			QString note = "";
 			if (!(m_Handler3D->StartSlice() == 0 && m_Handler3D->EndSlice() == m_Handler3D->NumSlices()))
 			{
 				note = QString("\nCalculated for active slices only.");

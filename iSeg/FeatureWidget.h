@@ -28,7 +28,7 @@ public:
 	void Init() override;
 	void NewLoaded() override;
 	std::string GetName() override { return std::string("Feature"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("feature.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

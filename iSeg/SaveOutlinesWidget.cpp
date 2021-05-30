@@ -269,7 +269,7 @@ void SaveOutlinesWidget::SavePushed()
 				usemc = true;
 
 			// Call method to extract surface, smooth, simplify and finally save it to file
-			int number_of_errors = m_Handler3D->ExtractTissueSurfaces(loadfilename.ascii(), vtissues, usemc, ratio, smoothingiter);
+			int number_of_errors = m_Handler3D->ExtractTissueSurfaces(loadfilename.toStdString(), vtissues, usemc, ratio, smoothingiter);
 
 			if (number_of_errors < 0)
 			{

@@ -79,7 +79,7 @@ private slots:
 	void on_mAllSlicesCheckBox_toggled(bool newValue);
 	void on_mExecutePushButton_clicked();
 
-	void on_ModeChanged(QWidget* current_widget);
+	void on_ModeChanged(QWidget*);
 
 	void BmpChanged() override;
 
