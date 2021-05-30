@@ -24,3 +24,5 @@ target_link_libraries(
 		#Qt${QT_VERSION_MAJOR}::Widgets
 		${QT_LIBRARIES}
 )
+
+vs_set_property(QDarkStyleSheet Thirdparty)
