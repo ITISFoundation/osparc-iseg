@@ -73,7 +73,7 @@ public:
 	}
 
 	// Use this for setting tree item height.
-	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
 	{
 		QSize sz = QItemDelegate::sizeHint(option, index);
 
@@ -454,7 +454,7 @@ void PropertyWidget::Edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						OnPropertyEdited(prop);
+						emit OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -467,7 +467,7 @@ void PropertyWidget::Edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						OnPropertyEdited(prop);
+						emit OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -480,7 +480,7 @@ void PropertyWidget::Edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						OnPropertyEdited(prop);
+						emit OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -493,7 +493,7 @@ void PropertyWidget::Edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						OnPropertyEdited(prop);
+						emit OnPropertyEdited(prop);
 					}
 				}
 				break;
@@ -506,7 +506,7 @@ void PropertyWidget::Edited()
 					if (v != prop_typed->Value())
 					{
 						prop_typed->SetValue(v);
-						OnPropertyEdited(prop);
+						emit OnPropertyEdited(prop);
 					}
 				}
 				break;

@@ -19,6 +19,7 @@ IF(ISEG_BUILD_TESTING)
 		test_Logging.cpp
 		test_iSegImageAdaptor.cpp
 		#test_SuperPixel.cpp
+		test_Properties.cpp
 		test_Transform.cpp
 	)
 	

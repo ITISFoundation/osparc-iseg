@@ -14,7 +14,10 @@
 #include "MainWindow.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
-#include "bmp_read_1.h"
+//#include "bmp_read_1.h"
+#include "PlastiqueStyle.h"
+#include "UserDir.h"
+#include "vtkCustomOutputWindow.h"
 
 #include "Interface/PropertyWidget.h"
 
@@ -28,19 +31,15 @@
 #include "Thirdparty/QDarkStyleSheet/dark.h"
 
 #include <QApplication>
-#include <QLabel>
-#include <QPlastiqueStyle>
-#include <QSplashScreen>
 #include <QDatetime>
+#include <QLabel>
 #include <QMessagebox>
+#include <QSplashScreen>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-
-#include <vtkObjectFactory.h>
-#include <vtkOutputWindow.h>
 
 #include <cerrno>
 #include <cmath>
@@ -57,8 +56,6 @@
 
 #define SHOWSPLASH
 
-using namespace iseg;
-
 namespace {
 
 std::string timestamped(const std::string prefix, const std::string& suffix)
@@ -74,49 +71,26 @@ std::pair<std::string, std::string> custom_parser(const std::string& s)
 	{
 		return std::make_pair(std::string("s4l"), std::string());
 	}
-	else
-	{
-		return std::make_pair(std::string(), std::string());
-	}
+	return std::make_pair(std::string(), std::string());
 }
-
-// \brief Redirect VTK errors/warnings to file
-class VtkCustomOutputWindow : public vtkOutputWindow
-{
-public:
-	static VtkCustomOutputWindow* New();
-	vtkTypeMacro(VtkCustomOutputWindow, vtkOutputWindow);
-	void PrintSelf(ostream& os, vtkIndent indent) override {}
-
-	// Put the text into the output stream.
-	void DisplayText(const char* msg) override { std::cerr << msg << std::endl; }
-
-protected:
-	VtkCustomOutputWindow() = default;
-
-private:
-	VtkCustomOutputWindow(const VtkCustomOutputWindow&) = delete; 
-	void operator=(const VtkCustomOutputWindow&) = delete;				 
-};
-
-vtkStandardNewMacro(VtkCustomOutputWindow);
 
 } // namespace
 
-#ifdef NDEBUG
-bool _print_debug_log = false;
-#else
-bool print_debug_log = true;
-#endif
 
 int main(int argc, char** argv)
 {
-	// parse program arguments
+	using namespace iseg;
 	namespace po = boost::program_options;
 	namespace fs = boost::filesystem;
 
+	// parse program arguments
 	po::options_description desc("Allowed options");
-	desc.add_options()("help", "produce help message")("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")("s4l", po::value<std::string>(), "start iSEG in S4L link mode")("debug", po::bool_switch()->default_value(false), "show debug log messages")("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
+	desc.add_options()
+		("help", "produce help message")
+		("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")
+		("s4l", po::value<std::string>(), "start iSEG in S4L link mode")
+		("debug", po::bool_switch()->default_value(false), "show debug log messages")
+		("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
 	po::variables_map vm;
 	po::store(po::command_line_parser(argc, argv).options(desc).extra_parser(custom_parser).run(), vm);
 	po::notify(vm);
@@ -135,47 +109,17 @@ int main(int argc, char** argv)
 	}
 
 	// install vtk error handler to avoid stupid popup windows
-	auto eow = VtkCustomOutputWindow::New();
+	auto eow = vtkCustomOutputWindow::New();
 	eow->SetInstance(eow);
 	eow->Delete();
 
-	QFileInfo fileinfo(argv[0]);
-
-	QDir tmpdir = QDir::home();
-	if (!tmpdir.exists("iSeg"))
-	{
-		std::cerr << "iSeg folder does not exist, creating...\n";
-				if (!tmpdir.mkdir(QString("iSeg")))
-		{
-			std::cerr << "failed to create iSeg folder, exiting...\n";
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (!tmpdir.cd("iSeg"))
-	{
-		std::cerr << "failed to enter iSeg folder, exiting...\n";
-		exit(EXIT_FAILURE);
-	}
-
-	if (!tmpdir.exists("tmp"))
-	{
-		std::cerr << "tmp folder does not exist, creating...\n";
-		if (!tmpdir.mkdir(QString("tmp")))
-		{
-			std::cerr << "failed to create tmp folder, exiting...\n";
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (!tmpdir.cd("tmp"))
-	{
-		std::cerr << "failed to enter tmp folder, exiting...\n";
-		exit(EXIT_FAILURE);
-	}
-
+	// start logging
+	QDir tmpdir = TempDir();
 	bool debug = vm.count("debug") ? vm["debug"].as<bool>() : false;
 	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
 	init_logging(log_file_name, true, debug);
 
+	QFileInfo fileinfo(argv[0]);
 	QDir file_directory = fileinfo.dir();
 	ISEG_INFO("fileDirectory = " << file_directory.absolutePath().toStdString());
 
@@ -203,45 +147,8 @@ int main(int argc, char** argv)
 	SlicesHandler slice_handler;
 
 	QApplication app(argc, argv);
-	//QStyle* style = new QProxyStyle(QStyleFactory::create("fusion"));
-	//assert(style);
-//#define PLASTIQUE
 #ifdef PLASTIQUE
-	QApplication::setStyle(new QPlastiqueStyle);
-
-	QPalette palette;
-	palette = app.palette();
-	palette.setColor(QPalette::Window, QColor(40, 40, 40));
-	palette.setColor(QPalette::Base, QColor(70, 70, 70));
-	palette.setColor(QPalette::WindowText, QColor(255, 255, 255));
-	palette.setColor(QPalette::Text, QColor(255, 255, 255));
-	palette.setColor(QPalette::Button, QColor(70, 70, 70));
-	palette.setColor(QPalette::Highlight, QColor(150, 150, 150));
-	palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
-	palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));
-	app.setPalette(palette);
-	// needed on MacOS, but not WIN32?
-	app.setStyleSheet(
-			"QWidget { color: white; }"
-			//"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
-			"QWidget:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QPushButton:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QLabel:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QLineEdit:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QCheckBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QComboBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QComboBox { background: rgb(40,40,40); border-radius: 5px; }"
-			"QComboBox::drop-down { border-left-color: rgb(40,40,40); }"
-			// https://doc.qt.io/qt-5/stylesheet-examples.html
-			"QTreeView::branch:!has-children:!has-siblings:adjoins-item { background: palette(window); }"
-			"QTreeView::branch:!has-children:has-siblings:adjoins-item { background: palette(window); }"
-			"QTreeView::branch:!has-children:has-siblings:!adjoins-item { background: palette(window); }"
-			"QTreeView::branch:!has-children:has-siblings:!adjoins-item { background: palette(window); }");
-	//"QComboBox::down-arrow { border: 1px rgb(40,40,40); }"
-	//"QTreeWidget::item { height: 20px; }");
-	//"QTreeView::branch { border-image: url(none.png); }"
-	//"QTreeWidget::item { padding: 2px; height: 20px; }");
-	//"QTreeWidget::branch:selected { border-top : 0px solid #8d8d8d; border-bottom : 0px solid #8d8d8d; }"
+	SetPlastiqueStyle(&app);
 #elif 1
 	dark::setStyleSheet(&app);
 #endif
@@ -291,8 +198,6 @@ int main(int argc, char** argv)
 	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [&group, &child_group]() {
 		std::cerr << "PropertyButton triggered\n";
 		group->DumpTree();
-
-		// TODO: this doesn't work for PropertyTreeWidget
 		child_group->SetEnabled(!child_group->Enabled());
 	}));
 
@@ -300,7 +205,6 @@ int main(int argc, char** argv)
 		ISEG_INFO(p->Name() << " : " << p->StringValue());
 	});
 	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
-		// TODO: this doesn't work for PropertyTreeWidget
 		pbtn->SetEnabled(pb->Value());
 		pe->SetVisible(pb->Value());
 	});
@@ -317,7 +221,7 @@ int main(int argc, char** argv)
 	dialog->setMinimumHeight(400);
 	dialog->raise();
 	dialog->exec();
-	return 0;
+	exit(EXIT_SUCCESS);
 #endif
 
 	main_window->showMaximized();

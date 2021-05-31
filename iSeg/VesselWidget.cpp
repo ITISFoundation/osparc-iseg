@@ -12,12 +12,13 @@
 #include "SlicesHandler.h"
 #include "VesselWidget.h"
 
-#include "Data/Vec3.h"
+#include "Interface/PropertyWidget.h"
 
 #include "Core/Pair.h"
 
-#include <qfiledialog.h>
-#include <qlabel.h>
+#include "Data/Vec3.h"
+
+#include <QFileDialog>
 
 #include <vector>
 
@@ -26,32 +27,6 @@ namespace iseg {
 VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
 		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
 {
-	m_Vbox1 = new Q3VBox(this);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_TxtInfo = new QLabel("Thresholds: 1000,1150,1250,1300", m_Vbox1);
-	m_PbExec = new QPushButton("Execute", m_Vbox1);
-	m_PbStore = new QPushButton("Save...", m_Vbox1);
-	m_PbStore->setEnabled(false);
-
-	m_TxtStart = new QLabel("Start Pt.: ", m_Hbox1);
-	m_CbbLb1 = new QComboBox(m_Hbox1);
-	m_TxtNrend = new QLabel("Nr. of Pts.: ", m_Hbox2);
-	m_SbNrend = new QSpinBox(1, 20, 1, m_Hbox2);
-	m_SbNrend->setValue(1);
-	m_TxtEndnr = new QLabel("Pt. Nr.: ", m_Hbox3);
-	m_SbEndnr = new QSpinBox(1, m_SbNrend->value(), 1, m_Hbox3);
-	m_SbEndnr->setValue(1);
-	m_TxtEnd = new QLabel(" End Pt.: ", m_Hbox3);
-	m_CbbLb2 = new QComboBox(m_Hbox3);
-
-	m_Hbox1->setFixedSize(m_Hbox1->sizeHint());
-	m_Hbox2->setFixedSize(m_Hbox2->sizeHint());
-	m_Hbox3->setFixedSize(m_Hbox3->sizeHint());
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	//	setFixedSize(vbox1->size());
-
 	AugmentedMark am;
 	am.mark = 0;
 	am.name = "";
@@ -61,19 +36,60 @@ VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent, const char* n
 	m_Selectedlabels.push_back(am);
 	m_Selectedlabels.push_back(am);
 
-	QObject_connect(m_SbNrend, SIGNAL(valueChanged(int)), this, SLOT(NrendChanged(int)));
-	QObject_connect(m_SbEndnr, SIGNAL(valueChanged(int)), this, SLOT(EndnrChanged(int)));
-	QObject_connect(m_PbExec, SIGNAL(clicked()), this, SLOT(Execute()));
-	QObject_connect(m_PbStore, SIGNAL(clicked()), this, SLOT(Savevessel()));
-	QObject_connect(m_CbbLb1, SIGNAL(activated(int)), this, SLOT(Cbb1Changed(int)));
-	QObject_connect(m_CbbLb2, SIGNAL(activated(int)), this, SLOT(Cbb2Changed(int)));
+	// settings
+	auto group = PropertyGroup::Create("Settings");
+
+	m_TxtInfo = group->Add("TxtInfo", PropertyString::Create("1000,1150,1250,1300"));
+	m_TxtInfo->SetDescription("Thresholds");
+
+	m_CbbLb1 = group->Add("CbbLb1", PropertyEnum::Create());
+	m_CbbLb1->SetDescription("Start Point");
+
+	m_SbNrend = group->Add("SbNrend", PropertyInt::Create(1, 1, 20));
+	m_SbNrend->SetDescription("Number of Points");
+
+	m_SbEndnr = group->Add("SbEndnr", PropertyInt::Create(1, 1, m_SbNrend->Value()));
+	m_SbEndnr->SetDescription("Point Number");
+
+	m_CbbLb2 = group->Add("CbbLb2", PropertyEnum::Create());
+	m_CbbLb2->SetDescription("End Point");
+
+	m_PbExec = group->Add("Execute", PropertyButton::Create("Execute", [this]() { Execute(); }));
+
+	m_PbStore = group->Add("Save", PropertyButton::Create("Save...", [this]() { Savevessel(); }));
+	m_PbStore->SetEnabled(false);
+
+	// connections
+	m_SbNrend->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			NrendChanged(m_SbNrend->Value());
+	});
+
+	m_SbEndnr->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			EndnrChanged(m_SbEndnr->Value());
+	});
+
+	m_CbbLb1->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			Cbb1Changed(m_CbbLb1->Value());
+	});
+
+	m_CbbLb2->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			Cbb1Changed(m_CbbLb2->Value());
+	});
+
+	// add property view
+	auto property_view = new PropertyWidget(group);
+
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
+	setLayout(layout);
 
 	MarksChanged();
 }
-
-VesselWidget::~VesselWidget() { delete m_Vbox1; }
-
-QSize VesselWidget::sizeHint() const { return m_Vbox1->sizeHint(); }
 
 void VesselWidget::Init()
 {
@@ -101,20 +117,21 @@ FILE* VesselWidget::LoadParams(FILE* fp, int /* version */)
 void VesselWidget::Getlabels()
 {
 	m_Handler3D->GetLabels(&m_Labels);
-	QObject_disconnect(m_CbbLb1, SIGNAL(activated(int)), this, SLOT(Cbb1Changed(int)));
-	QObject_disconnect(m_CbbLb2, SIGNAL(activated(int)), this, SLOT(Cbb2Changed(int)));
-	m_CbbLb1->clear();
-	m_CbbLb2->clear();
 
+	boost::signals2::shared_connection_block cb1_block(m_CbbLb1Connection);
+	boost::signals2::shared_connection_block cb2_block(m_CbbLb2Connection);
+
+	PropertyEnum::descriptions_type labels;
 	for (size_t i = 0; i < m_Labels.size(); i++)
 	{
-		m_CbbLb1->insertItem(QString(m_Labels[i].name.c_str()));
-		m_CbbLb2->insertItem(QString(m_Labels[i].name.c_str()));
+		labels.push_back(m_Labels[i].name);
 	}
+	m_CbbLb1->ReplaceDescriptions(labels);
+	m_CbbLb2->ReplaceDescriptions(labels);
 
-	for (size_t i = 0; i < m_Selectedlabels.size(); i++)
+	for (PropertyEnum::value_type i = 0; i < m_Selectedlabels.size(); i++)
 	{
-		size_t j = 0;
+		PropertyEnum::value_type j = 0;
 		while ((j < m_Labels.size()) && (m_Labels[j] != m_Selectedlabels[i]))
 			j++;
 		if (j == m_Labels.size())
@@ -132,11 +149,11 @@ void VesselWidget::Getlabels()
 				m_Selectedlabels[i] = m_Labels[0];
 				if (i == 0)
 				{
-					m_CbbLb1->setCurrentItem(0);
+					m_CbbLb1->SetValue(0);
 				}
-				else if ((int)i == m_SbEndnr->value())
+				else if ((int)i == m_SbEndnr->Value())
 				{
-					m_CbbLb2->setCurrentItem(0);
+					m_CbbLb2->SetValue(0);
 				}
 			}
 		}
@@ -144,33 +161,28 @@ void VesselWidget::Getlabels()
 		{
 			if (i == 0)
 			{
-				m_CbbLb1->setCurrentItem(j);
+				m_CbbLb1->SetValue(j);
 			}
-			else if ((int)i == m_SbEndnr->value())
+			else if ((int)i == m_SbEndnr->Value())
 			{
-				m_CbbLb2->setCurrentItem(j);
+				m_CbbLb2->SetValue(j);
 			}
 		}
 	}
 
-	QObject_connect(m_CbbLb1, SIGNAL(activated(int)), this, SLOT(Cbb1Changed(int)));
-	QObject_connect(m_CbbLb2, SIGNAL(activated(int)), this, SLOT(Cbb2Changed(int)));
+	m_CbbLb1->SetVisible(!m_Labels.empty());
+	m_CbbLb2->SetVisible(!m_Labels.empty());
+	m_SbNrend->SetVisible(!m_Labels.empty());
+	m_SbEndnr->SetVisible(!m_Labels.empty());
+	m_PbExec->SetVisible(!m_Labels.empty());
 
 	if (m_Labels.empty())
 	{
-		m_Hbox1->hide();
-		m_Hbox2->hide();
-		m_Hbox3->hide();
-		m_TxtInfo->setText("No labels exist.");
-		m_PbExec->hide();
+		m_TxtInfo->SetValue("No labels exist.");
 	}
 	else
 	{
-		m_Hbox1->show();
-		m_Hbox2->show();
-		m_Hbox3->show();
-		m_TxtInfo->setText("Thresholds: 1000,1150,1250,1300");
-		m_PbExec->show();
+		m_TxtInfo->SetValue("Thresholds: 1000,1150,1250,1300");
 	}
 }
 
@@ -191,7 +203,7 @@ void VesselWidget::Execute()
 	std::vector<Vec3> all_seeds; // seeds + end point
 
 	// save all start seeds in s
-	for (int i = 1; i <= m_SbNrend->value(); i++)
+	for (int i = 1; i <= m_SbNrend->Value(); i++)
 	{
 		int j = 0;
 		while ((j < i) && (m_Selectedlabels[j] != m_Selectedlabels[i]))
@@ -236,7 +248,7 @@ void VesselWidget::Execute()
 		if (world.Init(tmpbb_start, tmpbb_end, m_Handler3D))
 		{
 			world.Dijkstra(seeds, end, &m_BranchTree);
-			m_PbStore->setEnabled(true);
+			m_PbStore->SetEnabled(true);
 			OnSlicenrChanged(); // BL Why?
 		}
 	}
@@ -262,20 +274,18 @@ void VesselWidget::NrendChanged(int newval)
 	{
 		m_Selectedlabels.resize(newval + 1);
 	}
-	m_SbEndnr->setMaxValue(newval);
-	m_SbEndnr->setValue(1);
+	m_SbEndnr->SetMaximum(newval);
+	m_SbEndnr->SetValue(1);
 }
 
 void VesselWidget::EndnrChanged(int newval)
 {
-	QObject_disconnect(m_CbbLb2, SIGNAL(activated(int)), this, SLOT(Cbb2Changed(int)));
+	boost::signals2::shared_connection_block cb2_block(m_CbbLb2Connection);
 
-	size_t i = 0;
+	PropertyEnum::value_type i = 0;
 	while ((i < m_Labels.size()) && (m_Labels[i] != m_Selectedlabels[newval]))
 		i++;
-	m_CbbLb2->setCurrentItem(i);
-
-	QObject_connect(m_CbbLb2, SIGNAL(activated(int)), this, SLOT(Cbb2Changed(int)));
+	m_CbbLb2->SetValue(i);
 }
 
 void VesselWidget::Cbb1Changed(int newval)
@@ -285,7 +295,7 @@ void VesselWidget::Cbb1Changed(int newval)
 
 void VesselWidget::Cbb2Changed(int newval)
 {
-	m_Selectedlabels[m_SbEndnr->value()] = m_Labels[newval];
+	m_Selectedlabels[m_SbEndnr->Value()] = m_Labels[newval];
 }
 
 void VesselWidget::NewLoaded() { ResetBranchTree(); }
@@ -295,7 +305,7 @@ void VesselWidget::ResetBranchTree()
 	m_BranchTree.Clear();
 	m_Vp.clear();
 	emit Vp1Changed(&m_Vp);
-	m_PbStore->setEnabled(false);
+	m_PbStore->SetEnabled(false);
 }
 
 void VesselWidget::OnSlicenrChanged()

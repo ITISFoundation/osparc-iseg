@@ -79,6 +79,7 @@ SET(ViewerSrcs
 	TransformWidget.cpp
 	UndoConfigurationDialog.cpp
 	VesselWidget.cpp
+	vtkCustomOutputWindow.cpp
 	vtkEdgeCollapse.cpp
 	vtkGenericDataSetWriter.cpp
 	vtkImageExtractCompatibleMesher.cpp

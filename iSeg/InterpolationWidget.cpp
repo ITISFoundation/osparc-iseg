@@ -144,7 +144,6 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	auto layout = new QHBoxLayout;
 	layout->addWidget(property_view, 2);
 	layout->addStretch(1);
-
 	setLayout(layout);
 
 	MethodChanged();
