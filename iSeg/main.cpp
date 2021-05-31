@@ -31,10 +31,10 @@
 #include "Thirdparty/QDarkStyleSheet/dark.h"
 
 #include <QApplication>
-#include <QDatetime>
 #include <QLabel>
-#include <QMessagebox>
 #include <QSplashScreen>
+#include <QDateTime>
+#include <QMessageBox>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
