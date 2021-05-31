@@ -78,7 +78,6 @@
 #include <qmessagebox.h>
 #include <qprogressdialog.h>
 
-#define NO_OPENMP_SUPPORT
 #ifndef NO_OPENMP_SUPPORT
 #	include <omp.h>
 #endif
