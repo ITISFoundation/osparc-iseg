@@ -42,16 +42,12 @@ signals:
 private slots:
 	void Edited();
 
-	void drawRow2(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;// override;
-
 private:
 	void Build(Property_ptr p, QTreeWidgetItem* item, QTreeWidgetItem* parent_item);
 	QWidget* MakePropertyUi(Property& prop, QTreeWidgetItem* item);
 
 	void UpdateState(QTreeWidgetItem* item, Property_cptr p);
 	void UpdateDescription(QWidget* w, Property_cptr p);
-
-	int RowFromIndex(const QModelIndex& index) const;
 
 	template<typename TFunctor>
 	void VisitLeaves(QTreeWidgetItem* item, const TFunctor& functor);
@@ -64,6 +60,5 @@ private:
 	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
 	std::shared_ptr<char> m_Lifespan;
 };
-
 
 } // namespace iseg

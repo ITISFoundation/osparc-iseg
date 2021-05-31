@@ -32,7 +32,6 @@
 
 namespace iseg {
 
-static const int child_indent = 8;
 static const int row_height = 20;
 
 namespace {
@@ -95,17 +94,12 @@ public:
 };
 
 PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QTreeWidget(parent), m_Lifespan(std::make_shared<char>('1'))
+		: QTreeWidget(parent), m_ItemDelegate(new ItemDelegate), m_Lifespan(std::make_shared<char>('1'))
 {
-	m_ItemDelegate = new ItemDelegate;
-	m_ItemDelegate->SetHeight(row_height+4);
-
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-	setSelectionMode( QAbstractItemView::NoSelection );
-	//setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setSelectionMode(QAbstractItemView::NoSelection);
 
 	setColumnCount(2);
-	//hideColumn(2); // for property type
 	setAcceptDrops(false);
 	setDragDropMode(QTreeWidget::NoDragDrop);
 	setExpandsOnDoubleClick(false);
@@ -115,12 +109,11 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* n
 	setAnimated(true);
 	setIndentation(10);
 
-	auto splitter = new SplitterHandle(this);
-
-	//setAlternatingRowColors(true);
-	//setStyleSheet("alternate-background-color: yellow;background-color: red;");
-
+	m_ItemDelegate->SetHeight(row_height + 4);
 	setItemDelegate(m_ItemDelegate);
+
+	// move column spitter interactively
+	new SplitterHandle(this);
 
 	// setup the headers
 	QStringList header_list;
@@ -128,40 +121,15 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* n
 	header_list.append("Value");
 
 	setHeaderLabels(header_list);
-	//setColumnWidth(0, 150);
-	//setColumnWidth(1, 150);
-
+	header()->setMinimumSectionSize(100);
 	header()->setStretchLastSection(true);
 #if QT_VERSION >= 0x050000
 	header()->setSectionsMovable(false);
 #endif
 
-	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-	//setStyleSheet(
-	//		"QLineEdit { background-color: rgb(40,40,40) }"
-	//		"QPushButton { background-color: rgb(50,50,50); font: bold }");
+	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
 	SetProperty(prop);
-}
-
-int PropertyWidget::RowFromIndex(const QModelIndex& index) const
-{
-	int count = 0;
-
-	if (index.isValid())
-	{
-		count = (index.row() + 1) + RowFromIndex(index.parent());
-
-		const QModelIndex parent = index.parent();
-		if (parent.isValid())
-		{
-			for (int r = 0; r < index.row(); ++r)
-				count += model()->rowCount(parent.child(r, 0));
-		}
-	}
-
-	return count;
 }
 
 Property::ePropertyType PropertyWidget::ItemType(const QTreeWidgetItem* item) const
@@ -194,7 +162,7 @@ void PropertyWidget::SetProperty(Property_ptr prop)
 			}
 		};
 
-		for (int i=0; i<topLevelItemCount(); ++i)
+		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
 			auto item = topLevelItem(i);
 
@@ -216,104 +184,6 @@ void PropertyWidget::VisitLeaves(QTreeWidgetItem* item, const TFunctor& functor)
 		auto child = item->child(i);
 		VisitLeaves(child, functor);
 	}
-}
-
-void PropertyWidget::drawRow2(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-	QStyleOptionViewItemV3 opt = option;
-	/*
-	bool hasValue = true;
-	if (m_editorPrivate)
-	{
-		QtProperty* property = m_editorPrivate->indexToProperty(index);
-		if (property)
-			hasValue = property->hasValue();
-	}
-
-	if (!hasValue && m_editorPrivate->markPropertiesWithoutValue())
-	{
-		const QColor c = option.palette.color(QPalette::Dark);
-		painter->fillRect(option.rect, c);
-		opt.palette.setColor(QPalette::AlternateBase, c);
-	}
-	else
-	{
-		const QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
-		if (c.isValid())
-		{
-			painter->fillRect(option.rect, c);
-			opt.palette.setColor(QPalette::AlternateBase, c.lighter(112));
-		}
-	}
-	*/
-	//const int g = (index.row() % 2 == 0) ? 60 : 80;
-
-	const auto type = ItemType(itemFromIndex(index));
-
-	const QColor c2 = QColor(25, 35, 45);
-
-	const auto c = (type == Property::kGroup) ? QColor(50, 50, 50) : QColor(40, 40, 40);
-
-	painter->fillRect(option.rect, c);
-	opt.palette.setColor(QPalette::AlternateBase, c);
-
-	if (false) //type == Property::kButton)
-	{
-		QStyleOptionViewItem optb = option;
-
-		if (selectionModel()->isSelected(index))
-		{
-			optb.state |= QStyle::State_Selected;
-		}
-
-		int firstSection = header()->logicalIndex(0);
-		int lastSection = header()->logicalIndex(header()->count() - 1);
-		int left = header()->sectionViewportPosition(firstSection);
-		int right = header()->sectionViewportPosition(lastSection) + header()->sectionSize(lastSection);
-		int LevelOfThisItem = 1;
-		int indent = LevelOfThisItem * indentation();
-
-		left += indent;
-
-		optb.rect.setX(left);
-		optb.rect.setWidth(right - left);
-
-		itemDelegate(index)->paint(painter, optb, index);
-	}
-	else
-	{
-		QTreeView::drawRow(painter, option, index);
-	}
-
-	// draw grid lines
-	// https://stackoverflow.com/questions/24636138/showing-gridlines-with-qtreeview
-
-	QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
-	QPen pen(color);// QColor(30, 30, 30));
-	pen.setWidthF(0);
-
-	auto y = option.rect.y();
-
-	// saving is mandatory to keep alignment through out the row painting
-	painter->save();
-	painter->setPen(pen);
-
-	// don't draw the horizontal line before the root index
-	if (index != model()->index(0, 0))
-	{
-		painter->drawLine(0, y, option.rect.width(), y);
-	}
-	// draw vertical lines
-	if (type != Property::kButton && type != Property::kGroup)
-	{
-		painter->translate(visualRect(model()->index(0, 0)).x() - indentation() - .5, -.5);
-		for (int id = 0, num_sections = header()->count(); id < num_sections - 1; ++id)
-		{
-			painter->translate(header()->sectionSize(id), 0);
-			painter->drawLine(0, y, 0, y + option.rect.height());
-		}
-	}
-	painter->restore();
 }
 
 void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidgetItem* parent_item)
@@ -555,7 +425,7 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 	item->setDisabled(!p->Enabled());
 	item->setHidden(!p->Visible());
 
-	for (int col=0; col<2; ++col)
+	for (int col = 0; col < 2; ++col)
 	{
 		if (auto w = itemWidget(item, col))
 		{
@@ -567,7 +437,7 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 
 void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
 {
-	// description/name ? 
+	// description/name ?
 	w->setToolTip(Format(p->ToolTip()));
 }
 
