@@ -31,8 +31,8 @@
 #include <QLabel>
 #include <QPlastiqueStyle>
 #include <QSplashScreen>
-#include <QDatetime>
-#include <QMessagebox>
+#include <QDateTime>
+#include <QMessageBox>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -96,7 +96,7 @@ protected:
 
 private:
 	VtkCustomOutputWindow(const VtkCustomOutputWindow&) = delete; 
-	void operator=(const VtkCustomOutputWindow&) = delete;				 
+	void operator=(const VtkCustomOutputWindow&) = delete;
 };
 
 vtkStandardNewMacro(VtkCustomOutputWindow);
