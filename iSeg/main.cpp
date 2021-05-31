@@ -288,11 +288,13 @@ int main(int argc, char** argv)
 	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
 	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
+	auto child_group2 = group->Add("Extra", PropertyGroup::Create());
+	child_group2->SetDescription("Extra Settings");
+	auto pf2 = child_group2->Add("Alpha", PropertyReal::Create(0.5));
 	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [&group, &child_group]() {
 		std::cerr << "PropertyButton triggered\n";
 		group->DumpTree();
 
-		// TODO: this doesn't work for PropertyTreeWidget
 		child_group->SetEnabled(!child_group->Enabled());
 	}));
 
@@ -300,13 +302,14 @@ int main(int argc, char** argv)
 		ISEG_INFO(p->Name() << " : " << p->StringValue());
 	});
 	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
-		// TODO: this doesn't work for PropertyTreeWidget
 		pbtn->SetEnabled(pb->Value());
 		pe->SetVisible(pb->Value());
+		child_group2->SetEnabled(pb2->Value());
 	});
 	iseg::Connect(pb2->onModified, pbtn0, [&](Property_ptr p, Property::eChangeType type) {
 		pi2->SetEnabled(pb2->Value());
 		pbtn0->SetVisible(pb2->Value());
+		child_group2->SetVisible(pb2->Value());
 	});
 
 	auto dialog = new QDialog(main_window);
