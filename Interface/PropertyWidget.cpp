@@ -12,19 +12,13 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleValidator>
-#include <QFormLayout>
 #include <QHeaderView>
 #include <QIntValidator>
 #include <QItemDelegate>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPainter>
-#include <QParallelAnimationGroup>
-#include <QPointer>
-#include <QPropertyAnimation>
 #include <QPushButton>
-#include <QScrollArea>
-#include <QSpacerItem>
 #include <QStandardItemModel>
 #include <QTreeWidget>
 
@@ -166,23 +160,20 @@ void PropertyWidget::SetProperty(Property_ptr prop)
 		{
 			auto item = topLevelItem(i);
 
-			VisitLeaves(item, set_span);
+			VisitItems(item, set_span);
 		}
 	}
 }
 
 template<typename TFunctor>
-void PropertyWidget::VisitLeaves(QTreeWidgetItem* item, const TFunctor& functor)
+void PropertyWidget::VisitItems(QTreeWidgetItem* item, const TFunctor& functor)
 {
-	if (item->childCount() == 0)
-	{
-		functor(item);
-	}
+	functor(item);
 
 	for (int i = 0; i < item->childCount(); ++i)
 	{
 		auto child = item->child(i);
-		VisitLeaves(child, functor);
+		VisitItems(child, functor);
 	}
 }
 
@@ -192,12 +183,14 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 	{
 		parent_item->addChild(item);
 	}
+	else
+	{
+		addTopLevelItem(item);
+	}
 
 	const std::string name = prop->Description().empty() ? prop->Name() : prop->Description();
 	item->setFlags(Qt::ItemIsEnabled);
 	item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
-
-	addTopLevelItem(item);
 	expandItem(item);
 
 	m_ItemTypeMap[item] = prop->Type();
@@ -422,17 +415,21 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 
 void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 {
-	item->setDisabled(!p->Enabled());
-	item->setHidden(!p->Visible());
-
-	for (int col = 0; col < 2; ++col)
+	const auto set_state = [this, visible=p->Visible(), enabled=p->Enabled()](QTreeWidgetItem* item) 
 	{
-		if (auto w = itemWidget(item, col))
+		item->setDisabled(!enabled);
+		item->setHidden(!visible);
+
+		for (int col = 0; col < 2; ++col)
 		{
-			w->setEnabled(p->Enabled());
+			if (auto w = itemWidget(item, col))
+			{
+				w->setEnabled(enabled);
+			}
 		}
-	}
-	setItemHidden(item, !p->Visible());
+	};
+
+	VisitItems(item, set_state);
 }
 
 void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)

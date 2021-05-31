@@ -25,6 +25,7 @@ target_link_libraries(
 		${QT_LIBRARIES}
 )
 
+# todo: implement as build event?
 if (APPLE)
 	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/dark DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/iSeg.app/Contents/MacOS/)
 elseif(MSVC)

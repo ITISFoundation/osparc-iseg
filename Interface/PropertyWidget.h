@@ -50,7 +50,7 @@ private:
 	void UpdateDescription(QWidget* w, Property_cptr p);
 
 	template<typename TFunctor>
-	void VisitLeaves(QTreeWidgetItem* item, const TFunctor& functor);
+	void VisitItems(QTreeWidgetItem* item, const TFunctor& functor);
 
 	Property::ePropertyType ItemType(const QTreeWidgetItem* item) const;
 
