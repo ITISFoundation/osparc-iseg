@@ -17,11 +17,11 @@ namespace iseg {
 
 Project::Project()
 {
-	m_MLoadprojfilename1 = QString("");
-	m_MLoadprojfilename2 = QString("");
-	m_MLoadprojfilename3 = QString("");
-	m_MLoadprojfilename4 = QString("");
-	m_MFilename = QString("");
+	m_MLoadprojfilename1 = "";
+	m_MLoadprojfilename2 = "";
+	m_MLoadprojfilename3 = "";
+	m_MLoadprojfilename4 = "";
+	m_MFilename = "";
 }
 
 } // namespace iseg

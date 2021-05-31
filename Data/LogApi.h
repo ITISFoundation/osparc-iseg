@@ -20,19 +20,19 @@ class ISEG_DATA_API Log
 public:
 	static void Debug(const char* format, ...);
 	template<class C, typename... Args>
-	static void Debug(const std::basic_string<C>& format, Args... args) { debug(format.c_str(), args...); }
+	static void Debug(const std::basic_string<C>& format, Args... args) { Debug(format.c_str(), args...); }
 
 	static void Info(const char* format, ...);
 	template<class C, typename... Args>
-	static void Info(const std::basic_string<C>& format, Args... args) { info(format.c_str(), args...); }
+	static void Info(const std::basic_string<C>& format, Args... args) { Info(format.c_str(), args...); }
 
 	static void Warning(const char* format, ...);
 	template<class C, typename... Args>
-	static void Warning(const std::basic_string<C>& format, Args... args) { warning(format.c_str(), args...); }
+	static void Warning(const std::basic_string<C>& format, Args... args) { Warning(format.c_str(), args...); }
 
 	static void Error(const char* format, ...);
 	template<class C, typename... Args>
-	static void Error(const std::basic_string<C>& format, Args... args) { error(format.c_str(), args...); }
+	static void Error(const std::basic_string<C>& format, Args... args) { Error(format.c_str(), args...); }
 
 	static void Note(const std::string& channel, const char* format, ...);
 

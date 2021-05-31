@@ -9,6 +9,7 @@
 ##
 USE_QT4()
 USE_ITK()
+USE_BOOST()
 
 FILE(GLOB HEADERS *.h)
 SET(SOURCES
@@ -17,6 +18,7 @@ SET(SOURCES
 	PropertyWidget.cpp
 	Plugin.cpp
 	RecentPlaces.cpp
+	SplitterHandle.cpp
 	WidgetInterface.cpp
 )
 
@@ -24,6 +26,7 @@ QT4_WRAP_CPP(MOCSrcs
 	CollapsibleWidget.h
 	ProgressDialog.h
 	PropertyWidget.h
+	SplitterHandle.h
 	WidgetInterface.h
 )
 ADD_LIBRARY(iSegInterface SHARED  ${SOURCES} ${HEADERS} ${MOCSrcs})

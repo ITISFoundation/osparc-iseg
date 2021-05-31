@@ -303,7 +303,7 @@ public:
 	void SlicetissueY(tissues_size_t* return_bits, unsigned short ycoord);
 	tissues_size_t* SlicetissueY(unsigned short ycoord);
 	void SliceworkZ(unsigned short slicenr);
-	int ExtractTissueSurfaces(const QString& filename, std::vector<tissues_size_t>& tissuevec, bool usediscretemc = false, float ratio = 1.0f, unsigned smoothingiterations = 15, float passBand = 0.1f, float featureAngle = 180);
+	int ExtractTissueSurfaces(const std::string& filename, std::vector<tissues_size_t>& tissuevec, bool usediscretemc = false, float ratio = 1.0f, unsigned smoothingiterations = 15, float passBand = 0.1f, float featureAngle = 180);
 	void NextSlice();
 	void PrevSlice();
 	unsigned short GetNextFeaturingSlice(tissues_size_t type, bool& found);

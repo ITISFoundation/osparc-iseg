@@ -18,7 +18,7 @@ namespace iseg {
 Atlas::Atlas()
 {
 	for (int i = 0; i < maxnr; i++)
-		m_MAtlasfilename[i] = QString("");
+		m_MAtlasfilename[i] = "";
 	m_MAtlasdir = QDir("");
 }
 

@@ -9,46 +9,56 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
+#include "../Data/Property.h"
+
+#include <QTreeWidget>
 #include <QWidget>
 
 #include <map>
 #include <memory>
 
 class QBoxLayout;
+class QFormLayout;
 
 namespace iseg {
 
-class Property;
-using Property_ptr = std::shared_ptr<Property>;
-using Property_wptr = std::weak_ptr<Property>;
+class ItemDelegate;
 
 /* \brief UI class to display and edit properties
 **/
-class ISEG_INTERFACE_API PropertyWidget : public QWidget
+class ISEG_INTERFACE_API PropertyWidget : public QTreeWidget
 {
 	Q_OBJECT
 public:
 	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
-	void setProperty(Property_ptr p);
-	Property_ptr property() { return m_Property; }
+	void SetProperty(Property_ptr p);
 
 signals:
-	void OnPropertyEdited(iseg::Property_ptr);
+	void OnPropertyEdited(Property_ptr);
 
 private slots:
-	void ToggleCollapsable(bool checked);
 	void Edited();
 
 private:
-	void Build(Property_ptr p, QBoxLayout* layout);
-	QWidget* MakePropertyUi(Property& prop);
+	void Build(Property_ptr p, QTreeWidgetItem* item, QTreeWidgetItem* parent_item);
+	QWidget* MakePropertyUi(Property& prop, QTreeWidgetItem* item);
 
+	void UpdateState(QTreeWidgetItem* item, Property_cptr p);
+	void UpdateDescription(QWidget* w, Property_cptr p);
+
+	template<typename TFunctor>
+	void VisitItems(QTreeWidgetItem* item, const TFunctor& functor);
+
+	Property::ePropertyType ItemType(const QTreeWidgetItem* item) const;
+
+	ItemDelegate* m_ItemDelegate;
 	Property_ptr m_Property;
+	std::map<const QTreeWidgetItem*, Property::ePropertyType> m_ItemTypeMap;
 	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
-	std::map<QWidget*, QBoxLayout*> m_CollapseButtonLayoutMap;
+	std::shared_ptr<char> m_Lifespan;
 };
 
 } // namespace iseg

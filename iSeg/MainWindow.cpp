@@ -118,7 +118,7 @@ int bmpimgnr(QString* s, const QString& ext = ".bmp")
 
 QString TruncateFileName(QString str)
 {
-	if (str != QString(""))
+	if (str != "")
 	{
 		int pos = str.findRev('/', -2);
 		if (pos != -1 && (int)str.length() > pos + 1)
@@ -328,8 +328,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	QIcon isegicon(m_MPicpath.absFilePath(QString("isegicon.png")).ascii());
 	setWindowIcon(isegicon);
 	m_MLocationstring = locationstring;
-	m_MSaveprojfilename = QString("");
-	m_S4Lcommunicationfilename = QString("");
+	m_MSaveprojfilename = "";
+	m_S4Lcommunicationfilename = "";
 
 	m_Handler3D = hand3D;
 
@@ -418,13 +418,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_BmpShow->SetIsBmp(true);
 	m_BmpShow->update();
 
-	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("next.png")).ascii()), "", this);
+	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("next.png"))), "", this);
 	m_ToworkBtn->setFixedWidth(50);
-	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("previous.png")).ascii()), "", this);
+	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("previous.png"))), "", this);
 	m_TobmpBtn->setFixedWidth(50);
-	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png")).ascii()), "", this);
+	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png"))), "", this);
 	m_SwapBtn->setFixedWidth(50);
-	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png")).ascii()), "3D", this);
+	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png"))), "3D", this);
 	m_SwapAllBtn->setFixedWidth(50);
 
 	m_WorkShow = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -433,7 +433,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SlBrightnesswork = new QSlider(Qt::Horizontal, this);
 	m_SlBrightnesswork->setRange(0, 100);
 	m_LbContrastwork = new QLabel(this);
-	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png")).ascii()).pixmap());
+	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png"))).pixmap());
 	m_LeContrastworkVal = new QLineEdit(this);
 	m_LeContrastworkVal->setAlignment(Qt::AlignRight);
 	m_LeContrastworkVal->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -443,7 +443,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastworkVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastworkVal = new QLabel("x", this);
 	m_LbBrightnesswork = new QLabel(this);
-	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png")).ascii()).pixmap());
+	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png"))).pixmap());
 	m_LeBrightnessworkVal = new QLineEdit(this);
 	m_LeBrightnessworkVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessworkVal->setText(QString("%1").arg(9999, 3));
@@ -472,7 +472,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_TissueHierarchyWidget = new TissueHierarchyWidget(m_TissueTreeWidget, this);
 	m_TissueTreeWidget->UpdateTreeWidget(); // Reload hierarchy
 	m_CbTissuelock = new QCheckBox(this);
-	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absFilePath(QString("lock.png")).ascii()).pixmap());
+	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absFilePath(QString("lock.png"))).pixmap());
 	m_CbTissuelock->setChecked(false);
 	m_LockTissues = new QPushButton("All", this);
 	m_LockTissues->setToggleButton(true);
@@ -630,7 +630,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	}
 
 	m_MethodTab = new QStackedWidget(this);
-	m_MethodTab->setFrameStyle(Q3Frame::Box | Q3Frame::Sunken);
+	m_MethodTab->setFrameStyle(QFrame::Plain);
 	m_MethodTab->setLineWidth(2);
 
 	for (size_t i = 0; i < m_Tabwidgets.size(); i++)
@@ -1064,7 +1064,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	menuBar()->addMenu(m_File);
 	if (!m_MEditingmode)
 	{
-		m_File->insertItem(QIcon(m_MPicpath.absFilePath(QString("filenew.png")).ascii()), "&New...", this, SLOT(ExecuteNew()));
+		m_File->insertItem(QIcon(m_MPicpath.absFilePath(QString("filenew.png"))), "&New...", this, SLOT(ExecuteNew()));
 		m_Loadmenu = new QMenu("loadmenu", this);
 		m_Loadmenu->insertItem("Open Dicom (.dcm...)", this, SLOT(ExecuteLoaddicom()));
 		m_Loadmenu->insertItem("Open Image Series (.bmp, .png, ...)", this, SLOT(ExecuteLoadImageSeries()));
@@ -1163,7 +1163,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_Imagemenu->insertItem("Pad...", this, SLOT(ExecutePad()));
 		m_Imagemenu->insertItem("Crop...", this, SLOT(ExecuteCrop()));
 	}
-	m_Imagemenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("histo.png")).ascii()), "&Histogram...", this, SLOT(ExecuteHisto()));
+	m_Imagemenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("histo.png"))), "&Histogram...", this, SLOT(ExecuteHisto()));
 	m_Imagemenu->insertItem("&Contr./Bright. ...", this, SLOT(ExecuteScale()));
 	m_Imagemenu->insertItem("&Image Math. ...", this, SLOT(ExecuteImagemath()));
 	m_Imagemenu->insertItem("Unwrap", this, SLOT(ExecuteUnwrap()));
@@ -1339,7 +1339,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Separatornr, false);
 
 	m_Helpmenu = menuBar()->addMenu(tr("Help"));
-	m_Helpmenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("help.png")).ascii()), "About", this, SLOT(ExecuteAbout()));
+	m_Helpmenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("help.png"))), "About", this, SLOT(ExecuteAbout()));
 
 	QObject_connect(m_ToworkBtn, SIGNAL(clicked()), this, SLOT(ExecuteBmp2work()));
 	QObject_connect(m_TobmpBtn, SIGNAL(clicked()), this, SLOT(ExecuteWork2bmp()));
@@ -1474,8 +1474,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	{
 		QObject_connect(m_PbTab[i], SIGNAL(clicked()), m_MWidgetSignalMapper, SLOT(map()));
 		m_MWidgetSignalMapper->setMapping(m_PbTab[i], i);
-		QObject_connect(m_MWidgetSignalMapper, SIGNAL(mapped(int)), this, SLOT(PbTabPressed(int)));
 	}
+	QObject_connect(m_MWidgetSignalMapper, SIGNAL(mapped(int)), this, SLOT(PbTabPressed(int)));
 	for (auto widget : m_Tabwidgets)
 	{
 		assert(widget);
@@ -3416,8 +3416,8 @@ void MainWindow::ExecuteLoadproj4()
 
 void MainWindow::ExecuteLoadatlas(int i)
 {
-	AtlasWidget* aw = new AtlasWidget(m_MAtlasfilename.m_MAtlasdir.absFilePath(m_MAtlasfilename.m_MAtlasfilename[i])
-																				.ascii(),
+	AtlasWidget* aw = new AtlasWidget(
+			m_MAtlasfilename.m_MAtlasdir.absFilePath(m_MAtlasfilename.m_MAtlasfilename[i]).ascii(),
 			m_MPicpath);
 	if (aw->m_IsOk)
 	{
@@ -3720,7 +3720,7 @@ void MainWindow::ExecuteExportxmlregionextent()
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".xml")))
 		savefilename.append(".xml");
 
-	QString relfilename = QString("");
+	QString relfilename = "";
 	if (!m_MSaveprojfilename.isEmpty())
 		relfilename = m_MSaveprojfilename.right(m_MSaveprojfilename.length() -
 																						m_MSaveprojfilename.findRev("/") - 1);
@@ -3745,7 +3745,7 @@ void MainWindow::ExecuteExporttissueindex()
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
 
-	QString relfilename = QString("");
+	QString relfilename = "";
 	if (!m_MSaveprojfilename.isEmpty())
 		relfilename = m_MSaveprojfilename.right(m_MSaveprojfilename.length() - m_MSaveprojfilename.findRev("/") - 1);
 
@@ -3868,7 +3868,7 @@ void MainWindow::ExecuteNew()
 
 	emit EndDatachange(this, iseg::ClearUndo);
 
-	m_MSaveprojfilename = QString("");
+	m_MSaveprojfilename = "";
 	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
 	m_MNotes->clear();
@@ -6334,7 +6334,7 @@ void MainWindow::AddLoadProj(const QString& path1)
 		}
 	}
 
-	if (m_MLoadprojfilename.m_MLoadprojfilename1 != QString(""))
+	if (m_MLoadprojfilename.m_MLoadprojfilename1 != "")
 	{
 		int pos = m_MLoadprojfilename.m_MLoadprojfilename1.findRev('/', -2);
 		if (pos != -1 &&
@@ -6345,7 +6345,7 @@ void MainWindow::AddLoadProj(const QString& path1)
 			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf1nr, true);
 		}
 	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename2 != QString(""))
+	if (m_MLoadprojfilename.m_MLoadprojfilename2 != "")
 	{
 		int pos = m_MLoadprojfilename.m_MLoadprojfilename2.findRev('/', -2);
 		if (pos != -1 &&
@@ -6356,7 +6356,7 @@ void MainWindow::AddLoadProj(const QString& path1)
 			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf2nr, true);
 		}
 	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename3 != QString(""))
+	if (m_MLoadprojfilename.m_MLoadprojfilename3 != "")
 	{
 		int pos = m_MLoadprojfilename.m_MLoadprojfilename3.findRev('/', -2);
 		if (pos != -1 &&
@@ -6367,7 +6367,7 @@ void MainWindow::AddLoadProj(const QString& path1)
 			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf3nr, true);
 		}
 	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename4 != QString(""))
+	if (m_MLoadprojfilename.m_MLoadprojfilename4 != "")
 	{
 		int pos = m_MLoadprojfilename.m_MLoadprojfilename4.findRev('/', -2);
 		if (pos != -1 &&
@@ -6383,24 +6383,24 @@ void MainWindow::AddLoadProj(const QString& path1)
 
 void MainWindow::SaveLoadProj(const QString& latestprojpath) const
 {
-	if (latestprojpath == QString(""))
+	if (latestprojpath == "")
 		return;
 	FILE* fplatestproj = fopen(latestprojpath.ascii(), "w");
 	if (fplatestproj != nullptr)
 	{
-		if (m_MLoadprojfilename.m_MLoadprojfilename4 != QString(""))
+		if (m_MLoadprojfilename.m_MLoadprojfilename4 != "")
 		{
 			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename4.ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename3 != QString(""))
+		if (m_MLoadprojfilename.m_MLoadprojfilename3 != "")
 		{
 			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename3.ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename2 != QString(""))
+		if (m_MLoadprojfilename.m_MLoadprojfilename2 != "")
 		{
 			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename2.ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename1 != QString(""))
+		if (m_MLoadprojfilename.m_MLoadprojfilename1 != "")
 		{
 			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename1.ascii());
 		}

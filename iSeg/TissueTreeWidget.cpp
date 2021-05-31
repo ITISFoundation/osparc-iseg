@@ -263,8 +263,7 @@ QTreeWidgetItem* TissueTreeWidget::CreateHierarchyItem(bool isFolder, const QStr
 		new_tissue->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
 		new_tissue->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
 		new_tissue->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-		new_tissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-												 Qt::ItemIsDragEnabled);
+		new_tissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
 		return new_tissue;
 	}
 }
@@ -576,9 +575,9 @@ void TissueTreeWidget::UpdateTissueName(const QString& oldName, const QString& n
 
 	// Update tissue name in internal representations
 	auto& hierarchy_trees = m_Hierarchies->Hierarchies();
-	for (unsigned int i = 0; i < hierarchy_trees.size(); ++i)
+	for (auto & hierarchy_tree : hierarchy_trees)
 	{
-		hierarchy_trees[i]->UpdateTissueNameRecursively(oldName, newName);
+		hierarchy_tree->UpdateTissueNameRecursively(oldName, newName);
 	}
 
 	// Update tissue name in tree widget
@@ -608,8 +607,7 @@ void TissueTreeWidget::UpdateTissueNameWidget(const QString& oldName, const QStr
 		else
 		{
 			// Update tissue name
-			if (parent->text(TISSUETREEWIDGET_COLUMN_NAME).compare(oldName) ==
-					0)
+			if (parent->text(TISSUETREEWIDGET_COLUMN_NAME).compare(oldName) == 0)
 			{
 				parent->setText(TISSUETREEWIDGET_COLUMN_NAME, newName);
 			}
@@ -932,7 +930,7 @@ bool TissueTreeWidget::GetIsFolder(const QTreeWidgetItem* item) const
 {
 	if (item)
 	{
-		return item->text(TISSUETREEWIDGET_COLUMN_FOLDER).toUShort();
+		return item->text(TISSUETREEWIDGET_COLUMN_FOLDER).toUShort() != 0;
 	}
 	return true;
 }

@@ -65,7 +65,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 SET_COMPILER_AND_LINKER_FLAGS()
 
-
+# TODO: consider using INCLUDE_DIRECTORIES(SYSTEM
 INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}
@@ -84,4 +84,5 @@ ADD_SUBDIRECTORY(Thirdparty)
 
 
 # copy dlls and images to build folder
+# TODO: be more clear about what happens during install vs configure
 INSTALL_ALL_USED_LIBRARIES()

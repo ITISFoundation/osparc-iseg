@@ -1,209 +1,32 @@
 #include "PropertyWidget.h"
 
 #include "CollapsibleWidget.h"
+#include "FormatTooltip.h"
+#include "SplitterHandle.h"
 
+#include "../Data/Logger.h"
 #include "../Data/Property.h"
 
+#include <QApplication>
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleValidator>
+#include <QHeaderView>
 #include <QIntValidator>
+#include <QItemDelegate>
 #include <QLabel>
 #include <QLineEdit>
-#include <QParallelAnimationGroup>
-#include <QPropertyAnimation>
+#include <QPainter>
 #include <QPushButton>
-#include <QScrollArea>
-#include <QSpacerItem>
+#include <QStandardItemModel>
+#include <QTreeWidget>
 
 #include <iostream>
 
 namespace iseg {
 
-static const int child_indent = 8;
 static const int row_height = 20;
-
-PropertyWidget::PropertyWidget(Property_ptr p, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
-{
-	setProperty(p);
-}
-
-void PropertyWidget::setProperty(Property_ptr p)
-{
-	if (p && p != m_Property)
-	{
-		m_Property = p;
-
-		m_WidgetPropertyMap.clear();
-		m_CollapseButtonLayoutMap.clear();
-
-		auto layout = new QVBoxLayout(this);
-		Build(m_Property, layout);
-		layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Minimum, QSizePolicy::Expanding));
-		setLayout(layout);
-	}
-}
-
-QWidget* PropertyWidget::MakePropertyUi(Property& prop)
-{
-	const auto make_line_edit = [this](const Property& prop) {
-		// generic attributes
-		auto edit = new QLineEdit;
-		edit->setToolTip(QString::fromStdString(prop.ToolTip()));
-		edit->setEnabled(prop.Enabled());
-		edit->setVisible(prop.Visible());
-		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
-		return edit;
-	};
-
-	switch (prop.Type())
-	{
-	case Property::kInteger: {
-		auto p = dynamic_cast<PropertyInt*>(&prop);
-		auto edit = make_line_edit(prop);
-		edit->setText(QString::number(p->Value())); // ? should this be set via Property::StringValue?
-		edit->setValidator(new QIntValidator(p->MinValue(), p->MaxValue()));
-		return edit;
-	}
-	case Property::kReal: {
-		auto p = dynamic_cast<PropertyReal*>(&prop);
-		auto edit = make_line_edit(prop);
-		edit->setText(QString::number(p->Value())); // ? should this be set via Property::StringValue?
-		edit->setValidator(new QDoubleValidator(p->MinValue(), p->MaxValue(), 10));
-		return edit;
-	}
-	case Property::kString: {
-		auto p = dynamic_cast<PropertyString*>(&prop);
-		auto edit = make_line_edit(prop);
-		edit->setText(QString::fromStdString(p->Value()));
-		return edit;
-	}
-	case Property::kBool: {
-		auto p = dynamic_cast<PropertyBool*>(&prop);
-		auto checkbox = new QCheckBox;
-		checkbox->setChecked(p->Value());
-		checkbox->setStyleSheet("QCheckBox::indicator {width: 13px; height: 13px; }");
-		// connect to signal
-		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
-		return checkbox;
-	}
-	case Property::kButton: {
-		auto p = dynamic_cast<PropertyButton*>(&prop);
-		auto button = new QPushButton(QString::fromStdString(p->ButtonText()));
-		button->setAutoDefault(false);
-		// connect to signal
-		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
-		return button;
-	}
-	default:
-		return new QWidget; // \todo so we have two columns
-	}
-}
-
-void PropertyWidget::Build(Property_ptr prop, QBoxLayout* layout)
-{
-	const auto label_text = prop->Description().empty() ? prop->Name() : prop->Description();
-	auto field = MakePropertyUi(*prop);
-	field->setMaximumHeight(row_height);
-
-	// for callbacks
-	m_WidgetPropertyMap[field] = prop;
-
-	if (prop->Type() == Property::kGroup)
-	{
-		auto collapse_button = new QToolButton;
-		collapse_button->setStyleSheet("QToolButton { border: none; }");
-		collapse_button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-		collapse_button->setArrowType(Qt::ArrowType::DownArrow);
-		//collapse_button->setText(QString::fromStdString(label_text));
-		collapse_button->setCheckable(true);
-		collapse_button->setChecked(true);
-		collapse_button->setIconSize(QSize(5, 5));
-		collapse_button->setMaximumHeight(row_height);
-
-		auto label = new QLabel(QString::fromStdString(label_text));
-		label->setMaximumHeight(row_height);
-
-		auto header_hbox = new QHBoxLayout;
-		header_hbox->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
-		header_hbox->addWidget(collapse_button);
-		header_hbox->addWidget(label);
-		header_hbox->setSpacing(0);
-		//header_hbox->setSizeConstraint(QLayout::SizeConstraint::)
-
-		auto child_vbox = new QVBoxLayout;
-		if (!prop->Properties().empty())
-		{
-			auto header_line = new QFrame;
-			header_line->setFrameShape(QFrame::HLine);
-			header_line->setFrameShadow(QFrame::Plain);
-			//header_line->setStyleSheet("QFrame[frameShape=\"4\"] { color: rgb(128,128,128); }");
-			header_line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-			//child_vbox->addWidget(header_line);
-
-			for (const auto& p : prop->Properties())
-			{
-				Build(p, child_vbox);
-			}
-		}
-		auto child_area = new QWidget;
-		child_area->setLayout(child_vbox);
-
-		auto collapse_vbox = new QVBoxLayout;
-		collapse_vbox->addLayout(header_hbox);
-		collapse_vbox->addWidget(child_area);
-		collapse_vbox->setContentsMargins(child_indent, 0, 0, 0);
-		collapse_vbox->setSpacing(0);
-
-		m_CollapseButtonLayoutMap[collapse_button] = collapse_vbox;
-
-		layout->addLayout(collapse_vbox);
-
-		QObject_connect(collapse_button, SIGNAL(clicked(bool)), this, SLOT(ToggleCollapsable(bool)));
-	}
-	else
-	{
-		auto label = new QLabel(QString::fromStdString(label_text));
-
-		// split at 50%
-		QSizePolicy sp(QSizePolicy::Preferred, QSizePolicy::Preferred);
-		sp.setHorizontalStretch(1);
-		label->setSizePolicy(sp);
-		field->setSizePolicy(sp);
-
-		auto hbox = new QHBoxLayout;
-		hbox->addWidget(label);
-		hbox->addWidget(field);
-		hbox->setSpacing(2);
-		hbox->setContentsMargins(child_indent, 0, 0, 0);
-
-		layout->addLayout(hbox);
-	}
-}
-
-void PropertyWidget::ToggleCollapsable(bool checked)
-{
-	if (auto btn = dynamic_cast<QToolButton*>(QObject::sender()))
-	{
-		btn->setArrowType(checked ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
-
-		if (auto layout = m_CollapseButtonLayoutMap[btn])
-		{
-			auto last_item = layout->count() - 1;
-			if (auto w = layout->itemAt(last_item)->widget())
-			{
-				auto animation = new QPropertyAnimation(w, "maximumHeight");
-				animation->setDuration(100);
-				animation->setStartValue(w->maximumHeight());
-				animation->setEndValue(checked ? w->sizeHint().height() : 0);
-				animation->start();
-
-				QObject_connect(animation, SIGNAL(finished()), this, SLOT(update()));
-			}
-		}
-	}
-}
 
 namespace {
 template<typename T>
@@ -234,6 +57,387 @@ auto toType(QString const& q)
 }
 } // namespace
 
+class ItemDelegate : public QItemDelegate
+{
+private:
+	int m_iHeight;
+
+public:
+	ItemDelegate(QObject* poParent = nullptr, int iHeight = -1) : QItemDelegate(poParent), m_iHeight(iHeight)
+	{
+	}
+
+	void SetHeight(int iHeight)
+	{
+		m_iHeight = iHeight;
+	}
+
+	// Use this for setting tree item height.
+	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+	{
+		QSize sz = QItemDelegate::sizeHint(option, index);
+
+		if (m_iHeight != -1)
+		{
+			// Set tree item height.
+			sz.setHeight(m_iHeight);
+		}
+
+		return sz;
+	}
+};
+
+PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+		: QTreeWidget(parent), m_ItemDelegate(new ItemDelegate), m_Lifespan(std::make_shared<char>('1'))
+{
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSelectionMode(QAbstractItemView::NoSelection);
+
+	setColumnCount(2);
+	setAcceptDrops(false);
+	setDragDropMode(QTreeWidget::NoDragDrop);
+	setExpandsOnDoubleClick(false);
+	setHeaderHidden(true);
+	setFrameStyle(QFrame::Plain);
+	setUniformRowHeights(true);
+	setAnimated(true);
+	setIndentation(10);
+
+	m_ItemDelegate->SetHeight(row_height + 4);
+	setItemDelegate(m_ItemDelegate);
+
+	// move column spitter interactively
+	new SplitterHandle(this);
+
+	// setup the headers
+	QStringList header_list;
+	header_list.append("Property");
+	header_list.append("Value");
+
+	setHeaderLabels(header_list);
+	header()->setMinimumSectionSize(100);
+	header()->setStretchLastSection(true);
+#if QT_VERSION >= 0x050000
+	header()->setSectionsMovable(false);
+#endif
+
+	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+
+	SetProperty(prop);
+}
+
+Property::ePropertyType PropertyWidget::ItemType(const QTreeWidgetItem* item) const
+{
+	auto type = Property::kePropertyTypeSize;
+	auto found = m_ItemTypeMap.find(item);
+	if (found != m_ItemTypeMap.end())
+	{
+		type = found->second;
+	}
+	return type;
+}
+
+void PropertyWidget::SetProperty(Property_ptr prop)
+{
+	if (prop)
+	{
+		m_Property = prop;
+		m_WidgetPropertyMap.clear();
+		m_ItemTypeMap.clear();
+
+		clear();
+
+		Build(prop, new QTreeWidgetItem, nullptr);
+
+		const auto set_span = [this](QTreeWidgetItem* item) {
+			if (ItemType(item) == Property::kButton)
+			{
+				item->setFirstColumnSpanned(true);
+			}
+		};
+
+		for (int i = 0; i < topLevelItemCount(); ++i)
+		{
+			auto item = topLevelItem(i);
+
+			VisitItems(item, set_span);
+		}
+	}
+}
+
+template<typename TFunctor>
+void PropertyWidget::VisitItems(QTreeWidgetItem* item, const TFunctor& functor)
+{
+	functor(item);
+
+	for (int i = 0; i < item->childCount(); ++i)
+	{
+		auto child = item->child(i);
+		VisitItems(child, functor);
+	}
+}
+
+void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidgetItem* parent_item)
+{
+	if (parent_item)
+	{
+		parent_item->addChild(item);
+	}
+	else
+	{
+		addTopLevelItem(item);
+	}
+
+	const std::string name = prop->Description().empty() ? prop->Name() : prop->Description();
+	item->setFlags(Qt::ItemIsEnabled);
+	item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
+	expandItem(item);
+
+	m_ItemTypeMap[item] = prop->Type();
+
+	if (prop->Type() != Property::kGroup)
+	{
+		auto widget = MakePropertyUi(*prop, item);
+		//widget->setContentsMargins(5, 2, 2, 2);
+		widget->setMaximumHeight(row_height);
+
+		auto hbox = new QHBoxLayout;
+		hbox->addWidget(widget);
+		auto harea = new QWidget;
+		harea->setLayout(hbox);
+		hbox->setContentsMargins(5, 2, 2, 2);
+
+		if (prop->Type() == Property::kButton)
+		{
+			setItemWidget(item, 0, harea);
+		}
+		else
+		{
+			item->setText(0, QString::fromStdString(name));
+			setItemWidget(item, 1, harea);
+		}
+
+		m_WidgetPropertyMap[widget] = prop;
+	}
+	else
+	{
+		item->setText(0, QString::fromStdString(name));
+
+		Connect(prop->onModified, m_Lifespan, [this, item](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+		});
+
+		for (const auto& p : prop->Properties())
+		{
+			Build(p, new QTreeWidgetItem, item);
+		}
+	}
+}
+
+QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
+{
+	const auto make_line_edit = [this, item](const Property& p) {
+		// generic attributes
+		auto edit = new QLineEdit(this);
+		edit->setFrame(false);
+		edit->setToolTip(QString::fromStdString(p.ToolTip()));
+		item->setDisabled(!p.Enabled());
+		item->setHidden(!p.Visible());
+		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
+		return edit;
+	};
+
+	const auto label_text = prop.Description().empty() ? prop.Name() : prop.Description();
+
+	switch (prop.Type())
+	{
+	case Property::kInteger: {
+		auto ptyped = static_cast<const PropertyInt*>(&prop);
+		auto edit = make_line_edit(prop);
+		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
+		edit->setValidator(new QIntValidator(ptyped->Minimum(), ptyped->Maximum()));
+
+		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyInt*>(p.get());
+				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
+		return edit;
+	}
+	case Property::kReal: {
+		auto ptyped = static_cast<const PropertyReal*>(&prop);
+		auto edit = make_line_edit(prop);
+		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
+		edit->setValidator(new QDoubleValidator(ptyped->Minimum(), ptyped->Maximum(), 10));
+
+		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyReal*>(p.get());
+				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
+		return edit;
+	}
+	case Property::kString: {
+		auto ptyped = static_cast<const PropertyString*>(&prop);
+		auto edit = make_line_edit(prop);
+		edit->setText(QString::fromStdString(ptyped->Value()));
+
+		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyString*>(p.get());
+				edit->setText(QString::fromStdString(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(edit, p);
+			}
+		});
+		return edit;
+	}
+	case Property::kBool: {
+		auto ptyped = static_cast<const PropertyBool*>(&prop);
+		auto checkbox = new QCheckBox(this);
+		checkbox->setChecked(ptyped->Value());
+		UpdateState(item, prop.shared_from_this());
+		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
+
+		Connect(prop.onModified, m_Lifespan, [checkbox, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyBool*>(p.get());
+				checkbox->setChecked(ptyped->Value());
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(checkbox, p);
+			}
+		});
+		return checkbox;
+	}
+	case Property::kEnum: {
+		auto ptyped = static_cast<const PropertyEnum*>(&prop);
+		auto combo = new QComboBox(this);
+		//combo->setFrame(true);
+		for (auto d : ptyped->Values())
+		{
+			combo->insertItem(QString::fromStdString(d.second), d.first);
+		}
+		combo->setCurrentItem(ptyped->Value());
+		UpdateState(item, prop.shared_from_this());
+		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
+
+		Connect(prop.onModified, m_Lifespan, [combo, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertyEnum*>(p.get());
+				combo->setCurrentItem(ptyped->Value());
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+
+				auto ptyped = static_cast<const PropertyEnum*>(p.get());
+				auto model = qobject_cast<QStandardItemModel*>(combo->model());
+				if (ptyped->HasEnabledFlags() && model)
+				{
+					for (const auto& i : ptyped->Values())
+					{
+						if (auto item = model->item(i.first))
+						{
+							item->setEnabled(ptyped->Enabled(i.first));
+						}
+					}
+				}
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(combo, p);
+			}
+		});
+		return combo;
+	}
+	case Property::kButton: {
+		auto p = dynamic_cast<PropertyButton*>(&prop);
+		auto button = new QPushButton(QString::fromStdString(p->ButtonText()), this);
+		button->setAutoDefault(false);
+		UpdateState(item, prop.shared_from_this());
+		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
+
+		Connect(prop.onModified, m_Lifespan, [button, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(button, p);
+			}
+		});
+		return button;
+	}
+	default:
+		assert(false && "Unexpected property type");
+		return new QWidget; // \todo handle PropertyGroup here?
+	}
+}
+
+void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
+{
+	const auto set_state = [this, visible=p->Visible(), enabled=p->Enabled()](QTreeWidgetItem* item) 
+	{
+		item->setDisabled(!enabled);
+		item->setHidden(!visible);
+
+		for (int col = 0; col < 2; ++col)
+		{
+			if (auto w = itemWidget(item, col))
+			{
+				w->setEnabled(enabled);
+			}
+		}
+	};
+
+	VisitItems(item, set_state);
+}
+
+void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
+{
+	// description/name ?
+	w->setToolTip(Format(p->ToolTip()));
+}
+
 void PropertyWidget::Edited()
 {
 	if (auto w = dynamic_cast<QWidget*>(QObject::sender()))
@@ -245,7 +449,7 @@ void PropertyWidget::Edited()
 			case Property::kInteger: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyInt>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyInt>(prop);
 					auto v = toType<int>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -258,7 +462,7 @@ void PropertyWidget::Edited()
 			case Property::kReal: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyReal>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyReal>(prop);
 					auto v = toType<double>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -271,7 +475,7 @@ void PropertyWidget::Edited()
 			case Property::kString: {
 				if (auto edit = dynamic_cast<QLineEdit*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyString>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyString>(prop);
 					auto v = toType<std::string>(edit->text());
 					if (v != prop_typed->Value())
 					{
@@ -284,7 +488,7 @@ void PropertyWidget::Edited()
 			case Property::kBool: {
 				if (auto cb = dynamic_cast<QCheckBox*>(w))
 				{
-					auto prop_typed = std::dynamic_pointer_cast<PropertyBool>(prop);
+					auto prop_typed = std::static_pointer_cast<PropertyBool>(prop);
 					auto v = cb->isChecked();
 					if (v != prop_typed->Value())
 					{
@@ -294,8 +498,21 @@ void PropertyWidget::Edited()
 				}
 				break;
 			}
+			case Property::kEnum: {
+				if (auto cb = dynamic_cast<QComboBox*>(w))
+				{
+					auto prop_typed = std::static_pointer_cast<PropertyEnum>(prop);
+					auto v = cb->currentIndex();
+					if (v != prop_typed->Value())
+					{
+						prop_typed->SetValue(v);
+						OnPropertyEdited(prop);
+					}
+				}
+				break;
+			}
 			case Property::kButton: {
-				auto prop_typed = std::dynamic_pointer_cast<PropertyButton>(prop);
+				auto prop_typed = std::static_pointer_cast<PropertyButton>(prop);
 				if (prop_typed->Value())
 				{
 					prop_typed->Value()();

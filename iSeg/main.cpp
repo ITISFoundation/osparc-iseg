@@ -16,26 +16,31 @@
 #include "TissueInfos.h"
 #include "bmp_read_1.h"
 
-#include "Data/Logger.h"
-#include "Data/Property.h"
+#include "Interface/PropertyWidget.h"
 
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
 
-#include "Interface/PropertyWidget.h"
+#include "Data/Logger.h"
+#include "Data/Property.h"
 
+#include "Thirdparty/QDarkStyleSheet/dark.h"
+
+#include <QApplication>
+#include <QLabel>
 #include <QPlastiqueStyle>
 #include <QSplashScreen>
-#include <qapplication.h>
-#include <qdatetime.h>
-#include <qlabel.h>
-#include <qmessagebox.h>
+#include <QDatetime>
+#include <QMessagebox>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
+
+#include <vtkObjectFactory.h>
+#include <vtkOutputWindow.h>
 
 #include <cerrno>
 #include <cmath>
@@ -47,9 +52,6 @@
 #include <stack>
 #include <string>
 #include <vector>
-
-#include <vtkObjectFactory.h>
-#include <vtkOutputWindow.h>
 
 #pragma warning(disable : 4100)
 
@@ -142,31 +144,31 @@ int main(int argc, char** argv)
 	QDir tmpdir = QDir::home();
 	if (!tmpdir.exists("iSeg"))
 	{
-		std::cerr << "iSeg folder does not exist, creating..." << endl;
-		if (!tmpdir.mkdir(QString("iSeg")))
+		std::cerr << "iSeg folder does not exist, creating...\n";
+				if (!tmpdir.mkdir(QString("iSeg")))
 		{
-			std::cerr << "failed to create iSeg folder, exiting..." << endl;
+			std::cerr << "failed to create iSeg folder, exiting...\n";
 			exit(EXIT_FAILURE);
 		}
 	}
 	if (!tmpdir.cd("iSeg"))
 	{
-		std::cerr << "failed to enter iSeg folder, exiting..." << endl;
+		std::cerr << "failed to enter iSeg folder, exiting...\n";
 		exit(EXIT_FAILURE);
 	}
 
 	if (!tmpdir.exists("tmp"))
 	{
-		std::cerr << "tmp folder does not exist, creating..." << endl;
+		std::cerr << "tmp folder does not exist, creating...\n";
 		if (!tmpdir.mkdir(QString("tmp")))
 		{
-			std::cerr << "failed to create tmp folder, exiting..." << endl;
+			std::cerr << "failed to create tmp folder, exiting...\n";
 			exit(EXIT_FAILURE);
 		}
 	}
 	if (!tmpdir.cd("tmp"))
 	{
-		std::cerr << "failed to enter tmp folder, exiting..." << endl;
+		std::cerr << "failed to enter tmp folder, exiting...\n";
 		exit(EXIT_FAILURE);
 	}
 
@@ -201,6 +203,10 @@ int main(int argc, char** argv)
 	SlicesHandler slice_handler;
 
 	QApplication app(argc, argv);
+	//QStyle* style = new QProxyStyle(QStyleFactory::create("fusion"));
+	//assert(style);
+//#define PLASTIQUE
+#ifdef PLASTIQUE
 	QApplication::setStyle(new QPlastiqueStyle);
 
 	QPalette palette;
@@ -213,28 +219,41 @@ int main(int argc, char** argv)
 	palette.setColor(QPalette::Highlight, QColor(150, 150, 150));
 	palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
 	palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));
-	qApp->setPalette(palette);
 	app.setPalette(palette);
+	// needed on MacOS, but not WIN32?
+	app.setStyleSheet(
+			"QWidget { color: white; }"
+			//"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
+			"QWidget:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QPushButton:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QLabel:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QLineEdit:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QCheckBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QComboBox:disabled { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
+			"QComboBox { background: rgb(40,40,40); border-radius: 5px; }"
+			"QComboBox::drop-down { border-left-color: rgb(40,40,40); }"
+			// https://doc.qt.io/qt-5/stylesheet-examples.html
+			"QTreeView::branch:!has-children:!has-siblings:adjoins-item { background: palette(window); }"
+			"QTreeView::branch:!has-children:has-siblings:adjoins-item { background: palette(window); }"
+			"QTreeView::branch:!has-children:has-siblings:!adjoins-item { background: palette(window); }"
+			"QTreeView::branch:!has-children:has-siblings:!adjoins-item { background: palette(window); }");
+	//"QComboBox::down-arrow { border: 1px rgb(40,40,40); }"
+	//"QTreeWidget::item { height: 20px; }");
+	//"QTreeView::branch { border-image: url(none.png); }"
+	//"QTreeWidget::item { padding: 2px; height: 20px; }");
+	//"QTreeWidget::branch:selected { border-top : 0px solid #8d8d8d; border-bottom : 0px solid #8d8d8d; }"
+#elif 1
+	dark::setStyleSheet(&app);
+#endif
 
 #ifdef SHOWSPLASH
-	QString pixmapstr = QString(splashpicpath.toAscii().data());
-	QPixmap pixmap(pixmapstr);
-
-	QSplashScreen splash_screen(pixmap.scaledToHeight(600, Qt::SmoothTransformation));
+	QSplashScreen splash_screen(QPixmap(splashpicpath).scaledToHeight(600, Qt::SmoothTransformation));
 	splash_screen.show();
 	QTime now = QTime::currentTime();
 #endif
 	app.processEvents();
 
 	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), nullptr, "MainWindow", Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
-
-	// needed on MacOS, but not WIN32?
-	app.setStyleSheet(
-			"QWidget { color: white; }"
-			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
-			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QComboBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QCheckBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
 
 	main_window->LoadLoadProj(latestprojpath);
 	main_window->LoadAtlas(atlasdir);
@@ -254,6 +273,7 @@ int main(int argc, char** argv)
 	}
 #endif
 
+//#define TEST_PROPERTY
 #ifdef TEST_PROPERTY
 	auto group = PropertyGroup::Create();
 	group->SetDescription("Settings");
@@ -263,17 +283,38 @@ int main(int argc, char** argv)
 	auto child_group = group->Add("Advanced", PropertyGroup::Create());
 	child_group->SetDescription("Advanced Settings");
 	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
-	auto pb = child_group->Add("Use Foo", PropertyBool::Create(true));
+	auto pb = child_group->Add("Enable", PropertyBool::Create(true));
+	auto pb2 = child_group->Add("Visible", PropertyBool::Create(true));
+	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
-	auto pbtn = child_group->Add("Update", PropertyButton::Create([&group]() {
+	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
+	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [&group, &child_group]() {
 		std::cerr << "PropertyButton triggered\n";
 		group->DumpTree();
+
+		// TODO: this doesn't work for PropertyTreeWidget
+		child_group->SetEnabled(!child_group->Enabled());
 	}));
+
+	iseg::Connect(group->onChildModified, group, [&](Property_ptr p, Property::eChangeType type) {
+		ISEG_INFO(p->Name() << " : " << p->StringValue());
+	});
+	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
+		// TODO: this doesn't work for PropertyTreeWidget
+		pbtn->SetEnabled(pb->Value());
+		pe->SetVisible(pb->Value());
+	});
+	iseg::Connect(pb2->onModified, pbtn0, [&](Property_ptr p, Property::eChangeType type) {
+		pi2->SetEnabled(pb2->Value());
+		pbtn0->SetVisible(pb2->Value());
+	});
 
 	auto dialog = new QDialog(main_window);
 	auto layout = new QVBoxLayout;
 	layout->addWidget(new PropertyWidget(group));
 	dialog->setLayout(layout);
+	dialog->setMinimumWidth(450);
+	dialog->setMinimumHeight(400);
 	dialog->raise();
 	dialog->exec();
 	return 0;

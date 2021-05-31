@@ -566,7 +566,7 @@ void ImageViewerWidget::AddLabel()
 		Point p;
 		p.px = (unsigned short)m_Eventx;
 		p.py = (unsigned short)m_Eventy;
-		emit AddlabelSign(p, new_text.ascii());
+		emit AddlabelSign(p, new_text.toStdString());
 	}
 }
 

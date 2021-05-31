@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
 #include "WidgetInterface.h"
 

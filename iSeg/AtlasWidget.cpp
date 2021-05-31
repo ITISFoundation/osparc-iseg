@@ -63,11 +63,9 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, co
 	m_SlBrightness->setRange(0, 100);
 	m_SlBrightness->setValue(50);
 	m_LbContrast = new QLabel("C:", this);
-	m_LbContrast->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png")).ascii())
-															.pixmap());
+	m_LbContrast->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png"))).pixmap());
 	m_LbBrightness = new QLabel("B:", this);
-	m_LbBrightness->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png")).ascii())
-																.pixmap());
+	m_LbBrightness->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png"))).pixmap());
 	hbox1->addWidget(m_LbContrast);
 	hbox1->addWidget(m_SlContrast);
 	hbox1->addWidget(m_LbBrightness);

@@ -554,7 +554,7 @@ void ThresholdWidgetQt4::on_mKMeansDimsSpinBox_valueChanged(int newValue)
 	{
 		m_Filenames.resize(newValue - 1);
 		for (size_t i = cursize; i + 1 < newValue; ++i)
-			m_Filenames[i] = QString("");
+			m_Filenames[i] = "";
 	}
 
 	m_Ui.mKMeansImageNrSpinBox->setMaxValue(newValue);
