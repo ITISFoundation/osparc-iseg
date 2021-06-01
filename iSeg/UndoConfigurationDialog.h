@@ -11,10 +11,10 @@
 
 #include "SlicesHandler.h"
 
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QCheckBox>
+#include <QDialog>
+#include <QPushButton>
+#include <QSpinBox>
 
 namespace iseg {
 

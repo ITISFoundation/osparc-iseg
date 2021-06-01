@@ -14,14 +14,14 @@
 
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
+#include <QDialog>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QLineEdit>
+#include <QPainter>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 

@@ -18,18 +18,18 @@
 #include <q3boxlayout.h>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
+#include <QButtonGroup>
+#include <QCheckBox>
 #include <qcombobox.h>
-#include <qdialog.h>
-#include <qlabel.h>
+#include <QDialog>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qspinbox.h>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
 #include <qstringlist.h>
-#include <qwidget.h>
+#include <QWidget>
 
 #include <array>
 

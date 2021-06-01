@@ -11,10 +11,10 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QSpinBox>
 
 class QStackedLayout;
 
@@ -38,7 +38,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Fuzzy"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("fuzzy.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("fuzzy.png"))); }
 
 protected:
 	void OnSlicenrChanged() override;

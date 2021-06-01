@@ -19,10 +19,10 @@
 
 #include <QFormLayout>
 #include <QStackedLayout>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QSpinBox>
 
 namespace iseg {
 

@@ -28,15 +28,14 @@
 
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qfiledialog.h>
+#include <QButtonGroup>
 #include <qgridlayout.h>
 #include <qgroupbox.h>
-#include <qlabel.h>
+#include <QLabel>
 #include <qlayout.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
 #include <qstring.h>
 
 #include <QMouseEvent>
@@ -237,9 +236,9 @@ LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload
 			for (unsigned i = 0; i < (unsigned)m_Dicomseriesnr.size(); i++)
 			{
 				QString str;
-				m_Seriesnrselection->insertItem(str = str.setNum((int)m_Dicomseriesnr.at(i)));
+				m_Seriesnrselection->addItem(str = str.setNum((int)m_Dicomseriesnr.at(i)));
 			}
-			m_Seriesnrselection->setCurrentItem(0);
+			m_Seriesnrselection->setCurrentIndex(0);
 			m_Hbox6->show();
 		}
 	}
@@ -309,7 +308,7 @@ void LoaderDicom::LoadPushed()
 			unsigned pos = 0;
 			for (const auto& name : *m_Lnames)
 			{
-				if (m_Dicomseriesnrlist[pos++] == m_Dicomseriesnr[m_Seriesnrselection->currentItem()])
+				if (m_Dicomseriesnrlist[pos++] == m_Dicomseriesnr[m_Seriesnrselection->currentIndex()])
 				{
 					vnames.push_back(name.ascii());
 				}

@@ -247,7 +247,7 @@ QTreeWidgetItem* TissueTreeWidget::CreateHierarchyItem(bool isFolder, const QStr
 	if (isFolder)
 	{
 		QTreeWidgetItem* new_folder = new QTreeWidgetItem();
-		new_folder->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absFilePath(QString("fileopen.png")).ascii()));
+		new_folder->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("fileopen.png")).ascii()));
 		new_folder->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
 		new_folder->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
 		new_folder->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -665,19 +665,19 @@ void TissueTreeWidget::UpdateFolderIcons(QTreeWidgetItem* parent)
 			if (lock_states == 0)
 			{
 				// All child tissues unlocked
-				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absFilePath(QString("fileopen.png"))
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("fileopen.png"))
 																																.ascii()));
 			}
 			else if (lock_states == 1)
 			{
 				// All child tissues locked
-				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absFilePath(QString("folderlock1.png"))
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("folderlock1.png"))
 																																.ascii()));
 			}
 			else
 			{
 				// Mixed locked/unlocked
-				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absFilePath(QString("folderlock2.png"))
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("folderlock2.png"))
 																																.ascii()));
 			}
 

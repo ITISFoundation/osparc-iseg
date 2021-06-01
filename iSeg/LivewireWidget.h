@@ -17,10 +17,10 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <qcheckbox.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qspinbox.h>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
 
 class QFormLayout;
 
@@ -39,7 +39,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Contour"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("contour.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("contour.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

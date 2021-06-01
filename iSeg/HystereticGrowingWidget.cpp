@@ -18,22 +18,20 @@
 #include "Core/Pair.h"
 
 #include <q3vbox.h>
-#include <qapplication.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qfiledialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
+#include <QApplication>
+#include <QCheckBox>
+#include <QDialog>
+#include <QFileDialog>
+#include <QImage>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QLineEdit>
+#include <QPainter>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 

@@ -14,10 +14,10 @@
 #include "Interface/QtConnect.h"
 
 #include <QFormLayout>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qwidget.h>
+#include <QCheckBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QWidget>
 
 namespace iseg {
 

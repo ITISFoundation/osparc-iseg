@@ -23,9 +23,11 @@
 #include "Interface/RecentPlaces.h"
 
 #include <QApplication>
+#include <QButtonGroup>
 #include <QFileDialog>
 #include <QGroupBox>
 #include <QHeaderView>
+#include <QInputDialog>
 #include <QListWidget>
 #include <QPaintEvent>
 #include <QProgressDialog>
@@ -66,7 +68,7 @@ ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, const
 	m_Hbox3 = new Q3HBox(m_Vbox1);
 	m_LbBrightness = new QLabel(QString("B: "), m_Hbox3);
 	m_LbBrightness->show();
-	m_LbBrightness->setPixmap(QIcon(picpath.absFilePath(QString("icon-brightness.png")).ascii())
+	m_LbBrightness->setPixmap(QIcon(picpath.absoluteFilePath(QString("icon-brightness.png")).ascii())
 																.pixmap());
 	m_SlBrighness = new QSlider(Qt::Horizontal, m_Hbox3);
 	m_SlBrighness->setRange(0, 100);
@@ -75,7 +77,7 @@ ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, const
 	m_Hbox4 = new Q3HBox(m_Vbox1);
 	m_LbContrast = new QLabel(QString("C: "), m_Hbox4);
 	m_LbContrast->show();
-	m_LbContrast->setPixmap(QIcon(picpath.absFilePath(QString("icon-contrast.png")).ascii())
+	m_LbContrast->setPixmap(QIcon(picpath.absoluteFilePath(QString("icon-contrast.png")).ascii())
 															.pixmap());
 	m_SlContrast = new QSlider(Qt::Horizontal, m_Hbox4);
 	m_SlContrast->setRange(0, 99);
@@ -894,7 +896,7 @@ void TissueHierarchyWidget::UpdateHierarchyComboBox()
 	{
 		m_HierarchyComboBox->addItem(name);
 	}
-	m_HierarchyComboBox->setCurrentItem(m_TissueTreeWidget->GetSelectedHierarchy());
+	m_HierarchyComboBox->setCurrentIndex(m_TissueTreeWidget->GetSelectedHierarchy());
 	m_HierarchyComboBox->blockSignals(false);
 }
 
@@ -968,7 +970,7 @@ void TissueHierarchyWidget::HierarchyChanged(int index)
 	{
 		// Select default hierarchy
 		m_HierarchyComboBox->blockSignals(true);
-		m_HierarchyComboBox->setCurrentItem(0);
+		m_HierarchyComboBox->setCurrentIndex(0);
 		m_HierarchyComboBox->blockSignals(false);
 		return;
 	}
@@ -978,7 +980,7 @@ void TissueHierarchyWidget::HierarchyChanged(int index)
 
 	// Set selected item in combo box (may have changed during save hierarchy)
 	m_HierarchyComboBox->blockSignals(true);
-	m_HierarchyComboBox->setCurrentItem(index);
+	m_HierarchyComboBox->setCurrentIndex(index);
 	m_HierarchyComboBox->blockSignals(false);
 }
 
@@ -1338,7 +1340,8 @@ void BitsStack::PoptissuePressed() { PopHelper(false, false, true); }
 
 void BitsStack::LoaditemPressed()
 {
-	QStringList selected_files = QFileDialog::getOpenFileNames("Stackitems (*.stk)\nAll (*.*)", QString::null, this, "open file dialog", "Select on or more files to open");
+	QStringList selected_files = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to open", QString::null, "Stackitems (*.stk)\nAll (*.*)");
 	if (selected_files.isEmpty())
 	{
 		return;
@@ -1417,7 +1420,8 @@ void BitsStack::SaveitemPressed()
 		return;
 	}
 
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Stackitems (*.stk)\n", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(
+			this, "Save", "Stackitems (*.stk)\n", QString::null); //, filename);
 	if (savefilename.endsWith(QString(".stk")))
 	{
 		savefilename.remove(savefilename.length() - 4, 4);
@@ -1845,9 +1849,9 @@ ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent, const char* 
 {
 	m_Zoom = zoom1;
 	m_Vbox1 = new Q3VBoxLayout(this);
-	m_Pushzoomin = new QPushButton(QIcon(picpath.absFilePath(QString("zoomin.png"))), "Zoom in", this);
-	m_Pushzoomout = new QPushButton(QIcon(picpath.absFilePath(QString("zoomout.png"))), "Zoom out", this);
-	m_Pushunzoom = new QPushButton(QIcon(picpath.absFilePath(QString("unzoom.png"))), "Unzoom", this);
+	m_Pushzoomin = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomin.png"))), "Zoom in", this);
+	m_Pushzoomout = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomout.png"))), "Zoom out", this);
+	m_Pushunzoom = new QPushButton(QIcon(picpath.absoluteFilePath(QString("unzoom.png"))), "Unzoom", this);
 
 	m_ZoomF = new QLabel(QString("x"), this);
 	m_LeZoomF = new QLineEdit(QString::number(m_Zoom, 'g', 4), this);
@@ -2468,7 +2472,8 @@ MergeProjectsDialog::~MergeProjectsDialog() { delete m_HboxOverall; }
 
 void MergeProjectsDialog::AddPressed()
 {
-	QStringList openfilenames = QFileDialog::getOpenFileNames("Projects (*.prj)", QString::null, this, "iSeg", "Select one or more files to add");
+	QStringList openfilenames = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to add", QString::null, "Projects (*.prj)");
 	m_FileListWidget->addItems(openfilenames);
 }
 

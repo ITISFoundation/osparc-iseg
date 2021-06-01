@@ -15,21 +15,20 @@
 #include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialog>
+#include <QImage>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
+#include <QLineEdit>
+#include <QPainter>
 #include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 #include <algorithm>
 
@@ -49,7 +48,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Growing"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("growing.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("growing.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

@@ -14,8 +14,8 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <QPushButton>
+#include <QRadioButton>
 
 namespace iseg {
 
@@ -31,7 +31,7 @@ public:
 	void Cleanup() override;
 	void NewLoaded() override;
 	std::string GetName() override { return std::string("Picker"); };
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("picker.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("picker.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

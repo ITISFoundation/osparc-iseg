@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 	// start logging
 	QDir tmpdir = TempDir();
 	bool debug = vm.count("debug") ? vm["debug"].as<bool>() : false;
-	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
+	auto log_file_name = timestamped(tmpdir.absoluteFilePath("iSeg").toStdString(), ".log");
 	init_logging(log_file_name, true, debug);
 
 	QFileInfo fileinfo(argv[0]);
@@ -136,10 +136,10 @@ int main(int argc, char** argv)
 		ISEG_WARNING_MSG("atlas folder does not exist");
 	}
 
-	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
-	QString locationpath = file_directory.absPath();
-	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
-	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
+	QString splashpicpath = picpath.absoluteFilePath(QString("splash.png"));
+	QString locationpath = file_directory.absolutePath();
+	QString latestprojpath = tmpdir.absoluteFilePath(QString("latestproj.txt"));
+	QString settingspath = tmpdir.absoluteFilePath(QString("settings.bin"));
 
 	TissueInfos::InitTissues();
 	BranchItem::InitAvailablelabels();
@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 #endif
 	app.processEvents();
 
-	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), nullptr, "MainWindow", Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
+	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), nullptr, Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
 
 	main_window->LoadLoadProj(latestprojpath);
 	main_window->LoadAtlas(atlasdir);

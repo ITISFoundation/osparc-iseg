@@ -33,9 +33,9 @@
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 
-#include <qcolor.h>
-#include <qimage.h>
-#include <qmessagebox.h>
+#include <QColor>
+#include <QImage>
+#include <QMessageBox>
 
 #include <cassert>
 #include <cerrno>

@@ -20,16 +20,16 @@
 #include <QPaintEvent>
 #include <q3hbox.h>
 #include <q3scrollview.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qevent.h>
-#include <qimage.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialog>
+#include <QEvent>
+#include <QImage>
 #include <qlayout.h>
 #include <qpoint.h>
-#include <qradiobutton.h>
+#include <QRadioButton>
 #include <qscrollbar.h>
-#include <qwidget.h>
+#include <QWidget>
 
 #include <vector>
 

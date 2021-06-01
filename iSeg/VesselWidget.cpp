@@ -362,7 +362,7 @@ void VesselWidget::Cleanup()
 
 QIcon iseg::VesselWidget::GetIcon(QDir picdir)
 {
-	return QIcon(picdir.absFilePath(QString("vessel.png")));
+	return QIcon(picdir.absoluteFilePath(QString("vessel.png")));
 }
 
 } // namespace iseg

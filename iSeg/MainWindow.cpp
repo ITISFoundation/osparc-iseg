@@ -66,18 +66,19 @@
 
 #include <QDesktopWidget>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QShortcut>
 #include <QSignalMapper>
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QToolButton>
-#include <qapplication.h>
-#include <qdockwidget.h>
-#include <qmenubar.h>
-#include <qprogressdialog.h>
-#include <qsettings.h>
-#include <qtextedit.h>
-#include <qtooltip.h>
+#include <QApplication>
+#include <QDockWidget>
+#include <QMenuBar>
+#include <QProgressDialog>
+#include <QSettings>
+#include <QTextEdit>
+#include <QToolTip>
 
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
@@ -300,8 +301,8 @@ bool MenuWTT::event(QEvent* e)
 	return QMenu::event(e);
 }
 
-MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode, QWidget* parent, const char* name, Qt::WindowFlags wFlags, const std::vector<std::string>& plugin_search_dirs)
-		: QMainWindow(parent, name, wFlags)
+MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode, QWidget* parent, Qt::WindowFlags wFlags, const std::vector<std::string>& plugin_search_dirs)
+		: QMainWindow(parent, wFlags)
 {
 	setObjectName("MainWindow");
 	statusBar()->showMessage("Ready");
@@ -325,7 +326,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 
 	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
-	QIcon isegicon(m_MPicpath.absFilePath(QString("isegicon.png")).ascii());
+	QIcon isegicon(m_MPicpath.absoluteFilePath(QString("isegicon.png")).ascii());
 	setWindowIcon(isegicon);
 	m_MLocationstring = locationstring;
 	m_MSaveprojfilename = "";
@@ -393,7 +394,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SlBrightnessbmp = new QSlider(Qt::Horizontal, this);
 	m_SlBrightnessbmp->setRange(0, 100);
 	m_LbContrastbmp = new QLabel("C:", this);
-	m_LbContrastbmp->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png")).ascii()).pixmap());
+	m_LbContrastbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
 	m_LeContrastbmpVal = new QLineEdit(this);
 	m_LeContrastbmpVal->setAlignment(Qt::AlignRight);
 	m_LeContrastbmpVal->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -403,7 +404,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastbmpVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastbmpVal = new QLabel("x", this);
 	m_LbBrightnessbmp = new QLabel("B:", this);
-	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png")).ascii()).pixmap());
+	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png")).ascii()).pixmap());
 	m_LeBrightnessbmpVal = new QLineEdit(this);
 	m_LeBrightnessbmpVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessbmpVal->setText(QString("%1").arg(9999, 3));
@@ -418,13 +419,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_BmpShow->SetIsBmp(true);
 	m_BmpShow->update();
 
-	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("next.png"))), "", this);
+	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("next.png"))), "", this);
 	m_ToworkBtn->setFixedWidth(50);
-	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("previous.png"))), "", this);
+	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("previous.png"))), "", this);
 	m_TobmpBtn->setFixedWidth(50);
-	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png"))), "", this);
+	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("swap.png"))), "", this);
 	m_SwapBtn->setFixedWidth(50);
-	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absFilePath(QString("swap.png"))), "3D", this);
+	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("swap.png"))), "3D", this);
 	m_SwapAllBtn->setFixedWidth(50);
 
 	m_WorkShow = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -433,7 +434,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SlBrightnesswork = new QSlider(Qt::Horizontal, this);
 	m_SlBrightnesswork->setRange(0, 100);
 	m_LbContrastwork = new QLabel(this);
-	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png"))).pixmap());
+	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
 	m_LeContrastworkVal = new QLineEdit(this);
 	m_LeContrastworkVal->setAlignment(Qt::AlignRight);
 	m_LeContrastworkVal->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -443,7 +444,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastworkVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastworkVal = new QLabel("x", this);
 	m_LbBrightnesswork = new QLabel(this);
-	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png"))).pixmap());
+	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png"))).pixmap());
 	m_LeBrightnessworkVal = new QLineEdit(this);
 	m_LeBrightnessworkVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessworkVal->setText(QString("%1").arg(9999, 3));
@@ -472,7 +473,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_TissueHierarchyWidget = new TissueHierarchyWidget(m_TissueTreeWidget, this);
 	m_TissueTreeWidget->UpdateTreeWidget(); // Reload hierarchy
 	m_CbTissuelock = new QCheckBox(this);
-	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absFilePath(QString("lock.png"))).pixmap());
+	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("lock.png"))).pixmap());
 	m_CbTissuelock->setChecked(false);
 	m_LockTissues = new QPushButton("All", this);
 	m_LockTissues->setToggleButton(true);
@@ -549,9 +550,12 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 
 	unsigned short slicenr = m_Handler3D->ActiveSlice() + 1;
 	m_PbFirst = new QPushButton("|<<", this);
-	m_ScbSlicenr = new QScrollBar(1, (int)m_Handler3D->NumSlices(), 1, 5, 1, Qt::Horizontal, this);
+	m_ScbSlicenr = new QScrollBar(Qt::Horizontal, this);
+	m_ScbSlicenr->setRange(1, m_Handler3D->NumSlices());
+	m_ScbSlicenr->setSingleStep(1);
+	m_ScbSlicenr->setPageStep(5);
 	m_ScbSlicenr->setMinimumWidth(350);
-	m_ScbSlicenr->setValue(int(slicenr));
+	m_ScbSlicenr->setValue(static_cast<int>(slicenr));
 	m_PbLast = new QPushButton(">>|", this);
 	m_SbSlicenr = new QSpinBox(1, (int)m_Handler3D->NumSlices(), 1, this);
 	m_SbSlicenr->setValue(slicenr);
@@ -627,6 +631,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_PbTab[i] = new QPushButton(this);
 		m_PbTab[i]->setToggleButton(true);
 		m_PbTab[i]->setStyleSheet("text-align: left");
+		m_PbTab[i]->setMaximumHeight(20);
 	}
 
 	m_MethodTab = new QStackedWidget(this);
@@ -635,6 +640,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 
 	for (size_t i = 0; i < m_Tabwidgets.size(); i++)
 	{
+		m_Tabwidgets[i]->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 		m_MethodTab->addWidget(m_Tabwidgets[i]);
 	}
 
@@ -657,7 +663,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		qs = m_Tabwidgets[i]->sizeHint();
 		height_max = std::max(height_max, qs.height());
 	}
-	height_max += 65;
+	height_max += 45;
 
 	m_ScaleDialog = new ScaleWork(m_Handler3D, m_MPicpath, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
 	m_ImagemathDialog = new ImageMath(m_Handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
@@ -1064,26 +1070,24 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	menuBar()->addMenu(m_File);
 	if (!m_MEditingmode)
 	{
-		m_File->insertItem(QIcon(m_MPicpath.absFilePath(QString("filenew.png"))), "&New...", this, SLOT(ExecuteNew()));
-		m_Loadmenu = new QMenu("loadmenu", this);
-		m_Loadmenu->insertItem("Open Dicom (.dcm...)", this, SLOT(ExecuteLoaddicom()));
-		m_Loadmenu->insertItem("Open Image Series (.bmp, .png, ...)", this, SLOT(ExecuteLoadImageSeries()));
-		m_Loadmenu->insertItem("Open Medical Image (.mhd, .nii, ...)", this, SLOT(ExecuteLoadMedicalImage()));
-		m_Loadmenu->insertItem("Open Raw (.raw...)", this, SLOT(ExecuteLoadraw()));
-		m_Loadmenu->insertItem("Open Analyze Direct (.avw...)", this, SLOT(ExecuteLoadavw()));
-		m_Loadmenu->insertItem("Open VTK...", this, SLOT(ExecuteLoadvtk()));
-		m_Loadmenu->insertItem("Open RTdose...", this, SLOT(ExecuteLoadrtdose()));
-		m_File->insertItem("&Open", m_Loadmenu);
+		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("filenew.png"))), "&New...", this, SLOT(ExecuteNew()));
+		m_Loadmenu = m_File->addMenu("&Open");
+		m_Loadmenu->addAction("Open Dicom (.dcm...)", this, SLOT(ExecuteLoaddicom()));
+		m_Loadmenu->addAction("Open Image Series (.bmp, .png, ...)", this, SLOT(ExecuteLoadImageSeries()));
+		m_Loadmenu->addAction("Open Medical Image (.mhd, .nii, ...)", this, SLOT(ExecuteLoadMedicalImage()));
+		m_Loadmenu->addAction("Open Raw (.raw...)", this, SLOT(ExecuteLoadraw()));
+		m_Loadmenu->addAction("Open Analyze Direct (.avw...)", this, SLOT(ExecuteLoadavw()));
+		m_Loadmenu->addAction("Open VTK...", this, SLOT(ExecuteLoadvtk()));
+		m_Loadmenu->addAction("Open RTdose...", this, SLOT(ExecuteLoadrtdose()));
 	}
-	m_Reloadmenu = new QMenu("reloadmenu", this);
-	m_Reloadmenu->insertItem("Reopen Dicom (.dcm...)", this, SLOT(ExecuteReloaddicom()));
-	m_Reloadmenu->insertItem("Reopen Image Series (.bmp)", this, SLOT(ExecuteReloadbmp()));
-	m_Reloadmenu->insertItem("Reopen RAW (.raw...)", this, SLOT(ExecuteReloadraw()));
-	m_Reloadmenu->insertItem("Reopen Medical Image (.mhd, .nii, ...)", this, SLOT(ExecuteReloadMedicalImage()));
-	m_Reloadmenu->insertItem("Reopen Analyze Direct (.avw...)", this, SLOT(ExecuteReloadavw()));
-	m_Reloadmenu->insertItem("Reopen VTK...", this, SLOT(ExecuteReloadvtk()));
-	m_Reloadmenu->insertItem("Reopen RTdose...", this, SLOT(ExecuteReloadrtdose()));
-	m_File->insertItem("&Reopen", m_Reloadmenu);
+	m_Reloadmenu = m_File->addMenu("&Reopen");
+	m_Reloadmenu->addAction("Reopen Dicom (.dcm...)", this, SLOT(ExecuteReloaddicom()));
+	m_Reloadmenu->addAction("Reopen Image Series (.bmp)", this, SLOT(ExecuteReloadbmp()));
+	m_Reloadmenu->addAction("Reopen RAW (.raw...)", this, SLOT(ExecuteReloadraw()));
+	m_Reloadmenu->addAction("Reopen Medical Image (.mhd, .nii, ...)", this, SLOT(ExecuteReloadMedicalImage()));
+	m_Reloadmenu->addAction("Reopen Analyze Direct (.avw...)", this, SLOT(ExecuteReloadavw()));
+	m_Reloadmenu->addAction("Reopen VTK...", this, SLOT(ExecuteReloadvtk()));
+	m_Reloadmenu->addAction("Reopen RTdose...", this, SLOT(ExecuteReloadrtdose()));
 
 	if (!m_MEditingmode)
 	{
@@ -1105,99 +1109,99 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	QObject_connect(import_rt_action, SIGNAL(triggered()), this, SLOT(ExecuteLoadrtstruct()));
 	import_rt_action->setToolTip("Some data must be opened first to import its RTStruct file");
 
-	m_File->insertItem("&Export Image(s)...", this, SLOT(ExecuteSaveimg()));
-	m_File->insertItem("Export &Contour...", this, SLOT(ExecuteSaveContours()));
+	m_File->addAction("&Export Image(s)...", this, SLOT(ExecuteSaveimg()));
+	m_File->addAction("Export &Contour...", this, SLOT(ExecuteSaveContours()));
 
-	m_Exportmenu = new QMenu("exportmenu", this);
-	m_Exportmenu->insertItem("Export &Labelfield...(am)", this, SLOT(ExecuteExportlabelfield()));
-	m_Exportmenu->insertItem("Export vtk-ascii...(vti/vtk)", this, SLOT(ExecuteExportvtkascii()));
-	m_Exportmenu->insertItem("Export vtk-binary...(vti/vtk)", this, SLOT(ExecuteExportvtkbinary()));
-	m_Exportmenu->insertItem("Export vtk-compressed-ascii...(vti)", this, SLOT(ExecuteExportvtkcompressedascii()));
-	m_Exportmenu->insertItem("Export vtk-compressed-binary...(vti)", this, SLOT(ExecuteExportvtkcompressedbinary()));
-	m_Exportmenu->insertItem("Export Matlab...(mat)", this, SLOT(ExecuteExportmat()));
-	m_Exportmenu->insertItem("Export hdf...(h5)", this, SLOT(ExecuteExporthdf()));
-	m_Exportmenu->insertItem("Export xml-extent index...(xml)", this, SLOT(ExecuteExportxmlregionextent()));
-	m_Exportmenu->insertItem("Export tissue index...(txt)", this, SLOT(ExecuteExporttissueindex()));
-	m_File->insertItem("Export Tissue Distr.", m_Exportmenu);
-	m_File->insertItem("Export Color Lookup...", this, SLOT(ExecuteSavecolorlookup()));
-	m_File->insertSeparator();
+	m_Exportmenu = m_File->addMenu("Export Tissue Distr.");
+	m_Exportmenu->addAction("Export &Labelfield...(am)", this, SLOT(ExecuteExportlabelfield()));
+	m_Exportmenu->addAction("Export vtk-ascii...(vti/vtk)", this, SLOT(ExecuteExportvtkascii()));
+	m_Exportmenu->addAction("Export vtk-binary...(vti/vtk)", this, SLOT(ExecuteExportvtkbinary()));
+	m_Exportmenu->addAction("Export vtk-compressed-ascii...(vti)", this, SLOT(ExecuteExportvtkcompressedascii()));
+	m_Exportmenu->addAction("Export vtk-compressed-binary...(vti)", this, SLOT(ExecuteExportvtkcompressedbinary()));
+	m_Exportmenu->addAction("Export Matlab...(mat)", this, SLOT(ExecuteExportmat()));
+	m_Exportmenu->addAction("Export hdf...(h5)", this, SLOT(ExecuteExporthdf()));
+	m_Exportmenu->addAction("Export xml-extent index...(xml)", this, SLOT(ExecuteExportxmlregionextent()));
+	m_Exportmenu->addAction("Export tissue index...(txt)", this, SLOT(ExecuteExporttissueindex()));
+	m_File->addAction("Export Color Lookup...", this, SLOT(ExecuteSavecolorlookup()));
+	m_File->addSeparator();
 
 	if (!m_MEditingmode)
-		m_File->insertItem("Save &Project as...", this, SLOT(ExecuteSaveprojas()));
+		m_File->addAction("Save &Project as...", this, SLOT(ExecuteSaveprojas()));
 	else
-		m_File->insertItem("Save &Project-Copy as...", this, SLOT(ExecuteSavecopyas()));
-	m_File->insertItem(QIcon(m_MPicpath.absFilePath(QString("filesave.png"))), "Save Pro&ject", this, SLOT(ExecuteSaveproj()), QKeySequence("Ctrl+S"));
-	m_File->insertItem("Save Active Slices...", this, SLOT(ExecuteSaveactiveslicesas()));
+		m_File->addAction("Save &Project-Copy as...", this, SLOT(ExecuteSavecopyas()));
+	m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("filesave.png"))), "Save Pro&ject", this, SLOT(ExecuteSaveproj()), QKeySequence("Ctrl+S"));
+	m_File->addAction("Save Active Slices...", this, SLOT(ExecuteSaveactiveslicesas()));
 	if (!m_MEditingmode)
 	{
-		m_File->insertItem(QIcon(m_MPicpath.absFilePath(QString("fileopen.png"))), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
+		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("fileopen.png"))), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
 	}
-	m_File->insertSeparator();
-	m_File->insertItem("Save &Tissuelist...", this, SLOT(ExecuteSavetissues()));
-	m_File->insertItem("Open T&issuelist...", this, SLOT(ExecuteLoadtissues()));
-	m_File->insertItem("Set Tissuelist as Default", this, SLOT(ExecuteSettissuesasdef()));
-	m_File->insertItem("Remove Default Tissuelist", this, SLOT(ExecuteRemovedeftissues()));
-	m_File->insertSeparator();
+	m_File->addSeparator();
+	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSavetissues()));
+	m_File->addAction("Open T&issuelist...", this, SLOT(ExecuteLoadtissues()));
+	m_File->addAction("Set Tissuelist as Default", this, SLOT(ExecuteSettissuesasdef()));
+	m_File->addAction("Remove Default Tissuelist", this, SLOT(ExecuteRemovedeftissues()));
+	m_File->addSeparator();
 	if (!m_MEditingmode)
 	{
-		m_MLoadprojfilename.m_Lpf1nr = m_File->insertItem("", this, SLOT(ExecuteLoadproj1()));
-		m_MLoadprojfilename.m_Lpf2nr = m_File->insertItem("", this, SLOT(ExecuteLoadproj2()));
-		m_MLoadprojfilename.m_Lpf3nr = m_File->insertItem("", this, SLOT(ExecuteLoadproj3()));
-		m_MLoadprojfilename.m_Lpf4nr = m_File->insertItem("", this, SLOT(ExecuteLoadproj4()));
-		m_MLoadprojfilename.m_Separatornr = m_File->insertSeparator();
-		m_File->setItemVisible(m_MLoadprojfilename.m_Lpf1nr, false);
-		m_File->setItemVisible(m_MLoadprojfilename.m_Lpf2nr, false);
-		m_File->setItemVisible(m_MLoadprojfilename.m_Lpf3nr, false);
-		m_File->setItemVisible(m_MLoadprojfilename.m_Lpf4nr, false);
-		m_File->setItemVisible(m_MLoadprojfilename.m_Separatornr, false);
+		m_MLoadprojfilename.m_LoadRecentProjects[0] = m_File->addAction("", this, SLOT(ExecuteLoadproj1()));
+		m_MLoadprojfilename.m_LoadRecentProjects[1] = m_File->addAction("", this, SLOT(ExecuteLoadproj2()));
+		m_MLoadprojfilename.m_LoadRecentProjects[2] = m_File->addAction("", this, SLOT(ExecuteLoadproj3()));
+		m_MLoadprojfilename.m_LoadRecentProjects[3] = m_File->addAction("", this, SLOT(ExecuteLoadproj4()));
+		m_MLoadprojfilename.m_Separator = m_File->addSeparator();
+
+		m_MLoadprojfilename.m_LoadRecentProjects[0]->setVisible(false);
+		m_MLoadprojfilename.m_LoadRecentProjects[1]->setVisible(false);
+		m_MLoadprojfilename.m_LoadRecentProjects[2]->setVisible(false);
+		m_MLoadprojfilename.m_LoadRecentProjects[3]->setVisible(false);
+		m_MLoadprojfilename.m_Separator->setVisible(false);
 	}
-	//	file->insertItem( "E&xit", qApp,  SLOT(quit()), CTRL+Key_Q );
-	m_File->insertItem("E&xit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
+	//	file->addAction( "E&xit", qApp,  SLOT(quit()), CTRL+Key_Q );
+	m_File->addAction("E&xit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
 	m_Imagemenu = menuBar()->addMenu(tr("&Image"));
-	m_Imagemenu->insertItem("&Pixelsize...", this, SLOT(ExecutePixelsize()));
-	m_Imagemenu->insertItem("Offset...", this, SLOT(ExecuteDisplacement()));
-	m_Imagemenu->insertItem("Rotation...", this, SLOT(ExecuteRotation()));
-	//	imagemenu->insertItem( "Resize...", this,  SLOT(ExecuteResize()));
+	m_Imagemenu->addAction("&Pixelsize...", this, SLOT(ExecutePixelsize()));
+	m_Imagemenu->addAction("Offset...", this, SLOT(ExecuteDisplacement()));
+	m_Imagemenu->addAction("Rotation...", this, SLOT(ExecuteRotation()));
+	//	imagemenu->addAction( "Resize...", this,  SLOT(ExecuteResize()));
 	if (!m_MEditingmode)
 	{
-		m_Imagemenu->insertItem("Pad...", this, SLOT(ExecutePad()));
-		m_Imagemenu->insertItem("Crop...", this, SLOT(ExecuteCrop()));
+		m_Imagemenu->addAction("Pad...", this, SLOT(ExecutePad()));
+		m_Imagemenu->addAction("Crop...", this, SLOT(ExecuteCrop()));
 	}
-	m_Imagemenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("histo.png"))), "&Histogram...", this, SLOT(ExecuteHisto()));
-	m_Imagemenu->insertItem("&Contr./Bright. ...", this, SLOT(ExecuteScale()));
-	m_Imagemenu->insertItem("&Image Math. ...", this, SLOT(ExecuteImagemath()));
-	m_Imagemenu->insertItem("Unwrap", this, SLOT(ExecuteUnwrap()));
-	m_Imagemenu->insertItem("Overlay...", this, SLOT(ExecuteOverlay()));
-	m_Imagemenu->insertSeparator();
-	m_Imagemenu->insertItem("&x Sliced", this, SLOT(ExecuteXslice()));
-	m_Imagemenu->insertItem("&y Sliced", this, SLOT(ExecuteYslice()));
-	m_Imagemenu->insertItem("Tissue surface view", this, SLOT(ExecuteTissueSurfaceviewer()));
-	m_Imagemenu->insertItem("Target surface view", this, SLOT(ExecuteTargetSurfaceviewer()));
-	m_Imagemenu->insertItem("Source iso-surface view", this, SLOT(ExecuteSourceSurfaceviewer()));
-	m_Imagemenu->insertItem("Tissue volume view", this, SLOT(Execute3Dvolumeviewertissue()));
-	m_Imagemenu->insertItem("Source volume view", this, SLOT(Execute3Dvolumeviewerbmp()));
+	m_Imagemenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("histo.png"))), "&Histogram...", this, SLOT(ExecuteHisto()));
+	m_Imagemenu->addAction("&Contr./Bright. ...", this, SLOT(ExecuteScale()));
+	m_Imagemenu->addAction("&Image Math. ...", this, SLOT(ExecuteImagemath()));
+	m_Imagemenu->addAction("Unwrap", this, SLOT(ExecuteUnwrap()));
+	m_Imagemenu->addAction("Overlay...", this, SLOT(ExecuteOverlay()));
+	m_Imagemenu->addSeparator();
+	m_Imagemenu->addAction("&x Sliced", this, SLOT(ExecuteXslice()));
+	m_Imagemenu->addAction("&y Sliced", this, SLOT(ExecuteYslice()));
+	m_Imagemenu->addAction("Tissue surface view", this, SLOT(ExecuteTissueSurfaceviewer()));
+	m_Imagemenu->addAction("Target surface view", this, SLOT(ExecuteTargetSurfaceviewer()));
+	m_Imagemenu->addAction("Source iso-surface view", this, SLOT(ExecuteSourceSurfaceviewer()));
+	m_Imagemenu->addAction("Tissue volume view", this, SLOT(Execute3Dvolumeviewertissue()));
+	m_Imagemenu->addAction("Source volume view", this, SLOT(Execute3Dvolumeviewerbmp()));
 	if (!m_MEditingmode)
 	{
 		//xxxa;
-		m_Imagemenu->insertSeparator();
-		m_Imagemenu->insertItem("Swap xy", this, SLOT(ExecuteSwapxy()));
-		m_Imagemenu->insertItem("Swap xz", this, SLOT(ExecuteSwapxz()));
-		m_Imagemenu->insertItem("Swap yz", this, SLOT(ExecuteSwapyz()));
+		m_Imagemenu->addSeparator();
+		m_Imagemenu->addAction("Swap xy", this, SLOT(ExecuteSwapxy()));
+		m_Imagemenu->addAction("Swap xz", this, SLOT(ExecuteSwapxz()));
+		m_Imagemenu->addAction("Swap yz", this, SLOT(ExecuteSwapyz()));
 	}
 
 	m_Editmenu = menuBar()->addMenu(tr("E&dit"));
-	m_Undonr = m_Editmenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("undo.png"))), "&Undo", this, SLOT(ExecuteUndo()));
-	m_Redonr = m_Editmenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("redo.png"))), "Redo", this, SLOT(ExecuteRedo()));
-	m_Editmenu->insertSeparator();
-	m_Editmenu->insertItem("&Configure Undo...", this, SLOT(ExecuteUndoconf()));
-	m_Editmenu->insertItem("&Active Slices...", this, SLOT(ExecuteActiveslicesconf()));
-	m_Editmenu->setItemEnabled(m_Undonr, false);
-	m_Editmenu->setItemEnabled(m_Redonr, false);
-	m_Editmenu->insertItem("&Settings...", this, SLOT(ExecuteSettings()));
+	m_Undonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("undo.png"))), "&Undo", this, SLOT(ExecuteUndo()));
+	m_Redonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("redo.png"))), "Redo", this, SLOT(ExecuteRedo()));
+	m_Editmenu->addSeparator();
+	m_Editmenu->addAction("&Configure Undo...", this, SLOT(ExecuteUndoconf()));
+	m_Editmenu->addAction("&Active Slices...", this, SLOT(ExecuteActiveslicesconf()));
+	m_Undonr->setEnabled(false);
+	m_Redonr->setEnabled(false);
+	m_Editmenu->addAction("&Settings...", this, SLOT(ExecuteSettings()));
 
 	m_Viewmenu = menuBar()->addMenu(tr("&View"));
-	m_Hidemenu = new QMenu("hidemenu", this);
-	m_Hidesubmenu = new QMenu("hidesubmenu", this);
+	m_Hidemenu = m_Viewmenu->addMenu("&Toolbars");
+	m_Hidesubmenu = m_Viewmenu->addMenu("Methods");
 	m_Hidemenu->addAction(tabswdock->toggleViewAction());
 	m_Hidemenu->addAction(method_tabdock->toggleViewAction());
 	m_Hidemenu->addAction(notesdock->toggleViewAction());
@@ -1212,134 +1216,112 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_Hidemenu->addAction(maskdock->toggleViewAction());
 
 	m_Hidecontrastbright = new QAction("Contr./Bright.", this);
-	m_Hidecontrastbright->setToggleAction(true);
+	m_Hidecontrastbright->setCheckable(true);
 	m_Hidecontrastbright->setChecked(true);
 	QObject_connect(m_Hidecontrastbright, SIGNAL(toggled(bool)), this, SLOT(ExecuteHidecontrastbright(bool)));
-	m_Hidecontrastbright->addTo(m_Hidemenu);
+	m_Hidemenu->addAction(m_Hidecontrastbright);
 	m_Hidesource = new QAction("Source", this);
-	m_Hidesource->setToggleAction(true);
+	m_Hidesource->setCheckable(true);
 	m_Hidesource->setChecked(true);
 	QObject_connect(m_Hidesource, SIGNAL(toggled(bool)), this, SLOT(ExecuteHidesource(bool)));
-	m_Hidesource->addTo(m_Hidemenu);
+	m_Hidemenu->addAction(m_Hidesource);
 	m_Hidetarget = new QAction("Target", this);
-	m_Hidetarget->setToggleAction(true);
+	m_Hidetarget->setCheckable(true);
 	m_Hidetarget->setChecked(true);
 	QObject_connect(m_Hidetarget, SIGNAL(toggled(bool)), this, SLOT(ExecuteHidetarget(bool)));
-	m_Hidetarget->addTo(m_Hidemenu);
+	m_Hidemenu->addAction(m_Hidetarget);
 	m_Hidecopyswap = new QAction("Copy/Swap", this);
-	m_Hidecopyswap->setToggleAction(true);
+	m_Hidecopyswap->setCheckable(true);
 	m_Hidecopyswap->setChecked(true);
 	QObject_connect(m_Hidecopyswap, SIGNAL(toggled(bool)), this, SLOT(ExecuteHidecopyswap(bool)));
-	m_Hidecopyswap->addTo(m_Hidemenu);
+	m_Hidemenu->addAction(m_Hidecopyswap);
 	for (unsigned short i = 0; i < nrtabbuttons; i++)
 	{
 		m_ShowtabAction[i] = new QAction(m_Tabwidgets[i]->GetName().c_str(), this);
-		m_ShowtabAction[i]->setToggleAction(true);
+		m_ShowtabAction[i]->setCheckable(true);
 		m_ShowtabAction[i]->setChecked(m_ShowpbTab[i]);
 		QObject_connect(m_ShowtabAction[i], SIGNAL(toggled(bool)), this, SLOT(ExecuteShowtabtoggled(bool)));
-		m_ShowtabAction[i]->addTo(m_Hidesubmenu);
+		m_Hidesubmenu->addAction(m_ShowtabAction[i]);
 	}
 	m_Hideparameters = new QAction("Simplified", this);
-	m_Hideparameters->setToggleAction(true);
+	m_Hideparameters->setCheckable(true);
 	m_Hideparameters->setChecked(WidgetInterface::GetHideParams());
 	QObject_connect(m_Hideparameters, SIGNAL(toggled(bool)), this, SLOT(ExecuteHideparameters(bool)));
-	m_Hidesubmenu->insertSeparator();
-	m_Hideparameters->addTo(m_Hidesubmenu);
-	m_Viewmenu->insertItem("&Toolbars", m_Hidemenu);
-	m_Viewmenu->insertItem("Methods", m_Hidesubmenu);
+	m_Hidesubmenu->addSeparator();
+	m_Hidesubmenu->addAction(m_Hideparameters);
 
 	m_Toolmenu = menuBar()->addMenu(tr("T&ools"));
-	m_Toolmenu->insertItem("Target->Tissue", this, SLOT(DoWork2tissue()));
-	m_Toolmenu->insertItem("Target->Tissue grouped...", this, SLOT(DoWork2tissueGrouped()));
-	m_Toolmenu->insertItem("Tissue->Target", this, SLOT(DoTissue2work()));
-	m_Toolmenu->insertItem("In&verse Slice Order", this, SLOT(ExecuteInversesliceorder()));
+	m_Toolmenu->addAction("Target->Tissue", this, SLOT(DoWork2tissue()));
+	m_Toolmenu->addAction("Target->Tissue grouped...", this, SLOT(DoWork2tissueGrouped()));
+	m_Toolmenu->addAction("Tissue->Target", this, SLOT(DoTissue2work()));
+	m_Toolmenu->addAction("In&verse Slice Order", this, SLOT(ExecuteInversesliceorder()));
 	m_Toolmenu->addSeparator();
-	m_Toolmenu->insertItem("&Group Tissues...", this, SLOT(ExecuteGrouptissues()));
-	m_Toolmenu->insertItem("Remove Tissues...", this, SLOT(ExecuteRemovetissues()));
+	m_Toolmenu->addAction("&Group Tissues...", this, SLOT(ExecuteGrouptissues()));
+	m_Toolmenu->addAction("Remove Tissues...", this, SLOT(ExecuteRemovetissues()));
 	if (!m_MEditingmode)
 	{
-		m_Toolmenu->insertItem("Merge Projects...", this, SLOT(ExecuteMergeprojects()));
+		m_Toolmenu->addAction("Merge Projects...", this, SLOT(ExecuteMergeprojects()));
 	}
 	m_Toolmenu->addAction("Remove Unused Tissues", this, SLOT(ExecuteRemoveUnusedTissues()));
 	auto action = m_Toolmenu->addAction("Supplant Selected Tissue", this, SLOT(ExecuteVotingReplaceLabels()));
 	action->setToolTip("Remove selected tissue by iteratively assigning it to adjacent tissues.");
-	m_Toolmenu->insertItem("Split Disconnected Tissue Regions", this, SLOT(ExecuteSplitTissue()));
-	m_Toolmenu->insertItem("Compute Target Connectivity", this, SLOT(ExecuteTargetConnectedComponents()));
+	m_Toolmenu->addAction("Split Disconnected Tissue Regions", this, SLOT(ExecuteSplitTissue()));
+	m_Toolmenu->addAction("Compute Target Connectivity", this, SLOT(ExecuteTargetConnectedComponents()));
 	m_Toolmenu->addSeparator();
-	m_Toolmenu->insertItem("Clean Up", this, SLOT(ExecuteCleanup()));
-	m_Toolmenu->insertItem("Smooth Steps", this, SLOT(ExecuteSmoothsteps()));
-	m_Toolmenu->insertItem("Check Bone Connectivity", this, SLOT(ExecuteBoneconnectivity()));
+	m_Toolmenu->addAction("Clean Up", this, SLOT(ExecuteCleanup()));
+	m_Toolmenu->addAction("Smooth Steps", this, SLOT(ExecuteSmoothsteps()));
+	m_Toolmenu->addAction("Check Bone Connectivity", this, SLOT(ExecuteBoneconnectivity()));
 
 	m_Atlasmenu = menuBar()->addMenu(tr("Atlas"));
 	// todo: make atlas method generic, i.e. for loop
 	// see e.g. https://stackoverflow.com/questions/9187538/how-to-add-a-list-of-qactions-to-a-qmenu-and-handle-them-with-a-single-slot
-	m_MAtlasfilename.m_Atlasnr[0] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas0()));
-	m_MAtlasfilename.m_Atlasnr[1] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas1()));
-	m_MAtlasfilename.m_Atlasnr[2] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas2()));
-	m_MAtlasfilename.m_Atlasnr[3] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas3()));
-	m_MAtlasfilename.m_Atlasnr[4] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas4()));
-	m_MAtlasfilename.m_Atlasnr[5] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas5()));
-	m_MAtlasfilename.m_Atlasnr[6] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas6()));
-	m_MAtlasfilename.m_Atlasnr[7] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas7()));
-	m_MAtlasfilename.m_Atlasnr[8] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas8()));
-	m_MAtlasfilename.m_Atlasnr[9] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas9()));
-	m_MAtlasfilename.m_Atlasnr[10] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas10()));
-	m_MAtlasfilename.m_Atlasnr[11] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas11()));
-	m_MAtlasfilename.m_Atlasnr[12] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas12()));
-	m_MAtlasfilename.m_Atlasnr[13] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas13()));
-	m_MAtlasfilename.m_Atlasnr[14] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas14()));
-	m_MAtlasfilename.m_Atlasnr[15] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas15()));
-	m_MAtlasfilename.m_Atlasnr[16] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas16()));
-	m_MAtlasfilename.m_Atlasnr[17] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas17()));
-	m_MAtlasfilename.m_Atlasnr[18] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas18()));
-	m_MAtlasfilename.m_Atlasnr[19] =
-			m_Atlasmenu->insertItem("", this, SLOT(ExecuteLoadatlas19()));
-	m_MAtlasfilename.m_Separatornr = m_Atlasmenu->insertSeparator();
-	m_Atlasmenu->insertItem("Create Atlas...", this, SLOT(ExecuteCreateatlas()));
-	m_Atlasmenu->insertItem("Update Menu", this, SLOT(ExecuteReloadatlases()));
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[0], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[1], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[2], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[3], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[4], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[5], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[6], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[7], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[8], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[9], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[10], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[11], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[12], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[13], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[14], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[15], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[16], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[17], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[18], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[19], false);
-	m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Separatornr, false);
+	m_MAtlasfilename.m_Atlasnr[0] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas0()));
+	m_MAtlasfilename.m_Atlasnr[1] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas1()));
+	m_MAtlasfilename.m_Atlasnr[2] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas2()));
+	m_MAtlasfilename.m_Atlasnr[3] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas3()));
+	m_MAtlasfilename.m_Atlasnr[4] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas4()));
+	m_MAtlasfilename.m_Atlasnr[5] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas5()));
+	m_MAtlasfilename.m_Atlasnr[6] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas6()));
+	m_MAtlasfilename.m_Atlasnr[7] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas7()));
+	m_MAtlasfilename.m_Atlasnr[8] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas8()));
+	m_MAtlasfilename.m_Atlasnr[9] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas9()));
+	m_MAtlasfilename.m_Atlasnr[10] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas10()));
+	m_MAtlasfilename.m_Atlasnr[11] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas11()));
+	m_MAtlasfilename.m_Atlasnr[12] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas12()));
+	m_MAtlasfilename.m_Atlasnr[13] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas13()));
+	m_MAtlasfilename.m_Atlasnr[14] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas14()));
+	m_MAtlasfilename.m_Atlasnr[15] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas15()));
+	m_MAtlasfilename.m_Atlasnr[16] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas16()));
+	m_MAtlasfilename.m_Atlasnr[17] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas17()));
+	m_MAtlasfilename.m_Atlasnr[18] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas18()));
+	m_MAtlasfilename.m_Atlasnr[19] = m_Atlasmenu->addAction("", this, SLOT(ExecuteLoadatlas19()));
+	m_MAtlasfilename.m_Separator = m_Atlasmenu->addSeparator();
+	m_Atlasmenu->addAction("Create Atlas...", this, SLOT(ExecuteCreateatlas()));
+	m_Atlasmenu->addAction("Update Menu", this, SLOT(ExecuteReloadatlases()));
+	m_MAtlasfilename.m_Atlasnr[0]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[1]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[2]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[3]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[4]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[5]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[6]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[7]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[8]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[9]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[10]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[11]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[12]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[13]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[14]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[15]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[16]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[17]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[18]->setVisible(false);
+	m_MAtlasfilename.m_Atlasnr[19]->setVisible(false);
+	m_MAtlasfilename.m_Separator->setVisible(false);
 
 	m_Helpmenu = menuBar()->addMenu(tr("Help"));
-	m_Helpmenu->insertItem(QIcon(m_MPicpath.absFilePath(QString("help.png"))), "About", this, SLOT(ExecuteAbout()));
+	m_Helpmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("help.png"))), "About", this, SLOT(ExecuteAbout()));
 
 	QObject_connect(m_ToworkBtn, SIGNAL(clicked()), this, SLOT(ExecuteBmp2work()));
 	QObject_connect(m_TobmpBtn, SIGNAL(clicked()), this, SLOT(ExecuteWork2bmp()));
@@ -1561,7 +1543,7 @@ void MainWindow::closeEvent(QCloseEvent* qce)
 		}
 
 		SaveSettings();
-		SaveLoadProj(m_MLoadprojfilename.m_MFilename);
+		SaveLoadProj(m_MLoadprojfilename.m_CurrentFilename);
 		QMainWindow::closeEvent(qce);
 	}
 	else
@@ -1695,15 +1677,15 @@ void MainWindow::ExecuteSwapxy()
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
 				std::string temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
+				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 				if (SlicesHandler::SaveRawXySwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
 					temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
-					str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
+					str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
@@ -1751,14 +1733,14 @@ void MainWindow::ExecuteSwapxz()
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
 				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
+				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 				if (SlicesHandler::SaveRawXzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
 					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
+					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
@@ -1810,14 +1792,14 @@ void MainWindow::ExecuteSwapyz()
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
 				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
+				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 				if (SlicesHandler::SaveRawYzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
 					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absFilePath(QString(temp_file_name.c_str()));
+					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
@@ -1868,31 +1850,31 @@ void MainWindow::ExecuteResize(int resizetype)
 	nrslices = m_Handler3D->NumSlices();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, false) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, true) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 	if (m_Handler3D->SaveTissuesRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 		if (m_Handler3D->ReadRawFloat(str1.ascii(), w + dxm + dxp, h + dym + dyp, 0, nrslices + dzm + dzp) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 		if (m_Handler3D->ReloadRawFloat(str1.ascii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 		if (m_Handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
 		{
 			ok = false;
@@ -2073,7 +2055,8 @@ void MainWindow::ExecuteLoadImageSeries()
 {
 	MaybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp);;Images (*.png);;Images (*.jpg *.jpeg);;Images (*.tif *.tiff);;All (*.*)", QString::null, this, "open files dialog", "Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to open", QString::null, "Images (*.bmp);;Images (*.png);;Images (*.jpg *.jpeg);;Images (*.tif *.tiff);;All (*.*)");
 
 	if (!files.empty())
 	{
@@ -2131,7 +2114,8 @@ void MainWindow::ExecuteLoaddicom()
 {
 	MaybeSafe();
 
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)\nAll (*)", QString::null, this, "open files dialog", "Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to open", QString::null, "Images (*.dcm *.dicom)\nAll (*)");
 
 	if (!files.empty())
 	{
@@ -2159,7 +2143,8 @@ void MainWindow::ExecuteLoaddicom()
 
 void MainWindow::ExecuteReloaddicom()
 {
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.dcm *.dicom)", QString::null, this, "open files dialog", "Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to open", QString::null, "Images (*.dcm *.dicom)\nAll (*)");
 
 	if (!files.empty())
 	{
@@ -2306,7 +2291,8 @@ void MainWindow::ExecuteLoadavw()
 
 void MainWindow::ExecuteReloadbmp()
 {
-	QStringList files = QFileDialog::getOpenFileNames("Images (*.bmp)\nAll (*.*)", QString::null, this, "open files dialog", "Select one or more files to open");
+	QStringList files = QFileDialog::getOpenFileNames(
+			this, "Select one or more files to open", QString::null, "Images (*.bmp)\nAll (*.*)");
 
 	if ((unsigned short)files.size() == m_Handler3D->NumSlices() ||
 			(unsigned short)files.size() ==
@@ -2731,8 +2717,7 @@ void MainWindow::SaveSettings()
 	if (fp == nullptr)
 		return;
 	unsigned short save_proj_version = 12;
-	unsigned short combined_version =
-			(unsigned short)iseg::CombineTissuesVersion(save_proj_version, 1);
+	unsigned short combined_version = (unsigned short)iseg::CombineTissuesVersion(save_proj_version, 1);
 	fwrite(&combined_version, 1, sizeof(unsigned short), fp);
 	bool flag;
 	flag = WidgetInterface::GetHideParams();
@@ -2754,13 +2739,10 @@ void MainWindow::SaveSettings()
 	{
 		flag = true;
 		if (i < m_ShowtabAction.size() && m_ShowtabAction[i])
-			flag = m_ShowtabAction[i]->isOn();
+			flag = m_ShowtabAction[i]->isChecked();
 		fwrite(&flag, 1, sizeof(bool), fp);
 	}
 	fp = TissueInfos::SaveTissues(fp, save_proj_version);
-	/*for(size_t i=0;i<tabwidgets.size();i++){
-		fp=((QWidget1 *)(tabwidgets[i]))->SaveParams(fp,saveProjVersion);
-	}*/
 	m_ThresholdWidget->SaveParams(fp, save_proj_version);
 	m_HystWidget->SaveParams(fp, save_proj_version);
 	m_LivewireWidget->SaveParams(fp, save_proj_version);
@@ -2880,7 +2862,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	ExecuteShowtabtoggled(flag);
 
 	fp = TissueInfos::LoadTissues(fp, tissues_version);
-	const char* default_tissues_filename = m_MTmppath.absFilePath(QString("def_tissues.txt"));
+	const char* default_tissues_filename = m_MTmppath.absoluteFilePath(QString("def_tissues.txt"));
 	FILE* fp_tmp = fopen(default_tissues_filename, "r");
 	if (fp_tmp != nullptr || TissueInfos::GetTissueCount() <= 0)
 	{
@@ -2937,10 +2919,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 		}
 		settings.endGroup();
 
-		if (this->m_Handler3D->ReturnNrundo() == 0)
-			this->m_Editmenu->setItemEnabled(m_Undonr, false);
-		else
-			m_Editmenu->setItemEnabled(m_Undonr, true);
+		m_Undonr->setEnabled(this->m_Handler3D->ReturnNrundo() > 0);
 	}
 }
 
@@ -3370,7 +3349,7 @@ void MainWindow::ExecuteLoadproj1()
 {
 	MaybeSafe();
 
-	QString loadfilename = m_MLoadprojfilename.m_MLoadprojfilename1;
+	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[0];
 
 	if (!loadfilename.isEmpty())
 	{
@@ -3382,7 +3361,7 @@ void MainWindow::ExecuteLoadproj2()
 {
 	MaybeSafe();
 
-	QString loadfilename = m_MLoadprojfilename.m_MLoadprojfilename2;
+	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[1];
 
 	if (!loadfilename.isEmpty())
 	{
@@ -3394,7 +3373,7 @@ void MainWindow::ExecuteLoadproj3()
 {
 	MaybeSafe();
 
-	QString loadfilename = m_MLoadprojfilename.m_MLoadprojfilename3;
+	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[2];
 
 	if (!loadfilename.isEmpty())
 	{
@@ -3406,7 +3385,7 @@ void MainWindow::ExecuteLoadproj4()
 {
 	MaybeSafe();
 
-	QString loadfilename = m_MLoadprojfilename.m_MLoadprojfilename4;
+	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[3];
 
 	if (!loadfilename.isEmpty())
 	{
@@ -3417,7 +3396,7 @@ void MainWindow::ExecuteLoadproj4()
 void MainWindow::ExecuteLoadatlas(int i)
 {
 	AtlasWidget* aw = new AtlasWidget(
-			m_MAtlasfilename.m_MAtlasdir.absFilePath(m_MAtlasfilename.m_MAtlasfilename[i]).ascii(),
+			m_MAtlasfilename.m_MAtlasdir.absoluteFilePath(m_MAtlasfilename.m_MAtlasfilename[i]).ascii(),
 			m_MPicpath);
 	if (aw->m_IsOk)
 	{
@@ -3839,12 +3818,12 @@ void MainWindow::ExecuteLoadtissues()
 
 void MainWindow::ExecuteSettissuesasdef()
 {
-	TissueInfos::SaveDefaultTissueList(m_MTmppath.absFilePath(QString("def_tissues.txt")));
+	TissueInfos::SaveDefaultTissueList(m_MTmppath.absoluteFilePath(QString("def_tissues.txt")));
 }
 
 void MainWindow::ExecuteRemovedeftissues()
 {
-	remove(m_MTmppath.absFilePath(QString("def_tissues.txt")));
+	remove(m_MTmppath.absoluteFilePath(QString("def_tissues.txt")));
 }
 
 void MainWindow::ExecuteNew()
@@ -4250,15 +4229,8 @@ void MainWindow::ExecuteUndoconf()
 	uc.move(QCursor::pos());
 	uc.exec();
 
-	if (m_Handler3D->ReturnNrundo() == 0)
-		m_Editmenu->setItemEnabled(m_Undonr, false);
-	else
-		m_Editmenu->setItemEnabled(m_Undonr, true);
-
-	if (m_Handler3D->ReturnNrredo() == 0)
-		m_Editmenu->setItemEnabled(m_Redonr, false);
-	else
-		m_Editmenu->setItemEnabled(m_Redonr, true);
+	m_Undonr->setEnabled(m_Handler3D->ReturnNrundo() > 0);
+	m_Redonr->setEnabled(m_Handler3D->ReturnNrredo() > 0);
 
 	this->SaveSettings();
 }
@@ -5851,49 +5823,50 @@ void MainWindow::TreeWidgetContextmenu(const QPoint& pos)
 	{
 		if (m_TissueTreeWidget->GetCurrentIsFolder())
 		{
-			context_menu.insertItem("Toggle Lock", m_CbTissuelock, SLOT(click()));
-			context_menu.insertSeparator();
-			context_menu.insertItem("New Tissue...", this, SLOT(NewTissuePressed()));
-			context_menu.insertItem("New Folder...", this, SLOT(NewFolderPressed()));
-			context_menu.insertItem("Mod. Folder...", this, SLOT(ModifTissueFolderPressed()));
-			context_menu.insertItem("Del. Folder...", this, SLOT(RemoveTissueFolderPressed()));
+			context_menu.addAction("Toggle Lock", m_CbTissuelock, SLOT(click()));
+			context_menu.addSeparator();
+			context_menu.addAction("New Tissue...", this, SLOT(NewTissuePressed()));
+			context_menu.addAction("New Folder...", this, SLOT(NewFolderPressed()));
+			context_menu.addAction("Mod. Folder...", this, SLOT(ModifTissueFolderPressed()));
+			context_menu.addAction("Del. Folder...", this, SLOT(RemoveTissueFolderPressed()));
 		}
 		else
 		{
-			context_menu.insertItem("Toggle Lock", m_CbTissuelock, SLOT(click()));
-			context_menu.insertSeparator();
-			context_menu.insertItem("New Tissue...", this, SLOT(NewTissuePressed()));
-			context_menu.insertItem("New Folder...", this, SLOT(NewFolderPressed()));
-			context_menu.insertItem("Mod. Tissue...", this, SLOT(ModifTissueFolderPressed()));
-			context_menu.insertItem("Del. Tissue...", this, SLOT(RemoveTissueFolderPressed()));
-			context_menu.insertSeparator();
-			context_menu.insertItem("Get Tissue", this, SLOT(Tissue2work()));
-			context_menu.insertItem("Clear Tissue", this, SLOT(Cleartissue()));
-			context_menu.insertSeparator();
-			context_menu.insertItem("Next Feat. Slice", this, SLOT(NextFeaturingSlice()));
+			context_menu.addAction("Toggle Lock", m_CbTissuelock, SLOT(click()));
+			context_menu.addSeparator();
+			context_menu.addAction("New Tissue...", this, SLOT(NewTissuePressed()));
+			context_menu.addAction("New Folder...", this, SLOT(NewFolderPressed()));
+			context_menu.addAction("Mod. Tissue...", this, SLOT(ModifTissueFolderPressed()));
+			context_menu.addAction("Del. Tissue...", this, SLOT(RemoveTissueFolderPressed()));
+			context_menu.addSeparator();
+			context_menu.addAction("Get Tissue", this, SLOT(Tissue2work()));
+			context_menu.addAction("Clear Tissue", this, SLOT(Cleartissue()));
+			context_menu.addSeparator();
+			context_menu.addAction("Next Feat. Slice", this, SLOT(NextFeaturingSlice()));
 		}
 	}
 	else // multi-selection
 	{
-		context_menu.insertItem("Toggle Lock", m_CbTissuelock, SLOT(click()));
-		context_menu.insertSeparator();
-		context_menu.insertItem("Delete Selected", this, SLOT(Removeselected()));
-		context_menu.insertItem("Clear Selected", this, SLOT(Clearselected()));
-		context_menu.insertItem("Get Selected", this, SLOT(Selectedtissue2work()));
-		context_menu.insertItem("Merge", this, SLOT(Merge()));
+		context_menu.addAction("Toggle Lock", m_CbTissuelock, SLOT(click()));
+		context_menu.addSeparator();
+		context_menu.addAction("Delete Selected", this, SLOT(Removeselected()));
+		context_menu.addAction("Clear Selected", this, SLOT(Clearselected()));
+		context_menu.addAction("Get Selected", this, SLOT(Selectedtissue2work()));
+		context_menu.addAction("Merge", this, SLOT(Merge()));
 	}
 
 	if (!list.empty())
 	{
-		context_menu.insertItem("Unselect All", this, SLOT(Unselectall()));
-		context_menu.insertItem("Assign Random Colors", this, SLOT(RandomizeColors()));
-		context_menu.insertItem("View Tissue Surface", this, SLOT(ExecuteSelectedtissueSurfaceviewer()));
+		context_menu.addAction("Unselect All", this, SLOT(Unselectall()));
+		context_menu.addAction("Assign Random Colors", this, SLOT(RandomizeColors()));
+		context_menu.addAction("View Tissue Surface", this, SLOT(ExecuteSelectedtissueSurfaceviewer()));
 	}
-	context_menu.insertSeparator();
-	int item_id = context_menu.insertItem("Show Tissue Indices", m_TissueTreeWidget, SLOT(ToggleShowTissueIndices()));
-	context_menu.setItemChecked(item_id, !m_TissueTreeWidget->GetTissueIndicesHidden());
-	context_menu.insertItem("Sort By Name", m_TissueTreeWidget, SLOT(SortByTissueName()));
-	context_menu.insertItem("Sort By Index", m_TissueTreeWidget, SLOT(SortByTissueIndex()));
+	context_menu.addSeparator();
+	auto show_ind = context_menu.addAction("Show Tissue Indices", m_TissueTreeWidget, SLOT(ToggleShowTissueIndices()));
+	show_ind->setChecked(!m_TissueTreeWidget->GetTissueIndicesHidden());
+	// BL-ACTION context_menu.setItemChecked(item_id, !m_TissueTreeWidget->GetTissueIndicesHidden());
+	context_menu.addAction("Sort By Name", m_TissueTreeWidget, SLOT(SortByTissueName()));
+	context_menu.addAction("Sort By Index", m_TissueTreeWidget, SLOT(SortByTissueIndex()));
 	context_menu.exec(m_TissueTreeWidget->viewport()->mapToGlobal(pos));
 }
 
@@ -5951,9 +5924,8 @@ void MainWindow::ExecuteUndo()
 
 		if (selected_data.DataSelected())
 		{
-			m_Editmenu->setItemEnabled(m_Redonr, true);
-			if (m_Handler3D->ReturnNrundo() == 0)
-				m_Editmenu->setItemEnabled(m_Undonr, false);
+			m_Redonr->setEnabled(true);
+			m_Undonr->setEnabled(m_Handler3D->ReturnNrundo() > 0);
 		}
 	}
 }
@@ -5980,37 +5952,25 @@ void MainWindow::ExecuteRedo()
 
 	if (selected_data.DataSelected())
 	{
-		m_Editmenu->setItemEnabled(m_Undonr, true);
-		if (m_Handler3D->ReturnNrredo() == 0)
-			m_Editmenu->setItemEnabled(m_Redonr, false);
+		m_Undonr->setEnabled(true);
+		m_Redonr->setEnabled(m_Handler3D->ReturnNrredo() > 0);
 	}
 }
 
 void MainWindow::ClearStack() { m_BitstackWidget->ClearStack(); }
 
-/*void MainWindow::do_startundo(unsigned short undotype, unsigned short slicenr1)
-{
-	handler3D->start_undo(undotype,slicenr1);
-}
-
-void MainWindow::do_endundo()
-{
-	handler3D->end_undo();
-	editmenu->setItemEnabled(redonr,false);
-	editmenu->setItemEnabled(undonr,true);
-}*/
-
 void MainWindow::DoUndostepdone()
 {
-	m_Editmenu->setItemEnabled(m_Redonr, false);
-	m_Editmenu->setItemEnabled(m_Undonr, m_Handler3D->ReturnNrundo() > 0);
+	m_Redonr->setEnabled(false);
+	m_Undonr->setEnabled(m_Handler3D->ReturnNrundo() > 0);
 }
 
 void MainWindow::DoClearundo()
 {
 	m_Handler3D->ClearUndo();
-	m_Editmenu->setItemEnabled(m_Redonr, false);
-	m_Editmenu->setItemEnabled(m_Undonr, false);
+
+	m_Redonr->setEnabled(false);
+	m_Undonr->setEnabled(false);
 }
 
 void MainWindow::TabChanged(int idx)
@@ -6261,16 +6221,18 @@ void MainWindow::LoadAtlas(const QDir& path1)
 	{
 		m_MAtlasfilename.m_MAtlasfilename[i] = names1[i];
 		QFileInfo names1fi(names1[i]);
-		m_Atlasmenu->changeItem(m_MAtlasfilename.m_Atlasnr[i], names1fi.completeBaseName());
-		m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[i], true);
+		m_MAtlasfilename.m_Atlasnr[i]->setText(names1fi.completeBaseName());
+		m_MAtlasfilename.m_Atlasnr[i]->setVisible(true);
 	}
 	for (int i = m_MAtlasfilename.m_Nratlases; i < m_MAtlasfilename.maxnr; i++)
 	{
-		m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Atlasnr[i], false);
+		m_MAtlasfilename.m_Atlasnr[i]->setVisible(false);
 	}
 
 	if (!names1.empty())
-		m_Atlasmenu->setItemVisible(m_MAtlasfilename.m_Separatornr, true);
+	{
+		m_MAtlasfilename.m_Separator->setVisible(true);
+	}
 }
 
 void MainWindow::LoadLoadProj(const QString& path1)
@@ -6278,7 +6240,7 @@ void MainWindow::LoadLoadProj(const QString& path1)
 	unsigned short projcounter = 0;
 	FILE* fplatestproj = fopen(path1.ascii(), "r");
 	char c;
-	m_MLoadprojfilename.m_MFilename = path1;
+	m_MLoadprojfilename.m_CurrentFilename = path1;
 	while (fplatestproj != nullptr && projcounter < 4)
 	{
 		projcounter++;
@@ -6296,89 +6258,23 @@ void MainWindow::LoadLoadProj(const QString& path1)
 
 void MainWindow::AddLoadProj(const QString& path1)
 {
-	if (m_MLoadprojfilename.m_MLoadprojfilename1 != path1 &&
-			m_MLoadprojfilename.m_MLoadprojfilename2 != path1 &&
-			m_MLoadprojfilename.m_MLoadprojfilename3 != path1 &&
-			m_MLoadprojfilename.m_MLoadprojfilename4 != path1)
+	m_MLoadprojfilename.InsertProjectFileName(path1);
+	
+	for (int i = 0; i < 4; ++i)
 	{
-		m_MLoadprojfilename.m_MLoadprojfilename4 =
-				m_MLoadprojfilename.m_MLoadprojfilename3;
-		m_MLoadprojfilename.m_MLoadprojfilename3 =
-				m_MLoadprojfilename.m_MLoadprojfilename2;
-		m_MLoadprojfilename.m_MLoadprojfilename2 =
-				m_MLoadprojfilename.m_MLoadprojfilename1;
-		m_MLoadprojfilename.m_MLoadprojfilename1 = path1;
-	}
-	else
-	{
-		if (m_MLoadprojfilename.m_MLoadprojfilename2 == path1)
+		if (m_MLoadprojfilename.m_RecentProjectFileNames[i] != "")
 		{
-			QString dummy = m_MLoadprojfilename.m_MLoadprojfilename2;
-			m_MLoadprojfilename.m_MLoadprojfilename2 =
-					m_MLoadprojfilename.m_MLoadprojfilename1;
-			m_MLoadprojfilename.m_MLoadprojfilename1 = dummy;
-		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename3 == path1)
-		{
-			QString dummy = m_MLoadprojfilename.m_MLoadprojfilename3;
-			m_MLoadprojfilename.m_MLoadprojfilename3 =
-					m_MLoadprojfilename.m_MLoadprojfilename1;
-			m_MLoadprojfilename.m_MLoadprojfilename1 = dummy;
-		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename4 == path1)
-		{
-			QString dummy = m_MLoadprojfilename.m_MLoadprojfilename4;
-			m_MLoadprojfilename.m_MLoadprojfilename4 =
-					m_MLoadprojfilename.m_MLoadprojfilename1;
-			m_MLoadprojfilename.m_MLoadprojfilename1 = dummy;
+			const int pos = m_MLoadprojfilename.m_RecentProjectFileNames[i].findRev('/', -2);
+			if (pos != -1 && (int)m_MLoadprojfilename.m_RecentProjectFileNames[i].length() > pos + 1)
+			{
+				QString recent_filename = m_MLoadprojfilename.m_RecentProjectFileNames[i].right(m_MLoadprojfilename.m_RecentProjectFileNames[i].length() - pos - 1);
+				m_MLoadprojfilename.m_LoadRecentProjects[i]->setText(recent_filename);
+				m_MLoadprojfilename.m_LoadRecentProjects[i]->setVisible(true);
+			}
 		}
 	}
 
-	if (m_MLoadprojfilename.m_MLoadprojfilename1 != "")
-	{
-		int pos = m_MLoadprojfilename.m_MLoadprojfilename1.findRev('/', -2);
-		if (pos != -1 &&
-				(int)m_MLoadprojfilename.m_MLoadprojfilename1.length() > pos + 1)
-		{
-			QString name1 = m_MLoadprojfilename.m_MLoadprojfilename1.right(m_MLoadprojfilename.m_MLoadprojfilename1.length() - pos - 1);
-			m_File->changeItem(m_MLoadprojfilename.m_Lpf1nr, name1);
-			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf1nr, true);
-		}
-	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename2 != "")
-	{
-		int pos = m_MLoadprojfilename.m_MLoadprojfilename2.findRev('/', -2);
-		if (pos != -1 &&
-				(int)m_MLoadprojfilename.m_MLoadprojfilename2.length() > pos + 1)
-		{
-			QString name1 = m_MLoadprojfilename.m_MLoadprojfilename2.right(m_MLoadprojfilename.m_MLoadprojfilename2.length() - pos - 1);
-			m_File->changeItem(m_MLoadprojfilename.m_Lpf2nr, name1);
-			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf2nr, true);
-		}
-	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename3 != "")
-	{
-		int pos = m_MLoadprojfilename.m_MLoadprojfilename3.findRev('/', -2);
-		if (pos != -1 &&
-				(int)m_MLoadprojfilename.m_MLoadprojfilename3.length() > pos + 1)
-		{
-			QString name1 = m_MLoadprojfilename.m_MLoadprojfilename3.right(m_MLoadprojfilename.m_MLoadprojfilename3.length() - pos - 1);
-			m_File->changeItem(m_MLoadprojfilename.m_Lpf3nr, name1);
-			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf3nr, true);
-		}
-	}
-	if (m_MLoadprojfilename.m_MLoadprojfilename4 != "")
-	{
-		int pos = m_MLoadprojfilename.m_MLoadprojfilename4.findRev('/', -2);
-		if (pos != -1 &&
-				(int)m_MLoadprojfilename.m_MLoadprojfilename4.length() > pos + 1)
-		{
-			QString name1 = m_MLoadprojfilename.m_MLoadprojfilename4.right(m_MLoadprojfilename.m_MLoadprojfilename4.length() - pos - 1);
-			m_File->changeItem(m_MLoadprojfilename.m_Lpf4nr, name1);
-			m_File->setItemVisible(m_MLoadprojfilename.m_Lpf4nr, true);
-		}
-	}
-	m_File->setItemVisible(m_MLoadprojfilename.m_Separatornr, true);
+	m_MLoadprojfilename.m_Separator->setVisible(true);
 }
 
 void MainWindow::SaveLoadProj(const QString& latestprojpath) const
@@ -6388,21 +6284,21 @@ void MainWindow::SaveLoadProj(const QString& latestprojpath) const
 	FILE* fplatestproj = fopen(latestprojpath.ascii(), "w");
 	if (fplatestproj != nullptr)
 	{
-		if (m_MLoadprojfilename.m_MLoadprojfilename4 != "")
+		if (m_MLoadprojfilename.m_RecentProjectFileNames[3] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename4.ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[3].ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename3 != "")
+		if (m_MLoadprojfilename.m_RecentProjectFileNames[2] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename3.ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[2].ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename2 != "")
+		if (m_MLoadprojfilename.m_RecentProjectFileNames[1] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename2.ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[1].ascii());
 		}
-		if (m_MLoadprojfilename.m_MLoadprojfilename1 != "")
+		if (m_MLoadprojfilename.m_RecentProjectFileNames[0] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_MLoadprojfilename1.ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[0].ascii());
 		}
 
 		fclose(fplatestproj);

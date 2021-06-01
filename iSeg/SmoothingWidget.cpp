@@ -14,17 +14,17 @@
 #include "bmp_read_1.h"
 
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialog>
+#include <QLabel>
 #include <qlayout.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <QPushButton>
+#include <QRadioButton>
 #include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 #include <algorithm>
 

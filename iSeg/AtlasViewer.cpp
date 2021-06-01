@@ -16,15 +16,14 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QWheelEvent>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qwidget.h>
+#include <QApplication>
+#include <QColor>
+#include <QEvent>
+#include <QImage>
+#include <QLineEdit>
+#include <QPainter>
+#include <QPen>
+#include <QWidget>
 
 #include <algorithm>
 

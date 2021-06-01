@@ -17,8 +17,7 @@
 
 #include "Core/fillcontour.h"
 
-#include <qfiledialog.h>
-#include <qmessagebox.h>
+#include <QMessageBox>
 #include <qstring.h>
 #include <qstringlist.h>
 
@@ -114,7 +113,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	{
 		m_CbNames->insertItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
-	m_CbNames->setCurrentItem(m_Vectissuenrs[m_CbSolids->currentItem()]);
+	m_CbNames->setCurrentIndex(m_Vectissuenrs[m_CbSolids->currentItem()]);
 
 	m_Hbox4 = new Q3HBox(m_Vbox1);
 	m_PbOk = new QPushButton("OK", m_Hbox4);
@@ -145,7 +144,7 @@ void RadiotherapyStructureSetImporter::SolidChanged(int i)
 	m_SbPriority->setValue(m_Vecpriorities[i]);
 	m_CbNew->setChecked(m_Vecnew[i]);
 	m_LeName->setText(m_Vectissuenames[i].c_str());
-	m_CbNames->setCurrentItem(m_Vectissuenrs[i]);
+	m_CbNames->setCurrentIndex(m_Vectissuenrs[i]);
 	QObject_connect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
 	QObject_connect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
 	Updatevisibility();

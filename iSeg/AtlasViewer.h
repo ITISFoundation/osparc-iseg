@@ -15,8 +15,8 @@
 
 #include "Core/Pair.h"
 
-#include <qimage.h>
-#include <qwidget.h>
+#include <QImage>
+#include <QWidget>
 
 #include <vector>
 

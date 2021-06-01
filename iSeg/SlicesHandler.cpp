@@ -73,10 +73,10 @@
 
 #include <boost/format.hpp>
 
-#include <qdir.h>
-#include <qfileinfo.h>
-#include <qmessagebox.h>
-#include <qprogressdialog.h>
+#include <QDir>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QProgressDialog>
 
 #ifndef NO_OPENMP_SUPPORT
 #	include <omp.h>
@@ -1780,7 +1780,7 @@ FILE* SlicesHandler::SaveProject(const char* filename, const char* imageFileExte
 	image_file_name =
 			image_file_name.remove(after_dot, image_file_name.length() - after_dot) +
 			imageFileExtension;
-	SaveAllXdmf(QFileInfo(filename).dir().absFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
 
 	m_Startslice = startslice1;
 	m_Endslice = endslice1;
@@ -1795,7 +1795,7 @@ bool SlicesHandler::SaveCommunicationFile(const char* filename)
 	m_Startslice = 0;
 	m_Endslice = m_Nrslices;
 
-	SaveAllXdmf(QFileInfo(filename).dir().absFilePath(filename).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, true);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(filename).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, true);
 
 	m_Startslice = startslice1;
 	m_Endslice = endslice1;
@@ -1830,7 +1830,7 @@ FILE* SlicesHandler::SaveActiveSlices(const char* filename, const char* imageFil
 	image_file_name =
 			image_file_name.remove(after_dot, image_file_name.length() - after_dot) +
 			imageFileExtension;
-	SaveAllXdmf(QFileInfo(filename).dir().absFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
 
 	return fp;
 }
@@ -1917,7 +1917,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString
 	int after_dot = image_file_name.lastIndexOf('.') + 1;
 	image_file_name = image_file_name.remove(after_dot, image_file_name.length() - after_dot) + image_file_extension;
 
-	auto image_file_path = QFileInfo(savefilename).dir().absFilePath(image_file_name).toStdString();
+	auto image_file_path = QFileInfo(savefilename).dir().absoluteFilePath(image_file_name).toStdString();
 	if (!SaveMergeAllXdmf(image_file_path.c_str(), mergeFilenames, nrslices_total, this->m_Hdf5Compression))
 	{
 		return nullptr;
@@ -2042,7 +2042,7 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 
 		if (image_file_name.endsWith(".xmf", Qt::CaseInsensitive))
 		{
-			LoadAllXdmf(QFileInfo(filename).dir().absFilePath(image_file_name).toAscii().data());
+			LoadAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data());
 		}
 		else
 		{
@@ -2472,33 +2472,33 @@ bool SlicesHandler::SwapXY()
 	unsigned char mode1 = GetActivebmphandler()->ReturnMode(true);
 	unsigned char mode2 = GetActivebmphandler()->ReturnMode(false);
 
-	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 	if (SaveRawXySwapped(str1.ascii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 	if (SaveRawXySwapped(str1.ascii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 	if (SaveTissuesRawXySwapped(str1.ascii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
 			ok = false;
 		SetModeall(mode1, true);
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 		if (ReloadRawFloat(str1.ascii(), 0) != 1)
 			ok = false;
 		SetModeall(mode2, false);
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
@@ -2535,31 +2535,31 @@ bool SlicesHandler::SwapYZ()
 	nrslices = Height();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 	if (SaveRawYzSwapped(str1.ascii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 	if (SaveRawYzSwapped(str1.ascii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 	if (SaveTissuesRawYzSwapped(str1.ascii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 		if (ReloadRawFloat(str1.ascii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
@@ -2602,31 +2602,31 @@ bool SlicesHandler::SwapXZ()
 	//float thick = get_slicethickness();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 	if (SaveRawXzSwapped(str1.ascii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 	if (SaveRawXzSwapped(str1.ascii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 	if (SaveTissuesRawXzSwapped(str1.ascii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
 		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
 		if (ReloadRawFloat(str1.ascii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
 		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}

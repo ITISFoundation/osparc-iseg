@@ -15,30 +15,30 @@
 #include "Data/DataSelection.h"
 #include "Data/Point.h"
 
-#include <qdir.h>
-#include <qmainwindow.h>
-#include <qmenu.h>
+#include <QMainWindow>
+#include <QMenu>
+#include <QDir>
 
+class QAction;
+class QCheckBox;
+class QCloseEvent;
+class QDockWidget;
 class QLabel;
 class QTextEdit;
 class QLineEdit;
 class QMenuBar;
-class QWidget;
-class QVBoxLayout;
 class QHBoxLayout;
 class QPushButton;
-class QCheckBox;
+class QStackedWidget;
 class QSpinBox;
 class QSlider;
 class QTreeWidgetItem;
 class QSignalMapper;
-class QCloseEvent;
-class QDockWidget;
+class QVBoxLayout;
+class QWidget;
 
-class QStackedWidget;
 class QScrollBar;
 class Q3ScrollView;
-class QAction;
 
 class QLogTable;
 
@@ -89,7 +89,7 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget, const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
+	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget, const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
 	~MainWindow() override = default;
 
 	friend class Settings;
@@ -274,8 +274,8 @@ private:
 	SurfaceViewerWidget* m_SurfaceViewer;
 	VolumeViewerWidget* m_VV3D;
 	VolumeViewerWidget* m_VV3Dbmp;
-	int m_Undonr;
-	int m_Redonr;
+	QAction* m_Undonr;
+	QAction* m_Redonr;
 	QString m_MSaveprojfilename;
 	QString m_S4Lcommunicationfilename;
 	Project m_MLoadprojfilename;

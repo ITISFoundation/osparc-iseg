@@ -13,18 +13,18 @@
 #include "TransformWidget.h"
 
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialog>
+#include <QLabel>
 #include <qlayout.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
 #include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 

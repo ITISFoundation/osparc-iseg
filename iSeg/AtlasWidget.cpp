@@ -23,15 +23,14 @@
 #include <QScrollBar>
 #include <QSlider>
 #include <QWheelEvent>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qwidget.h>
+#include <QApplication>
+#include <QColor>
+#include <QEvent>
+#include <QImage>
+#include <QLineEdit>
+#include <QPainter>
+#include <QPen>
+#include <QWidget>
 
 namespace iseg {
 
@@ -63,9 +62,9 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, co
 	m_SlBrightness->setRange(0, 100);
 	m_SlBrightness->setValue(50);
 	m_LbContrast = new QLabel("C:", this);
-	m_LbContrast->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-contrast.png"))).pixmap());
+	m_LbContrast->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
 	m_LbBrightness = new QLabel("B:", this);
-	m_LbBrightness->setPixmap(QIcon(m_MPicpath.absFilePath(QString("icon-brightness.png"))).pixmap());
+	m_LbBrightness->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png"))).pixmap());
 	hbox1->addWidget(m_LbContrast);
 	hbox1->addWidget(m_SlContrast);
 	hbox1->addWidget(m_LbBrightness);

@@ -30,7 +30,7 @@ public:
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	std::string GetName() override { return std::string("Interpolate"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("interpolate.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("interpolate.png"))); }
 
 private:
 	void OnTissuenrChanged(int i) override;

@@ -11,9 +11,9 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qpushbutton.h>
-#include <qslider.h>
-#include <qspinbox.h>
+#include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
 
 namespace iseg {
 
@@ -31,7 +31,7 @@ public:
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	std::string GetName() override { return std::string("Watershed"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("watershed.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("watershed.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

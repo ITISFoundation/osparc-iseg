@@ -15,7 +15,6 @@
 #include "Interface/WidgetInterface.h"
 
 class QRadioButton;
-class QButtonGroup;
 class QSpinBox;
 class QCheckBox;
 class QLineEdit;
@@ -35,7 +34,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Morpho"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("morphology.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("morphology.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

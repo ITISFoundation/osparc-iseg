@@ -14,18 +14,18 @@
 #include "Interface/WidgetInterface.h"
 
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
+#include <QLineEdit>
 #include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
+#include <QPushButton>
+#include <QRadioButton>
 #include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QSlider>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 
@@ -44,7 +44,7 @@ public:
 
 	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Transform"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("transform.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("transform.png"))); }
 
 	void GetDataSelection(bool& source, bool& target, bool& tissues);
 

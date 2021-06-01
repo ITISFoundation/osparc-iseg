@@ -9,7 +9,10 @@
  */
 #pragma once
 
-#include <qdir.h>
+#include <QAction>
+#include <QDir>
+
+#include <array>
 
 namespace iseg {
 
@@ -20,8 +23,8 @@ public:
 	static const int maxnr = 20;
 	QString m_MAtlasfilename[maxnr];
 	QDir m_MAtlasdir;
-	int m_Atlasnr[maxnr];
-	int m_Separatornr;
+	std::array<QAction*, maxnr> m_Atlasnr{};
+	QAction* m_Separator;
 	int m_Nratlases;
 };
 

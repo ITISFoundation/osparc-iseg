@@ -32,7 +32,7 @@ public:
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 	std::string GetName() override { return std::string("Edge"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("edge.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("edge.png"))); }
 
 private:
 	void OnSlicenrChanged() override;

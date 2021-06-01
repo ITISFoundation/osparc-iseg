@@ -15,13 +15,6 @@
 
 namespace iseg {
 
-Project::Project()
-{
-	m_MLoadprojfilename1 = "";
-	m_MLoadprojfilename2 = "";
-	m_MLoadprojfilename3 = "";
-	m_MLoadprojfilename4 = "";
-	m_MFilename = "";
-}
+Project::Project() = default;
 
 } // namespace iseg

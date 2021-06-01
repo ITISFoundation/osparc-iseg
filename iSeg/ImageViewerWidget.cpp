@@ -22,21 +22,20 @@
 #include "Data/Point.h"
 
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
+#include <QColor>
 #include <QContextMenuEvent>
+#include <QEvent>
+#include <QImage>
+#include <QInputDialog>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPaintEvent>
+#include <QPainter>
+#include <QPen>
 #include <QWheelEvent>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qfiledialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpen.h>
 
 #include <algorithm>
 #include <cassert>
@@ -728,7 +727,7 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 		context_menu.addAction(m_Nexttargetslice);
 
 		// add to tissue
-		context_menu.insertSeparator();
+		context_menu.addSeparator();
 		context_menu.addAction(m_Addtissue);
 		context_menu.addAction(m_Subtissue);
 		context_menu.addAction(m_Addtissue3D);
@@ -737,7 +736,7 @@ void ImageViewerWidget::contextMenuEvent(QContextMenuEvent* event)
 	}
 
 	// marks
-	context_menu.insertSeparator();
+	context_menu.addSeparator();
 	context_menu.addAction(m_Addmark);
 	context_menu.addAction(m_Addlabel);
 	context_menu.addAction(m_Removemark);

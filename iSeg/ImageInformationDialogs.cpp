@@ -20,12 +20,12 @@
 #include <QFormLayout>
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qapplication.h>
-#include <qlabel.h>
+#include <QApplication>
+#include <QLabel>
 #include <qlayout.h>
-#include <qpushbutton.h>
+#include <QPushButton>
 #include <qstring.h>
-#include <qwidget.h>
+#include <QWidget>
 
 namespace iseg {
 

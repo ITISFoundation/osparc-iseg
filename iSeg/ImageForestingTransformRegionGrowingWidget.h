@@ -14,9 +14,9 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qslider.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QSlider>
 
 namespace iseg {
 
@@ -33,7 +33,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("IFT"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("iftrg.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("iftrg.png"))); }
 
 protected:
 	void OnTissuenrChanged(int i) override;

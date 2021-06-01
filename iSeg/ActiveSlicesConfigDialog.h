@@ -9,9 +9,9 @@
  */
 #pragma once
 
-#include <qdialog.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QDialog>
+#include <QPushButton>
+#include <QSpinBox>
 
 namespace iseg {
 

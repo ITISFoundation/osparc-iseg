@@ -59,7 +59,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	{
 		XdmfImageReader* reader = new XdmfImageReader();
 		QString image_filename = QFileInfo(*iter_filename).completeBaseName() + ".xmf";
-		reader->SetFileName(QFileInfo(*iter_filename).dir().absFilePath(image_filename).toAscii().data());
+		reader->SetFileName(QFileInfo(*iter_filename).dir().absoluteFilePath(image_filename).toAscii().data());
 		if (reader->ParseXML() == 0)
 		{
 			ISEG_ERROR_MSG("XdmfImageMerger::InternalWrite while parsing xmls");

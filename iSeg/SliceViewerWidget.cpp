@@ -19,15 +19,15 @@
 #include <Q3VBoxLayout>
 #include <QCloseEvent>
 #include <QPaintEvent>
-#include <qapplication.h>
-#include <qbuttongroup.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qradiobutton.h>
-#include <qwidget.h>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QColor>
+#include <QEvent>
+#include <QImage>
+#include <QPainter>
+#include <QPen>
+#include <QRadioButton>
+#include <QWidget>
 
 #include <algorithm>
 

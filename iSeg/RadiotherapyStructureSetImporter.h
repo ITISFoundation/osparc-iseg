@@ -17,15 +17,15 @@
 
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qcheckbox.h>
+#include <QCheckBox>
 #include <qcombobox.h>
-#include <qdialog.h>
-#include <qlabel.h>
+#include <QDialog>
+#include <QLabel>
 #include <qlayout.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QWidget>
 
 #include <vector>
 
