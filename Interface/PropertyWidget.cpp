@@ -55,6 +55,18 @@ auto toType(QString const& q)
 {
 	return toType(q, Type<T>{});
 }
+
+int CountProps(Property_cptr parent)
+{
+	int count = 1;
+
+	for (const auto& child : parent->Properties())
+	{
+		count += CountProps(child);
+	}
+	return count;
+}
+
 } // namespace
 
 class ItemDelegate : public QItemDelegate
@@ -121,9 +133,18 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* n
 	header()->setSectionsMovable(false);
 #endif
 
-	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-
 	SetProperty(prop);
+
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+}
+
+QSize PropertyWidget::minimumSizeHint() const
+{
+	auto sz = QTreeWidget::minimumSizeHint();
+	sz.setHeight(CountProps(m_Property) * (row_height+2));
+	return sz;
 }
 
 Property::ePropertyType PropertyWidget::ItemType(const QTreeWidgetItem* item) const
@@ -352,9 +373,9 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 		//combo->setFrame(true);
 		for (auto d : ptyped->Values())
 		{
-			combo->insertItem(QString::fromStdString(d.second), d.first);
+			combo->insertItem(d.first, QString::fromStdString(d.second));
 		}
-		combo->setCurrentItem(ptyped->Value());
+		combo->setCurrentIndex(ptyped->Value());
 		UpdateState(item, prop.shared_from_this());
 		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
 
@@ -362,7 +383,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyEnum*>(p.get());
-				combo->setCurrentItem(ptyped->Value());
+				combo->setCurrentIndex(ptyped->Value());
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{

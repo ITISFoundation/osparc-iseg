@@ -126,8 +126,6 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 
 	// ui widgets
 	m_VtkWidget = new QVTKWidget;
-	m_VtkWidget->setMinimumSize(400, 400);
-	m_VtkWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
 	auto property_view = new PropertyWidget(group);
 	property_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -419,6 +417,8 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	//
 	//iren->Start();
 	m_VtkWidget->GetRenderWindow()->Render();
+
+	resize(600, 600);
 }
 
 void VolumeViewerWidget::closeEvent(QCloseEvent* qce)

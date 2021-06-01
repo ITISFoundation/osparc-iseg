@@ -36,6 +36,8 @@ public:
 
 	void SetProperty(Property_ptr p);
 
+	QSize minimumSizeHint() const override;
+
 signals:
 	void OnPropertyEdited(Property_ptr);
 

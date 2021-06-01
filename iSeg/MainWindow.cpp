@@ -3940,7 +3940,7 @@ void MainWindow::Execute3Dvolumeviewertissue()
 	if (m_VV3D == nullptr)
 	{
 		m_VV3D = new VolumeViewerWidget(m_Handler3D, false, true, true, nullptr);
-		QObject_connect(m_VV3D, SIGNAL(Hasbeenclosed()), this, SLOT(VV3D_closed()));
+		QObject_connect(m_VV3D, SIGNAL(Hasbeenclosed()), this, SLOT(VV3DClosed()));
 	}
 
 	m_VV3D->show();
@@ -3958,7 +3958,7 @@ void MainWindow::Execute3Dvolumeviewerbmp()
 	if (m_VV3Dbmp == nullptr)
 	{
 		m_VV3Dbmp = new VolumeViewerWidget(m_Handler3D, true, true, true, nullptr);
-		QObject_connect(m_VV3Dbmp, SIGNAL(Hasbeenclosed()), this, SLOT(VV3Dbmp_closed()));
+		QObject_connect(m_VV3Dbmp, SIGNAL(Hasbeenclosed()), this, SLOT(VV3DbmpClosed()));
 	}
 
 	m_VV3Dbmp->show();
