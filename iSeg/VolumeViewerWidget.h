@@ -11,6 +11,8 @@
 
 #include "Core/Pair.h"
 
+#include "Data/Property.h"
+
 #include <QWidget>
 
 #include <vtkCommand.h>
@@ -18,12 +20,6 @@
 
 class QVTKWidget;
 class QVTKInteractor;
-class Q3VBox;
-class Q3HBox;
-class QSlider;
-class QLabel;
-class QCheckBox;
-class QPushButton;
 
 class vtkLookupTable;
 class vtkImplicitPlaneWidget;
@@ -54,39 +50,11 @@ class VolumeViewerWidget : public QWidget
 	Q_OBJECT
 public:
 	VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1 = true, bool raytraceortexturemap1 = true, bool shade1 = true, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~VolumeViewerWidget() override;
-	std::string m_Fnamei;
-	QVTKWidget* m_VtkWidget;
-	bool m_Bmportissue;
-	Q3VBox* m_Vbox1;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	QCheckBox* m_CbShade;
-	QCheckBox* m_CbRaytraceortexturemap;
-	QCheckBox* m_CbShowslices;
-	QCheckBox* m_CbShowslice1;
-	QCheckBox* m_CbShowslice2;
-	QCheckBox* m_CbShowvolume;
-	QSlider* m_SlContr;
-	QSlider* m_SlBright;
-	QSlider* m_SlTrans;
-	QLabel* m_LbContr;
-	QLabel* m_LbBright;
-	QLabel* m_LbTrans;
-	QPushButton* m_BtUpdate;
-
-public slots:
-	void TissueChanged();
-	void PixelsizeChanged(Pair p);
-	void ThicknessChanged(float thick);
-	void Reload();
+	~VolumeViewerWidget() override {}
 
 protected:
 	void closeEvent(QCloseEvent*) override;
-	void resizeEvent(QResizeEvent*) override;
 
-protected slots:
 	void ShadeChanged();
 	void RaytraceortexturemapChanged();
 	void ShowslicesChanged();
@@ -94,15 +62,36 @@ protected slots:
 	void ContrbrightChanged();
 	void TranspChanged();
 
+public slots:
+	void TissueChanged();
+	void PixelsizeChanged(Pair p);
+	void ThicknessChanged(float thick);
+	void Reload();
+
 signals:
 	void Hasbeenclosed();
 
 private:
+	QVTKWidget* m_VtkWidget;
+	bool m_Bmportissue;
+
+	std::shared_ptr<PropertyBool> m_CbShade;
+	std::shared_ptr<PropertyBool> m_CbRaytraceortexturemap;
+	std::shared_ptr<PropertyBool> m_CbShowslices;
+	std::shared_ptr<PropertyBool> m_CbShowslice1;
+	std::shared_ptr<PropertyBool> m_CbShowslice2;
+	std::shared_ptr<PropertyBool> m_CbShowvolume;
+
+	std::shared_ptr<PropertyReal> m_SlContr;
+	std::shared_ptr<PropertyReal> m_SlBright;
+	std::shared_ptr<PropertyReal> m_SlTrans;
+	std::shared_ptr<PropertyButton> m_BtUpdate;
+
 	SlicesHandler* m_Hand3D;
 	double m_Range[2];
+
 	vtkSmartPointer<vtkCutter> m_SliceCutterY, m_SliceCutterZ;
 	vtkSmartPointer<vtkPlane> m_SlicePlaneY, m_SlicePlaneZ;
-
 	vtkSmartPointer<QVTKInteractor> m_Iren;
 
 	vtkSmartPointer<vtkImageData> m_Input;
