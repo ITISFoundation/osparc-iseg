@@ -11,30 +11,33 @@ void Property::OnModified(eChangeType change)
 	{
 		me = shared_from_this();
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		ISEG_WARNING_MSG(e.what());
 	}
 
 	// signal change
-	if (me)
+	if (me && !m_BlockSignals)
 	{
 		onModified(me, change);
-	}
 
-	// recursively notify parents
-	auto p = Parent();
-	while (p)
-	{
-		p->OnChildModified(me, change);
-		p = p->Parent();
+		// recursively notify parents
+		auto p = Parent();
+		while (p)
+		{
+			p->OnChildModified(me, change);
+			p = p->Parent();
+		}
 	}
 }
 
 void Property::OnChildModified(Property_ptr child, eChangeType change) const
 {
 	// signal change
-	onChildModified(child, change);
+	if (!m_BlockSignals)
+	{
+		onChildModified(child, change);
+	}
 }
 
 void Property::SetDescription(const std::string& v)
@@ -251,6 +254,20 @@ std::string PropertyEnum::ItemToolTip(value_type index) const
 		return found->second;
 	}
 	return ToolTip();
+}
+
+BlockPropertySignal::BlockPropertySignal(Property_ptr p)
+		: m_Property(p)
+{
+	p->m_BlockSignals = true;
+}
+
+BlockPropertySignal::~BlockPropertySignal()
+{
+	if (auto p = m_Property.lock())
+	{
+		p->m_BlockSignals = false;
+	}
 }
 
 } // namespace iseg

@@ -80,6 +80,12 @@ BOOST_AUTO_TEST_CASE(Property_signals)
 	pb->SetVisible(false);
 	BOOST_CHECK_EQUAL(prop_value_changed.size(), 0);
 	BOOST_CHECK_EQUAL(prop_state_changed.size(), 1);
+	clear();
+
+	BlockPropertySignal block(pb);
+	pb->SetValue(!pb->Value());
+	BOOST_CHECK_EQUAL(prop_value_changed.size(), 0);
+	BOOST_CHECK_EQUAL(prop_state_changed.size(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

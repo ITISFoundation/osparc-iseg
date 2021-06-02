@@ -32,6 +32,7 @@ ISEG_DECL_CLASS_PTR(PropertyBool);
 ISEG_DECL_CLASS_PTR(PropertyEnum);
 ISEG_DECL_CLASS_PTR(PropertyButton);
 ISEG_DECL_CLASS_PTR(PropertyGroup);
+class BlockPropertySignal;
 
 class ISEG_DATA_API Property : public std::enable_shared_from_this<Property>
 {
@@ -115,6 +116,9 @@ protected:
 	Property_wptr m_Parent;
 	bool m_Enabled = true;
 	bool m_Visible = true;
+
+	friend class BlockPropertySignal;
+	bool m_BlockSignals = false;
 };
 
 template<class T>
@@ -346,6 +350,16 @@ public:
 
 protected:
 	PropertyGroup() = default;
+};
+
+class ISEG_DATA_API BlockPropertySignal
+{
+public:
+	BlockPropertySignal(Property_ptr p);
+	~BlockPropertySignal();
+
+private:
+	Property_wptr m_Property;
 };
 
 } // namespace iseg
