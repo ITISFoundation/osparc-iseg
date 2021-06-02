@@ -38,20 +38,15 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
 
 	m_Sourcegroup = group->Add("Input", PropertyEnum::Create({"Selected Tissue", "All Tissues", "Target"}, 0));
 	m_Sourcegroup->SetDescription("Input Image");
-	m_Sourcegroup->SetToolTip(
-			"Selected Tissue: Interpolate currently selected tissue."
-			"<br>"
-			"All Tissues: Interpolate all tissue at once (not available for extrapolation)."
-			"<br>"
-			"Target: Interpolat Target image");
+	m_Sourcegroup->SetItemToolTip(kTissue, "Interpolate currently selected tissue.");
+	m_Sourcegroup->SetItemToolTip(kTissueAll, "Interpolate all tissue at once (not available for extrapolation).");
+	m_Sourcegroup->SetItemToolTip(kWork, "Interpolat Target image.");
 
 	auto extrapol_group = PropertyGroup::Create("Extrapolation Settings");
 
 	m_SbSlicenr = group->Add("TargetSlice", PropertyInt::Create(1, 1, m_Nrslices));
 	m_SbSlicenr->SetDescription("Target Slice");
-	m_SbSlicenr->SetToolTip(
-			"Set the slice index where the Tissue/Target "
-			"distribution will be extrapolated.");
+	m_SbSlicenr->SetToolTip("Set the slice index where the Tissue/Target distribution will be extrapolated.");
 
 	auto batch_group = PropertyGroup::Create("Batch Settings");
 
@@ -79,7 +74,9 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
 			"[1] S. Beucher. Sets, partitions and functions interpolations. 1998.<br>"
 			"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of multidimensional objects. 1990.");
 
-	m_Connectivitygroup = group->Add("Connectivity", PropertyEnum::Create({"4-connectivity", "8-connectivity"}, 1));
+	m_Connectivitygroup = group->Add("Connectivity", PropertyEnum::Create({"City-Block", "Chess"}, 1));
+	m_Connectivitygroup->SetItemToolTip(kCityBlock, "Connectivity includes face neighbors");
+	m_Connectivitygroup->SetItemToolTip(kCityBlock, "Connectivity includes vertex neighbors");
 
 	m_CbBrush = group->Add("EnableBrush", PropertyBool::Create(false));
 	m_CbBrush->SetDescription("Enable Brush");
@@ -117,7 +114,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
 			BrushChanged();
 	});
 
-	m_SourceConnection = m_Sourcegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+	m_Sourcegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
 		if (type == Property::kValueChanged)
 			SourceChanged();
 	});
@@ -134,7 +131,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
 		if (type == Property::kValueChanged)
 			MethodChanged();
 	});
-	m_ModeConnection = m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+	m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
 		if (type == Property::kValueChanged)
 			MethodChanged();
 	});
@@ -246,7 +243,7 @@ void InterpolationWidget::Execute()
 {
 	const auto batchstride = static_cast<unsigned short>(m_SbBatchstride->Value());
 	const bool connected = m_CbConnectedshapebased->Visible() && m_CbConnectedshapebased->Value();
-	const bool chess_connectivity = (m_Connectivitygroup->Value() == eConnectivityType::k8Connectivity);
+	const bool chess_connectivity = (m_Connectivitygroup->Value() == eConnectivityType::kChess);
 
 	unsigned short current = m_Handler3D->ActiveSlice();
 	if (current != m_Startnr)
@@ -482,9 +479,9 @@ FILE* InterpolationWidget::SaveParams(FILE* fp, int version)
 			{
 				dummy = (int)(m_CbMedianset->Value());
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::k4Connectivity);
+				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::kCityBlock);
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::k8Connectivity);
+				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::kChess);
 				fwrite(&(dummy), 1, sizeof(int), fp);
 			}
 		}
@@ -522,12 +519,12 @@ FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 		}
 
 		{
-			boost::signals2::shared_connection_block mode_block(m_ModeConnection);
-			boost::signals2::shared_connection_block source_block(m_SourceConnection);
+			BlockPropertySignal mode_block(m_Modegroup);
+			BlockPropertySignal source_block(m_Sourcegroup);
 			m_SbSlicenr->SetValue(slicenr);
 			m_Sourcegroup->SetValue(source[kWork] ? kWork : (source[kTissue] ? kTissue : kTissueAll));
 			m_Modegroup->SetValue(mode[kInterpolation] ? kInterpolation : (mode[kExtrapolation] ? kExtrapolation : kBatchInterpolation));
-			m_Connectivitygroup->SetValue(cityblock ? k4Connectivity : k8Connectivity);
+			m_Connectivitygroup->SetValue(cityblock ? kCityBlock : kChess);
 		}
 
 		MethodChanged();

@@ -58,6 +58,9 @@ private:
 	template<typename TFunctor>
 	void VisitItems(QTreeWidgetItem* item, const TFunctor& functor);
 
+	template<typename TFunctor, typename TCombiner>
+	void VisitItems(QTreeWidgetItem* item, const TFunctor& functor, const TCombiner& combine, bool value);
+
 	Property::ePropertyType ItemType(const QTreeWidgetItem* item) const;
 
 	ItemDelegate* m_ItemDelegate;

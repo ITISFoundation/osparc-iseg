@@ -64,8 +64,8 @@ private:
 	std::shared_ptr<PropertyEnum> m_Modegroup;
 
 	enum eConnectivityType {
-		k4Connectivity = 0,
-		k8Connectivity
+		kCityBlock = 0,
+		kChess
 	};
 	std::shared_ptr<PropertyEnum> m_Connectivitygroup;
 
@@ -79,9 +79,6 @@ private:
 	unsigned short m_Startnr;
 	unsigned short m_Nrslices;
 	unsigned short m_Tissuenr;
-
-	boost::signals2::scoped_connection m_ModeConnection;
-	boost::signals2::scoped_connection m_SourceConnection;
 
 public slots:
 	void Handler3DChanged();

@@ -74,6 +74,9 @@ public:
 	bool Visible() const { return m_Visible; }
 	void SetVisible(bool v);
 
+	bool NetEnabled() const;
+	bool NetVisible() const;
+
 	const std::vector<Property_ptr>& Properties() const { return m_Properties; }
 
 	using change_signal_type = boost::signals2::signal<void(Property_ptr, eChangeType)>;

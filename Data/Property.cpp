@@ -76,6 +76,30 @@ void Property::SetVisible(bool v)
 	}
 }
 
+bool Property::NetEnabled() const
+{
+	bool enabled = Enabled();
+	auto p = Parent();
+	while (enabled && p)
+	{
+		enabled = enabled && p->Enabled();
+		p = p->Parent();
+	}
+	return enabled;
+}
+
+bool Property::NetVisible() const
+{
+	bool visible = Visible();
+	auto p = Parent();
+	while (visible && p)
+	{
+		visible = visible && p->Visible();
+		p = p->Parent();
+	}
+	return visible;
+}
+
 void Property::DumpTree() const
 {
 	DumpTree(this, 0);

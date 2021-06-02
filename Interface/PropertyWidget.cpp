@@ -200,6 +200,19 @@ void PropertyWidget::VisitItems(QTreeWidgetItem* item, const TFunctor& functor)
 	}
 }
 
+template<typename TFunctor, typename TCombiner>
+void PropertyWidget::VisitItems(QTreeWidgetItem* item, const TFunctor& functor, const TCombiner& combine, bool value)
+{
+	functor(item, value);
+
+	for (int i = 0; i < item->childCount(); ++i)
+	{
+		auto child = item->child(i);
+		bool child_value = combine(child, value);
+		VisitItems(child, functor, combine, child_value);
+	}
+}
+
 void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidgetItem* parent_item)
 {
 	if (parent_item)
@@ -430,11 +443,9 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 
 void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 {
-	const auto set_state = [this, visible=p->Visible(), enabled=p->Enabled()](QTreeWidgetItem* item) 
+	const auto set_enabled = [this](QTreeWidgetItem* item, bool enabled) 
 	{
-		// TODO BL: BUG!! if parent is visible, this will make child visible, even if its property is NOT
 		item->setDisabled(!enabled);
-		item->setHidden(!visible);
 
 		for (int col = 0; col < 2; ++col)
 		{
@@ -445,7 +456,37 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 		}
 	};
 
-	VisitItems(item, set_state);
+	const auto combine_enabled = [this](QTreeWidgetItem* item, bool v) {
+		if (auto p = m_ItemPropertyMap[item].lock())
+		{
+			return v && p->Enabled();
+		}
+		return v;
+	};
+
+	bool enabled = p->NetEnabled();
+	if (enabled == item->isDisabled())
+	{
+		VisitItems(item, set_enabled, combine_enabled, enabled);
+	}
+
+	const auto set_visible = [](QTreeWidgetItem* item, bool visible) {
+		item->setHidden(!visible);
+	};
+
+	const auto combine_visible = [this](QTreeWidgetItem* item, bool v) {
+		if (auto p = m_ItemPropertyMap[item].lock())
+		{
+			return v && p->Visible();
+		}
+		return v;
+	};
+
+	bool visible = p->NetVisible();
+	if (visible == item->isHidden())
+	{
+		VisitItems(item, set_visible, combine_visible, visible);
+	}
 }
 
 void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
