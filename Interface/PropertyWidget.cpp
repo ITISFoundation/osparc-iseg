@@ -370,16 +370,18 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 	case Property::kEnum: {
 		auto ptyped = static_cast<const PropertyEnum*>(&prop);
 		auto combo = new QComboBox(this);
-		//combo->setFrame(true);
 		for (auto d : ptyped->Values())
 		{
 			combo->insertItem(d.first, QString::fromStdString(d.second));
 		}
 		combo->setCurrentIndex(ptyped->Value());
 		UpdateState(item, prop.shared_from_this());
+		UpdateComboState(combo, ptyped);
+		UpdateComboToolTips(combo, ptyped);
+
 		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
 
-		Connect(prop.onModified, m_Lifespan, [combo, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop.onModified, m_Lifespan, [combo, item, ptyped, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyEnum*>(p.get());
@@ -388,23 +390,12 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			else if (type == Property::eChangeType::kStateChanged)
 			{
 				UpdateState(item, p);
-
-				auto ptyped = static_cast<const PropertyEnum*>(p.get());
-				auto model = qobject_cast<QStandardItemModel*>(combo->model());
-				if (ptyped->HasEnabledFlags() && model)
-				{
-					for (const auto& i : ptyped->Values())
-					{
-						if (auto item = model->item(i.first))
-						{
-							item->setEnabled(ptyped->Enabled(i.first));
-						}
-					}
-				}
+				UpdateComboState(combo, ptyped);
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
 				UpdateDescription(combo, p);
+				UpdateComboToolTips(combo, ptyped);
 			}
 		});
 		return combo;
@@ -458,6 +449,36 @@ void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
 {
 	// description/name ?
 	w->setToolTip(Format(p->ToolTip()));
+}
+
+void PropertyWidget::UpdateComboState(QComboBox* combo, const PropertyEnum* ptyped)
+{
+	auto model = qobject_cast<QStandardItemModel*>(combo->model());
+	if (ptyped->HasEnabledFlags() && model)
+	{
+		for (const auto& i : ptyped->Values())
+		{
+			if (auto combo_item = model->item(i.first))
+			{
+				combo_item->setEnabled(ptyped->Enabled(i.first));
+			}
+		}
+	}
+}
+
+void PropertyWidget::UpdateComboToolTips(QComboBox* combo, const PropertyEnum* ptyped)
+{
+	auto model = qobject_cast<QStandardItemModel*>(combo->model());
+	if (ptyped->HasItemToolTips())
+	{
+		for (const auto& i : ptyped->Values())
+		{
+			if (auto combo_item = model->item(i.first))
+			{
+				combo_item->setToolTip(QString::fromStdString(ptyped->ItemToolTip(i.first)));
+			}
+		}
+	}
 }
 
 void PropertyWidget::Edited()

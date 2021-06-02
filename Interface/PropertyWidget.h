@@ -21,6 +21,7 @@
 
 class QBoxLayout;
 class QFormLayout;
+class QComboBox;
 
 namespace iseg {
 
@@ -50,6 +51,9 @@ private:
 
 	void UpdateState(QTreeWidgetItem* item, Property_cptr p);
 	void UpdateDescription(QWidget* w, Property_cptr p);
+
+	void UpdateComboState(QComboBox* combo, const PropertyEnum* ptyped);
+	void UpdateComboToolTips(QComboBox* combo, const PropertyEnum* ptyped);
 
 	template<typename TFunctor>
 	void VisitItems(QTreeWidgetItem* item, const TFunctor& functor);

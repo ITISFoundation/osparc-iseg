@@ -26,6 +26,12 @@
 namespace iseg {
 
 ISEG_DECL_CLASS_PTR(Property);
+ISEG_DECL_CLASS_PTR(PropertyInt);
+ISEG_DECL_CLASS_PTR(PropertyReal);
+ISEG_DECL_CLASS_PTR(PropertyBool);
+ISEG_DECL_CLASS_PTR(PropertyEnum);
+ISEG_DECL_CLASS_PTR(PropertyButton);
+ISEG_DECL_CLASS_PTR(PropertyGroup);
 
 class ISEG_DATA_API Property : public std::enable_shared_from_this<Property>
 {
@@ -296,8 +302,15 @@ public:
 	void SetEnabled(value_type index, bool on);
 	bool Enabled(value_type index) const;
 
-	/// Check if any items have been enabled/disabled 
+	/// Check if any items have been enabled/disabled
 	bool HasEnabledFlags() const { return !m_Enabled.empty(); }
+
+	/// Item tooltip
+	void SetItemToolTip(value_type index, const std::string& v);
+	std::string ItemToolTip(value_type index) const;
+
+	/// Check if any items have tool tips
+	bool HasItemToolTips() const { return !m_ToolTips.empty(); }
 
 	/// Set alternative invalid value description
 	void SetInvalidDescription(const description_type& descr);
@@ -312,6 +325,8 @@ private:
 	value_type m_Value;
 	/// Enabled flag
 	std::map<value_type, bool> m_Enabled;
+	// Tooltips
+	std::map<value_type, std::string> m_ToolTips;
 	/// Invalid value description. Default: L"#Invalid"
 	description_type m_Invalid;
 };

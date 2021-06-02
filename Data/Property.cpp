@@ -178,6 +178,7 @@ const PropertyEnum::values_type& PropertyEnum::Values() const
 void PropertyEnum::ReplaceValues(values_type const& new_values)
 {
 	assert(m_Enabled.empty() && "m_Enabled flags may not be up-to-date");
+	assert(m_ToolTips.empty() && "m_ToolTips flags may not be up-to-date");
 	bool changed = false;
 	{
 		changed = !(new_values == m_Values);
@@ -230,6 +231,26 @@ bool PropertyEnum::Enabled(value_type index) const
 		return found->second;
 	}
 	return true;
+}
+
+void PropertyEnum::SetItemToolTip(value_type index, const std::string& v)
+{
+	const auto found = m_ToolTips.find(index);
+	if (found == m_ToolTips.end() || found->second != v)
+	{
+		m_ToolTips[index] = v;
+		OnModified(eChangeType::kDescriptionChanged);
+	}
+}
+
+std::string PropertyEnum::ItemToolTip(value_type index) const
+{
+	const auto found = m_ToolTips.find(index);
+	if (found != m_ToolTips.end())
+	{
+		return found->second;
+	}
+	return ToolTip();
 }
 
 } // namespace iseg
