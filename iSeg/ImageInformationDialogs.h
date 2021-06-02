@@ -16,7 +16,6 @@
 #include <q3vbox.h>
 #include <QDialog>
 #include <QLabel>
-#include <qlayout.h>
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>

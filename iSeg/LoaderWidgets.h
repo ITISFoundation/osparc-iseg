@@ -20,15 +20,14 @@
 #include <q3vbox.h>
 #include <QButtonGroup>
 #include <QCheckBox>
-#include <qcombobox.h>
+#include <QComboBox>
 #include <QDialog>
 #include <QLabel>
-#include <qlayout.h>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSpinBox>
-#include <qstringlist.h>
+#include <QStringList>
 #include <QWidget>
 
 #include <array>

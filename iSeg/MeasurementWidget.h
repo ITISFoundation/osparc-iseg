@@ -15,7 +15,7 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qcombobox.h>
+#include <QComboBox>
 #include <QRadioButton>
 
 class QStackedWidget;

@@ -22,9 +22,8 @@
 #include <q3vbox.h>
 #include <QApplication>
 #include <QLabel>
-#include <qlayout.h>
 #include <QPushButton>
-#include <qstring.h>
+#include <QString>
 #include <QWidget>
 
 namespace iseg {

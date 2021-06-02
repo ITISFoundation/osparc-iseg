@@ -17,11 +17,9 @@
 #include <QCheckBox>
 #include <QDialog>
 #include <QLabel>
-#include <qlayout.h>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <qsize.h>
 #include <QSlider>
 #include <QSpinBox>
 #include <QWidget>

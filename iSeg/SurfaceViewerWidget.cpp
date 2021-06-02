@@ -20,8 +20,10 @@
 #include "../Data/Color.h"
 
 #include <QAction>
+#include <QHBoxLayout>
 #include <QMenu>
 #include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <vtkBitArray.h>
 #include <vtkCellData.h>

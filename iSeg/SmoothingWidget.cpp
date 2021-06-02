@@ -18,10 +18,8 @@
 #include <QCheckBox>
 #include <QDialog>
 #include <QLabel>
-#include <qlayout.h>
 #include <QPushButton>
 #include <QRadioButton>
-#include <qsize.h>
 #include <QSlider>
 #include <QSpinBox>
 #include <QWidget>

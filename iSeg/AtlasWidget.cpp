@@ -16,21 +16,21 @@
 
 #include "Core/ProjectVersion.h"
 
-#include <QCloseEvent>
-#include <QContextMenuEvent>
-#include <QMouseEvent>
-#include <QPaintEvent>
-#include <QScrollBar>
-#include <QSlider>
-#include <QWheelEvent>
 #include <QApplication>
+#include <QCloseEvent>
 #include <QColor>
+#include <QContextMenuEvent>
 #include <QEvent>
 #include <QImage>
 #include <QLineEdit>
+#include <QMouseEvent>
+#include <QPaintEvent>
 #include <QPainter>
 #include <QPen>
-#include <QWidget>
+#include <QScrollBar>
+#include <QSlider>
+#include <QVBoxLayout>
+#include <QWheelEvent>
 
 namespace iseg {
 

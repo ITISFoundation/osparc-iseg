@@ -19,11 +19,9 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QLabel>
-#include <qlayout.h>
-#include <qpixmap.h>
+#include <QPixmap>
 #include <QPushButton>
 #include <QRadioButton>
-#include <qsize.h>
 #include <QSlider>
 #include <QSpinBox>
 #include <QWidget>

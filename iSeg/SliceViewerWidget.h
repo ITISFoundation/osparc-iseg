@@ -25,10 +25,8 @@
 #include <QDialog>
 #include <QEvent>
 #include <QImage>
-#include <qlayout.h>
-#include <qpoint.h>
 #include <QRadioButton>
-#include <qscrollbar.h>
+#include <QScrollBar>
 #include <QWidget>
 
 #include <vector>

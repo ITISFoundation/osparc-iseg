@@ -18,8 +18,8 @@
 #include "Core/fillcontour.h"
 
 #include <QMessageBox>
-#include <qstring.h>
-#include <qstringlist.h>
+#include <QString>
+#include <QStringList>
 
 namespace iseg {
 

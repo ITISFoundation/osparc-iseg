@@ -29,14 +29,13 @@
 #include <q3hbox.h>
 #include <q3vbox.h>
 #include <QButtonGroup>
-#include <qgridlayout.h>
-#include <qgroupbox.h>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
-#include <qlayout.h>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <qstring.h>
+#include <QString>
 
 #include <QMouseEvent>
 #include <QPainter>

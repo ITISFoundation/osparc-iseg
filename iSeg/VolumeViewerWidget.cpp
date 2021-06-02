@@ -18,7 +18,9 @@
 #include "Interface/PropertyWidget.h"
 #include "Interface/QtConnect.h"
 
+#include <QHBoxLayout>
 #include <QResizeEvent>
+#include <QVBoxLayout>
 
 #include <vtkActor.h>
 #include <vtkColorTransferFunction.h>

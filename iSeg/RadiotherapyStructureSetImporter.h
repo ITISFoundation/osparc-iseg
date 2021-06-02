@@ -18,10 +18,9 @@
 #include <q3hbox.h>
 #include <q3vbox.h>
 #include <QCheckBox>
-#include <qcombobox.h>
+#include <QComboBox>
 #include <QDialog>
 #include <QLabel>
-#include <qlayout.h>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>

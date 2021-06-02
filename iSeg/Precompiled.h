@@ -20,16 +20,14 @@
 #include <QDialog>
 #include <QImage>
 #include <QLabel>
-#include <qlayout.h>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPushButton>
 #include <QRadioButton>
-#include <qsize.h>
 #include <QSlider>
 #include <QSpinBox>
-#include <qstring.h>
+#include <QString>
 #include <QWidget>
 
 #include <algorithm>

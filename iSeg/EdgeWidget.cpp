@@ -29,6 +29,7 @@
 #include <vtkSmartPointer.h>
 
 #include <QFileDialog>
+#include <QVBoxLayout>
 
 namespace iseg {
 

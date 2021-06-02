@@ -17,14 +17,12 @@
 
 #include "Core/Pair.h"
 
-#include <q3vbox.h>
 #include <QApplication>
 #include <QCheckBox>
 #include <QDialog>
 #include <QFileDialog>
 #include <QImage>
 #include <QLabel>
-#include <qlayout.h>
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>

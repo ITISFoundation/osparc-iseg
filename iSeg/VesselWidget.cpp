@@ -19,6 +19,7 @@
 #include "Data/Vec3.h"
 
 #include <QFileDialog>
+#include <QHBoxLayout>
 
 #include <vector>
 

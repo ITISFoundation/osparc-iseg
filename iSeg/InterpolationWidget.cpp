@@ -16,6 +16,8 @@
 
 #include "Data/BrushInteraction.h"
 
+#include <QHBoxLayout>
+
 #include <algorithm>
 #include <array>
 

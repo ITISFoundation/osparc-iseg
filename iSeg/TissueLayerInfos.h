@@ -11,7 +11,7 @@
 
 #include "Data/Types.h"
 
-#include <qstring.h>
+#include <QString>
 
 #include <map>
 #include <set>
