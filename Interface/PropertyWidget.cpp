@@ -149,13 +149,15 @@ QSize PropertyWidget::minimumSizeHint() const
 
 Property::ePropertyType PropertyWidget::ItemType(const QTreeWidgetItem* item) const
 {
-	auto type = Property::kePropertyTypeSize;
-	auto found = m_ItemTypeMap.find(item);
-	if (found != m_ItemTypeMap.end())
+	auto found = m_ItemPropertyMap.find(item);
+	if (found != m_ItemPropertyMap.end())
 	{
-		type = found->second;
+		if (auto p = found->second.lock())
+		{
+			return p->Type();
+		}
 	}
-	return type;
+	return Property::kePropertyTypeSize;
 }
 
 void PropertyWidget::SetProperty(Property_ptr prop)
@@ -164,7 +166,7 @@ void PropertyWidget::SetProperty(Property_ptr prop)
 	{
 		m_Property = prop;
 		m_WidgetPropertyMap.clear();
-		m_ItemTypeMap.clear();
+		m_ItemPropertyMap.clear();
 
 		clear();
 
@@ -214,7 +216,7 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 	item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);
 	expandItem(item);
 
-	m_ItemTypeMap[item] = prop->Type();
+	m_ItemPropertyMap[item] = prop;
 
 	if (prop->Type() != Property::kGroup)
 	{
@@ -430,6 +432,7 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 {
 	const auto set_state = [this, visible=p->Visible(), enabled=p->Enabled()](QTreeWidgetItem* item) 
 	{
+		// TODO BL: BUG!! if parent is visible, this will make child visible, even if its property is NOT
 		item->setDisabled(!enabled);
 		item->setHidden(!visible);
 

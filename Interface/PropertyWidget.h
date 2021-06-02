@@ -62,7 +62,7 @@ private:
 
 	ItemDelegate* m_ItemDelegate;
 	Property_ptr m_Property;
-	std::map<const QTreeWidgetItem*, Property::ePropertyType> m_ItemTypeMap;
+	std::map<const QTreeWidgetItem*, Property_wptr> m_ItemPropertyMap;
 	std::map<QWidget*, Property_wptr> m_WidgetPropertyMap;
 	std::shared_ptr<char> m_Lifespan;
 };
