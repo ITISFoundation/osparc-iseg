@@ -71,8 +71,8 @@ using label_type = unsigned long;
 using label_object_type = itk::ShapeLabelObject<label_type, 2>;
 using label_map_type = itk::LabelMap<label_object_type>;
 
-AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Kalman filter based root tracer"));
 

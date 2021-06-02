@@ -37,7 +37,7 @@ class Bmptissuesliceshower : public QWidget
 {
 	Q_OBJECT
 public:
-	Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	void update();
 	void SetTissuevisible(bool on);
 	void SetZposvisible(bool on);
@@ -90,7 +90,7 @@ class SliceViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~SliceViewerWidget() override;
 	int GetSlicenr();
 

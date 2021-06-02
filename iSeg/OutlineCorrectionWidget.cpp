@@ -46,8 +46,8 @@ namespace iseg {
 
 std::map<QAbstractButton*, int> widget_page;
 
-OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+OutlineCorrectionWidget::OutlineCorrectionWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("OutLine Correction routines that can be used to modify "
 										"the result of a segmentation operation and to correct frequently "

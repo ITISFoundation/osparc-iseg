@@ -34,8 +34,8 @@ float f1(float dI, float k) { return std::exp(-std::pow(dI / k, 2)); }
 float f2(float dI, float k) { return 1 / (1 + std::pow(dI / k, 2)); }
 } // namespace
 
-SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+SmoothingWidget::SmoothingWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Smoothing and noise removal filters."));
 

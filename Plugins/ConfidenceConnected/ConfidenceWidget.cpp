@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <sstream>
 
-ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	m_Activeslice = m_Handler3D->ActiveSlice();
 

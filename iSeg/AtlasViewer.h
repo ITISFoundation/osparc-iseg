@@ -26,7 +26,7 @@ class AtlasViewer : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1, float dx1, float dy1, float dz1, std::vector<float>* r, std::vector<float>* g, std::vector<float>* b, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1, float dx1, float dy1, float dz1, std::vector<float>* r, std::vector<float>* g, std::vector<float>* b, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~AtlasViewer() override;
 	void Init();
 	void update();

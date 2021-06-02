@@ -89,7 +89,7 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode = false, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget, const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
+	MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode = false, const std::vector<std::string>& plugin_search_dirs = std::vector<std::string>());
 	~MainWindow() override = default;
 
 	friend class Settings;

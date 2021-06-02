@@ -38,10 +38,12 @@
 
 namespace iseg {
 
-ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, Qt::WindowFlags wFlags)
 		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
@@ -282,8 +284,8 @@ void ScaleWork::SliderReleased()
 	emit EndDatachange(this);
 }
 
-HistoWin::HistoWin(unsigned int* histo1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+HistoWin::HistoWin(unsigned int* histo1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
 	m_Histo = histo1;
 	m_Image.create(258, 258, 8);
@@ -334,15 +336,17 @@ void HistoWin::paintEvent(QPaintEvent* e)
 	}
 }
 
-ShowHisto::ShowHisto(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+ShowHisto::ShowHisto(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
 	m_Vbox1 = new Q3VBox(this);
 	m_Bmphand->MakeHistogram(true);
-	m_Histwindow = new HistoWin(m_Bmphand->ReturnHistogram(), m_Vbox1, name, wFlags);
+	m_Histwindow = new HistoWin(m_Bmphand->ReturnHistogram(), m_Vbox1, wFlags);
 	m_Histwindow->setFixedSize(258, 258);
 
 	m_Hbox1 = new Q3HBox(m_Vbox1);
@@ -487,8 +491,8 @@ void ShowHisto::Newloaded()
 	BmphandChanged(m_Handler3D->GetActivebmphandler());
 }
 
-Colorshower::Colorshower(int lx1, int ly1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+Colorshower::Colorshower(int lx1, int ly1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
 	m_Lx = lx1;
 	m_Ly = ly1;
@@ -523,9 +527,11 @@ void Colorshower::paintEvent(QPaintEvent* e)
 	painter.fillRect(m_Lx / 4, m_Ly / 4, m_Lx / 2, m_Ly / 2, color);
 }
 
-TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_TissueTreeWidget(tissueTree)
+TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_TissueTreeWidget(tissueTree)
 {
+	setModal(true);
+
 	m_Modify = modifyTissue;
 
 	m_Vbox1 = new Q3VBoxLayout(this);
@@ -811,9 +817,11 @@ void TissueAdder::AddPressed()
 
 	}
 
-TissueFolderAdder::TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_TissueTreeWidget(tissueTree)
+TissueFolderAdder::TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_TissueTreeWidget(tissueTree)
 {
+	setModal(true);
+
 	setFixedWidth(235);
 	setFixedHeight(161);
 
@@ -1055,8 +1063,8 @@ void TissueHierarchyWidget::RemoveHierarchyPressed()
 	m_TissueTreeWidget->RemoveCurrentHierarchy();
 }
 
-BitsStack::BitsStack(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
+BitsStack::BitsStack(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
 	m_BitsNames = new QListWidget(this);
 	m_Hbox1 = new Q3HBoxLayout(this);
@@ -1146,8 +1154,7 @@ void BitsStack::PushHelper(bool source, bool target, bool tissue)
 	data_selection.tissues = tissue;
 	emit BeginDataexport(data_selection, this);
 
-	BitsStackPushdialog pushdialog(this, QString("Copy ") + data_name +
-																					 QString("..."));
+	BitsStackPushdialog pushdialog(this);
 	if (pushdialog.exec() == QDialog::Rejected)
 	{
 		emit EndDataexport(this);
@@ -1546,8 +1553,8 @@ FILE* BitsStack::LoadProj(FILE* fp)
 	return fp;
 }
 
-ExtoverlayWidget::ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
+ExtoverlayWidget::ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
@@ -1764,9 +1771,11 @@ void ExtoverlayWidget::TargetToggled()
 	emit WorkoverlayvisibleChanged(isset);
 }
 
-BitsStackPushdialog::BitsStackPushdialog(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, false, wFlags)
+BitsStackPushdialog::BitsStackPushdialog(QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags)
 {
+	setModal(false);
+
 	m_Vboxoverall = new Q3VBox(this);
 	m_Hboxparams = new Q3HBox(m_Vboxoverall);
 	m_Vboxsliceselection = new Q3VBox(m_Hboxparams);
@@ -1776,10 +1785,8 @@ BitsStackPushdialog::BitsStackPushdialog(QWidget* parent, const char* name, Qt::
 	m_Vboxslicerangelineedits = new Q3VBox(m_Hboxslicerange);
 	m_Hboxpushbuttons = new Q3HBox(m_Vboxoverall);
 
-	m_RbCurrentslice =
-			new QRadioButton(QString("Current slice"), m_Vboxsliceselection);
-	m_RbMultislices =
-			new QRadioButton(QString("Slice range"), m_Vboxsliceselection);
+	m_RbCurrentslice = new QRadioButton(QString("Current slice"), m_Vboxsliceselection);
+	m_RbMultislices = new QRadioButton(QString("Slice range"), m_Vboxsliceselection);
 	m_Slicegroup = new QButtonGroup(this);
 	m_Slicegroup->insert(m_RbCurrentslice);
 	m_Slicegroup->insert(m_RbMultislices);
@@ -1844,8 +1851,8 @@ void BitsStackPushdialog::SliceselectionChanged()
 
 //xxxxxxxxxxxxxxxxxxxxxx histo xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
 	m_Zoom = zoom1;
 	m_Vbox1 = new Q3VBoxLayout(this);
@@ -1957,10 +1964,11 @@ QSize QHBoxLayout_fixedheight::maximumSize() const
 
 //--------------------------------------------------
 
-ImageMath::ImageMath(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+ImageMath::ImageMath(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
@@ -2194,10 +2202,11 @@ void ImageMath::ValueChanged()
 
 //--------------------------------------------------
 
-ImageOverlay::ImageOverlay(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+ImageOverlay::ImageOverlay(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 	m_BkpWork = (float*)malloc(sizeof(float) * m_Bmphand->ReturnArea());
@@ -2380,7 +2389,7 @@ void ImageOverlay::SliderChanged(int newval)
 	emit EndDatachange(this, iseg::NoUndo);
 }
 
-CleanerParams::CleanerParams(int* rate1, int* minsize1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+CleanerParams::CleanerParams(int* rate1, int* minsize1, QWidget* parent, Qt::WindowFlags wFlags)
 {
 	m_Rate = rate1;
 	m_Minsize = minsize1;
@@ -2420,9 +2429,11 @@ void CleanerParams::DontdoitPressed()
 	close();
 }
 
-MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags)
 {
+	setModal(true);
+
 	m_HboxOverall = new Q3HBoxLayout(this);
 	m_VboxFileList = new Q3VBoxLayout(this);
 	m_VboxButtons = new Q3VBoxLayout(this);
@@ -2466,6 +2477,8 @@ MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, const char* name, Qt::
 	QObject_connect(m_MoveDownButton, SIGNAL(clicked()), this, SLOT(MoveDownPressed()));
 	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(accept()));
 	QObject_connect(m_CancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+
+	setWindowTitle("Merge Projects");
 }
 
 MergeProjectsDialog::~MergeProjectsDialog() { delete m_HboxOverall; }
@@ -2532,7 +2545,7 @@ void MergeProjectsDialog::GetFilenames(std::vector<QString>& filenames)
 }
 
 CheckBoneConnectivityDialog::CheckBoneConnectivityDialog(SlicesHandler* hand3D, const char* name, QWidget* parent /*=0*/, Qt::WindowFlags wFlags /*=0*/)
-		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
 	m_MainBox = new Q3HBox(this);
 	m_Vbox1 = new Q3VBox(m_MainBox);

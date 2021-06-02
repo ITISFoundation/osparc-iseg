@@ -75,9 +75,11 @@ bool orthonormalize(float* vecA, float* vecB)
 }
 } // namespace
 
-PixelResize::PixelResize(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+PixelResize::PixelResize(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	auto dx = m_Handler3D->Spacing();
 
 	m_LeDx = new QLineEdit(QString::number(dx[0]));
@@ -187,9 +189,11 @@ Vec3 PixelResize::GetPixelsize()
 	return dx;
 }
 
-DisplacementDialog::DisplacementDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+DisplacementDialog::DisplacementDialog(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Handler3D->GetDisplacement(m_Displacement);
 	m_LeDispx = new QLineEdit(QString::number(m_Displacement[0]));
 	m_LeDispx->setValidator(new QDoubleValidator);
@@ -257,9 +261,11 @@ void DisplacementDialog::ReturnDisplacement(float disp[3])
 	disp[2] = m_Displacement[2];
 }
 
-RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Handler3D->ImageTransform().GetRotation(m_Rotation);
 
 	m_Vbox1 = new Q3VBox(this);
@@ -399,9 +405,11 @@ void RotationDialog::GetRotation(float r[3][3])
 	}
 }
 
-ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D), m_Resizetype(type1)
+ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_Resizetype(type1)
 {
+	setModal(true);
+
 	m_MainBox = new Q3HBox(this);
 	m_Vbox1 = new Q3VBox(m_MainBox);
 	m_Hbox1 = new Q3HBox(m_Vbox1);

@@ -21,9 +21,11 @@
 
 namespace iseg {
 
-UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+UndoConfigurationDialog::UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	auto layout = new QFormLayout;
 
 	m_CbUndo3D = new QCheckBox;

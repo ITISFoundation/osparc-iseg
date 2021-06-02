@@ -25,8 +25,8 @@
 
 namespace iseg {
 
-LivewireWidget::LivewireWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+LivewireWidget::LivewireWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Use the Auto Trace to follow ideal contour path or draw "
 										"contours around a tissue to segment it."));

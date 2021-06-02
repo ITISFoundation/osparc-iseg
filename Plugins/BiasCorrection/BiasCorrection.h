@@ -26,7 +26,7 @@ class BiasCorrectionWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D);
 	~BiasCorrectionWidget() override;
 
 	void Init() override;

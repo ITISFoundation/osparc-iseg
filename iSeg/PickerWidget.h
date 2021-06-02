@@ -23,7 +23,7 @@ class PickerWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	PickerWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	PickerWidget(SlicesHandler* hand3D);
 	~PickerWidget() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;

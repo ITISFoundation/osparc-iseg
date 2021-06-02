@@ -27,8 +27,8 @@
 
 namespace iseg {
 
-ThresholdWidgetQt4::ThresholdWidgetQt4(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+ThresholdWidgetQt4::ThresholdWidgetQt4(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	initUi();
 	updateUi();

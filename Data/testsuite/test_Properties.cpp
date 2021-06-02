@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(Property_signals)
 	child_group->SetDescription("Advanced Settings");
 	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
 	auto pb = child_group->Add("Enable", PropertyBool::Create(true));
-	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
+	auto pbtn0 = child_group->Add("Update", PropertyButton::Create([]() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
 	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
 

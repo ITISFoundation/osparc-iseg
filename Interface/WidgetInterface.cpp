@@ -15,8 +15,8 @@ namespace iseg {
 
 bool WidgetInterface::hideparams = false;
 
-WidgetInterface::WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+WidgetInterface::WidgetInterface(QWidget* parent)
+		: QWidget(parent)
 {
 	m_MCursor = new QCursor(Qt::CrossCursor);
 }

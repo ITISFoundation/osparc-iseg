@@ -38,7 +38,7 @@ class HystereticGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	HystereticGrowingWidget(SlicesHandler* hand3D);
 	~HystereticGrowingWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

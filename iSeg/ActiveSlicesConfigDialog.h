@@ -21,7 +21,7 @@ class ActiveSlicesConfigDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 private:
 	SlicesHandler* m_Handler3D;

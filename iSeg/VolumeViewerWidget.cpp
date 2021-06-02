@@ -43,8 +43,8 @@
 
 namespace iseg {
 
-VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1, bool gpu_or_raycast, bool shade1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Bmportissue(bmportissue1), m_Hand3D(hand3D1)
+VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1, bool gpu_or_raycast, bool shade1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Bmportissue(bmportissue1), m_Hand3D(hand3D1)
 {
 	// properties
 	auto group = PropertyGroup::Create("Volume Viewer Settings");
@@ -69,7 +69,7 @@ VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1
 	m_SlBright = group->Add("Level", PropertyReal::Create(50, 0, 100));
 	m_SlTrans = group->Add("Transparency", PropertyReal::Create(50, 0, 100));
 
-	m_BtUpdate = group->Add("Update", PropertyButton::Create("Update", [this]() { Reload(); }));
+	m_BtUpdate = group->Add("Update", PropertyButton::Create([this]() { Reload(); }));
 
 	m_SlContr->SetVisible(m_Bmportissue);
 	m_SlBright->SetVisible(m_Bmportissue);

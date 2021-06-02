@@ -27,8 +27,8 @@
 
 namespace iseg {
 
-MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Handler3D(hand3D)
+MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
 	m_HboxOverall = new Q3HBoxLayout(this);
 	m_VboxOverall = new Q3VBoxLayout();
@@ -448,7 +448,7 @@ void MultiDatasetWidget::ChangeDatasetName()
 	{
 		if (radio_button.m_RadioButton->isChecked())
 		{
-			EditText edit_text_dlg(this->parentWidget(), "", this->windowFlags());
+			EditText edit_text_dlg(this->parentWidget(), this->windowFlags());
 			edit_text_dlg.SetEditableText(radio_button.m_RadioButton->text());
 			if (edit_text_dlg.exec())
 			{

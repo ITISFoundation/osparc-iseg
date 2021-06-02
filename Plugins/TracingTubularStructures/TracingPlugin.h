@@ -23,7 +23,7 @@ public:
 
 	std::string Description() const override { return "Tracing Plugin"; }
 
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 
 class AutoTracingPlugin : public Plugin
@@ -36,7 +36,7 @@ public:
 
 	std::string Description() const override { return "AutoTracing Plugin"; }
 
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 
 }} // namespace iseg::plugin

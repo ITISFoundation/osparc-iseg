@@ -29,7 +29,7 @@ class ImageViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	ImageViewerWidget(QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ImageViewerWidget(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ImageViewerWidget() override;
 	void Init(SlicesHandler* hand3D, bool bmporwork);
 	void update();

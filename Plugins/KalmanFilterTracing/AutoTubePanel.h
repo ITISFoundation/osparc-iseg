@@ -66,7 +66,7 @@ class AutoTubePanel : public iseg::WidgetInterface
 
 	Q_OBJECT
 public:
-	AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	AutoTubePanel(iseg::SlicesHandlerInterface* hand3D);
 	~AutoTubePanel() override = default;
 
 	void Init() override;

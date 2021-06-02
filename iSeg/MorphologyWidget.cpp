@@ -26,8 +26,8 @@
 
 namespace iseg {
 
-MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Apply morphological operations to the Target image. "
 										"Morphological operations are "

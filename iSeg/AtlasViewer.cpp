@@ -29,8 +29,8 @@
 
 namespace iseg {
 
-AtlasViewer::AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1, float dx1, float dy1, float dz1, std::vector<float>* r, std::vector<float>* g, std::vector<float>* b, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+AtlasViewer::AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1, float dx1, float dy1, float dz1, std::vector<float>* r, std::vector<float>* g, std::vector<float>* b, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
 	setCursor(Qt::CrossCursor);
 	m_Scalefactor = 1.0f;

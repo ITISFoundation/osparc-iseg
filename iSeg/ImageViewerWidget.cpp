@@ -45,8 +45,8 @@
 
 namespace iseg {
 
-ImageViewerWidget::ImageViewerWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags) //,showvp(false)
+ImageViewerWidget::ImageViewerWidget(QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags) //,showvp(false)
 {
 	m_Brightness = m_Scaleoffset = 0.0f;
 	m_Contrast = m_Scalefactor = 1.0f;

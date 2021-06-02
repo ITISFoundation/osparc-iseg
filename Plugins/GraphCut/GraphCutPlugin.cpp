@@ -28,9 +28,9 @@ std::string GCBoneSegmentationPlugin::Description() const
 	return "Automatic bone segmentation in CT images using graph-cut method.";
 }
 
-WidgetInterface* GCBoneSegmentationPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+WidgetInterface* GCBoneSegmentationPlugin::CreateWidget() const
 {
-	return new BoneSegmentationWidget(SliceHandler(), parent, name, wFlags);
+	return new BoneSegmentationWidget(SliceHandler());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -43,9 +43,9 @@ std::string GCTissueSeparatorPlugin::Description() const
 	return "Separate tissue using only minor user-input.";
 }
 
-WidgetInterface* GCTissueSeparatorPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+WidgetInterface* GCTissueSeparatorPlugin::CreateWidget() const
 {
-	return new TissueSeparatorWidget(SliceHandler(), parent, name, wFlags);
+	return new TissueSeparatorWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

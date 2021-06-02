@@ -17,8 +17,8 @@ namespace {
 PanelAutoTracingPlugin register_addon3;
 } // namespace
 
-iseg::WidgetInterface* PanelAutoTracingPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+iseg::WidgetInterface* PanelAutoTracingPlugin::CreateWidget() const
 {
-	return new AutoTubePanel(SliceHandler(), parent, name, wFlags);
+	return new AutoTubePanel(SliceHandler());
 }
 }} // namespace iseg::plugin

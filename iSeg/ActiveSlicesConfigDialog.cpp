@@ -18,9 +18,11 @@
 
 namespace iseg {
 
-ActiveSlicesConfigDialog::ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+ActiveSlicesConfigDialog::ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_SbStart = new QSpinBox(1, (int)m_Handler3D->NumSlices(), 1, nullptr);
 	m_SbStart->setValue((int)m_Handler3D->StartSlice() + 1);
 

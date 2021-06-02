@@ -99,7 +99,7 @@ public:
 	}
 };
 
-PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
+PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFlags wFlags)
 		: QTreeWidget(parent), m_ItemDelegate(new ItemDelegate), m_Lifespan(std::make_shared<char>('1'))
 {
 	setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -411,7 +411,8 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 	}
 	case Property::kButton: {
 		auto p = dynamic_cast<PropertyButton*>(&prop);
-		auto button = new QPushButton(QString::fromStdString(p->ButtonText()), this);
+		const auto button_text = p->ButtonText().empty() ? prop.Name() : p->ButtonText();
+		auto button = new QPushButton(QString::fromStdString(button_text), this);
 		button->setAutoDefault(false);
 		UpdateState(item, prop.shared_from_this());
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));

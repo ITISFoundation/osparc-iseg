@@ -108,9 +108,9 @@ std::shared_ptr<PropertyString> PropertyString::Create(value_type value)
 	return std::shared_ptr<PropertyString>(new PropertyString(value));
 }
 
-std::shared_ptr<PropertyButton> PropertyButton::Create(const std::string& txt, value_type value)
+std::shared_ptr<PropertyButton> PropertyButton::Create(value_type value, const std::string& txt)
 {
-	return std::shared_ptr<PropertyButton>(new PropertyButton(txt, value));
+	return std::shared_ptr<PropertyButton>(new PropertyButton(value, txt));
 }
 
 std::shared_ptr<PropertyGroup> PropertyGroup::Create(const std::string& description)

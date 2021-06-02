@@ -236,7 +236,7 @@ class ISEG_DATA_API PropertyButton : public Property
 public:
 	using value_type = std::function<void()>;
 
-	static std::shared_ptr<PropertyButton> Create(const std::string& txt, value_type value);
+	static std::shared_ptr<PropertyButton> Create(value_type value, const std::string& txt="");
 
 	const value_type& Value() const { return m_Value; }
 	void SetValue(value_type v)
@@ -251,7 +251,7 @@ public:
 	ePropertyType Type() const override { return ePropertyType::kButton; }
 
 protected:
-	PropertyButton(const std::string& txt, value_type value) : m_ButtonText(txt), m_Value(value) {}
+	PropertyButton(value_type value, const std::string& txt) : m_Value(value), m_ButtonText(txt) {}
 
 private:
 	std::string m_ButtonText;

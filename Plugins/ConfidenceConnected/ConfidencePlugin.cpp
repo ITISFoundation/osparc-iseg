@@ -21,9 +21,9 @@ ConfidencePlugin::ConfidencePlugin() = default;
 
 ConfidencePlugin::~ConfidencePlugin() = default;
 
-WidgetInterface* ConfidencePlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+WidgetInterface* ConfidencePlugin::CreateWidget() const
 {
-	return new ConfidenceWidget(SliceHandler(), parent, name, wFlags);
+	return new ConfidenceWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

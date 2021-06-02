@@ -30,7 +30,7 @@ class PixelResize : public QDialog
 {
 	Q_OBJECT
 public:
-	PixelResize(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	PixelResize(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~PixelResize() override = default;
 	Vec3 GetPixelsize();
 
@@ -61,7 +61,7 @@ class DisplacementDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	DisplacementDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	DisplacementDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~DisplacementDialog() override = default;
 	void ReturnDisplacement(float disp[3]);
 
@@ -86,7 +86,7 @@ class RotationDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	RotationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	RotationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~RotationDialog() override;
 	void GetRotation(float r[3][3]);
 
@@ -163,7 +163,7 @@ public:
 		kPad = 1,
 		kCrop = 2 };
 
-	ResizeDialog(SlicesHandler* hand3D, eResizeType type1 = kOther, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ResizeDialog(SlicesHandler* hand3D, eResizeType type1 = kOther, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ResizeDialog() override;
 	void ReturnPadding(int& dxm, int& dxp, int& dym, int& dyp, int& dzm, int& dzp);
 

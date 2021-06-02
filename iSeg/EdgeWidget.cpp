@@ -33,8 +33,8 @@
 
 namespace iseg {
 
-EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+EdgeWidget::EdgeWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format(
 			"Various edge extraction routines. These are mostly useful "
@@ -61,8 +61,8 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D, QWidget* parent, const char* name,
 	m_Cb3d = group->Add("Skeletonize3D", PropertyBool::Create(true));
 	m_Cb3d->SetDescription("Apply in 3D");
 
-	m_BtnExec = group->Add("Execute", PropertyButton::Create("Execute", [this]() { Execute(); }));
-	m_BtnExportCenterlines = group->Add("Export", PropertyButton::Create("Export", [this]() { ExportCenterlines(); }));
+	m_BtnExec = group->Add("Execute", PropertyButton::Create([this]() { Execute(); }));
+	m_BtnExportCenterlines = group->Add("Export", PropertyButton::Create([this]() { ExportCenterlines(); }));
 
 	// initialize
 	MethodChanged();

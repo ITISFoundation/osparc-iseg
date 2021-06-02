@@ -22,7 +22,7 @@ class ThresholdWidgetQt4 : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	explicit ThresholdWidgetQt4(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags);
+	explicit ThresholdWidgetQt4(SlicesHandler* hand3D);
 	~ThresholdWidgetQt4() override;
 
 	void Init() override;

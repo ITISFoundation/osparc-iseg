@@ -24,7 +24,7 @@ class ImageForestingTransformRegionGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D);
 	~ImageForestingTransformRegionGrowingWidget() override;
 	void Init() override;
 	void NewLoaded() override;

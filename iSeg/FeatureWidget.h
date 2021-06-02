@@ -24,7 +24,7 @@ class FeatureWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FeatureWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	FeatureWidget(SlicesHandler* hand3D);
 	void Init() override;
 	void NewLoaded() override;
 	std::string GetName() override { return std::string("Feature"); }

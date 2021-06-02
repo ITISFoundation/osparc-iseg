@@ -21,6 +21,6 @@ public:
 
 	std::string Name() const override { return "Levelset"; }
 	std::string Description() const override { return "LevelSet Plugin"; }
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 }} // namespace iseg::plugin

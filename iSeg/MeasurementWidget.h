@@ -27,7 +27,7 @@ class MeasurementWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	MeasurementWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	MeasurementWidget(SlicesHandler* hand3D);
 	~MeasurementWidget() override = default;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;

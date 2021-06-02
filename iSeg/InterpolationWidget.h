@@ -23,7 +23,7 @@ class InterpolationWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	InterpolationWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	InterpolationWidget(SlicesHandler* hand3D);
 	~InterpolationWidget() override;
 	void Init() override;
 	void NewLoaded() override;

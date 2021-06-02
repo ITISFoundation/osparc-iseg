@@ -32,7 +32,7 @@ class TransformWidget : public WidgetInterface
 	Q_OBJECT
 
 public:
-	TransformWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	TransformWidget(SlicesHandler* hand3D);
 	~TransformWidget() override;
 
 	void Init() override;

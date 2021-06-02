@@ -25,8 +25,8 @@
 
 namespace iseg {
 
-VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+VesselWidget::VesselWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	AugmentedMark am;
 	am.mark = 0;
@@ -55,9 +55,9 @@ VesselWidget::VesselWidget(SlicesHandler* hand3D, QWidget* parent, const char* n
 	m_CbbLb2 = group->Add("CbbLb2", PropertyEnum::Create());
 	m_CbbLb2->SetDescription("End Point");
 
-	m_PbExec = group->Add("Execute", PropertyButton::Create("Execute", [this]() { Execute(); }));
+	m_PbExec = group->Add("Execute", PropertyButton::Create([this]() { Execute(); }, "Execute"));
 
-	m_PbStore = group->Add("Save", PropertyButton::Create("Save...", [this]() { Savevessel(); }));
+	m_PbStore = group->Add("Save", PropertyButton::Create([this]() { Savevessel(); }, "Save..."));
 	m_PbStore->SetEnabled(false);
 
 	// connections

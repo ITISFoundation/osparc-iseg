@@ -34,8 +34,8 @@
 
 namespace iseg {
 
-AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
 	m_IsOk = false;
 	QString title("Atlas - ");

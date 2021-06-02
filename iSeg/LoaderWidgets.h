@@ -38,7 +38,7 @@ class LoaderDicom : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~LoaderDicom() override;
 
 private:
@@ -98,7 +98,7 @@ public:
 		kTIF
 	};
 
-	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~LoaderColorImages() override;
 
 	eImageType m_Type = kPNG;
@@ -154,7 +154,7 @@ class ChannelMixer : public QDialog
 {
 	Q_OBJECT
 public:
-	ChannelMixer(std::vector<const char*> filenames, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ChannelMixer(std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ChannelMixer() override;
 
 	int GetRedFactor() const;
@@ -262,7 +262,7 @@ class LoaderRaw : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderRaw(SlicesHandler* nullptrand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LoaderRaw(SlicesHandler* nullptrand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~LoaderRaw() override;
 
 	QString GetFileName() const;
@@ -331,7 +331,7 @@ class ExportImg : public QDialog
 {
 	Q_OBJECT
 public:
-	ExportImg(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ExportImg(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ExportImg() override = default;
 
 private slots:
@@ -350,7 +350,7 @@ class ReloaderBmp2 : public QDialog
 {
 	Q_OBJECT
 public:
-	ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ReloaderBmp2() override;
 	//	void update();
 	//protected:
@@ -381,7 +381,7 @@ class ReloaderRaw : public QDialog
 {
 	Q_OBJECT
 public:
-	ReloaderRaw(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ReloaderRaw(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ReloaderRaw() override;
 	//	void update();
 	//protected:
@@ -430,7 +430,7 @@ class NewImg : public QDialog
 {
 	Q_OBJECT
 public:
-	NewImg(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	NewImg(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~NewImg() override;
 
 	bool NewPressed() const;
@@ -465,7 +465,7 @@ public:
 	void SetEditableText(QString editable_text);
 	QString GetEditableText();
 
-	EditText(QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	EditText(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~EditText() override;
 
 private:
@@ -505,7 +505,7 @@ public:
 
 	int GetSelectedType();
 
-	SupportedMultiDatasetTypes(QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SupportedMultiDatasetTypes(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~SupportedMultiDatasetTypes() override;
 
 private:

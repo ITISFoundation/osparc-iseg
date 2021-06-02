@@ -24,7 +24,7 @@ class WatershedWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	WatershedWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	WatershedWidget(SlicesHandler* hand3D);
 	~WatershedWidget() override;
 	void Init() override;
 	void NewLoaded() override;

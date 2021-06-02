@@ -28,7 +28,7 @@ class ISEG_INTERFACE_API WidgetInterface : public QWidget
 {
 	Q_OBJECT
 public:
-	WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags);
+	WidgetInterface(QWidget* parent = nullptr);
 	virtual void Init() {}
 	virtual void NewLoaded() {}
 	virtual void Cleanup() {}

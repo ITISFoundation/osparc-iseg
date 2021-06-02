@@ -34,7 +34,7 @@ class RadiotherapyStructureSetImporter : public QDialog
 {
 	Q_OBJECT
 public:
-	RadiotherapyStructureSetImporter(QString filename, SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	RadiotherapyStructureSetImporter(QString filename, SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~RadiotherapyStructureSetImporter() override;
 
 private:

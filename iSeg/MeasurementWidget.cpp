@@ -32,8 +32,8 @@
 
 namespace iseg {
 
-MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+MeasurementWidget::MeasurementWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Perform different types of distance, angle or volume measurements"));
 

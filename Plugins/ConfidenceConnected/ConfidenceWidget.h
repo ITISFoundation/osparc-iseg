@@ -26,7 +26,7 @@ class ConfidenceWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D);
 	~ConfidenceWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

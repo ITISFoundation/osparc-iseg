@@ -37,7 +37,7 @@ public:
 
 	virtual std::string Description() const = 0;
 
-	virtual WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const = 0;
+	virtual WidgetInterface* CreateWidget() const = 0;
 
 private:
 	SlicesHandlerInterface* m_SliceHandler;

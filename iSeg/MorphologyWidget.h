@@ -26,7 +26,7 @@ class MorphologyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	MorphologyWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	MorphologyWidget(SlicesHandler* hand3D);
 	~MorphologyWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

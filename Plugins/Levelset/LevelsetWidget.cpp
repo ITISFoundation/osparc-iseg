@@ -35,8 +35,8 @@
 
 namespace acc = boost::accumulators;
 
-LevelsetWidget::LevelsetWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+LevelsetWidget::LevelsetWidget(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	m_Activeslice = m_Handler3D->ActiveSlice();
 

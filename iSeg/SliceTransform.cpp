@@ -26,9 +26,8 @@
 namespace iseg {
 
 SliceTransform::SliceTransform(SlicesHandler* hand3D)
-		: m_OriginalSource(nullptr), m_OriginalTarget(nullptr), m_OriginalTissues(nullptr)
+		: m_Handler3D(hand3D), m_OriginalSource(nullptr), m_OriginalTarget(nullptr), m_OriginalTissues(nullptr)
 {
-	m_Handler3D = hand3D;
 	m_ActiveSlice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 

@@ -89,12 +89,9 @@ enum eActions {
 
 } // namespace
 
-SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inputtype, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inputtype, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_InputType(inputtype), m_Hand3D(hand3D1)
 {
-	m_InputType = inputtype;
-	m_Hand3D = hand3D1;
-
 	m_VtkWidget = new QVTKWidget;
 	m_VtkWidget->setMinimumSize(600, 600);
 

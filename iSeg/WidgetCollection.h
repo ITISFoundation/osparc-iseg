@@ -50,7 +50,7 @@ class ScaleWork : public QDialog
 {
 	Q_OBJECT
 public:
-	ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ScaleWork() override;
 
 private:
@@ -100,7 +100,7 @@ class ImageMath : public QDialog
 {
 	Q_OBJECT
 public:
-	ImageMath(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ImageMath(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ImageMath() override;
 
 private:
@@ -145,7 +145,7 @@ class ImageOverlay : public QDialog
 {
 	Q_OBJECT
 public:
-	ImageOverlay(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ImageOverlay(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ImageOverlay() override;
 
 protected:
@@ -189,7 +189,7 @@ class HistoWin : public QWidget
 {
 	Q_OBJECT
 public:
-	HistoWin(unsigned int* histo1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	HistoWin(unsigned int* histo1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	void update();
 	void HistoChanged(unsigned int* histo1);
 
@@ -205,7 +205,7 @@ class ShowHisto : public QDialog
 {
 	Q_OBJECT
 public:
-	ShowHisto(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ShowHisto(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ShowHisto() override;
 
 private:
@@ -250,7 +250,7 @@ class Colorshower : public QWidget
 {
 	Q_OBJECT
 public:
-	Colorshower(int lx1, int ly1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	Colorshower(int lx1, int ly1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 protected:
 	void paintEvent(QPaintEvent* e) override;
@@ -271,7 +271,7 @@ class TissueAdder : public QDialog
 {
 	Q_OBJECT
 public:
-	TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~TissueAdder() override;
 	//	FILE *save_proj(FILE *fp);
 
@@ -332,7 +332,7 @@ class TissueFolderAdder : public QDialog
 {
 	Q_OBJECT
 public:
-	TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~TissueFolderAdder() override;
 
 private:
@@ -386,7 +386,7 @@ class BitsStack : public QWidget
 {
 	Q_OBJECT
 public:
-	BitsStack(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	BitsStack(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~BitsStack() override;
 	QMap<QString, unsigned int>* ReturnBitsnr();
 	void Newloaded();
@@ -442,7 +442,7 @@ class BitsStackPushdialog : public QDialog
 {
 	Q_OBJECT
 public:
-	BitsStackPushdialog(QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	BitsStackPushdialog(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Dialog); //TODO BL Qt::Widget
 	~BitsStackPushdialog() override;
 	bool GetPushcurrentslice();
 	unsigned int GetStartslice(bool* ok);
@@ -475,7 +475,7 @@ class ExtoverlayWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ExtoverlayWidget() override;
 	void Newloaded();
 
@@ -532,7 +532,7 @@ class ZoomWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	ZoomWidget(double zoom1, QDir picpath, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ZoomWidget(double zoom1, QDir picpath, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ZoomWidget() override;
 	double GetZoom() const;
 
@@ -567,7 +567,7 @@ class CleanerParams : public QDialog
 {
 	Q_OBJECT
 public:
-	CleanerParams(int* rate1, int* minsize1, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	CleanerParams(int* rate1, int* minsize1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~CleanerParams() override;
 
 private:
@@ -592,7 +592,7 @@ class MergeProjectsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	MergeProjectsDialog(QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	MergeProjectsDialog(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~MergeProjectsDialog() override;
 
 	void GetFilenames(std::vector<QString>& filenames);

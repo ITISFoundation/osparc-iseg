@@ -301,8 +301,8 @@ bool MenuWTT::event(QEvent* e)
 	return QMenu::event(e);
 }
 
-MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode, QWidget* parent, Qt::WindowFlags wFlags, const std::vector<std::string>& plugin_search_dirs)
-		: QMainWindow(parent, wFlags)
+MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, const QDir& picpath, const QDir& tmppath, bool editingmode, const std::vector<std::string>& plugin_search_dirs)
+		: m_Handler3D(hand3D)
 {
 	setObjectName("MainWindow");
 	statusBar()->showMessage("Ready");
@@ -331,8 +331,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_MLocationstring = locationstring;
 	m_MSaveprojfilename = "";
 	m_S4Lcommunicationfilename = "";
-
-	m_Handler3D = hand3D;
 
 	m_Handler3D->m_OnTissueSelectionChanged.connect([this](const std::vector<tissues_size_t>& sel) {
 		std::set<tissues_size_t> selection(sel.begin(), sel.end());
@@ -385,7 +383,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_CbWorkpicturevisible = new QCheckBox("Show Image", this);
 	m_CbWorkpicturevisible->setChecked(true);
 
-	m_BmpShow = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_BmpShow = new ImageViewerWidget(this);
 	m_LbSource = new QLabel("Source", this);
 	m_LbTarget = new QLabel("Target", this);
 	m_BmpScroller = new Q3ScrollView(this);
@@ -428,7 +426,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("swap.png"))), "3D", this);
 	m_SwapAllBtn->setFixedWidth(50);
 
-	m_WorkShow = new ImageViewerWidget(this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_WorkShow = new ImageViewerWidget(this);
 	m_SlContrastwork = new QSlider(Qt::Horizontal, this);
 	m_SlContrastwork->setRange(0, 100);
 	m_SlBrightnesswork = new QSlider(Qt::Horizontal, this);
@@ -568,39 +566,39 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LbInactivewarning = new QLabel("  3D Inactive Slice!  ", this);
 	m_LbInactivewarning->setStyleSheet("QLabel  { color: red; }");
 
-	m_ThresholdWidget = new ThresholdWidgetQt4(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_ThresholdWidget = new ThresholdWidgetQt4(m_Handler3D);
 	m_Tabwidgets.push_back(m_ThresholdWidget);
-	m_HystWidget = new HystereticGrowingWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_HystWidget = new HystereticGrowingWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_HystWidget);
-	m_LivewireWidget = new LivewireWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_LivewireWidget = new LivewireWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_LivewireWidget);
-	m_IftrgWidget = new ImageForestingTransformRegionGrowingWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_IftrgWidget = new ImageForestingTransformRegionGrowingWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_IftrgWidget);
-	m_FastmarchingWidget = new FastmarchingFuzzyWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_FastmarchingWidget = new FastmarchingFuzzyWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_FastmarchingWidget);
-	m_WatershedWidget = new WatershedWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_WatershedWidget = new WatershedWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_WatershedWidget);
-	m_OlcWidget = new OutlineCorrectionWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_OlcWidget = new OutlineCorrectionWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_OlcWidget);
-	m_InterpolationWidget = new InterpolationWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_InterpolationWidget = new InterpolationWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_InterpolationWidget);
-	m_SmoothingWidget = new SmoothingWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_SmoothingWidget = new SmoothingWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_SmoothingWidget);
-	m_MorphologyWidget = new MorphologyWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_MorphologyWidget = new MorphologyWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_MorphologyWidget);
-	m_EdgeWidget = new EdgeWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_EdgeWidget = new EdgeWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_EdgeWidget);
-	m_FeatureWidget = new FeatureWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_FeatureWidget = new FeatureWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_FeatureWidget);
-	m_MeasurementWidget = new MeasurementWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_MeasurementWidget = new MeasurementWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_MeasurementWidget);
-	m_VesselextrWidget = new VesselWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_VesselextrWidget = new VesselWidget(m_Handler3D);
 #ifdef PLUGIN_VESSEL_WIDGET
 	tabwidgets.push_back(vesselextr_widget);
 #endif
-	m_PickerWidget = new PickerWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_PickerWidget = new PickerWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_PickerWidget);
-	m_TransformWidget = new TransformWidget(m_Handler3D, nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_TransformWidget = new TransformWidget(m_Handler3D);
 	m_Tabwidgets.push_back(m_TransformWidget);
 
 	for (const auto& dir : plugin_search_dirs)
@@ -616,7 +614,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	for (auto a : addons)
 	{
 		a->InstallSliceHandler(m_Handler3D);
-		m_Tabwidgets.push_back(a->CreateWidget(nullptr, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase));
+		m_Tabwidgets.push_back(a->CreateWidget());
 	}
 
 	auto nrtabbuttons = (unsigned short)m_Tabwidgets.size();
@@ -665,13 +663,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	}
 	height_max += 45;
 
-	m_ScaleDialog = new ScaleWork(m_Handler3D, m_MPicpath, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	m_ImagemathDialog = new ImageMath(m_Handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	m_ImageoverlayDialog = new ImageOverlay(m_Handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_ScaleDialog = new ScaleWork(m_Handler3D, m_MPicpath, this);
+	m_ImagemathDialog = new ImageMath(m_Handler3D, this);
+	m_ImageoverlayDialog = new ImageOverlay(m_Handler3D, this);
 
-	m_BitstackWidget = new BitsStack(m_Handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	m_OverlayWidget = new ExtoverlayWidget(m_Handler3D, this, "new window", Qt::WDestructiveClose | Qt::WResizeNoErase);
-	m_MultidatasetWidget = new MultiDatasetWidget(m_Handler3D, this, "multi dataset window", Qt::WDestructiveClose | Qt::WResizeNoErase);
+	m_BitstackWidget = new BitsStack(m_Handler3D, this);
+	m_OverlayWidget = new ExtoverlayWidget(m_Handler3D, this);
+	m_MultidatasetWidget = new MultiDatasetWidget(m_Handler3D, this);
 
 	int height_max1 = height_max;
 
@@ -3261,7 +3259,7 @@ void MainWindow::ExecuteMergeprojects()
 	emit BeginDataexport(data_selection, this);
 
 	// Get list of project file names to be merged
-	MergeProjectsDialog merge_dialog(this, "Merge Projects");
+	MergeProjectsDialog merge_dialog(this);
 	if (merge_dialog.exec() != QDialog::Accepted)
 	{
 		emit EndDataexport(this);
@@ -4445,7 +4443,7 @@ void MainWindow::ExecuteXslice()
 
 	if (m_Xsliceshower == nullptr)
 	{
-		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr, nullptr, Qt::WStyle_StaysOnTop);
+		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
 		m_Xsliceshower->ZposChanged();
 		if (m_Ysliceshower != nullptr)
 		{
@@ -4484,7 +4482,7 @@ void MainWindow::ExecuteYslice()
 
 	if (m_Ysliceshower == nullptr)
 	{
-		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr, nullptr, Qt::WStyle_StaysOnTop);
+		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
 		m_Ysliceshower->ZposChanged();
 		if (m_Xsliceshower != nullptr)
 		{

@@ -18,8 +18,8 @@
 
 namespace iseg {
 
-WatershedWidget::WatershedWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+WatershedWidget::WatershedWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue (2D) by selecting points in the current slice "
 										"based on the Watershed method."

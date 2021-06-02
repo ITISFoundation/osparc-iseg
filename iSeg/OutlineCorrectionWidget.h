@@ -37,7 +37,7 @@ class OutlineCorrectionWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	OutlineCorrectionWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	OutlineCorrectionWidget(SlicesHandler* hand3D);
 	~OutlineCorrectionWidget() override = default;
 	void Cleanup() override;
 

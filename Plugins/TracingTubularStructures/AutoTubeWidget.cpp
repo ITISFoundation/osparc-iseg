@@ -66,8 +66,8 @@ class BinaryThinningImageFilter<TInputImage, TOutputImage, 3> : public itk::Bina
 {
 };
 
-AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Sandbox Tool"));
 

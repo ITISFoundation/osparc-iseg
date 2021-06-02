@@ -42,7 +42,7 @@ public:
 		bool m_IsActive;
 	};
 
-	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~MultiDatasetWidget() override;
 	void NewLoaded();
 	int GetNumberOfDatasets();

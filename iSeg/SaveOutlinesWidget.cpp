@@ -32,9 +32,11 @@
 
 namespace iseg {
 
-SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Vbox1 = new Q3VBox(this);
 	m_LboTissues = new QListWidget(m_Vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)

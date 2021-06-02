@@ -25,8 +25,8 @@
 
 namespace iseg {
 
-FeatureWidget::FeatureWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+FeatureWidget::FeatureWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Obtain information about the gray value and tissue distribution."
 										"<br>"

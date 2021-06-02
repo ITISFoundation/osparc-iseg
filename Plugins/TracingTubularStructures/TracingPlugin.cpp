@@ -19,14 +19,14 @@ TracingPlugin register_addon;
 AutoTracingPlugin register_addon2;
 } // namespace
 
-iseg::WidgetInterface* TracingPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+iseg::WidgetInterface* TracingPlugin::CreateWidget() const
 {
-	return new TraceTubesWidget(SliceHandler(), parent, name, wFlags);
+	return new TraceTubesWidget(SliceHandler());
 }
 
-iseg::WidgetInterface* AutoTracingPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+iseg::WidgetInterface* AutoTracingPlugin::CreateWidget() const
 {
-	return new AutoTubeWidget(SliceHandler(), parent, name, wFlags);
+	return new AutoTubeWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

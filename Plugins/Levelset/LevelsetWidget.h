@@ -25,7 +25,7 @@ class LevelsetWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	LevelsetWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LevelsetWidget(iseg::SlicesHandlerInterface* hand3D);
 	~LevelsetWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

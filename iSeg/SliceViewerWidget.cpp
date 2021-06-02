@@ -33,8 +33,8 @@
 
 namespace iseg {
 
-Bmptissuesliceshower::Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Tissuevisible(tissuevisible1), m_Handler3D(hand3D), m_Slicenr(slicenr1), m_Directionx(orientation), m_Bmporwork(bmpon), m_Thickness(thickness1), m_Zposvisible(zposvisible1), m_Xyposvisible(xyposvisible1), m_Xypos(xypos1), m_Zoom(zoom1)
+Bmptissuesliceshower::Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Tissuevisible(tissuevisible1), m_Handler3D(hand3D), m_Slicenr(slicenr1), m_Directionx(orientation), m_Bmporwork(bmpon), m_Thickness(thickness1), m_Zposvisible(zposvisible1), m_Xyposvisible(xyposvisible1), m_Xypos(xypos1), m_Zoom(zoom1)
 {
 	if (m_Directionx)
 	{
@@ -400,8 +400,8 @@ void Bmptissuesliceshower::SetZoom(double z)
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags), m_Handler3D(hand3D), m_Directionx(orientation), m_Xyexists(false)
+SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D), m_Directionx(orientation), m_Xyexists(false)
 {
 	if (m_Directionx)
 		m_Nrslices = m_Handler3D->Width();

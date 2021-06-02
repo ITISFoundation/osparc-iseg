@@ -22,7 +22,7 @@ class VesselWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	VesselWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	VesselWidget(SlicesHandler* hand3D);
 	~VesselWidget() override {}
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;

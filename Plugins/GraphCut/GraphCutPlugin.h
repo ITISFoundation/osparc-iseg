@@ -21,7 +21,7 @@ public:
 
 	std::string Name() const override { return "CT Auto-Bone"; }
 	std::string Description() const override;
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 
 class GCTissueSeparatorPlugin : public Plugin
@@ -32,7 +32,7 @@ public:
 
 	std::string Name() const override { return "Tissue Separator"; }
 	std::string Description() const override;
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 
 }} // namespace iseg::plugin

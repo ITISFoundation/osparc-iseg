@@ -25,7 +25,7 @@ class AutoTubeWidget : public iseg::WidgetInterface
 {
 	Q_OBJECT
 public:
-	AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D);
 	~AutoTubeWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

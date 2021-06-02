@@ -23,8 +23,8 @@
 
 namespace iseg {
 
-InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
 
@@ -88,7 +88,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 	m_BrushRadius->SetToolTip("Set the radius of the brush in physical units, i.e. typically mm.");
 
 	// Execute
-	auto push_start = group->Add("StartSlice", PropertyButton::Create("Start Slice", [this]() { StartslicePressed(); }));
+	auto push_start = group->Add("StartSlice", PropertyButton::Create([this]() { StartslicePressed(); }, "Start Slice"));
 	push_start->SetToolTip(
 			"Interpolation/extrapolation is based on 2 slices. Click start to "
 			"select the first slice and Execute to select the second slice. Interpolation "
@@ -99,7 +99,7 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 			"The user can add it with Adder function. The 'All Tissues' option "
 			"adds the result directly to the tissue.");
 
-	m_Pushexec = group->Add("Execute", PropertyButton::Create("Execute", [this]() { Execute(); }));
+	m_Pushexec = group->Add("Execute", PropertyButton::Create([this]() { Execute(); }));
 	m_Pushexec->SetEnabled(false);
 
 	// create signal-slot connections

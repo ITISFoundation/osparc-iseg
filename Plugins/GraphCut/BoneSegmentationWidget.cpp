@@ -70,8 +70,8 @@ private:
 
 } // namespace
 
-BoneSegmentationWidget::BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D), m_CurrentFilter(nullptr)
+BoneSegmentationWidget::BoneSegmentationWidget(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D), m_CurrentFilter(nullptr)
 {
 	using namespace iseg;
 
@@ -104,7 +104,7 @@ BoneSegmentationWidget::BoneSegmentationWidget(iseg::SlicesHandlerInterface* han
 	m_End = group->Add("End Slice", PropertyInt::Create(m_Handler3D->EndSlice()));
 
 	// setup callbacks
-	auto pbtn = group->Add("Execute", PropertyButton::Create("Execute", [this]() { DoWork(); }));
+	auto pbtn = group->Add("Execute", PropertyButton::Create([this]() { DoWork(); }));
 
 	m_UseSliceRange->onModified.connect([this](Property_ptr, Property::eChangeType type) {
 		if (type == Property::kValueChanged)

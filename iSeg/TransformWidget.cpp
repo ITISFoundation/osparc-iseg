@@ -26,8 +26,8 @@
 
 namespace iseg {
 
-TransformWidget::TransformWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+TransformWidget::TransformWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Shift/rotate/scale the Source, Target or Tissue."));
 

@@ -36,7 +36,7 @@ class SaveOutlinesWidget : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~SaveOutlinesWidget() override;
 
 private:

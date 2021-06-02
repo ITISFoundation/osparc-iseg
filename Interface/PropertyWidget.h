@@ -32,7 +32,7 @@ class ISEG_INTERFACE_API PropertyWidget : public QTreeWidget
 {
 	Q_OBJECT
 public:
-	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	PropertyWidget(Property_ptr p = nullptr, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 	void SetProperty(Property_ptr p);
 

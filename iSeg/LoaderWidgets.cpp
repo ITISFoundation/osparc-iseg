@@ -102,8 +102,8 @@ namespace iseg {
 namespace algo = boost::algorithm;
 namespace fs = boost::filesystem;
 
-ExportImg::ExportImg(SlicesHandler* h, QWidget* p, const char* n, Qt::WindowFlags f)
-		: QDialog(p, n, f), m_Handler3D(h)
+ExportImg::ExportImg(SlicesHandler* h, QWidget* p, Qt::WindowFlags f)
+		: QDialog(p, f), m_Handler3D(h)
 {
 	auto img_selection_hbox = new QHBoxLayout;
 	m_ImgSelectionGroup = make_button_group({"Source", "Target", "Tissue"}, 0);
@@ -155,9 +155,11 @@ void ExportImg::SavePushed()
 	close();
 }
 
-LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D), m_Reload(breload), m_Lnames(lname)
+LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_Reload(breload), m_Lnames(lname)
 {
+	setModal(true);
+
 	m_Vbox1 = new Q3VBox(this);
 	m_Hbox1 = new Q3HBox(m_Vbox1);
 	m_CbSubsect = new QCheckBox(QString("Subsection "), m_Hbox1);
@@ -367,9 +369,11 @@ void LoaderDicom::LoadPushed()
 	}
 }
 
-LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D)
+LoaderRaw::LoaderRaw(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
+	setModal(true);
+
 	m_Vbox1 = new Q3VBox(this);
 	m_Hbox1 = new Q3HBox(m_Vbox1);
 	m_FileName = new QLabel(QString("File Name: "), m_Hbox1);
@@ -556,10 +560,10 @@ void LoaderRaw::SelectPushed()
 	m_NameEdit->setText(loadfilename);
 }
 
-ReloaderRaw::ReloaderRaw(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+ReloaderRaw::ReloaderRaw(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
-	m_Handler3D = hand3D;
+	setModal(true);
 
 	m_Vbox1 = new Q3VBox(this);
 	m_Hbox1 = new Q3HBox(m_Vbox1);
@@ -703,10 +707,10 @@ void ReloaderRaw::SelectPushed()
 	m_NameEdit->setText(loadfilename);
 }
 
-NewImg::NewImg(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+NewImg::NewImg(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
-	m_Handler3D = hand3D;
+	setModal(true);
 
 	m_Vbox1 = new Q3VBox(this);
 	m_Hbox2 = new Q3HBox(m_Vbox1);
@@ -760,9 +764,11 @@ void NewImg::OnClose()
 	close();
 }
 
-LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_Handler3D(hand3D), m_Type(typ), m_MFilenames(filenames)
+LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_Type(typ), m_MFilenames(filenames)
 {
+	setModal(true);
+
 	m_MapToLut = new QCheckBox(QString("Map colors to lookup table"));
 	m_MapToLut->setChecked(true);
 	if (typ == LoaderColorImages::kTIF)
@@ -1032,9 +1038,11 @@ void ClickableLabel::paintEvent(QPaintEvent* e)
 	painter.drawPath(square);
 }
 
-ChannelMixer::ChannelMixer(std::vector<const char*> filenames, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags), m_MFilenames(filenames)
+ChannelMixer::ChannelMixer(std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_MFilenames(filenames)
 {
+	setModal(true);
+
 	m_PreviewCenter.setX(0);
 	m_PreviewCenter.setY(0);
 	QString file_name = QString::fromUtf8(m_MFilenames[0]);
@@ -1496,11 +1504,10 @@ void ChannelMixer::LoadPushed()
 	close();
 }
 
-ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_MFilenames(filenames)
 {
-	m_Handler3D = hand3D;
-	m_MFilenames = filenames;
+	setModal(true);
 
 	m_Vbox1 = new Q3VBox(this);
 	m_Hbox2 = new Q3HBox(m_Vbox1);
@@ -1521,13 +1528,6 @@ ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filen
 	m_CancelBut = new QPushButton("Cancel", m_Hbox3);
 	m_Hbox3->show();
 
-	/*	vbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	vbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox1->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox2->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox3->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox4->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	hbox5->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));*/
 	m_Vbox1->show();
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
@@ -1578,9 +1578,11 @@ void ReloaderBmp2::LoadPushed()
 	close();
 }
 
-EditText::EditText(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+EditText::EditText(QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags)
 {
+	setModal(true);
+
 	m_Vbox1 = new Q3VBox(this);
 
 	m_Hbox1 = new Q3HBox(m_Vbox1);
@@ -1607,9 +1609,11 @@ void EditText::SetEditableText(QString editable_text)
 
 QString EditText::GetEditableText() { return m_TextEdit->text(); }
 
-SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: QDialog(parent, name, TRUE, wFlags)
+SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags)
 {
+	setModal(true);
+
 	m_Hboxoverall = new Q3HBoxLayout(this);
 	m_Vboxoverall = new Q3VBoxLayout(this);
 	m_Hboxoverall->addLayout(m_Vboxoverall);

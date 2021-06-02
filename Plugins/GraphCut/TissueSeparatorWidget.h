@@ -27,7 +27,7 @@ class TissueSeparatorWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~TissueSeparatorWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;

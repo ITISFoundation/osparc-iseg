@@ -21,9 +21,9 @@ LevelsetPlugin::LevelsetPlugin() = default;
 
 LevelsetPlugin::~LevelsetPlugin() = default;
 
-WidgetInterface* LevelsetPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+WidgetInterface* LevelsetPlugin::CreateWidget() const
 {
-	return new LevelsetWidget(SliceHandler(), parent, name, wFlags);
+	return new LevelsetWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

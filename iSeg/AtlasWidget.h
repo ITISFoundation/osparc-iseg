@@ -36,7 +36,7 @@ class AtlasWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	AtlasWidget(const char* filename, QDir picpath, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~AtlasWidget() override;
 	bool m_IsOk;
 

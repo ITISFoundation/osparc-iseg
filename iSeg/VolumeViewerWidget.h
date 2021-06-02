@@ -49,7 +49,7 @@ class VolumeViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1 = true, bool raytraceortexturemap1 = true, bool shade1 = true, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1 = true, bool raytraceortexturemap1 = true, bool shade1 = true, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~VolumeViewerWidget() override {}
 
 protected:

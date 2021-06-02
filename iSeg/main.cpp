@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 #endif
 	app.processEvents();
 
-	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), nullptr, Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
+	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), plugin_dirs);
 
 	main_window->LoadLoadProj(latestprojpath);
 	main_window->LoadAtlas(atlasdir);
@@ -192,13 +192,13 @@ int main(int argc, char** argv)
 	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
 	auto pb = child_group->Add("Enable", PropertyBool::Create(true));
 	auto pb2 = child_group->Add("Visible", PropertyBool::Create(true));
-	auto pbtn0 = child_group->Add("Update", PropertyButton::Create("Update", []() {}));
+	auto pbtn0 = child_group->Add("Update", PropertyButton::Create([]() {}));
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
 	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
 	auto child_group2 = group->Add("Extra", PropertyGroup::Create());
 	child_group2->SetDescription("Extra Settings");
 	auto pf2 = child_group2->Add("Alpha", PropertyReal::Create(0.5));
-	auto pbtn = group->Add("Update", PropertyButton::Create("Update", [&group, &child_group]() {
+	auto pbtn = group->Add("Update", PropertyButton::Create([&group, &child_group]() {
 		std::cerr << "PropertyButton triggered\n";
 		group->DumpTree();
 		child_group->SetEnabled(!child_group->Enabled());

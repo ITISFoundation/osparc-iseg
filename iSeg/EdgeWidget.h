@@ -25,7 +25,7 @@ class EdgeWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	EdgeWidget(SlicesHandler* hand3D);
 	~EdgeWidget() override;
 	void Init() override;
 	void NewLoaded() override;

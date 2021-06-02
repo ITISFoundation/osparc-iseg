@@ -29,7 +29,7 @@ class FastmarchingFuzzyWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FastmarchingFuzzyWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	FastmarchingFuzzyWidget(SlicesHandler* hand3D);
 	~FastmarchingFuzzyWidget() override;
 	void Init() override;
 	void NewLoaded() override;

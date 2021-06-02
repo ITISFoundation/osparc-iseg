@@ -22,7 +22,7 @@ public:
 
 	std::string Description() const override { return "Panel AutoTracing Plugin"; }
 
-	WidgetInterface* CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const override;
+	WidgetInterface* CreateWidget() const override;
 };
 
 }} // namespace iseg::plugin

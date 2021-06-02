@@ -53,7 +53,7 @@ public:
 	enum eInputType { kSource,
 		kTarget,
 		kSelectedTissues };
-	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType input_type, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~SurfaceViewerWidget() override;
 
 	static bool IsOpenGlSupported();

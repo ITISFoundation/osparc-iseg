@@ -34,7 +34,7 @@ class SmoothingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	SmoothingWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SmoothingWidget(SlicesHandler* hand3D);
 	~SmoothingWidget() override;
 	QSize sizeHint() const override;
 	void Init() override;

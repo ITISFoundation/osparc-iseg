@@ -33,8 +33,8 @@
 
 namespace iseg {
 
-HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler3D(hand3D)
+HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Segment a tissue by picking seed points and adding "
 										"neighboring pixels with similar intensities."));

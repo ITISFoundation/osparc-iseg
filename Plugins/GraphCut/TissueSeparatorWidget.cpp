@@ -28,8 +28,8 @@
 
 namespace iseg {
 
-TissueSeparatorWidget::TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_SliceHandler(hand3D)
+TissueSeparatorWidget::TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: m_SliceHandler(hand3D)
 {
 	m_CurrentSlice = m_SliceHandler->ActiveSlice();
 

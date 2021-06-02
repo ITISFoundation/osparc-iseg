@@ -76,8 +76,8 @@ void add_completer(QLineEdit* file_path, QWidget* parent)
 }
 } // namespace
 
-TraceTubesWidget::TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent, const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), m_Handler(hand3D)
+TraceTubesWidget::TraceTubesWidget(iseg::SlicesHandlerInterface* hand3D)
+	: m_Handler(hand3D)
 {
 	setToolTip(Format("Trace elongated structures"));
 

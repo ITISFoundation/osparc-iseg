@@ -21,9 +21,9 @@ BiasCorrectionPlugin::BiasCorrectionPlugin() = default;
 
 BiasCorrectionPlugin::~BiasCorrectionPlugin() = default;
 
-WidgetInterface* BiasCorrectionPlugin::CreateWidget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+WidgetInterface* BiasCorrectionPlugin::CreateWidget() const
 {
-	return new BiasCorrectionWidget(SliceHandler(), parent, name, wFlags);
+	return new BiasCorrectionWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

@@ -22,7 +22,7 @@ class UndoConfigurationDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, const char* name = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~UndoConfigurationDialog() override;
 
 private:
