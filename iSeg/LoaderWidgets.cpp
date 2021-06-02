@@ -1614,40 +1614,39 @@ SupportedMultiDatasetTypes::SupportedMultiDatasetTypes(QWidget* parent, Qt::Wind
 {
 	setModal(true);
 
-	m_Hboxoverall = new Q3HBoxLayout(this);
-	m_Vboxoverall = new Q3VBoxLayout(this);
-	m_Hboxoverall->addLayout(m_Vboxoverall);
-
-	// Dataset selection group box
-	QGroupBox* radio_group_box = new QGroupBox("Supported types");
-	Q3VBoxLayout* radio_layout = new Q3VBoxLayout(this);
-	for (int i = 0; i < eSupportedTypes::nrSupportedTypes; i++)
+	// widgets
+	auto radio_group_box = new QGroupBox("Supported types");
+	for (int i = 0; i < eSupportedTypes::keSupportedTypesSize; i++)
 	{
-		QString texted = ToQString(eSupportedTypes(i));
-		QRadioButton* radio_but = new QRadioButton(texted);
-		radio_layout->addWidget(radio_but);
+		m_RadioButs.push_back(new QRadioButton(ToQString(eSupportedTypes(i))));
+	}
 
-		m_RadioButs.push_back(radio_but);
+	m_SelectBut = new QPushButton("Select");
+	m_CancelBut = new QPushButton("Cancel");
+
+	// layout
+	auto radio_layout = new QVBoxLayout;
+	for (auto rb : m_RadioButs)
+	{
+		radio_layout->addWidget(rb);
 	}
 	radio_group_box->setLayout(radio_layout);
-	m_Vboxoverall->addWidget(radio_group_box);
 
-	QHBoxLayout* buttons_layout = new QHBoxLayout();
-	m_SelectBut = new QPushButton("Select", this);
-	m_CancelBut = new QPushButton("Cancel", this);
+	auto buttons_layout = new QHBoxLayout;
 	buttons_layout->addWidget(m_SelectBut);
 	buttons_layout->addWidget(m_CancelBut);
-	m_Vboxoverall->addLayout(buttons_layout);
 
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	auto vbox_overall = new QVBoxLayout;
+	vbox_overall->addWidget(radio_group_box);
+	vbox_overall->addLayout(buttons_layout);
 
+	setLayout(vbox_overall);
+
+	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+	// connections
 	QObject_connect(m_SelectBut, SIGNAL(clicked()), this, SLOT(accept()));
 	QObject_connect(m_CancelBut, SIGNAL(clicked()), this, SLOT(reject()));
-}
-
-SupportedMultiDatasetTypes::~SupportedMultiDatasetTypes()
-{
-	delete m_Vboxoverall;
 }
 
 int SupportedMultiDatasetTypes::GetSelectedType()

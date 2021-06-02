@@ -20,8 +20,8 @@
 #include <itkRawImageIO.h>
 #include <itkResampleImageFilter.h>
 
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QFileDialog>
 #include <QGroupBox>
 
@@ -30,39 +30,46 @@ namespace iseg {
 MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
 		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
-	m_HboxOverall = new Q3HBoxLayout(this);
-	m_VboxOverall = new Q3VBoxLayout();
-	m_HboxOverall->addLayout(m_VboxOverall);
+	m_AddDatasetButton = new QPushButton("Add New Dataset...");
+	m_AddDatasetButton->setToolTip(
+		"Add new image data to available datasets. Image should "
+		"be aligned (registered). If dimensions don't match, the "
+		"image will be re-sampled to the dimensions of the main dataset");
 
-	// Add dataset button
-	m_AddDatasetButton = new QPushButton("Add Dataset...", this);
-	m_VboxOverall->addWidget(m_AddDatasetButton);
-
-	// Dataset selection group box
 	m_DatasetsGroupBox = new QGroupBox("- Available datasets -");
-	m_VboxDatasets = new Q3VBoxLayout(m_DatasetsGroupBox);
-	m_VboxDatasets->addStretch(1);
-	m_DatasetsGroupBox->setLayout(m_VboxDatasets);
-	m_VboxOverall->addWidget(m_DatasetsGroupBox);
 
-	//Buttons
-	QHBoxLayout* buttons_grid = new QHBoxLayout();
-	m_VboxOverall->addLayout(buttons_grid);
-
-	// Add dataset button
 	m_LoadDatasetButton = new QPushButton("Load Dataset", this);
-	buttons_grid->addWidget(m_LoadDatasetButton);
 
 	m_ChangeNameButton = new QPushButton("Change Name", this);
-	buttons_grid->addWidget(m_ChangeNameButton);
 
 	m_RemoveDatasetButton = new QPushButton("Remove Dataset", this);
-	buttons_grid->addWidget(m_RemoveDatasetButton);
 	m_RemoveDatasetButton->setEnabled(false);
 
-	m_DatasetsGroupBox->setMinimumHeight(200);
-	setFixedHeight(m_HboxOverall->sizeHint().height());
+	// layout
+	m_VboxDatasets = new QVBoxLayout;
+	m_VboxDatasets->addStretch(1);
 
+	QHBoxLayout* buttons_grid = new QHBoxLayout();
+	buttons_grid->addWidget(m_LoadDatasetButton);
+	buttons_grid->addWidget(m_ChangeNameButton);
+	buttons_grid->addWidget(m_RemoveDatasetButton);
+
+	auto vbox_overall = new QVBoxLayout;
+	vbox_overall->addWidget(m_AddDatasetButton);
+	vbox_overall->addWidget(m_DatasetsGroupBox);
+	vbox_overall->addLayout(buttons_grid);
+
+	auto hbox_overall = new QHBoxLayout;
+	hbox_overall->addLayout(vbox_overall);
+
+	m_DatasetsGroupBox->setLayout(m_VboxDatasets);
+	setLayout(hbox_overall);
+
+	// size
+	m_DatasetsGroupBox->setMinimumHeight(200);
+	setFixedHeight(hbox_overall->sizeHint().height());
+
+	// connections
 	QObject_connect(m_AddDatasetButton, SIGNAL(clicked()), this, SLOT(AddDatasetPressed()));
 	QObject_connect(m_LoadDatasetButton, SIGNAL(clicked()), this, SLOT(SwitchDataset()));
 	QObject_connect(m_ChangeNameButton, SIGNAL(clicked()), this, SLOT(ChangeDatasetName()));
@@ -72,8 +79,6 @@ MultiDatasetWidget::MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent, Q
 	Initialize();
 }
 
-MultiDatasetWidget::~MultiDatasetWidget() { m_RadioButtons.clear(); }
-
 void MultiDatasetWidget::Initialize()
 {
 	m_ItIsBeingLoaded = false;
@@ -82,18 +87,14 @@ void MultiDatasetWidget::Initialize()
 
 void MultiDatasetWidget::ClearRadioButtons()
 {
-	if (m_VboxDatasets->layout() != nullptr)
+	QLayoutItem* item;
+	while ((item = m_VboxDatasets->takeAt(0)) != nullptr)
 	{
-		QLayoutItem* item;
-		while ((item = m_VboxDatasets->layout()->takeAt(0)) != nullptr)
-		{
-			delete item->widget();
-			delete item;
-		}
+		delete item->widget();
+		delete item;
 	}
 
 	m_VboxDatasets->update();
-	m_VboxDatasets->layout()->update();
 
 	m_RadioButtons.clear();
 }
@@ -106,6 +107,7 @@ void MultiDatasetWidget::NewLoaded()
 		return;
 	}
 
+	// TODO BL expect memory leaks
 	ClearRadioButtons();
 
 	Initialize();
@@ -114,6 +116,7 @@ void MultiDatasetWidget::NewLoaded()
 	const unsigned short h_loaded = m_Handler3D->Height();
 	const unsigned short nrofslices_loaded = m_Handler3D->NumSlices();
 
+	// TODO BL ?
 	const bool check_match = true;
 	if (check_match)
 	{
@@ -125,8 +128,6 @@ void MultiDatasetWidget::NewLoaded()
 	}
 
 	SDatasetInfo new_radio_button;
-	// Create the copy of the main dataset only when adding a second dataset
-	//CopyImagesSlices(m_Handler3D, newRadioButton);
 
 	QStringList paths;
 	paths.append("main_Dataset");
@@ -159,8 +160,8 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 		switch (SupportedMultiDatasetTypes::eSupportedTypes(selected_type))
 		{
-		case SupportedMultiDatasetTypes::eSupportedTypes::bmp:
-		case SupportedMultiDatasetTypes::eSupportedTypes::dcm: {
+		case SupportedMultiDatasetTypes::eSupportedTypes::kBMP:
+		case SupportedMultiDatasetTypes::eSupportedTypes::kDicom: {
 			loadfilenames = QFileDialog::getOpenFileNames(
 					"Images (*.dcm *.dicom *.bmp)\n"
 					"All (*)",
@@ -186,7 +187,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 		}
 		break;
 
-		case SupportedMultiDatasetTypes::eSupportedTypes::raw: {
+		case SupportedMultiDatasetTypes::eSupportedTypes::kRaw: {
 
 			LoaderRaw lr(nullptr, this);
 			lr.SetSkipReading(true);
@@ -241,9 +242,10 @@ void MultiDatasetWidget::AddDatasetPressed()
 		}
 		break;
 
-		case SupportedMultiDatasetTypes::eSupportedTypes::nifti:
-		case SupportedMultiDatasetTypes::eSupportedTypes::vtk: {
-			auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open File", "", "Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia)");
+		case SupportedMultiDatasetTypes::eSupportedTypes::kNifti:
+		case SupportedMultiDatasetTypes::eSupportedTypes::kMeta:
+		case SupportedMultiDatasetTypes::eSupportedTypes::kVTK: {
+			auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open File", "", "Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia *.mhd *.mha)");
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();
@@ -469,11 +471,10 @@ void MultiDatasetWidget::RemoveDataset()
 		if (radio_button.m_RadioButton->isChecked())
 		{
 			m_VboxDatasets->removeWidget(radio_button.m_RadioButton);
+			delete radio_button.m_RadioButton;
 
 			std::for_each(radio_button.m_BmpSlices.begin(), radio_button.m_BmpSlices.end(), [](float* element) { free(element); });
 			radio_button.m_BmpSlices.clear();
-
-			delete radio_button.m_RadioButton;
 
 			m_RadioButtons.erase(m_RadioButtons.begin() + index);
 

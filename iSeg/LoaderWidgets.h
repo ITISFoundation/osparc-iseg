@@ -483,22 +483,24 @@ class SupportedMultiDatasetTypes : public QDialog
 {
 	Q_OBJECT
 public:
-	enum eSupportedTypes { bmp,
-		dcm,
-		nifti,
-		raw,
-		vtk,
-		nrSupportedTypes };
+	enum eSupportedTypes { kBMP,
+		kDicom,
+		kNifti,
+		kMeta,
+		kRaw,
+		kVTK,
+		keSupportedTypesSize };
 
 	inline QString ToQString(eSupportedTypes v) const
 	{
 		switch (v)
 		{
-		case bmp: return "BMP";
-		case dcm: return "DICOM";
-		case nifti: return "NIfTI";
-		case raw: return "RAW";
-		case vtk: return "VTK";
+		case kBMP: return "BMP";
+		case kDicom: return "DICOM";
+		case kNifti: return "NIfTI";
+		case kMeta: return "UNC Meta";
+		case kRaw: return "RAW";
+		case kVTK: return "VTK";
 		default: return "[unsupported]";
 		}
 	}
@@ -506,12 +508,8 @@ public:
 	int GetSelectedType();
 
 	SupportedMultiDatasetTypes(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~SupportedMultiDatasetTypes() override;
 
 private:
-	Q3HBoxLayout* m_Hboxoverall;
-	Q3VBoxLayout* m_Vboxoverall;
-
 	std::vector<QRadioButton*> m_RadioButs;
 
 	QPushButton* m_SelectBut;

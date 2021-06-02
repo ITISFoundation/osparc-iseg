@@ -19,9 +19,7 @@
 class QGroupBox;
 class QRadioButton;
 class QPushButton;
-// Qt3
-class Q3HBoxLayout;
-class Q3VBoxLayout;
+class QVBoxLayout;
 
 namespace iseg {
 
@@ -43,7 +41,7 @@ public:
 	};
 
 	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~MultiDatasetWidget() override;
+
 	void NewLoaded();
 	int GetNumberOfDatasets();
 	bool IsActive(const int multiDS_index);
@@ -76,9 +74,8 @@ private:
 	SlicesHandler* m_Handler3D;
 	std::vector<SDatasetInfo> m_RadioButtons;
 
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxOverall;
-	Q3VBoxLayout* m_VboxDatasets;
+	QVBoxLayout* m_VboxDatasets;
+
 	QGroupBox* m_DatasetsGroupBox;
 	QPushButton* m_AddDatasetButton;
 	QPushButton* m_LoadDatasetButton;
