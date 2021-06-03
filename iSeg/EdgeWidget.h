@@ -58,15 +58,15 @@ private:
 		kCenterlines,
 		eModeTypeSize
 	};
-	std::shared_ptr<PropertyEnum> m_Modegroup;
+	PropertyEnum_ptr m_Modegroup;
 
-	std::shared_ptr<PropertySlider> m_SlSigma; // scaled to [0,5]
-	std::shared_ptr<PropertySlider> m_SlThresh1; // scaled to [0,150]
-	std::shared_ptr<PropertySlider> m_SlThresh2; // scaled to [0,150]
-	std::shared_ptr<PropertyBool> m_Cb3d;
+	PropertySlider_ptr m_SlSigma; // scaled to [0,5]
+	PropertySlider_ptr m_SlThresh1; // scaled to [0,150]
+	PropertySlider_ptr m_SlThresh2; // scaled to [0,150]
+	PropertyBool_ptr m_Cb3d;
 
-	std::shared_ptr<PropertyButton> m_BtnExportCenterlines;
-	std::shared_ptr<PropertyButton> m_BtnExec;
+	PropertyButton_ptr m_BtnExportCenterlines;
+	PropertyButton_ptr m_BtnExec;
 };
 
 } // namespace iseg

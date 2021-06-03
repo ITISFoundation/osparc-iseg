@@ -46,35 +46,35 @@ private:
 	SlicesHandler* m_Handler3D;
 	BrushInteraction* m_Brush = nullptr;
 
-	std::shared_ptr<PropertyInt> m_SbSlicenr;
-	std::shared_ptr<PropertyInt> m_SbBatchstride;
+	PropertyInt_ptr m_SbSlicenr;
+	PropertyInt_ptr m_SbBatchstride;
 
 	enum eSourceType {
 		kTissue = 0,
 		kTissueAll,
 		kWork
 	};
-	std::shared_ptr<PropertyEnum> m_Sourcegroup;
+	PropertyEnum_ptr m_Sourcegroup;
 
 	enum eModeType {
 		kInterpolation = 0,
 		kExtrapolation,
 		kBatchInterpolation
 	};
-	std::shared_ptr<PropertyEnum> m_Modegroup;
+	PropertyEnum_ptr m_Modegroup;
 
 	enum eConnectivityType {
 		kCityBlock = 0,
 		kChess
 	};
-	std::shared_ptr<PropertyEnum> m_Connectivitygroup;
+	PropertyEnum_ptr m_Connectivitygroup;
 
-	std::shared_ptr<PropertyBool> m_CbMedianset;
-	std::shared_ptr<PropertyBool> m_CbConnectedshapebased;
-	std::shared_ptr<PropertyBool> m_CbBrush;
-	std::shared_ptr<PropertyReal> m_BrushRadius;
+	PropertyBool_ptr m_CbMedianset;
+	PropertyBool_ptr m_CbConnectedshapebased;
+	PropertyBool_ptr m_CbBrush;
+	PropertyReal_ptr m_BrushRadius;
 
-	std::shared_ptr<PropertyButton> m_Pushexec;
+	PropertyButton_ptr m_Pushexec;
 
 	unsigned short m_Startnr;
 	unsigned short m_Nrslices;

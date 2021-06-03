@@ -136,6 +136,10 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFla
 #endif
 
 	SetProperty(prop);
+	if (auto root = topLevelItem(0))
+	{
+		UpdateState(root, prop.get());
+	}
 
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -210,8 +214,7 @@ void PropertyWidget::VisitItems(QTreeWidgetItem* item, const TFunctor& functor, 
 	for (int i = 0; i < item->childCount(); ++i)
 	{
 		auto child = item->child(i);
-		bool child_value = combine(child, value);
-		VisitItems(child, functor, combine, child_value);
+		VisitItems(child, functor, combine, combine(child, value));
 	}
 }
 
@@ -235,16 +238,18 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 
 	if (prop->Type() != Property::kGroup)
 	{
-		auto widget = MakePropertyUi(*prop, item);
-		//widget->setContentsMargins(5, 2, 2, 2);
-		widget->setMaximumHeight(row_height);
+		// create widget
+		auto widget = MakePropertyUi(prop.get(), item);
 
+		// use uniform row size
+		widget->setMaximumHeight(row_height);
 		auto hbox = new QHBoxLayout;
 		hbox->addWidget(widget);
 		auto harea = new QWidget;
 		harea->setLayout(hbox);
 		hbox->setContentsMargins(5, 2, 2, 2);
 
+		// add widget to item
 		if (prop->Type() == Property::kButton)
 		{
 			setItemWidget(item, 0, harea);
@@ -255,16 +260,21 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 			setItemWidget(item, 1, harea);
 		}
 
+		// set state and tooltips
+		UpdateDescription(widget, prop.get());
+
+		// need to map widget to property for 'Edited'
 		m_WidgetPropertyMap[widget] = prop;
 	}
 	else
 	{
 		item->setText(0, QString::fromStdString(name));
+		item->setToolTip(0, QString::fromStdString(prop->ToolTip()));
 
 		Connect(prop->onModified, m_Lifespan, [this, item](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 		});
 
@@ -275,31 +285,26 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 	}
 }
 
-QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
+QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 {
-	const auto make_line_edit = [this, item](const Property& p) {
+	const auto make_line_edit = [this, item](const Property* p) {
 		// generic attributes
 		auto edit = new QLineEdit(this);
 		edit->setFrame(false);
-		edit->setToolTip(QString::fromStdString(p.ToolTip()));
-		item->setDisabled(!p.Enabled());
-		item->setHidden(!p.Visible());
 		QObject_connect(edit, SIGNAL(editingFinished()), this, SLOT(Edited()));
 		return edit;
 	};
 
-	const auto label_text = prop.Description().empty() ? prop.Name() : prop.Description();
-
 	static_assert(Property::kePropertyTypeSize == 8, "Property types changed");
-	switch (prop.Type())
+	switch (prop->Type())
 	{
 	case Property::kInteger: {
-		auto ptyped = static_cast<const PropertyInt*>(&prop);
+		auto ptyped = static_cast<const PropertyInt*>(prop);
 		auto edit = make_line_edit(prop);
 		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
 		edit->setValidator(new QIntValidator(ptyped->Minimum(), ptyped->Maximum()));
 
-		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyInt*>(p.get());
@@ -312,22 +317,22 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(edit, p);
+				UpdateDescription(edit, p.get());
 			}
 		});
 		return edit;
 	}
 	case Property::kReal: {
-		auto ptyped = static_cast<const PropertyReal*>(&prop);
+		auto ptyped = static_cast<const PropertyReal*>(prop);
 		auto edit = make_line_edit(prop);
 		edit->setText(QString::number(ptyped->Value())); // ? should this be set via Property::StringValue?
 		edit->setValidator(new QDoubleValidator(ptyped->Minimum(), ptyped->Maximum(), 10));
 
-		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyReal*>(p.get());
@@ -340,21 +345,21 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(edit, p);
+				UpdateDescription(edit, p.get());
 			}
 		});
 		return edit;
 	}
 	case Property::kString: {
-		auto ptyped = static_cast<const PropertyString*>(&prop);
+		auto ptyped = static_cast<const PropertyString*>(prop);
 		auto edit = make_line_edit(prop);
 		edit->setText(QString::fromStdString(ptyped->Value()));
 
-		Connect(prop.onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [edit, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyString*>(p.get());
@@ -362,23 +367,22 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(edit, p);
+				UpdateDescription(edit, p.get());
 			}
 		});
 		return edit;
 	}
 	case Property::kBool: {
-		auto ptyped = static_cast<const PropertyBool*>(&prop);
+		auto ptyped = static_cast<const PropertyBool*>(prop);
 		auto checkbox = new QCheckBox(this);
 		checkbox->setChecked(ptyped->Value());
-		UpdateState(item, prop.shared_from_this());
 		QObject_connect(checkbox, SIGNAL(toggled(bool)), this, SLOT(Edited()));
 
-		Connect(prop.onModified, m_Lifespan, [checkbox, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [checkbox, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyBool*>(p.get());
@@ -386,30 +390,29 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(checkbox, p);
+				UpdateDescription(checkbox, p.get());
 			}
 		});
 		return checkbox;
 	}
 	case Property::kEnum: {
-		auto ptyped = static_cast<const PropertyEnum*>(&prop);
+		auto ptyped = static_cast<const PropertyEnum*>(prop);
 		auto combo = new QComboBox(this);
 		for (auto d : ptyped->Values())
 		{
 			combo->insertItem(d.first, QString::fromStdString(d.second));
 		}
 		combo->setCurrentIndex(ptyped->Value());
-		UpdateState(item, prop.shared_from_this());
 		UpdateComboState(combo, ptyped);
 		UpdateComboToolTips(combo, ptyped);
 
 		QObject_connect(combo, SIGNAL(currentIndexChanged(int)), this, SLOT(Edited()));
 
-		Connect(prop.onModified, m_Lifespan, [combo, item, ptyped, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [combo, item, ptyped, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertyEnum*>(p.get());
@@ -417,49 +420,47 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, ptyped);
 				UpdateComboState(combo, ptyped);
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(combo, p);
+				UpdateDescription(combo, ptyped);
 				UpdateComboToolTips(combo, ptyped);
 			}
 		});
 		return combo;
 	}
 	case Property::kButton: {
-		auto p = dynamic_cast<PropertyButton*>(&prop);
-		const auto button_text = p->ButtonText().empty() ? prop.Name() : p->ButtonText();
+		auto p = dynamic_cast<PropertyButton*>(prop);
+		const auto button_text = p->ButtonText().empty() ? p->Name() : p->ButtonText();
 		auto button = new QPushButton(QString::fromStdString(button_text), this);
 		button->setAutoDefault(false);
-		UpdateState(item, prop.shared_from_this());
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 
-		Connect(prop.onModified, m_Lifespan, [button, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [button, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(button, p);
+				UpdateDescription(button, p.get());
 			}
 		});
 		return button;
 	}
 	case Property::kSlider: {
-		auto ptyped = static_cast<const PropertySlider*>(&prop);
+		auto ptyped = static_cast<const PropertySlider*>(prop);
 		auto slider = new QSlider(Qt::Horizontal);
 		slider->setValue(ptyped->Value());
 		slider->setRange(ptyped->Minimum(), ptyped->Maximum());
-		UpdateState(item, prop.shared_from_this());
 
 		QObject_connect(slider, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
 		QObject_connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved()));
 		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(Edited()));
 
-		Connect(prop.onModified, m_Lifespan, [slider, item, this](Property_ptr p, Property::eChangeType type) {
+		Connect(prop->onModified, m_Lifespan, [slider, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
 			{
 				auto ptyped = static_cast<const PropertySlider*>(p.get());
@@ -472,11 +473,11 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
-				UpdateState(item, p);
+				UpdateState(item, p.get());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
-				UpdateDescription(slider, p);
+				UpdateDescription(slider, p.get());
 			}
 		});
 		return slider;
@@ -487,7 +488,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 	}
 }
 
-void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
+void PropertyWidget::UpdateState(QTreeWidgetItem* item, const Property* prop)
 {
 	const auto set_enabled = [this](QTreeWidgetItem* item, bool enabled) 
 	{
@@ -510,11 +511,7 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 		return v;
 	};
 
-	bool enabled = p->NetEnabled();
-	if (enabled == item->isDisabled())
-	{
-		VisitItems(item, set_enabled, combine_enabled, enabled);
-	}
+	VisitItems(item, set_enabled, combine_enabled, prop->NetEnabled());
 
 	const auto set_visible = [](QTreeWidgetItem* item, bool visible) {
 		item->setHidden(!visible);
@@ -528,14 +525,10 @@ void PropertyWidget::UpdateState(QTreeWidgetItem* item, Property_cptr p)
 		return v;
 	};
 
-	bool visible = p->NetVisible();
-	if (visible == item->isHidden())
-	{
-		VisitItems(item, set_visible, combine_visible, visible);
-	}
+	VisitItems(item, set_visible, combine_visible, prop->NetVisible());
 }
 
-void PropertyWidget::UpdateDescription(QWidget* w, Property_cptr p)
+void PropertyWidget::UpdateDescription(QWidget* w, const Property* p)
 {
 	// description/name ?
 	w->setToolTip(Format(p->ToolTip()));

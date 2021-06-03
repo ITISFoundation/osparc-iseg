@@ -6124,7 +6124,7 @@ void MainWindow::TabChanged(int idx)
 
 		UpdateMethodButtonsPressed(m_TabOld);
 	}
-	else
+	else if (qw)
 	{
 		m_TabOld = static_cast<WidgetInterface*>(qw);
 	}

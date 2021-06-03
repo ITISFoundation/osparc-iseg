@@ -31,6 +31,7 @@ ISEG_DECL_CLASS_PTR(PropertyReal);
 ISEG_DECL_CLASS_PTR(PropertyBool);
 ISEG_DECL_CLASS_PTR(PropertyEnum);
 ISEG_DECL_CLASS_PTR(PropertyButton);
+ISEG_DECL_CLASS_PTR(PropertySlider);
 ISEG_DECL_CLASS_PTR(PropertyGroup);
 class BlockPropertySignal;
 
@@ -300,6 +301,9 @@ public:
 	static const value_type k_invalid_value = static_cast<value_type>(-1);
 
 	static std::shared_ptr<PropertyEnum> Create(const descriptions_type& descriptions = descriptions_type(), const value_type value = k_invalid_value);
+
+	using Property::Enabled;
+	using Property::SetEnabled;
 
 	value_type Value() const;
 	void SetValue(const value_type value);

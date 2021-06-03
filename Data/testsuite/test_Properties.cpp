@@ -34,7 +34,6 @@ BOOST_AUTO_TEST_CASE(Property_signals)
 	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
 	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
 
-
 	iseg::Connect(pb->onModified, pb, [&](Property_ptr p, Property::eChangeType type) {
 		pe->SetVisible(pb->Value());
 		ps->SetEnabled(pb->Value());
@@ -86,6 +85,35 @@ BOOST_AUTO_TEST_CASE(Property_signals)
 	pb->SetValue(!pb->Value());
 	BOOST_CHECK_EQUAL(prop_value_changed.size(), 0);
 	BOOST_CHECK_EQUAL(prop_state_changed.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(Property_NetEnabled_NetVisible)
+{
+	auto group = PropertyGroup::Create("Settings");
+	auto pb1 = group->Add("Enable", PropertyBool::Create(true));
+	auto pb2 = group->Add("Visible", PropertyBool::Create(true));
+	auto child_group = group->Add("Child", PropertyGroup::Create("Child Settings"));
+	auto pi = child_group->Add("Int", PropertyEnum::Create({"A", "B", "C"}, 0));
+
+	pi->SetVisible(false);
+	BOOST_CHECK_EQUAL(pi->NetVisible(), false);
+
+	pi->SetVisible(true);
+	BOOST_CHECK_EQUAL(pi->NetVisible(), true);
+
+	pi->SetVisible(true);
+	child_group->SetVisible(false);
+	BOOST_CHECK_EQUAL(pi->NetVisible(), false);
+
+	pi->SetEnabled(false);
+	BOOST_CHECK_EQUAL(pi->NetEnabled(), false);
+
+	pi->SetEnabled(true);
+	BOOST_CHECK_EQUAL(pi->NetEnabled(), true);
+
+	pi->SetEnabled(true);
+	child_group->SetEnabled(false);
+	BOOST_CHECK_EQUAL(pi->NetEnabled(), false);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

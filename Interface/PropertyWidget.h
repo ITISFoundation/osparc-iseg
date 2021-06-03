@@ -49,10 +49,10 @@ private slots:
 
 private:
 	void Build(Property_ptr p, QTreeWidgetItem* item, QTreeWidgetItem* parent_item);
-	QWidget* MakePropertyUi(Property& prop, QTreeWidgetItem* item);
+	QWidget* MakePropertyUi(Property* prop, QTreeWidgetItem* item);
 
-	void UpdateState(QTreeWidgetItem* item, Property_cptr p);
-	void UpdateDescription(QWidget* w, Property_cptr p);
+	void UpdateState(QTreeWidgetItem* item, const Property* p);
+	void UpdateDescription(QWidget* w, const Property* p);
 
 	void UpdateComboState(QComboBox* combo, const PropertyEnum* ptyped);
 	void UpdateComboToolTips(QComboBox* combo, const PropertyEnum* ptyped);
