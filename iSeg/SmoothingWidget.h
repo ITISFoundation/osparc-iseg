@@ -7,24 +7,14 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef SMOOTHWIDGET_3MARCH05
-#define SMOOTHWIDGET_3MARCH05
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QLabel>
-#include <QPixmap>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
+#include "Data/Property.h"
 
 #include <algorithm>
 
@@ -36,7 +26,6 @@ class SmoothingWidget : public WidgetInterface
 public:
 	SmoothingWidget(SlicesHandler* hand3D);
 	~SmoothingWidget() override;
-	QSize sizeHint() const override;
 	void Init() override;
 	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
@@ -48,60 +37,47 @@ public:
 private:
 	void OnSlicenrChanged() override;
 
+	void Execute();
+	void ContinueDiff();
+	void MethodChanged();
+	void SigmasliderChanged(int v);
+	void KsliderChanged(int v);
+	void NChanged();
+	void KmaxChanged();
+	void SliderPressed();
+	void SliderReleased();
+
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
 
-	Q3HBox* m_Hboxoverall;
-	Q3VBox* m_Vboxmethods;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3HBox* m_Hbox5;
-	//	Q3HBox *hbox6;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	QLabel* m_TxtN;
-	QLabel* m_TxtSigma1;
-	QLabel* m_TxtSigma2;
-	QLabel* m_TxtDt;
-	QLabel* m_TxtIter;
-	QLabel* m_TxtK;
-	QLabel* m_TxtRestrain1;
-	QLabel* m_TxtRestrain2;
-	QSlider* m_SlSigma;
-	QSlider* m_SlK;
-	QSlider* m_SlRestrain;
-	QSpinBox* m_SbN;
-	QSpinBox* m_SbIter;
-	QSpinBox* m_SbKmax;
-	//	QSpinBox *sb_restrainmax;
-	QCheckBox* m_Allslices;
-	QRadioButton* m_RbGaussian;
-	QRadioButton* m_RbAverage;
-	QRadioButton* m_RbMedian;
-	QRadioButton* m_RbSigmafilter;
-	QRadioButton* m_RbAnisodiff;
-	QButtonGroup* m_Modegroup;
-	QPushButton* m_Pushexec;
-	QPushButton* m_Contdiff;
+	PropertySlider_ptr m_SlSigma;
+	PropertySlider_ptr m_SlK;
+	PropertySlider_ptr m_SlRestrain;
+
+	PropertyInt_ptr m_SbN;
+	PropertyInt_ptr m_SbIter;
+	PropertyInt_ptr m_SbKmax;
+
+	PropertyBool_ptr m_Allslices;
+
+	enum eModeTypes {
+		kGaussian,
+		kAverage,
+		kMedian,
+		kSigmafilter,
+		kAnisodiff,
+		keModeTypesSize
+	};
+	PropertyEnum_ptr m_Modegroup;
+
+	PropertyButton_ptr m_Pushexec;
+	PropertyButton_ptr m_Contdiff;
 
 	bool m_Dontundo;
 
 private slots:
-	void BmphandChanged(Bmphandler* bmph);
-	void Execute();
-	void ContinueDiff();
-	void MethodChanged(int);
-	void SigmasliderChanged(int newval);
-	void KsliderChanged(int newval);
-	void NChanged(int newval);
-	void KmaxChanged(int newval);
-	void SliderPressed();
-	void SliderReleased();
+	void BmphandChanged(Bmphandler* bmph); // TODO BL is this a slot?
 };
 
 } // namespace iseg
-
-#endif
