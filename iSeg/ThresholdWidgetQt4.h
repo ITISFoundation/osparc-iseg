@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,29 +13,26 @@
 
 #include "ui_ThresholdWidgetQt4.h"
 
-
-
 namespace iseg {
 
 class SlicesHandler;
-class bmphandler;
+class Bmphandler;
 
 class ThresholdWidgetQt4 : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	explicit ThresholdWidgetQt4(SlicesHandler *hand3D, QWidget *parent,
-								const char* name, Qt::WindowFlags wFlags);
-	virtual ~ThresholdWidgetQt4();
+	explicit ThresholdWidgetQt4(SlicesHandler* hand3D);
+	~ThresholdWidgetQt4() override;
 
-	virtual void init() override;
-	virtual void newloaded() override;
-	virtual void hideparams_changed() override;
+	void Init() override;
+	void NewLoaded() override;
+	void HideParamsChanged() override;
 	// should be const'ed
-	virtual std::string GetName() override { return std::string("Threshold"); }
-	virtual QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("thresholding.png"))); }
-	virtual FILE *SaveParams(FILE *fp, int version) override;
-	virtual FILE *LoadParams(FILE *fp, int version) override;
+	std::string GetName() override { return std::string("Threshold"); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("thresholding.png"))); }
+	FILE* SaveParams(FILE* fp, int version) override;
+	FILE* LoadParams(FILE* fp, int version) override;
 
 private slots:
 	// manual
@@ -74,7 +71,6 @@ private slots:
 	void on_mKMeansIterationsSpinBox_valueChanged(int newValue);
 	void on_mKMeansConvergeSpinBox_valueChanged(int newValue);
 
-
 	// general
 	void on_mUseCenterFileCheckBox_toggled(bool newValue);
 	void on_mCenterFilenameLineEdit_editingFinished();
@@ -83,14 +79,13 @@ private slots:
 	void on_mAllSlicesCheckBox_toggled(bool newValue);
 	void on_mExecutePushButton_clicked();
 
-	void on_ModeChanged(QWidget* current_widget);
+	void on_ModeChanged(QWidget*);
 
-	// override
-	void bmp_changed();
+	void BmpChanged() override;
 
 private:
-	void on_tissuenr_changed(int i) override;
-	void on_slicenr_changed() override;
+	void OnTissuenrChanged(int i) override;
+	void OnSlicenrChanged() override;
 	void initUi();
 	void updateUi();
 	void resetThresholds();
@@ -100,14 +95,13 @@ private:
 
 	std::pair<float, float> get_range() const;
 
-	SlicesHandler *handler3D = nullptr;
-	float threshs[21]; // ugly
-	float weights[20]; // ugly
-	float *bits[20]; // ugly
-	unsigned bits1[20]; // ugly
-	std::vector<QString> filenames;
-	Ui::ThresholdWidgetQt4 ui;
-
+	SlicesHandler* m_Handler3D = nullptr;
+	float m_Threshs[21];	// ugly
+	float m_Weights[20];	// ugly
+	float* m_Bits[20];		// ugly
+	unsigned m_Bits1[20]; // ugly
+	std::vector<QString> m_Filenames;
+	Ui::ThresholdWidgetQt4 m_Ui;
 };
 
 } // namespace iseg

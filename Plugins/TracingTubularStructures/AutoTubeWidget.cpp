@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  *
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,8 +13,8 @@
 #include "Data/Logger.h"
 #include "Data/SlicesHandlerITKInterface.h"
 
-#include "itkBinaryThinningImageFilter3D.h"
-#include "itkNonMaxSuppressionImageFilter.h"
+#include "Thirdparty/IJ/BinaryThinningImageFilter3D/itkBinaryThinningImageFilter3D.h"
+#include "Thirdparty/IJ/NonMaxSuppression/itkNonMaxSuppressionImageFilter.h"
 
 #include <itkBinaryThinningImageFilter.h>
 #include <itkBinaryThresholdImageFilter.h>
@@ -66,60 +66,59 @@ class BinaryThinningImageFilter<TInputImage, TOutputImage, 3> : public itk::Bina
 {
 };
 
-AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
+AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Sandbox Tool"));
 
-	_metric2d = new QCheckBox;
-	_metric2d->setChecked(false);
-	_metric2d->setToolTip(Format("Use 2D pseudo vesselness (blob feature per slice), or use full 3D vesselness."));
+	m_Metric2d = new QCheckBox;
+	m_Metric2d->setChecked(false);
+	m_Metric2d->setToolTip(Format("Use 2D pseudo vesselness (blob feature per slice), or use full 3D vesselness."));
 
-	_non_max_suppression = new QCheckBox;
-	_non_max_suppression->setChecked(true);
-	_non_max_suppression->setToolTip(Format("Extract approx. one pixel wide paths based on non-maximum suppression."));
+	m_NonMaxSuppression = new QCheckBox;
+	m_NonMaxSuppression->setChecked(true);
+	m_NonMaxSuppression->setToolTip(Format("Extract approx. one pixel wide paths based on non-maximum suppression."));
 
-	_skeletonize = new QCheckBox;
-	_skeletonize->setChecked(true);
-	_skeletonize->setToolTip(Format("Compute 1-pixel wide centerlines (skeleton)."));
+	m_Skeletonize = new QCheckBox;
+	m_Skeletonize->setChecked(true);
+	m_Skeletonize->setToolTip(Format("Compute 1-pixel wide centerlines (skeleton)."));
 
-	_sigma_low = new QLineEdit(QString::number(0.3));
-	_sigma_low->setValidator(new QDoubleValidator);
+	m_SigmaLow = new QLineEdit(QString::number(0.3));
+	m_SigmaLow->setValidator(new QDoubleValidator);
 
-	_sigma_hi = new QLineEdit(QString::number(0.6));
-	_sigma_hi->setValidator(new QDoubleValidator);
+	m_SigmaHi = new QLineEdit(QString::number(0.6));
+	m_SigmaHi->setValidator(new QDoubleValidator);
 
-	_number_sigma_levels = new QLineEdit(QString::number(2));
-	_number_sigma_levels->setValidator(new QIntValidator);
+	m_NumberSigmaLevels = new QLineEdit(QString::number(2));
+	m_NumberSigmaLevels->setValidator(new QIntValidator);
 
-	_threshold = new QLineEdit;
-	_threshold->setValidator(new QDoubleValidator);
+	m_Threshold = new QLineEdit;
+	m_Threshold->setValidator(new QDoubleValidator);
 
-	_max_radius = new QLineEdit(QString::number(1));
-	_max_radius->setValidator(new QDoubleValidator);
+	m_MaxRadius = new QLineEdit(QString::number(1));
+	m_MaxRadius->setValidator(new QDoubleValidator);
 
-	_min_object_size = new QLineEdit(QString::number(10));
-	_min_object_size->setValidator(new QIntValidator);
+	m_MinObjectSize = new QLineEdit(QString::number(10));
+	m_MinObjectSize->setValidator(new QIntValidator);
 
-	_select_objects_button = new QPushButton("Select Mask");
-	_selected_objects = new QLineEdit;
-	_selected_objects->setReadOnly(true);
+	m_SelectObjectsButton = new QPushButton("Select Mask");
+	m_SelectedObjects = new QLineEdit;
+	m_SelectedObjects->setReadOnly(true);
 
-	_execute_button = new QPushButton("Execute");
+	m_ExecuteButton = new QPushButton("Execute");
 
 	auto layout = new QFormLayout;
-	layout->addRow("Sigma Min", _sigma_low);
-	layout->addRow("Sigma Max", _sigma_hi);
-	layout->addRow("Number of Sigmas", _number_sigma_levels);
-	layout->addRow("2D Vesselness", _metric2d);
-	layout->addRow("Feature Threshold", _threshold);
-	layout->addRow("Non-maximum Suppression", _non_max_suppression);
-	layout->addRow("Centerlines", _skeletonize);
+	layout->addRow("Sigma Min", m_SigmaLow);
+	layout->addRow("Sigma Max", m_SigmaHi);
+	layout->addRow("Number of Sigmas", m_NumberSigmaLevels);
+	layout->addRow("2D Vesselness", m_Metric2d);
+	layout->addRow("Feature Threshold", m_Threshold);
+	layout->addRow("Non-maximum Suppression", m_NonMaxSuppression);
+	layout->addRow("Centerlines", m_Skeletonize);
 	//layout->addRow("Maximum radius", _max_radius);
-	layout->addRow("Minimum object size", _min_object_size);
-	layout->addRow(_select_objects_button, _selected_objects);
-	layout->addRow(_execute_button);
+	layout->addRow("Minimum object size", m_MinObjectSize);
+	layout->addRow(m_SelectObjectsButton, m_SelectedObjects);
+	layout->addRow(m_ExecuteButton);
 
 	auto big_view = new QWidget;
 	big_view->setLayout(layout);
@@ -131,46 +130,46 @@ AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D, QWidget* pa
 	top_layout->addWidget(scroll_area, 0, 0);
 	setLayout(top_layout);
 
-	QObject::connect(_select_objects_button, SIGNAL(clicked()), this, SLOT(select_objects()));
-	QObject::connect(_execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
+	QObject_connect(m_SelectObjectsButton, SIGNAL(clicked()), this, SLOT(SelectObjects()));
+	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(DoWork()));
 }
 
-void AutoTubeWidget::init()
+void AutoTubeWidget::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
-void AutoTubeWidget::newloaded()
+void AutoTubeWidget::NewLoaded()
 {
-	on_slicenr_changed();
+	OnSlicenrChanged();
 }
 
-void AutoTubeWidget::on_slicenr_changed()
-{
-}
-
-void AutoTubeWidget::cleanup()
-{
-	_selected_objects->setText("");
-	_cached_feature_image.img = nullptr;
-}
-
-void AutoTubeWidget::on_mouse_clicked(iseg::Point p)
+void AutoTubeWidget::OnSlicenrChanged()
 {
 }
 
-void AutoTubeWidget::select_objects()
+void AutoTubeWidget::Cleanup()
 {
-	auto sel = _handler3D->tissue_selection();
+	m_SelectedObjects->setText("");
+	m_CachedFeatureImage.img = nullptr;
+}
+
+void AutoTubeWidget::OnMouseClicked(iseg::Point p)
+{
+}
+
+void AutoTubeWidget::SelectObjects()
+{
+	auto sel = m_Handler3D->TissueSelection();
 	std::cout << "sel " << sel[0] << std::endl;
 	std::string text = join(sel | transformed([](int d) { return std::to_string(d); }), ", ");
-	_selected_objects->setText(QString::fromStdString(text));
+	m_SelectedObjects->setText(QString::fromStdString(text));
 }
 
-void AutoTubeWidget::do_work()
+void AutoTubeWidget::DoWork()
 {
-	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
 	try
 	{
 		if ((true)) //(all_slices->isChecked())
@@ -180,7 +179,7 @@ void AutoTubeWidget::do_work()
 			auto source = itk_handler.GetSource(true); // active_slices -> correct seed z-position
 			auto target = itk_handler.GetTarget(true);
 			auto tissues = itk_handler.GetTissues(true);
-			do_work_nd<input_type, tissues_type, input_type>(source, tissues, target);
+			DoWorkNd<input_type, tissues_type, input_type>(source, tissues, target);
 		}
 		else
 		{
@@ -189,7 +188,7 @@ void AutoTubeWidget::do_work()
 			auto source = itk_handler.GetSourceSlice();
 			auto target = itk_handler.GetTargetSlice();
 			auto tissues = itk_handler.GetTissuesSlice();
-			do_work_nd<input_type, tissues_type, input_type>(source, tissues, target);
+			DoWorkNd<input_type, tissues_type, input_type>(source, tissues, target);
 		}
 	}
 	catch (const std::exception& e)
@@ -199,7 +198,7 @@ void AutoTubeWidget::do_work()
 }
 
 template<class TInput, class TImage>
-typename TImage::Pointer AutoTubeWidget::compute_feature_image(TInput* source) const
+typename TImage::Pointer AutoTubeWidget::ComputeFeatureImage(TInput* source) const
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using hessian_pixel_type = itk::SymmetricSecondRankTensor<float, ImageDimension>;
@@ -207,31 +206,31 @@ typename TImage::Pointer AutoTubeWidget::compute_feature_image(TInput* source) c
 	using feature_filter_type = itk::HessianToObjectnessMeasureImageFilter<hessian_image_type, TImage>;
 	using multiscale_hessian_filter_type = itk::MultiScaleHessianBasedMeasureImageFilter<TInput, hessian_image_type, TImage>;
 
-	double sigm_min = _sigma_low->text().toDouble();
-	double sigm_max = _sigma_hi->text().toDouble();
-	int num_levels = _number_sigma_levels->text().toInt();
+	double sigm_min = m_SigmaLow->text().toDouble();
+	double sigm_max = m_SigmaHi->text().toDouble();
+	int num_levels = m_NumberSigmaLevels->text().toInt();
 
-	auto objectnessFilter = feature_filter_type::New();
-	objectnessFilter->SetBrightObject(false);
-	objectnessFilter->SetObjectDimension(1);
-	objectnessFilter->SetScaleObjectnessMeasure(true);
-	objectnessFilter->SetAlpha(0.5);
-	objectnessFilter->SetBeta(0.5);
-	objectnessFilter->SetGamma(5.0);
+	auto objectness_filter = feature_filter_type::New();
+	objectness_filter->SetBrightObject(false);
+	objectness_filter->SetObjectDimension(1);
+	objectness_filter->SetScaleObjectnessMeasure(true);
+	objectness_filter->SetAlpha(0.5);
+	objectness_filter->SetBeta(0.5);
+	objectness_filter->SetGamma(5.0);
 
-	auto multiScaleEnhancementFilter = multiscale_hessian_filter_type::New();
-	multiScaleEnhancementFilter->SetInput(source);
-	multiScaleEnhancementFilter->SetHessianToMeasureFilter(objectnessFilter);
-	multiScaleEnhancementFilter->SetSigmaStepMethodToEquispaced();
-	multiScaleEnhancementFilter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetNumberOfSigmaSteps(std::min(1, num_levels));
-	multiScaleEnhancementFilter->Update();
-	return multiScaleEnhancementFilter->GetOutput();
+	auto multi_scale_enhancement_filter = multiscale_hessian_filter_type::New();
+	multi_scale_enhancement_filter->SetInput(source);
+	multi_scale_enhancement_filter->SetHessianToMeasureFilter(objectness_filter);
+	multi_scale_enhancement_filter->SetSigmaStepMethodToEquispaced();
+	multi_scale_enhancement_filter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetNumberOfSigmaSteps(std::min(1, num_levels));
+	multi_scale_enhancement_filter->Update();
+	return multi_scale_enhancement_filter->GetOutput();
 }
 
 template<class TInput, class TImage>
-typename TImage::Pointer AutoTubeWidget::compute_feature_image_2d(TInput* source) const
+typename TImage::Pointer AutoTubeWidget::ComputeFeatureImage2d(TInput* source) const
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using input_type = TInput;
@@ -246,35 +245,35 @@ typename TImage::Pointer AutoTubeWidget::compute_feature_image_2d(TInput* source
 	using multiscale_hessian_filter_type = itk::MultiScaleHessianBasedMeasureImageFilter<image_type, hessian_image_type, image_type>;
 	using slice_by_slice_filter_type = itk::SliceBySliceImageFilter<input_type, output_type, multiscale_hessian_filter_type>;
 
-	double sigm_min = _sigma_low->text().toDouble();
-	double sigm_max = _sigma_hi->text().toDouble();
-	int num_levels = _number_sigma_levels->text().toInt();
+	double sigm_min = m_SigmaLow->text().toDouble();
+	double sigm_max = m_SigmaHi->text().toDouble();
+	int num_levels = m_NumberSigmaLevels->text().toInt();
 
-	auto objectnessFilter = feature_filter_type::New();
-	objectnessFilter->SetBrightObject(false);
-	objectnessFilter->SetObjectDimension(ImageDimension == 2 ? 1 : 0); // for 2D analysis we are looking for lines in a single slice
-	objectnessFilter->SetScaleObjectnessMeasure(true);
-	objectnessFilter->SetAlpha(0.5);
-	objectnessFilter->SetBeta(0.5);
-	objectnessFilter->SetGamma(5.0);
+	auto objectness_filter = feature_filter_type::New();
+	objectness_filter->SetBrightObject(false);
+	objectness_filter->SetObjectDimension(ImageDimension == 2 ? 1 : 0); // for 2D analysis we are looking for lines in a single slice
+	objectness_filter->SetScaleObjectnessMeasure(true);
+	objectness_filter->SetAlpha(0.5);
+	objectness_filter->SetBeta(0.5);
+	objectness_filter->SetGamma(5.0);
 
-	auto multiScaleEnhancementFilter = multiscale_hessian_filter_type::New();
-	multiScaleEnhancementFilter->SetHessianToMeasureFilter(objectnessFilter);
-	multiScaleEnhancementFilter->SetSigmaStepMethodToEquispaced();
-	multiScaleEnhancementFilter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetNumberOfSigmaSteps(std::min(1, num_levels));
+	auto multi_scale_enhancement_filter = multiscale_hessian_filter_type::New();
+	multi_scale_enhancement_filter->SetHessianToMeasureFilter(objectness_filter);
+	multi_scale_enhancement_filter->SetSigmaStepMethodToEquispaced();
+	multi_scale_enhancement_filter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetNumberOfSigmaSteps(std::min(1, num_levels));
 
 	auto slice_filter = slice_by_slice_filter_type::New();
 	slice_filter->SetInput(source);
-	slice_filter->SetFilter(multiScaleEnhancementFilter);
+	slice_filter->SetFilter(multi_scale_enhancement_filter);
 	slice_filter->Update();
 
 	return slice_filter->GetOutput();
 }
 
 template<class TInput, class TTissue, class TTarget>
-void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* target)
+void AutoTubeWidget::DoWorkNd(TInput* source, TTissue* tissues, TTarget* target)
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using input_type = TInput;
@@ -288,22 +287,22 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 
 	typename real_type::Pointer feature_image;
 	std::vector<double> feature_params;
-	feature_params.push_back(_sigma_low->text().toDouble());
-	feature_params.push_back(_sigma_hi->text().toDouble());
-	feature_params.push_back(_number_sigma_levels->text().toInt());
-	feature_params.push_back(_metric2d->isChecked());
-	if (!_cached_feature_image.get(feature_image, feature_params))
+	feature_params.push_back(m_SigmaLow->text().toDouble());
+	feature_params.push_back(m_SigmaHi->text().toDouble());
+	feature_params.push_back(m_NumberSigmaLevels->text().toInt());
+	feature_params.push_back(m_Metric2d->isChecked());
+	if (!m_CachedFeatureImage.Get(feature_image, feature_params))
 	{
-		feature_image = _metric2d->isChecked()
-												? compute_feature_image_2d<input_type, real_type>(source)
-												: compute_feature_image<input_type, real_type>(source);
-		_cached_feature_image.store(feature_image, feature_params);
-		_cached_skeleton.img = nullptr;
+		feature_image = m_Metric2d->isChecked()
+												? ComputeFeatureImage2d<input_type, real_type>(source)
+												: ComputeFeatureImage<input_type, real_type>(source);
+		m_CachedFeatureImage.Store(feature_image, feature_params);
+		m_CachedSkeleton.img = nullptr;
 	}
 
 	// initialize threshold to reasonable value
 	bool ok = false;
-	float lower = _threshold->text().toFloat(&ok);
+	float lower = m_Threshold->text().toFloat(&ok);
 	if (!ok)
 	{
 		auto calculator = itk::MinimumMaximumImageCalculator<real_type>::New();
@@ -314,35 +313,34 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		auto max_gm = calculator->GetMaximum();
 
 		lower = min_gm + 0.8 * (max_gm - min_gm); // stupid way to guess threshold
-		_threshold->setText(QString::number(lower));
+		m_Threshold->setText(QString::number(lower));
 	}
 
 	// extract IDs if any were set
 	std::vector<int> object_ids;
-	if (!_selected_objects->text().isEmpty())
+	if (!m_SelectedObjects->text().isEmpty())
 	{
 		std::vector<std::string> tokens;
-		std::string selected_objects_text = _selected_objects->text().toStdString();
+		std::string selected_objects_text = m_SelectedObjects->text().toStdString();
 		boost::algorithm::split(tokens, selected_objects_text, boost::algorithm::is_any_of(","));
-		std::transform(tokens.begin(), tokens.end(), std::back_inserter(object_ids),
-				[](std::string s) {
-					boost::algorithm::trim(s);
-					return stoi(s);
-				});
+		std::transform(tokens.begin(), tokens.end(), std::back_inserter(object_ids), [](std::string s) {
+			boost::algorithm::trim(s);
+			return stoi(s);
+		});
 	}
 
 	// mask feature image before skeletonization
 	if (!object_ids.empty())
 	{
-		using map_functor = iseg::Functor::MapLabels<unsigned short, unsigned char>;
-		map_functor map;
-		map.m_Map.assign(_handler3D->tissue_names().size() + 1, 0);
+		using map_functor_type = iseg::Functor::MapLabels<unsigned short, unsigned char>;
+		map_functor_type map;
+		map.m_Map.assign(m_Handler3D->TissueNames().size() + 1, 0);
 		for (size_t i = 0; i < object_ids.size(); i++)
 		{
 			map.m_Map.at(object_ids[i]) = 1;
 		}
 
-		auto map_filter = itk::UnaryFunctorImageFilter<TTissue, mask_type, map_functor>::New();
+		auto map_filter = itk::UnaryFunctorImageFilter<TTissue, mask_type, map_functor_type>::New();
 		map_filter->SetFunctor(map);
 		map_filter->SetInput(tissues);
 
@@ -356,13 +354,13 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 	typename mask_type::Pointer skeleton;
 	std::vector<double> skeleton_params(object_ids.begin(), object_ids.end());
 	skeleton_params.push_back(lower);
-	skeleton_params.push_back(_non_max_suppression->isChecked());
-	skeleton_params.push_back(_skeletonize->isChecked());
-	skeleton_params.push_back(_min_object_size->text().toInt());
-	if (!_cached_skeleton.get(skeleton, skeleton_params))
+	skeleton_params.push_back(m_NonMaxSuppression->isChecked());
+	skeleton_params.push_back(m_Skeletonize->isChecked());
+	skeleton_params.push_back(m_MinObjectSize->text().toInt());
+	if (!m_CachedSkeleton.Get(skeleton, skeleton_params))
 	{
 		// disconnect bright tubes via non-maxi suppression
-		if (_non_max_suppression->isChecked())
+		if (m_NonMaxSuppression->isChecked())
 		{
 			auto masking = itk::ThresholdImageFilter<real_type>::New();
 			masking->SetInput(feature_image);
@@ -388,7 +386,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 			skeleton = threshold->GetOutput();
 		}
 
-		if (_skeletonize->isChecked())
+		if (m_Skeletonize->isChecked())
 		{
 			// get centerline: either thresholding or non-max suppression must be done before this
 			auto thinning = thinnning_filter_type::New();
@@ -403,11 +401,11 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 			SAFE_UPDATE(rescale, return );
 			skeleton = rescale->GetOutput();
 		}
-		_cached_skeleton.store(skeleton, skeleton_params);
+		m_CachedSkeleton.Store(skeleton, skeleton_params);
 	}
 
 	typename mask_type::Pointer output;
-	if (skeleton && _min_object_size->text().toInt() > 1)
+	if (skeleton && m_MinObjectSize->text().toInt() > 1)
 	{
 		auto connectivity = itk::ConnectedComponentImageFilter<mask_type, labelfield_type>::New();
 		connectivity->SetInput(skeleton);
@@ -415,7 +413,7 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 
 		auto relabel = itk::RelabelComponentImageFilter<labelfield_type, labelfield_type>::New();
 		relabel->SetInput(connectivity->GetOutput());
-		relabel->SetMinimumObjectSize(_min_object_size->text().toInt());
+		relabel->SetMinimumObjectSize(m_MinObjectSize->text().toInt());
 
 		auto threshold = itk::BinaryThresholdImageFilter<labelfield_type, mask_type>::New();
 		threshold->SetInput(relabel->GetOutput());
@@ -424,11 +422,11 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		output = threshold->GetOutput();
 	}
 
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = true; // all_slices->isChecked();
-	dataSelection.sliceNr = _handler3D->active_slice();
-	dataSelection.work = true;
-	emit begin_datachange(dataSelection, this);
+	iseg::DataSelection data_selection;
+	data_selection.allSlices = true; // all_slices->isChecked();
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
+	emit BeginDatachange(data_selection, this);
 
 	if (output && iseg::Paste<mask_type, input_type>(output, target))
 	{
@@ -439,5 +437,5 @@ void AutoTubeWidget::do_work_nd(TInput* source, TTissue* tissues, TTarget* targe
 		std::cerr << "Error: could not set output because image regions don't match.\n";
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }

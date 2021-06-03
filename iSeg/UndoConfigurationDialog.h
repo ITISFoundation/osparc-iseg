@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,10 +11,10 @@
 
 #include "SlicesHandler.h"
 
-#include <qdialog.h>
-#include <qcheckbox.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QCheckBox>
+#include <QDialog>
+#include <QPushButton>
+#include <QSpinBox>
 
 namespace iseg {
 
@@ -22,20 +22,18 @@ class UndoConfigurationDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent = 0, const char* name = 0,
-							Qt::WindowFlags wFlags = 0);
-	~UndoConfigurationDialog();
+	UndoConfigurationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~UndoConfigurationDialog() override;
 
 private:
-	SlicesHandler* handler3D;
-	QCheckBox* cb_undo3D;
-	QSpinBox* sb_nrundo;
-	QSpinBox* sb_nrundoarrays;
-	QPushButton* pb_close;
+	SlicesHandler* m_Handler3D;
+	QCheckBox* m_CbUndo3D;
+	QSpinBox* m_SbNrundo;
+	QSpinBox* m_SbNrundoarrays;
+	QPushButton* m_PbClose;
 
 private slots:
-	void ok_pressed();
+	void OkPressed();
 };
 
 } // namespace iseg
-

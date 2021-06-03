@@ -46,7 +46,7 @@ MACRO(SET_COMPILER_AND_LINKER_FLAGS)
 		SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /debug:fastlink")
 	ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 		# -std=c++11 -stdlib=libc++ 
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override -Wunreachable-code-aggressive")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-inconsistent-missing-override -Wunreachable-code-aggressive -Wunused")
 	ENDIF()
 ENDMACRO()
 

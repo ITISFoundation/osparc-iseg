@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,7 +9,7 @@
 */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
 #include "../Data/ProgressInfo.h"
 
@@ -30,18 +30,18 @@ class ISEG_INTERFACE_API ProgressDialog
 public:
 	ProgressDialog(const char* msg, QWidget* parent);
 
-	void setNumberOfSteps(int N) override;
-	void increment() override;
-	bool wasCanceled() const override;
-	void setValue(int percent) override;
+	void SetNumberOfSteps(int N) override;
+	void Increment() override;
+	bool WasCanceled() const override;
+	void SetValue(int percent) override;
 
 private slots:
-	void cancel();
+	void Cancel();
 
 private:
-	bool canceled = false;
-	QProgressDialog* progress = nullptr;
-	std::atomic<int> count;
+	bool m_Canceled = false;
+	QProgressDialog* m_Progress = nullptr;
+	std::atomic<int> m_Count;
 };
 
 } // namespace iseg

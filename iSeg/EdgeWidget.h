@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,18 +15,7 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include "Data/Property.h"
 
 #include <algorithm>
 
@@ -36,60 +25,48 @@ class EdgeWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	EdgeWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~EdgeWidget();
-	QSize sizeHint() const override;
-	void init() override;
-	void newloaded() override;
+	EdgeWidget(SlicesHandler* hand3D);
+	~EdgeWidget() override;
+	void Init() override;
+	void NewLoaded() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
 	std::string GetName() override { return std::string("Edge"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("edge.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("edge.png"))); }
 
 private:
-	void on_slicenr_changed() override;
+	void OnSlicenrChanged() override;
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	Q3HBox* hboxoverall;
-	Q3VBox* vboxmethods;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3HBox* hbox4;
-	Q3VBox* vbox1;
-	QLabel* txt_sigmal;
-	QLabel* txt_sigma2;
-	QLabel* txt_thresh11;
-	QLabel* txt_thresh12;
-	QLabel* txt_thresh21;
-	QLabel* txt_thresh22;
-	QSlider* sl_sigma;
-	QSlider* sl_thresh1;
-	QSlider* sl_thresh2;
-	QCheckBox* cb_3d;
-	QPushButton* btn_export_centerlines;
-	QPushButton* btn_exec;
+	void Execute();
+	void ExportCenterlines();
+	void MethodChanged();
+	void SliderChanged();
 
-	QRadioButton* rb_sobel;
-	QRadioButton* rb_laplacian;
-	QRadioButton* rb_interquartile;
-	QRadioButton* rb_momentline;
-	QRadioButton* rb_gaussline;
-	QRadioButton* rb_canny;
-	QRadioButton* rb_laplacianzero;
-	QRadioButton* rb_centerlines;
-	QButtonGroup* modegroup;
+	Bmphandler* m_Bmphand = nullptr;
+	SlicesHandler* m_Handler3D = nullptr;
+	unsigned short m_Activeslice = 0;
+	bool m_BlockExecute = false;
 
-private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void execute();
-	void export_centerlines();
-	void method_changed(int);
-	void slider_changed(int newval);
+	enum eModeType {
+		kSobel = 0,
+		kLaplacian,
+		kInterquartile,
+		kMomentline,
+		kGaussline,
+		kCanny,
+		kLaplacianzero,
+		kCenterlines,
+		eModeTypeSize
+	};
+	PropertyEnum_ptr m_Modegroup;
+
+	PropertySlider_ptr m_SlSigma; // scaled to [0,5]
+	PropertySlider_ptr m_SlThresh1; // scaled to [0,150]
+	PropertySlider_ptr m_SlThresh2; // scaled to [0,150]
+	PropertyBool_ptr m_Cb3d;
+
+	PropertyButton_ptr m_BtnExportCenterlines;
+	PropertyButton_ptr m_BtnExec;
 };
 
 } // namespace iseg

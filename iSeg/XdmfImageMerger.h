@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -51,33 +51,24 @@ public:
 	int Write();
 
 protected:
-	char* FileName;
-	unsigned NumberOfSlices;
-	unsigned TotalNumberOfSlices;
-	unsigned Width;
-	unsigned Height;
-	int Compression;
-	float* PixelSize;
-	Transform ImageTransform;
-	float** ImageSlices;
-	float** WorkSlices;
-	tissues_size_t** TissueSlices;
-	std::vector<QString> MergeFileNames;
+	char* m_FileName;
+	unsigned m_NumberOfSlices;
+	unsigned m_TotalNumberOfSlices;
+	unsigned m_Width;
+	unsigned m_Height;
+	int m_Compression;
+	float* m_PixelSize;
+	Transform m_ImageTransform;
+	float** m_ImageSlices;
+	float** m_WorkSlices;
+	tissues_size_t** m_TissueSlices;
+	std::vector<QString> m_MergeFileNames;
 
 private:
-	int InternalWrite(const char* filename,
-			std::vector<QString>& mergefilenames, float** slicesbmp,
-			float** sliceswork, tissues_size_t** slicestissue,
-			unsigned nrslices, unsigned nrslicesTotal, unsigned width,
-			unsigned height, float* pixelsize, const Transform& transform,
-			int compression);
-	int ReadSource(XdmfImageReader* imageReader, const char* filename,
-			std::vector<float>& bufferFloat, size_t& sliceoffset);
-	int ReadTarget(XdmfImageReader* imageReader, const char* filename,
-			std::vector<float>& bufferFloat, size_t& sliceoffset);
-	int ReadTissues(XdmfImageReader* imageReader, const char* filename,
-			std::vector<tissues_size_t>& bufferTissuesSizeT,
-			size_t& sliceoffset);
+	int InternalWrite(const char* filename, std::vector<QString>& mergefilenames, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height, float* pixelsize, const Transform& transform, int compression);
+	int ReadSource(XdmfImageReader* imageReader, const char* filename, std::vector<float>& bufferFloat, size_t& sliceoffset) const;
+	int ReadTarget(XdmfImageReader* imageReader, const char* filename, std::vector<float>& bufferFloat, size_t& sliceoffset) const;
+	int ReadTissues(XdmfImageReader* imageReader, const char* filename, std::vector<tissues_size_t>& bufferTissuesSizeT, size_t& sliceoffset) const;
 };
 
 } // namespace iseg

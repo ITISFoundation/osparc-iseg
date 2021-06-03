@@ -33,15 +33,11 @@
 #include "../../IMaxFlow.h"
 #include "../../../System/Collection/Array.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace General
-        {
-            namespace PushRelabel
-            {
-                /** Implementation of Push-Relabel maximum flow algorithm on general directed graphs with FIFO 
+namespace Gc {
+namespace Flow {
+namespace General {
+namespace PushRelabel {
+/** Implementation of Push-Relabel maximum flow algorithm on general directed graphs with FIFO 
                     selection rule and gap relabeling.
 
                     This method is commonly referred to as <b>Q_PRF</b> and its description can be found
@@ -81,133 +77,131 @@ namespace Gc
 
                     @see HighestLevel, Fifo
                 */
-		        template <class TFLOW, class TCAP>
-		        class GC_DLL_EXPORT FifoGap
-                    : public IMaxFlow<TFLOW,TFLOW,TCAP>
-		        {
-                private:
-                    // Forward declaration
-			        struct Node;
+template <class TFLOW, class TCAP>
+class GC_DLL_EXPORT FifoGap
+    : public IMaxFlow<TFLOW, TFLOW, TCAP>
+{
+  private:
+    // Forward declaration
+    struct Node;
 
-                    /** Structure for storing arcs in the network. */
-			        struct Arc
-			        {
-                        /** Residual capacity. */
-				        TCAP m_res_cap;
-                        /** Pointer to the next arc with the same tail. */
-				        Arc *m_next;
-                        /** Pointer to the arc going in the opposite direction. */
-				        Arc *m_sister;
-                        /** Pointer to the head node of this arc. */
-				        Node *m_head;
-			        };
+    /** Structure for storing arcs in the network. */
+    struct Arc
+    {
+        /** Residual capacity. */
+        TCAP m_res_cap;
+        /** Pointer to the next arc with the same tail. */
+        Arc * m_next;
+        /** Pointer to the arc going in the opposite direction. */
+        Arc * m_sister;
+        /** Pointer to the head node of this arc. */
+        Node * m_head;
+    };
 
-                    /** Structure for storing nodes in the network. */
-			        struct Node
-			        {
-                        /** Pointer to the first arc going from this node. */
-				        Arc *m_first;
-                        /** Currently processed arc. */
-				        Arc *m_current;
-                        /** Node excess. */
-                        TFLOW m_excess;
-                        /** Node rank (distance to the sink). */
-                        Size m_rank;
-                        /** Next node on the same layer */
-                        Node *m_lay_next;
-                        /** Previous node on the same layer */
-                        Node *m_lay_prev;
-                        /** Next active node */
-                        Node *m_next_active;
-			        };
+    /** Structure for storing nodes in the network. */
+    struct Node
+    {
+        /** Pointer to the first arc going from this node. */
+        Arc * m_first;
+        /** Currently processed arc. */
+        Arc * m_current;
+        /** Node excess. */
+        TFLOW m_excess;
+        /** Node rank (distance to the sink). */
+        Size m_rank;
+        /** Next node on the same layer */
+        Node * m_lay_next;
+        /** Previous node on the same layer */
+        Node * m_lay_prev;
+        /** Next active node */
+        Node * m_next_active;
+    };
 
-                    /** Structure for storing rank layers. */
-                    struct Layer
-                    {
-                        /** First node on the layer. */
-                        Node *m_first;
-                    };
+    /** Structure for storing rank layers. */
+    struct Layer
+    {
+        /** First node on the layer. */
+        Node * m_first;
+    };
 
-                    /** The array of nodes. */
-                    System::Collection::Array<1,Node> m_node_list;
-                    /** The array of arcs. */
-                    System::Collection::Array<1,Arc> m_arc_list;
-                    /** Node count. */
-			        Size m_nodes;
-                    /** Arc count. */
-			        Size m_arcs;
-                    /** Global update frequency. */
-                    double m_glob_rel_freq;
-                    /** Total flow */
-                    TFLOW m_flow;
+    /** The array of nodes. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** The array of arcs. */
+    System::Collection::Array<1, Arc> m_arc_list;
+    /** Node count. */
+    Size m_nodes;
+    /** Arc count. */
+    Size m_arcs = 0;
+    /** Global update frequency. */
+    double m_glob_rel_freq = 0.4;
+    /** Total flow */
+    TFLOW m_flow;
 
-                    /** First active node in the queue */
-                    Node *m_fifo_first;
-                    /** Last active node in the queue */
-                    Node *m_fifo_last;
-                    /** Array of layers. */
-                    System::Collection::Array<1,Layer> m_layer_list;
-                    /** Highest rank. */
-                    Size m_max_rank;
+    /** First active node in the queue */
+    Node * m_fifo_first;
+    /** Last active node in the queue */
+    Node * m_fifo_last;
+    /** Array of layers. */
+    System::Collection::Array<1, Layer> m_layer_list;
+    /** Highest rank. */
+    Size m_max_rank;
 
-                    /** Current stage. Used to check correct method calling order. */
-                    Uint8 m_stage;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		        public:
-			        /** Constructor. */
-			        FifoGap()
-				        : m_arcs(0), m_glob_rel_freq(0.4), m_stage(0)
-			        {}
+  public:
+    /** Constructor. */
+    FifoGap() = default;
 
-			        /** Destructor. */
-			        virtual ~FifoGap()
-			        {
-				        Dispose();
-			        }
+    /** Destructor. */
+    ~FifoGap() override
+    {
+        Dispose();
+    }
 
-    			    virtual void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs);
+    void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs) override;
 
-	    		    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap);
+    void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) override;
 
-		    	    virtual void SetTerminalArcCap(Size node, TFLOW csrc, TFLOW csnk);
+    void SetTerminalArcCap(Size node, TFLOW csrc, TFLOW csnk) override;
 
-			        virtual TFLOW FindMaxFlow();
+    TFLOW FindMaxFlow() override;
 
-			        virtual Origin NodeOrigin(Size node) const;
+    Origin NodeOrigin(Size node) const override;
 
-			        virtual void Dispose();
+    void Dispose() override;
 
-                    /** Set the global update frequency.
+    /** Set the global update frequency.
 
                         Global update is performed whenever the number of relabelings
                         exceeds the number of nodes times the global update frequency.
                     
                         @param[in] new_freq New global update frequency.
                     */
-                    void SetGlobalUpdateFrequency(double new_freq)
-                    {
-                        m_glob_rel_freq = new_freq;
-                    }
+    void SetGlobalUpdateFrequency(double new_freq)
+    {
+        m_glob_rel_freq = new_freq;
+    }
 
-                    /** Get global update frequency.
+    /** Get global update frequency.
                     
                         @return Current global update frequency.
                     */
-                    double GetGlobalUpdateFrequency()
-                    {
-                        return m_glob_rel_freq;
-                    }
+    double GetGlobalUpdateFrequency()
+    {
+        return m_glob_rel_freq;
+    }
 
-		        private:
-                    /** Global update of node ranks. 
+  private:
+    /** Global update of node ranks. 
                     
                         Performed using breadth-first search from the sink. This method has
                         to be performed regularly as it has drastical impact on the running
                         time of the algorithm.
                     */
-                    void GlobalUpdate();
+    void GlobalUpdate();
 
-                    /** Gap relabeling.
+    /** Gap relabeling.
 
                         Whenever a gap emerges in the node ranks all nodes with a rank above
                         this gap can be marked as unreachable from the sink.
@@ -215,53 +209,53 @@ namespace Gc
                         @param[in] empty_lay The layer that has become empty.
                         @param[in] next_layer_rank Rank of the layer below the empty layer.
                     */
-                    void GapRelabeling(Layer *empty_lay, Size next_layer_rank);
+    void GapRelabeling(Layer * empty_lay, Size next_layer_rank);
 
-                    /** Add node to the list of nodes on given layer
+    /** Add node to the list of nodes on given layer
 
                         @param[in] lay Layer pointer
                         @param[in] node Node to be added.
                     */
-                    void AddToLayer(Layer *lay, Node *node)
-                    {
-                        Node *first = lay->m_first;
+    void AddToLayer(Layer * lay, Node * node)
+    {
+        Node * first = lay->m_first;
 
-                        if (first != NULL)
-                        {
-                            first->m_lay_prev = node;
-                        }
-                        node->m_lay_next = first;
-                        node->m_lay_prev = NULL;
-                        lay->m_first = node;
-                    }
+        if (first != nullptr)
+        {
+            first->m_lay_prev = node;
+        }
+        node->m_lay_next = first;
+        node->m_lay_prev = nullptr;
+        lay->m_first = node;
+    }
 
-                    /** Remove node from the list of nodes on given layer
+    /** Remove node from the list of nodes on given layer
 
                         @param[in] lay Layer pointer.
                         @param[in] node Node to be removed.
                     */
-                    void RemoveFromLayer(Layer *lay, Node *node)
-                    {
-                        Node *prev = node->m_lay_prev, *next = node->m_lay_next;
+    void RemoveFromLayer(Layer * lay, Node * node)
+    {
+        Node *prev = node->m_lay_prev, *next = node->m_lay_next;
 
-                        if (prev != NULL)
-                        {
-                            prev->m_lay_next = next;
-                        }
-                        else
-                        {
-                            lay->m_first = next;
-                        }
-
-                        if (next != NULL)
-                        {
-                            next->m_lay_prev = prev;
-                        }
-                    }        
-                };
-            }
+        if (prev != nullptr)
+        {
+            prev->m_lay_next = next;
         }
-	}
+        else
+        {
+            lay->m_first = next;
+        }
+
+        if (next != nullptr)
+        {
+            next->m_lay_prev = prev;
+        }
+    }
+};
 }
+}
+}
+} // namespace Gc::Flow::General::PushRelabel
 
 #endif

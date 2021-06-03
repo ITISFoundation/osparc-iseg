@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -23,28 +23,28 @@
 namespace iseg {
 
 Settings::Settings(QWidget* parent)
-	: QDialog(parent), mainWindow((MainWindow*)parent), ui(new Ui::Settings)
+		: QDialog(parent), m_MainWindow((MainWindow*)parent), m_Ui(new Ui::Settings)
 {
-	assert(mainWindow);
-	ui->setupUi(this);
+	assert(m_MainWindow);
+	m_Ui->setupUi(this);
 
-	this->ui->spinBoxCompression->setValue(mainWindow->handler3D->GetCompression());
-	this->ui->checkBoxContiguousMemory->setChecked(mainWindow->handler3D->GetContiguousMemory());
-	this->ui->checkBoxEnableBlosc->setChecked(BloscEnabled());
-    this->ui->checkBoxSaveTarget->setChecked(mainWindow->handler3D->SaveTarget());
+	this->m_Ui->spinBoxCompression->setValue(m_MainWindow->m_Handler3D->GetCompression());
+	this->m_Ui->checkBoxContiguousMemory->setChecked(m_MainWindow->m_Handler3D->GetContiguousMemory());
+	this->m_Ui->checkBoxEnableBlosc->setChecked(BloscEnabled());
+	this->m_Ui->checkBoxSaveTarget->setChecked(m_MainWindow->m_Handler3D->SaveTarget());
 }
 
-Settings::~Settings() { delete ui; }
+Settings::~Settings() { delete m_Ui; }
 
 void Settings::accept()
 {
-	ISEG_INFO("setting compression = " << this->ui->spinBoxCompression->value());
-	mainWindow->handler3D->SetCompression(this->ui->spinBoxCompression->value());
-	mainWindow->handler3D->SetContiguousMemory(this->ui->checkBoxContiguousMemory->isChecked());
-	SetBloscEnabled(this->ui->checkBoxEnableBlosc->isChecked());
-    mainWindow->handler3D->SetSaveTarget(this->ui->checkBoxSaveTarget->isChecked());
+	ISEG_INFO("setting compression = " << this->m_Ui->spinBoxCompression->value());
+	m_MainWindow->m_Handler3D->SetCompression(this->m_Ui->spinBoxCompression->value());
+	m_MainWindow->m_Handler3D->SetContiguousMemory(this->m_Ui->checkBoxContiguousMemory->isChecked());
+	SetBloscEnabled(this->m_Ui->checkBoxEnableBlosc->isChecked());
+	m_MainWindow->m_Handler3D->SetSaveTarget(this->m_Ui->checkBoxSaveTarget->isChecked());
 
-	mainWindow->SaveSettings();
+	m_MainWindow->SaveSettings();
 	this->hide();
 }
 
@@ -53,4 +53,4 @@ void Settings::reject()
 	this->hide();
 }
 
-}// namespace iseg
+} // namespace iseg

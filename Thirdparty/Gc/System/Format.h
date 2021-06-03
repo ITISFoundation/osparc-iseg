@@ -33,11 +33,9 @@
 #include "../Core.h"
 #include "../Type.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        /** Auxiliary text formatting class.
+namespace Gc {
+namespace System {
+/** Auxiliary text formatting class.
         
             This class can be used for simple and type-safe formatting of
             strings. The formatting string is passed to the class in the
@@ -53,52 +51,53 @@ namespace Gc
 
             @todo Escaping of the curly braces.
         */
-        class GC_DLL_EXPORT Format
-        {
-        private:
-            /** The formatted string. */
-            std::string m_str;
-            /** Next value index. */
-            Size m_idx;
+class GC_DLL_EXPORT Format
+{
+  private:
+    /** The formatted string. */
+    std::string m_str;
+    /** Next value index. */
+    Size m_idx;
 
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] format Formatting string.
             */
-            Format(const std::string &format)
-                : m_str(format), m_idx(0)
-            {}
+    Format(const std::string & format)
+        : m_str(format)
+        , m_idx(0)
+    {}
 
-            /** Value insertion operator. */
-            template<class T>
-            Format& operator<< (const T &v)
-            {
-                std::ostringstream os;
-                os << v;
-                InsertString(os.str());
-                return *this;
-            }
+    /** Value insertion operator. */
+    template <class T>
+    Format & operator<<(const T & v)
+    {
+        std::ostringstream os;
+        os << v;
+        InsertString(os.str());
+        return *this;
+    }
 
-            /** Get formatted string. */
-            const std::string& ToString() const
-            {
-                return m_str;
-            }
+    /** Get formatted string. */
+    const std::string & ToString() const
+    {
+        return m_str;
+    }
 
-            /** Automatic conversion operator */
-            operator const std::string& () const
-            {
-                return m_str;
-            }
+    /** Automatic conversion operator */
+    operator const std::string &() const
+    {
+        return m_str;
+    }
 
-        protected:
-            /** Insert string at the current value index position and
+  protected:
+    /** Insert string at the current value index position and
                 increase the value index counter. 
             */
-            void InsertString (const std::string &s);
-        };
-    }
+    void InsertString(const std::string & s);
+};
 }
+} // namespace Gc::System
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,111 +15,105 @@ namespace iseg {
 
 tissuelayers_size_t TissueLayerInfos::GetTissueLayerCount()
 {
-	return (tissuelayers_size_t)tissueLayerInfosVector.size();
+	return (tissuelayers_size_t)tissue_layer_infos_vector.size();
 }
 
 TissueLayerInfoStruct*
-	TissueLayerInfos::GetTissueLayerInfo(tissuelayers_size_t layerIdx)
+		TissueLayerInfos::GetTissueLayerInfo(tissuelayers_size_t layerIdx)
 {
-	return &tissueLayerInfosVector[layerIdx];
+	return &tissue_layer_infos_vector[layerIdx];
 }
 
 tissuelayers_size_t TissueLayerInfos::GetTissueLayerIndex(QString layerName)
 {
-	if (tissueLayerIndexMap.find(layerName) != tissueLayerIndexMap.end())
+	if (tissue_layer_index_map.find(layerName) != tissue_layer_index_map.end())
 	{
-		return tissueLayerIndexMap[layerName];
+		return tissue_layer_index_map[layerName];
 	}
 	return 0;
 }
 
 QString TissueLayerInfos::GetTissueLayerName(tissuelayers_size_t layerIdx)
 {
-	return tissueLayerInfosVector[layerIdx].name;
+	return tissue_layer_infos_vector[layerIdx].m_Name;
 }
 
 bool TissueLayerInfos::GetTissueLayerVisible(tissuelayers_size_t layerIdx)
 {
-	return tissueLayerInfosVector[layerIdx].visible;
+	return tissue_layer_infos_vector[layerIdx].m_Visible;
 }
 
 float TissueLayerInfos::GetTissueLayerOpac(tissuelayers_size_t layerIdx)
 {
-	return tissueLayerInfosVector[layerIdx].opac;
+	return tissue_layer_infos_vector[layerIdx].m_Opac;
 }
 
-TissueLayerOverlayMode
-	TissueLayerInfos::GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx)
+eTissueLayerOverlayMode
+		TissueLayerInfos::GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx)
 {
-	return tissueLayerInfosVector[layerIdx].mode;
+	return tissue_layer_infos_vector[layerIdx].m_Mode;
 }
 
-void TissueLayerInfos::SetTissueLayerName(tissuelayers_size_t layerIdx,
-										  QString val)
+void TissueLayerInfos::SetTissueLayerName(tissuelayers_size_t layerIdx, QString val)
 {
-	tissueLayerIndexMap.erase(tissueLayerInfosVector[layerIdx].name);
-	tissueLayerIndexMap.insert(TissueLayerIndexMapEntryType(val, layerIdx));
-	tissueLayerInfosVector[layerIdx].name = val;
+	tissue_layer_index_map.erase(tissue_layer_infos_vector[layerIdx].m_Name);
+	tissue_layer_index_map.insert(TissueLayerIndexMapEntryType(val, layerIdx));
+	tissue_layer_infos_vector[layerIdx].m_Name = val;
 }
 
-void TissueLayerInfos::SetTissueLayerVisible(tissuelayers_size_t layerIdx,
-											 bool val)
+void TissueLayerInfos::SetTissueLayerVisible(tissuelayers_size_t layerIdx, bool val)
 {
-	tissueLayerInfosVector[layerIdx].visible = val;
+	tissue_layer_infos_vector[layerIdx].m_Visible = val;
 }
 
 void TissueLayerInfos::SetTissueLayersVisible(bool val)
 {
-	TissueLayerInfosVecType::iterator vecIt;
-	for (vecIt = tissueLayerInfosVector.begin() + 1;
-		 vecIt != tissueLayerInfosVector.end(); ++vecIt)
+	TissueLayerInfosVecType::iterator vec_it;
+	for (vec_it = tissue_layer_infos_vector.begin() + 1;
+			 vec_it != tissue_layer_infos_vector.end(); ++vec_it)
 	{
-		vecIt->visible = val;
+		vec_it->m_Visible = val;
 	}
 }
 
-void TissueLayerInfos::SetTissueLayerOpac(tissuelayers_size_t layerIdx,
-										  float val)
+void TissueLayerInfos::SetTissueLayerOpac(tissuelayers_size_t layerIdx, float val)
 {
-	tissueLayerInfosVector[layerIdx].opac = val;
+	tissue_layer_infos_vector[layerIdx].m_Opac = val;
 }
 
-void TissueLayerInfos::SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx,
-												 TissueLayerOverlayMode val)
+void TissueLayerInfos::SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx, eTissueLayerOverlayMode val)
 {
-	tissueLayerInfosVector[layerIdx].mode = val;
+	tissue_layer_infos_vector[layerIdx].m_Mode = val;
 }
 
 void TissueLayerInfos::AddTissueLayer(TissueLayerInfoStruct& layer)
 {
-	tissueLayerInfosVector.push_back(layer);
-	tissueLayerIndexMap.insert(
-		TissueLayerIndexMapEntryType(layer.name, GetTissueLayerCount() - 1));
+	tissue_layer_infos_vector.push_back(layer);
+	tissue_layer_index_map.insert(TissueLayerIndexMapEntryType(layer.m_Name, GetTissueLayerCount() - 1));
 }
 
 void TissueLayerInfos::RemoveTissueLayer(tissuelayers_size_t layerIdx)
 {
-	tissueLayerInfosVector.erase(tissueLayerInfosVector.begin() + layerIdx);
+	tissue_layer_infos_vector.erase(tissue_layer_infos_vector.begin() + layerIdx);
 	CreateTissueLayerIndexMap();
 }
 
 void TissueLayerInfos::RemoveAllTissueLayers()
 {
-	tissueLayerIndexMap.clear();
-	tissueLayerInfosVector.clear();
+	tissue_layer_index_map.clear();
+	tissue_layer_infos_vector.clear();
 }
 
 void TissueLayerInfos::CreateTissueLayerIndexMap()
 {
-	tissueLayerIndexMap.clear();
+	tissue_layer_index_map.clear();
 	for (tissuelayers_size_t idx = 0; idx < GetTissueLayerCount(); ++idx)
 	{
-		tissueLayerIndexMap.insert(TissueLayerIndexMapEntryType(
-			tissueLayerInfosVector[idx].name, idx));
+		tissue_layer_index_map.insert(TissueLayerIndexMapEntryType(tissue_layer_infos_vector[idx].m_Name, idx));
 	}
 }
 
-TissueLayerInfosVecType TissueLayerInfos::tissueLayerInfosVector;
-TissueLayerIndexMapType TissueLayerInfos::tissueLayerIndexMap;
+TissueLayerInfosVecType TissueLayerInfos::tissue_layer_infos_vector;
+TissueLayerIndexMapType TissueLayerInfos::tissue_layer_index_map;
 
-}// namespace iseg
+} // namespace iseg

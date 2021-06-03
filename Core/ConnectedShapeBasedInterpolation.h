@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,8 +11,8 @@
 #pragma once
 
 #include "Data/ItkUtils.h"
-#include "Data/Types.h"
 #include "Data/ScopedTimer.h"
+#include "Data/Types.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkCastImageFilter.h>
@@ -40,7 +40,7 @@ public:
 	using labefield_type = itk::Image<unsigned short, 2>;
 	using image_stack_type = itk::SliceContiguousImage<float>;
 
-	std::vector<image_type::Pointer> interpolate(const labefield_type* tissues1, const labefield_type* tissues2, tissues_size_t tissue_label, int number_of_slices, bool include_input_slices)
+	std::vector<image_type::Pointer> Interpolate(const labefield_type* tissues1, const labefield_type* tissues2, tissues_size_t tissue_label, int number_of_slices, bool include_input_slices)
 	{
 		auto mask_tissues = [](const labefield_type* tissues, tissues_size_t tissuetype) {
 			auto masker = itk::BinaryThresholdImageFilter<labefield_type, image_type>::New();
@@ -54,7 +54,7 @@ public:
 		};
 		auto img1 = mask_tissues(tissues1, tissue_label);
 		auto img2 = mask_tissues(tissues2, tissue_label);
-		auto slices = interpolate(img1, img2, number_of_slices);
+		auto slices = Interpolate(img1, img2, number_of_slices);
 		if (include_input_slices)
 		{
 			slices.insert(slices.begin(), img1);
@@ -63,19 +63,19 @@ public:
 		return slices;
 	}
 
-	std::vector<image_type::Pointer> interpolate(const image_type* slice1, const image_type* slice2, int number_of_slices)
+	std::vector<image_type::Pointer> Interpolate(const image_type* slice1, const image_type* slice2, int number_of_slices)
 	{
 		int num_objects1 = 0;
 		int num_objects2 = 0;
-		const auto objects1 = get_components(slice1, num_objects1);
-		const auto objects2 = get_components(slice2, num_objects2);
+		const auto objects1 = GetComponents(slice1, num_objects1);
+		const auto objects2 = GetComponents(slice2, num_objects2);
 		if (num_objects1 != num_objects2 || num_objects2 == 0)
 		{
 			throw std::runtime_error("Slices don't have same number of foreground objects.");
 		}
 
-		const auto center_of_mass1 = get_center_of_mass(objects1, num_objects1);
-		const auto center_of_mass2 = get_center_of_mass(objects2, num_objects2);
+		const auto center_of_mass1 = GetCenterOfMass(objects1, num_objects1);
+		const auto center_of_mass2 = GetCenterOfMass(objects2, num_objects2);
 
 		auto get_closest = [](const std::vector<itk::Point<double, 2>>& pts1, const std::vector<itk::Point<double, 2>>& pts2) {
 			std::map<size_t, size_t> corresponding_objects;
@@ -119,10 +119,10 @@ public:
 			itk::Vector<double, 2> translation;
 			translation[0] = x1[0] - x2[0];
 			translation[1] = x1[1] - x2[1];
-			auto slice2_moved = move_image(slice2, -translation);
+			auto slice2_moved = MoveImage(slice2, -translation);
 
-			auto sdf1 = compute_sdf<image_type>(slice1);
-			auto sdf2 = compute_sdf<image_type>(slice2_moved);
+			auto sdf1 = ComputeSdf<image_type>(slice1);
+			auto sdf2 = ComputeSdf<image_type>(slice2_moved);
 
 			// slack to 3d image
 			using image_stack_type = itk::SliceContiguousImage<float>;
@@ -140,7 +140,7 @@ public:
 			start[2] = 0;
 			size[2] = 2;
 			spacing[2] = 1.0; // unit spacing
-			origin[2] = 0.0; // zero
+			origin[2] = 0.0;	// zero
 
 			auto image3d = image_stack_type::New();
 			image3d->SetOrigin(origin);
@@ -155,7 +155,7 @@ public:
 			container->SetImportPointersForSlices(slices, size[0] * size[1], false);
 			image3d->SetPixelContainer(container);
 
-			auto mask = resample(image3d, number_of_slices);
+			auto mask = Resample(image3d, number_of_slices);
 
 			for (int i = 0; i < number_of_slices; i++)
 			{
@@ -172,7 +172,7 @@ public:
 				threed2twod->Update();
 
 				double ratio = (i + 1) / (number_of_slices + 1.0);
-				auto slice = move_image(threed2twod->GetOutput(), ratio * translation);
+				auto slice = MoveImage(threed2twod->GetOutput(), ratio * translation);
 
 				if (interpolated_slices[i])
 				{
@@ -195,7 +195,7 @@ public:
 
 private:
 	/// find connected foreground regions (called "objects")
-	mask_type::Pointer get_components(const image_type* img, int& num_objects) const
+	mask_type::Pointer GetComponents(const image_type* img, int& num_objects) const
 	{
 		ScopedTimer timer("ConnectedComponents");
 
@@ -211,7 +211,7 @@ private:
 	}
 
 	/// compute center of mass of foreground object, assumes BG=0
-	std::vector<itk::Point<double, 2>> get_center_of_mass(const mask_type* img, int num_objects) const
+	std::vector<itk::Point<double, 2>> GetCenterOfMass(const mask_type* img, int num_objects) const
 	{
 		ScopedTimer timer("CenterOfMass");
 
@@ -246,7 +246,7 @@ private:
 
 	/// shift image by a specified amount
 	template<class TImage>
-	typename TImage::Pointer move_image(const TImage* img, const itk::Vector<double, 2>& translation) const
+	typename TImage::Pointer MoveImage(const TImage* img, const itk::Vector<double, 2>& translation) const
 	{
 		ScopedTimer timer("MoveImage");
 
@@ -270,7 +270,7 @@ private:
 
 	/// compute signed distance function, assumes BG=0
 	template<class TImage>
-	image_type::Pointer compute_sdf(const TImage* img) const
+	image_type::Pointer ComputeSdf(const TImage* img) const
 	{
 		ScopedTimer timer("SignedDistance");
 
@@ -286,7 +286,7 @@ private:
 	}
 
 	/// interpolate between known slices
-	mask3_type::Pointer resample(const image_stack_type* image3d, size_t num_slices) const
+	mask3_type::Pointer Resample(const image_stack_type* image3d, size_t num_slices) const
 	{
 		ScopedTimer timer("Resample");
 

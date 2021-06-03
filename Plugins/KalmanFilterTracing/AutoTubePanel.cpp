@@ -21,8 +21,8 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "itkBinaryThinningImageFilter3D.h"
-#include "itkNonMaxSuppressionImageFilter.h"
+#include "Thirdparty/IJ/BinaryThinningImageFilter3D/itkBinaryThinningImageFilter3D.h"
+#include "Thirdparty/IJ/NonMaxSuppression/itkNonMaxSuppressionImageFilter.h"
 
 #include <itkBinaryThinningImageFilter.h>
 #include <itkBinaryThresholdImageFilter.h>
@@ -44,12 +44,12 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
 #include <Eigen/Dense>
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 
 using boost::adaptors::transformed;
@@ -67,175 +67,174 @@ class BinaryThinningImageFilter<TInputImage, TOutputImage, 3> : public itk::Bina
 {
 };
 
-typedef unsigned long LabelType;
-typedef itk::ShapeLabelObject<LabelType, 2> LabelObjectType;
-typedef itk::LabelMap<LabelObjectType> LabelMapType;
+using label_type = unsigned long;
+using label_object_type = itk::ShapeLabelObject<label_type, 2>;
+using label_map_type = itk::LabelMap<label_object_type>;
 
-AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), _handler3D(hand3D)
+AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Kalman filter based root tracer"));
 
-	_execute_button = new QPushButton("Execute");
-	_execute_button->setMaximumSize(_execute_button->minimumSizeHint());
-	_remove_button = new QPushButton("Remove Object");
-	_remove_button->setMaximumSize(_remove_button->minimumSizeHint());
-	_extrapolate_button = new QPushButton("Extrapolate");
-	_extrapolate_button->setMaximumSize(_extrapolate_button->minimumSizeHint());
-	_merge_button = new QPushButton("Merge Selected List Items");
-	_merge_button->setMaximumSize(_merge_button->minimumSizeHint());
-	_select_objects_button = new QPushButton("Select Mask");
-	_select_objects_button->setMaximumSize(_select_objects_button->minimumSizeHint());
-	_visualize_button = new QPushButton("See Label Map");
-	_update_kfilter_button = new QPushButton("Update Kalman Filters");
-	_remove_k_filter = new QPushButton("Remove Kalman Filter");
-	_save = new QPushButton("Save Parameters");
-	_load = new QPushButton("Load Parameters");
-	_remove_non_selected = new QPushButton("Remove Non Selected");
-	_add_to_tissues = new QPushButton("Add To Tissues");
-	_export_lines = new QPushButton("Export lines");
-	_k_filter_predict = new QPushButton("Predict Root Positions");
+	m_ExecuteButton = new QPushButton("Execute");
+	m_ExecuteButton->setMaximumSize(m_ExecuteButton->minimumSizeHint());
+	m_RemoveButton = new QPushButton("Remove Object");
+	m_RemoveButton->setMaximumSize(m_RemoveButton->minimumSizeHint());
+	m_ExtrapolateButton = new QPushButton("Extrapolate");
+	m_ExtrapolateButton->setMaximumSize(m_ExtrapolateButton->minimumSizeHint());
+	m_MergeButton = new QPushButton("Merge Selected List Items");
+	m_MergeButton->setMaximumSize(m_MergeButton->minimumSizeHint());
+	m_SelectObjectsButton = new QPushButton("Select Mask");
+	m_SelectObjectsButton->setMaximumSize(m_SelectObjectsButton->minimumSizeHint());
+	m_VisualizeButton = new QPushButton("See Label Map");
+	m_UpdateKfilterButton = new QPushButton("Update Kalman Filters");
+	m_RemoveKFilter = new QPushButton("Remove Kalman Filter");
+	m_Save = new QPushButton("Save Parameters");
+	m_Load = new QPushButton("Load Parameters");
+	m_RemoveNonSelected = new QPushButton("Remove Non Selected");
+	m_AddToTissues = new QPushButton("Add To Tissues");
+	m_ExportLines = new QPushButton("Export lines");
+	m_KFilterPredict = new QPushButton("Predict Root Positions");
 
 	int width(80);
 
-	QLabel* _min = new QLabel("Sigma Min");
-	QLabel* _max = new QLabel("Sigma Max");
-	QLabel* _num = new QLabel("Number of Sigmas");
-	QLabel* _feature_th = new QLabel("Feature Threshold");
-	QLabel* _non_max = new QLabel("Non-maximum Suppression");
-	QLabel* _add_l = new QLabel("Add To Existing Label Map");
-	QLabel* _centerlines = new QLabel("Centerlines");
-	QLabel* _min_obj_size = new QLabel("Min Object Size");
-	QLabel* _slice_l = new QLabel("Slice Object List");
-	QLabel* _obj_prob_l = new QLabel("Probability List");
-	QLabel* _min_p = new QLabel("Minimum Probability");
-	QLabel* _w_d = new QLabel("Weight: Distance");
-	QLabel* _w_pa = new QLabel("Weight: Parameters");
-	QLabel* _w_pr = new QLabel("Weight: Prediction");
-	QLabel* _limit_s = new QLabel("Extrapolate To Slice");
-	QLabel* _k_filters_list = new QLabel("Kalman Filter List");
-	QLabel* _r_k_filter = new QLabel("Restart Kalman Filter");
-	QLabel* _connect_d = new QLabel("Connect Dots");
-	QLabel* _extra_only = new QLabel("Keep Only Matches");
-	QLabel* _addPix = new QLabel("Add Pixel");
-	QLabel* _line_radius_l = new QLabel("Line Radius");
+	QLabel* min = new QLabel("Sigma Min");
+	QLabel* max = new QLabel("Sigma Max");
+	QLabel* num = new QLabel("Number of Sigmas");
+	QLabel* feature_th = new QLabel("Feature Threshold");
+	QLabel* non_max = new QLabel("Non-maximum Suppression");
+	QLabel* add_l = new QLabel("Add To Existing Label Map");
+	QLabel* centerlines = new QLabel("Centerlines");
+	QLabel* min_obj_size = new QLabel("Min Object Size");
+	QLabel* slice_l = new QLabel("Slice Object List");
+	QLabel* obj_prob_l = new QLabel("Probability List");
+	QLabel* min_p = new QLabel("Minimum Probability");
+	QLabel* w_d = new QLabel("Weight: Distance");
+	QLabel* w_pa = new QLabel("Weight: Parameters");
+	QLabel* w_pr = new QLabel("Weight: Prediction");
+	QLabel* limit_s = new QLabel("Extrapolate To Slice");
+	QLabel* k_filters_list = new QLabel("Kalman Filter List");
+	QLabel* r_k_filter = new QLabel("Restart Kalman Filter");
+	QLabel* connect_d = new QLabel("Connect Dots");
+	QLabel* extra_only = new QLabel("Keep Only Matches");
+	QLabel* add_pix = new QLabel("Add Pixel");
+	QLabel* line_radius_l = new QLabel("Line Radius");
 
-	_sigma_low = new QLineEdit(QString::number(0.3));
-	_sigma_low->setValidator(new QDoubleValidator);
-	_sigma_low->setFixedWidth(width);
+	m_SigmaLow = new QLineEdit(QString::number(0.3));
+	m_SigmaLow->setValidator(new QDoubleValidator);
+	m_SigmaLow->setFixedWidth(width);
 
-	_min_probability = new QLineEdit(QString::number(0.5));
-	_min_probability->setValidator(new QDoubleValidator);
-	_min_probability->setFixedWidth(width);
+	m_MinProbability = new QLineEdit(QString::number(0.5));
+	m_MinProbability->setValidator(new QDoubleValidator);
+	m_MinProbability->setFixedWidth(width);
 
-	_w_distance = new QLineEdit(QString::number(0.3));
-	_w_distance->setValidator(new QDoubleValidator);
-	_w_distance->setFixedWidth(width);
+	m_WDistance = new QLineEdit(QString::number(0.3));
+	m_WDistance->setValidator(new QDoubleValidator);
+	m_WDistance->setFixedWidth(width);
 
-	_w_params = new QLineEdit(QString::number(0.3));
-	_w_params->setValidator(new QDoubleValidator);
-	_w_params->setFixedWidth(width);
+	m_WParams = new QLineEdit(QString::number(0.3));
+	m_WParams->setValidator(new QDoubleValidator);
+	m_WParams->setFixedWidth(width);
 
-	_w_pred = new QLineEdit(QString::number(0.3));
-	_w_pred->setValidator(new QDoubleValidator);
-	_w_pred->setFixedWidth(width);
+	m_WPred = new QLineEdit(QString::number(0.3));
+	m_WPred->setValidator(new QDoubleValidator);
+	m_WPred->setFixedWidth(width);
 
-	_sigma_hi = new QLineEdit(QString::number(0.6));
-	_sigma_hi->setValidator(new QDoubleValidator);
-	_sigma_hi->setFixedWidth(width);
+	m_SigmaHi = new QLineEdit(QString::number(0.6));
+	m_SigmaHi->setValidator(new QDoubleValidator);
+	m_SigmaHi->setFixedWidth(width);
 
-	_number_sigma_levels = new QLineEdit(QString::number(2));
-	_number_sigma_levels->setValidator(new QIntValidator);
-	_number_sigma_levels->setFixedWidth(width);
+	m_NumberSigmaLevels = new QLineEdit(QString::number(2));
+	m_NumberSigmaLevels->setValidator(new QIntValidator);
+	m_NumberSigmaLevels->setFixedWidth(width);
 
-	_threshold = new QLineEdit(QString::number(3));
-	_threshold->setValidator(new QDoubleValidator);
-	_threshold->setFixedWidth(width);
+	m_Threshold = new QLineEdit(QString::number(3));
+	m_Threshold->setValidator(new QDoubleValidator);
+	m_Threshold->setFixedWidth(width);
 
-	_max_radius = new QLineEdit(QString::number(1));
-	_max_radius->setValidator(new QDoubleValidator);
-	_max_radius->setFixedWidth(width);
+	m_MaxRadius = new QLineEdit(QString::number(1));
+	m_MaxRadius->setValidator(new QDoubleValidator);
+	m_MaxRadius->setFixedWidth(width);
 
-	_min_object_size = new QLineEdit(QString::number(1));
-	_min_object_size->setValidator(new QIntValidator);
-	_min_object_size->setFixedWidth(width);
+	m_MinObjectSize = new QLineEdit(QString::number(1));
+	m_MinObjectSize->setValidator(new QIntValidator);
+	m_MinObjectSize->setFixedWidth(width);
 
-	_selected_objects = new QLineEdit;
-	_selected_objects->setReadOnly(true);
-	_selected_objects->setFixedWidth(width);
+	m_SelectedObjects = new QLineEdit;
+	m_SelectedObjects->setReadOnly(true);
+	m_SelectedObjects->setFixedWidth(width);
 
-	_limit_slice = new QLineEdit();
-	_limit_slice->setValidator(new QIntValidator);
-	_limit_slice->setFixedWidth(width);
+	m_LimitSlice = new QLineEdit();
+	m_LimitSlice->setValidator(new QIntValidator);
+	m_LimitSlice->setFixedWidth(width);
 
-	_line_radius = new QLineEdit();
-	_line_radius->setValidator(new QDoubleValidator);
-	_line_radius->setFixedWidth(width);
+	m_LineRadius = new QLineEdit();
+	m_LineRadius->setValidator(new QDoubleValidator);
+	m_LineRadius->setFixedWidth(width);
 
-	_skeletonize = new QCheckBox;
-	_skeletonize->setChecked(true);
-	_skeletonize->setToolTip(Format("Compute 1-pixel wide centerlines (skeleton)."));
+	m_Skeletonize = new QCheckBox;
+	m_Skeletonize->setChecked(true);
+	m_Skeletonize->setToolTip(Format("Compute 1-pixel wide centerlines (skeleton)."));
 
-	_connect_dots = new QCheckBox;
-	_connect_dots->setChecked(false);
+	m_ConnectDots = new QCheckBox;
+	m_ConnectDots->setChecked(false);
 
-	_non_max_suppression = new QCheckBox;
-	_non_max_suppression->setChecked(true);
-	_non_max_suppression->setToolTip(Format("Extract approx. one pixel wide paths based on non-maximum suppression."));
+	m_NonMaxSuppression = new QCheckBox;
+	m_NonMaxSuppression->setChecked(true);
+	m_NonMaxSuppression->setToolTip(Format("Extract approx. one pixel wide paths based on non-maximum suppression."));
 
-	_add = new QCheckBox;
-	_add->setChecked(false);
-	_add->setToolTip(Format("Add New Objects To Label Map"));
+	m_Add = new QCheckBox;
+	m_Add->setChecked(false);
+	m_Add->setToolTip(Format("Add New Objects To Label Map"));
 
-	_restart_k_filter = new QCheckBox;
-	_restart_k_filter->setChecked(false);
+	m_RestartKFilter = new QCheckBox;
+	m_RestartKFilter->setChecked(false);
 
-	_extrapolate_only_matches = new QCheckBox;
-	_extrapolate_only_matches->setChecked(true);
+	m_ExtrapolateOnlyMatches = new QCheckBox;
+	m_ExtrapolateOnlyMatches->setChecked(true);
 
-	_add_pixel = new QCheckBox;
-	_add_pixel->setChecked(false);
+	m_AddPixel = new QCheckBox;
+	m_AddPixel->setChecked(false);
 
-	object_list = new QListWidget();
-	object_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_ObjectList = new QListWidget();
+	m_ObjectList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	object_probability_list = new QListWidget();
-	object_probability_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_ObjectProbabilityList = new QListWidget();
+	m_ObjectProbabilityList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	k_filters_list = new QListWidget();
-	k_filters_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_KFiltersList = new QListWidget();
+	m_KFiltersList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	QVBoxLayout* vbox1 = new QVBoxLayout;
-	vbox1->addWidget(_slice_l);
-	vbox1->addWidget(object_list);
+	vbox1->addWidget(slice_l);
+	vbox1->addWidget(m_ObjectList);
 
 	QVBoxLayout* vbox2 = new QVBoxLayout;
-	vbox2->addWidget(_limit_s);
-	vbox2->addWidget(_limit_slice);
-	vbox2->addWidget(_select_objects_button);
-	vbox2->addWidget(_selected_objects);
-	vbox2->addWidget(_add_l);
-	vbox2->addWidget(_add);
-	vbox2->addWidget(_r_k_filter);
-	vbox2->addWidget(_restart_k_filter);
-	vbox2->addWidget(_extra_only);
-	vbox2->addWidget(_extrapolate_only_matches);
-	vbox2->addWidget(_addPix);
-	vbox2->addWidget(_add_pixel);
+	vbox2->addWidget(limit_s);
+	vbox2->addWidget(m_LimitSlice);
+	vbox2->addWidget(m_SelectObjectsButton);
+	vbox2->addWidget(m_SelectedObjects);
+	vbox2->addWidget(add_l);
+	vbox2->addWidget(m_Add);
+	vbox2->addWidget(r_k_filter);
+	vbox2->addWidget(m_RestartKFilter);
+	vbox2->addWidget(extra_only);
+	vbox2->addWidget(m_ExtrapolateOnlyMatches);
+	vbox2->addWidget(add_pix);
+	vbox2->addWidget(m_AddPixel);
 
 	QVBoxLayout* vbox3 = new QVBoxLayout;
-	vbox3->addWidget(_k_filters_list);
 	vbox3->addWidget(k_filters_list);
+	vbox3->addWidget(m_KFiltersList);
 
 	QVBoxLayout* vbox4 = new QVBoxLayout;
-	vbox4->addWidget(_remove_non_selected);
-	vbox4->addWidget(_update_kfilter_button);
-	vbox4->addWidget(_visualize_button);
-	vbox4->addWidget(_save);
-	vbox4->addWidget(_load);
-	vbox4->addWidget(_add_to_tissues);
-	vbox4->addWidget(_export_lines);
+	vbox4->addWidget(m_RemoveNonSelected);
+	vbox4->addWidget(m_UpdateKfilterButton);
+	vbox4->addWidget(m_VisualizeButton);
+	vbox4->addWidget(m_Save);
+	vbox4->addWidget(m_Load);
+	vbox4->addWidget(m_AddToTissues);
+	vbox4->addWidget(m_ExportLines);
 
 	QHBoxLayout* hbox1 = new QHBoxLayout;
 	hbox1->addLayout(vbox4);
@@ -244,40 +243,40 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	hbox1->addLayout(vbox3);
 
 	QVBoxLayout* vbox5 = new QVBoxLayout;
-	vbox5->addWidget(_min);
-	vbox5->addWidget(_sigma_low);
-	vbox5->addWidget(_max);
-	vbox5->addWidget(_sigma_hi);
-	vbox5->addWidget(_num);
-	vbox5->addWidget(_number_sigma_levels);
-	vbox5->addWidget(_feature_th);
-	vbox5->addWidget(_threshold);
+	vbox5->addWidget(min);
+	vbox5->addWidget(m_SigmaLow);
+	vbox5->addWidget(max);
+	vbox5->addWidget(m_SigmaHi);
+	vbox5->addWidget(num);
+	vbox5->addWidget(m_NumberSigmaLevels);
+	vbox5->addWidget(feature_th);
+	vbox5->addWidget(m_Threshold);
 
 	QVBoxLayout* vbox6 = new QVBoxLayout;
-	vbox6->addWidget(_non_max);
-	vbox6->addWidget(_non_max_suppression);
-	vbox6->addWidget(_centerlines);
-	vbox6->addWidget(_skeletonize);
-	vbox6->addWidget(_min_obj_size);
-	vbox6->addWidget(_min_object_size);
-	vbox6->addWidget(_connect_d);
-	vbox6->addWidget(_connect_dots);
-	vbox6->addWidget(_line_radius_l);
-	vbox6->addWidget(_line_radius);
+	vbox6->addWidget(non_max);
+	vbox6->addWidget(m_NonMaxSuppression);
+	vbox6->addWidget(centerlines);
+	vbox6->addWidget(m_Skeletonize);
+	vbox6->addWidget(min_obj_size);
+	vbox6->addWidget(m_MinObjectSize);
+	vbox6->addWidget(connect_d);
+	vbox6->addWidget(m_ConnectDots);
+	vbox6->addWidget(line_radius_l);
+	vbox6->addWidget(m_LineRadius);
 
 	QVBoxLayout* vbox8 = new QVBoxLayout;
-	vbox8->addWidget(_min_p);
-	vbox8->addWidget(_min_probability);
-	vbox8->addWidget(_w_d);
-	vbox8->addWidget(_w_distance);
-	vbox8->addWidget(_w_pa);
-	vbox8->addWidget(_w_params);
-	vbox8->addWidget(_w_pr);
-	vbox8->addWidget(_w_pred);
+	vbox8->addWidget(min_p);
+	vbox8->addWidget(m_MinProbability);
+	vbox8->addWidget(w_d);
+	vbox8->addWidget(m_WDistance);
+	vbox8->addWidget(w_pa);
+	vbox8->addWidget(m_WParams);
+	vbox8->addWidget(w_pr);
+	vbox8->addWidget(m_WPred);
 
 	QVBoxLayout* vbox9 = new QVBoxLayout;
-	vbox9->addWidget(_obj_prob_l);
-	vbox9->addWidget(object_probability_list);
+	vbox9->addWidget(obj_prob_l);
+	vbox9->addWidget(m_ObjectProbabilityList);
 
 	QHBoxLayout* hbox2 = new QHBoxLayout;
 	hbox2->addLayout(vbox5);
@@ -286,12 +285,12 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	hbox2->addLayout(vbox8);
 
 	QHBoxLayout* hbox3 = new QHBoxLayout;
-	hbox3->addWidget(_merge_button);
-	hbox3->addWidget(_remove_button);
-	hbox3->addWidget(_remove_k_filter);
-	hbox3->addWidget(_extrapolate_button);
-	hbox3->addWidget(_k_filter_predict);
-	hbox3->addWidget(_execute_button);
+	hbox3->addWidget(m_MergeButton);
+	hbox3->addWidget(m_RemoveButton);
+	hbox3->addWidget(m_RemoveKFilter);
+	hbox3->addWidget(m_ExtrapolateButton);
+	hbox3->addWidget(m_KFilterPredict);
+	hbox3->addWidget(m_ExecuteButton);
 
 	auto layout = new QFormLayout;
 	layout->addRow(hbox3);
@@ -308,87 +307,85 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* pare
 	top_layout->addWidget(scroll_area, 0, 0);
 	setLayout(top_layout);
 
-	QObject::connect(_select_objects_button, SIGNAL(clicked()), this, SLOT(select_objects()));
-	QObject::connect(_execute_button, SIGNAL(clicked()), this, SLOT(do_work()));
-	QObject::connect(object_list, SIGNAL(itemSelectionChanged()), this, SLOT(item_selected()));
-	QObject::connect(object_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(item_double_clicked(QListWidgetItem*)));
-	QObject::connect(_merge_button, SIGNAL(clicked()), this, SLOT(merge_selected_items()));
-	QObject::connect(_extrapolate_button, SIGNAL(clicked()), this, SLOT(extrapolate_results()));
-	QObject::connect(_visualize_button, SIGNAL(clicked()), this, SLOT(visualize()));
-	QObject::connect(_update_kfilter_button, SIGNAL(clicked()), this, SLOT(update_kalman_filters()));
-	QObject::connect(_remove_button, SIGNAL(clicked()), this, SLOT(remove_object()));
-	QObject::connect(_remove_k_filter, SIGNAL(clicked()), this, SLOT(remove_k_filter()));
-	QObject::connect(k_filters_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(k_filter_double_clicked(QListWidgetItem*)));
-	QObject::connect(_save, SIGNAL(clicked()), this, SLOT(save()));
-	QObject::connect(_load, SIGNAL(clicked()), this, SLOT(load()));
-	QObject::connect(_remove_non_selected, SIGNAL(clicked()), this, SLOT(remove_non_selected()));
-	QObject::connect(_add_to_tissues, SIGNAL(clicked()), this, SLOT(add_to_tissues()));
-	QObject::connect(_export_lines, SIGNAL(clicked()), this, SLOT(export_lines()));
-	QObject::connect(_k_filter_predict, SIGNAL(clicked()), this, SLOT(predict_k_filter()));
+	QObject_connect(m_SelectObjectsButton, SIGNAL(clicked()), this, SLOT(SelectObjects()));
+	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(DoWork()));
+	QObject_connect(m_ObjectList, SIGNAL(itemSelectionChanged()), this, SLOT(ItemSelected()));
+	QObject_connect(m_ObjectList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(ItemDoubleClicked(QListWidgetItem*)));
+	QObject_connect(m_MergeButton, SIGNAL(clicked()), this, SLOT(MergeSelectedItems()));
+	QObject_connect(m_ExtrapolateButton, SIGNAL(clicked()), this, SLOT(ExtrapolateResults()));
+	QObject_connect(m_VisualizeButton, SIGNAL(clicked()), this, SLOT(Visualize()));
+	QObject_connect(m_UpdateKfilterButton, SIGNAL(clicked()), this, SLOT(UpdateKalmanFilters()));
+	QObject_connect(m_RemoveButton, SIGNAL(clicked()), this, SLOT(RemoveObject()));
+	QObject_connect(m_RemoveKFilter, SIGNAL(clicked()), this, SLOT(RemoveKFilter()));
+	QObject_connect(m_KFiltersList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(KFilterDoubleClicked(QListWidgetItem*)));
+	QObject_connect(m_Save, SIGNAL(clicked()), this, SLOT(Save()));
+	QObject_connect(m_Load, SIGNAL(clicked()), this, SLOT(Load()));
+	QObject_connect(m_RemoveNonSelected, SIGNAL(clicked()), this, SLOT(RemoveNonSelected()));
+	QObject_connect(m_AddToTissues, SIGNAL(clicked()), this, SLOT(AddToTissues()));
+	QObject_connect(m_ExportLines, SIGNAL(clicked()), this, SLOT(ExportLines()));
+	QObject_connect(m_KFilterPredict, SIGNAL(clicked()), this, SLOT(PredictKFilter()));
 }
 
-void AutoTubePanel::predict_k_filter()
+void AutoTubePanel::PredictKFilter()
 {
-	if (k_filters.empty())
+	if (m_KFilters.empty())
 	{
-		QMessageBox mBox;
-		mBox.setWindowTitle("Error");
-		mBox.setText("Cannot predict without any Kalman filters!");
-		mBox.exec();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Error");
+		m_box.setText("Cannot predict without any Kalman filters!");
+		m_box.exec();
 		return;
 	}
 
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	typedef float PixelType;
-	using ImageType = itk::Image<PixelType, 2>;
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
+	using pixel_type = float;
+	using image_type = itk::Image<pixel_type, 2>;
 
-	for (auto filter : k_filters)
+	for (const auto& filter : m_KFilters)
 	{
 
-		if (!label_maps[_handler3D->active_slice()])
+		if (!m_LabelMaps[m_Handler3D->ActiveSlice()])
 		{
-			typedef float PixelType;
-			using ImageType = itk::Image<PixelType, 2>;
-			ImageType::SizeType size{{384, 384}};
-			LabelMapType::Pointer map = LabelMapType::New();
+			image_type::SizeType size{{384, 384}};
+			label_map_type::Pointer map = label_map_type::New();
 			itk::Index<2> index{{0, 0}};
 
-			ImageType::RegionType region;
+			image_type::RegionType region;
 			region.SetSize(size);
 			region.SetIndex(index);
 
 			map->SetRegions(region);
 			map->Allocate(true);
 			map->Update();
-			label_maps[_handler3D->active_slice()] = map;
+			m_LabelMaps[m_Handler3D->ActiveSlice()] = map;
 
 			std::vector<std::string> list;
-			objects[_handler3D->active_slice()] = list;
+			m_Objects[m_Handler3D->ActiveSlice()] = list;
 		}
 
-		auto labelMap = label_maps[_handler3D->active_slice()];
+		auto label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
-		typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+		using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, image_type>;
 		auto label2image = Label2ImageType::New();
-		label2image->SetInput(labelMap);
+		label2image->SetInput(label_map);
 		label2image->Update();
 		auto image = label2image->GetOutput();
 
 		KalmanFilter copy = filter;
-		copy.measurement_prediction();
-		std::vector<double> prediction = copy.get_prediction();
+		copy.MeasurementPrediction();
+		std::vector<double> prediction = copy.GetPrediction();
 
 		itk::Index<2> index;
 		index[0] = prediction[0];
 		index[1] = prediction[1];
 
-		LabelType last_label = 0;
-		if (!labelMap->GetLabels().empty())
-			last_label = labelMap->GetLabels().back();
+		label_type last_label = 0;
+		if (!label_map->GetLabels().empty())
+			last_label = label_map->GetLabels().back();
 
 		if (image->GetBufferedRegion().IsInside(index))
 		{
-			LabelType found_label = labelMap->GetPixel(index);
+			label_type found_label = label_map->GetPixel(index);
 
 			if (found_label == 0)
 			{
@@ -396,106 +393,106 @@ void AutoTubePanel::predict_k_filter()
 
 				image->Update();
 
-				typedef itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType> Image2LabelType;
+				using Image2LabelType = itk::LabelImageToShapeLabelMapFilter<image_type, label_map_type>;
 				auto image2label = Image2LabelType::New();
 				image2label->SetInput(image);
 				image2label->Update();
 
-				label_maps[_handler3D->active_slice()] = image2label->GetOutput();
+				m_LabelMaps[m_Handler3D->ActiveSlice()] = image2label->GetOutput();
 
-				objects[_handler3D->active_slice()].push_back(filter.get_label());
+				m_Objects[m_Handler3D->ActiveSlice()].push_back(filter.GetLabel());
 			}
 		}
 	}
 
-	auto labelObjects = label_maps[_handler3D->active_slice()]->GetLabelObjects();
-	label_maps[_handler3D->active_slice()]->ClearLabels();
-	for (auto& object : labelObjects)
-		label_maps[_handler3D->active_slice()]->PushLabelObject(object);
+	auto label_objects = m_LabelMaps[m_Handler3D->ActiveSlice()]->GetLabelObjects();
+	m_LabelMaps[m_Handler3D->ActiveSlice()]->ClearLabels();
+	for (auto& object : label_objects)
+		m_LabelMaps[m_Handler3D->ActiveSlice()]->PushLabelObject(object);
 
-	refresh_object_list();
-	visualize_label_map(label_maps[_handler3D->active_slice()]);
-	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	RefreshObjectList();
+	VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
+	m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 }
 
-void AutoTubePanel::add_to_tissues()
+void AutoTubePanel::AddToTissues()
 {
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	QMessageBox mBox;
-	mBox.setWindowTitle("");
-	mBox.setText("Before continuing make sure that all the roots were found and labeled in all slices and that they all have kalman filters. In addition, make sure that all of these roots have tissues with their name before continuing");
-	mBox.addButton(QMessageBox::No);
-	mBox.addButton(QMessageBox::Yes);
-	mBox.setDefaultButton(QMessageBox::No);
-	if (mBox.exec() == QMessageBox::Yes)
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
+	QMessageBox m_box;
+	m_box.setWindowTitle("");
+	m_box.setText("Before continuing make sure that all the roots were found and labeled in all slices and that they all have kalman filters. In addition, make sure that all of these roots have tissues with their name before continuing");
+	m_box.addButton(QMessageBox::No);
+	m_box.addButton(QMessageBox::Yes);
+	m_box.setDefaultButton(QMessageBox::No);
+	if (m_box.exec() == QMessageBox::Yes)
 	{
-		if (k_filters.size() > 0 && max_active_slice_reached == _handler3D->num_slices() - 1)
+		if (!m_KFilters.empty() && m_MaxActiveSliceReached == m_Handler3D->NumSlices() - 1)
 		{
 			// get Kalman filter labels
 			std::vector<std::string> labels;
-			for (auto filter : k_filters)
-				labels.push_back(filter.get_label());
+			for (const auto& filter : m_KFilters)
+				labels.push_back(filter.GetLabel());
 
-			iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
-			auto tissue_names = _handler3D->tissue_names();
+			iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
+			auto tissue_names = m_Handler3D->TissueNames();
 
 			// shallow copy - used to transform index to world coordinates
 			auto image_3d = itk_handler.GetSource(false);
 
-			typedef float PixelType;
+			using pixel_type = float;
 			using tissue_type = SlicesHandlerInterface::tissue_type;
-			using ImageType = itk::Image<PixelType, 2>;
-			using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
-			using IteratorType = itk::ImageRegionIterator<itk::Image<tissue_type, 2>>;
+			using image_type = itk::Image<pixel_type, 2>;
+			using const_iterator_type = itk::ImageRegionConstIterator<image_type>;
+			using iterator_type = itk::ImageRegionIterator<itk::Image<tissue_type, 2>>;
 
 			std::ofstream myfile;
-			for (auto label : labels)
+			for (const auto& label : labels)
 			{
 				std::string filename = label + ".txt";
 				myfile.open(filename);
 				std::vector<std::string>::iterator it = std::find(tissue_names.begin(), tissue_names.end(), label);
 				if (it == labels.end())
 				{
-					QMessageBox mBox;
-					mBox.setWindowTitle("Error");
-					mBox.setText("Roots have no tissues! First create a tissue in the tissue list!");
-					mBox.exec();
+					QMessageBox m_box;
+					m_box.setWindowTitle("Error");
+					m_box.setText("Roots have no tissues! First create a tissue in the tissue list!");
+					m_box.exec();
 					myfile.close();
 					break;
 				}
 
 				bool draw_circle;
-				double circle_radius = _line_radius->text().toDouble(&draw_circle);
+				double circle_radius = m_LineRadius->text().toDouble(&draw_circle);
 				auto spacing = itk_handler.GetTissuesSlice(0)->GetSpacing();
 				auto ball = iseg::MakeBall<2>(spacing, draw_circle ? circle_radius : 1.0);
 
 				tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
-				for (int i(0); i < _handler3D->num_slices(); i++)
+				for (int i(0); i < m_Handler3D->NumSlices(); i++)
 				{
 					itk::Image<tissue_type, 2>::Pointer tissue = itk_handler.GetTissuesSlice(i);
-					auto labelMap = label_maps[i];
+					auto label_map = m_LabelMaps[i];
 
-					labelMap = calculate_label_map_params(labelMap);
+					label_map = CalculateLabelMapParams(label_map);
 
-					it = std::find(objects[i].begin(), objects[i].end(), label);
-					if (it != objects[i].end())
+					it = std::find(m_Objects[i].begin(), m_Objects[i].end(), label);
+					if (it != m_Objects[i].end())
 					{
-						int row = std::distance(objects[i].begin(), it);
-						auto labelObject = labelMap->GetLabelObject(row + 1);
+						int row = std::distance(m_Objects[i].begin(), it);
+						auto label_object = label_map->GetLabelObject(row + 1);
 
-						using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
+						using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, image_type>;
 						auto label2image = Label2ImageType::New();
-						label2image->SetInput(labelMap);
+						label2image->SetInput(label_map);
 						label2image->Update();
 
-						ConstIteratorType in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
-						IteratorType out(tissue, label2image->GetOutput()->GetRequestedRegion());
+						const_iterator_type in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
+						iterator_type out(tissue, label2image->GetOutput()->GetRequestedRegion());
 						double x(0);
 						double y(0);
 						int size(0);
 						for (in.GoToBegin(), out.GoToBegin(); !in.IsAtEnd(); ++in, ++out)
 						{
-							if (labelMap->GetPixel(in.GetIndex()) == labelObject->GetLabel())
+							if (label_map->GetPixel(in.GetIndex()) == label_object->GetLabel())
 							{
 								if (!draw_circle) // copy to tissues
 									out.Set(tissue_number);
@@ -519,8 +516,7 @@ void AutoTubePanel::add_to_tissues()
 						if (draw_circle) // draw perfect circle
 						{
 							using ShapedNeighborhoodIterator = itk::ShapedNeighborhoodIterator<itk::Image<tissue_type, 2>>;
-							ShapedNeighborhoodIterator siterator(ball.GetRadius(),
-									tissue, tissue->GetLargestPossibleRegion());
+							ShapedNeighborhoodIterator siterator(ball.GetRadius(), tissue, tissue->GetLargestPossibleRegion());
 
 							//siterator.CreateActiveListFromNeighborhood(ball); // does not work because ball has incorrect neighborhood type
 							size_t idx = 0;
@@ -551,29 +547,29 @@ void AutoTubePanel::add_to_tissues()
 				myfile.close();
 			}
 
-			iseg::DataSelection dataSelection;
-			dataSelection.allSlices = true;
-			dataSelection.tissues = true;
+			iseg::DataSelection data_selection;
+			data_selection.allSlices = true;
+			data_selection.tissues = true;
 
-			emit begin_datachange(dataSelection, this);
-			emit end_datachange(this);
+			emit BeginDatachange(data_selection, this);
+			emit EndDatachange(this);
 
-			QMessageBox mBox;
-			mBox.setWindowTitle("");
-			mBox.setText("Done");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("");
+			m_box.setText("Done");
+			m_box.exec();
 		}
 		else
 		{
-			QMessageBox mBox;
-			mBox.setWindowTitle("Error");
-			mBox.setText("Only Click When All Roots are found in all slices and all have kalman filters in the kalman filter list!");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("Error");
+			m_box.setText("Only Click When All Roots are found in all slices and all have kalman filters in the kalman filter list!");
+			m_box.exec();
 		}
 	}
 }
 
-void AutoTubePanel::export_lines()
+void AutoTubePanel::ExportLines()
 {
 	auto directory = QFileDialog::getExistingDirectory(this, "Open directory");
 	if (directory.isEmpty())
@@ -581,63 +577,61 @@ void AutoTubePanel::export_lines()
 
 	// get Kalman filter labels
 	std::vector<std::string> labels;
-	for (auto filter : k_filters)
-		labels.push_back(filter.get_label());
+	for (const auto& filter : m_KFilters)
+		labels.push_back(filter.GetLabel());
 
-	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
-	auto tissue_names = _handler3D->tissue_names();
+	iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
+	auto tissue_names = m_Handler3D->TissueNames();
 
 	// shallow copy - used to transform index to world coordinates
 	auto image_3d = itk_handler.GetSource(false);
 
-	typedef float PixelType;
-	using tissue_type = SlicesHandlerInterface::tissue_type;
-	using ImageType = itk::Image<PixelType, 2>;
-	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
+	using pixel_type = float;
+	using image_type = itk::Image<pixel_type, 2>;
+	using const_iterator_type = itk::ImageRegionConstIterator<image_type>;
 
 	std::ofstream myfile;
-	for (auto label : labels)
+	for (const auto& label : labels)
 	{
 		std::string filename = directory.toStdString() + label + ".txt";
 		myfile.open(filename);
 		auto it = std::find(tissue_names.begin(), tissue_names.end(), label);
 		if (it == labels.end())
 		{
-			QMessageBox mBox;
-			mBox.setWindowTitle("Error");
-			mBox.setText("Roots have no tissues! First create a tissue in the tissue list!");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("Error");
+			m_box.setText("Roots have no tissues! First create a tissue in the tissue list!");
+			m_box.exec();
 			myfile.close();
 			continue;
 		}
 
-		tissues_size_t tissue_number = std::distance(tissue_names.begin(), it);
-		for (int i(0); i < _handler3D->num_slices(); i++)
+		for (int i(0); i < m_Handler3D->NumSlices(); i++)
 		{
 			auto tissue = itk_handler.GetTissuesSlice(i);
-			auto labelMap = label_maps[i];
+			auto label_map = m_LabelMaps[i];
 
-			labelMap = calculate_label_map_params(labelMap);
+			label_map = CalculateLabelMapParams(label_map);
 
-			it = std::find(objects[i].begin(), objects[i].end(), label);
-			if (it != objects[i].end())
+			it = std::find(m_Objects[i].begin(), m_Objects[i].end(), label);
+			if (it != m_Objects[i].end())
 			{
-				int row = std::distance(objects[i].begin(), it);
-				auto labelObject = labelMap->GetLabelObject(row + 1);
+				int row = std::distance(m_Objects[i].begin(), it);
+				auto label_object = label_map->GetLabelObject(row + 1);
 
-				using Label2ImageType = itk::LabelMapToLabelImageFilter<LabelMapType, ImageType>;
+				using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, image_type>;
 				auto label2image = Label2ImageType::New();
-				label2image->SetInput(labelMap);
+				label2image->SetInput(label_map);
 				label2image->Update();
 
-				ConstIteratorType in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
+				const_iterator_type in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
 				double x(0);
 				double y(0);
 				int size(0);
 				for (in.GoToBegin(); !in.IsAtEnd(); ++in)
 				{
 					// why do we go via iterator to labelMap?
-					if (labelMap->GetPixel(in.GetIndex()) == labelObject->GetLabel())
+					if (label_map->GetPixel(in.GetIndex()) == label_object->GetLabel())
 					{
 						x += in.GetIndex()[0];
 						y += in.GetIndex()[1];
@@ -664,21 +658,21 @@ void AutoTubePanel::export_lines()
 }
 
 // function for the Remove Non Selected button
-void AutoTubePanel::remove_non_selected()
+void AutoTubePanel::RemoveNonSelected()
 {
 	// get cached information
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
 	// making sure that they are selected objects
-	if (selected.size() > 0)
+	if (!m_Selected.empty())
 	{
 		std::vector<int> rows_to_delete;
 
 		// find all rows that are not selected
-		for (int i(0); i < objects[_handler3D->active_slice()].size(); i++)
+		for (int i(0); i < m_Objects[m_Handler3D->ActiveSlice()].size(); i++)
 		{
-			std::vector<int>::iterator it = std::find(selected.begin(), selected.end(), i);
-			if (it == selected.end())
+			std::vector<int>::iterator it = std::find(m_Selected.begin(), m_Selected.end(), i);
+			if (it == m_Selected.end())
 				rows_to_delete.push_back(i);
 		}
 
@@ -687,56 +681,56 @@ void AutoTubePanel::remove_non_selected()
 		std::sort(rows_to_delete.begin(), rows_to_delete.end(), std::greater<int>());
 		for (auto row : rows_to_delete)
 		{
-			label_maps[_handler3D->active_slice()]->RemoveLabel(row + 1);
-			objects[_handler3D->active_slice()].erase(objects[_handler3D->active_slice()].begin() + row);
+			m_LabelMaps[m_Handler3D->ActiveSlice()]->RemoveLabel(row + 1);
+			m_Objects[m_Handler3D->ActiveSlice()].erase(m_Objects[m_Handler3D->ActiveSlice()].begin() + row);
 		}
 
 		// delete rows to delete from current slice's probabilities list
-		if (_handler3D->active_slice() != 0)
+		if (m_Handler3D->ActiveSlice() != 0)
 		{
 			for (auto row : rows_to_delete)
 			{
-				_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(row + 1), true, false);
+				m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], std::to_string(row + 1), true, false);
 			}
 		}
 
-		auto labelObjects = label_maps[_handler3D->active_slice()]->GetLabelObjects();
+		auto label_objects = m_LabelMaps[m_Handler3D->ActiveSlice()]->GetLabelObjects();
 
 		// rename elements in probabilities list to correspond to the new indexes of remaining objects
-		if (_handler3D->active_slice() != 0)
+		if (m_Handler3D->ActiveSlice() != 0)
 		{
-			for (unsigned int i(0); i < label_maps[_handler3D->active_slice()]->GetNumberOfLabelObjects(); i++)
+			for (unsigned int i(0); i < m_LabelMaps[m_Handler3D->ActiveSlice()]->GetNumberOfLabelObjects(); i++)
 			{
-				_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(label_maps[_handler3D->active_slice()]->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
+				m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], std::to_string(m_LabelMaps[m_Handler3D->ActiveSlice()]->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
 			}
 		}
 		// rename remaining labels of label map to 1 until number of label objects
-		label_maps[_handler3D->active_slice()]->ClearLabels();
-		for (auto& object : labelObjects)
-			label_maps[_handler3D->active_slice()]->PushLabelObject(object);
+		m_LabelMaps[m_Handler3D->ActiveSlice()]->ClearLabels();
+		for (auto& object : label_objects)
+			m_LabelMaps[m_Handler3D->ActiveSlice()]->PushLabelObject(object);
 
-		refresh_object_list();
-		refresh_probability_list();
+		RefreshObjectList();
+		RefreshProbabilityList();
 
-		visualize_label_map(label_maps[_handler3D->active_slice()]);
+		VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
 
-		_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
-		selected.clear();
+		m_Selected.clear();
 	}
 }
 
-void AutoTubePanel::save_label_map(FILE* fp, LabelMapType::Pointer map)
+void AutoTubePanel::SaveLabelMap(FILE* fp, label_map_type::Pointer map)
 {
 
-	typedef float PixelType;
-	using ImageType = itk::Image<PixelType, 2>;
+	using pixel_type = float;
+	using image_type = itk::Image<pixel_type, 2>;
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
-	auto label2image = Label2ImageType::New();
+	using label2image_type = itk::LabelMapToLabelImageFilter<label_map_type, image_type>;
+	auto label2image = label2image_type::New();
 	label2image->SetInput(map);
 
-	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
+	using const_iterator_type = itk::ImageRegionConstIterator<image_type>;
 	SAFE_UPDATE(label2image, return );
 	int dummy;
 
@@ -747,16 +741,16 @@ void AutoTubePanel::save_label_map(FILE* fp, LabelMapType::Pointer map)
 	dummy = label2image->GetOutput()->GetRequestedRegion().GetSize()[1];
 	fwrite(&dummy, sizeof(int), 1, fp);
 	// GetPixel() returns the label for the given index -> we save the labels for each pixel
-	ConstIteratorType in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
+	const_iterator_type in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
 	for (in.GoToBegin(); !in.IsAtEnd(); ++in)
 	{
 		dummy = map->GetPixel(in.GetIndex());
 		fwrite(&dummy, sizeof(int), 1, fp);
 	}
 
-	std::map<LabelType, std::vector<double>> params = get_label_map_params(map);
+	std::map<label_type, std::vector<double>> params = GetLabelMapParams(map);
 	// saving paramters of label objects
-	for (auto it : params)
+	for (const auto& it : params)
 	{
 		for (auto parameter : it.second)
 		{
@@ -766,7 +760,7 @@ void AutoTubePanel::save_label_map(FILE* fp, LabelMapType::Pointer map)
 	}
 }
 
-void AutoTubePanel::save_l_to_t(FILE* fp, std::map<LabelType, std::string> l_to_t)
+void AutoTubePanel::SaveLToT(FILE* fp, std::map<label_type, std::string> l_to_t)
 {
 	// save labelto text mapping
 
@@ -775,23 +769,23 @@ void AutoTubePanel::save_l_to_t(FILE* fp, std::map<LabelType, std::string> l_to_
 
 	for (auto const& element : l_to_t)
 	{
-		fwrite(&(element.first), sizeof(LabelType), 1, fp);
+		fwrite(&(element.first), sizeof(label_type), 1, fp);
 		fwrite(&(element.second), sizeof(std::string), 1, fp);
 	}
 }
-std::map<LabelType, std::string> AutoTubePanel::load_l_to_t(FILE* fi)
+std::map<label_type, std::string> AutoTubePanel::LoadLToT(FILE* fi)
 {
 
 	// load label to text mapping
 
-	std::map<LabelType, std::string> mapping;
+	std::map<label_type, std::string> mapping;
 	int size;
 	fread(&size, sizeof(int), 1, fi);
 
 	for (unsigned int j(0); j < size; j++)
 	{
-		LabelType label;
-		fread(&label, sizeof(LabelType), 1, fi);
+		label_type label;
+		fread(&label, sizeof(label_type), 1, fi);
 		std::string text;
 		fread(&text, sizeof(std::string), 1, fi);
 		mapping[label] = text;
@@ -799,9 +793,9 @@ std::map<LabelType, std::string> AutoTubePanel::load_l_to_t(FILE* fi)
 	return mapping;
 }
 
-LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
+label_map_type::Pointer AutoTubePanel::LoadLabelMap(FILE* fi)
 {
-	LabelMapType::Pointer map = LabelMapType::New();
+	label_map_type::Pointer map = label_map_type::New();
 
 	int x;
 	int y;
@@ -812,14 +806,14 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 	int value;
 	itk::Index<2> index{{0, 0}};
 
-	typedef float PixelType;
-	using ImageType = itk::Image<PixelType, 2>;
-	ImageType::SizeType size{{384, 384}};
+	using pixel_type = float;
+	using image_type = itk::Image<pixel_type, 2>;
+	image_type::SizeType size{{384, 384}};
 
 	size[0] = x;
 	size[1] = y;
 
-	ImageType::RegionType region;
+	image_type::RegionType region;
 	region.SetSize(size);
 	region.SetIndex(index);
 
@@ -827,23 +821,23 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 	map->Allocate(true);
 	map->Update();
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
-	auto label2image = Label2ImageType::New();
+	using label2image_type = itk::LabelMapToLabelImageFilter<label_map_type, image_type>;
+	auto label2image = label2image_type::New();
 	label2image->SetInput(map);
 	label2image->Update();
 
-	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
-	ConstIteratorType in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
+	using const_iterator_type = itk::ImageRegionConstIterator<image_type>;
+	const_iterator_type in(label2image->GetOutput(), label2image->GetOutput()->GetRequestedRegion());
 	for (in.GoToBegin(); !in.IsAtEnd(); ++in)
 	{
 		fread(&value, sizeof(int), 1, fi);
 		map->SetPixel(in.GetIndex(), value);
 	}
 
-	map = calculate_label_map_params(map);
+	map = CalculateLabelMapParams(map);
 
 	double param;
-	for (auto& labelObject : map->GetLabelObjects())
+	for (auto& label_object : map->GetLabelObjects())
 	{
 		double centroid_x;
 		double centroid_y;
@@ -852,29 +846,29 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 		itk::Point<double, 2> centroid;
 		centroid[0] = centroid_x;
 		centroid[1] = centroid_y;
-		labelObject->SetCentroid(centroid);
+		label_object->SetCentroid(centroid);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetEquivalentSphericalPerimeter(param);
+		label_object->SetEquivalentSphericalPerimeter(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetEquivalentSphericalRadius(param);
+		label_object->SetEquivalentSphericalRadius(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetFeretDiameter(param);
+		label_object->SetFeretDiameter(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetFlatness(param);
+		label_object->SetFlatness(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetNumberOfPixels(param);
+		label_object->SetNumberOfPixels(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetNumberOfPixelsOnBorder(param);
+		label_object->SetNumberOfPixelsOnBorder(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetPerimeter(param);
+		label_object->SetPerimeter(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetPerimeterOnBorder(param);
+		label_object->SetPerimeterOnBorder(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetPerimeterOnBorderRatio(param);
+		label_object->SetPerimeterOnBorderRatio(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetPhysicalSize(param);
+		label_object->SetPhysicalSize(param);
 		fread(&param, sizeof(double), 1, fi);
-		labelObject->SetRoundness(param);
+		label_object->SetRoundness(param);
 	}
 
 	map->Update();
@@ -882,125 +876,125 @@ LabelMapType::Pointer AutoTubePanel::load_label_map(FILE* fi)
 	return map;
 }
 
-void AutoTubePanel::save_k_filter(FILE* fp, std::vector<KalmanFilter> filters)
+void AutoTubePanel::SaveKFilter(FILE* fp, std::vector<KalmanFilter> filters)
 {
 	int size = filters.size();
 	fwrite(&size, sizeof(int), 1, fp);
 	for (auto const& element : filters)
 	{
 
-		Eigen::VectorXd z = element.get_z();
+		Eigen::VectorXd z = element.GetZ();
 		for (unsigned int i(0); i < z.size(); i++)
 		{
 			fwrite(&z(i), sizeof(double), 1, fp);
 		}
-		Eigen::VectorXd z_hat = element.get_z_hat();
+		Eigen::VectorXd z_hat = element.GetZHat();
 		for (unsigned int i(0); i < z_hat.size(); i++)
 		{
 			fwrite(&z_hat(i), sizeof(double), 1, fp);
 		}
 
-		Eigen::VectorXd x = element.get_x();
+		Eigen::VectorXd x = element.GetX();
 		for (unsigned int i(0); i < x.size(); i++)
 		{
 			fwrite(&x(i), sizeof(double), 1, fp);
 		}
 
-		Eigen::VectorXd v = element.get_v();
+		Eigen::VectorXd v = element.GetV();
 		for (unsigned int i(0); i < v.size(); i++)
 		{
 			fwrite(&v(i), sizeof(double), 1, fp);
 		}
 
-		Eigen::VectorXd n = element.get_n();
+		Eigen::VectorXd n = element.GetN();
 		for (unsigned int i(0); i < n.size(); i++)
 		{
 			fwrite(&n(i), sizeof(double), 1, fp);
 		}
 
-		Eigen::VectorXd m = element.get_m();
+		Eigen::VectorXd m = element.GetM();
 		for (unsigned int i(0); i < m.size(); i++)
 		{
 			fwrite(&m(i), sizeof(double), 1, fp);
 		}
 
-		Eigen::MatrixXd F = element.get_F();
-		for (unsigned int i(0); i < F.rows(); i++)
+		Eigen::MatrixXd f = element.GetF();
+		for (unsigned int i(0); i < f.rows(); i++)
 		{
-			for (unsigned int j(0); j < F.cols(); j++)
+			for (unsigned int j(0); j < f.cols(); j++)
 			{
-				fwrite(&F(i, j), sizeof(double), 1, fp);
+				fwrite(&f(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd H = element.get_H();
-		for (unsigned int i(0); i < H.rows(); i++)
+		Eigen::MatrixXd h = element.GetH();
+		for (unsigned int i(0); i < h.rows(); i++)
 		{
-			for (unsigned int j(0); j < H.cols(); j++)
+			for (unsigned int j(0); j < h.cols(); j++)
 			{
-				fwrite(&H(i, j), sizeof(double), 1, fp);
+				fwrite(&h(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd P = element.get_P();
-		for (unsigned int i(0); i < P.rows(); i++)
+		Eigen::MatrixXd p = element.GetP();
+		for (unsigned int i(0); i < p.rows(); i++)
 		{
-			for (unsigned int j(0); j < P.cols(); j++)
+			for (unsigned int j(0); j < p.cols(); j++)
 			{
-				fwrite(&P(i, j), sizeof(double), 1, fp);
+				fwrite(&p(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd Q = element.get_Q();
-		for (unsigned int i(0); i < Q.rows(); i++)
+		Eigen::MatrixXd q = element.GetQ();
+		for (unsigned int i(0); i < q.rows(); i++)
 		{
-			for (unsigned int j(0); j < Q.cols(); j++)
+			for (unsigned int j(0); j < q.cols(); j++)
 			{
-				fwrite(&Q(i, j), sizeof(double), 1, fp);
+				fwrite(&q(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd R = element.get_R();
-		for (unsigned int i(0); i < R.rows(); i++)
+		Eigen::MatrixXd r = element.GetR();
+		for (unsigned int i(0); i < r.rows(); i++)
 		{
-			for (unsigned int j(0); j < R.cols(); j++)
+			for (unsigned int j(0); j < r.cols(); j++)
 			{
-				fwrite(&R(i, j), sizeof(double), 1, fp);
+				fwrite(&r(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd W = element.get_W();
-		for (unsigned int i(0); i < W.rows(); i++)
+		Eigen::MatrixXd w = element.GetW();
+		for (unsigned int i(0); i < w.rows(); i++)
 		{
-			for (unsigned int j(0); j < W.cols(); j++)
+			for (unsigned int j(0); j < w.cols(); j++)
 			{
-				fwrite(&W(i, j), sizeof(double), 1, fp);
+				fwrite(&w(i, j), sizeof(double), 1, fp);
 			}
 		}
 
-		Eigen::MatrixXd S = element.get_S();
-		for (unsigned int i(0); i < S.rows(); i++)
+		Eigen::MatrixXd s = element.GetS();
+		for (unsigned int i(0); i < s.rows(); i++)
 		{
-			for (unsigned int j(0); j < S.cols(); j++)
+			for (unsigned int j(0); j < s.cols(); j++)
 			{
-				fwrite(&S(i, j), sizeof(double), 1, fp);
+				fwrite(&s(i, j), sizeof(double), 1, fp);
 			}
 		}
-		int slice = element.get_slice();
-		int iteration = element.get_iteration();
-		int last_slice = element.get_last_slice();
-		std::string label = element.get_label();
+		int slice = element.GetSlice();
+		int iteration = element.GetIteration();
+		int last_slice = element.GetLastSlice();
+		std::string label = element.GetLabel();
 
 		fwrite(&slice, sizeof(int), 1, fp);
 		fwrite(&iteration, sizeof(int), 1, fp);
 		fwrite(&last_slice, sizeof(int), 1, fp);
-		int Nstring = label.size();
-		fwrite(&Nstring, sizeof(int), 1, fp);
-		fwrite(label.c_str(), 1, Nstring, fp);
+		int nstring = label.size();
+		fwrite(&nstring, sizeof(int), 1, fp);
+		fwrite(label.c_str(), 1, nstring, fp);
 	}
 }
 
-std::vector<KalmanFilter> AutoTubePanel::load_k_filters(FILE* fi)
+std::vector<KalmanFilter> AutoTubePanel::LoadKFilters(FILE* fi)
 {
 	std::vector<KalmanFilter> filters;
 
@@ -1011,146 +1005,146 @@ std::vector<KalmanFilter> AutoTubePanel::load_k_filters(FILE* fi)
 
 		KalmanFilter k;
 
-		int N = k.N;
+		int num = k.N;
 
-		Eigen::VectorXd z(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd z(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			z(i) = dummy;
 		}
 
-		Eigen::VectorXd z_hat(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd z_hat(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			z_hat(i) = dummy;
 		}
 
-		Eigen::VectorXd x(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd x(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			x(i) = dummy;
 		}
 
-		Eigen::VectorXd v(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd v(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			v(i) = dummy;
 		}
 
-		Eigen::VectorXd n(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd n(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			n(i) = dummy;
 		}
 
-		Eigen::VectorXd m(N);
-		for (unsigned int i(0); i < N; i++)
+		Eigen::VectorXd m(num);
+		for (unsigned int i(0); i < num; i++)
 		{
 			double dummy;
 			fread(&dummy, sizeof(double), 1, fi);
 			m(i) = dummy;
 		}
 
-		Eigen::MatrixXd F(N, N);
-		for (unsigned int i(0); i < F.rows(); i++)
+		Eigen::MatrixXd f(num, num);
+		for (unsigned int i(0); i < f.rows(); i++)
 		{
-			for (unsigned int j(0); j < F.cols(); j++)
+			for (unsigned int j(0); j < f.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				F(i, j) = dummy;
+				f(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd H(N, N);
-		for (unsigned int i(0); i < H.rows(); i++)
+		Eigen::MatrixXd h(num, num);
+		for (unsigned int i(0); i < h.rows(); i++)
 		{
-			for (unsigned int j(0); j < H.cols(); j++)
+			for (unsigned int j(0); j < h.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				H(i, j) = dummy;
+				h(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd P(N, N);
-		for (unsigned int i(0); i < P.rows(); i++)
+		Eigen::MatrixXd p(num, num);
+		for (unsigned int i(0); i < p.rows(); i++)
 		{
-			for (unsigned int j(0); j < P.cols(); j++)
+			for (unsigned int j(0); j < p.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				P(i, j) = dummy;
+				p(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd Q(N, N);
-		for (unsigned int i(0); i < Q.rows(); i++)
+		Eigen::MatrixXd q(num, num);
+		for (unsigned int i(0); i < q.rows(); i++)
 		{
-			for (unsigned int j(0); j < Q.cols(); j++)
+			for (unsigned int j(0); j < q.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				Q(i, j) = dummy;
+				q(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd R(N, N);
-		for (unsigned int i(0); i < R.rows(); i++)
+		Eigen::MatrixXd r(num, num);
+		for (unsigned int i(0); i < r.rows(); i++)
 		{
-			for (unsigned int j(0); j < R.cols(); j++)
+			for (unsigned int j(0); j < r.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				R(i, j) = dummy;
+				r(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd W(N, N);
-		for (unsigned int i(0); i < W.rows(); i++)
+		Eigen::MatrixXd w(num, num);
+		for (unsigned int i(0); i < w.rows(); i++)
 		{
-			for (unsigned int j(0); j < W.cols(); j++)
+			for (unsigned int j(0); j < w.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				W(i, j) = dummy;
+				w(i, j) = dummy;
 			}
 		}
 
-		Eigen::MatrixXd S(N, N);
-		for (unsigned int i(0); i < S.rows(); i++)
+		Eigen::MatrixXd s(num, num);
+		for (unsigned int i(0); i < s.rows(); i++)
 		{
-			for (unsigned int j(0); j < S.cols(); j++)
+			for (unsigned int j(0); j < s.cols(); j++)
 			{
 				double dummy;
 				fread(&dummy, sizeof(double), 1, fi);
-				S(i, j) = dummy;
+				s(i, j) = dummy;
 			}
 		}
 
-		k.set_z(z);
-		k.set_z_hat(z_hat);
-		k.set_x(x);
-		k.set_v(v);
-		k.set_n(n);
-		k.set_m(m);
-		k.set_F(F);
-		k.set_P(P);
-		k.set_H(H);
-		k.set_Q(Q);
-		k.set_R(R);
-		k.set_W(W);
-		k.set_S(S);
+		k.SetZ(z);
+		k.SetZHat(z_hat);
+		k.SetX(x);
+		k.SetV(v);
+		k.SetN(n);
+		k.SetM(m);
+		k.SetF(f);
+		k.SetP(p);
+		k.SetH(h);
+		k.SetQ(q);
+		k.SetR(r);
+		k.SetW(w);
+		k.SetS(s);
 
 		int slice;
 		fread(&slice, sizeof(int), 1, fi);
@@ -1158,26 +1152,25 @@ std::vector<KalmanFilter> AutoTubePanel::load_k_filters(FILE* fi)
 		fread(&iteration, sizeof(int), 1, fi);
 		int last_slice;
 		fread(&last_slice, sizeof(int), 1, fi);
-		int Nstring;
-		fread(&Nstring, sizeof(int), 1, fi);
-		std::vector<char> content(Nstring, 0);
-		fread(&content[0], 1, Nstring, fi);
+		int nstring;
+		fread(&nstring, sizeof(int), 1, fi);
+		std::vector<char> content(nstring, 0);
+		fread(&content[0], 1, nstring, fi);
 		std::string label(content.begin(), content.end());
 
-		k.set_slice(slice);
-		k.set_iteration(iteration);
-		k.set_last_slice(last_slice);
-		k.set_label(label);
+		k.SetSlice(slice);
+		k.SetIteration(iteration);
+		k.SetLastSlice(last_slice);
+		k.SetLabel(label);
 		filters.push_back(k);
 	}
 	return filters;
 }
 
-void AutoTubePanel::save()
+void AutoTubePanel::Save()
 {
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	QString savefilename = QFileDialog::getSaveFileName(
-			QString::null, "Projects (*.prj)\n", this); //, filename);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
+	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)\n", this); //, filename);
 
 	if (!savefilename.isEmpty())
 	{
@@ -1187,62 +1180,61 @@ void AutoTubePanel::save()
 		fo = fopen(savefilename.ascii(), "wb");
 
 		int dummy;
-		dummy = _handler3D->num_slices();
+		dummy = m_Handler3D->NumSlices();
 		fwrite(&dummy, sizeof(int), 1, fo);
 
-		dummy = max_active_slice_reached;
+		dummy = m_MaxActiveSliceReached;
 		fwrite(&dummy, sizeof(int), 1, fo);
 
-		for (unsigned int i(0); i <= max_active_slice_reached; i++)
+		for (unsigned int i(0); i <= m_MaxActiveSliceReached; i++)
 		{
 
-			dummy = _cached_data.objects[i].size();
+			dummy = m_CachedData.objects[i].size();
 			fwrite(&dummy, sizeof(int), 1, fo);
-			for (unsigned int j(0); j < _cached_data.objects[i].size(); j++)
+			for (unsigned int j(0); j < m_CachedData.objects[i].size(); j++)
 			{
-				int N = _cached_data.objects[i][j].size();
-				fwrite(&N, sizeof(int), 1, fo);
-				fwrite(_cached_data.objects[i][j].c_str(), 1, N, fo);
+				int n = m_CachedData.objects[i][j].size();
+				fwrite(&n, sizeof(int), 1, fo);
+				fwrite(m_CachedData.objects[i][j].c_str(), 1, n, fo);
 			}
 		}
 
-		for (unsigned int i(0); i <= max_active_slice_reached; i++)
+		for (unsigned int i(0); i <= m_MaxActiveSliceReached; i++)
 		{
-			save_label_map(fo, _cached_data.label_maps[i]);
+			SaveLabelMap(fo, m_CachedData.label_maps[i]);
 		}
-		for (unsigned int i(0); i <= max_active_slice_reached; i++)
+		for (unsigned int i(0); i <= m_MaxActiveSliceReached; i++)
 		{
-			save_l_to_t(fo, _cached_data.label_to_text[i]);
+			SaveLToT(fo, m_CachedData.label_to_text[i]);
 		}
 
-		save_k_filter(fo, _cached_data.k_filters);
+		SaveKFilter(fo, m_CachedData.k_filters);
 
-		for (unsigned int i(0); i <= max_active_slice_reached; i++)
+		for (unsigned int i(0); i <= m_MaxActiveSliceReached; i++)
 		{
-			dummy = _cached_data._probabilities[i].size();
+			dummy = m_CachedData._probabilities[i].size();
 			fwrite(&dummy, sizeof(int), 1, fo);
-			for (auto const& prob : _cached_data._probabilities[i])
+			for (auto const& prob : m_CachedData._probabilities[i])
 			{
-				int N = prob.size();
-				fwrite(&N, sizeof(int), 1, fo);
-				fwrite(prob.c_str(), 1, N, fo);
+				int n = prob.size();
+				fwrite(&n, sizeof(int), 1, fo);
+				fwrite(prob.c_str(), 1, n, fo);
 			}
 		}
 
 		fclose(fo);
-		QMessageBox mBox;
-		mBox.setWindowTitle("Saving");
-		mBox.setText(QString::fromStdString("Saving Finished"));
-		mBox.exec();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Saving");
+		m_box.setText(QString::fromStdString("Saving Finished"));
+		m_box.exec();
 	}
 }
 
-void AutoTubePanel::load()
+void AutoTubePanel::Load()
 {
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null,
-			"Projects (*.prj)\n"
-			"All (*.*)",
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
+	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "Projects (*.prj)\n"
+																																		 "All (*.*)",
 			this); //, filename);
 	if (!loadfilename.isEmpty())
 	{
@@ -1255,11 +1247,11 @@ void AutoTubePanel::load()
 		int num_slices;
 		fread(&num_slices, sizeof(int), 1, fi);
 
-		max_active_slice_reached = num_slices;
+		m_MaxActiveSliceReached = num_slices;
 
 		std::vector<std::vector<std::string>> objs(max_num_slices);
-		std::vector<LabelMapType::Pointer> l_maps(max_num_slices);
-		std::vector<std::map<LabelType, std::string>> l_to_t(max_num_slices);
+		std::vector<label_map_type::Pointer> l_maps(max_num_slices);
+		std::vector<std::map<label_type, std::string>> l_to_t(max_num_slices);
 		std::vector<std::vector<std::string>> probabilities(max_num_slices);
 		std::vector<KalmanFilter> k_fs;
 
@@ -1271,10 +1263,10 @@ void AutoTubePanel::load()
 			std::vector<std::string> vec;
 			for (unsigned int j(0); j < size; j++)
 			{
-				int N;
-				fread(&N, sizeof(int), 1, fi);
-				std::vector<char> content(N, 0);
-				fread(&content[0], 1, N, fi);
+				int n;
+				fread(&n, sizeof(int), 1, fi);
+				std::vector<char> content(n, 0);
+				fread(&content[0], 1, n, fi);
 				std::string str(content.begin(), content.end());
 				vec.push_back(str);
 			}
@@ -1284,18 +1276,18 @@ void AutoTubePanel::load()
 		for (unsigned int i(0); i <= num_slices; i++)
 		{
 
-			LabelMapType::Pointer label_map = load_label_map(fi);
-			visualize_label_map(label_map);
+			label_map_type::Pointer label_map = LoadLabelMap(fi);
+			VisualizeLabelMap(label_map);
 			l_maps[i] = label_map;
 		}
 
 		for (unsigned int i(0); i <= num_slices; i++)
 		{
 
-			l_to_t[i] = load_l_to_t(fi);
+			l_to_t[i] = LoadLToT(fi);
 		}
 
-		k_fs = load_k_filters(fi);
+		k_fs = LoadKFilters(fi);
 
 		for (unsigned int i(0); i <= num_slices; i++)
 		{
@@ -1305,10 +1297,10 @@ void AutoTubePanel::load()
 			fread(&size, sizeof(int), 1, fi);
 			for (unsigned int j(0); j < size; j++)
 			{
-				int N;
-				fread(&N, sizeof(int), 1, fi);
-				std::vector<char> content(N, 0);
-				fread(&content[0], 1, N, fi);
+				int n;
+				fread(&n, sizeof(int), 1, fi);
+				std::vector<char> content(n, 0);
+				fread(&content[0], 1, n, fi);
 				// Construct the string (skip this, if you read into the string directly)
 				std::string str(content.begin(), content.end());
 
@@ -1319,64 +1311,64 @@ void AutoTubePanel::load()
 
 		fclose(fi);
 
-		_cached_data.store(l_maps, objs, l_to_t, k_fs, probabilities, max_active_slice_reached);
-		objects = objs;
-		_probabilities = probabilities;
-		label_maps = l_maps;
-		k_filters = k_fs;
+		m_CachedData.Store(l_maps, objs, l_to_t, k_fs, probabilities, m_MaxActiveSliceReached);
+		m_Objects = objs;
+		m_Probabilities = probabilities;
+		m_LabelMaps = l_maps;
+		m_KFilters = k_fs;
 
-		refresh_object_list();
-		refresh_probability_list();
-		refresh_k_filter_list();
-		QMessageBox mBox;
-		mBox.setWindowTitle("Loading");
-		mBox.setText(QString::fromStdString("Loading Finished"));
-		mBox.exec();
+		RefreshObjectList();
+		RefreshProbabilityList();
+		RefreshKFilterList();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Loading");
+		m_box.setText(QString::fromStdString("Loading Finished"));
+		m_box.exec();
 	}
 }
 
-void AutoTubePanel::k_filter_double_clicked(QListWidgetItem* item)
+void AutoTubePanel::KFilterDoubleClicked(QListWidgetItem* item)
 {
 	// get cached data
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 	std::vector<std::string> labels;
-	for (auto filter : k_filters)
-		labels.push_back(filter.get_label());
+	for (const auto& filter : m_KFilters)
+		labels.push_back(filter.GetLabel());
 
-	QMessageBox mBox;
+	QMessageBox m_box;
 	std::stringstream buffer;
 	//auto split= split_string(item->text().toStdString());
 
 	std::string label = item->text().toStdString();
 	const std::vector<std::string>::iterator it = std::find(labels.begin(), labels.end(), label);
 	int index = std::distance(labels.begin(), it);
-	buffer << k_filters[index] << std::endl;
-	if (_restart_k_filter->isChecked())
+	buffer << m_KFilters[index] << std::endl;
+	if (m_RestartKFilter->isChecked())
 	{
 		KalmanFilter k;
-		k.set_label(k_filters[index].get_label());
-		k.set_slice(k_filters[index].get_slice());
-		k_filters[index] = k;
+		k.SetLabel(m_KFilters[index].GetLabel());
+		k.SetSlice(m_KFilters[index].GetSlice());
+		m_KFilters[index] = k;
 	}
 	else
 	{
-		mBox.setWindowTitle("Filters");
-		mBox.setText(QString::fromStdString(buffer.str()));
-		mBox.exec();
+		m_box.setWindowTitle("Filters");
+		m_box.setText(QString::fromStdString(buffer.str()));
+		m_box.exec();
 	}
 
 	// store cached data
-	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 }
 
-void AutoTubePanel::remove_k_filter()
+void AutoTubePanel::RemoveKFilter()
 {
-	QList<QListWidgetItem*> items = k_filters_list->selectedItems();
+	QList<QListWidgetItem*> items = m_KFiltersList->selectedItems();
 	// get all rows from the selected items
 	std::vector<int> rows;
 	for (auto item : items)
 	{
-		int row = k_filters_list->row(item);
+		int row = m_KFiltersList->row(item);
 		rows.push_back(row);
 	}
 
@@ -1384,58 +1376,58 @@ void AutoTubePanel::remove_k_filter()
 	std::sort(rows.begin(), rows.end(), std::greater<int>());
 	for (auto row : rows)
 	{
-		k_filters.erase(k_filters.begin() + row);
+		m_KFilters.erase(m_KFilters.begin() + row);
 	}
 
-	refresh_k_filter_list();
-	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	RefreshKFilterList();
+	m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 }
 
-void AutoTubePanel::update_kalman_filters()
+void AutoTubePanel::UpdateKalmanFilters()
 {
 
-	if (k_filters.size() > 0 && label_maps[_handler3D->active_slice()])
+	if (!m_KFilters.empty() && m_LabelMaps[m_Handler3D->ActiveSlice()])
 	{
 		// get cached data
-		_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 		// get Kalman filter laels
 		std::vector<std::string> labels;
-		for (auto filter : k_filters)
-			labels.push_back(filter.get_label());
+		for (const auto& filter : m_KFilters)
+			labels.push_back(filter.GetLabel());
 		bool not_in_k_filter_list(false);
 		std::vector<std::string> objects_not_in_list;
 		// for each slice
-		for (int i(0); i <= _handler3D->active_slice(); i++) // \bug this always starts at slice 0 => it should store start slice, i.e. where user pressed execute first time
+		for (int i(0); i <= m_Handler3D->ActiveSlice(); i++) // \bug this always starts at slice 0 => it should store start slice, i.e. where user pressed execute first time
 		{
-			auto labelMap = label_maps[i];
-			if (!labelMap)
+			auto label_map = m_LabelMaps[i];
+			if (!label_map)
 			{
-				QMessageBox mBox;
-				mBox.setWindowTitle("Error");
-				mBox.setText(QString::fromStdString("No label map for slice " + boost::lexical_cast<std::string>(i) + ". Tool expects you to start at slice 0."));
-				mBox.exec();
+				QMessageBox m_box;
+				m_box.setWindowTitle("Error");
+				m_box.setText(QString::fromStdString("No label map for slice " + std::to_string(i) + ". Tool expects you to start at slice 0."));
+				m_box.exec();
 				return;
 			}
 
-			typedef std::map<LabelType, std::vector<double>> LabelToParams;
-			LabelToParams label_to_params = get_label_map_params(labelMap);
+			using LabelToParams = std::map<label_type, std::vector<double>>;
+			LabelToParams label_to_params = GetLabelMapParams(label_map);
 			// for each object in slice object list
-			for (unsigned int row(0); row < objects[i].size(); row++)
+			for (unsigned int row(0); row < m_Objects[i].size(); row++)
 			{
-				std::string label = objects[i][row];
-				auto labelObject = labelMap->GetNthLabelObject(row);
+				std::string label = m_Objects[i][row];
+				auto label_object = label_map->GetNthLabelObject(row);
 
 				std::vector<std::string>::iterator it = std::find(labels.begin(), labels.end(), label);
 				if (it != labels.end())
 				{
 					int index = std::distance(labels.begin(), it);
-					if (k_filters[index].get_slice() <= i + 1 && k_filters[index].get_last_slice() < i + 1)
+					if (m_KFilters[index].GetSlice() <= i + 1 && m_KFilters[index].GetLastSlice() < i + 1)
 					{
-						std::vector<double> params = label_to_params[labelObject->GetLabel()];
+						std::vector<double> params = label_to_params[label_object->GetLabel()];
 						std::vector<double> needed_params = {params[0], params[1]};
-						k_filters[index].set_measurement(needed_params);
-						k_filters[index].work();
-						k_filters[index].set_last_slice(i + 1);
+						m_KFilters[index].SetMeasurement(needed_params);
+						m_KFilters[index].Work();
+						m_KFilters[index].SetLastSlice(i + 1);
 					}
 				}
 				else
@@ -1449,30 +1441,30 @@ void AutoTubePanel::update_kalman_filters()
 		if (not_in_k_filter_list)
 		{
 			std::string message;
-			for (auto object : objects_not_in_list)
+			for (const auto& object : objects_not_in_list)
 				message += object + "\n";
 
-			QMessageBox mBox;
-			mBox.setWindowTitle("Error");
-			mBox.setText(QString::fromStdString(message) + "Don't Have Kalman Filters!");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("Error");
+			m_box.setText(QString::fromStdString(message) + "Don't Have Kalman Filters!");
+			m_box.exec();
 		}
 		// store to cached data
-		_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 	}
 	else
 	{
 
-		QMessageBox mBox;
-		mBox.setWindowTitle("Error");
-		mBox.setText("No Kalman Filters Found! or No label map exists for the current slice");
-		mBox.exec();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Error");
+		m_box.setText("No Kalman Filters Found! or No label map exists for the current slice");
+		m_box.exec();
 	}
 }
 
-LabelMapType::Pointer AutoTubePanel::calculate_label_map_params(LabelMapType::Pointer labelMap)
+label_map_type::Pointer AutoTubePanel::CalculateLabelMapParams(label_map_type::Pointer labelMap)
 {
-	typedef itk::ShapeLabelMapFilter<LabelMapType> ShapeLabelMapFilter;
+	using ShapeLabelMapFilter = itk::ShapeLabelMapFilter<label_map_type>;
 
 	ShapeLabelMapFilter::Pointer shape_filter = ShapeLabelMapFilter::New();
 	shape_filter->SetInput(labelMap);
@@ -1482,18 +1474,18 @@ LabelMapType::Pointer AutoTubePanel::calculate_label_map_params(LabelMapType::Po
 	return shape_filter->GetOutput();
 }
 
-std::map<LabelType, std::vector<double>> AutoTubePanel::get_label_map_params(LabelMapType::Pointer labelMap)
+std::map<label_type, std::vector<double>> AutoTubePanel::GetLabelMapParams(label_map_type::Pointer labelMap)
 {
-	std::map<LabelType, std::vector<double>> label_to_params;
-	typedef float PixelType;
+	std::map<label_type, std::vector<double>> label_to_params;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
 
-	std::map<LabelType, double> label_2_x;
-	std::map<LabelType, double> label_2_y;
-	std::map<LabelType, double> label_2_nb_pixels;
+	std::map<label_type, double> label_2_x;
+	std::map<label_type, double> label_2_y;
+	std::map<label_type, double> label_2_nb_pixels;
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(labelMap);
 	label2image->Update();
@@ -1526,28 +1518,28 @@ std::map<LabelType, std::vector<double>> AutoTubePanel::get_label_map_params(Lab
 
 	for (unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); i++)
 	{
-		auto labelObject = labelMap->GetNthLabelObject(i);
+		auto label_object = labelMap->GetNthLabelObject(i);
 		std::vector<double> params;
 
-		params.push_back(label_2_x[labelObject->GetLabel()]);
-		params.push_back(label_2_y[labelObject->GetLabel()]);
-		params.push_back(labelObject->GetEquivalentSphericalPerimeter());
-		params.push_back(labelObject->GetEquivalentSphericalRadius());
-		params.push_back(labelObject->GetFeretDiameter());
-		params.push_back(labelObject->GetFlatness());
-		params.push_back(labelObject->GetNumberOfPixels());
-		params.push_back(labelObject->GetNumberOfPixelsOnBorder());
-		params.push_back(labelObject->GetPerimeter());
-		params.push_back(labelObject->GetPerimeterOnBorder());
-		params.push_back(labelObject->GetPerimeterOnBorderRatio());
-		params.push_back(labelObject->GetPhysicalSize());
-		params.push_back(labelObject->GetRoundness());
-		label_to_params.insert(std::make_pair(labelObject->GetLabel(), params));
+		params.push_back(label_2_x[label_object->GetLabel()]);
+		params.push_back(label_2_y[label_object->GetLabel()]);
+		params.push_back(label_object->GetEquivalentSphericalPerimeter());
+		params.push_back(label_object->GetEquivalentSphericalRadius());
+		params.push_back(label_object->GetFeretDiameter());
+		params.push_back(label_object->GetFlatness());
+		params.push_back(label_object->GetNumberOfPixels());
+		params.push_back(label_object->GetNumberOfPixelsOnBorder());
+		params.push_back(label_object->GetPerimeter());
+		params.push_back(label_object->GetPerimeterOnBorder());
+		params.push_back(label_object->GetPerimeterOnBorderRatio());
+		params.push_back(label_object->GetPhysicalSize());
+		params.push_back(label_object->GetRoundness());
+		label_to_params.insert(std::make_pair(label_object->GetLabel(), params));
 	}
 	return label_to_params;
 }
 
-std::vector<double> AutoTubePanel::softmax(std::vector<double> distances, std::vector<double> diff_in_pred, std::vector<double> diff_in_data)
+std::vector<double> AutoTubePanel::Softmax(std::vector<double> distances, std::vector<double> diff_in_pred, std::vector<double> diff_in_data)
 {
 	std::vector<double> probabilities;
 
@@ -1556,7 +1548,7 @@ std::vector<double> AutoTubePanel::softmax(std::vector<double> distances, std::v
 	for (unsigned int i(0); i < distances.size(); i++)
 	{
 
-		double x = exp(-(_w_distance->text().toDouble() * distances[i] + _w_pred->text().toDouble() * diff_in_pred[i] + _w_params->text().toDouble() * diff_in_data[i]));
+		double x = exp(-(m_WDistance->text().toDouble() * distances[i] + m_WPred->text().toDouble() * diff_in_pred[i] + m_WParams->text().toDouble() * diff_in_data[i]));
 		probabilities.push_back(x);
 		sum += x;
 	}
@@ -1565,50 +1557,49 @@ std::vector<double> AutoTubePanel::softmax(std::vector<double> distances, std::v
 		if (probabilities.size() > 1)
 			probability = probability / sum;
 
-		if (isnan(probability))
+		if (std::isnan(probability))
 			probability = 0;
 	}
 	return probabilities;
 }
 
-std::vector<std::string> AutoTubePanel::split_string(std::string text)
+std::vector<std::string> AutoTubePanel::SplitString(std::string text)
 {
 	// splits a string only via " " (the space character)
 	std::istringstream iss(text);
-	std::vector<std::string> results(std::istream_iterator<std::string>{iss},
-			std::istream_iterator<std::string>());
+	std::vector<std::string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 	return results;
 }
 
-void AutoTubePanel::remove_object()
+void AutoTubePanel::RemoveObject()
 {
 	// removes object from the Slice Object List
 
 	// Get Chached data
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
-	QList<QListWidgetItem*> items = object_list->selectedItems();
-	LabelMapType::Pointer labelMap = label_maps[_handler3D->active_slice()];
+	QList<QListWidgetItem*> items = m_ObjectList->selectedItems();
+	label_map_type::Pointer label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
-	std::vector<LabelObjectType*> objects_to_remove;
+	std::vector<label_object_type*> objects_to_remove;
 	std::vector<int> rows;
 	std::vector<std::string> labels;
 
 	for (auto item : items)
 	{
-		int row = object_list->row(item);
+		int row = m_ObjectList->row(item);
 		rows.push_back(row);
 
-		auto labelObject = labelMap->GetNthLabelObject(row);
-		labels.push_back(std::to_string(labelObject->GetLabel()));
-		objects_to_remove.push_back(labelObject);
+		auto label_object = label_map->GetNthLabelObject(row);
+		labels.push_back(std::to_string(label_object->GetLabel()));
+		objects_to_remove.push_back(label_object);
 
-		label_to_text[_handler3D->active_slice()].erase(labelObject->GetLabel());
+		m_LabelToText[m_Handler3D->ActiveSlice()].erase(label_object->GetLabel());
 	}
 
 	// Remove from label objects  from label map
 	for (auto object : objects_to_remove)
-		labelMap->RemoveLabelObject(object);
+		label_map->RemoveLabelObject(object);
 
 	int offset(0);
 
@@ -1617,78 +1608,78 @@ void AutoTubePanel::remove_object()
 
 	for (auto row : rows)
 	{
-		auto it = objects[_handler3D->active_slice()].begin();
+		auto it = m_Objects[m_Handler3D->ActiveSlice()].begin();
 		std::advance(it, row - offset);
-		objects[_handler3D->active_slice()].erase(it);
+		m_Objects[m_Handler3D->ActiveSlice()].erase(it);
 		offset += 1;
 	}
 
-	if (_handler3D->active_slice() != 0)
+	if (m_Handler3D->ActiveSlice() != 0)
 	{
-		for (auto label : labels)
+		for (const auto& label : labels)
 		{
-			_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], label, true, false);
+			m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], label, true, false);
 		}
 	}
 
-	auto labelObjects = labelMap->GetLabelObjects();
+	auto label_objects = label_map->GetLabelObjects();
 
-	if (_handler3D->active_slice() != 0)
+	if (m_Handler3D->ActiveSlice() != 0)
 	{
-		for (unsigned int i(0); i < labelMap->GetNumberOfLabelObjects(); i++)
+		for (unsigned int i(0); i < label_map->GetNumberOfLabelObjects(); i++)
 		{
-			_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(labelMap->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
+			m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], std::to_string(label_map->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
 		}
 	}
 
 	// clear labels from label map and re-initialize to have from 1 up to number of label objects
-	labelMap->ClearLabels();
-	for (auto& object : labelObjects)
-		labelMap->PushLabelObject(object);
+	label_map->ClearLabels();
+	for (auto& object : label_objects)
+		label_map->PushLabelObject(object);
 
-	SAFE_UPDATE(labelMap, return );
-	label_maps[_handler3D->active_slice()] = labelMap;
+	SAFE_UPDATE(label_map, return );
+	m_LabelMaps[m_Handler3D->ActiveSlice()] = label_map;
 
-	visualize_label_map(labelMap);
-	refresh_object_list();
-	refresh_probability_list();
-	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	VisualizeLabelMap(label_map);
+	RefreshObjectList();
+	RefreshProbabilityList();
+	m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 }
 
-char AutoTubePanel::get_random_char()
+char AutoTubePanel::GetRandomChar()
 {
-	unsigned seed = time(0);
+	unsigned seed = time(nullptr);
 	srand(seed);
 	return char(rand() % 26 + 'a');
 }
 
-void AutoTubePanel::visualize()
+void AutoTubePanel::Visualize()
 {
-	if (!label_maps.empty() && label_maps[_handler3D->active_slice()])
-		visualize_label_map(label_maps[_handler3D->active_slice()]);
+	if (!m_LabelMaps.empty() && m_LabelMaps[m_Handler3D->ActiveSlice()])
+		VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
 	else
 	{
-		QMessageBox mBox;
-		mBox.setWindowTitle("Error");
-		mBox.setText("No label map to show");
-		mBox.exec();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Error");
+		m_box.setText("No label map to show");
+		m_box.exec();
 	}
 }
-void AutoTubePanel::merge_selected_items()
+void AutoTubePanel::MergeSelectedItems()
 {
-	QList<QListWidgetItem*> items = object_list->selectedItems();
+	QList<QListWidgetItem*> items = m_ObjectList->selectedItems();
 	if (items.size() > 1)
 	{
-		typedef itk::Image<unsigned char, 2> mask_type;
+		using mask_type = itk::Image<unsigned char, 2>;
 
-		_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
-		auto labelMap = label_maps[_handler3D->active_slice()];
+		auto label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
 		std::vector<int> rows;
 
 		for (auto item : items)
-			rows.push_back(object_list->row(item));
+			rows.push_back(m_ObjectList->row(item));
 
 		std::sort(rows.begin(), rows.end());
 
@@ -1696,53 +1687,53 @@ void AutoTubePanel::merge_selected_items()
 
 		std::string target_name = items[0]->text().toStdString();
 
-		LabelType target_label(labelMap->GetNthLabelObject(rows[0])->GetLabel());
+		label_type target_label(label_map->GetNthLabelObject(rows[0])->GetLabel());
 
-		std::vector<unsigned int> pixelIds;
+		std::vector<unsigned int> pixel_ids;
 
 		// need to map labels to target label in the new merged label map
-		std::map<LabelType, LabelType> objects_label_mapping;
-		for (unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); i++)
+		std::map<label_type, label_type> objects_label_mapping;
+		for (unsigned int i = 0; i < label_map->GetNumberOfLabelObjects(); i++)
 		{
 			// Get the ith region
 
-			auto labelObject = labelMap->GetNthLabelObject(i);
+			auto label_object = label_map->GetNthLabelObject(i);
 
-			std::pair<LabelType, LabelType> label_pair;
-			if (std::find(rows.begin(), rows.end(), labelObject->GetLabel() - 1) != rows.end())
+			std::pair<label_type, label_type> label_pair;
+			if (std::find(rows.begin(), rows.end(), label_object->GetLabel() - 1) != rows.end())
 			{
 				// map label to a different label in new label map
-				label_pair = std::make_pair(labelObject->GetLabel(), target_label);
+				label_pair = std::make_pair(label_object->GetLabel(), target_label);
 				objects_label_mapping.insert(label_pair);
 			}
 			else
 			{
 				// map label to the same label
-				label_pair = std::make_pair(labelObject->GetLabel(), labelObject->GetLabel());
+				label_pair = std::make_pair(label_object->GetLabel(), label_object->GetLabel());
 				objects_label_mapping.insert(label_pair);
 			}
 		}
 
-		auto merge_label_map = itk::ChangeLabelLabelMapFilter<LabelMapType>::New();
-		merge_label_map->SetInput(labelMap);
+		auto merge_label_map = itk::ChangeLabelLabelMapFilter<label_map_type>::New();
+		merge_label_map->SetInput(label_map);
 		merge_label_map->SetChangeMap(objects_label_mapping);
 		SAFE_UPDATE(merge_label_map, return );
-		labelMap = merge_label_map->GetOutput();
+		label_map = merge_label_map->GetOutput();
 
-		auto binary_image = itk::LabelMapToBinaryImageFilter<LabelMapType, mask_type>::New();
-		binary_image->SetInput(labelMap);
+		auto binary_image = itk::LabelMapToBinaryImageFilter<label_map_type, mask_type>::New();
+		binary_image->SetInput(label_map);
 		SAFE_UPDATE(binary_image, return );
-		mask_image = binary_image->GetOutput();
+		m_MaskImage = binary_image->GetOutput();
 
-		std::vector<LabelType> labels = labelMap->GetLabels();
+		std::vector<label_type> labels = label_map->GetLabels();
 		std::vector<std::string> objects_list;
 
-		std::map<LabelType, std::string> l_to_t;
+		std::map<label_type, std::string> l_to_t;
 		for (unsigned int i(0); i < labels.size(); i++)
 		{
 			if (target_label != labels[i])
 			{
-				objects_list.push_back(label_to_text[_handler3D->active_slice()][labels[i]]);
+				objects_list.push_back(m_LabelToText[m_Handler3D->ActiveSlice()][labels[i]]);
 			}
 			else
 			{
@@ -1750,51 +1741,51 @@ void AutoTubePanel::merge_selected_items()
 			}
 		}
 
-		if (_handler3D->active_slice() != 0)
+		if (m_Handler3D->ActiveSlice() != 0)
 		{
 			for (unsigned int i(1); i < rows.size(); i++)
 			{
-				_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(rows[i] + 1), true, false);
+				m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], std::to_string(rows[i] + 1), true, false);
 			}
 		}
 
-		auto labelObjects = labelMap->GetLabelObjects();
+		auto label_objects = label_map->GetLabelObjects();
 
-		if (_handler3D->active_slice() != 0)
+		if (m_Handler3D->ActiveSlice() != 0)
 		{
-			for (unsigned int i(0); i < labelMap->GetNumberOfLabelObjects(); i++)
+			for (unsigned int i(0); i < label_map->GetNumberOfLabelObjects(); i++)
 			{
-				_probabilities[_handler3D->active_slice()] = modify_probability(_probabilities[_handler3D->active_slice()], std::to_string(labelMap->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
+				m_Probabilities[m_Handler3D->ActiveSlice()] = ModifyProbability(m_Probabilities[m_Handler3D->ActiveSlice()], std::to_string(label_map->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
 			}
 		}
 
 		// clear labels from label map and re-initialize to have from 1 up to number of label objects
-		labelMap->ClearLabels();
-		for (auto& object : labelObjects)
-			labelMap->PushLabelObject(object);
+		label_map->ClearLabels();
+		for (auto& object : label_objects)
+			label_map->PushLabelObject(object);
 
-		label_maps[_handler3D->active_slice()] = labelMap;
-		objects[_handler3D->active_slice()] = objects_list;
-		refresh_object_list();
-		refresh_probability_list();
+		m_LabelMaps[m_Handler3D->ActiveSlice()] = label_map;
+		m_Objects[m_Handler3D->ActiveSlice()] = objects_list;
+		RefreshObjectList();
+		RefreshProbabilityList();
 
-		_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 	}
 }
 
-void AutoTubePanel::on_mouse_clicked(iseg::Point p)
+void AutoTubePanel::OnMouseClicked(iseg::Point p)
 {
 	// if point click is a label object it adds it to the current slice's selected objects
 
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
-	if (label_maps[_handler3D->active_slice()])
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
+	if (m_LabelMaps[m_Handler3D->ActiveSlice()])
 	{
-		typedef float PixelType;
+		using PixelType = float;
 		using ImageType = itk::Image<PixelType, 2>;
-		if (!label_maps[_handler3D->active_slice()])
+		if (!m_LabelMaps[m_Handler3D->ActiveSlice()])
 		{
 			ImageType::SizeType size{{384, 384}};
-			LabelMapType::Pointer map = LabelMapType::New();
+			label_map_type::Pointer map = label_map_type::New();
 			itk::Index<2> index{{0, 0}};
 
 			ImageType::RegionType region;
@@ -1804,46 +1795,46 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
 			map->SetRegions(region);
 			map->Allocate(true);
 			map->Update();
-			label_maps[_handler3D->active_slice()] = map;
+			m_LabelMaps[m_Handler3D->ActiveSlice()] = map;
 
 			std::vector<std::string> list;
-			objects[_handler3D->active_slice()] = list;
+			m_Objects[m_Handler3D->ActiveSlice()] = list;
 		}
-		auto labelMap = label_maps[_handler3D->active_slice()];
+		auto label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
 		itk::Index<2> index;
 		index[0] = p.px;
 		index[1] = p.py;
 
-		LabelType label = labelMap->GetPixel(index);
+		label_type label = label_map->GetPixel(index);
 
 		// 0 is background
-		if (label != 0 && !_add_pixel->isChecked())
+		if (label != 0 && !m_AddPixel->isChecked())
 		{
-			auto item = object_list->item(label - 1); // rows start from 0 and labels in label map from 1
-			object_list->setCurrentItem(item);
+			auto item = m_ObjectList->item(label - 1); // rows start from 0 and labels in label map from 1
+			m_ObjectList->setCurrentItem(item);
 
-			int row = object_list->row(item);
+			int row = m_ObjectList->row(item);
 
-			std::vector<int>::iterator it = std::find(selected.begin(), selected.end(), row);
-			if (it == selected.end())
-				selected.push_back(row);
+			std::vector<int>::iterator it = std::find(m_Selected.begin(), m_Selected.end(), row);
+			if (it == m_Selected.end())
+				m_Selected.push_back(row);
 		}
 
-		else if (_add_pixel->isChecked() && label == 0)
+		else if (m_AddPixel->isChecked() && label == 0)
 		{
 
-			typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+			using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, ImageType>;
 			auto label2image = Label2ImageType::New();
-			label2image->SetInput(labelMap);
+			label2image->SetInput(label_map);
 			label2image->Update();
 			auto image = label2image->GetOutput();
 
-			if (labelMap->GetPixel(index) == 0)
+			if (label_map->GetPixel(index) == 0)
 			{
-				LabelType last_label = 0;
-				if (!labelMap->GetLabels().empty())
-					last_label = labelMap->GetLabels().back();
+				label_type last_label = 0;
+				if (!label_map->GetLabels().empty())
+					last_label = label_map->GetLabels().back();
 
 				if (image->GetBufferedRegion().IsInside(index))
 				{
@@ -1852,29 +1843,29 @@ void AutoTubePanel::on_mouse_clicked(iseg::Point p)
 
 					image->Update();
 
-					typedef itk::LabelImageToShapeLabelMapFilter<ImageType, LabelMapType> Image2LabelType;
+					using Image2LabelType = itk::LabelImageToShapeLabelMapFilter<ImageType, label_map_type>;
 					auto image2label = Image2LabelType::New();
 					image2label->SetInput(image);
 					image2label->Update();
 
-					label_maps[_handler3D->active_slice()] = image2label->GetOutput();
+					m_LabelMaps[m_Handler3D->ActiveSlice()] = image2label->GetOutput();
 
-					objects[_handler3D->active_slice()].push_back(std::to_string(last_label + 1));
+					m_Objects[m_Handler3D->ActiveSlice()].push_back(std::to_string(last_label + 1));
 				}
 
-				auto labelObjects = label_maps[_handler3D->active_slice()]->GetLabelObjects();
-				label_maps[_handler3D->active_slice()]->ClearLabels();
-				for (auto& object : labelObjects)
-					label_maps[_handler3D->active_slice()]->PushLabelObject(object);
+				auto label_objects = m_LabelMaps[m_Handler3D->ActiveSlice()]->GetLabelObjects();
+				m_LabelMaps[m_Handler3D->ActiveSlice()]->ClearLabels();
+				for (auto& object : label_objects)
+					m_LabelMaps[m_Handler3D->ActiveSlice()]->PushLabelObject(object);
 			}
 
-			refresh_object_list();
-			visualize_label_map(label_maps[_handler3D->active_slice()]);
-			_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+			RefreshObjectList();
+			VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
+			m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 		}
 	}
 }
-double AutoTubePanel::calculate_distance(std::vector<double> params_1, std::vector<double> params_2)
+double AutoTubePanel::CalculateDistance(std::vector<double> params_1, std::vector<double> params_2)
 {
 	// calculate distance
 	itk::Point<double, 2> centroid1;
@@ -1888,14 +1879,14 @@ double AutoTubePanel::calculate_distance(std::vector<double> params_1, std::vect
 	return centroid1.EuclideanDistanceTo(centroid2);
 }
 
-bool AutoTubePanel::label_in_list(const std::string label)
+bool AutoTubePanel::LabelInList(const std::string label)
 {
 	bool in_list(false);
-	for (unsigned int i(0); i < objects.size(); i++)
+	for (unsigned int i(0); i < m_Objects.size(); i++)
 	{
-		if (objects[i].size() > 0)
+		if (!(m_Objects[i]).empty())
 		{
-			for (auto o_label : objects[i])
+			for (const auto& o_label : m_Objects[i])
 			{
 				if (o_label == label)
 				{
@@ -1910,12 +1901,12 @@ bool AutoTubePanel::label_in_list(const std::string label)
 	return in_list;
 }
 
-void AutoTubePanel::extrapolate_results()
+void AutoTubePanel::ExtrapolateResults()
 {
 	// Function of Extrapolate button
 
 	// To make sure that it is not checked as we do not want to add to existing label maps when there aren't any
-	_add->setChecked(false);
+	m_Add->setChecked(false);
 
 	// boolean in case no label objects are found
 	bool quit(false);
@@ -1923,110 +1914,110 @@ void AutoTubePanel::extrapolate_results()
 	// quite in case a Kalman filter does not exist for an object
 	bool quit_k_filters(false);
 
-	int limit_slice = _limit_slice->text().toInt();
-	if (limit_slice <= _handler3D->active_slice() || limit_slice >= _handler3D->num_slices())
-		limit_slice = _handler3D->num_slices();
+	int limit_slice = m_LimitSlice->text().toInt();
+	if (limit_slice <= m_Handler3D->ActiveSlice() || limit_slice >= m_Handler3D->NumSlices())
+		limit_slice = m_Handler3D->NumSlices();
 
-	if (k_filters.size() > 0)
+	if (!m_KFilters.empty())
 	{
 
-		for (unsigned int index(_handler3D->active_slice()); index < limit_slice - 1; index++)
+		for (unsigned int index(m_Handler3D->ActiveSlice()); index < limit_slice - 1; index++)
 		{
 
-			_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+			m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
 			int slice_to_infer_from = index; // starting slice
 
-			_handler3D->set_active_slice(slice_to_infer_from + 1, true);
+			m_Handler3D->SetActiveSlice(slice_to_infer_from + 1, true);
 
-			if (max_active_slice_reached < _handler3D->active_slice())
-				max_active_slice_reached = _handler3D->active_slice();
+			if (m_MaxActiveSliceReached < m_Handler3D->ActiveSlice())
+				m_MaxActiveSliceReached = m_Handler3D->ActiveSlice();
 
 			// preparing data for do_work_nd -> function of Execute button which will save a new label map in label_maps[_handler3D->active_slice()]
-			iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+			iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
 
 			using input_type = itk::Image<float, 2>;
 			using tissues_type = itk::Image<iseg::tissues_size_t, 2>;
 			auto source = itk_handler.GetSourceSlice();
 			auto target = itk_handler.GetTargetSlice();
 			auto tissues = itk_handler.GetTissuesSlice();
-			do_work_nd<input_type, tissues_type, input_type>(source, tissues, target);
+			DoWorkNd<input_type, tissues_type, input_type>(source, tissues, target);
 
 			// label map from slice to infer from
-			auto labelMap = label_maps[slice_to_infer_from];
+			auto label_map = m_LabelMaps[slice_to_infer_from];
 
 			// new label map
-			auto extrapolated_labelMap = label_maps[_handler3D->active_slice()];
+			auto extrapolated_label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
 			std::vector<itk::Point<double, 2>>* centroids = new std::vector<itk::Point<double, 2>>;
 
-			for (unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); i++)
+			for (unsigned int i = 0; i < label_map->GetNumberOfLabelObjects(); i++)
 			{
 				// Get the ith region
-				auto labelObject = labelMap->GetNthLabelObject(i);
-				centroids->push_back(labelObject->GetCentroid());
+				auto label_object = label_map->GetNthLabelObject(i);
+				centroids->push_back(label_object->GetCentroid());
 			}
 
-			typedef std::map<LabelType, std::vector<double>> LabelToParams;
+			using LabelToParams = std::map<label_type, std::vector<double>>;
 
 			LabelToParams label_to_params;
-			label_to_params = get_label_map_params(labelMap);
+			label_to_params = GetLabelMapParams(label_map);
 
 			LabelToParams extrapolated_label_to_params;
-			extrapolated_label_to_params = get_label_map_params(extrapolated_labelMap);
+			extrapolated_label_to_params = GetLabelMapParams(extrapolated_label_map);
 
-			std::map<LabelType, LabelType> objects_label_mapping;
+			std::map<label_type, label_type> objects_label_mapping;
 
-			std::map<LabelType, std::string> l_to_t; // local variable label to text mapping
-			std::vector<std::string> probs;					 // probabilities
+			std::map<label_type, std::string> l_to_t; // local variable label to text mapping
+			std::vector<std::string> probs;						// probabilities
 
-			if (centroids->empty() || extrapolated_labelMap->GetNumberOfLabelObjects() == 0)
+			if (centroids->empty() || extrapolated_label_map->GetNumberOfLabelObjects() == 0)
 			{
 				quit = true;
-				_handler3D->set_active_slice(slice_to_infer_from, true);
+				m_Handler3D->SetActiveSlice(slice_to_infer_from, true);
 				break;
 			}
 			std::vector<std::string> objects_list;
 
 			std::vector<std::string> labels;
-			for (auto filter : k_filters)
+			for (const auto& filter : m_KFilters)
 			{
-				labels.push_back(filter.get_label());
+				labels.push_back(filter.GetLabel());
 			}
 
 			std::vector<std::string>::iterator it; // iterator used to find the index of the given kalman filter from the label map
 
-			double threshold_probability = _min_probability->text().toDouble();
+			double threshold_probability = m_MinProbability->text().toDouble();
 
-			for (unsigned int i = 0; i < extrapolated_labelMap->GetNumberOfLabelObjects(); i++)
+			for (unsigned int i = 0; i < extrapolated_label_map->GetNumberOfLabelObjects(); i++)
 			{
 				std::vector<double> distances;
 				std::vector<double> diff_from_predictions;
 				std::vector<double> diff_in_data;
-				for (unsigned int j = 0; j < labelMap->GetNumberOfLabelObjects(); j++)
+				for (unsigned int j = 0; j < label_map->GetNumberOfLabelObjects(); j++)
 				{
 
-					std::vector<double> par = label_to_params[labelMap->GetNthLabelObject(j)->GetLabel()];
+					std::vector<double> par = label_to_params[label_map->GetNthLabelObject(j)->GetLabel()];
 
-					it = std::find(labels.begin(), labels.end(), label_to_text[slice_to_infer_from][labelMap->GetNthLabelObject(j)->GetLabel()]);
+					it = std::find(labels.begin(), labels.end(), m_LabelToText[slice_to_infer_from][label_map->GetNthLabelObject(j)->GetLabel()]);
 					if (it != labels.end())
 					{
 						int index = std::distance(labels.begin(), it);
 
 						// calculates the difference in position prediction
-						double diff_from_pred = k_filters[index].diff_btw_predicated_object(extrapolated_label_to_params[extrapolated_labelMap->GetNthLabelObject(i)->GetLabel()]);
+						double diff_from_pred = m_KFilters[index].DiffBtwPredicatedObject(extrapolated_label_to_params[extrapolated_label_map->GetNthLabelObject(i)->GetLabel()]);
 						diff_from_predictions.push_back(diff_from_pred);
 
 						// calculate the distance
-						double distance = calculate_distance(label_to_params[labelMap->GetNthLabelObject(j)->GetLabel()], extrapolated_label_to_params[extrapolated_labelMap->GetNthLabelObject(i)->GetLabel()]);
+						double distance = CalculateDistance(label_to_params[label_map->GetNthLabelObject(j)->GetLabel()], extrapolated_label_to_params[extrapolated_label_map->GetNthLabelObject(i)->GetLabel()]);
 						distances.push_back(distance);
 
-						unsigned int Size(label_to_params[labelMap->GetNthLabelObject(j)->GetLabel()].size());
+						unsigned int size(label_to_params[label_map->GetNthLabelObject(j)->GetLabel()].size());
 						// calculate the difference between the two given object's parameters
 						double sum(0);
-						for (unsigned int k(2); k < Size; k++)
+						for (unsigned int k(2); k < size; k++)
 						{
-							sum += abs(label_to_params[labelMap->GetNthLabelObject(j)->GetLabel()][k] - extrapolated_label_to_params[extrapolated_labelMap->GetNthLabelObject(i)->GetLabel()][k]);
+							sum += abs(label_to_params[label_map->GetNthLabelObject(j)->GetLabel()][k] - extrapolated_label_to_params[extrapolated_label_map->GetNthLabelObject(i)->GetLabel()][k]);
 						}
 						diff_in_data.push_back(sum); // two first elements are centroids
 					}
@@ -2040,60 +2031,60 @@ void AutoTubePanel::extrapolate_results()
 					break;
 				std::vector<double> probabilities;
 				// calculates the probabilities of label object from the extrapolated label map to being any label object from the previous label map
-				probabilities = softmax(distances, diff_from_predictions, diff_in_data);
+				probabilities = Softmax(distances, diff_from_predictions, diff_in_data);
 
 				// index of highest probability
 				int max_index = std::distance(probabilities.begin(), std::max_element(probabilities.begin(), probabilities.end()));
 
-				auto new_labelObject = extrapolated_labelMap->GetNthLabelObject(i);
+				auto new_label_object = extrapolated_label_map->GetNthLabelObject(i);
 				bool set(false); // was the name of the new label object already set?
 
 				if (probabilities[max_index] > threshold_probability)
 				{
-					auto old_labelObject = labelMap->GetNthLabelObject(max_index);
+					auto old_label_object = label_map->GetNthLabelObject(max_index);
 
 					// if the new label object corresponds to an old label object that is a digit
 					// we add a random charecter to it so the user can see to which object it is linked too
 
-					if (isdigit(label_to_text[slice_to_infer_from][old_labelObject->GetLabel()][0]))
+					if (isdigit(m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()][0]))
 					{
 						char letter_to_add;
-						if (isalpha(label_to_text[slice_to_infer_from][old_labelObject->GetLabel()].back()))
-							letter_to_add = label_to_text[slice_to_infer_from][old_labelObject->GetLabel()].back();
+						if (isalpha(m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()].back()))
+							letter_to_add = m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()].back();
 						else
-							letter_to_add = get_random_char();
-						while (label_in_list(label_to_text[slice_to_infer_from][old_labelObject->GetLabel()] + letter_to_add))
+							letter_to_add = GetRandomChar();
+						while (LabelInList(m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()] + letter_to_add))
 						{
-							letter_to_add = get_random_char();
+							letter_to_add = GetRandomChar();
 						}
-						l_to_t[new_labelObject->GetLabel()] = label_to_text[slice_to_infer_from][old_labelObject->GetLabel()] + letter_to_add;
+						l_to_t[new_label_object->GetLabel()] = m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()] + letter_to_add;
 					}
 					else
 					{
-						l_to_t[new_labelObject->GetLabel()] = label_to_text[slice_to_infer_from][old_labelObject->GetLabel()];
+						l_to_t[new_label_object->GetLabel()] = m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()];
 					}
 
 					set = true;
 				}
 
-				for (unsigned int j = 0; j < labelMap->GetNumberOfLabelObjects(); j++)
+				for (unsigned int j = 0; j < label_map->GetNumberOfLabelObjects(); j++)
 				{
-					auto old_labelObject = labelMap->GetNthLabelObject(j);
+					auto old_label_object = label_map->GetNthLabelObject(j);
 
 					// if Extrapolate Only Matches is not checked and the new object was not set then add it to the mapping
-					if (!_extrapolate_only_matches->isChecked() && !set)
-						l_to_t[new_labelObject->GetLabel()] = std::to_string(new_labelObject->GetLabel());
+					if (!m_ExtrapolateOnlyMatches->isChecked() && !set)
+						l_to_t[new_label_object->GetLabel()] = std::to_string(new_label_object->GetLabel());
 
-					std::string str = "Probability of " + std::to_string(new_labelObject->GetLabel()) + " -> " + label_to_text[slice_to_infer_from][old_labelObject->GetLabel()] + " = " + std::to_string(probabilities[j]);
+					std::string str = "Probability of " + std::to_string(new_label_object->GetLabel()) + " -> " + m_LabelToText[slice_to_infer_from][old_label_object->GetLabel()] + " = " + std::to_string(probabilities[j]);
 					probs.push_back(str);
 				}
 			}
 
-			if (_extrapolate_only_matches->isChecked())
+			if (m_ExtrapolateOnlyMatches->isChecked())
 			{
 				bool in;
 
-				for (auto label : extrapolated_labelMap->GetLabels())
+				for (auto label : extrapolated_label_map->GetLabels())
 				{
 					in = false;
 					for (auto& element : l_to_t)
@@ -2107,31 +2098,31 @@ void AutoTubePanel::extrapolate_results()
 					if (!in)
 					{
 						// if label not in the mapping -> remove the probability from the probability list and remove its label from the label map
-						probs = modify_probability(probs, std::to_string(label), true, false);
-						extrapolated_labelMap->RemoveLabel(label);
+						probs = ModifyProbability(probs, std::to_string(label), true, false);
+						extrapolated_label_map->RemoveLabel(label);
 					}
 				}
 
 				// modify the probability to write the correct index in the object list
-				for (unsigned int i(0); i < extrapolated_labelMap->GetNumberOfLabelObjects(); i++)
+				for (unsigned int i(0); i < extrapolated_label_map->GetNumberOfLabelObjects(); i++)
 				{
-					probs = modify_probability(probs, std::to_string(extrapolated_labelMap->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
+					probs = ModifyProbability(probs, std::to_string(extrapolated_label_map->GetNthLabelObject(i)->GetLabel()), false, true, std::to_string(i + 1));
 				}
 
 				// Change label maps labels from 1 up to number of labele objects
-				auto labelObjects = extrapolated_labelMap->GetLabelObjects();
-				extrapolated_labelMap->ClearLabels();
-				for (auto& object : labelObjects)
-					extrapolated_labelMap->PushLabelObject(object);
+				auto label_objects = extrapolated_label_map->GetLabelObjects();
+				extrapolated_label_map->ClearLabels();
+				for (auto& object : label_objects)
+					extrapolated_label_map->PushLabelObject(object);
 			}
 
 			if (quit_k_filters)
 				break;
 
 			labels.clear();
-			for (auto filter : k_filters)
+			for (const auto& filter : m_KFilters)
 			{
-				labels.push_back(filter.get_label());
+				labels.push_back(filter.GetLabel());
 			}
 
 			for (auto& element : l_to_t)
@@ -2151,44 +2142,44 @@ void AutoTubePanel::extrapolate_results()
                  */
 			}
 
-			label_maps[_handler3D->active_slice()] = extrapolated_labelMap;
-			objects[_handler3D->active_slice()] = objects_list;
-			_probabilities[_handler3D->active_slice()] = probs;
+			m_LabelMaps[m_Handler3D->ActiveSlice()] = extrapolated_label_map;
+			m_Objects[m_Handler3D->ActiveSlice()] = objects_list;
+			m_Probabilities[m_Handler3D->ActiveSlice()] = probs;
 
-			refresh_object_list();
-			refresh_probability_list();
-			refresh_k_filter_list();
-			visualize_label_map(extrapolated_labelMap);
+			RefreshObjectList();
+			RefreshProbabilityList();
+			RefreshKFilterList();
+			VisualizeLabelMap(extrapolated_label_map);
 
-			_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+			m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 		}
 
 		if (quit)
 		{
-			QMessageBox mBox;
-			mBox.setWindowTitle("Error");
-			mBox.setText("Stopped at slice:" + QString::number(_handler3D->active_slice() + 1) + " due to object found not meeting criteria. Change filtering settings and try again.");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("Error");
+			m_box.setText("Stopped at slice:" + QString::number(m_Handler3D->ActiveSlice() + 1) + " due to object found not meeting criteria. Change filtering settings and try again.");
+			m_box.exec();
 		}
 
 		if (quit_k_filters)
 		{
-			QMessageBox mBox;
-			mBox.setWindowTitle("Error");
-			mBox.setText("Stopped due to there being objects having no Kalman Filters! Make sure all objects have Kalman Filters!");
-			mBox.exec();
+			QMessageBox m_box;
+			m_box.setWindowTitle("Error");
+			m_box.setText("Stopped due to there being objects having no Kalman Filters! Make sure all objects have Kalman Filters!");
+			m_box.exec();
 		}
 	}
 	else
 	{
-		QMessageBox mBox;
-		mBox.setWindowTitle("Error");
-		mBox.setText("Cannot Extrapolate When There Are No kalman Filters! Extrapolate only when all objects have Kalman Filters!");
-		mBox.exec();
+		QMessageBox m_box;
+		m_box.setWindowTitle("Error");
+		m_box.setText("Cannot Extrapolate When There Are No kalman Filters! Extrapolate only when all objects have Kalman Filters!");
+		m_box.exec();
 	}
 }
 
-bool AutoTubePanel::isInteger(const std::string& s)
+bool AutoTubePanel::IsInteger(const std::string& s)
 {
 	if (s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+')))
 		return false;
@@ -2199,49 +2190,44 @@ bool AutoTubePanel::isInteger(const std::string& s)
 	return (*p == 0);
 }
 
-void AutoTubePanel::item_selected()
+void AutoTubePanel::ItemSelected()
 {
-	QList<QListWidgetItem*> items = object_list->selectedItems();
-	object_selected(items);
+	QList<QListWidgetItem*> items = m_ObjectList->selectedItems();
+	ObjectSelected(items);
 }
 
-void AutoTubePanel::item_double_clicked(QListWidgetItem* item)
+void AutoTubePanel::ItemDoubleClicked(QListWidgetItem* item)
 {
 	item->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	object_list->editItem(item);
-	QObject::connect(object_list, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(item_edited(QListWidgetItem*)));
+	m_ObjectList->editItem(item);
+	QObject_connect(m_ObjectList, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(ItemEdited(QListWidgetItem*)));
 }
 
-bool AutoTubePanel::is_label(const std::string& s)
+bool AutoTubePanel::IsLabel(const std::string& s)
 {
-	try
-	{
-		boost::lexical_cast<int>(s);
-		return true;
-	}
-	catch (boost::bad_lexical_cast&)
-	{
-	}
-	return false;
+	auto str = QString::fromStdString(s);
+	bool b = false;
+	str.toInt(&b);
+	return b;
 }
 
-void AutoTubePanel::item_edited(QListWidgetItem* Item)
+void AutoTubePanel::ItemEdited(QListWidgetItem* Item)
 {
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 
 	std::string new_name = Item->text().toStdString();
 	boost::algorithm::trim(new_name);
 
-	std::string old_name = objects[_handler3D->active_slice()][object_list->currentRow()];
+	std::string old_name = m_Objects[m_Handler3D->ActiveSlice()][m_ObjectList->currentRow()];
 
-	if (!new_name.empty() && !is_label(new_name))
+	if (!new_name.empty() && !IsLabel(new_name))
 	{
 
 		bool in_k_filters(true);
 
 		std::vector<std::string> labels;
-		for (auto filter : k_filters)
-			labels.push_back(filter.get_label());
+		for (const auto& filter : m_KFilters)
+			labels.push_back(filter.GetLabel());
 
 		if (std::find(labels.begin(), labels.end(), new_name) == labels.end())
 			in_k_filters = false;
@@ -2250,71 +2236,71 @@ void AutoTubePanel::item_edited(QListWidgetItem* Item)
 		if (!in_k_filters)
 		{
 			KalmanFilter k;
-			k.set_label(new_name);
-			k.set_slice(_handler3D->active_slice() + 1);
-			k_filters.push_back(k);
+			k.SetLabel(new_name);
+			k.SetSlice(m_Handler3D->ActiveSlice() + 1);
+			m_KFilters.push_back(k);
 		}
 
 		// update objects
-		objects[_handler3D->active_slice()][object_list->currentRow()] = new_name;
+		m_Objects[m_Handler3D->ActiveSlice()][m_ObjectList->currentRow()] = new_name;
 
 		// update mapping
-		std::map<LabelType, std::string> l_to_t;
-		for (unsigned int i(0); i < objects[_handler3D->active_slice()].size(); i++)
+		std::map<label_type, std::string> l_to_t;
+		for (unsigned int i(0); i < m_Objects[m_Handler3D->ActiveSlice()].size(); i++)
 		{
-			l_to_t[label_maps[_handler3D->active_slice()]->GetNthLabelObject(i)->GetLabel()] = objects[_handler3D->active_slice()][i];
+			l_to_t[m_LabelMaps[m_Handler3D->ActiveSlice()]->GetNthLabelObject(i)->GetLabel()] = m_Objects[m_Handler3D->ActiveSlice()][i];
 		}
 
-		label_to_text[_handler3D->active_slice()] = l_to_t;
-		refresh_k_filter_list();
+		m_LabelToText[m_Handler3D->ActiveSlice()] = l_to_t;
+		RefreshKFilterList();
 
-		_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+		m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 	}
 }
 
-void AutoTubePanel::object_selected(QList<QListWidgetItem*> items)
+void AutoTubePanel::ObjectSelected(QList<QListWidgetItem*> items)
 {
 	if (!items.empty())
 	{
-		auto labelMap = label_maps[_handler3D->active_slice()];
+		auto label_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
 
 		std::vector<int> labels_indexes;
 		for (unsigned int i(0); i < items.size(); i++)
-			labels_indexes.push_back(object_list->row(items[i]));
+			labels_indexes.push_back(m_ObjectList->row(items[i]));
 
 		// select pixels to highlight
 		std::vector<itk::Index<2>>* item_pixels = new std::vector<itk::Index<2>>;
 		for (auto label : labels_indexes)
 		{
-			auto labelObject = labelMap->GetNthLabelObject(label);
-			for (unsigned int pixelId = 0; pixelId < labelObject->Size(); pixelId++)
+			auto label_object = label_map->GetNthLabelObject(label);
+			for (unsigned int pixel_id = 0; pixel_id < label_object->Size(); pixel_id++)
 			{
-				item_pixels->push_back(labelObject->GetIndex(pixelId));
+				item_pixels->push_back(label_object->GetIndex(pixel_id));
 			}
 		}
 
-		visualize_label_map(label_maps[_handler3D->active_slice()], item_pixels);
+		VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()], item_pixels);
 	}
 }
 
-std::vector<std::string> AutoTubePanel::modify_probability(std::vector<std::string> probs, std::string label, bool remove, bool change, std::string value)
+std::vector<std::string> AutoTubePanel::ModifyProbability(std::vector<std::string> probs, std::string label, bool remove, bool change, std::string value)
 {
 	// each label object has multiple values in the probability list as it has a probability for all the objects in the previous slice
 	std::vector<unsigned int> indices;
 	for (unsigned int ind(0); ind < probs.size(); ind++)
 	{
-		std::string _prob = probs[ind];
-		std::vector<std::string> str = split_string(_prob);
+		std::string prob = probs[ind];
+		std::vector<std::string> str = SplitString(prob);
 		std::string label_text = str[2]; // position of object labels name
 		if (label == label_text)
 		{
 			if (change) // change name
 			{
 				str[2] = value;
-				_prob = "";
-				for (auto word : str)
-					_prob += word + " ";
-				probs[ind] = _prob;
+				prob = "";
+				for (const auto& word : str)
+					prob += word + " ";
+				probs[ind] = prob;
 			}
 			else
 				indices.push_back(ind);
@@ -2332,119 +2318,119 @@ std::vector<std::string> AutoTubePanel::modify_probability(std::vector<std::stri
 	return probs;
 }
 
-void AutoTubePanel::refresh_k_filter_list()
+void AutoTubePanel::RefreshKFilterList()
 {
 
-	k_filters_list->clear();
+	m_KFiltersList->clear();
 
-	for (auto filter : k_filters)
+	for (const auto& filter : m_KFilters)
 	{
-		k_filters_list->addItem(QString::fromStdString(filter.get_label()));
+		m_KFiltersList->addItem(QString::fromStdString(filter.GetLabel()));
 	}
-	k_filters_list->show();
+	m_KFiltersList->show();
 }
 
-void AutoTubePanel::refresh_object_list()
+void AutoTubePanel::RefreshObjectList()
 {
-	object_list->clear();
-	std::map<LabelType, std::string> l_to_t;
-	if (!objects.empty() && objects[_handler3D->active_slice()].size() > 0)
+	m_ObjectList->clear();
+	std::map<label_type, std::string> l_to_t;
+	if (!m_Objects.empty() && !(m_Objects[m_Handler3D->ActiveSlice()]).empty())
 	{
-		for (unsigned int i(0); i < objects[_handler3D->active_slice()].size(); i++)
+		for (unsigned int i(0); i < m_Objects[m_Handler3D->ActiveSlice()].size(); i++)
 		{
-			object_list->addItem(QString::fromStdString(objects[_handler3D->active_slice()][i]));
-			l_to_t[i + 1] = objects[_handler3D->active_slice()][i];
+			m_ObjectList->addItem(QString::fromStdString(m_Objects[m_Handler3D->ActiveSlice()][i]));
+			l_to_t[i + 1] = m_Objects[m_Handler3D->ActiveSlice()][i];
 		}
 	}
-	object_list->show();
-	label_to_text[_handler3D->active_slice()] = l_to_t; // update mapping to reflect the refreshed objects
+	m_ObjectList->show();
+	m_LabelToText[m_Handler3D->ActiveSlice()] = l_to_t; // update mapping to reflect the refreshed objects
 }
-void AutoTubePanel::refresh_probability_list()
+void AutoTubePanel::RefreshProbabilityList()
 {
-	object_probability_list->clear();
-	if (_handler3D->active_slice() != 0)
+	m_ObjectProbabilityList->clear();
+	if (m_Handler3D->ActiveSlice() != 0)
 	{
-		if (!_probabilities.empty() && _probabilities[_handler3D->active_slice()].size() > 0)
+		if (!m_Probabilities.empty() && !(m_Probabilities[m_Handler3D->ActiveSlice()]).empty())
 		{
-			for (unsigned int i(0); i < _probabilities[_handler3D->active_slice()].size(); i++)
+			for (unsigned int i(0); i < m_Probabilities[m_Handler3D->ActiveSlice()].size(); i++)
 			{
-				object_probability_list->addItem(QString::fromStdString(_probabilities[_handler3D->active_slice()][i]));
+				m_ObjectProbabilityList->addItem(QString::fromStdString(m_Probabilities[m_Handler3D->ActiveSlice()][i]));
 			}
 		}
-		object_probability_list->show();
+		m_ObjectProbabilityList->show();
 	}
 }
 
-void AutoTubePanel::select_objects()
+void AutoTubePanel::SelectObjects()
 {
-	auto sel = _handler3D->tissue_selection();
+	auto sel = m_Handler3D->TissueSelection();
 
 	std::string text = join(sel | transformed([](int d) { return std::to_string(d); }), ", ");
-	_selected_objects->setText(QString::fromStdString(text));
+	m_SelectedObjects->setText(QString::fromStdString(text));
 }
 
-void AutoTubePanel::init()
+void AutoTubePanel::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
-void AutoTubePanel::newloaded()
+void AutoTubePanel::NewLoaded()
 {
-	on_slicenr_changed();
+	OnSlicenrChanged();
 }
 
-void AutoTubePanel::on_slicenr_changed()
+void AutoTubePanel::OnSlicenrChanged()
 {
-	_cached_data.get(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 	// initialize object list for all slices
-	if (objects.empty() || objects.size() != _handler3D->num_slices())
+	if (m_Objects.empty() || m_Objects.size() != m_Handler3D->NumSlices())
 
-		objects = std::vector<std::vector<std::string>>(_handler3D->num_slices());
+		m_Objects = std::vector<std::vector<std::string>>(m_Handler3D->NumSlices());
 
 	// initiating label maps
-	if (label_maps.empty() || label_maps.size() != _handler3D->num_slices())
-		label_maps = std::vector<LabelMapType::Pointer>(_handler3D->num_slices());
+	if (m_LabelMaps.empty() || m_LabelMaps.size() != m_Handler3D->NumSlices())
+		m_LabelMaps = std::vector<label_map_type::Pointer>(m_Handler3D->NumSlices());
 
-	if (label_to_text.empty() || label_to_text.size() != _handler3D->num_slices())
-		label_to_text = std::vector<std::map<LabelType, std::string>>(_handler3D->num_slices());
+	if (m_LabelToText.empty() || m_LabelToText.size() != m_Handler3D->NumSlices())
+		m_LabelToText = std::vector<std::map<label_type, std::string>>(m_Handler3D->NumSlices());
 
-	if (_probabilities.empty() || _probabilities.size() != _handler3D->num_slices())
+	if (m_Probabilities.empty() || m_Probabilities.size() != m_Handler3D->NumSlices())
 	{
-		_probabilities = std::vector<std::vector<std::string>>(_handler3D->num_slices());
+		m_Probabilities = std::vector<std::vector<std::string>>(m_Handler3D->NumSlices());
 		std::vector<std::string> init;
 		init.push_back(" ");
-		_probabilities[0] = init;
+		m_Probabilities[0] = init;
 	}
 
-	refresh_object_list();
-	refresh_probability_list();
-	refresh_k_filter_list();
-	selected.clear();
+	RefreshObjectList();
+	RefreshProbabilityList();
+	RefreshKFilterList();
+	m_Selected.clear();
 
-	if (!label_maps.empty() && label_maps[_handler3D->active_slice()])
-		visualize_label_map(label_maps[_handler3D->active_slice()]);
+	if (!m_LabelMaps.empty() && m_LabelMaps[m_Handler3D->ActiveSlice()])
+		VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
 }
 
-void AutoTubePanel::cleanup()
+void AutoTubePanel::Cleanup()
 {
 }
 
-void AutoTubePanel::do_work()
+void AutoTubePanel::DoWork()
 {
 	// function for Execute Button
 
-	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
 	using input_type = itk::Image<float, 2>;
 	using tissues_type = itk::Image<iseg::tissues_size_t, 2>;
 	auto source = itk_handler.GetSourceSlice();
 	auto target = itk_handler.GetTargetSlice();
 	auto tissues = itk_handler.GetTissuesSlice();
-	do_work_nd<input_type, tissues_type, input_type>(source, tissues, target);
+	DoWorkNd<input_type, tissues_type, input_type>(source, tissues, target);
 }
 
 template<class TInput, class TImage>
-typename TImage::Pointer AutoTubePanel::compute_feature_image(TInput* source) const
+typename TImage::Pointer AutoTubePanel::ComputeFeatureImage(TInput* source) const
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using hessian_pixel_type = itk::SymmetricSecondRankTensor<float, ImageDimension>;
@@ -2452,49 +2438,49 @@ typename TImage::Pointer AutoTubePanel::compute_feature_image(TInput* source) co
 	using feature_filter_type = itk::HessianToObjectnessMeasureImageFilter<hessian_image_type, TImage>;
 	using multiscale_hessian_filter_type = itk::MultiScaleHessianBasedMeasureImageFilter<TInput, hessian_image_type, TImage>;
 
-	double sigm_min = _sigma_low->text().toDouble();
-	double sigm_max = _sigma_hi->text().toDouble();
-	int num_levels = _number_sigma_levels->text().toInt();
+	double sigm_min = m_SigmaLow->text().toDouble();
+	double sigm_max = m_SigmaHi->text().toDouble();
+	int num_levels = m_NumberSigmaLevels->text().toInt();
 
-	auto objectnessFilter = feature_filter_type::New();
-	objectnessFilter->SetBrightObject(false);
-	objectnessFilter->SetObjectDimension(1);
-	objectnessFilter->SetScaleObjectnessMeasure(true);
-	objectnessFilter->SetAlpha(0.5);
-	objectnessFilter->SetBeta(0.5);
-	objectnessFilter->SetGamma(5.0);
+	auto objectness_filter = feature_filter_type::New();
+	objectness_filter->SetBrightObject(false);
+	objectness_filter->SetObjectDimension(1);
+	objectness_filter->SetScaleObjectnessMeasure(true);
+	objectness_filter->SetAlpha(0.5);
+	objectness_filter->SetBeta(0.5);
+	objectness_filter->SetGamma(5.0);
 
-	auto multiScaleEnhancementFilter = multiscale_hessian_filter_type::New();
-	multiScaleEnhancementFilter->SetInput(source);
-	multiScaleEnhancementFilter->SetHessianToMeasureFilter(objectnessFilter);
-	multiScaleEnhancementFilter->SetSigmaStepMethodToEquispaced();
-	multiScaleEnhancementFilter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
-	multiScaleEnhancementFilter->SetNumberOfSigmaSteps(std::min(1, num_levels));
-	multiScaleEnhancementFilter->Update();
-	return multiScaleEnhancementFilter->GetOutput();
+	auto multi_scale_enhancement_filter = multiscale_hessian_filter_type::New();
+	multi_scale_enhancement_filter->SetInput(source);
+	multi_scale_enhancement_filter->SetHessianToMeasureFilter(objectness_filter);
+	multi_scale_enhancement_filter->SetSigmaStepMethodToEquispaced();
+	multi_scale_enhancement_filter->SetSigmaMinimum(std::min(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetSigmaMaximum(std::max(sigm_min, sigm_max));
+	multi_scale_enhancement_filter->SetNumberOfSigmaSteps(std::min(1, num_levels));
+	multi_scale_enhancement_filter->Update();
+	return multi_scale_enhancement_filter->GetOutput();
 }
 
-void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vector<itk::Index<2>>* pixels)
+void AutoTubePanel::VisualizeLabelMap(label_map_type::Pointer labelMap, std::vector<itk::Index<2>>* pixels)
 {
-	typedef float PixelType;
+	using PixelType = float;
 	using ImageType = itk::Image<PixelType, 2>;
 
-	iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+	iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
 	auto target = itk_handler.GetTargetSlice();
 
-	typedef itk::LabelMapToLabelImageFilter<LabelMapType, ImageType> Label2ImageType;
+	using Label2ImageType = itk::LabelMapToLabelImageFilter<label_map_type, ImageType>;
 	auto label2image = Label2ImageType::New();
 	label2image->SetInput(labelMap);
 	SAFE_UPDATE(label2image, return );
 
 	using tissue_type = SlicesHandlerInterface::tissue_type;
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = false; // all_slices->isChecked();
-	dataSelection.sliceNr = _handler3D->active_slice();
-	dataSelection.work = true;
-	dataSelection.tissues = false;
-	dataSelection.bmp = false;
+	iseg::DataSelection data_selection;
+	data_selection.allSlices = false; // all_slices->isChecked();
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
+	data_selection.tissues = false;
+	data_selection.bmp = false;
 
 	using ConstIteratorType = itk::ImageRegionConstIterator<ImageType>;
 	using IteratorType = itk::ImageRegionIterator<ImageType>;
@@ -2528,12 +2514,12 @@ void AutoTubePanel::visualize_label_map(LabelMapType::Pointer labelMap, std::vec
 		}
 	}
 
-	emit begin_datachange(dataSelection, this);
+	emit BeginDatachange(data_selection, this);
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 template<class TInput, class TTissue, class TTarget>
-void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target)
+void AutoTubePanel::DoWorkNd(TInput* source, TTissue* tissues, TTarget* target)
 {
 	itkStaticConstMacro(ImageDimension, size_t, TInput::ImageDimension);
 	using input_type = TInput;
@@ -2548,32 +2534,31 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 	using thinnning_filter_type = BinaryThinningImageFilter<mask_type, mask_type, ImageDimension>;
 
 	std::vector<double> feature_params;
-	feature_params.push_back(_sigma_low->text().toDouble());
-	feature_params.push_back(_sigma_hi->text().toDouble());
-	feature_params.push_back(_number_sigma_levels->text().toInt());
+	feature_params.push_back(m_SigmaLow->text().toDouble());
+	feature_params.push_back(m_SigmaHi->text().toDouble());
+	feature_params.push_back(m_NumberSigmaLevels->text().toInt());
 
 	// extract IDs if any were set
 	std::vector<int> object_ids;
-	if (!_selected_objects->text().isEmpty())
+	if (!m_SelectedObjects->text().isEmpty())
 	{
 		std::vector<std::string> tokens;
-		std::string selected_objects_text = _selected_objects->text().toStdString();
+		std::string selected_objects_text = m_SelectedObjects->text().toStdString();
 		boost::algorithm::split(tokens, selected_objects_text, boost::algorithm::is_any_of(","));
-		std::transform(tokens.begin(), tokens.end(), std::back_inserter(object_ids),
-				[](std::string s) {
-					boost::algorithm::trim(s);
-					return stoi(s);
-				});
+		std::transform(tokens.begin(), tokens.end(), std::back_inserter(object_ids), [](std::string s) {
+			boost::algorithm::trim(s);
+			return stoi(s);
+		});
 	}
 
 	typename real_type::Pointer feature_image;
-	feature_image = compute_feature_image<input_type, real_type>(source);
+	feature_image = ComputeFeatureImage<input_type, real_type>(source);
 	// mask feature image before skeletonization
 	if (!object_ids.empty())
 	{
 		using map_functor = iseg::Functor::MapLabels<unsigned short, unsigned char>;
 		map_functor map;
-		map.m_Map.assign(_handler3D->tissue_names().size() + 1, 0);
+		map.m_Map.assign(m_Handler3D->TissueNames().size() + 1, 0);
 		for (size_t i = 0; i < object_ids.size(); i++)
 		{
 			map.m_Map.at(object_ids[i]) = 1;
@@ -2594,7 +2579,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 	std::vector<double> skeleton_params(object_ids.begin(), object_ids.end());
 	float lower(30);
 
-	if (_non_max_suppression->isChecked())
+	if (m_NonMaxSuppression->isChecked())
 	{
 		auto masking = itk::ThresholdImageFilter<real_type>::New();
 		masking->SetInput(feature_image);
@@ -2620,7 +2605,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 		skeleton = threshold->GetOutput();
 	}
 
-	if (_skeletonize->isChecked())
+	if (m_Skeletonize->isChecked())
 	{
 		// get centerline: either thresholding or non-max suppression must be done before this
 		auto thinning = thinnning_filter_type::New();
@@ -2635,7 +2620,7 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 		SAFE_UPDATE(rescale, return );
 		skeleton = rescale->GetOutput();
 	}
-	typedef itk::BinaryImageToLabelMapFilter<mask_type, LabelMapType> BinaryImageToLabelMapFilterType;
+	using BinaryImageToLabelMapFilterType = itk::BinaryImageToLabelMapFilter<mask_type, label_map_type>;
 
 	typename mask_type::Pointer output;
 	if (skeleton)
@@ -2646,80 +2631,80 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 
 		auto relabel = itk::RelabelComponentImageFilter<labelfield_type, labelfield_type>::New();
 		relabel->SetInput(connectivity->GetOutput());
-		relabel->SetMinimumObjectSize(_min_object_size->text().toInt());
+		relabel->SetMinimumObjectSize(m_MinObjectSize->text().toInt());
 		SAFE_UPDATE(relabel, return );
 
 		auto threshold = itk::BinaryThresholdImageFilter<labelfield_type, mask_type>::New();
 		threshold->SetInput(relabel->GetOutput());
-		threshold->SetLowerThreshold(_threshold->text().toInt());
+		threshold->SetLowerThreshold(m_Threshold->text().toInt());
 		SAFE_UPDATE(threshold, return );
 
 		output = threshold->GetOutput();
 
 		//converting output to label map
-		auto binaryImageToLabelMapFilter = BinaryImageToLabelMapFilterType::New();
-		binaryImageToLabelMapFilter->SetInput(output);
-		if (_connect_dots->isChecked())
-			binaryImageToLabelMapFilter->SetFullyConnected(true);
+		auto binary_image_to_label_map_filter = BinaryImageToLabelMapFilterType::New();
+		binary_image_to_label_map_filter->SetInput(output);
+		if (m_ConnectDots->isChecked())
+			binary_image_to_label_map_filter->SetFullyConnected(true);
 		else
-			binaryImageToLabelMapFilter->SetFullyConnected(false);
-		SAFE_UPDATE(binaryImageToLabelMapFilter, return );
+			binary_image_to_label_map_filter->SetFullyConnected(false);
+		SAFE_UPDATE(binary_image_to_label_map_filter, return );
 
-		iseg::SlicesHandlerITKInterface itk_handler(_handler3D);
+		iseg::SlicesHandlerITKInterface itk_handler(m_Handler3D);
 		std::vector<std::string> label_object_list;
 
-		auto labelMap = binaryImageToLabelMapFilter->GetOutput();
-		auto map = calculate_label_map_params(labelMap);
-		typedef std::map<LabelType, std::vector<double>> LabelToParams;
+		auto label_map = binary_image_to_label_map_filter->GetOutput();
+		auto map = CalculateLabelMapParams(label_map);
+		using LabelToParams = std::map<label_type, std::vector<double>>;
 
-		LabelToParams label_to_params = get_label_map_params(map);
+		LabelToParams label_to_params = GetLabelMapParams(map);
 
 		std::vector<std::string> labels;
-		for (auto& filter : k_filters)
-			labels.push_back(filter.get_label());
+		for (auto& filter : m_KFilters)
+			labels.push_back(filter.GetLabel());
 
-		if (!_add->isChecked())
+		if (!m_Add->isChecked())
 		{
 			for (unsigned int i = 0; i < map->GetNumberOfLabelObjects(); i++)
 			{
 
 				// Get the ith region
-				auto labelObject = map->GetNthLabelObject(i);
-				label_object_list.push_back(std::to_string(labelObject->GetLabel()));
+				auto label_object = map->GetNthLabelObject(i);
+				label_object_list.push_back(std::to_string(label_object->GetLabel()));
 			}
-			objects[_handler3D->active_slice()] = label_object_list;
-			label_maps[_handler3D->active_slice()] = map;
+			m_Objects[m_Handler3D->ActiveSlice()] = label_object_list;
+			m_LabelMaps[m_Handler3D->ActiveSlice()] = map;
 		}
 		else
 		{
-			auto old_map = label_maps[_handler3D->active_slice()];
-			LabelType last_label = old_map->GetLabels().back();
+			auto old_map = m_LabelMaps[m_Handler3D->ActiveSlice()];
+			label_type last_label = old_map->GetLabels().back();
 			for (unsigned int i(0); i < map->GetNumberOfLabelObjects(); i++)
 			{
 				map->GetNthLabelObject(i)->SetLabel(map->GetNthLabelObject(i)->GetLabel() + last_label);
 				SAFE_UPDATE(map, return );
-				objects[_handler3D->active_slice()].push_back(std::to_string(map->GetNthLabelObject(i)->GetLabel()));
+				m_Objects[m_Handler3D->ActiveSlice()].push_back(std::to_string(map->GetNthLabelObject(i)->GetLabel()));
 			}
-			using MergeLabelFilterType = itk::MergeLabelMapFilter<LabelMapType>;
+			using MergeLabelFilterType = itk::MergeLabelMapFilter<label_map_type>;
 			auto merger = MergeLabelFilterType::New();
 			merger->SetInput(0, old_map);
 			merger->SetInput(1, map);
-			merger->SetMethod(MergeLabelFilterType::KEEP);
+			merger->SetMethod(MergeLabelFilterType::MethodChoice::KEEP);
 			SAFE_UPDATE(merger, return );
 
-			auto calculated_map = calculate_label_map_params(merger->GetOutput());
+			auto calculated_map = CalculateLabelMapParams(merger->GetOutput());
 
-			label_maps[_handler3D->active_slice()] = calculated_map;
+			m_LabelMaps[m_Handler3D->ActiveSlice()] = calculated_map;
 		}
 	}
 
-	if (max_active_slice_reached < _handler3D->active_slice())
-		max_active_slice_reached = _handler3D->active_slice();
+	if (m_MaxActiveSliceReached < m_Handler3D->ActiveSlice())
+		m_MaxActiveSliceReached = m_Handler3D->ActiveSlice();
 
-	iseg::DataSelection dataSelection;
-	dataSelection.allSlices = false; // all_slices->isChecked();
-	dataSelection.sliceNr = _handler3D->active_slice();
-	dataSelection.work = true;
+	iseg::DataSelection data_selection;
+	data_selection.allSlices = false; // all_slices->isChecked();
+	data_selection.sliceNr = m_Handler3D->ActiveSlice();
+	data_selection.work = true;
 
 	if (output && iseg::Paste<mask_type, input_type>(output, target))
 	{
@@ -2732,14 +2717,14 @@ void AutoTubePanel::do_work_nd(TInput* source, TTissue* tissues, TTarget* target
 		std::cerr << "Error: could not set output because image regions don't match.\n";
 	}
 
-	emit begin_datachange(dataSelection, this);
-	emit end_datachange(this);
-	mask_image = output;
+	emit BeginDatachange(data_selection, this);
+	emit EndDatachange(this);
+	m_MaskImage = output;
 
-	refresh_object_list();
-	refresh_k_filter_list();
-	visualize_label_map(label_maps[_handler3D->active_slice()]);
-	_cached_data.store(label_maps, objects, label_to_text, k_filters, _probabilities, max_active_slice_reached);
+	RefreshObjectList();
+	RefreshKFilterList();
+	VisualizeLabelMap(m_LabelMaps[m_Handler3D->ActiveSlice()]);
+	m_CachedData.Store(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
 }
 
 } // namespace iseg

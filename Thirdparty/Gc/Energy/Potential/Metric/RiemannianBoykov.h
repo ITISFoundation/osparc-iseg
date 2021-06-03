@@ -34,15 +34,11 @@
 #include "../../../Math/Algebra/SquareMatrix.h"
 #include "../../Neighbourhood.h"
 
-namespace Gc
-{
-    namespace Energy
-    {
-        namespace Potential
-        {
-            namespace Metric
-            {
-                /** 2-clique potentials approximating a general Riemannian metric. 
+namespace Gc {
+namespace Energy {
+namespace Potential {
+namespace Metric {
+/** 2-clique potentials approximating a general Riemannian metric. 
 
                     This class implements calculation of edge weights approximating
                     a general Riemannian metric. 
@@ -78,25 +74,25 @@ namespace Gc
                     @tparam N Number of dimensions.
                     @tparam T Precision.
                 */
-                template <Size N, class T>
-                class RiemannianBoykov           
-                {
-                protected:
-                    /** Edge weights. */
-                    System::Collection::Array<1,T> m_rew;
-                    /** Normalized neighbourhood. */
-                    Neighbourhood<N,T> m_nno;
-                    /** Weights for a standard Euclidean metric. */
-                    System::Collection::Array<1,T> m_em;
+template <Size N, class T>
+class RiemannianBoykov
+{
+  protected:
+    /** Edge weights. */
+    System::Collection::Array<1, T> m_rew;
+    /** Normalized neighbourhood. */
+    Neighbourhood<N, T> m_nno;
+    /** Weights for a standard Euclidean metric. */
+    System::Collection::Array<1, T> m_em;
 
-                public:
-                    /** Constructor. 
+  public:
+    /** Constructor. 
                     
                         @param[in] n %Neighbourhood used.
                     */
-                    RiemannianBoykov(const Neighbourhood<N,T> &n);
+    RiemannianBoykov(const Neighbourhood<N, T> & n);
 
-                    /** Specify the transformation of the Riemannian space.
+    /** Specify the transformation of the Riemannian space.
 
                         @param[in] mt Positive definite symmetric matrix specifying the 
                         transformation of the space. The space is stretched in the directions 
@@ -116,10 +112,9 @@ namespace Gc
 
                         @see SetMetricTensor().
                     */
-                    RiemannianBoykov<N,T>& SetTransformationMatrix
-                        (const Math::Algebra::SquareMatrix<N,T> &mt);
+    RiemannianBoykov<N, T> & SetTransformationMatrix(const Math::Algebra::SquareMatrix<N, T> & mt);
 
-                    /** Specify the transformation of the Riemannian space.
+    /** Specify the transformation of the Riemannian space.
 
                         @param[in] mt Positive definite symmetric matrix specifying the 
                         transformation of the space. The space is stretched in the directions 
@@ -139,24 +134,23 @@ namespace Gc
 
                         @see SetTransformationMatrix().
                     */
-                    RiemannianBoykov<N,T>& SetMetricTensor
-                        (const Math::Algebra::SquareMatrix<N,T> &mt);
+    RiemannianBoykov<N, T> & SetMetricTensor(const Math::Algebra::SquareMatrix<N, T> & mt);
 
-                    /** Get edge weights calculated for the current metric tensor. */
-                    const System::Collection::Array<1,T>& EdgeWeights() const
-                    {
-                        return m_rew;
-                    }
-
-                    /** Get the edge weight for i-th neighbour (using the current metric tensor). */
-                    T operator[] (Size i) const
-                    {
-                        return m_rew[i];
-                    }
-                };
-            }
-        }
+    /** Get edge weights calculated for the current metric tensor. */
+    const System::Collection::Array<1, T> & EdgeWeights() const
+    {
+        return m_rew;
     }
+
+    /** Get the edge weight for i-th neighbour (using the current metric tensor). */
+    T operator[](Size i) const
+    {
+        return m_rew[i];
+    }
+};
 }
+}
+}
+} // namespace Gc::Energy::Potential::Metric
 
 #endif

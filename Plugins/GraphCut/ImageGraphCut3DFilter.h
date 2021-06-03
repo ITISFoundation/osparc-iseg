@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -43,10 +43,10 @@ class ITK_EXPORT ImageGraphCutFilter : public ImageToImageFilter<TInput, TOutput
 {
 public:
 	// ITK related defaults
-	typedef ImageGraphCutFilter Self;
-	typedef ImageToImageFilter<TInput, TOutput> Superclass;
-	typedef SmartPointer<Self> Pointer;
-	typedef SmartPointer<const Self> ConstPointer;
+	using Self = ImageGraphCutFilter;
+	using Superclass = ImageToImageFilter<TInput, TOutput>;
+	using Pointer = SmartPointer<Self>;
+	using ConstPointer = SmartPointer<const Self>;
 
 	itkNewMacro(Self);
 
@@ -54,12 +54,12 @@ public:
 	itkStaticConstMacro(NDimension, unsigned int, TInput::ImageDimension);
 
 	// image types
-	typedef TInput InputImageType;
-	typedef TForeground ForegroundImageType;
-	typedef TBackground BackgroundImageType;
-	typedef TOutput OutputImageType;
+	using InputImageType = TInput;
+	using ForegroundImageType = TForeground;
+	using BackgroundImageType = TBackground;
+	using OutputImageType = TOutput;
 
-	typedef std::vector<itk::Index<3>> IndexContainerType; // container for sinks / sources
+	using IndexContainerType = std::vector<itk::Index<3>>; // container for sinks / sources
 
 	enum BoundaryDirectionType {
 		NoDirection,
@@ -122,9 +122,9 @@ public:
 
 private:
 	ImageGraphCutFilter();
-	virtual ~ImageGraphCutFilter() {}
+	~ImageGraphCutFilter() override {}
 
-	virtual void GenerateData() override;
+	void GenerateData() override;
 
 private:
 	struct ImageContainer
@@ -136,7 +136,7 @@ private:
 		typename OutputImageType::Pointer output;
 		typename InputImageType::RegionType outputRegion;
 	};
-	typedef Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32> GraphType;
+	using GraphType = Gc::Flow::IGridMaxFlow<3, Gc::Float32, Gc::Float32, Gc::Float32>;
 
 	void InitializeGraph(GraphType*, ImageContainer, ProgressReporter& progress);
 
@@ -152,18 +152,18 @@ private:
 	}
 
 	// parameters
-	bool m_UseForegroundBackground;
-	bool m_UseIntensity;
-	bool m_UseGradientMagnitude;
+	bool m_UseForegroundBackground = false;
+	bool m_UseIntensity = false;
+	bool m_UseGradientMagnitude = false;
 	eMaxFlowAlgorithm m_MaxFlowAlgorithm;
-	bool m_6Connected;
-	int m_ForegroundValue;
-	int m_BackgroundValue;
-	double m_Sigma;							 // noise in boundary term
+	bool m_6Connected = false;
+	int m_ForegroundValue = 400;
+	int m_BackgroundValue = -50;
+	double m_Sigma = 0.2;				 // noise in boundary term
 	int m_NumberOfHistogramBins; // bins per dimension of histograms
 	typename OutputImageType::PixelType m_ForegroundPixelValue;
 	typename OutputImageType::PixelType m_BackgroundPixelValue;
-	bool m_PrintTimer;
+	bool m_PrintTimer = true;
 
 private:
 	ImageGraphCutFilter(const Self&); // intentionally not implemented

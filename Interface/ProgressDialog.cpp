@@ -11,48 +11,48 @@ namespace iseg {
 ProgressDialog::ProgressDialog(const char* msg, QWidget* parent /*= 0*/)
 		: QObject(parent)
 {
-	progress = new QProgressDialog(msg, "Cancel", 0, 100, parent);
-	progress->setWindowModality(Qt::WindowModal);
-	progress->setMinimumDuration(0);
+	m_Progress = new QProgressDialog(msg, "Cancel", 0, 100, parent);
+	m_Progress->setWindowModality(Qt::WindowModal);
+	m_Progress->setMinimumDuration(0);
 
-	auto cancel_button = new QPushButton(QString("Cancel"), progress);
-	progress->setCancelButton(cancel_button);
+	auto cancel_button = new QPushButton(QString("Cancel"), m_Progress);
+	m_Progress->setCancelButton(cancel_button);
 
-	count.store(0);
-	
-	QObject::connect(cancel_button, SIGNAL(clicked()), this, SLOT(cancel()));
+	m_Count.store(0);
+
+	QObject_connect(cancel_button, SIGNAL(clicked()), this, SLOT(Cancel()));
 }
 
-void ProgressDialog::setNumberOfSteps(int N)
+void ProgressDialog::SetNumberOfSteps(int N)
 {
-	progress->setMaximum(N);
-	progress->setValue(0);
+	m_Progress->setMaximum(N);
+	m_Progress->setValue(0);
 }
 
-void ProgressDialog::increment()
+void ProgressDialog::Increment()
 {
-	count++;
-	progress->setValue(count);
+	m_Count++;
+	m_Progress->setValue(m_Count);
 }
 
-bool ProgressDialog::wasCanceled() const
+bool ProgressDialog::WasCanceled() const
 {
-	return canceled;
+	return m_Canceled;
 }
 
-void ProgressDialog::setValue(int percent)
+void ProgressDialog::SetValue(int percent)
 {
-	if (progress->value() != percent)
+	if (m_Progress->value() != percent)
 	{
-		progress->setValue(percent);
+		m_Progress->setValue(percent);
 
 		QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 	}
 }
 
-void ProgressDialog::cancel()
+void ProgressDialog::Cancel()
 {
-	canceled = true;
+	m_Canceled = true;
 }
 
 } // namespace iseg

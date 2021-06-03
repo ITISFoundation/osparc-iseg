@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,42 +11,44 @@
 
 #include "SelectColorButton.h"
 
+#include "Interface/QtConnect.h"
+
 #include <QColorDialog>
 
 namespace iseg {
 
 SelectColorButton::SelectColorButton(QWidget* parent)
-	: color(255, 255, 255) // default white
+		: m_Color(255, 255, 255) // default white
 {
-	updateColor();
+	UpdateColor();
 
-	connect(this, SIGNAL(clicked()), this, SLOT(changeColor()));
+	QObject_connect(this, SIGNAL(clicked()), this, SLOT(ChangeColor()));
 }
 
-void SelectColorButton::updateColor()
+void SelectColorButton::UpdateColor()
 {
-	setStyleSheet("background-color: " + color.name());
+	setStyleSheet("background-color: " + m_Color.name());
 }
 
-void SelectColorButton::changeColor()
+void SelectColorButton::ChangeColor()
 {
-	QColor new_color = QColorDialog::getColor(color, parentWidget(), "Select Outline Color");
-	if (new_color.isValid() && new_color != color)
+	QColor new_color = QColorDialog::getColor(m_Color, parentWidget(), "Select Outline Color");
+	if (new_color.isValid() && new_color != m_Color)
 	{
-		setColor(new_color);
-		onColorChanged(new_color);
+		SetColor(new_color);
+		emit OnColorChanged(new_color);
 	}
 }
 
-void SelectColorButton::setColor(const QColor& color)
+void SelectColorButton::SetColor(const QColor& color)
 {
-	this->color = color;
-	updateColor();
+	this->m_Color = color;
+	UpdateColor();
 }
 
-const QColor& SelectColorButton::getColor()
+const QColor& SelectColorButton::GetColor()
 {
-	return color;
+	return m_Color;
 }
 
-}
+} // namespace iseg

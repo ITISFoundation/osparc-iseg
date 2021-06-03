@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -26,10 +26,10 @@ class TissueHierarchyItem; // BL TODO get rid of this?
 class TissueInfo
 {
 public:
-	std::string name = "?";
-	Color color = {0.f, 0.f, 0.f};
-	float opac = 0.5f;
-	bool locked = false;
+	std::string m_Name = "?";
+	Color m_Color = {0.f, 0.f, 0.f};
+	float m_Opac = 0.5f;
+	bool m_Locked = false;
 };
 
 class TissueInfos
@@ -84,8 +84,8 @@ protected:
 	static void CreateTissueTypeMap();
 
 protected:
-	static TissueInfosVecType tissueInfosVector;
-	static TissueTypeMapType tissueTypeMap;
+	static TissueInfosVecType tissue_infos_vector;
+	static TissueTypeMapType tissue_type_map;
 };
 
 } // namespace iseg

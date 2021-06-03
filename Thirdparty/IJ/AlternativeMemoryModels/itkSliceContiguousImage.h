@@ -50,16 +50,16 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template<class TPixel>
+template <class TPixel>
 class ITK_TEMPLATE_EXPORT SliceContiguousImage : public ImageBase<3>
 {
 public:
-  /** Standard class typedefs */
-  typedef SliceContiguousImage         Self;
-  typedef ImageBase< 3 >               Superclass;
-  typedef SmartPointer<Self>           Pointer;
-  typedef SmartPointer<const Self>     ConstPointer;
-  typedef WeakPointer<const Self>      ConstWeakPointer;
+  /** Standard class type aliases */
+  using Self = SliceContiguousImage;
+  using Superclass = ImageBase<3>;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
+  using ConstWeakPointer = WeakPointer<const Self>;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -67,160 +67,182 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SliceContiguousImage, ImageBase);
 
-  /** Pixel typedef support. */
-  typedef TPixel PixelType;
-  
+  /** Pixel type. */
+  using PixelType = TPixel;
+
   /** This is the actual pixel type contained in the buffer. */
-  typedef TPixel InternalPixelType;
+  using InternalPixelType = TPixel;
 
   /** Typedef alias for PixelType */
-  typedef TPixel ValueType;
+  using ValueType = TPixel;
 
-  typedef InternalPixelType IOPixelType;
+  using IOPixelType = InternalPixelType;
 
   /** Dimension of the image.  This constant is used by functions that are
    * templated over image type (as opposed to being templated over pixel type
    * and dimension) when they need compile time access to the dimension of
    * the image. */
-  itkStaticConstMacro( ImageDimension, unsigned int, Superclass::ImageDimension );
+  itkStaticConstMacro(ImageDimension, unsigned int, Superclass::ImageDimension);
 
   /** Container used to store pixels in the image. */
-  typedef SliceContiguousImageContainer<unsigned long, InternalPixelType> PixelContainer;
+  using PixelContainer = SliceContiguousImageContainer<unsigned long, InternalPixelType>;
 
   /** Index typedef support. An index is used to access pixel values. */
-  typedef typename Superclass::IndexType  IndexType;
+  using IndexType = typename Superclass::IndexType;
 
   /** Offset typedef support. An offset is used to access pixel values. */
-  typedef typename Superclass::OffsetType OffsetType;
+  using OffsetType = typename Superclass::OffsetType;
 
   /** Size typedef support. A size is used to define region bounds. */
-  typedef typename Superclass::SizeType  SizeType;
+  using SizeType = typename Superclass::SizeType;
 
   /** Direction typedef support. A matrix of direction cosines. */
-  typedef typename Superclass::DirectionType  DirectionType;
+  using DirectionType = typename Superclass::DirectionType;
 
   /** Region typedef support. A region is used to specify a subset of an image. */
-  typedef typename Superclass::RegionType  RegionType;
+  using RegionType = typename Superclass::RegionType;
 
   /** Spacing typedef support.  Spacing holds the size of a pixel.  The
    * spacing is the geometric distance between image samples. */
-  typedef typename Superclass::SpacingType SpacingType;
+  using SpacingType = typename Superclass::SpacingType;
 
   /** Origin typedef support.  The origin is the geometric coordinates
    * of the index (0,0). */
-  typedef typename Superclass::PointType PointType;
+  using PointType = typename Superclass::PointType;
 
   /** A pointer to the pixel container. */
-  typedef typename PixelContainer::Pointer PixelContainerPointer;
-  typedef typename PixelContainer::ConstPointer PixelContainerConstPointer;
+  using PixelContainerPointer = typename PixelContainer::Pointer;
+  using PixelContainerConstPointer = typename PixelContainer::ConstPointer;
 
   /** Offset typedef (relative position between indices) */
-  typedef typename Superclass::OffsetValueType OffsetValueType;
+  using OffsetValueType = typename Superclass::OffsetValueType;
 
   /** Accessor type that convert data between internal and external
    *  representations. */
-  typedef SliceContiguousImagePixelAccessor< InternalPixelType, SizeType >
-    AccessorType;
+  using AccessorType = SliceContiguousImagePixelAccessor<InternalPixelType, SizeType>;
 
   /** Tyepdef for the functor used to access pixels.*/
-  typedef SliceContiguousImagePixelAccessorFunctor< Self >
-    AccessorFunctorType;
+  using AccessorFunctorType = SliceContiguousImagePixelAccessorFunctor<Self>;
 
   /** Tyepdef for the functor used to access a neighborhood of pixel pointers.*/
-  typedef SliceContiguousImageNeighborhoodAccessorFunctor< Self >
-    NeighborhoodAccessorFunctorType;
+  using NeighborhoodAccessorFunctorType = SliceContiguousImageNeighborhoodAccessorFunctor<Self>;
 
   /** Allocate the image memory. The size of the image must
    * already be set, e.g. by calling SetRegions(). */
-  void Allocate(bool initialize=false) override;
+  void
+  Allocate(bool initialize = false) override;
 
-	/** Restore the data object to its initial state. This means releasing
+  /** Restore the data object to its initial state. This means releasing
    * memory. */
-  void Initialize() override;
+  void
+  Initialize() override;
 
   /** Fill the image buffer with a value.  Be sure to call Allocate()
    * first. */
-  void FillBuffer(const PixelType& value);
+  void
+  FillBuffer(const PixelType & value);
 
   /** \brief Set a pixel value.
    *
    * Allocate() needs to have been called first -- for efficiency,
    * this function does not check that the image has actually been
    * allocated yet. */
-   void SetPixel( const IndexType &index, const PixelType& value )
-    {
-    typename PixelContainer::SliceArrayType *slices = m_Container->GetSlices();
-    OffsetValueType offset = this->ComputeOffset(index);
-    SizeType size = this->GetLargestPossibleRegion().GetSize();
-    unsigned long sizeOfSlice = size[0] * size[1];
-    const unsigned long sliceIndex = offset / sizeOfSlice;
-    const unsigned long sliceOffset = offset % sizeOfSlice;
-    slices->operator[](sliceIndex)[sliceOffset] = value;
-    }
+  void
+  SetPixel(const IndexType & index, const PixelType & value)
+  {
+    typename PixelContainer::SliceArrayType * slices = m_Container->GetSlices();
+    OffsetValueType                           offset = this->ComputeOffset(index);
+    SizeType                                  size = this->GetLargestPossibleRegion().GetSize();
+    unsigned long                             sizeOfSlice = size[0] * size[1];
+    const unsigned long                       sliceIndex = offset / sizeOfSlice;
+    const unsigned long                       sliceOffset = offset % sizeOfSlice;
+    slices->                                  operator[](sliceIndex)[sliceOffset] = value;
+  }
 
   /** \brief Get a pixel (read only version).
    *
    * For efficiency, this function does not check that the
-   * image has actually been allocated yet. Note that the method returns a 
+   * image has actually been allocated yet. Note that the method returns a
    * pixel on the stack. */
-  const PixelType& GetPixel(const IndexType &index) const
-    {
-    typename PixelContainer::SliceArrayType *slices = m_Container->GetSlices();
-    OffsetValueType offset = this->ComputeOffset(index);
-    SizeType size = this->GetLargestPossibleRegion().GetSize();
-    unsigned long sizeOfSlice = size[0] * size[1];
-    const unsigned long sliceIndex = offset / sizeOfSlice;
-    const unsigned long sliceOffset = offset % sizeOfSlice;
-    return ( slices->operator[](sliceIndex)[sliceOffset] );
-    }
+  const PixelType &
+  GetPixel(const IndexType & index) const
+  {
+    typename PixelContainer::SliceArrayType * slices = m_Container->GetSlices();
+    OffsetValueType                           offset = this->ComputeOffset(index);
+    SizeType                                  size = this->GetLargestPossibleRegion().GetSize();
+    unsigned long                             sizeOfSlice = size[0] * size[1];
+    const unsigned long                       sliceIndex = offset / sizeOfSlice;
+    const unsigned long                       sliceOffset = offset % sizeOfSlice;
+    return (slices->operator[](sliceIndex)[sliceOffset]);
+  }
 
   /** \brief Get a reference to a pixel (e.g. for editing).
    *
    * For efficiency, this function does not check that the
    * image has actually been allocated yet. */
-  PixelType& GetPixel(const IndexType &index )
-    {
-    typename PixelContainer::SliceArrayType *slices = m_Container->GetSlices();
-    OffsetValueType offset = this->ComputeOffset(index);
-    SizeType size = this->GetLargestPossibleRegion().GetSize();
-    unsigned long sizeOfSlice = size[0] * size[1];
-    const unsigned long sliceIndex = offset / sizeOfSlice;
-    const unsigned long sliceOffset = offset % sizeOfSlice;
-    return ( slices->operator[](sliceIndex)[sliceOffset] );
-    }
+  PixelType &
+  GetPixel(const IndexType & index)
+  {
+    typename PixelContainer::SliceArrayType * slices = m_Container->GetSlices();
+    OffsetValueType                           offset = this->ComputeOffset(index);
+    SizeType                                  size = this->GetLargestPossibleRegion().GetSize();
+    unsigned long                             sizeOfSlice = size[0] * size[1];
+    const unsigned long                       sliceIndex = offset / sizeOfSlice;
+    const unsigned long                       sliceOffset = offset % sizeOfSlice;
+    return (slices->operator[](sliceIndex)[sliceOffset]);
+  }
 
   /** \brief Access a pixel. This version cannot be an lvalue because the pixel
    * is converted on the fly to a VariableLengthVector.
    *
    * For efficiency, this function does not check that the
    * image has actually been allocated yet. */
-  PixelType& operator[](const IndexType &index)
-     { return this->GetPixel(index); }
+  PixelType &
+  operator[](const IndexType & index)
+  {
+    return this->GetPixel(index);
+  }
 
   /** \brief Access a pixel.
    *
    * For efficiency, this function does not check that the
    * image has actually been allocated yet. */
-  PixelType& operator[](const IndexType &index) const
-     { return this->GetPixel(index); }
+  PixelType &
+  operator[](const IndexType & index) const
+  {
+    return this->GetPixel(index);
+  }
 
   /** Slice contiguous images do not have buffer. This method always returns 0 */
-  InternalPixelType * GetBufferPointer()
-    { return 0; }
-  const InternalPixelType * GetBufferPointer() const
-    { return 0; }
+  InternalPixelType *
+  GetBufferPointer()
+  {
+    return nullptr;
+  }
+  const InternalPixelType *
+  GetBufferPointer() const
+  {
+    return nullptr;
+  }
 
   /** Return a pointer to the container. */
-  PixelContainer* GetPixelContainer()
-    { return m_Container.GetPointer(); }
+  PixelContainer *
+  GetPixelContainer()
+  {
+    return m_Container.GetPointer();
+  }
 
   /** Return a pointer to the container. */
-  const PixelContainer* GetPixelContainer() const
-    { return m_Container.GetPointer(); }
+  const PixelContainer *
+  GetPixelContainer() const
+  {
+    return m_Container.GetPointer();
+  }
 
   /** Set the container to use. Note that this does not cause the
    * DataObject to be modified. */
-  void SetPixelContainer( PixelContainer *container );
+  void
+  SetPixelContainer(PixelContainer * container);
 
   /** Graft the data and information from one image to another. This
    * is a convenience method to setup a second image with all the meta
@@ -232,63 +254,57 @@ public:
    * simply calls CopyInformation() and copies the region ivars.
    * The implementation here refers to the superclass' implementation
    * and then copies over the pixel container. */
-  virtual void Graft(const DataObject *data) override;
-  
+  void
+  Graft(const DataObject * data) override;
+
   /** Return the Pixel Accessor object */
-  AccessorType GetPixelAccessor( void ) 
-    { 
-      return AccessorType(
-        m_Container->GetSlices(),
-        this->GetLargestPossibleRegion().GetSize()
-      );
-    }
+  AccessorType
+  GetPixelAccessor()
+  {
+    return AccessorType(m_Container->GetSlices(), this->GetLargestPossibleRegion().GetSize());
+  }
 
   /** Return the Pixel Accesor object */
-  const AccessorType GetPixelAccessor( void ) const
-    {
-      return AccessorType(
-        m_Container->GetSlices(),
-        this->GetLargestPossibleRegion().GetSize()
-      );
-    }
+  const AccessorType
+  GetPixelAccessor() const
+  {
+    return AccessorType(m_Container->GetSlices(), this->GetLargestPossibleRegion().GetSize());
+  }
 
   /** Return the NeighborhoodAccessor functor */
-  NeighborhoodAccessorFunctorType GetNeighborhoodAccessor() 
-    {
-      return NeighborhoodAccessorFunctorType(
-        m_Container->GetSlices(),
-        this->GetLargestPossibleRegion().GetSize()
-       );
-    }
+  NeighborhoodAccessorFunctorType
+  GetNeighborhoodAccessor()
+  {
+    return NeighborhoodAccessorFunctorType(m_Container->GetSlices(), this->GetLargestPossibleRegion().GetSize());
+  }
 
   /** Return the NeighborhoodAccessor functor */
-  const NeighborhoodAccessorFunctorType GetNeighborhoodAccessor() const
-    {
-      return NeighborhoodAccessorFunctorType(
-        m_Container->GetSlices(),
-        this->GetLargestPossibleRegion().GetSize()
-       );
-    }
+  const NeighborhoodAccessorFunctorType
+  GetNeighborhoodAccessor() const
+  {
+    return NeighborhoodAccessorFunctorType(m_Container->GetSlices(), this->GetLargestPossibleRegion().GetSize());
+  }
 
 protected:
   SliceContiguousImage();
-  void PrintSelf( std::ostream& os, Indent indent ) const override;
-  virtual ~SliceContiguousImage() {};
-  
+  void
+  PrintSelf(std::ostream & os, Indent indent) const override;
+  ~SliceContiguousImage() override = default;
+
 private:
-  SliceContiguousImage( const Self & ); // purposely not implementated
-  void operator=(const Self&); //purposely not implemented
+  SliceContiguousImage(const Self &) = delete;
+  void
+  operator=(const Self &) = delete;
 
   /** Memory for the slices containing the pixel data. */
   PixelContainerPointer m_Container;
-
-}; 
+};
 
 
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#	include "itkSliceContiguousImage.txx"
+#  include "itkSliceContiguousImage.txx"
 #endif
 
 #endif

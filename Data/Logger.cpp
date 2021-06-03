@@ -2,5 +2,4 @@
 
 namespace iseg {
 
-
 } // namespace iseg

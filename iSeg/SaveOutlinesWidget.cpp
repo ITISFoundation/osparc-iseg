@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,225 +14,225 @@
 #include "StdStringToQString.h"
 #include "TissueInfos.h"
 
-#include <qfiledialog.h>
+#include "Interface/QtConnect.h"
+
 #include <q3hbox.h>
-#include <qlistwidget.h>
 #include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qdialog.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QButtonGroup>
+#include <QDialog>
+#include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 
-SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent,
-									   const char* name, Qt::WindowFlags wFlags)
-	: QDialog(parent, name, TRUE, wFlags), handler3D(hand3D)
+SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
-	vbox1 = new Q3VBox(this);
-	lbo_tissues = new QListWidget(vbox1);
+	setModal(true);
+
+	m_Vbox1 = new Q3VBox(this);
+	m_LboTissues = new QListWidget(m_Vbox1);
 	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); ++i)
 	{
-		lbo_tissues->addItem(ToQ(TissueInfos::GetTissueName(i)));
+		m_LboTissues->addItem(ToQ(TissueInfos::GetTissueName(i)));
 	}
-	lbo_tissues->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	hbox2 = new Q3HBox(vbox1);
-	hbox1 = new Q3HBox(vbox1);
-	hbox3 = new Q3HBox(vbox1);
-	hbox4 = new Q3HBox(vbox1);
-	hbox7 = new Q3HBox(vbox1);
-	hbox6 = new Q3HBox(vbox1);
-	hbox8 = new Q3HBox(vbox1);
-	hbox9 = new Q3HBox(vbox1);
-	hboxslicesbetween = new Q3HBox(vbox1);
-	hbox5 = new Q3HBox(vbox1);
+	m_LboTissues->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_Hbox2 = new Q3HBox(m_Vbox1);
+	m_Hbox1 = new Q3HBox(m_Vbox1);
+	m_Hbox3 = new Q3HBox(m_Vbox1);
+	m_Hbox4 = new Q3HBox(m_Vbox1);
+	m_Hbox7 = new Q3HBox(m_Vbox1);
+	m_Hbox6 = new Q3HBox(m_Vbox1);
+	m_Hbox8 = new Q3HBox(m_Vbox1);
+	m_Hbox9 = new Q3HBox(m_Vbox1);
+	m_Hboxslicesbetween = new Q3HBox(m_Vbox1);
+	m_Hbox5 = new Q3HBox(m_Vbox1);
 
-	lb_file = new QLabel(QString("File Name: "), hbox1);
-	le_file = new QLineEdit(hbox1);
-	pb_file = new QPushButton("Select...", hbox1);
+	m_LbFile = new QLabel(QString("File Name: "), m_Hbox1);
+	m_LeFile = new QLineEdit(m_Hbox1);
+	m_PbFile = new QPushButton("Select...", m_Hbox1);
 
-	filetype = new QButtonGroup(this);
+	m_Filetype = new QButtonGroup(this);
 	//	filetype->hide();
-	rb_line = new QRadioButton(QString("Outlines"), hbox2);
-	rb_triang = new QRadioButton(QString("Triangulate"), hbox2);
-	filetype->insert(rb_line);
-	filetype->insert(rb_triang);
-	rb_line->setChecked(TRUE);
-	rb_triang->show();
-	rb_line->show();
+	m_RbLine = new QRadioButton(QString("Outlines"), m_Hbox2);
+	m_RbTriang = new QRadioButton(QString("Triangulate"), m_Hbox2);
+	m_Filetype->insert(m_RbLine);
+	m_Filetype->insert(m_RbTriang);
+	m_RbLine->setChecked(TRUE);
+	m_RbTriang->show();
+	m_RbLine->show();
 
-	lb_simplif = new QLabel("Simplification: ", hbox3);
-	simplif = new QButtonGroup(this);
+	m_LbSimplif = new QLabel("Simplification: ", m_Hbox3);
+	m_Simplif = new QButtonGroup(this);
 	//	simplif->hide();
-	rb_none = new QRadioButton(QString("none"), hbox3);
-	rb_dougpeuck = new QRadioButton(QString("Doug-Peucker"), hbox3);
-	rb_dist = new QRadioButton(QString("Distance"), hbox3);
-	simplif->insert(rb_none);
-	simplif->insert(rb_dougpeuck);
-	simplif->insert(rb_dist);
-	rb_dougpeuck->show();
+	m_RbNone = new QRadioButton(QString("none"), m_Hbox3);
+	m_RbDougpeuck = new QRadioButton(QString("Doug-Peucker"), m_Hbox3);
+	m_RbDist = new QRadioButton(QString("Distance"), m_Hbox3);
+	m_Simplif->insert(m_RbNone);
+	m_Simplif->insert(m_RbDougpeuck);
+	m_Simplif->insert(m_RbDist);
+	m_RbDougpeuck->show();
 	//	rb_dist->hide(); //!!!
-	rb_dist->setEnabled(false);
-	rb_none->setChecked(TRUE);
-	rb_none->show();
+	m_RbDist->setEnabled(false);
+	m_RbNone->setChecked(TRUE);
+	m_RbNone->show();
 
-	lb_dist = new QLabel("Segm. Size: ", hbox4);
-	sb_dist = new QSpinBox(5, 50, 5, hbox4);
-	sb_dist->setValue(5);
+	m_LbDist = new QLabel("Segm. Size: ", m_Hbox4);
+	m_SbDist = new QSpinBox(5, 50, 5, m_Hbox4);
+	m_SbDist->setValue(5);
 
-	lb_f1 = new QLabel("Max. Dist.: 0 ", hbox7);
-	sl_f = new QSlider(0, 100, 5, 15, Qt::Horizontal, hbox7);
-	lb_f2 = new QLabel(" 5", hbox7);
+	m_LbF1 = new QLabel("Max. Dist.: 0 ", m_Hbox7);
+	m_SlF = new QSlider(0, 100, 5, 15, Qt::Horizontal, m_Hbox7);
+	m_LbF2 = new QLabel(" 5", m_Hbox7);
 
-	lb_minsize = new QLabel("Min. Size: ", hbox6);
-	sb_minsize = new QSpinBox(1, 999, 1, hbox6);
-	sb_minsize->setValue(1);
+	m_LbMinsize = new QLabel("Min. Size: ", m_Hbox6);
+	m_SbMinsize = new QSpinBox(1, 999, 1, m_Hbox6);
+	m_SbMinsize->setValue(1);
 
-	cb_extrusion = new QCheckBox("Extrusions", hbox8);
-	cb_extrusion->setChecked(false);
-	lb_topextrusion = new QLabel(" Slices on top: ", hbox8);
-	sb_topextrusion = new QSpinBox(0, 100, 1, hbox8);
-	sb_topextrusion->setValue(10);
-	lb_bottomextrusion = new QLabel(" Slices on bottom: ", hbox8);
-	sb_bottomextrusion = new QSpinBox(0, 100, 1, hbox8);
-	sb_bottomextrusion->setValue(10);
+	m_CbExtrusion = new QCheckBox("Extrusions", m_Hbox8);
+	m_CbExtrusion->setChecked(false);
+	m_LbTopextrusion = new QLabel(" Slices on top: ", m_Hbox8);
+	m_SbTopextrusion = new QSpinBox(0, 100, 1, m_Hbox8);
+	m_SbTopextrusion->setValue(10);
+	m_LbBottomextrusion = new QLabel(" Slices on bottom: ", m_Hbox8);
+	m_SbBottomextrusion = new QSpinBox(0, 100, 1, m_Hbox8);
+	m_SbBottomextrusion->setValue(10);
 
-	cb_smooth = new QCheckBox("Smooth", hbox9);
-	cb_smooth->setChecked(false);
+	m_CbSmooth = new QCheckBox("Smooth", m_Hbox9);
+	m_CbSmooth->setChecked(false);
 
-	cb_marchingcubes = new QCheckBox("Use Marching Cubes (faster)", hbox9);
-	cb_marchingcubes->setChecked(true);
+	m_CbMarchingcubes = new QCheckBox("Use Marching Cubes (faster)", m_Hbox9);
+	m_CbMarchingcubes->setChecked(true);
 
-	lb_between = new QLabel("Interpol. Slices: ", hboxslicesbetween);
-	sb_between = new QSpinBox(0, 10, 1, hboxslicesbetween);
-	sb_between->setValue(0);
+	m_LbBetween = new QLabel("Interpol. Slices: ", m_Hboxslicesbetween);
+	m_SbBetween = new QSpinBox(0, 10, 1, m_Hboxslicesbetween);
+	m_SbBetween->setValue(0);
 
-	pb_exec = new QPushButton("Save", hbox5);
-	pb_close = new QPushButton("Quit", hbox5);
+	m_PbExec = new QPushButton("Save", m_Hbox5);
+	m_PbClose = new QPushButton("Quit", m_Hbox5);
 
-	vbox1->show();
+	m_Vbox1->show();
 
-	lbo_tissues->setFixedSize(lbo_tissues->sizeHint());
+	m_LboTissues->setFixedSize(m_LboTissues->sizeHint());
 
 	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-	vbox1->setFixedSize(vbox1->sizeHint());
+	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
 
-	QObject::connect(pb_file, SIGNAL(clicked()), this, SLOT(file_pushed()));
-	QObject::connect(pb_exec, SIGNAL(clicked()), this, SLOT(save_pushed()));
-	QObject::connect(pb_close, SIGNAL(clicked()), this, SLOT(close()));
-	QObject::connect(filetype, SIGNAL(buttonClicked(int)), this, SLOT(mode_changed()));
-	QObject::connect(cb_extrusion, SIGNAL(clicked()), this, SLOT(mode_changed()));
-	QObject::connect(simplif, SIGNAL(buttonClicked(int)), this, SLOT(simplif_changed()));
+	QObject_connect(m_PbFile, SIGNAL(clicked()), this, SLOT(FilePushed()));
+	QObject_connect(m_PbExec, SIGNAL(clicked()), this, SLOT(SavePushed()));
+	QObject_connect(m_PbClose, SIGNAL(clicked()), this, SLOT(close()));
+	QObject_connect(m_Filetype, SIGNAL(buttonClicked(int)), this, SLOT(ModeChanged()));
+	QObject_connect(m_CbExtrusion, SIGNAL(clicked()), this, SLOT(ModeChanged()));
+	QObject_connect(m_Simplif, SIGNAL(buttonClicked(int)), this, SLOT(SimplifChanged()));
 
-	mode_changed();
+	ModeChanged();
 }
 
 SaveOutlinesWidget::~SaveOutlinesWidget()
 {
-	delete vbox1;
-	delete filetype;
-	delete simplif;
+	delete m_Vbox1;
+	delete m_Filetype;
+	delete m_Simplif;
 }
 
-void SaveOutlinesWidget::mode_changed()
+void SaveOutlinesWidget::ModeChanged()
 {
-	if (rb_line->isChecked())
+	if (m_RbLine->isChecked())
 	{
-		rb_dougpeuck->setText("Doug-Peucker");
-		lb_f1->setText("Max. Dist.: 0 ");
-		lb_f2->setText(" 5");
+		m_RbDougpeuck->setText("Doug-Peucker");
+		m_LbF1->setText("Max. Dist.: 0 ");
+		m_LbF2->setText(" 5");
 		//		hbox3->show();
-		hbox6->show();
-		hbox8->show();
-		hbox9->hide();
+		m_Hbox6->show();
+		m_Hbox8->show();
+		m_Hbox9->hide();
 #ifdef ISEG_RELEASEVERSION
-		hbox3->show();
-		hbox7->show();
+		m_Hbox3->show();
+		m_Hbox7->show();
 #endif
-		if (cb_extrusion->isChecked())
+		if (m_CbExtrusion->isChecked())
 		{
-			lb_topextrusion->show();
-			lb_bottomextrusion->show();
-			sb_topextrusion->show();
-			sb_bottomextrusion->show();
+			m_LbTopextrusion->show();
+			m_LbBottomextrusion->show();
+			m_SbTopextrusion->show();
+			m_SbBottomextrusion->show();
 		}
 		else
 		{
-			lb_topextrusion->hide();
-			lb_bottomextrusion->hide();
-			sb_topextrusion->hide();
-			sb_bottomextrusion->hide();
+			m_LbTopextrusion->hide();
+			m_LbBottomextrusion->hide();
+			m_SbTopextrusion->hide();
+			m_SbBottomextrusion->hide();
 		}
 		//		hbox4->show();
-		hboxslicesbetween->show();
-		simplif_changed();
+		m_Hboxslicesbetween->show();
+		SimplifChanged();
 	}
 	else
 	{
-		rb_dougpeuck->setText("collapse");
-		lb_f1->setText("Ratio: 1 ");
-		lb_f2->setText(" 100%");
+		m_RbDougpeuck->setText("collapse");
+		m_LbF1->setText("Ratio: 1 ");
+		m_LbF2->setText(" 100%");
 		//		hbox3->show();
 		//		hbox4->hide();
 		//		hbox7->hide();
-		simplif_changed();
-		hbox6->hide();
-		hbox8->hide();
-		hbox9->show();
+		SimplifChanged();
+		m_Hbox6->hide();
+		m_Hbox8->hide();
+		m_Hbox9->show();
 #ifdef ISEG_RELEASEVERSION
-		hbox3->show();
-		hbox7->hide();
+		m_Hbox3->show();
+		m_Hbox7->hide();
 #endif
-		hboxslicesbetween->hide();
+		m_Hboxslicesbetween->hide();
 	}
 }
 
-void SaveOutlinesWidget::simplif_changed()
+void SaveOutlinesWidget::SimplifChanged()
 {
-	if (rb_none->isChecked())
+	if (m_RbNone->isChecked())
 	{
-		hbox4->hide();
-		hbox7->hide();
+		m_Hbox4->hide();
+		m_Hbox7->hide();
 	}
-	else if (rb_dougpeuck->isChecked())
+	else if (m_RbDougpeuck->isChecked())
 	{
-		hbox4->hide();
-		hbox7->show();
+		m_Hbox4->hide();
+		m_Hbox7->show();
 	}
-	else if (rb_dist->isChecked())
+	else if (m_RbDist->isChecked())
 	{
-		hbox4->show();
-		hbox7->hide();
+		m_Hbox4->show();
+		m_Hbox7->hide();
 	}
 }
 
-void SaveOutlinesWidget::file_pushed()
+void SaveOutlinesWidget::FilePushed()
 {
 	QString loadfilename;
-	if (rb_triang->isChecked())
-		loadfilename = QFileDialog::getSaveFileName(
-			QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
+	if (m_RbTriang->isChecked())
+		loadfilename = QFileDialog::getSaveFileName(QString::null, "Surface grids (*.vtp *.dat *.stl)", this);
 	else
 		loadfilename =
-			QFileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
+				QFileDialog::getSaveFileName(QString::null, "Files (*.txt)", this);
 
-	le_file->setText(loadfilename);
-	return;
+	m_LeFile->setText(loadfilename);
 }
 
-void SaveOutlinesWidget::save_pushed()
+void SaveOutlinesWidget::SavePushed()
 {
 	std::vector<tissues_size_t> vtissues;
 	for (tissues_size_t i = 0; i < TissueInfos::GetTissueCount(); i++)
 	{
-		if (lbo_tissues->item((int)i)->isSelected())
+		if (m_LboTissues->item((int)i)->isSelected())
 		{
 			vtissues.push_back((tissues_size_t)i + 1);
 		}
@@ -240,141 +240,113 @@ void SaveOutlinesWidget::save_pushed()
 
 	if (vtissues.empty())
 	{
-		QMessageBox::warning(this, tr("Warning"),
-							 tr("No tissues have been selected."),
-							 QMessageBox::Ok, 0);
+		QMessageBox::warning(this, tr("Warning"), tr("No tissues have been selected."), QMessageBox::Ok, 0);
 		return;
 	}
 
-	if (!(le_file->text()).isEmpty())
+	if (!(m_LeFile->text()).isEmpty())
 	{
-		QString loadfilename = le_file->text();
-		if (rb_triang->isChecked())
+		QString loadfilename = m_LeFile->text();
+		if (m_RbTriang->isChecked())
 		{
 			ISEG_INFO_MSG("triangulating...");
 			// If no extension given, add a default one
 			if (loadfilename.length() > 4 &&
-				!loadfilename.toLower().endsWith(QString(".vtp")) &&
-				!loadfilename.toLower().endsWith(QString(".stl")) &&
-				!loadfilename.toLower().endsWith(QString(".dat")))
+					!loadfilename.endsWith(QString(".vtp"), Qt::CaseInsensitive) &&
+					!loadfilename.endsWith(QString(".stl"), Qt::CaseInsensitive) &&
+					!loadfilename.endsWith(QString(".dat"), Qt::CaseInsensitive))
 				loadfilename.append(".dat");
 
-			float ratio = sl_f->value() * 0.0099f + 0.01f;
-			if (rb_none->isChecked())
+			float ratio = m_SlF->value() * 0.0099f + 0.01f;
+			if (m_RbNone->isChecked())
 				ratio = 1.0;
 
 			unsigned int smoothingiter = 0;
-			if (cb_smooth->isChecked())
+			if (m_CbSmooth->isChecked())
 				smoothingiter = 9;
 
 			bool usemc = false;
-			if (cb_marchingcubes->isChecked())
+			if (m_CbMarchingcubes->isChecked())
 				usemc = true;
 
 			// Call method to extract surface, smooth, simplify and finally save it to file
-			int numberOfErrors = handler3D->extract_tissue_surfaces(
-				loadfilename.ascii(), vtissues, usemc, ratio, smoothingiter);
+			int number_of_errors = m_Handler3D->ExtractTissueSurfaces(loadfilename.toStdString(), vtissues, usemc, ratio, smoothingiter);
 
-			if (numberOfErrors < 0)
+			if (number_of_errors < 0)
 			{
-				QMessageBox::warning(
-					this, "iSeg",
-					"Surface extraction failed.\n\nMaybe something is "
-					"wrong the pixel type or label field.",
-					QMessageBox::Ok | QMessageBox::Default);
+				QMessageBox::warning(this, "iSeg", "Surface extraction failed.\n\nMaybe something is "
+																					 "wrong the pixel type or label field.",
+						QMessageBox::Ok | QMessageBox::Default);
 			}
-			else if (numberOfErrors > 0)
+			else if (number_of_errors > 0)
 			{
-				QMessageBox::warning(
-					this, "iSeg",
-					"Surface extraction might have failed.\n\nPlease "
-					"verify the tissue names and colors carefully.",
-					QMessageBox::Ok | QMessageBox::Default);
+				QMessageBox::warning(this, "iSeg", "Surface extraction might have failed.\n\nPlease "
+																					 "verify the tissue names and colors carefully.",
+						QMessageBox::Ok | QMessageBox::Default);
 			}
 		}
 		else
 		{
 			if (loadfilename.length() > 4 &&
-				!loadfilename.endsWith(QString(".txt")))
+					!loadfilename.endsWith(QString(".txt")))
 				loadfilename.append(".txt");
 
-			if (sb_between->value() == 0)
+			if (m_SbBetween->value() == 0)
 			{
-				Pair pair1 = handler3D->get_pixelsize();
-				handler3D->set_pixelsize(pair1.high / 2, pair1.low / 2);
+				Pair pair1 = m_Handler3D->GetPixelsize();
+				m_Handler3D->SetPixelsize(pair1.high / 2, pair1.low / 2);
 				//				handler3D->extract_contours2(sb_minsize->value(), vtissues);
-				if (rb_dougpeuck->isChecked())
+				if (m_RbDougpeuck->isChecked())
 				{
-					handler3D->extract_contours2_xmirrored(
-						sb_minsize->value(), vtissues, sl_f->value() * 0.05f);
+					m_Handler3D->ExtractContours2Xmirrored(m_SbMinsize->value(), vtissues, m_SlF->value() * 0.05f);
 					//					handler3D->dougpeuck_line(sl_f->value()*0.05f*2);
 				}
-				else if (rb_dist->isChecked())
+				else if (m_RbDist->isChecked())
 				{
-					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
-														   vtissues);
+					m_Handler3D->ExtractContours2Xmirrored(m_SbMinsize->value(), vtissues);
 				}
-				else if (rb_none->isChecked())
+				else if (m_RbNone->isChecked())
 				{
-					handler3D->extract_contours2_xmirrored(sb_minsize->value(),
-														   vtissues);
+					m_Handler3D->ExtractContours2Xmirrored(m_SbMinsize->value(), vtissues);
 				}
-				handler3D->shift_contours(-(int)handler3D->width(),
-										  -(int)handler3D->height());
-				if (cb_extrusion->isChecked())
+				m_Handler3D->ShiftContours(-(int)m_Handler3D->Width(), -(int)m_Handler3D->Height());
+				if (m_CbExtrusion->isChecked())
 				{
-					handler3D->setextrusion_contours(
-						sb_topextrusion->value() - 1,
-						sb_bottomextrusion->value() - 1);
+					m_Handler3D->SetextrusionContours(m_SbTopextrusion->value() - 1, m_SbBottomextrusion->value() - 1);
 				}
-				handler3D->save_contours(loadfilename.ascii());
+				m_Handler3D->SaveContours(loadfilename.ascii());
 #define ROTTERDAM
 #ifdef ROTTERDAM
 				FILE* fp = fopen(loadfilename.ascii(), "a");
 				float disp[3];
-				handler3D->get_displacement(disp);
-				fprintf(fp, "V1\nX%i %i %i %i O%f %f %f\n",
-						-(int)handler3D->width(),
-						(int)handler3D->width(),
-						-(int)handler3D->height(),
-						(int)handler3D->height(), disp[0], disp[1],
-						disp[2]); // TODO: rotation
-				std::vector<augmentedmark> labels;
-				handler3D->get_labels(&labels);
+				m_Handler3D->GetDisplacement(disp);
+				fprintf(fp, "V1\nX%i %i %i %i O%f %f %f\n", -(int)m_Handler3D->Width(), (int)m_Handler3D->Width(), -(int)m_Handler3D->Height(), (int)m_Handler3D->Height(), disp[0], disp[1], disp[2]); // TODO: rotation
+				std::vector<AugmentedMark> labels;
+				m_Handler3D->GetLabels(&labels);
 				if (!labels.empty())
 					fprintf(fp, "V1\n");
 				for (size_t i = 0; i < labels.size(); i++)
 				{
-					fprintf(fp, "S%i 1\nL%i %i %s\n", (int)labels[i].slicenr,
-							(int)handler3D->width() - 1 -
-								(int)labels[i].p.px * 2,
-							(int)labels[i].p.py * 2 -
-								(int)handler3D->height() + 1,
-							labels[i].name.c_str());
+					fprintf(fp, "S%i 1\nL%i %i %s\n", (int)labels[i].slicenr, (int)m_Handler3D->Width() - 1 - (int)labels[i].p.px * 2, (int)labels[i].p.py * 2 - (int)m_Handler3D->Height() + 1, labels[i].name.c_str());
 				}
 				fclose(fp);
 #endif
-				handler3D->set_pixelsize(pair1.high, pair1.low);
-				if (cb_extrusion->isChecked())
+				m_Handler3D->SetPixelsize(pair1.high, pair1.low);
+				if (m_CbExtrusion->isChecked())
 				{
-					handler3D->resetextrusion_contours();
+					m_Handler3D->ResetextrusionContours();
 				}
 			}
 			else
 			{
-				handler3D->extractinterpolatesave_contours2_xmirrored(
-					sb_minsize->value(), vtissues, sb_between->value(),
-					rb_dougpeuck->isChecked(), sl_f->value() * 0.05f,
-					loadfilename.ascii());
+				m_Handler3D->ExtractinterpolatesaveContours2Xmirrored(m_SbMinsize->value(), vtissues, m_SbBetween->value(), m_RbDougpeuck->isChecked(), m_SlF->value() * 0.05f, loadfilename.ascii());
 			}
 		}
 		close();
 	}
 	else
 	{
-		QMessageBox::warning(this, tr("Warning"),
-							 tr("No filename has been specified."),
-							 QMessageBox::Ok, 0);
+		QMessageBox::warning(this, tr("Warning"), tr("No filename has been specified."), QMessageBox::Ok, 0);
 		return;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,13 +15,6 @@
 
 namespace iseg {
 
-Project::Project()
-{
-	m_loadprojfilename1 = QString("");
-	m_loadprojfilename2 = QString("");
-	m_loadprojfilename3 = QString("");
-	m_loadprojfilename4 = QString("");
-	m_filename = QString("");
-}
+Project::Project() = default;
 
-}// namespace iseg
+} // namespace iseg

@@ -4,15 +4,12 @@
 
 namespace iseg {
 
-std::tuple<unsigned char, unsigned char, unsigned char> Color::toUChar() const
+std::tuple<unsigned char, unsigned char, unsigned char> Color::ToUChar() const
 {
-	return std::make_tuple(
-			static_cast<unsigned char>(255.0f * r),
-			static_cast<unsigned char>(255.0f * g),
-			static_cast<unsigned char>(255.0f * b));
+	return std::make_tuple(static_cast<unsigned char>(255.0f * r), static_cast<unsigned char>(255.0f * g), static_cast<unsigned char>(255.0f * b));
 }
 
-std::tuple<float, float, float> Color::toHSL() const
+std::tuple<float, float, float> Color::ToHsl() const
 {
 	const float fmax = std::max(r, std::max(g, b));
 	const float fmin = std::min(r, std::min(g, b));
@@ -34,12 +31,12 @@ std::tuple<float, float, float> Color::toHSL() const
 		}
 		if (fmax == r)
 		{
-			float tmpVal = 0.0f;
+			float tmp_val = 0.0f;
 			if (g < b)
 			{
-				tmpVal = 6.0f;
+				tmp_val = 6.0f;
 			}
-			fh = (g - b) / fdiff + tmpVal;
+			fh = (g - b) / fdiff + tmp_val;
 		}
 		else if (fmax == g)
 		{
@@ -54,7 +51,7 @@ std::tuple<float, float, float> Color::toHSL() const
 	return std::tie(fh, fs, fl);
 }
 
-Color Color::fromHSL(float fh, float fs, float fl)
+Color Color::FromHsl(float fh, float fs, float fl)
 {
 	float fr = fl;
 	float fg = fl;
@@ -72,14 +69,14 @@ Color Color::fromHSL(float fh, float fs, float fl)
 			q = fl + fs - fl * fs;
 		}
 		float p = 2.0f * fl - q;
-		fr = hue2rgb(p, q, fh + 1.0f / 3.0f);
-		fg = hue2rgb(p, q, fh);
-		fb = hue2rgb(p, q, fh - 1.0f / 3.0f);
+		fr = Hue2rgb(p, q, fh + 1.0f / 3.0f);
+		fg = Hue2rgb(p, q, fh);
+		fb = Hue2rgb(p, q, fh - 1.0f / 3.0f);
 	}
-	return Color(fr, fg, fb);
+	return {fr, fg, fb};
 }
 
-float Color::hue2rgb(float p, float q, float t)
+float Color::Hue2rgb(float p, float q, float t)
 {
 	if (t < 0.0f)
 		t += 1.0f;
@@ -93,18 +90,18 @@ float Color::hue2rgb(float p, float q, float t)
 		return p + (q - p) * (2.0f / 3.0f - t) * 6.0f;
 	return p;
 }
-Color Color::nextRandom(const Color& prev)
+Color Color::NextRandom(const Color& prev)
 {
 	const float golden_ratio_conjugate = 0.618033988749895f;
 
 	float h, s, l;
 
-	std::tie(h, s, l) = prev.toHSL();
+	std::tie(h, s, l) = prev.ToHsl();
 
 	// See http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 	h += golden_ratio_conjugate;
 	h = std::fmod(h, 1.0f);
-	return Color::fromHSL(h, s, l);
+	return Color::FromHsl(h, s, l);
 }
 
 } // namespace iseg

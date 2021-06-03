@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,24 +14,21 @@
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qcolor.h>
-#include <qdialog.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qmessagebox.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qsize.h>
-#include <qslider.h>
-#include <qspinbox.h>
-#include <qstring.h>
-#include <qwidget.h>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QColor>
+#include <QDialog>
+#include <QImage>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPainter>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSlider>
+#include <QSpinBox>
+#include <QString>
+#include <QWidget>
 
 #include <algorithm>
 #include <cassert>

@@ -32,16 +32,12 @@
 #include "../../Type.h"
 #include "../../Data/Image.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        namespace Segmentation
-        {
-            /** %Tools related to segmentation algorithms. */
-            namespace Tools
-            {
-                /** Normalize image and its resolution. 
+namespace Gc {
+namespace Algo {
+namespace Segmentation {
+/** %Tools related to segmentation algorithms. */
+namespace Tools {
+/** Normalize image and its resolution. 
 
                     This function scales the image intensities to [0,1] interval and divides
                     the resolution/spacing by its smallest element (e.g (2,2,4) will
@@ -50,11 +46,11 @@ namespace Gc
                     @param[in] im_in Input image.
                     @param[out] im_out Normalized input image (can be the same reference as im_in)
                 */
-                template <Size N, class T, class DATA>
-                void GC_DLL_EXPORT NormalizeImage(const Data::Image<N,T,DATA> &im_in, 
-                    Data::Image<N,T,T> &im_out);
+template <Size N, class T, class DATA>
+void GC_DLL_EXPORT NormalizeImage(const Data::Image<N, T, DATA> & im_in,
+                                  Data::Image<N, T, T> & im_out);
 
-                /** Create mask for the two-stage algorithm.
+/** Create mask for the two-stage algorithm.
 
                     Using the coarse segmentation from the first stage this method can be used
                     to create a mask of a band of given size along the segmentation boundary. 
@@ -64,11 +60,11 @@ namespace Gc
                     @param[in] band_size Size of the band in voxels.
                     @param[out] mask The output mask.
                 */
-                template <Size N>
-                void GC_DLL_EXPORT CreateBandMask(const System::Collection::Array<N,bool> &seg, 
-                    Size band_size, System::Collection::Array<N,Uint8> &mask);
+template <Size N>
+void GC_DLL_EXPORT CreateBandMask(const System::Collection::Array<N, bool> & seg,
+                                  Size band_size, System::Collection::Array<N, Uint8> & mask);
 
-                /** Create mask for the two-stage algorithm.
+/** Create mask for the two-stage algorithm.
 
                     Using the coarse segmentation from the first stage this method can be used
                     to create a mask of a band of given size along the segmentation boundary. 
@@ -81,13 +77,13 @@ namespace Gc
                     @param[in] band_size Size of the band in voxels.
                     @param[out] mask The output mask.
                 */
-                template <Size N>
-                void GC_DLL_EXPORT CreateBandMask(const System::Collection::Array<N,bool> &seg, 
-                    const System::Collection::Array<N,Uint8> &init_mask, Size band_size,
-                    System::Collection::Array<N,Uint8> &mask);
-            }
-        }
-    }
+template <Size N>
+void GC_DLL_EXPORT CreateBandMask(const System::Collection::Array<N, bool> & seg,
+                                  const System::Collection::Array<N, Uint8> & init_mask, Size band_size,
+                                  System::Collection::Array<N, Uint8> & mask);
+} // namespace Tools
 }
+}
+} // namespace Gc::Algo::Segmentation
 
 #endif

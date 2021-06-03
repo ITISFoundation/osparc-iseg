@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -28,8 +28,7 @@ public:
 	void SetColor(size_t idx, unsigned char rgb[3]);
 	void GetColor(size_t idx, unsigned char rgb[3]) const;
 	void GetColor(double v, unsigned char rgb[3]) const;
-	void GetColor(double v, unsigned char& r, unsigned char& g,
-				  unsigned char& b) const;
+	void GetColor(double v, unsigned char& r, unsigned char& g, unsigned char& b) const;
 
 private:
 	vtkLookupTable* m_Lut;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,9 +19,8 @@ public:
 	BiasCorrectionPlugin();
 	~BiasCorrectionPlugin();
 
-	std::string name() const override { return "Bias Addon "; }
-	std::string description() const override { return "Bias Plugin"; }
-	WidgetInterface* create_widget(QWidget* parent, const char* name,
-			Qt::WindowFlags wFlags) const override;
+	std::string Name() const override { return "Bias Addon "; }
+	std::string Description() const override { return "Bias Plugin"; }
+	WidgetInterface* CreateWidget() const override;
 };
 }} // namespace iseg::plugin

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,9 +9,9 @@
  */
 #pragma once
 
-#include <qdialog.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
+#include <QDialog>
+#include <QPushButton>
+#include <QSpinBox>
 
 namespace iseg {
 
@@ -21,21 +21,20 @@ class ActiveSlicesConfigDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent = 0,
-							 const char* name = 0, Qt::WindowFlags wFlags = 0);
+	ActiveSlicesConfigDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 private:
-	SlicesHandler* handler3D;
+	SlicesHandler* m_Handler3D;
 
-	QSpinBox* sb_start;
-	QSpinBox* sb_end;
-	QPushButton* pb_close;
-	QPushButton* pb_ok;
+	QSpinBox* m_SbStart;
+	QSpinBox* m_SbEnd;
+	QPushButton* m_PbClose;
+	QPushButton* m_PbOk;
 
 private slots:
-	void ok_pressed();
-	void startslice_changed(int startslice1);
-	void endslice_changed(int endslice1);
+	void OkPressed();
+	void StartsliceChanged(int startslice1);
+	void EndsliceChanged(int endslice1);
 };
 
 } // namespace iseg

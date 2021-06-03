@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,20 +15,20 @@
 namespace iseg {
 
 namespace {
-void makeTransform(Transform &tr)
+void makeTransform(Transform& tr)
 {
-	tr.setIdentity();
+	tr.SetIdentity();
 
 	Vec3 d0(0.1f, 0.9f, 0.1f);
-	d0.normalize();
+	d0.Normalize();
 	Vec3 d1(0.9f, -0.1f, 0.1f);
-	d1.normalize();
+	d1.Normalize();
 	Vec3 d2(d0 ^ d1);
-	d2.normalize();
-	tr.setRotation(d0, d1, d2);
+	d2.Normalize();
+	tr.SetRotation(d0, d1, d2);
 
 	float offset[3] = {3.4f, -10.f, 2.5f};
-	tr.setOffset(offset);
+	tr.SetOffset(offset);
 }
 } // namespace
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 	std::fill_n(dc, 6, 0.f);
 	dc[0] = dc[4] = 1.f;
 
-	tr.setTransform(offset, dc);
+	tr.SetTransform(offset, dc);
 	for (int r = 0; r < 4; r++)
 	{
 		for (int c = 0; c < 4; c++)
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 	}
 
 	float disp[3];
-	tr.getOffset(disp);
+	tr.GetOffset(disp);
 	for (int r = 0; r < 3; r++)
 	{
 		BOOST_CHECK_EQUAL(disp[r], offset[r]);
@@ -86,14 +86,14 @@ BOOST_AUTO_TEST_CASE(Transform_api)
 		{
 			// negative padding
 			int plo[3] = {-1, -2, -3};
-			tr2.paddingUpdateTransform(plo, spacing);
+			tr2.PaddingUpdateTransform(plo, spacing);
 
 			// revert padding
 			for (int k = 0; k < 3; k++)
 			{
 				plo[k] = -plo[k];
 			}
-			tr2.paddingUpdateTransform(plo, spacing);
+			tr2.PaddingUpdateTransform(plo, spacing);
 		}
 
 		// compare

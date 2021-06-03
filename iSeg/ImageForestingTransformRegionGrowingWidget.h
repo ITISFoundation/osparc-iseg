@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,9 +14,9 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qlabel.h>
-#include <qpushbutton.h>
-#include <qslider.h>
+#include <QLabel>
+#include <QPushButton>
+#include <QSlider>
 
 namespace iseg {
 
@@ -24,59 +24,58 @@ class ImageForestingTransformRegionGrowingWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~ImageForestingTransformRegionGrowingWidget();
-	void init() override;
-	void newloaded() override;
-	void cleanup() override;
+	ImageForestingTransformRegionGrowingWidget(SlicesHandler* hand3D);
+	~ImageForestingTransformRegionGrowingWidget() override;
+	void Init() override;
+	void NewLoaded() override;
+	void Cleanup() override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void hideparams_changed() override;
+	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("IFT"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("iftrg.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("iftrg.png"))); }
 
 protected:
-	void on_tissuenr_changed(int i) override;
-	void on_slicenr_changed() override;
+	void OnTissuenrChanged(int i) override;
+	void OnSlicenrChanged() override;
 
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_released(Point p) override;
-	void on_mouse_moved(Point p) override;
+	void OnMouseClicked(Point p) override;
+	void OnMouseReleased(Point p) override;
+	void OnMouseMoved(Point p) override;
+	void BmpChanged() override;
 
 private:
-	void init1();
-	void removemarks(Point p);
-	void getrange();
+	void Init1();
+	void Removemarks(Point p);
+	void Getrange();
 
-	float* lbmap;
-	ImageForestingTransformRegionGrowing* IFTrg;
-	Point last_pt;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
+	float* m_Lbmap;
+	ImageForestingTransformRegionGrowing* m_IfTrg;
+	Point m_LastPt;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
 
-	QSlider* sl_thresh;
-	QPushButton* pushexec;
-	QPushButton* pushclear;
-	QPushButton* pushremove;
+	QSlider* m_SlThresh;
+	QPushButton* m_Pushexec;
+	QPushButton* m_Pushclear;
+	QPushButton* m_Pushremove;
 
-	unsigned tissuenr;
-	float thresh;
-	float maxthresh;
-	std::vector<Mark> vm;
-	std::vector<Mark> vmempty;
-	std::vector<Point> vmdyn;
-	unsigned area;
+	unsigned m_Tissuenr;
+	float m_Thresh;
+	float m_Maxthresh;
+	std::vector<Mark> m_Vm;
+	std::vector<Mark> m_Vmempty;
+	std::vector<Point> m_Vmdyn;
+	unsigned m_Area;
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void execute();
-	void clearmarks();
-	void slider_changed(int i);
-	void slider_pressed();
-	void slider_released();
-	void bmp_changed();
+	void BmphandChanged(Bmphandler* bmph);
+	void Execute();
+	void Clearmarks();
+	void SliderChanged(int i);
+	void SliderPressed();
+	void SliderReleased();
 };
 
 } // namespace iseg

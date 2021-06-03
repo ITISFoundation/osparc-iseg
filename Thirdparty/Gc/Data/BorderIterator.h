@@ -31,11 +31,9 @@
 #include "../Type.h"
 #include "../Math/Algebra/Vector.h"
 
-namespace Gc
-{
-    namespace Data
-    {
-        /** N-dimensional data border iterator. 
+namespace Gc {
+namespace Data {
+/** N-dimensional data border iterator. 
         
             The purpose of this class is to provide fast and easy method to
             iterate through N-dimensional data which have a border of specific
@@ -85,31 +83,31 @@ namespace Gc
 
             @see NextBlock().
         */
-        template <Size N>
-        class BorderIterator
-        {
-        protected:
-            /** Size of the N-dimensional space. */
-            Math::Algebra::Vector<N,Size> m_sz;
-            /** Number of elements required to move to the next position in given dimension. */
-            Math::Algebra::Vector<N,Size> m_stride;
-            /** Size of the border at the beginning of each dimension. */
-            Math::Algebra::Vector<N,Size> m_left;
-            /** Size of the border at the end of each dimension. */
-            Math::Algebra::Vector<N,Size> m_right;
-            /** Current position in the space. */
-            Math::Algebra::Vector<N,Size> m_cur;
-            /** Position of the last element. */
-            Math::Algebra::Vector<N,Size> m_end;
-            /** Number of elements yet to be processed. */
-            Size m_count;
-            /** Forward/Backward iteration. */
-            bool m_is_reversed;
-            /** All elements lie in the border. */
-            bool m_is_only_border;
+template <Size N>
+class BorderIterator
+{
+  protected:
+    /** Size of the N-dimensional space. */
+    Math::Algebra::Vector<N, Size> m_sz;
+    /** Number of elements required to move to the next position in given dimension. */
+    Math::Algebra::Vector<N, Size> m_stride;
+    /** Size of the border at the beginning of each dimension. */
+    Math::Algebra::Vector<N, Size> m_left;
+    /** Size of the border at the end of each dimension. */
+    Math::Algebra::Vector<N, Size> m_right;
+    /** Current position in the space. */
+    Math::Algebra::Vector<N, Size> m_cur;
+    /** Position of the last element. */
+    Math::Algebra::Vector<N, Size> m_end;
+    /** Number of elements yet to be processed. */
+    Size m_count;
+    /** Forward/Backward iteration. */
+    bool m_is_reversed;
+    /** All elements lie in the border. */
+    bool m_is_only_border;
 
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] sz Size of the N-dimensional space.
                 @param[in] bleft Size of the border at the beginning of each dimension.
@@ -118,98 +116,102 @@ namespace Gc
                 @remarks If the size of the border is equal or greater than the size of the
                     array in any of the dimensions than all elements are border elements.
             */
-            BorderIterator(const Math::Algebra::Vector<N,Size> &sz, 
-                const Math::Algebra::Vector<N,Size> &bleft,
-                const Math::Algebra::Vector<N,Size> &bright)
-                : m_sz(sz), m_left(bleft), m_right(bright), m_count(0), m_is_reversed(false)
+    BorderIterator(const Math::Algebra::Vector<N, Size> & sz,
+                   const Math::Algebra::Vector<N, Size> & bleft,
+                   const Math::Algebra::Vector<N, Size> & bright)
+        : m_sz(sz)
+        , m_left(bleft)
+        , m_right(bright)
+        , m_count(0)
+        , m_is_reversed(false)
+    {
+        // Check parameters
+        m_is_only_border = false;
+        for (Size i = 0; i < N; i++)
+        {
+            if (sz[i] <= bleft[i] + bright[i])
             {
-                // Check parameters
-                m_is_only_border = false;
-                for (Size i = 0; i < N; i++)
-                {
-                    if (sz[i] <= bleft[i] + bright[i])
-                    {
-                        // All elements are border elements
-                        m_is_only_border = true;
-                        break;
-                    }
-                }
-
-                // Calculate the stride (sub-space volume)
-                m_stride[0] = 1;
-                for (Size i = 1; i < N; i++)
-                {
-                    m_stride[i] = m_sz[i-1] * m_stride[i-1];
-                }
-
-                // Last elemenet position
-                m_end = m_sz - Math::Algebra::Vector<N,Size>(1);
+                // All elements are border elements
+                m_is_only_border = true;
+                break;
             }
+        }
 
-            /** Initialize the iterator. 
+        // Calculate the stride (sub-space volume)
+        m_stride[0] = 1;
+        for (Size i = 1; i < N; i++)
+        {
+            m_stride[i] = m_sz[i - 1] * m_stride[i - 1];
+        }
+
+        // Last elemenet position
+        m_end = m_sz - Math::Algebra::Vector<N, Size>(1);
+    }
+
+    /** Initialize the iterator. 
             
                 @param[in] reverse If \c true the data will be iterated from the end.
                     Otherwise from the beginning.
             */
-            void Start(bool reverse)
+    void Start(bool reverse)
+    {
+        m_cur.SetZero();
+        m_count = m_sz.Product();
+
+        if (reverse != m_is_reversed)
+        {
+            std::swap(m_left, m_right);
+        }
+        m_is_reversed = reverse;
+    }
+
+    /** Check if the end of the data was reached. */
+    bool IsFinished()
+    {
+        return (m_count == 0);
+    }
+
+    /** Returns whether forward or backward iteration is performed. */
+    bool IsReversed()
+    {
+        return m_is_reversed;
+    }
+
+    /** Get the coordinates of the element at the beginning of current block. */
+    Math::Algebra::Vector<N, Size> CurPos() const
+    {
+        if (m_is_reversed)
+        {
+            return m_end - m_cur;
+        }
+
+        return m_cur;
+    }
+
+    /** Get forward/backward neighbour coordinates. */
+    void NextPos(Math::Algebra::Vector<N, Size> & elpos)
+    {
+        if (m_is_reversed)
+        {
+            Size k = 0;
+            while (k < N && --elpos[k] > m_end[k])
             {
-                m_cur.SetZero();
-                m_count = m_sz.Product();
-
-                if (reverse != m_is_reversed)
-                {
-                    std::swap(m_left, m_right);
-                }
-                m_is_reversed = reverse;
+                elpos[k] = m_end[k];
+                k++;
             }
-
-            /** Check if the end of the data was reached. */
-            bool IsFinished()
+        }
+        else
+        {
+            Size k = 0;
+            while (k < N && ++elpos[k] > m_end[k])
             {
-                return (m_count == 0);
+                elpos[k] = 0;
+                k++;
             }
+        }
+    }
 
-            /** Returns whether forward or backward iteration is performed. */
-            bool IsReversed()
-            {
-                return m_is_reversed;
-            }
-
-            /** Get the coordinates of the element at the beginning of current block. */
-            Math::Algebra::Vector<N,Size> CurPos() const
-            {
-                if (m_is_reversed)
-                {
-                    return m_end - m_cur;
-                }
-
-                return m_cur;
-            }
-
-            /** Get forward/backward neighbour coordinates. */
-            void NextPos(Math::Algebra::Vector<N,Size> &elpos)
-            {
-                if (m_is_reversed)
-                {
-                    Size k = 0;
-                    while (k < N && --elpos[k] > m_end[k])
-                    {
-                        elpos[k] = m_end[k];
-                        k++;
-                    }
-                }
-                else
-                {
-                    Size k = 0;
-                    while (k < N && ++elpos[k] > m_end[k])
-                    {
-                        elpos[k] = 0;
-                        k++;
-                    }
-                }
-            }
-
-            /** Get next block of data.
+    /** Get next block of data.
 
                 When iterating through the data, blocks of border and non-border elements
                 alternate. This method tells what is the length of the next consecutive 
@@ -230,89 +232,89 @@ namespace Gc
                 @return \c True if the next consecutive block of elements of size \c num 
                     lies in the border. \c False otherwise.
             */
-            bool NextBlock(Size &num)
+    bool NextBlock(Size & num)
+    {
+        if (m_is_only_border)
+        {
+            num = m_count;
+            m_count = 0;
+            return true;
+        }
+
+        // Count left or right border elements
+        for (Size i = N; i-- > 0;)
+        {
+            if (m_cur[i] < m_left[i])
             {
-                if (m_is_only_border)
-                {
-                    num = m_count;
-                    m_count = 0;
-                    return true;
-                }
-
-                // Count left or right border elements
-                for (Size i = N; i-- > 0; )
-                {
-                    if (m_cur[i] < m_left[i])
-                    {
-                        num = CountLeftBorderElements(i);
-                        m_count -= num;
-                        return true;
-                    }
-                    else if (m_cur[i] >= m_sz[i] - m_right[i])
-                    {
-                        num = CountRightBorderElements(i);
-                        m_count -= num;
-                        return true;
-                    }
-                }
-
-                // Count non-border elements
-                Size i = 0;
-                while (!m_left[i] && !m_right[i] && i + 1 < N)
-                {
-                    i++;
-                }
-
-                Size nbs = m_sz[i] - m_left[i] - m_right[i]; 
-                num = nbs * m_stride[i];
-                m_cur[i] += nbs - 1;
-                while (i < N && ++m_cur[i] >= m_sz[i])
-                {
-                    m_cur[i] = 0;
-                    i++;
-                }
-
+                num = CountLeftBorderElements(i);
                 m_count -= num;
-                return false;
+                return true;
             }
-
-        private:
-            Size CountLeftBorderElements(Size p)
+            else if (m_cur[i] >= m_sz[i] - m_right[i])
             {
-                Size num = 0;
-
-                for (Size i = 0; i <= p; i++)
-                {
-                    num += m_left[i] * m_stride[i];
-                    m_cur[i] = m_left[i];
-                }
-
-                return num;
+                num = CountRightBorderElements(i);
+                m_count -= num;
+                return true;
             }
+        }
 
-            Size CountRightBorderElements(Size p)
-            {
-                Size num = 0;
+        // Count non-border elements
+        Size i = 0;
+        while (!m_left[i] && !m_right[i] && i + 1 < N)
+        {
+            i++;
+        }
 
-                while (p < N)
-                {
-                    if (++m_cur[p] >= m_sz[p] - m_right[p])
-                    {
-                        num += m_right[p] * m_stride[p];
-                        m_cur[p] = 0;
-                    }
-                    else
-                    {
-                        num += CountLeftBorderElements(p-1);
-                        break;
-                    }
-                    p++;
-                }
-                
-                return num;
-            }
-        };
+        Size nbs = m_sz[i] - m_left[i] - m_right[i];
+        num = nbs * m_stride[i];
+        m_cur[i] += nbs - 1;
+        while (i < N && ++m_cur[i] >= m_sz[i])
+        {
+            m_cur[i] = 0;
+            i++;
+        }
+
+        m_count -= num;
+        return false;
     }
+
+  private:
+    Size CountLeftBorderElements(Size p)
+    {
+        Size num = 0;
+
+        for (Size i = 0; i <= p; i++)
+        {
+            num += m_left[i] * m_stride[i];
+            m_cur[i] = m_left[i];
+        }
+
+        return num;
+    }
+
+    Size CountRightBorderElements(Size p)
+    {
+        Size num = 0;
+
+        while (p < N)
+        {
+            if (++m_cur[p] >= m_sz[p] - m_right[p])
+            {
+                num += m_right[p] * m_stride[p];
+                m_cur[p] = 0;
+            }
+            else
+            {
+                num += CountLeftBorderElements(p - 1);
+                break;
+            }
+            p++;
+        }
+
+        return num;
+    }
+};
 }
+} // namespace Gc::Data
 
 #endif

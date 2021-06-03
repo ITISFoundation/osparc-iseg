@@ -21,13 +21,13 @@
 #define __QVTKWin32Header_h
 
 #if defined(WIN32)
-# if defined(QVTK_EXPORTS)
-#  define QVTK_EXPORT __declspec(dllexport)
-# else
-#  define QVTK_EXPORT __declspec(dllimport)
-# endif
+#if defined(QVTK_EXPORTS)
+#define QVTK_EXPORT __declspec(dllexport)
 #else
-# define QVTK_EXPORT
+#define QVTK_EXPORT __declspec(dllimport)
+#endif
+#else
+#define QVTK_EXPORT
 #endif
 
 #endif /*__QVTKWin32Header_h*/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
 #include <QString>
 
@@ -22,21 +22,15 @@ namespace iseg {
 class ISEG_INTERFACE_API RecentPlaces
 {
 public:
-	static QString getOpenFileName(QWidget* parent = 0,
-			const QString& caption = QString(),
-			const QString& dir = QString(),
-			const QString& filter = QString());
-			
-	static QString getSaveFileName(QWidget* parent = 0,
-			const QString& caption = QString(),
-			const QString& dir = QString(),
-			const QString& filter = QString());
+	static QString GetOpenFileName(QWidget* parent = nullptr, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString());
 
-	static void addRecent(const QString& dir_or_file_path);
+	static QString GetSaveFileName(QWidget* parent = nullptr, const QString& caption = QString(), const QString& dir = QString(), const QString& filter = QString());
 
-	static QString lastDirectory();
+	static void AddRecent(const QString& dir_or_file_path);
 
-	static std::deque<QString> recentDirectories();
+	static QString LastDirectory();
+
+	static std::deque<QString> RecentDirectories();
 };
 
-}
+} // namespace iseg

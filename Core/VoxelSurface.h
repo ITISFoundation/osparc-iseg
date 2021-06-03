@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,7 +15,7 @@
 
 #include <vector>
 
-class vtkPolyData;
+class vtkPolyData; // NOLINT
 
 namespace iseg {
 
@@ -32,16 +32,9 @@ public:
 		kPartial = 2
 	};
 
-	eSurfaceImageOverlap Voxelize(vtkPolyData* polydata, 
-			std::vector<float*>& all_slices, const unsigned dims[3],
-			const Vec3& spacing, const Transform& transform,
-			unsigned startslice, unsigned endslice) const;
+	eSurfaceImageOverlap Voxelize(vtkPolyData* polydata, std::vector<float*>& all_slices, const unsigned dims[3], const Vec3& spacing, const Transform& transform, unsigned startslice, unsigned endslice) const;
 
-	eSurfaceImageOverlap Intersect(vtkPolyData* surface, 
-			std::vector<float*>& all_slices, const unsigned dims[3],
-			const Vec3& spacing, const Transform& transform,
-			unsigned startslice, unsigned endslice,
-			double relative_tolerance = 0.1);
+	eSurfaceImageOverlap Intersect(vtkPolyData* surface, std::vector<float*>& all_slices, const unsigned dims[3], const Vec3& spacing, const Transform& transform, unsigned startslice, unsigned endslice, double relative_tolerance = 0.1) const;
 
 private:
 	float m_ForeGroundValue;

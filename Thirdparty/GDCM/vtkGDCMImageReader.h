@@ -32,20 +32,16 @@
 // .SECTION BUG
 // Overlay are assumed to have the same extent as image. Right now if overlay origin is not
 // 0,0 the overlay will have an offset...
-// Only the very first overlay is loaded at the VTK level, for now (even if there are more than one in the file)
-// .SECTION DataOrigin
-// When the reader is instanciated with FileLowerLeftOn the DataOrigin and Image Position (Patient) are
-// identical. But when FileLowerLeft is Off, we have to reorder the Y-line of the image, and thus the DataOrigin
-// is then translated to the other side of the image.
-// .SECTION Spacing
-// When reading a 3D volume, the spacing along the Z dimension might be negative (so as to respect up-side-down)
-// as specified in the Image Orientation (Patient) tag. When Z-spacing is 0, this means the multi-frame object
-// contains image which do not represent uniform volume.
-// .SECTION Warning
-// When using vtkGDCMPolyDataReader in conjonction with vtkGDCMImageReader
-// it is *required* that FileLowerLeft is set to ON as coordinate system
-// would be inconsistent in between the two data structures.
-// .SECTION Color Space mapping:
+// Only the very first overlay is loaded at the VTK level, for now (even if there are more than one
+// in the file) .SECTION DataOrigin When the reader is instanciated with FileLowerLeftOn the
+// DataOrigin and Image Position (Patient) are identical. But when FileLowerLeft is Off, we have to
+// reorder the Y-line of the image, and thus the DataOrigin is then translated to the other side of
+// the image. .SECTION Spacing When reading a 3D volume, the spacing along the Z dimension might be
+// negative (so as to respect up-side-down) as specified in the Image Orientation (Patient) tag.
+// When Z-spacing is 0, this means the multi-frame object contains image which do not represent
+// uniform volume. .SECTION Warning When using vtkGDCMPolyDataReader in conjonction with
+// vtkGDCMImageReader it is *required* that FileLowerLeft is set to ON as coordinate system would be
+// inconsistent in between the two data structures. .SECTION Color Space mapping:
 // * VTK_LUMINANCE         <-> MONOCHROME2
 // * VTK_LUMINANCE_ALPHA   <-> Not supported
 // * VTK_RGB               <-> RGB
@@ -64,15 +60,15 @@
 #ifndef VTKGDCMIMAGEREADER_H
 #define VTKGDCMIMAGEREADER_H
 
-#include "vtkMedicalImageReader2.h"
 #include "vtkImageData.h"
+#include "vtkMedicalImageReader2.h"
 #include "vtkVersion.h"
 
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
 #else
 class vtkMedicalImageProperties;
 #endif
-#if (VTK_MAJOR_VERSION > 5) || ( VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0 )
+#if (VTK_MAJOR_VERSION > 5) || (VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0)
 #else
 class vtkStringArray;
 #endif
@@ -96,135 +92,135 @@ class vtkPolyData;
 #define VTK_CMYK 8
 #endif
 
-//BTX
-namespace gdcm { class ImageReader; }
-//ETX
+// BTX
+namespace gdcm
+{
+class ImageReader;
+}
+// ETX
 class vtkMatrix4x4;
 class VTK_EXPORT vtkGDCMImageReader : public vtkMedicalImageReader2
 {
 public:
-  static vtkGDCMImageReader *New();
-  vtkTypeMacro(vtkGDCMImageReader,vtkMedicalImageReader2);
-  virtual void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkGDCMImageReader* New();
+  vtkTypeMacro(vtkGDCMImageReader, vtkMedicalImageReader2);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description: is the given file name a DICOM file containing an image ?
-  virtual int CanReadFile(const char* fname);
+  int CanReadFile(const char* fname) override;
 
   // Description:
   // Valid extensions
-  virtual const char* GetFileExtensions()
-    {
+  const char* GetFileExtensions() override
+  {
     // I would like to get rid of ACR/NEMA/IMA so only allow dcm extension for now
     return ".dcm .DCM";
-    }
+  }
 
   // Description:
   // A descriptive name for this format
-  virtual const char* GetDescriptiveName()
-    {
-    return "DICOM";
-    }
+  const char* GetDescriptiveName() override { return "DICOM"; }
 
   // Description:
   // Get the Image Position (Patient) as stored in the DICOM file
   // This is a read-only data member
   vtkGetObjectMacro(DirectionCosines, vtkMatrix4x4);
 
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
 #else
   // Description:
   // Get the medical image properties object
   vtkGetObjectMacro(MedicalImageProperties, vtkMedicalImageProperties);
 #endif
-  virtual void SetMedicalImageProperties(vtkMedicalImageProperties *pd);
+  virtual void SetMedicalImageProperties(vtkMedicalImageProperties* pd);
 
-#if (VTK_MAJOR_VERSION > 5) || ( VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0 )
+#if (VTK_MAJOR_VERSION > 5) || (VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0)
 #else
   virtual void SetFileNames(vtkStringArray*);
   vtkGetObjectMacro(FileNames, vtkStringArray);
 #endif
 
   // Description:
-  // Specifically request to load the overlay into the gdcm-VTK layer (gdcm always loads them when found).
-  // If no overlay is found in the image, then the vtkImageData for the overlay will be empty.
-  vtkGetMacro(LoadOverlays,int);
-  vtkSetMacro(LoadOverlays,int);
-  vtkBooleanMacro(LoadOverlays,int);
+  // Specifically request to load the overlay into the gdcm-VTK layer (gdcm always loads them when
+  // found). If no overlay is found in the image, then the vtkImageData for the overlay will be
+  // empty.
+  vtkGetMacro(LoadOverlays, int);
+  vtkSetMacro(LoadOverlays, int);
+  vtkBooleanMacro(LoadOverlays, int);
 
   // Description:
   // Set/Get whether or not to load the Icon as vtkImageData (if found in the DICOM file)
-  vtkGetMacro(LoadIconImage,int);
-  vtkSetMacro(LoadIconImage,int);
-  vtkBooleanMacro(LoadIconImage,int);
+  vtkGetMacro(LoadIconImage, int);
+  vtkSetMacro(LoadIconImage, int);
+  vtkBooleanMacro(LoadIconImage, int);
 
   // Description:
   // Set/Get whether or not the image was compressed using a lossy compression algorithm
-  vtkGetMacro(LossyFlag,int);
-  vtkSetMacro(LossyFlag,int);
-  vtkBooleanMacro(LossyFlag,int);
+  vtkGetMacro(LossyFlag, int);
+  vtkSetMacro(LossyFlag, int);
+  vtkBooleanMacro(LossyFlag, int);
 
   // Description:
   // Read only: number of overlays as found in this image (multiple overlays per slice is allowed)
   // Only valid when LoadOverlays is true
-  vtkGetMacro(NumberOfOverlays,int);
+  vtkGetMacro(NumberOfOverlays, int);
 
   // Description:
   // Read only: number of icon image (there can only be zero or one icon per file)
   // Only valid when LoadIconImage is true
-  vtkGetMacro(NumberOfIconImages,int);
+  vtkGetMacro(NumberOfIconImages, int);
 
   // Description:
   // Get Overlay/IconImage
   // Remember to ALWAYS use those methods in your code, as the internal number for the output port
   // is not garantee to remain the same, as features are added to the reader
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
-//FIXME: Need to get rid of BTX/ETX if only the Python Wrapper of VTK 4.2 would let me
-//BTX
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
+  // FIXME: Need to get rid of BTX/ETX if only the Python Wrapper of VTK 4.2 would let me
+  // BTX
   vtkAlgorithmOutput* GetOverlayPort(int index);
   vtkAlgorithmOutput* GetIconImagePort();
-//ETX
+// ETX
 #endif
   vtkImageData* GetOverlay(int i);
   vtkImageData* GetIconImage();
 
   // Description:
   // Load image with its associated Lookup Table
-  vtkGetMacro(ApplyLookupTable,int);
-  vtkSetMacro(ApplyLookupTable,int);
-  vtkBooleanMacro(ApplyLookupTable,int);
+  vtkGetMacro(ApplyLookupTable, int);
+  vtkSetMacro(ApplyLookupTable, int);
+  vtkBooleanMacro(ApplyLookupTable, int);
 
   // Description:
   // Load image as YBR
-  vtkGetMacro(ApplyYBRToRGB,int)
-  vtkSetMacro(ApplyYBRToRGB,int)
-  vtkBooleanMacro(ApplyYBRToRGB,int);
+  vtkGetMacro(ApplyYBRToRGB, int) vtkSetMacro(ApplyYBRToRGB, int)
+    vtkBooleanMacro(ApplyYBRToRGB, int);
 
   // Description:
-  // Return VTK_LUMINANCE, VTK_INVERSE_LUMINANCE, VTK_RGB, VTK_RGBA, VTK_LOOKUP_TABLE, VTK_YBR or VTK_CMYK
-  // or 0 when ImageFormat is not handled.
-  // Warning: For color image, PlanarConfiguration need to be taken into account.
-  vtkGetMacro(ImageFormat,int);
+  // Return VTK_LUMINANCE, VTK_INVERSE_LUMINANCE, VTK_RGB, VTK_RGBA, VTK_LOOKUP_TABLE, VTK_YBR or
+  // VTK_CMYK or 0 when ImageFormat is not handled. Warning: For color image, PlanarConfiguration
+  // need to be taken into account.
+  vtkGetMacro(ImageFormat, int);
 
   // Description:
   // Return the Planar Configuration. This simply means that the internal DICOM image was stored
   // using a particular planar configuration (most of the time: 0)
   // For monochrome image, PlanarConfiguration is always 0
-  vtkGetMacro(PlanarConfiguration,int);
+  vtkGetMacro(PlanarConfiguration, int);
 
   // Description:
   // Return the 'raw' information stored in the DICOM file:
-  // In case of a series of multiple files, only the first file is considered. The Image Orientation (Patient)
-  // is garantee to remain the same, and image Image Position (Patient) in other slice can be computed
-  // using the ZSpacing (3rd dimension)
-  // (0020,0032) DS [87.774866\-182.908510\168.629671]       #  32, 3 ImagePositionPatient
-  // (0020,0037) DS [0.001479\0.999989\-0.004376\-0.002039\-0.004372\-0.999988] #  58, 6 ImageOrientationPatient
-  vtkGetVector3Macro(ImagePositionPatient,double);
-  vtkGetVector6Macro(ImageOrientationPatient,double);
+  // In case of a series of multiple files, only the first file is considered. The Image Orientation
+  // (Patient) is garantee to remain the same, and image Image Position (Patient) in other slice can
+  // be computed using the ZSpacing (3rd dimension) (0020,0032) DS
+  // [87.774866\-182.908510\168.629671]       #  32, 3 ImagePositionPatient (0020,0037) DS
+  // [0.001479\0.999989\-0.004376\-0.002039\-0.004372\-0.999988] #  58, 6 ImageOrientationPatient
+  vtkGetVector3Macro(ImagePositionPatient, double);
+  vtkGetVector6Macro(ImageOrientationPatient, double);
 
   // Description:
   // Set/Get the first Curve Data:
-  vtkGetObjectMacro(Curve,vtkPolyData);
-  virtual void SetCurve(vtkPolyData *pd);
+  vtkGetObjectMacro(Curve, vtkPolyData);
+  virtual void SetCurve(vtkPolyData* pd);
 
   // Description:
   // \DEPRECATED:
@@ -232,49 +228,46 @@ public:
   // Value returned by GetShift/GetScale might be innacurate since Shift/Scale could be
   // varying along the Series read. Therefore user are advices not to use those functions
   // anymore
-  vtkGetMacro(Shift,double);
-  vtkGetMacro(Scale,double);
+  vtkGetMacro(Shift, double);
+  vtkGetMacro(Scale, double);
 
 protected:
   vtkGDCMImageReader();
-  ~vtkGDCMImageReader();
+  ~vtkGDCMImageReader() override;
 
-  vtkSetVector6Macro(ImageOrientationPatient,double);
+  vtkSetVector6Macro(ImageOrientationPatient, double);
 
-//BTX
-  void FillMedicalImageInformation(const gdcm::ImageReader &reader);
-//ETX
+  // BTX
+  void FillMedicalImageInformation(const gdcm::ImageReader& reader);
+  // ETX
   int RequestInformationCompat();
   int RequestDataCompat();
 
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
-  int ProcessRequest(vtkInformation* request,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector);
-  int RequestInformation(vtkInformation *request,
-                         vtkInformationVector **inputVector,
-                         vtkInformationVector *outputVector);
-  int RequestData(vtkInformation *request,
-                  vtkInformationVector **inputVector,
-                  vtkInformationVector *outputVector);
-#else /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
-  void ExecuteInformation();
-  void ExecuteData(vtkDataObject *out);
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
+  int ProcessRequest(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
+#else  /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
+  void ExecuteIn overrideformation();
+  void ExecuteData(vtkDataObject* out);
 #endif /*(VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )*/
 
 protected:
-#if (VTK_MAJOR_VERSION >= 5) || ( VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5 )
+#if (VTK_MAJOR_VERSION >= 5) || (VTK_MAJOR_VERSION == 4 && VTK_MINOR_VERSION > 5)
 #else
   // Description:
   // Medical Image properties
-  vtkMedicalImageProperties *MedicalImageProperties;
+  vtkMedicalImageProperties* MedicalImageProperties;
 #endif
-#if (VTK_MAJOR_VERSION > 5) || ( VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0 )
+#if (VTK_MAJOR_VERSION > 5) || (VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION > 0)
 #else
-  vtkStringArray *FileNames;
+  vtkStringArray* FileNames;
 #endif
 
-  vtkMatrix4x4 *DirectionCosines;
+  vtkMatrix4x4* DirectionCosines;
   int LoadOverlays;
   int NumberOfOverlays;
   int LoadIconImage;
@@ -282,7 +275,7 @@ protected:
   int IconImageDataExtent[6];
   double ImagePositionPatient[3];
   double ImageOrientationPatient[6];
-  vtkPolyData *Curve;
+  vtkPolyData* Curve;
 
   int ImageFormat;
   // the following 3, should remain optional
@@ -293,7 +286,7 @@ protected:
   int ApplyPlanarConfiguration;
   int ApplyShiftScale;
 
-  int LoadSingleFile(const char *filename, char *pointer, unsigned long &outlen);
+  int LoadSingleFile(const char* filename, char* pointer, unsigned long& outlen);
 
   double Shift;
   double Scale;
@@ -305,13 +298,13 @@ protected:
 
 protected:
   // TODO / FIXME
-  void SetFilePrefix(const char *) {}
+  void SetFilePrefix(const char*) override {}
   vtkGetStringMacro(FilePrefix);
-  void SetFilePattern(const char *) {}
+  void SetFilePattern(const char*) override {}
   vtkGetStringMacro(FilePattern);
 
 private:
-  vtkGDCMImageReader(const vtkGDCMImageReader&);  // Not implemented.
-  void operator=(const vtkGDCMImageReader&);  // Not implemented.
+  vtkGDCMImageReader(const vtkGDCMImageReader&) = delete;
+  void operator=(const vtkGDCMImageReader&) = delete;
 };
 #endif

@@ -43,15 +43,12 @@
 #include "../../System/Time/StopWatch.h"
 #include "Tools.h"
 
-namespace Gc
-{
-    /** Graph cut based image processing algorithms. */
-    namespace Algo
-    {
-        /** Image segmentation methods. */
-        namespace Segmentation
-        {
-            /** This files implement graph cut based minimization of the two-phase piecewise
+namespace Gc {
+/** Graph cut based image processing algorithms. */
+namespace Algo {
+/** Image segmentation methods. */
+namespace Segmentation {
+/** This files implement graph cut based minimization of the two-phase piecewise
                 constant Mumford-Shah model, also known as the Chan-Vese model for
                 image segmentation.
 
@@ -90,15 +87,14 @@ namespace Gc
                     normalized, i.e., divided by the value of \f$ \mu \f$ (so this parameter is not
                     an input for the computation routines because it is assumed to be always 1).
             */
-            namespace ChanVese
-            {
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Chan-Vese segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+namespace ChanVese {
+//////////////////////////////////////////////////////////////////////////
+//
+// Chan-Vese segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute the Chan-Vese segmentation on a given image.                    
+/** Compute the Chan-Vese segmentation on a given image.                    
 
                     The graph construction is based on the following paper:
                     - Y. Zeng, W. Chen, and Q. Peng. <em>Effciently solving the piecewise 
@@ -138,23 +134,23 @@ namespace Gc
 
                     @see Clustering::KMeans::Lloyd(), Tools::NormalizeImage().
                 */
-                template <Size N, class T>
-                T GC_DLL_EXPORT Compute(const Data::Image<N,T,T> &im, T l1, T l2, T &c1, 
-                    T &c2, T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IMaxFlow<T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT Compute(const Data::Image<N, T, T> & im, T l1, T l2, T & c1,
+                        T & c2, T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                        Flow::IMaxFlow<T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                template <Size N, class T>
-                T GC_DLL_EXPORT Compute(const Data::Image<N,T,T> &im, T l1, T l2, T &c1, 
-                    T &c2, T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT Compute(const Data::Image<N, T, T> & im, T l1, T l2, T & c1,
+                        T & c2, T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                        Flow::IGridMaxFlow<N, T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Masked Chan-Vese segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Masked Chan-Vese segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute Chan-Vese segmentation of an image with a voxel mask.
+/** Compute Chan-Vese segmentation of an image with a voxel mask.
                 
                     This function computes the same thing as Compute() does. However, it
                     is possible to mark selected voxels as being known to belong to
@@ -166,25 +162,25 @@ namespace Gc
 
                     @see Compute, Segmentation::MaskFlag.
                 */
-                template <Size N, class T>
-                T GC_DLL_EXPORT ComputeMasked(const Data::Image<N,T,T> &im, 
-                    const System::Collection::Array<N,Uint8> &mask, T l1, T l2, T &c1, 
-                    T &c2, T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IMaxFlow<T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT ComputeMasked(const Data::Image<N, T, T> & im,
+                              const System::Collection::Array<N, Uint8> & mask, T l1, T l2, T & c1,
+                              T & c2, T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                              Flow::IMaxFlow<T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                template <Size N, class T>
-                T GC_DLL_EXPORT ComputeMasked(const Data::Image<N,T,T> &im, 
-                    const System::Collection::Array<N,Uint8> &mask, T l1, T l2, T &c1, 
-                    T &c2, T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT ComputeMasked(const Data::Image<N, T, T> & im,
+                              const System::Collection::Array<N, Uint8> & mask, T l1, T l2, T & c1,
+                              T & c2, T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                              Flow::IGridMaxFlow<N, T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Two-stage Chan-Vese segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Two-stage Chan-Vese segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute two-stage Chan-Vese segmentation of a given image.
+/** Compute two-stage Chan-Vese segmentation of a given image.
 
                     In the first stage segmentation is computed using (smaller)
                     neighbourhood \c nb1 and then in the second stage it is smoothed
@@ -224,36 +220,36 @@ namespace Gc
 
                     @see Compute(), Clustering::KMeans::Lloyd(), Tools::NormalizeImage().
                 */
-                template <Size N, class T, class MAXFLOW1, class MAXFLOW2>
-                T ComputeTwoStage(const Data::Image<N,T,T> &im, T l1, T l2, 
-                    T &c1, T &c2, T conv_crit1, T conv_crit2, 
-                    Size &max_iter1, Size &max_iter2,
-                    const Energy::Neighbourhood<N,Int32> &nb1, 
-                    const Energy::Neighbourhood<N,Int32> &nb2,
-                    Size band_size, MAXFLOW1 &mf1, MAXFLOW2 &mf2,
-                    System::Collection::Array<N,bool> &seg)
-                {
-                    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
+template <Size N, class T, class MAXFLOW1, class MAXFLOW2>
+T ComputeTwoStage(const Data::Image<N, T, T> & im, T l1, T l2,
+                  T & c1, T & c2, T conv_crit1, T conv_crit2,
+                  Size & max_iter1, Size & max_iter2,
+                  const Energy::Neighbourhood<N, Int32> & nb1,
+                  const Energy::Neighbourhood<N, Int32> & nb2,
+                  Size band_size, MAXFLOW1 & mf1, MAXFLOW2 & mf2,
+                  System::Collection::Array<N, bool> & seg)
+{
+    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
 
-                    // First phase - coarse segmentation
-                    Compute(im, l1, l2, c1, c2, conv_crit1, max_iter1, nb1, mf1, seg);
-                    mf1.Dispose();
-                    
-                    // Create band mask
-                    System::Collection::Array<N,Uint8> mask;
-                    Tools::CreateBandMask(seg, band_size, mask);
+    // First phase - coarse segmentation
+    Compute(im, l1, l2, c1, c2, conv_crit1, max_iter1, nb1, mf1, seg);
+    mf1.Dispose();
 
-                    // Second phase - refinement of the boundary in given band
-                    return ComputeMasked(im, mask, l1, l2, c1, c2, conv_crit2, max_iter2, nb2, mf2, seg);
-                }
+    // Create band mask
+    System::Collection::Array<N, Uint8> mask;
+    Tools::CreateBandMask(seg, band_size, mask);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Two-stage masked Chan-Vese segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+    // Second phase - refinement of the boundary in given band
+    return ComputeMasked(im, mask, l1, l2, c1, c2, conv_crit2, max_iter2, nb2, mf2, seg);
+}
 
-                /** Compute two-stage Chan-Vese segmentation of an image with a voxel mask.
+//////////////////////////////////////////////////////////////////////////
+//
+// Two-stage masked Chan-Vese segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
+
+/** Compute two-stage Chan-Vese segmentation of an image with a voxel mask.
                 
                     This function computes the same thing as ComputeTwoStage() does. However, it
                     is possible to mark selected voxels as being known to belong to
@@ -265,32 +261,32 @@ namespace Gc
 
                     @see ComputeTwoStage, ComputeMasked, Segmentation::MaskFlag.
                 */
-                template <Size N, class T, class MAXFLOW1, class MAXFLOW2>
-                T ComputeTwoStageMasked(const Data::Image<N,T,T> &im, 
-                    const System::Collection::Array<N,Uint8> &mask, T l1, T l2, 
-                    T &c1, T &c2, T conv_crit1, T conv_crit2, 
-                    Size &max_iter1, Size &max_iter2,
-                    const Energy::Neighbourhood<N,Int32> &nb1, 
-                    const Energy::Neighbourhood<N,Int32> &nb2,
-                    Size band_size, MAXFLOW1 &mf1, 
-                    MAXFLOW2 &mf2, System::Collection::Array<N,bool> &seg)
-                {
-                    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
+template <Size N, class T, class MAXFLOW1, class MAXFLOW2>
+T ComputeTwoStageMasked(const Data::Image<N, T, T> & im,
+                        const System::Collection::Array<N, Uint8> & mask, T l1, T l2,
+                        T & c1, T & c2, T conv_crit1, T conv_crit2,
+                        Size & max_iter1, Size & max_iter2,
+                        const Energy::Neighbourhood<N, Int32> & nb1,
+                        const Energy::Neighbourhood<N, Int32> & nb2,
+                        Size band_size, MAXFLOW1 & mf1,
+                        MAXFLOW2 & mf2, System::Collection::Array<N, bool> & seg)
+{
+    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
 
-                    // First phase - coarse segmentation
-                    ComputeMasked(im, mask, l1, l2, c1, c2, conv_crit1, max_iter1, nb1, mf1, seg);
-                    mf1.Dispose();
-                    
-                    // Create band mask
-                    System::Collection::Array<N,Uint8> stage2_mask;
-                    Tools::CreateBandMask(seg, mask, band_size, stage2_mask);
+    // First phase - coarse segmentation
+    ComputeMasked(im, mask, l1, l2, c1, c2, conv_crit1, max_iter1, nb1, mf1, seg);
+    mf1.Dispose();
 
-                    // Second phase - refinement of the boundary in given band mask
-                    return ComputeMasked(im, stage2_mask, l1, l2, c1, c2, conv_crit2, max_iter2, nb2, mf2, seg);
-                }
-            }
-        }
-    }
+    // Create band mask
+    System::Collection::Array<N, Uint8> stage2_mask;
+    Tools::CreateBandMask(seg, mask, band_size, stage2_mask);
+
+    // Second phase - refinement of the boundary in given band mask
+    return ComputeMasked(im, stage2_mask, l1, l2, c1, c2, conv_crit2, max_iter2, nb2, mf2, seg);
 }
+} // namespace ChanVese
+} // namespace Segmentation
+} // namespace Algo
+} // namespace Gc
 
 #endif

@@ -32,11 +32,9 @@
 #include "../Math/Algebra/Vector.h"
 #include "Neighbourhood.h"
 
-namespace Gc
-{    
-	namespace Energy
-	{
-        /** Second order discrete energy class defined on a regular grid.
+namespace Gc {
+namespace Energy {
+/** Second order discrete energy class defined on a regular grid.
         
             This class represents a discrete second order energy of the following type:
             \f[
@@ -57,33 +55,32 @@ namespace Gc
 
             @see IEnergy.
         */
-        template <Size N, class T, class L>
-	    class IGridEnergy
-	    {
-        public:
-            /** Virtual destructor. */
-            virtual ~IGridEnergy()
-            {}
+template <Size N, class T, class L>
+class IGridEnergy
+{
+  public:
+    /** Virtual destructor. */
+    virtual ~IGridEnergy() = default;
 
-            /** Number of possible labels. */
-            virtual Size Labels() const = 0;
+    /** Number of possible labels. */
+    virtual Size Labels() const = 0;
 
-            /** Grid dimensions. */
-            virtual Math::Algebra::Vector<N,Size> Dimensions() const = 0;
+    /** Grid dimensions. */
+    virtual Math::Algebra::Vector<N, Size> Dimensions() const = 0;
 
-            /** Get grid neighbourhood system. */
-            virtual const Neighbourhood<N,Int32> &NbSystem() const = 0;
+    /** Get grid neighbourhood system. */
+    virtual const Neighbourhood<N, Int32> & NbSystem() const = 0;
 
-            /** Unary clique potentials, i.e., label penalties (data costs). 
+    /** Unary clique potentials, i.e., label penalties (data costs). 
             
                 @param[in] node Node index.
                 @param[in] label Label index.
                 @return %Energy corresponding to the labeling of node \c node
                     with label \c label.
             */
-            virtual T CliquePotential(Size node, L label) const = 0;
+    virtual T CliquePotential(Size node, L label) const = 0;
 
-            /** Pairwise clique potentials, i.e., smoothness costs. 
+    /** Pairwise clique potentials, i.e., smoothness costs. 
             
                 @param[in] n1 First node index.
                 @param[in] n2 Second node index.
@@ -94,9 +91,9 @@ namespace Gc
                 @return %Energy corresponding to the labeling of nodes \c n1 and \c n2
                     with labels \c l1 and \c l2, respectively.
             */
-            virtual T CliquePotential(Size n1, Size n2, Size i, L l1, L l2) const = 0;
-	    };
-	}
+    virtual T CliquePotential(Size n1, Size n2, Size i, L l1, L l2) const = 0;
+};
 }
+} // namespace Gc::Energy
 
 #endif

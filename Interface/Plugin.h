@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
 #include "WidgetInterface.h"
 
@@ -28,26 +28,25 @@ class ISEG_INTERFACE_API Plugin
 {
 public:
 	Plugin();
-	~Plugin();
+	~Plugin() = default;
 
-	void install_slice_handler(SlicesHandlerInterface* slice_handler);
-	SlicesHandlerInterface* slice_handler() const { return _slice_handler; }
+	void InstallSliceHandler(SlicesHandlerInterface* slice_handler);
+	SlicesHandlerInterface* SliceHandler() const { return m_SliceHandler; }
 
-	virtual std::string name() const = 0;
+	virtual std::string Name() const = 0;
 
-	virtual std::string description() const = 0;
+	virtual std::string Description() const = 0;
 
-	virtual WidgetInterface* create_widget(QWidget* parent,
-			const char* name, Qt::WindowFlags wFlags) const = 0;
+	virtual WidgetInterface* CreateWidget() const = 0;
 
 private:
-	SlicesHandlerInterface* _slice_handler;
+	SlicesHandlerInterface* m_SliceHandler;
 };
 
 class ISEG_INTERFACE_API PluginRegistry
 {
 public:
-	static std::vector<Plugin*> registered_plugins();
+	static std::vector<Plugin*> RegisteredPlugins();
 };
 
 }} // namespace iseg::plugin

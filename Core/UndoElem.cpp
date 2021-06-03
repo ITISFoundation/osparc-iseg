@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,95 +18,94 @@ namespace iseg {
 
 UndoElem::UndoElem()
 {
-	bmp_old = work_old = bmp_new = work_new = nullptr;
-	tissue_old = tissue_new = nullptr;
-	mode1_old = mode1_new = mode2_old = mode2_new = 0;
-	multi = false;
+	m_BmpOld = m_WorkOld = m_BmpNew = m_WorkNew = nullptr;
+	m_TissueOld = m_TissueNew = nullptr;
+	m_Mode1Old = m_Mode1New = m_Mode2Old = m_Mode2New = 0;
 }
 
 UndoElem::~UndoElem()
 {
-	if (bmp_old != nullptr)
-		free(bmp_old);
-	if (work_old != nullptr)
-		free(work_old);
-	if (tissue_old != nullptr)
-		free(tissue_old);
-	if (bmp_new != nullptr)
-		free(bmp_new);
-	if (work_new != nullptr)
-		free(work_new);
-	if (tissue_new != nullptr)
-		free(tissue_new);
+	if (m_BmpOld != nullptr)
+		free(m_BmpOld);
+	if (m_WorkOld != nullptr)
+		free(m_WorkOld);
+	if (m_TissueOld != nullptr)
+		free(m_TissueOld);
+	if (m_BmpNew != nullptr)
+		free(m_BmpNew);
+	if (m_WorkNew != nullptr)
+		free(m_WorkNew);
+	if (m_TissueNew != nullptr)
+		free(m_TissueNew);
 }
 
-void UndoElem::merge(UndoElem* ue)
+void UndoElem::Merge(UndoElem* ue)
 {
-	if (dataSelection.sliceNr == ue->dataSelection.sliceNr && !multi)
+	if (m_DataSelection.sliceNr == ue->m_DataSelection.sliceNr && !Multi())
 	{
-		if (ue->dataSelection.bmp)
+		if (ue->m_DataSelection.bmp)
 		{
-			if (dataSelection.bmp)
-				free(bmp_new);
+			if (m_DataSelection.bmp)
+				free(m_BmpNew);
 			else
 			{
-				bmp_old = ue->bmp_old;
-				mode1_old = ue->mode1_old;
+				m_BmpOld = ue->m_BmpOld;
+				m_Mode1Old = ue->m_Mode1Old;
 			}
-			mode1_new = ue->mode1_new;
-			bmp_new = ue->bmp_new;
+			m_Mode1New = ue->m_Mode1New;
+			m_BmpNew = ue->m_BmpNew;
 		}
-		if (ue->dataSelection.work)
+		if (ue->m_DataSelection.work)
 		{
-			if (dataSelection.work)
-				free(work_new);
+			if (m_DataSelection.work)
+				free(m_WorkNew);
 			else
 			{
-				work_old = ue->work_old;
-				mode2_old = ue->mode2_old;
+				m_WorkOld = ue->m_WorkOld;
+				m_Mode2Old = ue->m_Mode2Old;
 			}
-			mode2_new = ue->mode2_new;
-			work_new = ue->work_new;
+			m_Mode2New = ue->m_Mode2New;
+			m_WorkNew = ue->m_WorkNew;
 		}
-		if (ue->dataSelection.tissues)
+		if (ue->m_DataSelection.tissues)
 		{
-			if (dataSelection.tissues)
-				free(tissue_new);
+			if (m_DataSelection.tissues)
+				free(m_TissueNew);
 			else
-				tissue_old = ue->tissue_old;
-			tissue_new = ue->tissue_new;
+				m_TissueOld = ue->m_TissueOld;
+			m_TissueNew = ue->m_TissueNew;
 		}
-		if (ue->dataSelection.vvm)
+		if (ue->m_DataSelection.vvm)
 		{
-			vvm_new.clear();
-			vvm_new = ue->vvm_new;
-			if (!dataSelection.vvm)
+			m_VvmNew.clear();
+			m_VvmNew = ue->m_VvmNew;
+			if (!m_DataSelection.vvm)
 			{
-				vvm_old.clear();
-				vvm_old = ue->vvm_old;
+				m_VvmOld.clear();
+				m_VvmOld = ue->m_VvmOld;
 			}
 		}
-		if (ue->dataSelection.limits)
+		if (ue->m_DataSelection.limits)
 		{
-			limits_new.clear();
-			limits_new = ue->limits_new;
-			if (!dataSelection.limits)
+			m_LimitsNew.clear();
+			m_LimitsNew = ue->m_LimitsNew;
+			if (!m_DataSelection.limits)
 			{
-				limits_old.clear();
-				limits_old = ue->limits_old;
+				m_LimitsOld.clear();
+				m_LimitsOld = ue->m_LimitsOld;
 			}
 		}
-		if (ue->dataSelection.marks)
+		if (ue->m_DataSelection.marks)
 		{
-			marks_new.clear();
-			marks_new = ue->marks_new;
-			if (!dataSelection.marks)
+			m_MarksNew.clear();
+			m_MarksNew = ue->m_MarksNew;
+			if (!m_DataSelection.marks)
 			{
-				marks_old.clear();
-				marks_old = ue->marks_old;
+				m_MarksOld.clear();
+				m_MarksOld = ue->m_MarksOld;
 			}
 		}
-		dataSelection.CombineSelection(ue->dataSelection);
+		m_DataSelection.CombineSelection(ue->m_DataSelection);
 	}
 	/*	if(bmp_new!=nullptr) free(bmp_new);
 		if(work_new!=nullptr) free(work_new);
@@ -122,20 +121,20 @@ void UndoElem::merge(UndoElem* ue)
 		marks_new=ue->marks_new;*/
 }
 
-unsigned UndoElem::arraynr()
+unsigned UndoElem::Arraynr()
 {
 	unsigned i = 0;
 	const unsigned added = 1;
 
-	if (dataSelection.bmp)
+	if (m_DataSelection.bmp)
 	{
 		i += added;
 	}
-	if (dataSelection.work)
+	if (m_DataSelection.work)
 	{
 		i += added;
 	}
-	if (dataSelection.tissues)
+	if (m_DataSelection.tissues)
 	{
 		i += added;
 	}
@@ -143,48 +142,58 @@ unsigned UndoElem::arraynr()
 	return i;
 }
 
-MultiUndoElem::MultiUndoElem() { multi = true; }
+bool UndoElem::Multi() const
+{
+	return false;
+}
+
+MultiUndoElem::MultiUndoElem() = default;
 
 MultiUndoElem::~MultiUndoElem()
 {
 	std::vector<float*>::iterator itf;
 	std::vector<tissues_size_t*>::iterator it8;
 
-	for (itf = vbmp_old.begin(); itf != vbmp_old.end(); itf++)
+	for (itf = m_VbmpOld.begin(); itf != m_VbmpOld.end(); itf++)
 		free(*itf);
-	for (itf = vwork_old.begin(); itf != vwork_old.end(); itf++)
+	for (itf = m_VworkOld.begin(); itf != m_VworkOld.end(); itf++)
 		free(*itf);
-	for (it8 = vtissue_old.begin(); it8 != vtissue_old.end(); it8++)
+	for (it8 = m_VtissueOld.begin(); it8 != m_VtissueOld.end(); it8++)
 		free(*it8);
-	for (itf = vbmp_new.begin(); itf != vbmp_new.end(); itf++)
+	for (itf = m_VbmpNew.begin(); itf != m_VbmpNew.end(); itf++)
 		free(*itf);
-	for (itf = vwork_new.begin(); itf != vwork_new.end(); itf++)
+	for (itf = m_VworkNew.begin(); itf != m_VworkNew.end(); itf++)
 		free(*itf);
-	for (it8 = vtissue_new.begin(); it8 != vtissue_new.end(); it8++)
+	for (it8 = m_VtissueNew.begin(); it8 != m_VtissueNew.end(); it8++)
 		free(*it8);
 }
 
-void MultiUndoElem::merge(UndoElem* ue) {}
+void MultiUndoElem::Merge(UndoElem* ue) {}
 
-unsigned MultiUndoElem::arraynr()
+unsigned MultiUndoElem::Arraynr()
 {
 	unsigned i = 0;
 	const unsigned added = 1;
 
-	if (dataSelection.bmp)
+	if (m_DataSelection.bmp)
 	{
 		i += added;
 	}
-	if (dataSelection.work)
+	if (m_DataSelection.work)
 	{
 		i += added;
 	}
-	if (dataSelection.tissues)
+	if (m_DataSelection.tissues)
 	{
 		i += added;
 	}
 
-	return i * vslicenr.size();
+	return i * m_Vslicenr.size();
+}
+
+bool MultiUndoElem::Multi() const
+{
+	return true;
 }
 
 } // namespace iseg

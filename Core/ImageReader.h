@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,9 +11,9 @@
 
 #include "iSegCore.h"
 
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 namespace iseg {
 
@@ -24,30 +24,23 @@ class Transform;
 class ISEG_CORE_API ImageReader
 {
 public:
-	static bool getInfo2D(const char* filename, unsigned& width, unsigned& height);
+	static bool GetInfo2D(const char* filename, unsigned& width, unsigned& height);
 
 	/// loads 2D image into pre-allocated memory
-	static bool getImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
+	static bool GetImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey);
 
 	/// get image size, spacing and transform
-	static bool getInfo(const char* filename, unsigned& width, unsigned& height,
-						unsigned& nrslices, float spacing[3],
-						Transform& transform);
+	static bool GetInfo(const char* filename, unsigned& width, unsigned& height, unsigned& nrslices, float spacing[3], Transform& transform);
 
 	/// loads image into pre-allocated memory
-	static bool getSlice(const char* filename, float* slice, unsigned slicenr,
-						 unsigned width, unsigned height);
+	static bool GetSlice(const char* filename, float* slice, unsigned slicenr, unsigned width, unsigned height);
 
 	/// \note allocates memory for slice using new
-	static float* getSliceInfo(const char* filename, unsigned slicenr,
-							   unsigned& width, unsigned& height);
+	static float* GetSliceInfo(const char* filename, unsigned slicenr, unsigned& width, unsigned& height);
 
 	/// loads image into pre-allocated memory
-	static bool getVolume(const char* filename, float** slices,
-						  unsigned nrslices, unsigned width, unsigned height);
-	static bool getVolume(const char* filename, float** slices,
-						  unsigned startslice, unsigned nrslices,
-						  unsigned width, unsigned height);
+	static bool GetVolume(const char* filename, float** slices, unsigned nrslices, unsigned width, unsigned height);
+	static bool GetVolume(const char* filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height);
 };
 
 } // namespace iseg

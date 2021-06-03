@@ -30,39 +30,37 @@
 
 #include "Exception.h"
 
-namespace Gc
-{
-    namespace System
-    {
-        /** Invalid operation exception class. 
+namespace Gc {
+namespace System {
+/** Invalid operation exception class. 
         
             Such exception is typically raised when method is called at
             wrong time (e.g. before data structures are initialized, etc.)
         */
-        class InvalidOperationException 
-            : public Exception
-        {
-        public:
-            /** Constructor. 
+class InvalidOperationException
+    : public Exception
+{
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            InvalidOperationException(const char *func, int line)
-                : Exception(func, line, "Invalid operation.")
-            {}
+    InvalidOperationException(const char * func, int line)
+        : Exception(func, line, "Invalid operation.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            InvalidOperationException(const char *func, int line, const std::string &msg)
-                : Exception(func, line, msg)
-            {}
-        };
-    }
+    InvalidOperationException(const char * func, int line, const std::string & msg)
+        : Exception(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::System
 
 #endif

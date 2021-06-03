@@ -33,13 +33,10 @@
 #include "../../Core.h"
 #include "CommonBase.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace Grid
-        {
-            /** Maximum flow algorithm (for directed grid graphs) integrated with the object 
+namespace Gc {
+namespace Flow {
+namespace Grid {
+/** Maximum flow algorithm (for directed grid graphs) integrated with the object 
                 indication function.
             
                 @todo Documentation.
@@ -60,35 +57,35 @@ namespace Gc
                     the computation will be faster and will require slightly 
                     less memory.
             */
-		    template <Size N, class TFLOW, class TTCAP, class TCAP, class LAB, bool MASK>
-		    class GC_DLL_EXPORT DanekLabels
-                : public CommonBase<N,TFLOW,TTCAP,TCAP>
-		    {
-            protected:
-                using CommonBase<N,TFLOW,TFLOW,TCAP>::m_arc_cap;
-                using CommonBase<N,TFLOW,TFLOW,TCAP>::m_nb;
-                using CommonBase<N,TFLOW,TFLOW,TCAP>::m_n_ofs;
-                using CommonBase<N,TFLOW,TFLOW,TCAP>::m_bw_idx;
-                using CommonBase<N,TFLOW,TFLOW,TCAP>::Sister;
+template <Size N, class TFLOW, class TTCAP, class TCAP, class LAB, bool MASK>
+class GC_DLL_EXPORT DanekLabels
+    : public CommonBase<N, TFLOW, TTCAP, TCAP>
+{
+  protected:
+    using CommonBase<N, TFLOW, TFLOW, TCAP>::m_arc_cap;
+    using CommonBase<N, TFLOW, TFLOW, TCAP>::m_nb;
+    using CommonBase<N, TFLOW, TFLOW, TCAP>::m_n_ofs;
+    using CommonBase<N, TFLOW, TFLOW, TCAP>::m_bw_idx;
+    using CommonBase<N, TFLOW, TFLOW, TCAP>::Sister;
 
-            private:
-                /** Structure used for storing nodes in the network. */
-			    class Node
-			    {
-                public:
-                    /** Next node in the queue of active nodes. */
-                    Node *m_qnext;
-                    /** Previous node in the queue of active nodes. */
-                    Node *m_qprev;
-                    /** Next orphan node. When this is not NULL, then node is orphan. */
-                    Node *m_next_orphan;
-                    /** Residual capacity of the terminal arcs */
-                    TTCAP m_tr_cap;
-                    /** Node distance to the contour. */
-                    Int32 m_dist;
-                    /** Index of arc going to the parent node. */
-				    Size m_parent_arc;
-                    /** Node tag. 
+  private:
+    /** Structure used for storing nodes in the network. */
+    class Node
+    {
+      public:
+        /** Next node in the queue of active nodes. */
+        Node * m_qnext;
+        /** Previous node in the queue of active nodes. */
+        Node * m_qprev;
+        /** Next orphan node. When this is not NULL, then node is orphan. */
+        Node * m_next_orphan;
+        /** Residual capacity of the terminal arcs */
+        TTCAP m_tr_cap;
+        /** Node distance to the contour. */
+        Int32 m_dist;
+        /** Index of arc going to the parent node. */
+        Size m_parent_arc;
+        /** Node tag. 
                     
                         It stores information about 3 binary variables:
                         - bit 0 - 0 = background, 1 = foreground
@@ -96,317 +93,316 @@ namespace Gc
                         - bit 2 - 0 = active node, 1 = passive node
                         - bit 3 - 0 = non-free node, 1 = free node
                     */
-                    Uint8 m_tag;
-                    /** Current object indicator. */
-                    LAB m_label;
-                };
+        Uint8 m_tag;
+        /** Current object indicator. */
+        LAB m_label;
+    };
 
-                /** First-in-first-out queue structure */
-                struct Queue
-                {
-                    /** First node in the queue */
-                    Node *m_first;
-                    /** Last node in the queue */
-                    Node *m_last;
-                };
+    /** First-in-first-out queue structure */
+    struct Queue
+    {
+        /** First node in the queue */
+        Node * m_first;
+        /** Last node in the queue */
+        Node * m_last;
+    };
 
-            private:
-                /** Queue of active nodes. Nodes closer to the boundary are 
+  private:
+    /** Queue of active nodes. Nodes closer to the boundary are 
                     processed first.
                 */
-                class ActiveNodeQueue
-                {
-                private:
-                    /** Queue of nodes on currently processed distance level. */
-                    Queue m_cur_lev;
-                    /** Queues of remaining distance levels. */
-                    std::map<Int32, Queue> m_map;
+    class ActiveNodeQueue
+    {
+      private:
+        /** Queue of nodes on currently processed distance level. */
+        Queue m_cur_lev;
+        /** Queues of remaining distance levels. */
+        std::map<Int32, Queue> m_map;
 
-                public:
-                    /** Dispose memory. */
-                    void Dispose()
-                    {                        
-                        m_map.clear();
-                    }
+      public:
+        /** Dispose memory. */
+        void Dispose()
+        {
+            m_map.clear();
+        }
 
-                    /** Insert node to the queue. 
+        /** Insert node to the queue. 
                     
                         Use this method only during the initial filling of the queue.
                         During the computation use PushNode method instead.
                     */
-                    void InsertNode(Node *n)
+        void InsertNode(Node * n)
+        {
+            typename std::map<Int32, Queue>::iterator iter = m_map.find(n->m_dist);
+
+            if (iter == m_map.end())
+            {
+                Queue q;
+
+                q.m_first = q.m_last = n;
+                m_map[n->m_dist] = q;
+            }
+            else
+            {
+                iter->second.m_last->m_qnext = n;
+                n->m_qprev = iter->second.m_last;
+                iter->second.m_last = n;
+            }
+        }
+
+        /** Init queue. Nodes closest to the boundary are set as active. */
+        void Init()
+        {
+            if (m_map.empty())
+            {
+                m_cur_lev.m_first = m_cur_lev.m_last = nullptr;
+            }
+            else
+            {
+                typename std::map<Int32, Queue>::iterator iter = m_map.begin();
+
+                m_cur_lev = iter->second;
+                m_map.erase(iter);
+            }
+        }
+
+        /** Get next active from the currently active distance level. */
+        Node * FrontNode()
+        {
+            return m_cur_lev.m_first;
+        }
+
+        /** Insert node into the queue. */
+        void PushNode(Node * n)
+        {
+            if (m_cur_lev.m_first == nullptr)
+            {
+                m_cur_lev.m_first = m_cur_lev.m_last = n;
+            }
+            else
+            {
+                if (m_cur_lev.m_first->m_dist == n->m_dist)
+                {
+                    m_cur_lev.m_last->m_qnext = n;
+                    n->m_qprev = m_cur_lev.m_last;
+                    m_cur_lev.m_last = n;
+                }
+                else
+                {
+                    InsertNode(n);
+                }
+            }
+        }
+
+        /** Remove node from the queue. */
+        void RemoveNode(Node * n)
+        {
+            Queue * q;
+
+            // Find queue containing the node and solve special cases
+            if (n->m_dist == m_cur_lev.m_first->m_dist)
+            {
+                if (m_cur_lev.m_first == m_cur_lev.m_last)
+                {
+                    if (m_map.empty())
                     {
-                        typename std::map<Int32, Queue>::iterator iter = m_map.find(n->m_dist);
+                        m_cur_lev.m_first = m_cur_lev.m_last = nullptr;
+                    }
+                    else
+                    {
+                        typename std::map<Int32, Queue>::iterator iter = m_map.begin();
 
-                        if (iter == m_map.end())
-                        {
-                            Queue q;
-
-                            q.m_first = q.m_last = n;
-                            m_map[n->m_dist] = q;
-                        }
-                        else
-                        {
-                            iter->second.m_last->m_qnext = n;
-                            n->m_qprev = iter->second.m_last;
-                            iter->second.m_last = n;
-                        }
+                        m_cur_lev = iter->second;
+                        m_map.erase(iter);
                     }
 
-                    /** Init queue. Nodes closest to the boundary are set as active. */
-                    void Init()
-                    {
-                        if (m_map.empty())
-                        {
-                            m_cur_lev.m_first = m_cur_lev.m_last = NULL;
-                        }
-                        else
-                        {
-                            typename std::map<Int32, Queue>::iterator iter = m_map.begin();
+                    return;
+                }
 
-                            m_cur_lev = iter->second;
-                            m_map.erase(iter);
-                        }
-                    }
+                q = &m_cur_lev;
+            }
+            else
+            {
+                typename std::map<Int32, Queue>::iterator iter = m_map.find(n->m_dist);
+                q = &iter->second;
 
-                    /** Get next active from the currently active distance level. */
-                    Node *FrontNode()
-                    {
-                        return m_cur_lev.m_first;
-                    }
+                if (q->m_first == q->m_last)
+                {
+                    m_map.erase(iter);
+                    return;
+                }
+            }
 
-                    /** Insert node into the queue. */
-                    void PushNode(Node *n)
-                    {
-                        if (m_cur_lev.m_first == NULL)
-                        {
-                            m_cur_lev.m_first = m_cur_lev.m_last = n;
-                        }
-                        else
-                        {
-                            if (m_cur_lev.m_first->m_dist == n->m_dist)
-                            {
-                                m_cur_lev.m_last->m_qnext = n;
-                                n->m_qprev = m_cur_lev.m_last;
-                                m_cur_lev.m_last = n;
-                            }
-                            else
-                            {
-                                InsertNode(n);
-                            }
-                        }
-                    }
+            // Remove node from the queue
+            if (n == q->m_first)
+            {
+                q->m_first = q->m_first->m_qnext;
+            }
+            else
+            {
+                if (n == q->m_last)
+                {
+                    q->m_last = q->m_last->m_qprev;
+                }
+                else
+                {
+                    n->m_qprev->m_qnext = n->m_qnext;
+                    n->m_qnext->m_qprev = n->m_qprev;
+                }
+            }
+        }
 
-                    /** Remove node from the queue. */
-                    void RemoveNode(Node *n)
-                    {
-                        Queue *q;
+        /** Check whether the queue is empty. */
+        bool IsEmpty() const
+        {
+            return (m_cur_lev.m_first == nullptr);
+        }
+    };
 
-                        // Find queue containing the node and solve special cases
-                        if (n->m_dist == m_cur_lev.m_first->m_dist)
-                        {
-                            if (m_cur_lev.m_first == m_cur_lev.m_last)
-                            {
-                                if (m_map.empty())
-                                {
-                                    m_cur_lev.m_first = m_cur_lev.m_last = NULL;
-                                }
-                                else
-                                {
-                                    typename std::map<Int32, Queue>::iterator iter = m_map.begin();
+  private:
+    /** Node array. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Initial object indicators. */
+    const System::Collection::Array<N, LAB> * m_ilab;
+    /** Initial distance map. */
+    System::Collection::Array<N, Uint32> m_dmap;
 
-                                    m_cur_lev = iter->second;
-                                    m_map.erase(iter);
-                                }
+    /** Forward (node -> grid) indexes. Used only in masked version. */
+    System::Collection::Array<1, Size> m_fw_idx;
 
-                                return;
-                            }
+    /** Total flow */
+    TFLOW m_flow;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-                            q = &m_cur_lev;
-                        }
-                        else
-                        {
-                            typename std::map<Int32, Queue>::iterator iter = m_map.find(n->m_dist);
-                            q = &iter->second;
+    /** Active nodes for SB, SF, TB and TF trees. */
+    ActiveNodeQueue m_bp[4];
+    /** Queue of orphans */
+    Queue m_q_orphan;
 
-                            if (q->m_first == q->m_last)
-                            {
-                                m_map.erase(iter);
-                                return;
-                            }
-                        }
+  public:
+    /** Constructor */
+    DanekLabels()
+        : m_ilab(nullptr)
+    {}
 
-                        // Remove node from the queue
-                        if (n == q->m_first)
-                        {
-                            q->m_first = q->m_first->m_qnext;
-                        }
-                        else
-                        {
-                            if (n == q->m_last)
-                            {
-                                q->m_last = q->m_last->m_qprev;
-                            }
-                            else
-                            {
-                                n->m_qprev->m_qnext = n->m_qnext;
-                                n->m_qnext->m_qprev = n->m_qprev;
-                            }
-                        }
-                    }
+    /** Destructor */
+    ~DanekLabels() override = default;
 
-                    /** Check whether the queue is empty. */
-                    bool IsEmpty() const
-                    {
-                        return (m_cur_lev.m_first == NULL);
-                    }
-                };
+    void Init(const Math::Algebra::Vector<N, Size> & dim,
+              const Energy::Neighbourhood<N, Int32> & nb) override;
 
-            private:
-                /** Node array. */
-                System::Collection::Array<1,Node> m_node_list;
-                /** Initial object indicators. */
-                const System::Collection::Array<N,LAB> *m_ilab;
-                /** Initial distance map. */
-                System::Collection::Array<N,Uint32> m_dmap;
-                
-                /** Forward (node -> grid) indexes. Used only in masked version. */
-                System::Collection::Array<1,Size> m_fw_idx;
+    void InitMask(const Math::Algebra::Vector<N, Size> & dim,
+                  const Energy::Neighbourhood<N, Int32> & nb,
+                  const System::Collection::IArrayMask<N> & mask) override;
 
-                /** Total flow */
-                TFLOW m_flow;
-                /** Current stage. Used to check correct method calling order. */
-                Uint8 m_stage;
+    void SetArcCap(Size node, Size arc, TCAP cap) override;
 
-                /** Active nodes for SB, SF, TB and TF trees. */
-                ActiveNodeQueue m_bp[4];
-                /** Queue of orphans */
-                Queue m_q_orphan;
+    void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk) override;
 
-		    public:
-			    /** Constructor */
-			    DanekLabels()
-                    : m_ilab(NULL), m_stage(0)
-			    {}
+    TFLOW FindMaxFlow() override;
 
-			    /** Destructor */
-			    virtual ~DanekLabels()
-			    {}
+    Origin NodeOrigin(Size node) const override;
 
-                virtual void Init(const Math::Algebra::Vector<N,Size> &dim, 
-                    const Energy::Neighbourhood<N,Int32> &nb);
+    void Dispose() override;
 
-                virtual void InitMask(const Math::Algebra::Vector<N,Size> &dim, 
-                    const Energy::Neighbourhood<N,Int32> &nb,
-                    const System::Collection::IArrayMask<N> &mask);
-
-		        virtual void SetArcCap(Size node, Size arc, TCAP cap);
-
-			    virtual void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk);
-
-			    virtual TFLOW FindMaxFlow();
-
-			    virtual Origin NodeOrigin(Size node) const;
-
-			    virtual void Dispose();
-
-                /** Set initial object indicators. 
+    /** Set initial object indicators. 
                 
                     @warning Only pointer to the object is taken, so this object
                         should not be deleted before or during the computation!
                 */
-                void SetInitialLabelingRef(const System::Collection::Array<N,LAB> &ilab);
+    void SetInitialLabelingRef(const System::Collection::Array<N, LAB> & ilab);
 
-                /** Get the final object indicator for a given node. */
-                LAB NodeLabel(Size node) const;
+    /** Get the final object indicator for a given node. */
+    LAB NodeLabel(Size node) const;
 
-            private:
-                /** Grow source and sink trees until an augmenting path is found. */
-                bool GrowTrees(Node *n, Node *&n_src, Node *&n_snk, Size &arc);
+  private:
+    /** Grow source and sink trees until an augmenting path is found. */
+    bool GrowTrees(Node * n, Node *& n_src, Node *& n_snk, Size & arc);
 
-                /** Augment flow across given path. */
-                void Augment(Node *n_src, Node *n_snk, Size arc);
+    /** Augment flow across given path. */
+    void Augment(Node * n_src, Node * n_snk, Size arc);
 
-                /** Adopt orphan nodes. 
+    /** Adopt orphan nodes. 
                 
                     @param[in] timestamp Current timestamp.
                 */
-                void AdoptOrphans();
+    void AdoptOrphans();
 
-                /** Add node to the queue of orphan nodes.
+    /** Add node to the queue of orphan nodes.
                     
                     @param[in] node Node to be added.
                 */
-                void AddToOrphans(Node *node)
-                {
-                    if (node->m_next_orphan == NULL)
-                    {                    
-                        if (m_q_orphan.m_last != NULL)
-                        {
-                            m_q_orphan.m_last->m_next_orphan = node;
-                        }
-                        else
-                        {
-                            m_q_orphan.m_first = node;
-                        }
-                        m_q_orphan.m_last = node;
-                        node->m_next_orphan = node; // Mark as orphan
-                    }
-                }
+    void AddToOrphans(Node * node)
+    {
+        if (node->m_next_orphan == nullptr)
+        {
+            if (m_q_orphan.m_last != nullptr)
+            {
+                m_q_orphan.m_last->m_next_orphan = node;
+            }
+            else
+            {
+                m_q_orphan.m_first = node;
+            }
+            m_q_orphan.m_last = node;
+            node->m_next_orphan = node; // Mark as orphan
+        }
+    }
 
-                /** Add node to its bucket priority queue. */
-                void EnqueueNode(Node *n)
-                {
-                    m_bp[n->m_tag].PushNode(n);
-                }
+    /** Add node to its bucket priority queue. */
+    void EnqueueNode(Node * n)
+    {
+        m_bp[n->m_tag].PushNode(n);
+    }
 
-                /** Remove node from its bucket priority queue. */
-                void DequeueNode(Node *n)
-                {
-                    m_bp[n->m_tag].RemoveNode(n);
-                }
+    /** Remove node from its bucket priority queue. */
+    void DequeueNode(Node * n)
+    {
+        m_bp[n->m_tag].RemoveNode(n);
+    }
 
-                /** Get arc capacity. */
-                TCAP& ArcCap(Node *n, Size arc)
-                {
-                    return m_arc_cap[(n - m_node_list.Begin()) * m_nb.Elements() + arc];
-                }
+    /** Get arc capacity. */
+    TCAP & ArcCap(Node * n, Size arc)
+    {
+        return m_arc_cap[(n - m_node_list.Begin()) * m_nb.Elements() + arc];
+    }
 
-                /** Get parent node. */
-                Node *ParentNode(Node *n)
-                {
-                    if (MASK)
-                    {
-                        return m_node_list.Begin() + m_bw_idx[m_fw_idx[n - m_node_list.Begin()] + 
-                            m_n_ofs[n->m_parent_arc]];
-                    }
-                    else
-                    {
-                        return n + m_n_ofs[n->m_parent_arc];
-                    }
-                }
+    /** Get parent node. */
+    Node * ParentNode(Node * n)
+    {
+        if (MASK)
+        {
+            return m_node_list.Begin() + m_bw_idx[m_fw_idx[n - m_node_list.Begin()] +
+                                                  m_n_ofs[n->m_parent_arc]];
+        }
+        else
+        {
+            return n + m_n_ofs[n->m_parent_arc];
+        }
+    }
 
-                /** Get head node of given arc. 
+    /** Get head node of given arc. 
                     
                     @param[in] n Pointer to the node. Used only in non-mask verison.
                     @param[in] nidx Grid index of the node (cached). Used only in 
                         masked version.
                     @param[in] arc Arc index.
                 */
-                Node *Head(Node *n, Size nidx, Size arc)
-                {
-                    if (MASK)
-                    {
-                        return m_node_list.Begin() + m_bw_idx[nidx + m_n_ofs[arc]];
-                    }
-                    else
-                    {
-                        return n + m_n_ofs[arc];
-                    }
-                }
-            };
+    Node * Head(Node * n, Size nidx, Size arc)
+    {
+        if (MASK)
+        {
+            return m_node_list.Begin() + m_bw_idx[nidx + m_n_ofs[arc]];
         }
-	}
+        else
+        {
+            return n + m_n_ofs[arc];
+        }
+    }
+};
 }
+}
+} // namespace Gc::Flow::Grid
 
 #endif

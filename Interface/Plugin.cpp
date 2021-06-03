@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,18 +13,18 @@
 namespace iseg { namespace plugin {
 
 namespace {
-std::vector<Plugin*> _addons;
+std::vector<Plugin*> addons;
 }
 
-std::vector<Plugin*> PluginRegistry::registered_plugins() { return _addons; }
+std::vector<Plugin*> PluginRegistry::RegisteredPlugins() { return addons; }
 
-Plugin::Plugin() { _addons.push_back(this); }
+Plugin::Plugin() { addons.push_back(this); }
 
-Plugin::~Plugin() {}
 
-void Plugin::install_slice_handler(SlicesHandlerInterface* slice_handler)
+
+void Plugin::InstallSliceHandler(SlicesHandlerInterface* slice_handler)
 {
-	_slice_handler = slice_handler;
+	m_SliceHandler = slice_handler;
 }
 
 }} // namespace iseg::plugin

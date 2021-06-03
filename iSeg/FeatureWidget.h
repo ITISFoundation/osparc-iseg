@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,7 +16,7 @@
 
 #include "Core/ImageForestingTransform.h"
 
-#include <qlabel.h>
+#include <QLabel>
 
 namespace iseg {
 
@@ -24,51 +24,50 @@ class FeatureWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	FeatureWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	void init() override;
-	void newloaded() override;
+	FeatureWidget(SlicesHandler* hand3D);
+	void Init() override;
+	void NewLoaded() override;
 	std::string GetName() override { return std::string("Feature"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("feature.png")).ascii()); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("feature.png"))); }
 
 private:
-	void on_slicenr_changed() override;
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_moved(Point p) override;
-	void on_mouse_released(Point p) override;
+	void OnSlicenrChanged() override;
+	void OnMouseClicked(Point p) override;
+	void OnMouseMoved(Point p) override;
+	void OnMouseReleased(Point p) override;
 
-	bool selecting;
-	std::vector<Point> dynamic;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
+	bool m_Selecting;
+	std::vector<Point> m_Dynamic;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
 
-	QLabel* lb_map;
-	QLabel* lb_av;
-	QLabel* lb_stddev;
-	QLabel* lb_min;
-	QLabel* lb_max;
-	QLabel* lb_pt;
-	QLabel* lb_tissue;
-	QLabel* lb_grey;
-	QLabel* lb_map_value;
-	QLabel* lb_av_value;
-	QLabel* lb_stddev_value;
-	QLabel* lb_min_value;
-	QLabel* lb_max_value;
-	QLabel* lb_pt_value;
-	QLabel* lb_grey_value;
-	QLabel* lb_work_map_value;
-	QLabel* lb_work_av_value;
-	QLabel* lb_work_stddev_value;
-	QLabel* lb_work_min_value;
-	QLabel* lb_work_max_value;
-	QLabel* lb_work_pt_value;
-	QLabel* lb_work_grey_value;
-	QLabel* lb_tissuename;
-	QLabel* lb_dummy;
+	QLabel* m_LbMap;
+	QLabel* m_LbAv;
+	QLabel* m_LbStddev;
+	QLabel* m_LbMin;
+	QLabel* m_LbMax;
+	QLabel* m_LbPt;
+	QLabel* m_LbTissue;
+	QLabel* m_LbGrey;
+	QLabel* m_LbMapValue;
+	QLabel* m_LbAvValue;
+	QLabel* m_LbStddevValue;
+	QLabel* m_LbMinValue;
+	QLabel* m_LbMaxValue;
+	QLabel* m_LbPtValue;
+	QLabel* m_LbGreyValue;
+	QLabel* m_LbWorkMapValue;
+	QLabel* m_LbWorkAvValue;
+	QLabel* m_LbWorkStddevValue;
+	QLabel* m_LbWorkMinValue;
+	QLabel* m_LbWorkMaxValue;
+	QLabel* m_LbWorkPtValue;
+	QLabel* m_LbWorkGreyValue;
+	QLabel* m_LbTissuename;
+	QLabel* m_LbDummy;
 
-	Point pstart;
+	Point m_Pstart;
 };
 
 } // namespace iseg

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -12,135 +12,81 @@
 #include "InterpolationWidget.h"
 #include "SlicesHandler.h"
 
+#include "Interface/PropertyWidget.h"
+
 #include "Data/BrushInteraction.h"
 
-#include <q3vbox.h>
-#include <qbuttongroup.h>
-#include <qcheckbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qradiobutton.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QHBoxLayout>
 
 #include <algorithm>
+#include <array>
 
 namespace iseg {
 
-InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
-		const char* name, Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), handler3D(hand3D)
+InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
+		: m_Handler3D(hand3D)
 {
 	setToolTip(Format("Interpolate/extrapolate between segmented slices."));
 
-	brush = nullptr;
+	m_Nrslices = m_Handler3D->NumSlices();
 
-	nrslices = handler3D->num_slices();
+	auto group = PropertyGroup::Create("Settings");
 
-	hboxoverall = new Q3HBox(this);
-	hboxoverall->setMargin(8);
-	vboxmethods = new Q3VBox(hboxoverall);
-	vboxdataselect = new Q3VBox(hboxoverall);
-	vboxparams = new Q3VBox(hboxoverall);
-	vboxexecute = new Q3VBox(hboxoverall);
+	m_Modegroup = group->Add("Mode", PropertyEnum::Create({"Interpolation", "Extrapolation", "Batch Interp."}, 0));
+	m_Modegroup->SetDescription("Mode");
+	m_Modegroup->SetToolTip("Select the interpolation mode.");
 
-	// Methods
-	vboxmethods->layout()->setAlignment(Qt::AlignTop);
-	rb_inter = new QRadioButton(QString("Interpolation"), vboxmethods);
-	rb_extra = new QRadioButton(QString("Extrapolation"), vboxmethods);
-	rb_batchinter = new QRadioButton(QString("Batch Interpol."), vboxmethods);
-	rb_batchinter->setToolTip(Format(
-			"Select the stride of (distance between) segmented slices and the "
-			"start slice to batch segment multiple slices."));
-	modegroup = new QButtonGroup(this);
-	modegroup->insert(rb_inter);
-	modegroup->insert(rb_extra);
-	modegroup->insert(rb_batchinter);
-	rb_inter->setChecked(TRUE);
+	m_Sourcegroup = group->Add("Input", PropertyEnum::Create({"Selected Tissue", "All Tissues", "Target"}, 0));
+	m_Sourcegroup->SetDescription("Input Image");
+	m_Sourcegroup->SetItemToolTip(kTissue, "Interpolate currently selected tissue.");
+	m_Sourcegroup->SetItemToolTip(kTissueAll, "Interpolate all tissue at once (not available for extrapolation).");
+	m_Sourcegroup->SetItemToolTip(kWork, "Interpolat Target image.");
 
-	// Data selection
-	vboxdataselect->layout()->setAlignment(Qt::AlignTop);
-	rb_tissue = new QRadioButton(QString("Selected Tissue"), vboxdataselect);
-	rb_tissue->setToolTip(Format(
-			"Works on the tissue distribution of the currently selected tissue."));
-	rb_tissueall = new QRadioButton(QString("All Tissues"), vboxdataselect);
-	rb_tissueall->setToolTip(Format(
-			"Works on all tissue at once (not available for extrapolation)."));
-	rb_work = new QRadioButton(QString("TargetPict"), vboxdataselect);
-	rb_work->setToolTip(Format("Works on the Target image."));
+	auto extrapol_group = PropertyGroup::Create("Extrapolation Settings");
 
-	sourcegroup = new QButtonGroup(this);
-	sourcegroup->insert(rb_tissue);
-	sourcegroup->insert(rb_tissueall);
-	sourcegroup->insert(rb_work);
-	rb_tissue->setChecked(TRUE);
+	m_SbSlicenr = group->Add("TargetSlice", PropertyInt::Create(1, 1, m_Nrslices));
+	m_SbSlicenr->SetDescription("Target Slice");
+	m_SbSlicenr->SetToolTip("Set the slice index where the Tissue/Target distribution will be extrapolated.");
 
-	// Parameters
-	vboxparams->layout()->setAlignment(Qt::AlignTop);
+	auto batch_group = PropertyGroup::Create("Batch Settings");
 
-	hboxextra = new Q3HBox(vboxparams);
-	txt_slicenr = new QLabel("Target Slice: ", hboxextra);
-	sb_slicenr = new QSpinBox(1, nrslices, 1, hboxextra);
-	sb_slicenr->setValue(1);
-	sb_slicenr->setToolTip(Format("Set the slice index where the Tissue/Target "
-																"distribution will be extrapolated."));
-
-	hboxbatch = new Q3HBox(vboxparams);
-	txt_batchstride = new QLabel("Stride: ", hboxbatch);
-	sb_batchstride = new QSpinBox(2, nrslices - 1, 1, hboxbatch);
-	sb_batchstride->setValue(2);
-	sb_batchstride->setToolTip(Format(
+	m_SbBatchstride = group->Add("Stride", PropertyInt::Create(2, 2, m_Nrslices - 1));
+	m_SbBatchstride->SetDescription("Stride");
+	m_SbBatchstride->SetToolTip(
 			"The stride is the distance between segmented slices. For example, "
 			"you may segment every fifth slice (stride=5), then interpolate in "
-			"between."));
+			"between.");
 
-	cb_connectedshapebased = new QCheckBox(QString("Connected Shape-Based"), vboxparams);
-	cb_connectedshapebased->setToolTip(Format(
+	m_CbConnectedshapebased = group->Add("ShapeBased", PropertyBool::Create(false));
+	m_CbConnectedshapebased->SetDescription("Connected Shape-Based");
+	m_CbConnectedshapebased->SetToolTip(
 			"Align corresponding foreground objects by their center of mass, "
-			"to ensure shape-based interpolation connects these objects"));
+			"to ensure shape-based interpolation connects these objects");
 
-	cb_medianset = new QCheckBox(QString("Median Set"), vboxparams);
-	cb_medianset->setChecked(false);
-	cb_medianset->setToolTip(Format(
+	m_CbMedianset = group->Add("MedianSet", PropertyBool::Create(false));
+	m_CbMedianset->SetDescription("Median Set");
+	m_CbMedianset->SetToolTip(
 			"If Median Set is ON, the algorithm described in [1] "
 			"is employed. Otherwise shape-based interpolation [2] is used. "
-			"Multiple "
-			"objects (with "
-			"different gray values or tissue assignments, respectively) can be "
-			"interpolated jointly "
-			"without introducing gaps or overlap.<br>"
-			"[1] S. Beucher. Sets, partitions and functions interpolations. "
-			"1998.<br>"
-			"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of "
-			"multidimensional objects. 1990."));
-	rb_4connectivity = new QRadioButton(QString("4-connectivity"), vboxparams);
-	rb_8connectivity = new QRadioButton(QString("8-connectivity"), vboxparams);
-	connectivitygroup = new QButtonGroup(this);
-	connectivitygroup->insert(rb_4connectivity);
-	connectivitygroup->insert(rb_8connectivity);
-	rb_8connectivity->setChecked(TRUE);
+			"Multiple objects (with different gray values or tissue assignments, "
+			"respectively) can be interpolated jointly without introducing gaps or overlap."
+			"<br>"
+			"[1] S. Beucher. Sets, partitions and functions interpolations. 1998.<br>"
+			"[2] S. P. Raya and J. K. Udupa. Shape-based interpolation of multidimensional objects. 1990.");
 
-	cb_brush = new QCheckBox("Enable brush");
-	cb_brush->setChecked(false);
+	m_Connectivitygroup = group->Add("Connectivity", PropertyEnum::Create({"City-Block", "Chess"}, 1));
+	m_Connectivitygroup->SetItemToolTip(kCityBlock, "Connectivity includes face neighbors");
+	m_Connectivitygroup->SetItemToolTip(kCityBlock, "Connectivity includes vertex neighbors");
 
-	brush_radius = new QLineEdit(QString::number(1));
-	brush_radius->setValidator(new QDoubleValidator);
-	brush_radius->setToolTip(Format("Set the radius of the brush in physical units, i.e. typically mm."));
-	
-	auto brush_param = new QWidget(vboxparams);
-	auto brush_layout = new QHBoxLayout;
-	brush_layout->addWidget(cb_brush);
-	brush_layout->addWidget(new QLabel("Brush radius"));
-	brush_layout->addWidget(brush_radius);
-	brush_param->setLayout(brush_layout);
+	m_CbBrush = group->Add("EnableBrush", PropertyBool::Create(false));
+	m_CbBrush->SetDescription("Enable Brush");
+
+	m_BrushRadius = group->Add("BrushRadius", PropertyReal::Create(1.0, 0.0));
+	m_BrushRadius->SetToolTip("Set the radius of the brush in physical units, i.e. typically mm.");
 
 	// Execute
-	vboxexecute->layout()->setAlignment(Qt::AlignTop);
-	pushstart = new QPushButton("Start Slice", vboxexecute);
-	pushstart->setToolTip(Format(
+	auto push_start = group->Add("StartSlice", PropertyButton::Create([this]() { StartslicePressed(); }, "Start Slice"));
+	push_start->SetToolTip(
 			"Interpolation/extrapolation is based on 2 slices. Click start to "
 			"select the first slice and Execute to select the second slice. Interpolation "
 			"automatically interpolates the intermediate slices."
@@ -148,393 +94,363 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D, QWidget* parent,
 			"Note:<br>The result is displayed in the Target but is not directly "
 			"added to the tissue distribution. "
 			"The user can add it with Adder function. The 'All Tissues' option "
-			"adds the result directly to the tissue."));
-	pushexec = new QPushButton("Execute", vboxexecute);
-	pushexec->setEnabled(false);
+			"adds the result directly to the tissue.");
 
-	vboxmethods->setMargin(5);
-	vboxdataselect->setMargin(5);
-	vboxparams->setMargin(5);
-	vboxexecute->setMargin(5);
-	vboxmethods->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	vboxmethods->setLineWidth(1);
+	m_Pushexec = group->Add("Execute", PropertyButton::Create([this]() { Execute(); }));
+	m_Pushexec->SetEnabled(false);
 
-	vboxmethods->setFixedSize(vboxparams->sizeHint());
-	vboxdataselect->setFixedSize(vboxparams->sizeHint());
-	vboxparams->setFixedSize(vboxparams->sizeHint());
-	vboxexecute->setFixedSize(vboxparams->sizeHint());
+	// create signal-slot connections
+	m_CbBrush->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			MethodChanged();
+	});
+	m_BrushRadius->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			BrushChanged();
+	});
 
-	QObject::connect(brush_radius, SIGNAL(textEdited(const QString &)), this, SLOT(brush_changed()));
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(brush_changed()));
+	m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			BrushChanged();
+	});
 
-	QObject::connect(pushstart, SIGNAL(clicked()), this, SLOT(startslice_pressed()));
-	QObject::connect(cb_medianset, SIGNAL(stateChanged(int)), this, SLOT(method_changed()));
-	QObject::connect(cb_connectedshapebased, SIGNAL(stateChanged(int)), this, SLOT(method_changed()));
-	QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this, SLOT(method_changed()));
-	QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this, SLOT(source_changed()));
+	m_Sourcegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			SourceChanged();
+	});
 
-	QObject::connect(pushexec, SIGNAL(clicked()), this, SLOT(execute()));
+	m_CbConnectedshapebased->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			if (m_CbConnectedshapebased->Value())
+				m_CbMedianset->SetValue(false);
+			MethodChanged();
+		}
+	});
+	m_CbMedianset->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			MethodChanged();
+	});
+	m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			MethodChanged();
+	});
 
-	method_changed();
-	source_changed();
+	// add widget and layout
+	auto property_view = new PropertyWidget(group);
+	//property_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
+	setLayout(layout);
+
+	MethodChanged();
+	SourceChanged();
 }
 
-InterpolationWidget::~InterpolationWidget()
-{
-	delete sourcegroup;
-	delete modegroup;
-	delete hboxoverall;
-}
+InterpolationWidget::~InterpolationWidget() {}
 
-QSize InterpolationWidget::sizeHint() const { return hboxoverall->sizeHint(); }
-
-void InterpolationWidget::init()
+void InterpolationWidget::Init()
 {
-	if (handler3D->num_slices() != nrslices)
+	if (m_Handler3D->NumSlices() != m_Nrslices)
 	{
-		nrslices = handler3D->num_slices();
-		sb_slicenr->setMaxValue((int)nrslices);
-		sb_batchstride->setMaxValue((int)nrslices - 1);
-		pushexec->setEnabled(false);
+		m_Nrslices = m_Handler3D->NumSlices();
+		m_SbSlicenr->SetMaximum((int)m_Nrslices);
+		m_SbBatchstride->SetMaximum((int)m_Nrslices - 1);
+		m_Pushexec->SetEnabled(false);
 	}
 
-	if (!brush)
+	if (!m_Brush)
 	{
-		brush = new BrushInteraction(handler3D,
-				[this](iseg::DataSelection sel) { begin_datachange(sel, this); },
-				[this](iseg::EndUndoAction a) { end_datachange(this, a); },
-				[this](std::vector<Point>* vp) { vpdyn_changed(vp);} );
-		brush_changed();
+		m_Brush = new BrushInteraction(
+				m_Handler3D,
+				[this](DataSelection sel) { emit BeginDatachange(sel, this); },
+				[this](iseg::eEndUndoAction a) { emit EndDatachange(this, a); },
+				[this](std::vector<Point>* vp) { emit VpdynChanged(vp); });
+		BrushChanged();
 	}
 	else
 	{
-		brush->init(handler3D);
+		m_Brush->Init(m_Handler3D);
 	}
 }
 
-void InterpolationWidget::newloaded() {}
+void InterpolationWidget::NewLoaded() {}
 
-void InterpolationWidget::on_slicenr_changed() {}
+void InterpolationWidget::OnSlicenrChanged() {}
 
-void InterpolationWidget::on_tissuenr_changed(int tissuetype)
+void InterpolationWidget::OnTissuenrChanged(int tissuetype)
 {
-	tissuenr = (tissues_size_t)tissuetype + 1;
+	m_Tissuenr = (tissues_size_t)tissuetype + 1;
 }
 
-void InterpolationWidget::handler3D_changed()
+void InterpolationWidget::Handler3DChanged()
 {
-	if (handler3D->num_slices() != nrslices)
+	if (m_Handler3D->NumSlices() != m_Nrslices)
 	{
-		nrslices = handler3D->num_slices();
-		sb_slicenr->setMaxValue((int)nrslices);
-		sb_batchstride->setMaxValue((int)nrslices - 1);
+		m_Nrslices = m_Handler3D->NumSlices();
+		m_SbSlicenr->SetMaximum((int)m_Nrslices);
+		m_SbBatchstride->SetMaximum((int)m_Nrslices - 1);
 	}
-	pushexec->setEnabled(false);
+	m_Pushexec->SetEnabled(false);
 }
 
-void InterpolationWidget::startslice_pressed()
+void InterpolationWidget::StartslicePressed()
 {
-	startnr = handler3D->active_slice();
-	pushexec->setEnabled(true);
+	m_Startnr = m_Handler3D->ActiveSlice();
+	m_Pushexec->SetEnabled(true);
 }
 
-void InterpolationWidget::on_mouse_clicked(Point p)
+void InterpolationWidget::OnMouseClicked(Point p)
 {
-	if (!cb_brush->isChecked())
+	if (!m_CbBrush->Value())
 	{
-		WidgetInterface::on_mouse_clicked(p);
+		WidgetInterface::OnMouseClicked(p);
 	}
-	else if (rb_work->isChecked() || rb_tissue->isChecked())
+	else if (m_Sourcegroup->Value() != eSourceType::kTissueAll)
 	{
-		brush->set_tissue_value(tissuenr);
-		brush->on_mouse_clicked(p);
-	}
-}
-
-void InterpolationWidget::on_mouse_released(Point p)
-{
-	if (!cb_brush->isChecked())
-	{
-		WidgetInterface::on_mouse_released(p);
-	}
-	else if (rb_work->isChecked() || rb_tissue->isChecked())
-	{
-		brush->on_mouse_released(p);
+		m_Brush->SetTissueValue(m_Tissuenr);
+		m_Brush->OnMouseClicked(p);
 	}
 }
 
-void InterpolationWidget::on_mouse_moved(Point p)
+void InterpolationWidget::OnMouseReleased(Point p)
 {
-	if (!cb_brush->isChecked())
+	if (!m_CbBrush->Value())
 	{
-		WidgetInterface::on_mouse_moved(p);
+		WidgetInterface::OnMouseReleased(p);
 	}
-	else if (rb_work->isChecked() || rb_tissue->isChecked())
+	else if (m_Sourcegroup->Value() != eSourceType::kTissueAll)
 	{
-		brush->on_mouse_moved(p);
+		m_Brush->OnMouseReleased(p);
 	}
 }
 
-void InterpolationWidget::execute()
+void InterpolationWidget::OnMouseMoved(Point p)
 {
-	unsigned short batchstride = (unsigned short)sb_batchstride->value();
-	bool const connected = cb_connectedshapebased->isVisible() && cb_connectedshapebased->isChecked();
-
-	unsigned short current = handler3D->active_slice();
-	if (current != startnr)
+	if (!m_CbBrush->Value())
 	{
-		iseg::DataSelection dataSelection;
-		if (rb_extra->isChecked())
+		WidgetInterface::OnMouseMoved(p);
+	}
+	else if (m_Sourcegroup->Value() != eSourceType::kTissueAll)
+	{
+		m_Brush->OnMouseMoved(p);
+	}
+}
+
+void InterpolationWidget::Execute()
+{
+	const auto batchstride = static_cast<unsigned short>(m_SbBatchstride->Value());
+	const bool connected = m_CbConnectedshapebased->Visible() && m_CbConnectedshapebased->Value();
+	const bool chess_connectivity = (m_Connectivitygroup->Value() == eConnectivityType::kChess);
+
+	unsigned short current = m_Handler3D->ActiveSlice();
+	if (current != m_Startnr)
+	{
+		DataSelection data_selection;
+		if (m_Modegroup->Value() == eModeType::kExtrapolation)
 		{
-			dataSelection.sliceNr = (unsigned short)sb_slicenr->value() - 1;
-			dataSelection.work = true;
-			emit begin_datachange(dataSelection, this);
-			if (rb_work->isChecked())
+			data_selection.sliceNr = (unsigned short)m_SbSlicenr->Value() - 1;
+			data_selection.work = true;
+			emit BeginDatachange(data_selection, this);
+			if (m_Sourcegroup->Value()==eSourceType::kWork)
 			{
-				handler3D->extrapolatework(startnr, current, (unsigned short)sb_slicenr->value() - 1);
+				m_Handler3D->Extrapolatework(m_Startnr, current, (unsigned short)m_SbSlicenr->Value() - 1);
 			}
 			else
 			{
-				handler3D->extrapolatetissue(startnr, current, (unsigned short)sb_slicenr->value() - 1, tissuenr);
+				m_Handler3D->Extrapolatetissue(m_Startnr, current, (unsigned short)m_SbSlicenr->Value() - 1, m_Tissuenr);
 			}
-			emit end_datachange(this);
+			emit EndDatachange(this);
 		}
-		else if (rb_inter->isChecked())
+		else if (m_Modegroup->Value() == eModeType::kInterpolation)
 		{
-			dataSelection.allSlices = true;
+			data_selection.allSlices = true;
 
-			if (rb_work->isChecked())
+			if (m_Sourcegroup->Value()==eSourceType::kWork)
 			{
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
-				if (cb_medianset->isChecked())
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
+				if (m_CbMedianset->Value())
 				{
-					handler3D->interpolateworkgrey_medianset(startnr, current, rb_8connectivity->isChecked());
+					m_Handler3D->InterpolateworkgreyMedianset(m_Startnr, current, chess_connectivity);
 				}
 				else
 				{
-					handler3D->interpolateworkgrey(startnr, current, connected);
+					m_Handler3D->Interpolateworkgrey(m_Startnr, current, connected);
 				}
 			}
-			else if (rb_tissue->isChecked())
+			else if (m_Sourcegroup->Value()==eSourceType::kTissue)
 			{
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
-				if (cb_medianset->isChecked())
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
+				if (m_CbMedianset->Value())
 				{
-					handler3D->interpolatetissue_medianset(startnr, current, tissuenr, rb_8connectivity->isChecked());
+					m_Handler3D->InterpolatetissueMedianset(m_Startnr, current, m_Tissuenr, chess_connectivity);
 				}
 				else
 				{
-					handler3D->interpolatetissue(startnr, current, tissuenr, connected);
+					m_Handler3D->Interpolatetissue(m_Startnr, current, m_Tissuenr, connected);
 				}
 			}
-			else if (rb_tissueall->isChecked())
+			else if (m_Sourcegroup->Value() == eSourceType::kTissueAll)
 			{
-				dataSelection.tissues = true;
-				emit begin_datachange(dataSelection, this);
-				if (cb_medianset->isChecked())
+				data_selection.tissues = true;
+				emit BeginDatachange(data_selection, this);
+				if (m_CbMedianset->Value())
 				{
-					handler3D->interpolatetissuegrey_medianset(startnr, current, rb_8connectivity->isChecked());
+					m_Handler3D->InterpolatetissuegreyMedianset(m_Startnr, current, chess_connectivity);
 				}
 				else
 				{
-					handler3D->interpolatetissuegrey(startnr, current);
+					m_Handler3D->Interpolatetissuegrey(m_Startnr, current);
 				}
 			}
-			emit end_datachange(this);
+			emit EndDatachange(this);
 		}
-		else if (rb_batchinter->isChecked())
+		else if (m_Modegroup->Value() == eModeType::kBatchInterpolation)
 		{
-			dataSelection.allSlices = true;
+			data_selection.allSlices = true;
 
-			if (rb_work->isChecked())
+			if (m_Sourcegroup->Value()==eSourceType::kWork)
 			{
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
 
-				if (cb_medianset->isChecked())
+				if (m_CbMedianset->Value())
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolateworkgrey_medianset(batchstart, batchstart + batchstride, rb_8connectivity->isChecked());
+						m_Handler3D->InterpolateworkgreyMedianset(batchstart, batchstart + batchstride, chess_connectivity);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolateworkgrey_medianset(batchstart - batchstride, current, rb_8connectivity->isChecked());
+						m_Handler3D->InterpolateworkgreyMedianset(batchstart - batchstride, current, chess_connectivity);
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolateworkgrey(batchstart, batchstart + batchstride, connected);
+						m_Handler3D->Interpolateworkgrey(batchstart, batchstart + batchstride, connected);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolateworkgrey(batchstart - batchstride, current, connected);
+						m_Handler3D->Interpolateworkgrey(batchstart - batchstride, current, connected);
 					}
 				}
 			}
-			else if (rb_tissue->isChecked())
+			else if (m_Sourcegroup->Value()==eSourceType::kTissue)
 			{
-				dataSelection.work = true;
-				emit begin_datachange(dataSelection, this);
+				data_selection.work = true;
+				emit BeginDatachange(data_selection, this);
 
-				if (cb_medianset->isChecked())
+				if (m_CbMedianset->Value())
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolatetissue_medianset(batchstart, batchstart + batchstride, tissuenr, rb_8connectivity->isChecked());
+						m_Handler3D->InterpolatetissueMedianset(batchstart, batchstart + batchstride, m_Tissuenr, chess_connectivity);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissue_medianset(batchstart - batchstride, current, tissuenr, rb_8connectivity->isChecked());
+						m_Handler3D->InterpolatetissueMedianset(batchstart - batchstride, current, m_Tissuenr, chess_connectivity);
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolatetissue(batchstart, batchstart + batchstride, tissuenr, connected);
+						m_Handler3D->Interpolatetissue(batchstart, batchstart + batchstride, m_Tissuenr, connected);
 					}
 					// Last batch with smaller stride
 					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissue(batchstart - batchstride, current, tissuenr, connected);
+						m_Handler3D->Interpolatetissue(batchstart - batchstride, current, m_Tissuenr, connected);
 					}
 				}
 			}
-			else if (rb_tissueall->isChecked())
+			else if (m_Sourcegroup->Value() == eSourceType::kTissueAll)
 			{
-				dataSelection.tissues = true;
-				emit begin_datachange(dataSelection, this);
+				data_selection.tissues = true;
+				emit BeginDatachange(data_selection, this);
 
-				if (cb_medianset->isChecked())
+				if (m_CbMedianset->Value())
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolatetissuegrey_medianset(batchstart, batchstart + batchstride,
-								rb_8connectivity->isChecked());
+						m_Handler3D->InterpolatetissuegreyMedianset(batchstart, batchstart + batchstride, chess_connectivity);
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-							current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissuegrey_medianset(batchstart - batchstride, current, rb_8connectivity->isChecked());
+						m_Handler3D->InterpolatetissuegreyMedianset(batchstart - batchstride, current, chess_connectivity);
 					}
 				}
 				else
 				{
 					unsigned short batchstart;
-					for (batchstart = startnr;
-							 batchstart <= current - batchstride;
-							 batchstart += batchstride)
+					for (batchstart = m_Startnr; batchstart <= current - batchstride; batchstart += batchstride)
 					{
-						handler3D->interpolatetissuegrey(batchstart, batchstart + batchstride);
+						m_Handler3D->Interpolatetissuegrey(batchstart, batchstart + batchstride);
 					}
 					// Last batch with smaller stride
-					if (batchstart > current &&
-							current - (batchstart - batchstride) >= 2)
+					if (batchstart > current && current - (batchstart - batchstride) >= 2)
 					{
-						handler3D->interpolatetissuegrey(batchstart - batchstride, current);
+						m_Handler3D->Interpolatetissuegrey(batchstart - batchstride, current);
 					}
 				}
 			}
-			emit end_datachange(this);
+			emit EndDatachange(this);
 		}
-		pushexec->setEnabled(false);
+		m_Pushexec->SetEnabled(false);
 	}
 }
 
-void InterpolationWidget::brush_changed()
+void InterpolationWidget::BrushChanged()
 {
-	if (brush)
+	if (m_Brush)
 	{
-		brush->set_brush_target(rb_work->isChecked());
-		brush->set_radius(brush_radius->text().toDouble());
+		m_Brush->SetBrushTarget(m_Sourcegroup->Value()==eSourceType::kWork);
+		m_Brush->SetRadius(m_BrushRadius->Value());
 	}
 }
 
-void InterpolationWidget::method_changed()
+void InterpolationWidget::MethodChanged()
 {
-	if (rb_extra->isChecked())
+	m_SbSlicenr->SetVisible(m_Modegroup->Value() == eModeType::kExtrapolation);
+	m_SbBatchstride->SetVisible(m_Modegroup->Value() == eModeType::kBatchInterpolation);
+
+	m_CbConnectedshapebased->SetVisible(m_Modegroup->Value() == eModeType::kInterpolation);
+
+	m_CbMedianset->SetVisible(m_Modegroup->Value() != eModeType::kExtrapolation);
+	m_Connectivitygroup->SetVisible(m_CbMedianset->Value() && m_Modegroup->Value() != eModeType::kExtrapolation);
+
+	m_CbBrush->SetEnabled(m_Modegroup->Value() == eModeType::kInterpolation);
+	m_BrushRadius->SetEnabled(m_CbBrush->Value() && m_Modegroup->Value() == eModeType::kInterpolation);
+
+	if (m_Modegroup->Value() == eModeType::kExtrapolation && m_Sourcegroup->Value() == eSourceType::kTissueAll)
 	{
-		hboxextra->show();
-		hboxbatch->hide();
-		cb_medianset->hide();
-		cb_connectedshapebased->hide();
-		rb_4connectivity->hide();
-		rb_8connectivity->hide();
-		if (rb_tissueall->isChecked())
-		{
-			rb_tissue->setChecked(true);
-		}
-		rb_tissueall->setEnabled(false);
+		m_Sourcegroup->SetValue(eSourceType::kTissue);
 	}
-	else if (rb_inter->isChecked())
-	{
-		hboxextra->hide();
-		hboxbatch->hide();
-		rb_tissueall->setEnabled(true);
-		cb_medianset->show();
-		if (cb_medianset->isChecked())
-		{
-			cb_connectedshapebased->hide();
-			rb_4connectivity->show();
-			rb_8connectivity->show();
-		}
-		else
-		{
-			cb_connectedshapebased->setVisible(!rb_tissueall->isChecked());
-			rb_4connectivity->hide();
-			rb_8connectivity->hide();
-		}
-	}
-	else if (rb_batchinter->isChecked())
-	{
-		hboxextra->hide();
-		hboxbatch->show();
-		rb_tissueall->setEnabled(true);
-		cb_medianset->show();
-		if (cb_medianset->isChecked())
-		{
-			rb_4connectivity->show();
-			rb_8connectivity->show();
-		}
-		else
-		{
-			rb_4connectivity->hide();
-			rb_8connectivity->hide();
-		}
-	}
+	m_Sourcegroup->SetEnabled(eSourceType::kTissueAll, m_Modegroup->Value() != eModeType::kExtrapolation);
 }
 
-void InterpolationWidget::source_changed()
+void InterpolationWidget::SourceChanged()
 {
-	method_changed();
+	// MethodChanged(); // TODO, is everything updated as expected?
 
-	if (brush)
+	if (m_Brush)
 	{
-		brush->set_brush_target(rb_work->isChecked());
+		m_Brush->SetBrushTarget(m_Sourcegroup->Value()==eSourceType::kWork);
 	}
 }
 
@@ -543,29 +459,29 @@ FILE* InterpolationWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = sb_slicenr->value();
+		dummy = m_SbSlicenr->Value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_tissue->isChecked());
+		dummy = (int)(m_Sourcegroup->Value()==eSourceType::kTissue);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_work->isChecked());
+		dummy = (int)(m_Sourcegroup->Value()==eSourceType::kWork);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_inter->isChecked());
+		dummy = (int)(m_Modegroup->Value() == eModeType::kInterpolation);
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(rb_extra->isChecked());
+		dummy = (int)(m_Modegroup->Value() == eModeType::kExtrapolation);
 		fwrite(&(dummy), 1, sizeof(int), fp);
 		if (version >= 11)
 		{
-			dummy = (int)(rb_tissueall->isChecked());
+			dummy = (int)(m_Sourcegroup->Value() == eSourceType::kTissueAll);
 			fwrite(&(dummy), 1, sizeof(int), fp);
-			dummy = (int)(rb_batchinter->isChecked());
+			dummy = (int)(m_Modegroup->Value() == eModeType::kBatchInterpolation);
 			fwrite(&(dummy), 1, sizeof(int), fp);
 			if (version >= 12)
 			{
-				dummy = (int)(cb_medianset->isChecked());
+				dummy = (int)(m_CbMedianset->Value());
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(rb_4connectivity->isChecked());
+				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::kCityBlock);
 				fwrite(&(dummy), 1, sizeof(int), fp);
-				dummy = (int)(rb_8connectivity->isChecked());
+				dummy = (int)(m_Connectivitygroup->Value() == eConnectivityType::kChess);
 				fwrite(&(dummy), 1, sizeof(int), fp);
 			}
 		}
@@ -578,48 +494,43 @@ FILE* InterpolationWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject::disconnect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
-		QObject::disconnect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(source_changed()));
+		std::array<int, 3> source;
+		std::array<int, 3> mode;
+		int slicenr;
+		int medianset;
+		int cityblock, chessboard;
 
-		int dummy;
-		fread(&dummy, sizeof(int), 1, fp);
-		sb_slicenr->setValue(dummy);
-		fread(&dummy, sizeof(int), 1, fp);
-		rb_tissue->setChecked(dummy > 0);
-		fread(&dummy, sizeof(int), 1, fp);
-		rb_work->setChecked(dummy > 0);
-		fread(&dummy, sizeof(int), 1, fp);
-		rb_inter->setChecked(dummy > 0);
-		fread(&dummy, sizeof(int), 1, fp);
-		rb_extra->setChecked(dummy > 0);
+		fread(&slicenr, sizeof(int), 1, fp);
+		fread(&source[kTissue], sizeof(int), 1, fp);
+		fread(&source[kWork], sizeof(int), 1, fp);
+		fread(&mode[kInterpolation], sizeof(int), 1, fp);
+		fread(&mode[kExtrapolation], sizeof(int), 1, fp);
 		if (version >= 11)
 		{
-			fread(&dummy, sizeof(int), 1, fp);
-			rb_tissueall->setChecked(dummy > 0);
-			fread(&dummy, sizeof(int), 1, fp);
-			rb_batchinter->setChecked(dummy > 0);
+			fread(&source[kTissueAll], sizeof(int), 1, fp);
+			fread(&mode[kBatchInterpolation], sizeof(int), 1, fp);
 			if (version >= 12)
 			{
-				fread(&dummy, sizeof(int), 1, fp);
-				cb_medianset->setChecked(dummy > 0);
-				fread(&dummy, sizeof(int), 1, fp);
-				rb_4connectivity->setChecked(dummy > 0);
-				fread(&dummy, sizeof(int), 1, fp);
-				rb_8connectivity->setChecked(dummy > 0);
+				fread(&medianset, sizeof(int), 1, fp);
+				m_CbMedianset->SetValue(medianset > 0);
+				fread(&cityblock, sizeof(int), 1, fp);
+				fread(&chessboard, sizeof(int), 1, fp);
 			}
 		}
 
-		method_changed();
-		source_changed();
+		{
+			BlockPropertySignal mode_block(m_Modegroup);
+			BlockPropertySignal source_block(m_Sourcegroup);
+			m_SbSlicenr->SetValue(slicenr);
+			m_Sourcegroup->SetValue(source[kWork] ? kWork : (source[kTissue] ? kTissue : kTissueAll));
+			m_Modegroup->SetValue(mode[kInterpolation] ? kInterpolation : (mode[kExtrapolation] ? kExtrapolation : kBatchInterpolation));
+			m_Connectivitygroup->SetValue(cityblock ? kCityBlock : kChess);
+		}
 
-		QObject::connect(modegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(method_changed()));
-		QObject::connect(sourcegroup, SIGNAL(buttonClicked(int)), this,
-				SLOT(source_changed()));
+		MethodChanged();
+		SourceChanged();
 	}
 	return fp;
 }
 
-}// namespace iseg
+} // namespace iseg

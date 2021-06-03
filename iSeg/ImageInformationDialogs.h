@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,14 +14,13 @@
 
 #include <q3hbox.h>
 #include <q3vbox.h>
-#include <qdialog.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpushbutton.h>
-#include <qspinbox.h>
-#include <qwidget.h>
+#include <QDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPainter>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QWidget>
 
 namespace iseg {
 
@@ -31,100 +30,97 @@ class PixelResize : public QDialog
 {
 	Q_OBJECT
 public:
-	PixelResize(SlicesHandler* hand3D, QWidget* parent = 0,
-				const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~PixelResize() {}
-	Vec3 get_pixelsize();
+	PixelResize(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~PixelResize() override = default;
+	Vec3 GetPixelsize();
 
 private:
-	SlicesHandler* handler3D;
+	SlicesHandler* m_Handler3D;
 
-	QLineEdit* le_dx;
-	QLineEdit* le_dy;
-	QLineEdit* le_dz;
-	QLineEdit* le_lx;
-	QLineEdit* le_ly;
-	QLineEdit* le_lz;
+	QLineEdit* m_LeDx;
+	QLineEdit* m_LeDy;
+	QLineEdit* m_LeDz;
+	QLineEdit* m_LeLx;
+	QLineEdit* m_LeLy;
+	QLineEdit* m_LeLz;
 
-	QPushButton* pb_resize;
-	QPushButton* pb_close;
+	QPushButton* m_PbResize;
+	QPushButton* m_PbClose;
 
 private slots:
-	void dx_changed();
-	void dy_changed();
-	void dz_changed();
-	void lx_changed();
-	void ly_changed();
-	void lz_changed();
-	void resize_pressed();
+	void DxChanged();
+	void DyChanged();
+	void DzChanged();
+	void LxChanged();
+	void LyChanged();
+	void LzChanged();
+	void ResizePressed();
 };
 
 class DisplacementDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	DisplacementDialog(SlicesHandler* hand3D, QWidget* parent = 0,
-					   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~DisplacementDialog() {}
-	void return_displacement(float disp[3]);
+	DisplacementDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~DisplacementDialog() override = default;
+	void ReturnDisplacement(float disp[3]);
 
 private:
-	float displacement[3];
-	SlicesHandler* handler3D;
+	float m_Displacement[3];
+	SlicesHandler* m_Handler3D;
 
-	QLineEdit* le_dispx;
-	QLineEdit* le_dispy;
-	QLineEdit* le_dispz;
-	QPushButton* pb_set;
-	QPushButton* pb_close;
+	QLineEdit* m_LeDispx;
+	QLineEdit* m_LeDispy;
+	QLineEdit* m_LeDispz;
+	QPushButton* m_PbSet;
+	QPushButton* m_PbClose;
 
 private slots:
-	void dispx_changed();
-	void dispy_changed();
-	void dispz_changed();
-	void set_pressed();
+	void DispxChanged();
+	void DispyChanged();
+	void DispzChanged();
+	void SetPressed();
 };
 
 class RotationDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	RotationDialog(SlicesHandler* hand3D, QWidget* parent = 0,
-				   const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~RotationDialog();
-	void get_rotation(float r[3][3]);
+	RotationDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~RotationDialog() override;
+	void GetRotation(float r[3][3]);
 
 private:
-	float rotation[3][3];
-	SlicesHandler* handler3D;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3HBox* hbox3;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	Q3VBox* vbox4;
-	QLabel* lb_descr;
-	QLabel* lb_c1;
-	QLabel* lb_c2;
-	QLabel* lb_c3;
-	QLineEdit* le_r11;
-	QLineEdit* le_r12;
-	QLineEdit* le_r13;
-	QLineEdit* le_r21;
-	QLineEdit* le_r22;
-	QLineEdit* le_r23;
-	QLineEdit* le_r31;
-	QLineEdit* le_r32;
-	QLineEdit* le_r33;
-	QPushButton* pb_orthonorm;
-	QPushButton* pb_set;
-	QPushButton* pb_close;
+	float m_Rotation[3][3];
+	SlicesHandler* m_Handler3D;
+	Q3HBox* m_Hbox1;
+	Q3HBox* m_Hbox2;
+	Q3HBox* m_Hbox3;
+	Q3VBox* m_Vbox1;
+	Q3VBox* m_Vbox2;
+	Q3VBox* m_Vbox3;
+	Q3VBox* m_Vbox4;
+	QLabel* m_LbDescr;
+	QLabel* m_LbC1;
+	QLabel* m_LbC2;
+	QLabel* m_LbC3;
+	QLineEdit* m_LeR11;
+	QLineEdit* m_LeR12;
+	QLineEdit* m_LeR13;
+	QLineEdit* m_LeR21;
+	QLineEdit* m_LeR22;
+	QLineEdit* m_LeR23;
+	QLineEdit* m_LeR31;
+	QLineEdit* m_LeR32;
+	QLineEdit* m_LeR33;
+	QPushButton* m_PbOrthonorm;
+	QPushButton* m_PbSet;
+	QPushButton* m_PbClose;
 
 private slots:
-	void rotation_changed();
-	void set_pressed();
-	void orthonorm_pressed();
+	void RotationChanged();
+	void SetPressed();
+	void OrthonormPressed();
 };
 
 class ImagePVLabel : public QLabel
@@ -132,7 +128,7 @@ class ImagePVLabel : public QLabel
 	Q_OBJECT
 
 public:
-	ImagePVLabel(QWidget* parent = 0, Qt::WindowFlags f = 0);
+	ImagePVLabel(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 	void SetWidth(int value) { m_Width = value; }
 	void SetHeight(int value) { m_Height = value; }
@@ -145,7 +141,7 @@ public slots:
 	void SetYMax(int value);
 
 private slots:
-	void paintEvent(QPaintEvent* e);
+	void paintEvent(QPaintEvent* e) override;
 
 protected:
 	int m_XMin;
@@ -163,46 +159,45 @@ class ResizeDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	enum eResizeType { kOther = 0, kPad = 1, kCrop = 2 };
+	enum eResizeType { kOther = 0,
+		kPad = 1,
+		kCrop = 2 };
 
-	ResizeDialog(SlicesHandler* hand3D, eResizeType type1 = kOther,
-				 QWidget* parent = 0, const char* name = 0,
-				 Qt::WindowFlags wFlags = 0);
-	~ResizeDialog();
-	void return_padding(int& dxm, int& dxp, int& dym, int& dyp, int& dzm,
-						int& dzp);
+	ResizeDialog(SlicesHandler* hand3D, eResizeType type1 = kOther, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~ResizeDialog() override;
+	void ReturnPadding(int& dxm, int& dxp, int& dym, int& dyp, int& dzm, int& dzp);
 
 private:
-	int d[6];
-	SlicesHandler* handler3D;
-	Q3HBox* hbox1;
-	Q3HBox* hbox2;
-	Q3VBox* vbox1;
-	Q3VBox* vbox2;
-	Q3VBox* vbox3;
-	Q3VBox* vbox4;
-	Q3VBox* vbox5;
-	QLabel* lb_dxm;
-	QLabel* lb_dym;
-	QLabel* lb_dzm;
-	QLabel* lb_dxp;
-	QLabel* lb_dyp;
-	QLabel* lb_dzp;
-	QSpinBox* sb_dxm;
-	QSpinBox* sb_dym;
-	QSpinBox* sb_dzm;
-	QSpinBox* sb_dxp;
-	QSpinBox* sb_dyp;
-	QSpinBox* sb_dzp;
-	QPushButton* pb_set;
-	QPushButton* pb_close;
-	Q3HBox* mainBox;
-	Q3VBox* vImagebox1;
+	int m_D[6];
+	SlicesHandler* m_Handler3D;
+	Q3HBox* m_Hbox1;
+	Q3HBox* m_Hbox2;
+	Q3VBox* m_Vbox1;
+	Q3VBox* m_Vbox2;
+	Q3VBox* m_Vbox3;
+	Q3VBox* m_Vbox4;
+	Q3VBox* m_Vbox5;
+	QLabel* m_LbDxm;
+	QLabel* m_LbDym;
+	QLabel* m_LbDzm;
+	QLabel* m_LbDxp;
+	QLabel* m_LbDyp;
+	QLabel* m_LbDzp;
+	QSpinBox* m_SbDxm;
+	QSpinBox* m_SbDym;
+	QSpinBox* m_SbDzm;
+	QSpinBox* m_SbDxp;
+	QSpinBox* m_SbDyp;
+	QSpinBox* m_SbDzp;
+	QPushButton* m_PbSet;
+	QPushButton* m_PbClose;
+	Q3HBox* m_MainBox;
+	Q3VBox* m_VImagebox1;
 	ImagePVLabel* m_ImageSourceLabel;
-	eResizeType resizetype;
+	eResizeType m_Resizetype;
 
 private slots:
-	void set_pressed();
+	void SetPressed();
 };
 
 } // namespace iseg

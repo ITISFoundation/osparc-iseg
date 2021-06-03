@@ -36,13 +36,10 @@
 #include "../../System/Time/StopWatch.h"
 #include "Tools.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        namespace Segmentation
-        {
-            /** This files implement graph cut based minimization of the Rousson-Deriche
+namespace Gc {
+namespace Algo {
+namespace Segmentation {
+/** This files implement graph cut based minimization of the Rousson-Deriche
                 bayesian model for image segmentation.
 
                 This is a regional based foreground/background image segmentation
@@ -74,30 +71,29 @@ namespace Gc
                 - ComputeTwoStage() - two-stage Rousson-Deriche algorithm
                 - ComputeTwoStageMasked() - two-stage Rousson-Deriche algorithm with an initial voxel mask
             */
-            namespace RoussonDeriche
-            {
-                /** Unknowns of the Rousson-Deriche segmentation model. */
-                template <class T>
-                class Params
-                {
-                public:
-                    /** Mean intensity of the background. */
-                    T m_c1;
-                    /** Mean intensity of the foreground. */
-                    T m_c2;
-                    /** Background intensity variance. */
-                    T m_v1;
-                    /** Foreground intensity variance. */
-                    T m_v2;
-                };
+namespace RoussonDeriche {
+/** Unknowns of the Rousson-Deriche segmentation model. */
+template <class T>
+class Params
+{
+  public:
+    /** Mean intensity of the background. */
+    T m_c1;
+    /** Mean intensity of the foreground. */
+    T m_c2;
+    /** Background intensity variance. */
+    T m_v1;
+    /** Foreground intensity variance. */
+    T m_v2;
+};
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Initialization method
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Initialization method
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Obtain an initial estimate of the unknowns in the Rousson-Deriche segmentation
+/** Obtain an initial estimate of the unknowns in the Rousson-Deriche segmentation
                     model.
 
                     This method estimates initial mean intensity and varance of both
@@ -110,17 +106,17 @@ namespace Gc
 
                     @return Number of iterations performed.
                 */
-                template <Size N, class T>
-                Size InitialEstimate(const System::Collection::Array<N,T> &im, Size max_iter,
-                    Params<T> &pm);
+template <Size N, class T>
+Size InitialEstimate(const System::Collection::Array<N, T> & im, Size max_iter,
+                     Params<T> & pm);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Rousson-Deriche segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Rousson-Deriche segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute the Rousson-Deriche segmentation on a given image.
+/** Compute the Rousson-Deriche segmentation on a given image.
 
                     The algorithm performs following steps:
                     -# Create a graph using current values of \c c1, \c c2, \c v1 and \c v2.
@@ -154,18 +150,18 @@ namespace Gc
 
                     @see InitialEstimate(), Tools::NormalizeImage(), Params.
                 */
-                template <Size N, class T>
-                T GC_DLL_EXPORT Compute(const Data::Image<N,T,T> &im, T lambda, Params<T> &pm, 
-                    T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT Compute(const Data::Image<N, T, T> & im, T lambda, Params<T> & pm,
+                        T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                        Flow::IGridMaxFlow<N, T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Masked Rousson-Deriche segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Masked Rousson-Deriche segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute Rousson-Deriche segmentation of an image with a voxel mask.
+/** Compute Rousson-Deriche segmentation of an image with a voxel mask.
                 
                     This function computes the same thing as Compute() does. However, it
                     is possible to mark selected voxels as being known to belong to
@@ -177,19 +173,19 @@ namespace Gc
 
                     @see Compute(), Segmentation::MaskFlag.
                 */
-                template <Size N, class T>
-                T GC_DLL_EXPORT ComputeMasked(const Data::Image<N,T,T> &im, 
-                    const System::Collection::Array<N,Uint8> &mask, T lambda, Params<T> &pm,
-                    T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf, System::Collection::Array<N,bool> &seg);
+template <Size N, class T>
+T GC_DLL_EXPORT ComputeMasked(const Data::Image<N, T, T> & im,
+                              const System::Collection::Array<N, Uint8> & mask, T lambda, Params<T> & pm,
+                              T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                              Flow::IGridMaxFlow<N, T, T, T> & mf, System::Collection::Array<N, bool> & seg);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Two-stage Rousson-Deriche segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//
+// Two-stage Rousson-Deriche segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
 
-                /** Compute two-stage Rousson-Deriche segmentation of a given image.
+/** Compute two-stage Rousson-Deriche segmentation of a given image.
 
                     In the first stage segmentation is computed using (smaller)
                     neighbourhood \c nb1 and then in the second stage it is smoothed
@@ -227,37 +223,37 @@ namespace Gc
 
                     @see Compute(), InitialEstimate(), Tools::NormalizeImage().
                 */
-                template <Size N, class T>
-                T ComputeTwoStage(const Data::Image<N,T,T> &im, T lambda, 
-                    Params<T> &pm, T conv_crit1, T conv_crit2, 
-                    Size &max_iter1, Size &max_iter2,
-                    const Energy::Neighbourhood<N,Int32> &nb1, 
-                    const Energy::Neighbourhood<N,Int32> &nb2,
-                    Size band_size, Flow::IGridMaxFlow<N,T,T,T> &mf1, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf2,
-                    System::Collection::Array<N,bool> &seg)
-                {
-                    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
+template <Size N, class T>
+T ComputeTwoStage(const Data::Image<N, T, T> & im, T lambda,
+                  Params<T> & pm, T conv_crit1, T conv_crit2,
+                  Size & max_iter1, Size & max_iter2,
+                  const Energy::Neighbourhood<N, Int32> & nb1,
+                  const Energy::Neighbourhood<N, Int32> & nb2,
+                  Size band_size, Flow::IGridMaxFlow<N, T, T, T> & mf1,
+                  Flow::IGridMaxFlow<N, T, T, T> & mf2,
+                  System::Collection::Array<N, bool> & seg)
+{
+    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
 
-                    // First phase - coarse segmentation
-                    Compute(im, lambda, pm, conv_crit1, max_iter1, nb1, mf1, seg);
-                    mf1.Dispose();
-                    
-                    // Create band mask
-                    System::Collection::Array<N,Uint8> mask;
-                    Tools::CreateBandMask(seg, band_size, mask);
+    // First phase - coarse segmentation
+    Compute(im, lambda, pm, conv_crit1, max_iter1, nb1, mf1, seg);
+    mf1.Dispose();
 
-                    // Second phase - refinement of the boundary in given band
-                    return ComputeMasked(im, mask, lambda, pm, conv_crit2, max_iter2, nb2, mf2, seg);
-                }
+    // Create band mask
+    System::Collection::Array<N, Uint8> mask;
+    Tools::CreateBandMask(seg, band_size, mask);
 
-                //////////////////////////////////////////////////////////////////////////
-                //
-                // Two-stage masked Rousson-Deriche segmentation routines
-                //
-                //////////////////////////////////////////////////////////////////////////
+    // Second phase - refinement of the boundary in given band
+    return ComputeMasked(im, mask, lambda, pm, conv_crit2, max_iter2, nb2, mf2, seg);
+}
 
-                /** Compute two-stage RoussonDeriche segmentation of an image with a voxel mask.
+//////////////////////////////////////////////////////////////////////////
+//
+// Two-stage masked Rousson-Deriche segmentation routines
+//
+//////////////////////////////////////////////////////////////////////////
+
+/** Compute two-stage RoussonDeriche segmentation of an image with a voxel mask.
                 
                     This function computes the same thing as ComputeTwoStage() does. However, it
                     is possible to mark selected voxels as being known to belong to
@@ -269,33 +265,33 @@ namespace Gc
 
                     @see ComputeTwoStage(), ComputeMasked(), Segmentation::MaskFlag.
                 */
-                template <Size N, class T>
-                T ComputeTwoStageMasked(const Data::Image<N,T,T> &im, 
-                    const System::Collection::Array<N,Uint8> &mask, T lambda,
-                    Params<T> &pm, T conv_crit1, T conv_crit2, 
-                    Size &max_iter1, Size &max_iter2,
-                    const Energy::Neighbourhood<N,Int32> &nb1, 
-                    const Energy::Neighbourhood<N,Int32> &nb2,
-                    Size band_size, Flow::IGridMaxFlow<N,T,T,T> &mf1, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf2, 
-                    System::Collection::Array<N,bool> &seg)
-                {
-                    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
+template <Size N, class T>
+T ComputeTwoStageMasked(const Data::Image<N, T, T> & im,
+                        const System::Collection::Array<N, Uint8> & mask, T lambda,
+                        Params<T> & pm, T conv_crit1, T conv_crit2,
+                        Size & max_iter1, Size & max_iter2,
+                        const Energy::Neighbourhood<N, Int32> & nb1,
+                        const Energy::Neighbourhood<N, Int32> & nb2,
+                        Size band_size, Flow::IGridMaxFlow<N, T, T, T> & mf1,
+                        Flow::IGridMaxFlow<N, T, T, T> & mf2,
+                        System::Collection::Array<N, bool> & seg)
+{
+    System::Time::StopWatch sw(__FUNCTION__, __LINE__, "total");
 
-                    // First phase - coarse segmentation
-                    ComputeMasked(im, mask, lambda, pm, conv_crit1, max_iter1, nb1, mf1, seg);
-                    mf1.Dispose();
-                    
-                    // Create band mask
-                    System::Collection::Array<N,Uint8> stage2_mask;
-                    Tools::CreateBandMask(seg, mask, band_size, stage2_mask);
+    // First phase - coarse segmentation
+    ComputeMasked(im, mask, lambda, pm, conv_crit1, max_iter1, nb1, mf1, seg);
+    mf1.Dispose();
 
-                    // Second phase - refinement of the boundary in given band mask
-                    return ComputeMasked(im, stage2_mask, lambda, pm, conv_crit2, max_iter2, nb2, mf2, seg);
-                }
-            }
-        }
-    }
+    // Create band mask
+    System::Collection::Array<N, Uint8> stage2_mask;
+    Tools::CreateBandMask(seg, mask, band_size, stage2_mask);
+
+    // Second phase - refinement of the boundary in given band mask
+    return ComputeMasked(im, stage2_mask, lambda, pm, conv_crit2, max_iter2, nb2, mf2, seg);
 }
+} // namespace RoussonDeriche
+}
+}
+} // namespace Gc::Algo::Segmentation
 
 #endif

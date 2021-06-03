@@ -35,17 +35,13 @@
 #include "../../../System/Collection/Pair.h"
 #include "../../Neighbourhood.h"
 
-namespace Gc
-{    
-    namespace Energy
-    {
-        /** Clique potential definitions. */
-        namespace Potential
-        {
-            /** Clique potentials that approximate a metric. */
-            namespace Metric
-            {
-                /** 2-clique potentials approximating a general Riemannian metric. 
+namespace Gc {
+namespace Energy {
+/** Clique potential definitions. */
+namespace Potential {
+/** Clique potentials that approximate a metric. */
+namespace Metric {
+/** 2-clique potentials approximating a general Riemannian metric. 
 
                     This class implements calculation of edge weights approximating
                     a general Riemannian metric. 
@@ -107,30 +103,30 @@ namespace Gc
                     @tparam N Number of dimensions.
                     @tparam T Precision.
                 */
-                template <Size N, class T>
-                class GC_DLL_EXPORT RiemannianDanek
-                {
-                protected:
-                    /** Neighbourhood. */
-                    Neighbourhood<N,T> m_nb;
-                    /** Edge weights. */
-                    System::Collection::Array<1,T> m_rw;
+template <Size N, class T>
+class GC_DLL_EXPORT RiemannianDanek
+{
+  protected:
+    /** Neighbourhood. */
+    Neighbourhood<N, T> m_nb;
+    /** Edge weights. */
+    System::Collection::Array<1, T> m_rw;
 
-                public:
-                    /** Constructor.
+  public:
+    /** Constructor.
 
                         @param[in] n Neighbourhood used.
                         
                         @remarks Don't forget to call SetTransformation() before accessing 
                             the edge weights.
                     */
-                    RiemannianDanek(const Neighbourhood<N,T> &n)
-                        : m_nb(n)
-                    {
-                        m_rw.Resize(m_nb.Elements(), 0);
-                    }
+    RiemannianDanek(const Neighbourhood<N, T> & n)
+        : m_nb(n)
+    {
+        m_rw.Resize(m_nb.Elements(), 0);
+    }
 
-                    /** Specify the transformation of the Riemannian space.
+    /** Specify the transformation of the Riemannian space.
 
                         @param[in] mt Positive definite symmetric matrix specifying the 
                         transformation of the space. The space is stretched in the directions 
@@ -148,23 +144,22 @@ namespace Gc
                         has the same eigenvectors but eigenvalues are square roots of the metric 
                         tensor ones.                        
                     */
-                    RiemannianDanek<N,T>& SetTransformationMatrix
-                        (const Math::Algebra::SquareMatrix<N,T> &mt);
+    RiemannianDanek<N, T> & SetTransformationMatrix(const Math::Algebra::SquareMatrix<N, T> & mt);
 
-                    /** Get edge weights approximating the Riemannian metric. */
-                    const System::Collection::Array<1,T>& EdgeWeights() const
-                    {
-                        return m_rw;
-                    }
+    /** Get edge weights approximating the Riemannian metric. */
+    const System::Collection::Array<1, T> & EdgeWeights() const
+    {
+        return m_rw;
+    }
 
-                    /** Get edge weight for i-th neighbourhood vector. */
-                    T operator[] (Size i) const
-                    {
-                        return m_rw[i];
-                    }
-                };
+    /** Get edge weight for i-th neighbourhood vector. */
+    T operator[](Size i) const
+    {
+        return m_rw[i];
+    }
+};
 
-                /** Faster specialization of RiemannianDanek for a 2D space. 
+/** Faster specialization of RiemannianDanek for a 2D space. 
                 
                     This class does the same as RiemannianDanek. It offers faster recomputation
                     when the transformation matrix changes, but supports only 2D space and requires 
@@ -174,40 +169,39 @@ namespace Gc
 
                     @tparam T Precision.
                 */
-                template <class T>
-                class GC_DLL_EXPORT RiemannianDanek2D
-                {
-                protected:
-                    /** Neighbourhood sorted according to the angular orientation and cross indexes. */
-                    System::Collection::Array<1,System::Collection::Pair<Math::Algebra::Vector<2,T>,Uint8> > m_nb;
-                    /** Calculated edge weights. */
-                    System::Collection::Array<1,T> m_rw;
+template <class T>
+class GC_DLL_EXPORT RiemannianDanek2D
+{
+  protected:
+    /** Neighbourhood sorted according to the angular orientation and cross indexes. */
+    System::Collection::Array<1, System::Collection::Pair<Math::Algebra::Vector<2, T>, Uint8>> m_nb;
+    /** Calculated edge weights. */
+    System::Collection::Array<1, T> m_rw;
 
-                public:
-                    /** Constructor. */
-                    RiemannianDanek2D(const Neighbourhood<2,T> &n);
+  public:
+    /** Constructor. */
+    RiemannianDanek2D(const Neighbourhood<2, T> & n);
 
-                    /** Specify the transformation of the Riemannian space. */
-                    RiemannianDanek2D<T>& SetTransformationMatrix
-                        (const Math::Algebra::SquareMatrix<2,T> &mt);
+    /** Specify the transformation of the Riemannian space. */
+    RiemannianDanek2D<T> & SetTransformationMatrix(const Math::Algebra::SquareMatrix<2, T> & mt);
 
-                    /** Get edge weights approximating the Riemannian metric. */
-                    const System::Collection::Array<1,T>& EdgeWeights() const
-                    {
-                        return m_rw;
-                    }
-
-                    /** Get edge weight for i-th neighbourhood vector. */
-                    T operator[](Size i) const
-                    {
-                        return m_rw[i];
-                    }
-
-                protected:
-                };
-            }
-        }
+    /** Get edge weights approximating the Riemannian metric. */
+    const System::Collection::Array<1, T> & EdgeWeights() const
+    {
+        return m_rw;
     }
+
+    /** Get edge weight for i-th neighbourhood vector. */
+    T operator[](Size i) const
+    {
+        return m_rw[i];
+    }
+
+  protected:
+};
+} // namespace Metric
+} // namespace Potential
 }
+} // namespace Gc::Energy
 
 #endif

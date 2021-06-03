@@ -30,15 +30,12 @@
 
 #include "../../Type.h"
 
-namespace Gc
-{
-	namespace System
-	{
-        /** Basic data transformation algorithms. */
-        namespace Algo
-        {
-        }
-	}
+namespace Gc {
+namespace System {
+/** Basic data transformation algorithms. */
+namespace Algo {
 }
+}
+} // namespace Gc::System
 
 #endif

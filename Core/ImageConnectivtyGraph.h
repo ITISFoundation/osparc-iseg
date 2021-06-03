@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -87,7 +87,7 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 			if (it.GetCenterPixel() != 0)
 			{
 				auto center_idx = image->ComputeOffset(it.GetIndex());
-				for (auto i = it.Begin(), iEnd = it.End(); i != iEnd; ++i)
+				for (auto i = it.Begin(), i_end = it.End(); i != i_end; ++i)
 				{
 					if (i.Get() != 0)
 					{
@@ -106,7 +106,7 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 		}
 	}
 
-	for (auto face_region : faces)
+	for (const auto& face_region : faces)
 	{
 		itk::ConstNeighborhoodIterator<TImage> it(radius, image, face_region);
 
@@ -115,7 +115,7 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 			if (it.GetCenterPixel() != 0)
 			{
 				auto center_idx = image->ComputeOffset(it.GetIndex());
-				for (unsigned int i = 0, iSize = it.Size(); i < iSize; i++)
+				for (unsigned int i = 0, i_size = it.Size(); i < i_size; i++)
 				{
 					bool inbounds = false;
 					auto val = it.GetPixel(i, inbounds);
@@ -143,9 +143,9 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 	// map nodes to compact range so we can use const map
 	std::unordered_map<size_t, unsigned int> node_id_map;
 	unsigned int id = 0;
-	for (auto &e: edges)
+	for (auto& e : edges)
 	{
-		for (int k=0; k<2; ++k)
+		for (int k = 0; k < 2; ++k)
 		{
 			auto found = node_id_map.find(e[k]);
 			if (found == node_id_map.end())
@@ -166,20 +166,20 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 
 	struct Connectivity
 	{
-		Connectivity(std::vector<int>& _map) : map(_map) {}
-		
-		int base_connection(int c)
+		Connectivity(std::vector<int>& _map) : m_Map(_map) {}
+
+		int BaseConnection(int c)
 		{
-			if (map[c] == c)
+			if (m_Map[c] == c)
 				return c;
 			else
-				return map[c] = base_connection(map[c]);
+				return m_Map[c] = BaseConnection(m_Map[c]);
 		}
-		std::vector<int>& map;
+		std::vector<int>& m_Map;
 	} ca(region_connectivity);
 
 	std::vector<Edge> output_edges;
-	for (size_t i = 0, iEnd = edges.size(); i < iEnd; ++i)
+	for (size_t i = 0, i_end = edges.size(); i < i_end; ++i)
 	{
 		bool add = true;
 		auto e = edges[i];
@@ -191,18 +191,18 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 				region_connectivity[next_region] = next_region;
 				id_region_map[e[1]] = next_region++;
 			}
-			id_region_map[e[0]] = ca.base_connection(id_region_map[e[1]]);
+			id_region_map[e[0]] = ca.BaseConnection(id_region_map[e[1]]);
 		}
 		else
 		{
 			if (id_region_map[e[1]] == -1)
 			{
-				id_region_map[e[1]] = ca.base_connection(id_region_map[e[0]]);
+				id_region_map[e[1]] = ca.BaseConnection(id_region_map[e[0]]);
 			}
 			else
 			{
-				int base0 = ca.base_connection(id_region_map[e[0]]);
-				int base1 = ca.base_connection(id_region_map[e[1]]);
+				int base0 = ca.BaseConnection(id_region_map[e[0]]);
+				int base1 = ca.BaseConnection(id_region_map[e[1]]);
 				if (base0 != base1)
 				{
 					// \warning this might break existing indirections
@@ -224,11 +224,11 @@ std::vector<Edge> ImageConnectivityGraph(TImage* image, typename TImage::RegionT
 
 	// map back to image ids
 	std::vector<size_t> id_node_map(node_id_map.size());
-	for (auto p: node_id_map)
+	for (auto p : node_id_map)
 	{
 		id_node_map.at(p.second) = p.first;
 	}
-	for (auto &e: output_edges)
+	for (auto& e : output_edges)
 	{
 		e[0] = id_node_map[e[0]];
 		e[1] = id_node_map[e[1]];

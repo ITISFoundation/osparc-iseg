@@ -1,5 +1,5 @@
 ##
-## Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+## Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 ## 
 ## This file is part of iSEG
 ## (see https://github.com/ITISFoundation/osparc-iseg).
@@ -50,6 +50,7 @@ SET(ViewerSrcs
 	Levelset.cpp
 	LivewireWidget.cpp
 	LoaderWidgets.cpp
+	LogTable.cpp
 	main.cpp
 	MainWindow.cpp
 	MeasurementWidget.cpp
@@ -78,6 +79,7 @@ SET(ViewerSrcs
 	TransformWidget.cpp
 	UndoConfigurationDialog.cpp
 	VesselWidget.cpp
+	vtkCustomOutputWindow.cpp
 	vtkEdgeCollapse.cpp
 	vtkGenericDataSetWriter.cpp
 	vtkImageExtractCompatibleMesher.cpp
@@ -105,6 +107,7 @@ SET(MyMocHeaders
 	InterpolationWidget.h
 	LivewireWidget.h
 	LoaderWidgets.h
+	LogTable.h
 	MainWindow.h
 	MeasurementWidget.h
 	MorphologyWidget.h
@@ -157,14 +160,15 @@ ELSE()
 
 		# and this part tells CMake where to find and install the file itself
 		SET_SOURCE_FILES_PROPERTIES(images/isegicon64.icns
-			PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"		
+			PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
 		)
 
 		# install other icons
-		FILE(GLOB PNG_FILES images/*.png)
-		SET_SOURCE_FILES_PROPERTIES(${ICON_FILES}
-			PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS/images"		
+		FILE(GLOB PNG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/*.png)
+		SET_SOURCE_FILES_PROPERTIES(${PNG_FILES}
+			PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS/images"
 		)
+		# TODO: do I need to add PNG_FILES here?
 		SET(ICON_FILES ${PNG_FILES} images/isegicon64.icns)
 	ENDIF()
 ENDIF()
@@ -178,6 +182,7 @@ TARGET_LINK_LIBRARIES(iSeg
 	QVTK
 	predicates
 	vtkGDCM
+	QDarkStyleSheet
 	${CMAKE_DL_LIBS}
 	${MY_EXTERNAL_LINK_LIBRARIES}
 )
@@ -209,7 +214,7 @@ IF(APPLE)
 	INSTALL(TARGETS iSeg
 		BUNDLE DESTINATION ${BUNDLE_INSTALL_TARGET}
 		RUNTIME DESTINATION ${BUNDLE_INSTALL_TARGET}
-	    COMPONENT executable
+		COMPONENT executable
 	)
 
 	FILE(GLOB plugins ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.ext.*)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,9 +11,9 @@
 
 #include "../HDF5IO.h"
 
-#include <boost/chrono.hpp>
 #include <boost/filesystem.hpp>
 
+#include <chrono>
 #include <string>
 
 namespace fs = boost::filesystem;
@@ -41,38 +41,38 @@ BOOST_AUTO_TEST_CASE(WriteRead)
 	iseg::HDF5IO io(4);
 
 	{
-		auto fid = io.create(fname, false);
+		auto fid = io.Create(fname, false);
 		BOOST_REQUIRE(fid >= 0);
 
-		auto r = io.writeData(fid, dname, slices.data(), 2, slice_size);
+		auto r = io.WriteData(fid, dname, slices.data(), 2, slice_size);
 		BOOST_CHECK(r == true);
 
-		BOOST_CHECK(io.close(fid));
+		BOOST_CHECK(io.Close(fid));
 	}
 
 	{
-		auto fid = io.open(fname);
+		auto fid = io.Open(fname);
 		BOOST_REQUIRE(fid >= 0);
 
 		std::vector<double> data(2 * slice_size);
-		auto r = io.readData(fid, dname, 0, 2 * slice_size, data.data());
+		auto r = io.ReadData(fid, dname, 0, 2 * slice_size, data.data());
 		BOOST_CHECK(r == true);
 
-		BOOST_CHECK(io.close(fid));
+		BOOST_CHECK(io.Close(fid));
 	}
 	{
-		auto fid = io.open(fname);
+		auto fid = io.Open(fname);
 		BOOST_REQUIRE(fid >= 0);
 
 		std::vector<float> data(slice_size);
 		size_t offset = 0;
 		for (size_t i = 0; i < 2; i++, offset += slice_size)
 		{
-			auto r = io.readData(fid, dname, offset, slice_size, data.data());
+			auto r = io.ReadData(fid, dname, offset, slice_size, data.data());
 			BOOST_CHECK(r == true);
 		}
 
-		BOOST_CHECK(io.close(fid));
+		BOOST_CHECK(io.Close(fid));
 	}
 
 	if (fs::exists(fname, ec))
@@ -105,26 +105,26 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 		iseg::HDF5IO io(1);
 		{
 			std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
-			auto fid = io.create(fname, false);
+			auto fid = io.Create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
-			auto before = boost::chrono::high_resolution_clock::now();
-			auto r = io.writeData(fid, dname, slices1.data(), num_slices, slice_size);
+			auto before = std::chrono::high_resolution_clock::now();
+			BOOST_CHECK(io.WriteData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
 			size_t offset = 0;
 			for (size_t i = 0; i < num_slices; i++, offset += slice_size)
 			{
-				auto r = io.readData(fid, dname, offset, slice_size, data.data());
+				BOOST_CHECK(io.ReadData(fid, dname, offset, slice_size, data.data()));
 			}
-			auto const after = boost::chrono::high_resolution_clock::now();
-			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());
+			auto const after = std::chrono::high_resolution_clock::now();
+			auto ms = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(after - before).count());
 
-			BOOST_CHECK(io.close(fid));
+			BOOST_CHECK(io.Close(fid));
 
 			BOOST_TEST_MESSAGE("Time " << ms << "[ms]");
 
-			BOOST_TEST_MESSAGE("Errors: " << io.dumpErrorStack());
+			BOOST_TEST_MESSAGE("Errors: " << io.DumpErrorStack());
 
 			boost::system::error_code ec;
 			if (fs::exists(fname, ec))
@@ -133,29 +133,29 @@ BOOST_AUTO_TEST_CASE(IO_Performance)
 			}
 		}
 
-		io.chunk_size = 1500;
+		io.m_ChunkSize = 1500;
 		{
 			std::string fname = (fs::temp_directory_path() / fs::path("foo.h5")).string();
-			auto fid = io.create(fname, false);
+			auto fid = io.Create(fname, false);
 			BOOST_REQUIRE(fid >= 0);
 
-			auto before = boost::chrono::high_resolution_clock::now();
-			auto r = io.writeData(fid, dname, slices1.data(), num_slices, slice_size);
+			auto before = std::chrono::high_resolution_clock::now();
+			BOOST_CHECK(io.WriteData(fid, dname, slices1.data(), num_slices, slice_size));
 
 			// read again
 			size_t offset = 0;
 			for (size_t i = 0; i < num_slices; i++, offset += slice_size)
 			{
-				auto r = io.readData(fid, dname, offset, slice_size, data.data());
+				BOOST_CHECK(io.ReadData(fid, dname, offset, slice_size, data.data()));
 			}
-			auto const after = boost::chrono::high_resolution_clock::now();
-			auto ms = static_cast<double>(boost::chrono::duration_cast<boost::chrono::milliseconds>(after - before).count());
+			auto const after = std::chrono::high_resolution_clock::now();
+			auto ms = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(after - before).count());
 
-			BOOST_CHECK(io.close(fid));
+			BOOST_CHECK(io.Close(fid));
 
 			BOOST_TEST_MESSAGE("Time " << ms << "[ms]");
 
-			BOOST_TEST_MESSAGE("Errors: " << io.dumpErrorStack());
+			BOOST_TEST_MESSAGE("Errors: " << io.DumpErrorStack());
 
 			boost::system::error_code ec;
 			if (fs::exists(fname, ec))

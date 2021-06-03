@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,41 +16,39 @@
 
 namespace iseg {
 
-bool ChannelExtractor::getSlice(const char* filename, float* slice, int channel,
-								unsigned slicenr, unsigned width,
-								unsigned height)
+bool ChannelExtractor::getSlice(const char* filename, float* slice, int channel, unsigned slicenr, unsigned width, unsigned height)
 {
-	QImage loadedImage(filename);
+	QImage loaded_image(filename);
 
-	if (loadedImage.height() != (int)height)
+	if (loaded_image.height() != (int)height)
 		return false;
-	if (loadedImage.width() != (int)width)
+	if (loaded_image.width() != (int)width)
 		return false;
 
-	int redFactor = 0;
-	int greenFactor = 0;
-	int blueFactor = 0;
-	int alphaFactor = 0;
+	int red_factor = 0;
+	int green_factor = 0;
+	int blue_factor = 0;
+	int alpha_factor = 0;
 
 	switch (channel)
 	{
-	case ChannelEnum::kRed: redFactor = 1; break;
-	case ChannelEnum::kGreen: greenFactor = 1; break;
-	case ChannelEnum::kBlue: blueFactor = 1; break;
-	case ChannelEnum::kAlpha: alphaFactor = 1; break;
+	case eChannelEnum::kRed: red_factor = 1; break;
+	case eChannelEnum::kGreen: green_factor = 1; break;
+	case eChannelEnum::kBlue: blue_factor = 1; break;
+	case eChannelEnum::kAlpha: alpha_factor = 1; break;
 	}
 
 	unsigned int counter = 0;
-	QColor oldColor;
-	for (int y = loadedImage.height() - 1; y >= 0; y--)
+	QColor old_color;
+	for (int y = loaded_image.height() - 1; y >= 0; y--)
 	{
-		for (int x = 0; x < loadedImage.width(); x++)
+		for (int x = 0; x < loaded_image.width(); x++)
 		{
-			oldColor = QColor(loadedImage.pixel(x, y));
-			slice[counter] = (unsigned char)(redFactor * oldColor.red() +
-											 greenFactor * oldColor.green() +
-											 blueFactor * oldColor.blue() +
-											 alphaFactor * oldColor.alpha());
+			old_color = QColor(loaded_image.pixel(x, y));
+			slice[counter] = (unsigned char)(red_factor * old_color.red() +
+																			 green_factor * old_color.green() +
+																			 blue_factor * old_color.blue() +
+																			 alpha_factor * old_color.alpha());
 			counter++;
 		}
 	}

@@ -1,0 +1,16 @@
+../../clazy/clazy/bin/clazy-standalone -checks=level0 --qt4-compat -p compile_commands.json ../src/Interface/WidgetInterface.cpp
+
+find /home/lloyd/src/iSeg/src/Data/ -iname *.h -o -iname *.cpp | xargs clang-format-10 -i -style=file
+
+find /home/lloyd/src/iSeg/src/Interface/ -iname *.cpp | xargs ../../clazy/clazy/bin/clazy-standalone -checks=level0 --qt4-compat -p compile_commands.json
+
+find /home/lloyd/src/iSeg/src/iSeg/ -iname *.cpp | xargs ../../clazy/clazy/bin/clazy-standalone -checks=level1,no-qt-macros,no-fully-qualified-moc-types,no-connect-by-name --qt4-compat -p compile_commands.json -extra-arg=-DEIGEN_DONT_PARALLELIZE 2> ../App.checks
+
+python3 ../run_clang_tidy.py -p ~/src/iSeg/build -header-filter=iSeg/ -checks='-*,modernize-use-override' /home/lloyd/src/iSeg/src/iSeg -fix
+
+Qt::WindowFlags wFlags = nullptr
+Qt::WindowFlags wFlags = Qt::Widget
+
+modernize-use-equals-delete
+
+readability-redundant-control-flow

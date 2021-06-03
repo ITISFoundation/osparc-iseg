@@ -34,13 +34,10 @@
 #include "../../Data/Image.h"
 #include "../../Flow/IGridMaxFlow.h"
 
-namespace Gc
-{
-    namespace Algo
-    {
-        namespace Segmentation
-        {
-            /** Methods for minimization of the Mumford-Shah model for image segmentation.
+namespace Gc {
+namespace Algo {
+namespace Segmentation {
+/** Methods for minimization of the Mumford-Shah model for image segmentation.
 
                 For an input image \f$ u_0 \f$ the Mumford-Shah model aims to find a pair
                 \f$ (u,C) \f$ such that \f$ u \f$ is a piecewise smooth approximation of 
@@ -57,9 +54,8 @@ namespace Gc
                 functions and associated variational problems</em>, Communications on Pure
                 and Applied Mathematics, vol. 42, no. 5, pp. 577-685, 1989.
             */
-            namespace MumfordShah
-            {
-                /** Piecewise constant Mumford-Shah segmentation via graph cuts.
+namespace MumfordShah {
+/** Piecewise constant Mumford-Shah segmentation via graph cuts.
 
                     In this simplification of the Mumford-Shah model we assume that image
                     \c u consists of \c k piecewise constant regions (possibly disconnected).
@@ -109,14 +105,14 @@ namespace Gc
                     @see Energy::Min::Grid::AlphaExpansion(), ChanVese, 
                         Tools::NormalizeImage(), Clustering::KMeans::Lloyd().
                 */
-                template <Size N, class T, class L>
-                T GC_DLL_EXPORT ComputePiecewiseConstant(const Data::Image<N,T,T> &im, Size k,
-                    const System::Collection::Array<1,T> &lambda, System::Collection::Array<1,T> &c,
-                    T conv_crit, Size &max_iter, const Energy::Neighbourhood<N,Int32> &nb, 
-                    Flow::IGridMaxFlow<N,T,T,T> &mf, System::Collection::Array<N,L> &seg);
-            }
-        }
-    }
+template <Size N, class T, class L>
+T GC_DLL_EXPORT ComputePiecewiseConstant(const Data::Image<N, T, T> & im, Size k,
+                                         const System::Collection::Array<1, T> & lambda, System::Collection::Array<1, T> & c,
+                                         T conv_crit, Size & max_iter, const Energy::Neighbourhood<N, Int32> & nb,
+                                         Flow::IGridMaxFlow<N, T, T, T> & mf, System::Collection::Array<N, L> & seg);
+} // namespace MumfordShah
 }
+}
+} // namespace Gc::Algo::Segmentation
 
 #endif

@@ -31,72 +31,72 @@
 #include "../Core.h"
 #include "../System/Collection/Array.h"
 
-namespace Gc
-{
-    namespace Data
-    {
-        /** N-dimensional image representation class.
+namespace Gc {
+namespace Data {
+/** N-dimensional image representation class.
         
             @tparam N Dimensionality of the data.
             @tparam PREC %Data type used to store the image resolution.
             @tparam DATA %Data type of the voxels.
         */
-        template <Size N, class PREC, class DATA>
-        class GC_DLL_EXPORT Image
-            : public System::Collection::Array<N,DATA>
+template <Size N, class PREC, class DATA>
+class GC_DLL_EXPORT Image
+    : public System::Collection::Array<N, DATA>
+{
+  protected:
+    using System::Collection::Array<N, DATA>::m_data;
+    using System::Collection::Array<N, DATA>::m_dim;
+    using System::Collection::Array<N, DATA>::m_elems;
+
+    /** %Image voxel spacing/resolution. */
+    Math::Algebra::Vector<N, PREC> m_spacing;
+
+  public:
+    /** Constructor. */
+    Image()
+        : System::Collection::Array<N, DATA>()
+        , m_spacing(0)
+    {}
+
+    /** Copy constructor. */
+    Image(const Image<N, PREC, DATA> & img)
+        : System::Collection::Array<N, DATA>()
+        , m_spacing(0)
+    {
+        *this = img;
+    }
+
+    /** Destructor. */
+    ~Image()
+    {
+        this->Dispose();
+    }
+
+    /** Assignment operator. */
+    Image<N, PREC, DATA> & operator=(const Image<N, PREC, DATA> & img)
+    {
+        if (this != &img)
         {
-        protected:
-            using System::Collection::Array<N,DATA>::m_data;
-            using System::Collection::Array<N,DATA>::m_dim;
-            using System::Collection::Array<N,DATA>::m_elems;
+            System::Collection::Array<N, DATA>::operator=(img);
+            m_spacing = img.m_spacing;
+        }
 
-            /** %Image voxel spacing/resolution. */
-            Math::Algebra::Vector<N,PREC> m_spacing;
+        return *this;
+    }
 
-        public:
-            /** Constructor. */
-            Image()
-                : System::Collection::Array<N,DATA>(), m_spacing(0)
-            {}
+    /** Get voxel spacing of the image. */
+    const Math::Algebra::Vector<N, PREC> & Spacing() const
+    {
+        return m_spacing;
+    }
 
-            /** Copy constructor. */
-            Image(const Image<N,PREC,DATA> &img)
-                : System::Collection::Array<N,DATA>(), m_spacing(0)
-            {
-                *this = img;
-            }
+    /** Set image voxel spacing. */
+    void SetSpacing(const Math::Algebra::Vector<N, PREC> & spc)
+    {
+        m_spacing = spc;
+    }
 
-            /** Destructor. */
-            ~Image()
-            {
-                this->Dispose();
-            }
-
-            /** Assignment operator. */
-            Image<N,PREC,DATA>& operator= (const Image<N,PREC,DATA> &img)
-            {
-                if (this != &img)
-                {
-                    System::Collection::Array<N,DATA>::operator=(img);
-                    m_spacing = img.m_spacing;
-                }
-
-                return *this;
-            }
-
-            /** Get voxel spacing of the image. */
-            const Math::Algebra::Vector<N,PREC>& Spacing() const
-            {
-                return m_spacing;
-            }
-
-            /** Set image voxel spacing. */
-            void SetSpacing(const Math::Algebra::Vector<N,PREC> &spc)
-            {
-                m_spacing = spc;
-            }
-
-            /** Pad image with given value.
+    /** Pad image with given value.
 
                 @param[in] left Size of the border to be added on the left 
                     side in each dimension.
@@ -107,35 +107,35 @@ namespace Gc
 
                 @see Gc::Energy::Neighbourhood::Extent().
             */
-            void Pad(const Math::Algebra::Vector<N,Size> &left,
-                const Math::Algebra::Vector<N,Size> &right, const DATA &val,
-                Image<N,PREC,DATA> &iout) const;
+    void Pad(const Math::Algebra::Vector<N, Size> & left,
+             const Math::Algebra::Vector<N, Size> & right, const DATA & val,
+             Image<N, PREC, DATA> & iout) const;
 
-            /** Copy image size and resolution. */
-            template <class DATA2>
-            void CopyMetaData(const Image<N,PREC,DATA2> &img)
-            {
-                Resize(img.Dimensions());
-                SetSpacing(img.Spacing());
-            }
+    /** Copy image size and resolution. */
+    template <class DATA2>
+    void CopyMetaData(const Image<N, PREC, DATA2> & img)
+    {
+        Resize(img.Dimensions());
+        SetSpacing(img.Spacing());
+    }
 
-            /** Get voxel size. 
+    /** Get voxel size. 
             
                 @return Product of the resolution vector.
             */
-            PREC VoxelSize() const
-            {
-                return m_spacing.Product();
-            }
+    PREC VoxelSize() const
+    {
+        return m_spacing.Product();
+    }
 
-            /** Calculate the range of element values in the image. 
+    /** Calculate the range of element values in the image. 
             
                 @param[out] imin Lowest element value.
                 @param[out] imax Highest element value.
             */
-            void Range(DATA &imin, DATA &imax) const;
-        };
-    }
+    void Range(DATA & imin, DATA & imax) const;
+};
 }
+} // namespace Gc::Data
 
 #endif

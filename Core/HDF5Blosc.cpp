@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,12 +18,12 @@ namespace iseg {
 #ifdef USE_HDF5_BLOSC
 bool _blosc_enabled = true;
 #else
-bool _blosc_enabled = false;
+bool blosc_enabled = false;
 #endif
 
 bool BloscEnabled()
 {
-	return _blosc_enabled;
+	return blosc_enabled;
 }
 
 void SetBloscEnabled(bool on)

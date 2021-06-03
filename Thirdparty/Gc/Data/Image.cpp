@@ -29,120 +29,118 @@
 #include "BorderIterator.h"
 #include "Image.h"
 
-namespace Gc
+namespace Gc {
+namespace Data {
+/************************************************************************/
+
+template <Size N, class PREC, class DATA>
+void Image<N, PREC, DATA>::Pad(const Math::Algebra::Vector<N, Size> & left,
+                               const Math::Algebra::Vector<N, Size> & right, const DATA & val,
+                               Image<N, PREC, DATA> & iout) const
 {
-    namespace Data
+    // Resize the output image
+    Math::Algebra::Vector<N, Size> new_dim = this->Dimensions() + left + right;
+    iout.Resize(new_dim);
+    iout.SetSpacing(Spacing());
+
+    // Create iterator
+    BorderIterator<N> iter(new_dim, left, right);
+    iter.Start(false);
+
+    // Start padding
+    const DATA * data_in = this->Begin();
+    DATA * data_out = iout.Begin();
+
+    while (!iter.IsFinished())
     {
-        /************************************************************************/
+        Size num;
 
-        template <Size N, class PREC, class DATA>
-        void Image<N,PREC,DATA>::Pad(const Math::Algebra::Vector<N,Size> &left,
-            const Math::Algebra::Vector<N,Size> &right, const DATA &val,
-            Image<N,PREC,DATA> &iout) const
+        if (iter.NextBlock(num))
         {
-            // Resize the output image
-            Math::Algebra::Vector<N,Size> new_dim = this->Dimensions() + left + right;
-            iout.Resize(new_dim);
-            iout.SetSpacing(Spacing());
-
-            // Create iterator
-            BorderIterator<N> iter(new_dim, left, right);
-            iter.Start(false);
-
-            // Start padding
-            const DATA *data_in = this->Begin();
-            DATA *data_out = iout.Begin();
-
-            while (!iter.IsFinished())
+            while (num-- > 0)
             {
-                Size num;
-                
-                if (iter.NextBlock(num))
-                {
-                    while (num-- > 0)
-                    {
-                        *data_out = val;
-                        data_out++;
-                    }
-                }
-                else
-                {
-                    while (num-- > 0)
-                    {
-                        *data_out = *data_in;
-                        data_out++;
-                        data_in++;
-                    }
-                }
+                *data_out = val;
+                data_out++;
             }
         }
-
-        /************************************************************************/
-
-        template <Size N, class PREC, class DATA>
-        void Image<N,PREC,DATA>::Range(DATA &imin, DATA &imax) const
+        else
         {
-            if (this->IsEmpty())
+            while (num-- > 0)
             {
-                throw System::InvalidOperationException(__FUNCTION__, __LINE__,
-                    "Intensity range of an empty image is undefined.");
-            }
-
-            imin = imax = m_data[0];
-            const DATA *p = &m_data[1];
-            for (Size i = 1; i < m_elems; i++, p++)
-            {
-                if (*p < imin)
-                {
-                    imin = *p;
-                }
-                else if (*p > imax)
-                {
-                    imax = *p;
-                }
+                *data_out = *data_in;
+                data_out++;
+                data_in++;
             }
         }
-
-        /************************************************************************/
-
-        // Explicit instantiations
-
-        // 2D
-        /** @cond */
-        template GC_DLL_EXPORT class Image<2,Float32,bool>;
-        template GC_DLL_EXPORT class Image<2,Float32,Uint8>;
-        template GC_DLL_EXPORT class Image<2,Float32,Uint16>;
-        template GC_DLL_EXPORT class Image<2,Float32,Uint32>;
-        template GC_DLL_EXPORT class Image<2,Float32,Uint64>;
-        template GC_DLL_EXPORT class Image<2,Float32,Float32>;
-        template GC_DLL_EXPORT class Image<2,Float32,Float64>;
-
-        template GC_DLL_EXPORT class Image<2,Float64,bool>;
-        template GC_DLL_EXPORT class Image<2,Float64,Uint8>;
-        template GC_DLL_EXPORT class Image<2,Float64,Uint16>;
-        template GC_DLL_EXPORT class Image<2,Float64,Uint32>;
-        template GC_DLL_EXPORT class Image<2,Float64,Uint64>;
-        template GC_DLL_EXPORT class Image<2,Float64,Float32>;
-        template GC_DLL_EXPORT class Image<2,Float64,Float64>;
-
-        // 3D
-        template GC_DLL_EXPORT class Image<3,Float32,bool>;
-        template GC_DLL_EXPORT class Image<3,Float32,Uint8>;
-        template GC_DLL_EXPORT class Image<3,Float32,Uint16>;
-        template GC_DLL_EXPORT class Image<3,Float32,Uint32>;
-        template GC_DLL_EXPORT class Image<3,Float32,Uint64>;
-        template GC_DLL_EXPORT class Image<3,Float32,Float32>;
-        template GC_DLL_EXPORT class Image<3,Float32,Float64>;
-
-        template GC_DLL_EXPORT class Image<3,Float64,bool>;
-        template GC_DLL_EXPORT class Image<3,Float64,Uint8>;
-        template GC_DLL_EXPORT class Image<3,Float64,Uint16>;
-        template GC_DLL_EXPORT class Image<3,Float64,Uint32>;
-        template GC_DLL_EXPORT class Image<3,Float64,Uint64>;
-        template GC_DLL_EXPORT class Image<3,Float64,Float32>;
-        template GC_DLL_EXPORT class Image<3,Float64,Float64>;
-        /** @endcond */
-
-        /************************************************************************/
     }
 }
+
+/************************************************************************/
+
+template <Size N, class PREC, class DATA>
+void Image<N, PREC, DATA>::Range(DATA & imin, DATA & imax) const
+{
+    if (this->IsEmpty())
+    {
+        throw System::InvalidOperationException(__FUNCTION__, __LINE__,
+                                                "Intensity range of an empty image is undefined.");
+    }
+
+    imin = imax = m_data[0];
+    const DATA * p = &m_data[1];
+    for (Size i = 1; i < m_elems; i++, p++)
+    {
+        if (*p < imin)
+        {
+            imin = *p;
+        }
+        else if (*p > imax)
+        {
+            imax = *p;
+        }
+    }
+}
+
+/************************************************************************/
+
+// Explicit instantiations
+
+// 2D
+/** @cond */
+template GC_DLL_EXPORT class Image<2, Float32, bool>;
+template GC_DLL_EXPORT class Image<2, Float32, Uint8>;
+template GC_DLL_EXPORT class Image<2, Float32, Uint16>;
+template GC_DLL_EXPORT class Image<2, Float32, Uint32>;
+template GC_DLL_EXPORT class Image<2, Float32, Uint64>;
+template GC_DLL_EXPORT class Image<2, Float32, Float32>;
+template GC_DLL_EXPORT class Image<2, Float32, Float64>;
+
+template GC_DLL_EXPORT class Image<2, Float64, bool>;
+template GC_DLL_EXPORT class Image<2, Float64, Uint8>;
+template GC_DLL_EXPORT class Image<2, Float64, Uint16>;
+template GC_DLL_EXPORT class Image<2, Float64, Uint32>;
+template GC_DLL_EXPORT class Image<2, Float64, Uint64>;
+template GC_DLL_EXPORT class Image<2, Float64, Float32>;
+template GC_DLL_EXPORT class Image<2, Float64, Float64>;
+
+// 3D
+template GC_DLL_EXPORT class Image<3, Float32, bool>;
+template GC_DLL_EXPORT class Image<3, Float32, Uint8>;
+template GC_DLL_EXPORT class Image<3, Float32, Uint16>;
+template GC_DLL_EXPORT class Image<3, Float32, Uint32>;
+template GC_DLL_EXPORT class Image<3, Float32, Uint64>;
+template GC_DLL_EXPORT class Image<3, Float32, Float32>;
+template GC_DLL_EXPORT class Image<3, Float32, Float64>;
+
+template GC_DLL_EXPORT class Image<3, Float64, bool>;
+template GC_DLL_EXPORT class Image<3, Float64, Uint8>;
+template GC_DLL_EXPORT class Image<3, Float64, Uint16>;
+template GC_DLL_EXPORT class Image<3, Float64, Uint32>;
+template GC_DLL_EXPORT class Image<3, Float64, Uint64>;
+template GC_DLL_EXPORT class Image<3, Float64, Float32>;
+template GC_DLL_EXPORT class Image<3, Float64, Float64>;
+/** @endcond */
+
+/************************************************************************/
+}
+} // namespace Gc::Data

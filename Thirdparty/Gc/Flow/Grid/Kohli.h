@@ -31,13 +31,10 @@
 #include "../../Core.h"
 #include "CommonBase.h"
 
-namespace Gc
-{
-    namespace Flow
-    {
-        namespace Grid
-        {
-            /** Implementation of Kohli's dynamic maximum flow algorithm for grid graphs.
+namespace Gc {
+namespace Flow {
+namespace Grid {
+/** Implementation of Kohli's dynamic maximum flow algorithm for grid graphs.
 
                 For description of this algorithm see General::Kohli.
 
@@ -59,202 +56,199 @@ namespace Gc
                     incorrect (i.e., it is not the same as what would be returned by a
                     non-dynamic algorithm).
             */
-            template <Size N, class TFLOW, class TTCAP, class TCAP, bool MASK>
-            class GC_DLL_EXPORT Kohli
-                : public CommonBase<N,TFLOW,TTCAP,TCAP>
-            {
-            protected:
-                using CommonBase<N,TFLOW,TTCAP,TCAP>::m_arc_cap;
-                using CommonBase<N,TFLOW,TTCAP,TCAP>::m_nb;
-                using CommonBase<N,TFLOW,TTCAP,TCAP>::m_n_ofs;
-                using CommonBase<N,TFLOW,TTCAP,TCAP>::m_bw_idx;
-                using CommonBase<N,TFLOW,TTCAP,TCAP>::Sister;
+template <Size N, class TFLOW, class TTCAP, class TCAP, bool MASK>
+class GC_DLL_EXPORT Kohli
+    : public CommonBase<N, TFLOW, TTCAP, TCAP>
+{
+  protected:
+    using CommonBase<N, TFLOW, TTCAP, TCAP>::m_arc_cap;
+    using CommonBase<N, TFLOW, TTCAP, TCAP>::m_nb;
+    using CommonBase<N, TFLOW, TTCAP, TCAP>::m_n_ofs;
+    using CommonBase<N, TFLOW, TTCAP, TCAP>::m_bw_idx;
+    using CommonBase<N, TFLOW, TTCAP, TCAP>::Sister;
 
-            private:    
-                /** Structure used for storing nodes in the network. */
-                struct Node
-                {
-                    /** Next active/marked node. When this is not NULL, then node is active/marked. */
-                    Node *m_next_active;
-                    /** Next orphan node. When this is not NULL, then node is orphan. */
-                    Node *m_next_orphan;
-                    /** Timestamp when distance was computed. */
-                    Size m_ts;
-                    /** Distance to the terminal */
-                    Size m_dist;
-                    /** Residual capacity of the terminal arcs */
-                    TTCAP m_tr_cap;
-                    /** Flow going through the node. */
-                    TTCAP m_f_diff;
-                    /** Index of arc going to the parent node. */
-                    typename CommonBase<N,TFLOW,TTCAP,TCAP>::NbIndexType m_parent_arc;
-                    /** Node origin - source, sink or free */
-                    Uint8 m_origin;
-                };
+  private:
+    /** Structure used for storing nodes in the network. */
+    struct Node
+    {
+        /** Next active/marked node. When this is not NULL, then node is active/marked. */
+        Node * m_next_active;
+        /** Next orphan node. When this is not NULL, then node is orphan. */
+        Node * m_next_orphan;
+        /** Timestamp when distance was computed. */
+        Size m_ts;
+        /** Distance to the terminal */
+        Size m_dist;
+        /** Residual capacity of the terminal arcs */
+        TTCAP m_tr_cap;
+        /** Flow going through the node. */
+        TTCAP m_f_diff;
+        /** Index of arc going to the parent node. */
+        typename CommonBase<N, TFLOW, TTCAP, TCAP>::NbIndexType m_parent_arc;
+        /** Node origin - source, sink or free */
+        Uint8 m_origin;
+    };
 
-                /** First-in-first-out queue structure */
-                struct Queue
-                {
-                    /** First node in the queue */
-                    Node *m_first;
-                    /** Last node in the queue */
-                    Node *m_last;
-                };
+    /** First-in-first-out queue structure */
+    struct Queue
+    {
+        /** First node in the queue */
+        Node * m_first;
+        /** Last node in the queue */
+        Node * m_last;
+    };
 
-                /** Graph nodes. */
-                System::Collection::Array<1,Node> m_node_list;
-                /** Forward (node -> grid) indexes. */
-                System::Collection::Array<1,Size> m_fw_idx;
+    /** Graph nodes. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Forward (node -> grid) indexes. */
+    System::Collection::Array<1, Size> m_fw_idx;
 
-                /** Total flow */
-                TFLOW m_flow;
-                /** Global time counter */
-                Size m_time;
+    /** Total flow */
+    TFLOW m_flow;
+    /** Global time counter */
+    Size m_time;
 
-                /** Source tree active nodes. */
-                Queue m_q_active;
-                /** Queue of orphans. */
-                Queue m_q_orphan;
-                /** Queue of marked nodes. */
-                Queue m_q_marked;
+    /** Source tree active nodes. */
+    Queue m_q_active;
+    /** Queue of orphans. */
+    Queue m_q_orphan;
+    /** Queue of marked nodes. */
+    Queue m_q_marked;
 
-                /** Current stage. Used to check correct method calling order. */
-                Uint8 m_stage;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		    public:
-			    /** Constructor */
-			    Kohli()
-                    : m_stage(0)
-                {}
+  public:
+    /** Constructor */
+    Kohli() = default;
 
-			    /** Destructor */
-			    virtual ~Kohli()
-			    {}
+    /** Destructor */
+    ~Kohli() override = default;
 
-                virtual void Init(const Math::Algebra::Vector<N,Size> &dim, 
-                    const Energy::Neighbourhood<N,Int32> &nb);
+    void Init(const Math::Algebra::Vector<N, Size> & dim,
+              const Energy::Neighbourhood<N, Int32> & nb) override;
 
-                virtual void InitMask(const Math::Algebra::Vector<N,Size> &dim, 
-                    const Energy::Neighbourhood<N,Int32> &nb,
-                    const System::Collection::IArrayMask<N> &mask);
+    void InitMask(const Math::Algebra::Vector<N, Size> & dim,
+                  const Energy::Neighbourhood<N, Int32> & nb,
+                  const System::Collection::IArrayMask<N> & mask) override;
 
-		        virtual void SetArcCap(Size node, Size arc, TCAP cap);
+    void SetArcCap(Size node, Size arc, TCAP cap) override;
 
-			    virtual void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk);
+    void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk) override;
 
-			    virtual TFLOW FindMaxFlow();
+    TFLOW FindMaxFlow() override;
 
-			    virtual Origin NodeOrigin(Size node) const;
+    Origin NodeOrigin(Size node) const override;
 
-                virtual bool IsDynamic() const
-                {
-                    return true;
-                }
+    bool IsDynamic() const override
+    {
+        return true;
+    }
 
-			    virtual void Dispose();
+    void Dispose() override;
 
-            private:
-                /** Init source and sink trees for first use. */
-                void InitTrees();
+  private:
+    /** Init source and sink trees for first use. */
+    void InitTrees();
 
-                /** Recycle trees from previous run. */
-                void RecycleTrees();
+    /** Recycle trees from previous run. */
+    void RecycleTrees();
 
-                /** Grow source and sink trees until an augmenting path is found. */
-                bool GrowTrees(Node *&n_src, Node *&n_snk, Size &arc);
+    /** Grow source and sink trees until an augmenting path is found. */
+    bool GrowTrees(Node *& n_src, Node *& n_snk, Size & arc);
 
-                /** Augment flow across given path. */
-                void Augment(Node *n_src, Node *n_snk, Size arc);
+    /** Augment flow across given path. */
+    void Augment(Node * n_src, Node * n_snk, Size arc);
 
-                /** Adopt orphan nodes. 
+    /** Adopt orphan nodes. 
                 
                     @param[in] timestamp Current timestamp.
                 */
-                void AdoptOrphans();
+    void AdoptOrphans();
 
-                /** Add node to the queue of active nodes.
+    /** Add node to the queue of active nodes.
                     
                     @param[in] node Node to be added.
                 */
-                void AddToActive(Node *node)
-                {
-                    if (node->m_next_active == NULL)
-                    {
-                        if (m_q_active.m_last != NULL)
-                        {
-                            m_q_active.m_last->m_next_active = node;
-                        }
-                        else
-                        {
-                            m_q_active.m_first = node;                        
-                        }
-                        m_q_active.m_last = node;
-                        node->m_next_active = node; // Mark as active
-                    }
-                }
+    void AddToActive(Node * node)
+    {
+        if (node->m_next_active == nullptr)
+        {
+            if (m_q_active.m_last != nullptr)
+            {
+                m_q_active.m_last->m_next_active = node;
+            }
+            else
+            {
+                m_q_active.m_first = node;
+            }
+            m_q_active.m_last = node;
+            node->m_next_active = node; // Mark as active
+        }
+    }
 
-                /** Add node to the queue of orphan nodes.
+    /** Add node to the queue of orphan nodes.
                     
                     @param[in] node Node to be added.
                 */
-                void AddToOrphans(Node *node)
-                {
-                    if (node->m_next_orphan == NULL)
-                    {                    
-                        if (m_q_orphan.m_last != NULL)
-                        {
-                            m_q_orphan.m_last->m_next_orphan = node;
-                        }
-                        else
-                        {
-                            m_q_orphan.m_first = node;
-                        }
-                        m_q_orphan.m_last = node;
-                        node->m_next_orphan = node; // Mark as orphan
-                    }
-                }
+    void AddToOrphans(Node * node)
+    {
+        if (node->m_next_orphan == nullptr)
+        {
+            if (m_q_orphan.m_last != nullptr)
+            {
+                m_q_orphan.m_last->m_next_orphan = node;
+            }
+            else
+            {
+                m_q_orphan.m_first = node;
+            }
+            m_q_orphan.m_last = node;
+            node->m_next_orphan = node; // Mark as orphan
+        }
+    }
 
-                /** Get arc capacity. */
-                TCAP& ArcCap(Node *n, Size arc)
-                {
-                    return m_arc_cap[(n - m_node_list.Begin()) * m_nb.Elements() + arc];
-                }
+    /** Get arc capacity. */
+    TCAP & ArcCap(Node * n, Size arc)
+    {
+        return m_arc_cap[(n - m_node_list.Begin()) * m_nb.Elements() + arc];
+    }
 
-                /** Get parent node. */
-                Node *ParentNode(Node *n)
-                {
-                    if (MASK)
-                    {
-                        return m_node_list.Begin() + m_bw_idx[m_fw_idx[n - m_node_list.Begin()] + 
-                            m_n_ofs[n->m_parent_arc]];
-                    }
-                    else
-                    {
-                        return n + m_n_ofs[n->m_parent_arc];
-                    }
-                }
+    /** Get parent node. */
+    Node * ParentNode(Node * n)
+    {
+        if (MASK)
+        {
+            return m_node_list.Begin() + m_bw_idx[m_fw_idx[n - m_node_list.Begin()] +
+                                                  m_n_ofs[n->m_parent_arc]];
+        }
+        else
+        {
+            return n + m_n_ofs[n->m_parent_arc];
+        }
+    }
 
-                /** Get head node of given arc. 
+    /** Get head node of given arc. 
                     
                     @param[in] n Pointer to the node. Used only in non-mask verison.
                     @param[in] nidx Grid index of the node (cached). Used only in 
                         masked version.
                     @param[in] arc Arc index.
                 */
-                Node *Head(Node *n, Size nidx, Size arc)
-                {
-                    if (MASK)
-                    {
-                        return m_node_list.Begin() + m_bw_idx[nidx + m_n_ofs[arc]];
-                    }
-                    else
-                    {
-                        return n + m_n_ofs[arc];
-                    }
-                }
-            };
+    Node * Head(Node * n, Size nidx, Size arc)
+    {
+        if (MASK)
+        {
+            return m_node_list.Begin() + m_bw_idx[nidx + m_n_ofs[arc]];
+        }
+        else
+        {
+            return n + m_n_ofs[arc];
         }
     }
+};
 }
+}
+} // namespace Gc::Flow::Grid
 
 #endif

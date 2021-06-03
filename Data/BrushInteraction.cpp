@@ -5,136 +5,129 @@
 
 namespace iseg {
 
-void BrushInteraction::init(iseg::SlicesHandlerInterface* handler)
+void BrushInteraction::Init(iseg::SlicesHandlerInterface* handler)
 {
 	if (handler == nullptr)
 		throw std::runtime_error("null slice handler");
 
-	_slice_handler = handler;
-	_width = _slice_handler->width();
-	_height = _slice_handler->height();
-	auto spacing = _slice_handler->spacing();
-	_dx = spacing[0];
-	_dy = spacing[1];
-	_cached_tissue_locks = _slice_handler->tissue_locks();
+	m_SliceHandler = handler;
+	m_Width = m_SliceHandler->Width();
+	m_Height = m_SliceHandler->Height();
+	auto spacing = m_SliceHandler->Spacing();
+	m_Dx = spacing[0];
+	m_Dy = spacing[1];
+	m_CachedTissueLocks = m_SliceHandler->TissueLocks();
 }
 
-void BrushInteraction::on_mouse_clicked(Point p)
+void BrushInteraction::OnMouseClicked(Point p)
 {
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = _slice_handler->active_slice();
-	dataSelection.work = _brush_target;
-	dataSelection.tissues = !_brush_target;
-	begin_datachange(dataSelection);
+	DataSelection data_selection;
+	data_selection.sliceNr = m_SliceHandler->ActiveSlice();
+	data_selection.work = m_BrushTarget;
+	data_selection.tissues = !m_BrushTarget;
+	m_BeginDatachange(data_selection);
 
-	_last_pt = p;
+	m_LastPt = p;
 
-	if (_brush_target)
+	if (m_BrushTarget)
 	{
-		draw_circle(p);
+		DrawCircle(p);
 
-		float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
-		brush(target, _width, _height, _dx, _dy, p, _radius, true, _target_value, 0.f, [](float v) { return false; });
+		float* target = m_SliceHandler->TargetSlices().at(m_SliceHandler->ActiveSlice());
+		brush(target, m_Width, m_Height, m_Dx, m_Dy, p, m_Radius, true, m_TargetValue, 0.f, [](float v) { return false; });
 	}
 	else
 	{
-		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
-		brush(tissue, _width, _height, _dx, _dy, p, _radius, true, _tissue_value, tissues_size_t(0),
-				[this](tissues_size_t v) {
-					return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
-				});
+		tissues_size_t* tissue = m_SliceHandler->TissueSlices(0).at(m_SliceHandler->ActiveSlice());
+		brush(tissue, m_Width, m_Height, m_Dx, m_Dy, p, m_Radius, true, m_TissueValue, tissues_size_t(0), [this](tissues_size_t v) {
+			return v < m_CachedTissueLocks.size() && m_CachedTissueLocks[v];
+		});
 	}
 
-	end_datachange(iseg::NoUndo);
+	m_EndDatachange(iseg::NoUndo);
 }
 
-void BrushInteraction::on_mouse_moved(Point p)
-{
-	std::vector<Point> vps;
-	addLine(&vps, _last_pt, p);
-	_last_pt = p;
-
-	if (_brush_target)
-	{
-		draw_circle(p);
-
-		float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
-		for (auto pi : vps)
-		{
-			brush(target, _width, _height, _dx, _dy, pi, _radius, true, _target_value, 0.f, [](float v) { return false; });
-		}
-	}
-	else
-	{
-		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
-		for (auto pi : vps)
-		{
-			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0),
-					[this](tissues_size_t v) {
-						return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
-					});
-		}
-	}
-
-	end_datachange(iseg::NoUndo);
-}
-
-void BrushInteraction::on_mouse_released(Point p)
+void BrushInteraction::OnMouseMoved(Point p)
 {
 	std::vector<Point> vps;
-	addLine(&vps, _last_pt, p);
+	addLine(&vps, m_LastPt, p);
+	m_LastPt = p;
 
-	if (_brush_target)
+	if (m_BrushTarget)
 	{
-		float* target = _slice_handler->target_slices().at(_slice_handler->active_slice());
+		DrawCircle(p);
+
+		float* target = m_SliceHandler->TargetSlices().at(m_SliceHandler->ActiveSlice());
 		for (auto pi : vps)
 		{
-			brush(target, _width, _height, _dx, _dy, pi, _radius, true, _target_value, 0.f, [](float v) { return false; });
+			brush(target, m_Width, m_Height, m_Dx, m_Dy, pi, m_Radius, true, m_TargetValue, 0.f, [](float v) { return false; });
 		}
 	}
 	else
 	{
-		tissues_size_t* tissue = _slice_handler->tissue_slices(0).at(_slice_handler->active_slice());
+		tissues_size_t* tissue = m_SliceHandler->TissueSlices(0).at(m_SliceHandler->ActiveSlice());
 		for (auto pi : vps)
 		{
-			brush(tissue, _width, _height, _dx, _dy, pi, _radius, true, _tissue_value, tissues_size_t(0),
-					[this](tissues_size_t v) {
-						return v < _cached_tissue_locks.size() && _cached_tissue_locks[v];
-					});
+			brush(tissue, m_Width, m_Height, m_Dx, m_Dy, pi, m_Radius, true, m_TissueValue, tissues_size_t(0), [this](tissues_size_t v) {
+				return v < m_CachedTissueLocks.size() && m_CachedTissueLocks[v];
+			});
+		}
+	}
+
+	m_EndDatachange(iseg::NoUndo);
+}
+
+void BrushInteraction::OnMouseReleased(Point p)
+{
+	std::vector<Point> vps;
+	addLine(&vps, m_LastPt, p);
+
+	if (m_BrushTarget)
+	{
+		float* target = m_SliceHandler->TargetSlices().at(m_SliceHandler->ActiveSlice());
+		for (auto pi : vps)
+		{
+			brush(target, m_Width, m_Height, m_Dx, m_Dy, pi, m_Radius, true, m_TargetValue, 0.f, [](float v) { return false; });
+		}
+	}
+	else
+	{
+		tissues_size_t* tissue = m_SliceHandler->TissueSlices(0).at(m_SliceHandler->ActiveSlice());
+		for (auto pi : vps)
+		{
+			brush(tissue, m_Width, m_Height, m_Dx, m_Dy, pi, m_Radius, true, m_TissueValue, tissues_size_t(0), [this](tissues_size_t v) {
+				return v < m_CachedTissueLocks.size() && m_CachedTissueLocks[v];
+			});
 		}
 	}
 
 	std::vector<Point> vpdyn;
-	vpdyn_changed(&vpdyn);
+	m_VpdynChanged(&vpdyn);
 
-	end_datachange(iseg::EndUndo);
+	m_EndDatachange(iseg::EndUndo);
 }
 
-void BrushInteraction::draw_circle(Point p)
+void BrushInteraction::DrawCircle(Point p)
 {
 	Point p1;
 	std::vector<Point> vpdyn;
 
-	float radius_corrected = (_dx > _dy) ? std::floor(_radius / _dx + 0.5f) * _dx : std::floor(_radius / _dy + 0.5f) * _dy;
+	float radius_corrected = (m_Dx > m_Dy) ? std::floor(m_Radius / m_Dx + 0.5f) * m_Dx : std::floor(m_Radius / m_Dy + 0.5f) * m_Dy;
 	float const radius_corrected2 = radius_corrected * radius_corrected;
-	int const xradius = static_cast<int>(std::ceil(radius_corrected / _dx));
-	int const yradius = static_cast<int>(std::ceil(radius_corrected / _dy));
-	for (p1.px = std::max(0, p.px - xradius);
-			 p1.px <= std::min((int)_width - 1, p.px + xradius);
-			 p1.px++)
+	int const xradius = static_cast<int>(std::ceil(radius_corrected / m_Dx));
+	int const yradius = static_cast<int>(std::ceil(radius_corrected / m_Dy));
+	for (p1.px = std::max(0, p.px - xradius); p1.px <= std::min((int)m_Width - 1, p.px + xradius); p1.px++)
 	{
-		for (p1.py = std::max(0, p.py - yradius);
-				 p1.py <= std::min((int)_height - 1, p.py + yradius);
-				 p1.py++)
+		for (p1.py = std::max(0, p.py - yradius); p1.py <= std::min((int)m_Height - 1, p.py + yradius); p1.py++)
 		{
-			if (std::pow(_dx * (p.px - p1.px), 2.f) + std::pow(_dy * (p.py - p1.py), 2.f) <= radius_corrected2)
+			if (std::pow(m_Dx * (p.px - p1.px), 2.f) + std::pow(m_Dy * (p.py - p1.py), 2.f) <= radius_corrected2)
 			{
 				vpdyn.push_back(p1);
 			}
 		}
 	}
 
-	vpdyn_changed(&vpdyn);
+	m_VpdynChanged(&vpdyn);
 	vpdyn.clear();
 }
 

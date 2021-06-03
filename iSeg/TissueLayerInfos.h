@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,7 +11,7 @@
 
 #include "Data/Types.h"
 
-#include <qstring.h>
+#include <QString>
 
 #include <map>
 #include <set>
@@ -19,47 +19,40 @@
 
 namespace iseg {
 
-enum TissueLayerOverlayMode {
-	Normal,
-	// TODO
+enum eTissueLayerOverlayMode {
+	Normal, // TODO
 };
 
 struct TissueLayerInfoStruct
 {
 	TissueLayerInfoStruct()
 	{
-		name = "?";
-		visible = true;
-		opac = 1.0f;
-		mode = Normal;
+		m_Name = "?";
+		m_Visible = true;
+		m_Opac = 1.0f;
+		m_Mode = Normal;
 	};
 
 	TissueLayerInfoStruct(const TissueLayerInfoStruct& other)
 	{
-		name = other.name;
-		visible = other.visible;
-		opac = other.opac;
-		mode = other.mode;
+		m_Name = other.m_Name;
+		m_Visible = other.m_Visible;
+		m_Opac = other.m_Opac;
+		m_Mode = other.m_Mode;
 	};
 
 	TissueLayerInfoStruct& operator=(const TissueLayerInfoStruct& other)
-	{
-		name = other.name;
-		visible = other.visible;
-		opac = other.opac;
-		mode = other.mode;
-		return *this;
-	};
+	= default;;
 
-	QString name;
-	bool visible;
-	float opac;
-	TissueLayerOverlayMode mode;
+	QString m_Name;
+	bool m_Visible;
+	float m_Opac;
+	eTissueLayerOverlayMode m_Mode;
 };
 
-typedef std::vector<TissueLayerInfoStruct> TissueLayerInfosVecType;
-typedef std::map<QString, tissuelayers_size_t> TissueLayerIndexMapType;
-typedef std::pair<QString, tissuelayers_size_t> TissueLayerIndexMapEntryType;
+using TissueLayerInfosVecType = std::vector<TissueLayerInfoStruct>;
+using TissueLayerIndexMapType = std::map<QString, tissuelayers_size_t>;
+using TissueLayerIndexMapEntryType = std::pair<QString, tissuelayers_size_t>;
 
 class TissueLayerInfos
 {
@@ -72,15 +65,14 @@ public:
 	static QString GetTissueLayerName(tissuelayers_size_t layerIdx);
 	static bool GetTissueLayerVisible(tissuelayers_size_t layerIdx);
 	static float GetTissueLayerOpac(tissuelayers_size_t layerIdx);
-	static TissueLayerOverlayMode
+	static eTissueLayerOverlayMode
 			GetTissueLayerOverlayMode(tissuelayers_size_t layerIdx);
 
 	static void SetTissueLayerName(tissuelayers_size_t layerIdx, QString val);
 	static void SetTissueLayerVisible(tissuelayers_size_t layerIdx, bool val);
 	static void SetTissueLayersVisible(bool val);
 	static void SetTissueLayerOpac(tissuelayers_size_t layerIdx, float val);
-	static void SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx,
-			TissueLayerOverlayMode val);
+	static void SetTissueLayerOverlayMode(tissuelayers_size_t layerIdx, eTissueLayerOverlayMode val);
 
 	static void AddTissueLayer(TissueLayerInfoStruct& layer);
 	static void RemoveTissueLayer(tissuelayers_size_t layerIdx);
@@ -90,8 +82,8 @@ protected:
 	static void CreateTissueLayerIndexMap();
 
 protected:
-	static TissueLayerInfosVecType tissueLayerInfosVector;
-	static TissueLayerIndexMapType tissueLayerIndexMap;
+	static TissueLayerInfosVecType tissue_layer_infos_vector;
+	static TissueLayerIndexMapType tissue_layer_index_map;
 };
 
 } // namespace iseg

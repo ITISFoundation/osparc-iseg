@@ -44,44 +44,38 @@
 class VTK_EXPORT vtkLookupTable16 : public vtkLookupTable
 {
 public:
-  static vtkLookupTable16 *New();
+  static vtkLookupTable16* New();
 
-  vtkTypeMacro(vtkLookupTable16,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkTypeMacro(vtkLookupTable16, vtkLookupTable);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  void Build();
+  void Build() override;
 
   void SetNumberOfTableValues(vtkIdType number);
 
-  unsigned char *WritePointer(const vtkIdType id, const int number);
+  unsigned char* WritePointer(const vtkIdType id, const int number);
 
-  unsigned short *GetPointer(const vtkIdType id) {
-    return this->Table16->GetPointer(4*id); };
+  unsigned short* GetPointer(const vtkIdType id) { return this->Table16->GetPointer(4 * id); };
 
 protected:
-  vtkLookupTable16(int sze=256, int ext=256);
-  ~vtkLookupTable16();
+  vtkLookupTable16(int sze = 256, int ext = 256);
+  ~vtkLookupTable16() override;
 
-  vtkUnsignedShortArray *Table16;
+  vtkUnsignedShortArray* Table16;
 
-void MapScalarsThroughTable2(void *input,
-                                             unsigned char *output,
-                                             int inputDataType,
-                                             int numberOfValues,
-                                             int inputIncrement,
-                                             int outputFormat);
+  void MapScalarsThroughTable2(void* input, unsigned char* output, int inputDataType,
+    int numberOfValues, int inputIncrement, int outputFormat) override;
 
 private:
-  vtkLookupTable16(const vtkLookupTable16&);  // Not implemented.
-  void operator=(const vtkLookupTable16&);  // Not implemented.
+  vtkLookupTable16(const vtkLookupTable16&) = delete;
+  void operator=(const vtkLookupTable16&) = delete;
 };
 
-//----------------------------------------------------------------------------
-inline unsigned char *vtkLookupTable16::WritePointer(const vtkIdType id,
-                                                   const int number)
+//--------------------- override----------------- override--------------------------------------
+inline unsigned char* vtkLookupTable16::WritePointer(const vtkIdType id, const int number)
 {
-  //this->InsertTime.Modified();
-  return (unsigned char*)this->Table16->WritePointer(4*id,4*number);
+  // this->InsertTime.Modified();
+  return (unsigned char*)this->Table16->WritePointer(4 * id, 4 * number);
 }
 
 #endif

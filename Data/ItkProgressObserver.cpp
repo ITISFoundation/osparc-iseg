@@ -24,7 +24,7 @@ void ItkProgressObserver::Execute(const itk::Object* object, const itk::EventObj
 	}
 
 	// check if abort was requested
-	if (progress_info->wasCanceled())
+	if (m_ProgressInfo->WasCanceled())
 	{
 		ISEG_WARNING("Process aborted");
 
@@ -36,7 +36,7 @@ void ItkProgressObserver::Execute(const itk::Object* object, const itk::EventObj
 	{
 		// update progress
 		int percent = static_cast<int>(100.f * filter->GetProgress());
-		progress_info->setValue(percent);
+		m_ProgressInfo->SetValue(percent);
 	}
 }
 

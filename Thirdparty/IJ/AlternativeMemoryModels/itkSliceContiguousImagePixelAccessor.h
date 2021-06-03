@@ -40,58 +40,59 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template<class TType, class TSize>
+template <class TType, class TSize>
 class ITK_TEMPLATE_EXPORT SliceContiguousImagePixelAccessor
 {
 public:
-
- /** External typedef. It defines the external aspect
+  /** External typedef. It defines the external aspect
    * that this class will exhibit. */
-  typedef TType ExternalType ;
+  using ExternalType = TType;
 
   /** Internal typedef. It defines the internal real
    * representation of data. */
-  typedef TType InternalType ;
+  using InternalType = TType;
 
   /** Typedef for slices array. */
-  typedef std::vector< TType * > SliceArrayType;
+  using SliceArrayType = std::vector<TType *>;
 
   /** Typedef for image size. */
-  typedef TSize SizeType;
+  using SizeType = TSize;
 
   /** Set output using the value in input */
-  inline void Set(InternalType & output, const ExternalType & input, const unsigned long offset ) const
-    {
-      const unsigned long slice = offset / m_SizeOfSlice;
-      const unsigned long sliceOffset = offset % m_SizeOfSlice;
-      InternalType *truePixel = (m_Slices->operator[](slice) + sliceOffset);
-      *truePixel = input;
-    }
+  inline void
+  Set(InternalType & output, const ExternalType & input, const unsigned long offset) const
+  {
+    const unsigned long slice = offset / m_SizeOfSlice;
+    const unsigned long sliceOffset = offset % m_SizeOfSlice;
+    InternalType *      truePixel = (m_Slices->operator[](slice) + sliceOffset);
+    *truePixel = input;
+  }
 
   /** Get the value from input */
-  inline ExternalType Get( const InternalType & begin, const unsigned long offset ) const
-    {
-      const unsigned long slice = offset / m_SizeOfSlice;
-      const unsigned long sliceOffset = offset % m_SizeOfSlice;
-      return *(m_Slices->operator[](slice) + sliceOffset);
-    }
+  inline ExternalType
+  Get(const InternalType & begin, const unsigned long offset) const
+  {
+    const unsigned long slice = offset / m_SizeOfSlice;
+    const unsigned long sliceOffset = offset % m_SizeOfSlice;
+    return *(m_Slices->operator[](slice) + sliceOffset);
+  }
 
-  SliceContiguousImagePixelAccessor() {}
+  SliceContiguousImagePixelAccessor() = default;
 
-   /** Constructor to initialize slices and image size at construction time */
-   SliceContiguousImagePixelAccessor( SliceArrayType* slices, SizeType size )
-     {
-     m_Slices = slices;
-     m_Size = size;
-     m_SizeOfSlice = size[0] * size[1]; // Pre-compute for speed
-     }
+  /** Constructor to initialize slices and image size at construction time */
+  SliceContiguousImagePixelAccessor(SliceArrayType * slices, SizeType size)
+  {
+    m_Slices = slices;
+    m_Size = size;
+    m_SizeOfSlice = size[0] * size[1]; // Pre-compute for speed
+  }
 
-  virtual ~SliceContiguousImagePixelAccessor() {};
+  virtual ~SliceContiguousImagePixelAccessor() = default;
 
 private:
-  SliceArrayType* m_Slices;
-  SizeType m_Size;
-  unsigned long m_SizeOfSlice;
+  SliceArrayType * m_Slices;
+  SizeType         m_Size;
+  unsigned long    m_SizeOfSlice;
 };
 
 } // end namespace itk

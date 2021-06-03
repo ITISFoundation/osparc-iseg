@@ -28,24 +28,21 @@
 #ifndef GC_FLOW_TYPE_H
 #define GC_FLOW_TYPE_H
 
-namespace Gc
-{
-    /** Namespace containing all methods for finding a maximum flow in a network. */
-    namespace Flow
-    {
-        /** Node origin after the min-cut/max-flow computation. */
-		enum Origin
-		{
-            /** Free node. Free nodes can be assigned to either the source 
+namespace Gc {
+/** Namespace containing all methods for finding a maximum flow in a network. */
+namespace Flow {
+/** Node origin after the min-cut/max-flow computation. */
+enum Origin {
+    /** Free node. Free nodes can be assigned to either the source 
                 or the sink without changing the capacity of the minimal cut.
             */
-			Free = 0,
-            /** Node connected to the source. */
-			Source = 1,
-            /** Node connected to the sink. */
-			Sink = 2
-		};
-    }
-}
+    Free = 0,
+    /** Node connected to the source. */
+    Source = 1,
+    /** Node connected to the sink. */
+    Sink = 2
+};
+} // namespace Flow
+} // namespace Gc
 
 #endif

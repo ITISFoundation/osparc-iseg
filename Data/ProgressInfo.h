@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,13 +16,13 @@ namespace iseg {
 class ISEG_DATA_API ProgressInfo
 {
 public:
-	virtual void setNumberOfSteps(int N) {}
+	virtual void SetNumberOfSteps(int N) {}
 
-	virtual void increment() {}
+	virtual void Increment() {}
 
-	virtual void setValue(int /* percent */) {}
+	virtual void SetValue(int /* percent */) {}
 
-	virtual bool wasCanceled() const { return false; }
+	virtual bool WasCanceled() const { return false; }
 };
 
 } // namespace iseg

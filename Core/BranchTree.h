@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,66 +20,66 @@ class BranchTree
 {
 public:
 	//! Constructor.
-	BranchTree(void)
+	BranchTree()
 	{
-		_branchTree.clear();
-		_branchTreeIter = _branchTree.begin();
+		m_BranchTree.clear();
+		m_BranchTreeIter = m_BranchTree.begin();
 	};
 	//! Destructor.
-	~BranchTree(void)
+	~BranchTree()
 	{
-		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
-				 it != _branchTree.end(); it++)
+		for (std::list<BranchItem*>::iterator it = m_BranchTree.begin();
+				 it != m_BranchTree.end(); it++)
 		{
 			delete *it;
 		}
-		_branchTree.clear();
+		m_BranchTree.clear();
 	};
 
-	void clear()
+	void Clear()
 	{
-		for (std::list<BranchItem*>::iterator it = _branchTree.begin();
-				 it != _branchTree.end(); it++)
+		for (std::list<BranchItem*>::iterator it = m_BranchTree.begin();
+				 it != m_BranchTree.end(); it++)
 		{
 			delete *it;
 		}
-		_branchTree.clear();
+		m_BranchTree.clear();
 	}
 
-	unsigned getSize() { return static_cast<unsigned>(_branchTree.size()); };
+	unsigned GetSize() { return static_cast<unsigned>(m_BranchTree.size()); };
 
 	// adds a new branch to _branchTree and returns the created branchItem
-	BranchItem* addNewBranch()
+	BranchItem* AddNewBranch()
 	{
-		BranchItem* BI = new BranchItem();
-		_branchTree.push_back(BI);
-		_branchTreeIter = _branchTree.begin();
-		return BI;
+		BranchItem* bi = new BranchItem();
+		m_BranchTree.push_back(bi);
+		m_BranchTreeIter = m_BranchTree.begin();
+		return bi;
 	};
 
-	void resetIterator() { _branchTreeIter = _branchTree.begin(); };
+	void ResetIterator() { m_BranchTreeIter = m_BranchTree.begin(); };
 
 	// increase _branchTreeIter and return new element
-	BranchItem* getItem()
+	BranchItem* GetItem()
 	{
-		if (_branchTreeIter == _branchTree.end())
+		if (m_BranchTreeIter == m_BranchTree.end())
 			return nullptr;
 		else
-			return *_branchTreeIter;
+			return *m_BranchTreeIter;
 	}
-	BranchItem* getNextItem()
+	BranchItem* GetNextItem()
 	{
-		if (_branchTreeIter != _branchTree.end())
-			_branchTreeIter++;
-		if (_branchTreeIter == _branchTree.end())
+		if (m_BranchTreeIter != m_BranchTree.end())
+			m_BranchTreeIter++;
+		if (m_BranchTreeIter == m_BranchTree.end())
 			return nullptr;
 		else
-			return *_branchTreeIter;
+			return *m_BranchTreeIter;
 	};
 
 private:
-	std::list<BranchItem*>::iterator _branchTreeIter;
-	std::list<BranchItem*> _branchTree;
+	std::list<BranchItem*>::iterator m_BranchTreeIter;
+	std::list<BranchItem*> m_BranchTree;
 };
 
 } // namespace iseg

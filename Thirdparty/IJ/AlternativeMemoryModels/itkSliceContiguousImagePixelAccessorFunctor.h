@@ -9,8 +9,8 @@
   Copyright (c) Insight Software Consortium. All rights reserved.
   See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -26,7 +26,7 @@ namespace itk
  * A typical user should not need to use this class. The class is internally
  * used by the neighborhood iterators.
  *
- * The pixel accessor is set with the SetPixelAccessor method. This accessor is 
+ * The pixel accessor is set with the SetPixelAccessor method. This accessor is
  * meant to be used only for SliceContiguousImage and not for Image. Prior to use,
  * this slices must be set.
  *
@@ -36,58 +36,64 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template<class TImageType>
+template <class TImageType>
 class ITK_TEMPLATE_EXPORT SliceContiguousImagePixelAccessorFunctor
 {
 public:
+  using ImageType = TImageType;
+  using InternalPixelType = typename ImageType::InternalPixelType;
+  using ExternalPixelType = typename ImageType::PixelType;
+  using PixelAccessorType = typename ImageType::AccessorType;
+  using VectorLengthType = unsigned int;
 
-  typedef TImageType                                   ImageType;
-  typedef typename ImageType::InternalPixelType        InternalPixelType;
-  typedef typename ImageType::PixelType                ExternalPixelType;
-  typedef typename ImageType::AccessorType             PixelAccessorType;
-  typedef unsigned int                                 VectorLengthType;
-  
   /** Set the PixelAccessor. This is set at construction time by the image iterators.
    * The type PixelAccessorType is obtained from the ImageType over which the iterators
    * are templated.
    * */
-  inline void SetPixelAccessor( PixelAccessorType& accessor ) 
-    {
+  inline void
+  SetPixelAccessor(PixelAccessorType & accessor)
+  {
     m_PixelAccessor = accessor;
-    }
+  }
 
   /** Set the pointer index to the start of the buffer. */
-  inline void SetBegin( const InternalPixelType * begin ) // NOTE: begin is always 0
-    { this->m_Begin = const_cast< InternalPixelType * >( begin ); }
+  inline void
+  SetBegin(const InternalPixelType * begin) // NOTE: begin is always 0
+  {
+    this->m_Begin = const_cast<InternalPixelType *>(begin);
+  }
 
   /** Set output using the value in input */
-  inline void Set( InternalPixelType & output, const ExternalPixelType &input ) const
-    {
-    m_PixelAccessor.Set( output, input, (&output)-m_Begin ); // NOTE: begin is always 0
-    }
+  inline void
+  Set(InternalPixelType & output, const ExternalPixelType & input) const
+  {
+    m_PixelAccessor.Set(output, input, (&output) - m_Begin); // NOTE: begin is always 0
+  }
 
   /** Get the value from input */
-  inline ExternalPixelType Get( const InternalPixelType &input ) const
-    {
-    return m_PixelAccessor.Get( input, (&input)-m_Begin ); // NOTE: begin is always 0
-    }
+  inline ExternalPixelType
+  Get(const InternalPixelType & input) const
+  {
+    return m_PixelAccessor.Get(input, (&input) - m_Begin); // NOTE: begin is always 0
+  }
 
   /** Required for some filters to compile. */
-  static void SetVectorLength( ImageType *, VectorLengthType )
-    {
-    }
+  static void
+  SetVectorLength(ImageType *, VectorLengthType)
+  {}
 
   /** Required for some filters to compile. */
-  static VectorLengthType GetVectorLength( const ImageType * )
-    {
+  static VectorLengthType
+  GetVectorLength(const ImageType *)
+  {
     return 1;
-    }
+  }
 
 private:
-  PixelAccessorType m_PixelAccessor; // The pixel accessor
-  InternalPixelType *m_Begin; // Begin of the buffer, always 0
+  PixelAccessorType   m_PixelAccessor; // The pixel accessor
+  InternalPixelType * m_Begin;         // Begin of the buffer, always 0
 };
 
-}
+} // namespace itk
 
 #endif

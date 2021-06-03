@@ -31,366 +31,362 @@
 #include "../../System/ArgumentException.h"
 #include "DistanceTransform.h"
 
-namespace Gc
+namespace Gc {
+namespace Algo {
+namespace Geometry {
+namespace DistanceTransform {
+/******************************************************************************/
+
+template <Size N, class T>
+static void Scan(System::Collection::Array<N, T> & map, const Energy::Neighbourhood<N, Int32> & nb)
 {
-    namespace Algo
+    // Calculate neighbour offsets
+    System::Collection::Array<1, Int32> ofs;
+    map.Indexes(nb, ofs);
+
+    // Check if we're doing forward or backward scan
+    bool forward = ofs[0] < 0;
+
+    // Get neighbourhood extent
+    Math::Algebra::Vector<N, Size> bleft, bright;
+    nb.Extent(bleft, bright);
+
+    // Create data iterator
+    Data::BorderIterator<N> iter(map.Dimensions(), bleft, bright);
+    iter.Start(!forward);
+
+    // Scan forward or backward
+    Math::Algebra::Vector<N, Size> ncur;
+    T * p = &map[forward ? 0 : (map.Elements() - 1)];
+    Int32 addp = forward ? 1 : -1;
+    Size bsize;
+
+    while (!iter.IsFinished())
     {
-        namespace Geometry
+        ncur = iter.CurPos();
+
+        if (iter.NextBlock(bsize)) // Border, we have to check boundaries
         {
-            namespace DistanceTransform
+            while (bsize-- > 0)
             {
-                /******************************************************************************/
-
-                template <Size N, class T>
-                static void Scan(System::Collection::Array<N,T> &map, const Energy::Neighbourhood<N,Int32> &nb)
+                for (Size i = 0; i < nb.Elements(); i++)
                 {
-                    // Calculate neighbour offsets
-                    System::Collection::Array<1,Int32> ofs;
-                    map.Indexes(nb, ofs);
-
-                    // Check if we're doing forward or backward scan
-                    bool forward = ofs[0] < 0;
-
-                    // Get neighbourhood extent
-                    Math::Algebra::Vector<N,Size> bleft, bright;
-                    nb.Extent(bleft, bright);
-
-                    // Create data iterator
-                    Data::BorderIterator<N> iter(map.Dimensions(), bleft, bright);
-                    iter.Start(!forward);                    
-
-                    // Scan forward or backward
-                    Math::Algebra::Vector<N,Size> ncur;
-                    T *p = &map[forward ? 0 : (map.Elements() - 1)];
-                    Int32 addp = forward ? 1 : -1;
-                    Size bsize;
-                    
-                    while (!iter.IsFinished())
+                    if (map.IsNeighbourInside(ncur, nb[i]))
                     {
-                        ncur = iter.CurPos();
-
-                        if (iter.NextBlock(bsize)) // Border, we have to check boundaries
-                        {                            
-                            while (bsize-- > 0)
-                            {
-                                for (Size i = 0; i < nb.Elements(); i++)
-                                {
-                                    if (map.IsNeighbourInside(ncur, nb[i]))
-                                    {
-                                        T nd = p[ofs[i]] + 1;
-                                        if (*p > nd)
-                                        {
-                                            *p = nd;
-                                        }
-                                    }
-                                }
-
-                                p += addp;
-                                iter.NextPos(ncur);
-                            }
-                        }
-                        else // Safe zone, no need to check boundaries
-                        {                                
-                            while (bsize-- > 0)
-                            {
-                                for (Size i = 0; i < nb.Elements(); i++)
-                                {
-                                    if (*p > p[ofs[i]] + 1)
-                                    {
-                                        *p = p[ofs[i]] + 1;
-                                    }
-                                }
-
-                                p += addp;
-                            }
-                        }
-                    }
-                }
-
-                /******************************************************************************/
-
-                template <Size N, class DATA, class T>
-                void CityBlock(const System::Collection::Array<N,DATA> &mask,
-                    DATA zero_val, System::Collection::Array<N,T> &map)
-                {
-                    // Generate neighbourhood
-                    Energy::Neighbourhood<N,Int32> nb;
-                    nb.Elementary();
-
-                    // Init map
-                    map.Resize(mask.Dimensions());
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        map[i] = (mask[i] == zero_val) ? 0 : (std::numeric_limits<T>::max() - 1);
-                    }
-
-                    // Forward and backward scan
-                    if (!mask.IsEmpty())
-                    {
-                        Scan(map, nb.Negative());
-                        Scan(map, nb.Positive());
-                    }
-                }
-
-                /******************************************************************************/
-
-                // Explicit instantiations
-                /** @cond */
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint64> &map);
-                /** @endcond */
-
-                /******************************************************************************/
-
-                template <Size N, class DATA, class T>
-                void ChessBoard(const System::Collection::Array<N,DATA> &mask,
-                    DATA zero_val, System::Collection::Array<N,T> &map)
-                {
-                    // Generate neighbourhood
-                    Energy::Neighbourhood<N,Int32> nb;
-                    nb.Box(Math::Algebra::Vector<N,Size>(1), false, false);
-
-                    // Init map
-                    map.Resize(mask.Dimensions());
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        map[i] = (mask[i] == zero_val) ? 0 : (std::numeric_limits<T>::max() - 1);
-                    }
-
-                    // Forward and backward scan
-                    if (!mask.IsEmpty())
-                    {
-                        Scan(map, nb.Negative());
-                        Scan(map, nb.Positive());
-                    }
-                }
-
-                /******************************************************************************/
-
-                // Explicit instantiations
-                /** @cond */
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,bool> &mask,
-                    bool zero_val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,bool> &mask,
-                    bool zero_val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 zero_val, System::Collection::Array<3,Uint64> &map);
-                /** @endcond */
-
-                /******************************************************************************/
-
-                template <Size N, class DATA, class T>
-                void CityBlockLocal(const System::Collection::Array<N,DATA> &mask,
-                    DATA val, System::Collection::Array<N,T> &map)
-                {
-                    if (mask.Dimensions() != map.Dimensions())
-                    {
-                        throw System::ArgumentException(__FUNCTION__, __LINE__, "Mask and map dimensions "
-                            "do not match.");
-                    }
-
-                    // Generate neighbourhood
-                    Energy::Neighbourhood<N,Int32> nb;
-                    nb.Elementary();
-
-                    // Init temporary map
-                    System::Collection::Array<N,T> temp_map;
-                    temp_map.Resize(mask.Dimensions());
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        temp_map[i] = (mask[i] != val) ? 0 : (std::numeric_limits<T>::max() - 1);
-                    }
-
-                    // Forward and backward scan
-                    if (!mask.IsEmpty())
-                    {
-                        Scan(temp_map, nb.Negative());
-                        Scan(temp_map, nb.Positive());
-                    }
-
-                    // Copy distances to output
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        if (mask[i] == val)
+                        T nd = p[ofs[i]] + 1;
+                        if (*p > nd)
                         {
-                            map[i] = temp_map[i];
+                            *p = nd;
                         }
                     }
                 }
 
-                /******************************************************************************/
-
-                // Explicit instantiations
-                /** @cond */
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint64> &map);
-                /** @endcond */
-
-                /******************************************************************************/
-
-                template <Size N, class DATA, class T>
-                void ChessBoardLocal(const System::Collection::Array<N,DATA> &mask,
-                    DATA val, System::Collection::Array<N,T> &map)
+                p += addp;
+                iter.NextPos(ncur);
+            }
+        }
+        else // Safe zone, no need to check boundaries
+        {
+            while (bsize-- > 0)
+            {
+                for (Size i = 0; i < nb.Elements(); i++)
                 {
-                    if (mask.Dimensions() != map.Dimensions())
+                    if (*p > p[ofs[i]] + 1)
                     {
-                        throw System::ArgumentException(__FUNCTION__, __LINE__, "Mask and map dimensions "
-                            "do not match.");
-                    }
-
-                    // Generate neighbourhood
-                    Energy::Neighbourhood<N,Int32> nb;
-                    nb.Box(Math::Algebra::Vector<N,Size>(1), false, false);
-
-                    // Init temporary map
-                    System::Collection::Array<N,T> temp_map;
-                    temp_map.Resize(mask.Dimensions());
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        temp_map[i] = (mask[i] != val) ? 0 : (std::numeric_limits<T>::max() - 1);
-                    }
-
-                    // Forward and backward scan
-                    if (!mask.IsEmpty())
-                    {
-                        Scan(temp_map, nb.Negative());
-                        Scan(temp_map, nb.Positive());
-                    }
-
-                    // Copy distances to output
-                    for (Size i = 0; i < mask.Elements(); i++)
-                    {
-                        if (mask[i] == val)
-                        {
-                            map[i] = temp_map[i];
-                        }
+                        *p = p[ofs[i]] + 1;
                     }
                 }
 
-                /******************************************************************************/
-
-                // Explicit instantiations
-                /** @cond */
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,bool> &mask,
-                    bool val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,bool> &mask,
-                    bool val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint8> &mask,
-                    Uint8 val, System::Collection::Array<3,Uint64> &map);
-
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<2,Uint64> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint16> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint32> &map);
-                template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3,Uint16> &mask,
-                    Uint16 val, System::Collection::Array<3,Uint64> &map);
-                /** @endcond */
-
-                /******************************************************************************/
+                p += addp;
             }
         }
     }
 }
+
+/******************************************************************************/
+
+template <Size N, class DATA, class T>
+void CityBlock(const System::Collection::Array<N, DATA> & mask,
+               DATA zero_val, System::Collection::Array<N, T> & map)
+{
+    // Generate neighbourhood
+    Energy::Neighbourhood<N, Int32> nb;
+    nb.Elementary();
+
+    // Init map
+    map.Resize(mask.Dimensions());
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        map[i] = (mask[i] == zero_val) ? 0 : (std::numeric_limits<T>::max() - 1);
+    }
+
+    // Forward and backward scan
+    if (!mask.IsEmpty())
+    {
+        Scan(map, nb.Negative());
+        Scan(map, nb.Positive());
+    }
+}
+
+/******************************************************************************/
+
+// Explicit instantiations
+/** @cond */
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, bool> & mask,
+                                      bool zero_val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, bool> & mask,
+                                      bool zero_val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, bool> & mask,
+                                      bool zero_val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, bool> & mask,
+                                      bool zero_val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, bool> & mask,
+                                      bool zero_val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, bool> & mask,
+                                      bool zero_val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<2, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT CityBlock(const System::Collection::Array<3, Uint8> & mask,
+                                      Uint8 zero_val, System::Collection::Array<3, Uint64> & map);
+/** @endcond */
+
+/******************************************************************************/
+
+template <Size N, class DATA, class T>
+void ChessBoard(const System::Collection::Array<N, DATA> & mask,
+                DATA zero_val, System::Collection::Array<N, T> & map)
+{
+    // Generate neighbourhood
+    Energy::Neighbourhood<N, Int32> nb;
+    nb.Box(Math::Algebra::Vector<N, Size>(1), false, false);
+
+    // Init map
+    map.Resize(mask.Dimensions());
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        map[i] = (mask[i] == zero_val) ? 0 : (std::numeric_limits<T>::max() - 1);
+    }
+
+    // Forward and backward scan
+    if (!mask.IsEmpty())
+    {
+        Scan(map, nb.Negative());
+        Scan(map, nb.Positive());
+    }
+}
+
+/******************************************************************************/
+
+// Explicit instantiations
+/** @cond */
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, bool> & mask,
+                                       bool zero_val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, bool> & mask,
+                                       bool zero_val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, bool> & mask,
+                                       bool zero_val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, bool> & mask,
+                                       bool zero_val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, bool> & mask,
+                                       bool zero_val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, bool> & mask,
+                                       bool zero_val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<2, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoard(const System::Collection::Array<3, Uint8> & mask,
+                                       Uint8 zero_val, System::Collection::Array<3, Uint64> & map);
+/** @endcond */
+
+/******************************************************************************/
+
+template <Size N, class DATA, class T>
+void CityBlockLocal(const System::Collection::Array<N, DATA> & mask,
+                    DATA val, System::Collection::Array<N, T> & map)
+{
+    if (mask.Dimensions() != map.Dimensions())
+    {
+        throw System::ArgumentException(__FUNCTION__, __LINE__, "Mask and map dimensions "
+                                                                "do not match.");
+    }
+
+    // Generate neighbourhood
+    Energy::Neighbourhood<N, Int32> nb;
+    nb.Elementary();
+
+    // Init temporary map
+    System::Collection::Array<N, T> temp_map;
+    temp_map.Resize(mask.Dimensions());
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        temp_map[i] = (mask[i] != val) ? 0 : (std::numeric_limits<T>::max() - 1);
+    }
+
+    // Forward and backward scan
+    if (!mask.IsEmpty())
+    {
+        Scan(temp_map, nb.Negative());
+        Scan(temp_map, nb.Positive());
+    }
+
+    // Copy distances to output
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        if (mask[i] == val)
+        {
+            map[i] = temp_map[i];
+        }
+    }
+}
+
+/******************************************************************************/
+
+// Explicit instantiations
+/** @cond */
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, bool> & mask,
+                                           bool val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, bool> & mask,
+                                           bool val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, bool> & mask,
+                                           bool val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, bool> & mask,
+                                           bool val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, bool> & mask,
+                                           bool val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, bool> & mask,
+                                           bool val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint8> & mask,
+                                           Uint8 val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<2, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT CityBlockLocal(const System::Collection::Array<3, Uint16> & mask,
+                                           Uint16 val, System::Collection::Array<3, Uint64> & map);
+/** @endcond */
+
+/******************************************************************************/
+
+template <Size N, class DATA, class T>
+void ChessBoardLocal(const System::Collection::Array<N, DATA> & mask,
+                     DATA val, System::Collection::Array<N, T> & map)
+{
+    if (mask.Dimensions() != map.Dimensions())
+    {
+        throw System::ArgumentException(__FUNCTION__, __LINE__, "Mask and map dimensions "
+                                                                "do not match.");
+    }
+
+    // Generate neighbourhood
+    Energy::Neighbourhood<N, Int32> nb;
+    nb.Box(Math::Algebra::Vector<N, Size>(1), false, false);
+
+    // Init temporary map
+    System::Collection::Array<N, T> temp_map;
+    temp_map.Resize(mask.Dimensions());
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        temp_map[i] = (mask[i] != val) ? 0 : (std::numeric_limits<T>::max() - 1);
+    }
+
+    // Forward and backward scan
+    if (!mask.IsEmpty())
+    {
+        Scan(temp_map, nb.Negative());
+        Scan(temp_map, nb.Positive());
+    }
+
+    // Copy distances to output
+    for (Size i = 0; i < mask.Elements(); i++)
+    {
+        if (mask[i] == val)
+        {
+            map[i] = temp_map[i];
+        }
+    }
+}
+
+/******************************************************************************/
+
+// Explicit instantiations
+/** @cond */
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, bool> & mask,
+                                            bool val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, bool> & mask,
+                                            bool val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, bool> & mask,
+                                            bool val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, bool> & mask,
+                                            bool val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, bool> & mask,
+                                            bool val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, bool> & mask,
+                                            bool val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint8> & mask,
+                                            Uint8 val, System::Collection::Array<3, Uint64> & map);
+
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<2, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<2, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<2, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<2, Uint64> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<3, Uint16> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<3, Uint32> & map);
+template void GC_DLL_EXPORT ChessBoardLocal(const System::Collection::Array<3, Uint16> & mask,
+                                            Uint16 val, System::Collection::Array<3, Uint64> & map);
+/** @endcond */
+
+/******************************************************************************/
+}
+}
+}
+} // namespace Gc::Algo::Geometry::DistanceTransform

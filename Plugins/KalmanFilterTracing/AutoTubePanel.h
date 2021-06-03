@@ -25,17 +25,15 @@
 #include <vector>
 
 namespace iseg {
-typedef unsigned long LabelType;
-typedef itk::ShapeLabelObject<LabelType, 2> LabelObjectType;
-typedef itk::LabelMap<LabelObjectType> LabelMapType;
+using label_type = unsigned long;
+using label_object_type = itk::ShapeLabelObject<label_type, 2>;
+using label_map_type = itk::LabelMap<label_object_type>;
 
 class AutoTubePanel : public iseg::WidgetInterface
 {
-
 	struct Cache
 	{
-
-		void store(std::vector<LabelMapType::Pointer> l, std::vector<std::vector<std::string>> o, std::vector<std::map<LabelType, std::string>> t, std::vector<KalmanFilter> k, std::vector<std::vector<std::string>> p, int m)
+		void Store(std::vector<label_map_type::Pointer> l, std::vector<std::vector<std::string>> o, std::vector<std::map<label_type, std::string>> t, std::vector<KalmanFilter> k, std::vector<std::vector<std::string>> p, int m)
 		{
 			objects = o;
 			label_maps = l;
@@ -45,7 +43,7 @@ class AutoTubePanel : public iseg::WidgetInterface
 			max_active_slice = m;
 		}
 
-		void get(std::vector<LabelMapType::Pointer>& l, std::vector<std::vector<std::string>>& o, std::vector<std::map<LabelType, std::string>>& t, std::vector<KalmanFilter>& k, std::vector<std::vector<std::string>>& p, int& m)
+		void Get(std::vector<label_map_type::Pointer>& l, std::vector<std::vector<std::string>>& o, std::vector<std::map<label_type, std::string>>& t, std::vector<KalmanFilter>& k, std::vector<std::vector<std::string>>& p, int& m) const
 		{
 			if (!label_maps.empty())
 			{
@@ -59,8 +57,8 @@ class AutoTubePanel : public iseg::WidgetInterface
 		}
 
 		std::vector<std::vector<std::string>> objects;
-		std::vector<LabelMapType::Pointer> label_maps;
-		std::vector<std::map<LabelType, std::string>> label_to_text;
+		std::vector<label_map_type::Pointer> label_maps;
+		std::vector<std::map<label_type, std::string>> label_to_text;
 		std::vector<KalmanFilter> k_filters;
 		std::vector<std::vector<std::string>> _probabilities;
 		int max_active_slice;
@@ -68,142 +66,137 @@ class AutoTubePanel : public iseg::WidgetInterface
 
 	Q_OBJECT
 public:
-	AutoTubePanel(iseg::SlicesHandlerInterface* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~AutoTubePanel() {}
+	AutoTubePanel(iseg::SlicesHandlerInterface* hand3D);
+	~AutoTubePanel() override = default;
 
-	void init() override;
-	void newloaded() override;
-	void cleanup() override;
+	void Init() override;
+	void NewLoaded() override;
+	void Cleanup() override;
 	std::string GetName() override { return std::string("Root Tracer"); };
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("LevelSet.png"))); };
 
-	void save_label_map(FILE* fp, LabelMapType::Pointer map);
-	LabelMapType::Pointer load_label_map(FILE* fi);
+	void SaveLabelMap(FILE* fp, label_map_type::Pointer map);
+	label_map_type::Pointer LoadLabelMap(FILE* fi);
 
-	void save_l_to_t(FILE* fp, std::map<LabelType, std::string> l_to_t);
-	std::map<LabelType, std::string> load_l_to_t(FILE* fi);
+	void SaveLToT(FILE* fp, std::map<label_type, std::string> l_to_t);
+	std::map<label_type, std::string> LoadLToT(FILE* fi);
 
-	void save_k_filter(FILE* fp, std::vector<KalmanFilter> k_filters);
-	std::vector<KalmanFilter> load_k_filters(FILE* fi);
+	void SaveKFilter(FILE* fp, std::vector<KalmanFilter> k_filters);
+	std::vector<KalmanFilter> LoadKFilters(FILE* fi);
 
-	std::vector<std::string> modify_probability(std::vector<std::string> probs, std::string label, bool remove, bool change, std::string value = "");
+	std::vector<std::string> ModifyProbability(std::vector<std::string> probs, std::string label, bool remove, bool change, std::string value = "");
 
 	template<class TInput, class TTissue, class TTarget>
-	void do_work_nd(TInput* source, TTissue* tissues, TTarget* target);
+	void DoWorkNd(TInput* source, TTissue* tissues, TTarget* target);
 
 	template<class TInput, class TImage>
-	typename TImage::Pointer compute_feature_image(TInput* source) const;
+	typename TImage::Pointer ComputeFeatureImage(TInput* source) const;
 
-	void refresh_object_list();
-	void refresh_probability_list();
-	void refresh_k_filter_list();
+	void RefreshObjectList();
+	void RefreshProbabilityList();
+	void RefreshKFilterList();
 
-	char get_random_char();
+	char GetRandomChar();
 
-	std::vector<std::string> split_string(std::string text);
+	std::vector<std::string> SplitString(std::string text);
 
-	bool is_label(const std::string& s);
-	bool label_in_list(const std::string label);
+	bool IsLabel(const std::string& s);
+	bool LabelInList(const std::string label);
 
-	std::map<LabelType, std::vector<double>> get_label_map_params(LabelMapType::Pointer labelMap);
-	LabelMapType::Pointer calculate_label_map_params(LabelMapType::Pointer labelMap);
+	std::map<label_type, std::vector<double>> GetLabelMapParams(label_map_type::Pointer labelMap);
+	label_map_type::Pointer CalculateLabelMapParams(label_map_type::Pointer labelMap);
 
-	double calculate_distance(std::vector<double> params_1, std::vector<double> params_2);
-	std::vector<double> softmax(std::vector<double> distances, std::vector<double> diff_in_pred, std::vector<double> diff_in_data);
+	double CalculateDistance(std::vector<double> params_1, std::vector<double> params_2);
+	std::vector<double> Softmax(std::vector<double> distances, std::vector<double> diff_in_pred, std::vector<double> diff_in_data);
 
-	void visualize_label_map(LabelMapType::Pointer labelMap, std::vector<itk::Index<2>>* pixels = nullptr);
+	void VisualizeLabelMap(label_map_type::Pointer labelMap, std::vector<itk::Index<2>>* pixels = nullptr);
 
-	bool isInteger(const std::string& s);
+	bool IsInteger(const std::string& s);
 
 private:
-	void on_slicenr_changed() override;
-	void on_mouse_clicked(iseg::Point p) override;
+	void OnSlicenrChanged() override;
+	void OnMouseClicked(iseg::Point p) override;
 
-	iseg::SlicesHandlerInterface* _handler3D;
+	void ObjectSelected(QList<QListWidgetItem*> items);
 
-	QListWidget* object_list;
-	QListWidget* object_probability_list;
-	QListWidget* k_filters_list;
+	iseg::SlicesHandlerInterface* m_Handler3D;
 
-	QPushButton* _execute_button;
-	QPushButton* _select_objects_button;
-	QPushButton* _remove_button;
-	QPushButton* _merge_button;
-	QPushButton* _extrapolate_button;
-	QPushButton* _visualize_button;
-	QPushButton* _update_kfilter_button;
-	QPushButton* _remove_k_filter;
-	QPushButton* _save;
-	QPushButton* _load;
-	QPushButton* _remove_non_selected;
-	QPushButton* _add_to_tissues;
-	QPushButton* _export_lines;
-	QPushButton* _k_filter_predict;
+	QListWidget* m_ObjectList;
+	QListWidget* m_ObjectProbabilityList;
+	QListWidget* m_KFiltersList;
 
-	QLineEdit* _selected_objects;
-	QLineEdit* _sigma_low;
-	QLineEdit* _sigma_hi;
-	QLineEdit* _number_sigma_levels;
-	QLineEdit* _threshold;
-	QLineEdit* _max_radius;
-	QLineEdit* _min_object_size;
-	QLineEdit* _min_probability;
-	QLineEdit* _w_distance;
-	QLineEdit* _w_params;
-	QLineEdit* _w_pred;
-	QLineEdit* _limit_slice;
-	QLineEdit* _line_radius;
+	QPushButton* m_ExecuteButton;
+	QPushButton* m_SelectObjectsButton;
+	QPushButton* m_RemoveButton;
+	QPushButton* m_MergeButton;
+	QPushButton* m_ExtrapolateButton;
+	QPushButton* m_VisualizeButton;
+	QPushButton* m_UpdateKfilterButton;
+	QPushButton* m_RemoveKFilter;
+	QPushButton* m_Save;
+	QPushButton* m_Load;
+	QPushButton* m_RemoveNonSelected;
+	QPushButton* m_AddToTissues;
+	QPushButton* m_ExportLines;
+	QPushButton* m_KFilterPredict;
 
-	QCheckBox* _non_max_suppression;
-	QCheckBox* _skeletonize;
-	QCheckBox* _add;
-	QCheckBox* _restart_k_filter;
-	QCheckBox* _connect_dots;
-	QCheckBox* _extrapolate_only_matches;
-	QCheckBox* _add_pixel;
+	QLineEdit* m_SelectedObjects;
+	QLineEdit* m_SigmaLow;
+	QLineEdit* m_SigmaHi;
+	QLineEdit* m_NumberSigmaLevels;
+	QLineEdit* m_Threshold;
+	QLineEdit* m_MaxRadius;
+	QLineEdit* m_MinObjectSize;
+	QLineEdit* m_MinProbability;
+	QLineEdit* m_WDistance;
+	QLineEdit* m_WParams;
+	QLineEdit* m_WPred;
+	QLineEdit* m_LimitSlice;
+	QLineEdit* m_LineRadius;
 
-	int max_active_slice_reached = 0;
-	int active_slice = 0;
+	QCheckBox* m_NonMaxSuppression;
+	QCheckBox* m_Skeletonize;
+	QCheckBox* m_Add;
+	QCheckBox* m_RestartKFilter;
+	QCheckBox* m_ConnectDots;
+	QCheckBox* m_ExtrapolateOnlyMatches;
+	QCheckBox* m_AddPixel;
 
-	std::vector<std::vector<std::string>> objects;
-	std::vector<std::vector<std::string>> _probabilities;
+	int m_MaxActiveSliceReached = 0;
+	int m_ActiveSlice = 0;
 
-	std::vector<LabelMapType::Pointer> label_maps;
+	std::vector<std::vector<std::string>> m_Objects;
+	std::vector<std::vector<std::string>> m_Probabilities;
 
-	itk::Image<unsigned char, 2>::Pointer mask_image;
+	std::vector<label_map_type::Pointer> m_LabelMaps;
 
-	std::vector<std::map<LabelType, std::string>> label_to_text;
-	std::vector<KalmanFilter> k_filters;
-	std::vector<int> selected;
+	itk::Image<unsigned char, 2>::Pointer m_MaskImage;
 
-	Cache _cached_data;
+	std::vector<std::map<label_type, std::string>> m_LabelToText;
+	std::vector<KalmanFilter> m_KFilters;
+	std::vector<int> m_Selected;
+
+	Cache m_CachedData;
 
 private slots:
-
-	void select_objects();
-	void do_work();
-	void bmp_changed(){};
-	void tissues_changed(){};
-	void work_changed(){};
-	void marks_changed(){};
-	void object_selected(QList<QListWidgetItem*> items);
-	void item_double_clicked(QListWidgetItem* item);
-	void item_edited(QListWidgetItem* item);
-	void item_selected();
-	void merge_selected_items();
-	void extrapolate_results();
-	void visualize();
-	void remove_object();
-	void remove_k_filter();
-	void update_kalman_filters();
-	void k_filter_double_clicked(QListWidgetItem* item);
-	void save();
-	void load();
-	void remove_non_selected();
-	void add_to_tissues();
-	void export_lines();
-	void predict_k_filter();
+	void SelectObjects();
+	void DoWork();
+	void ItemDoubleClicked(QListWidgetItem* item);
+	void ItemEdited(QListWidgetItem* item);
+	void ItemSelected();
+	void MergeSelectedItems();
+	void ExtrapolateResults();
+	void Visualize();
+	void RemoveObject();
+	void RemoveKFilter();
+	void UpdateKalmanFilters();
+	void KFilterDoubleClicked(QListWidgetItem* item);
+	void Save();
+	void Load();
+	void RemoveNonSelected();
+	void AddToTissues();
+	void ExportLines();
+	void PredictKFilter();
 };
 
-}
+} // namespace iseg

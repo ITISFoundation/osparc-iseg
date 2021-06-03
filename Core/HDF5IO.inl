@@ -3,7 +3,7 @@
 namespace iseg {
 
 template<typename T>
-HDF5IO::handle_id_type HDF5IO::getTypeValue()
+HDF5IO::handle_id_type HDF5IO::GetTypeValue()
 {
 	if (typeid(T) == typeid(double))
 	{
@@ -37,8 +37,7 @@ HDF5IO::handle_id_type HDF5IO::getTypeValue()
 }
 
 template<typename T>
-bool HDF5IO::readData(handle_id_type file, const std::string& name,
-		size_t arg_offset, size_t arg_length, T* data_out)
+bool HDF5IO::ReadData(handle_id_type file, const std::string& name, size_t arg_offset, size_t arg_length, T* data_out)
 {
 	hid_t dataset; /* handles */
 	hid_t datatype, dataspace;
@@ -66,7 +65,7 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 	datatype = H5Dget_type(dataset);
 	dataspace = H5Dget_space(dataset);
 	rank = H5Sget_simple_extent_ndims(dataspace);
-	status_n = H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
+	status_n = H5Sget_simple_extent_dims(dataspace, dims_out, nullptr);
 
 	// TODO: FAIL_IF( rank != 1 )
 
@@ -75,29 +74,26 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 		*/
 	offset_in[0] = arg_offset;
 	count[0] = arg_length;
-	status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset_in, NULL,
-			count, NULL);
+	status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset_in, nullptr, count, nullptr);
 
 	/*
 		* Define the memory dataspace.
 		*/
 	dimsm[0] = arg_length;
-	memspace = H5Screate_simple(1, dimsm, NULL);
+	memspace = H5Screate_simple(1, dimsm, nullptr);
 
 	/*
 		* Define memory hyperslab.
 		*/
 	offset_out[0] = 0;
 	count_out[0] = arg_length;
-	status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL,
-			count_out, NULL);
+	status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, nullptr, count_out, nullptr);
 
 	/*
 		* Read data from hyperslab in the file into the hyperslab in
 		* memory and display.
 		*/
-	status = H5Dread(dataset, getTypeValue<T>(), memspace, dataspace,
-			H5P_DEFAULT, data_out);
+	status = H5Dread(dataset, GetTypeValue<T>(), memspace, dataspace, H5P_DEFAULT, data_out);
 
 	H5Tclose(datatype);
 	H5Dclose(dataset);
@@ -108,9 +104,7 @@ bool HDF5IO::readData(handle_id_type file, const std::string& name,
 }
 
 template<typename T>
-bool HDF5IO::writeData(handle_id_type file, const std::string& name,
-		T** const slice_data, size_t num_slices,
-		size_t slice_size, size_t offset)
+bool HDF5IO::WriteData(handle_id_type file, const std::string& name, T** const slice_data, size_t num_slices, size_t slice_size, size_t offset)
 {
 	hid_t properties = -1, datatype = -1;
 	hid_t dataspace = -1, dataset = -1;
@@ -124,7 +118,7 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 		// size dataset.
 		int rank = 1;
 		hsize_t dimsf[1] = {num_slices * slice_size};
-		dataspace = H5Screate_simple(rank, dimsf, 0);
+		dataspace = H5Screate_simple(rank, dimsf, nullptr);
 
 		// Modify dataset creation properties by enable chunking and gzip compression
 		properties = H5Pcreate(H5P_DATASET_CREATE);
@@ -132,9 +126,9 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 		// Limit chunk size to 1GB, not sure if a much smaller number would be better
 		hsize_t const mega = 1024 * 1024;
 		hsize_t const giga = 1024 * mega;
-		hsize_t dim_chunks[1] = {chunk_size == 0 ? std::min<hsize_t>(slice_size, giga / sizeof(T)) : chunk_size};
+		hsize_t dim_chunks[1] = {m_ChunkSize == 0 ? std::min<hsize_t>(slice_size, giga / sizeof(T)) : m_ChunkSize};
 		H5Pset_chunk(properties, rank, dim_chunks);
-		if (CompressionLevel > 0) // disable filter when compression <= 0
+		if (m_CompressionLevel > 0) // disable filter when compression <= 0
 		{
 #ifdef USE_HDF5_BLOSC
 			if (BloscEnabled())
@@ -148,13 +142,13 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 			else
 #endif
 			{
-				H5Pset_deflate(properties, std::min(CompressionLevel, 9));
+				H5Pset_deflate(properties, std::min(m_CompressionLevel, 9));
 			}
 		}
 
 		// Define datatype for the data in the file.
 		// We will store little endian numbers.
-		datatype = H5Tcopy(getTypeValue<T>());
+		datatype = H5Tcopy(GetTypeValue<T>());
 		status = H5Tset_order(datatype, H5T_ORDER_LE);
 
 		dataset = H5Dcreate(file, name.c_str(), datatype, dataspace, properties);
@@ -179,7 +173,7 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 			hsize_t dim_offset[1] = {current_offset};
 			hsize_t dim_slab[1] = {slice_size};
 
-			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset, 0, dim_slab, 0);
+			status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, dim_offset, nullptr, dim_slab, nullptr);
 			if (status >= 0)
 			{
 				status = H5Sselect_valid(dataspace);
@@ -188,19 +182,19 @@ bool HDF5IO::writeData(handle_id_type file, const std::string& name,
 					int mem_rank = 1;
 					hsize_t dim_mem[1] = {dim_slab[0]};
 					// We create the dataspace in the memory
-					hid_t memspace = H5Screate_simple(mem_rank, dim_mem, 0);
+					hid_t memspace = H5Screate_simple(mem_rank, dim_mem, nullptr);
 					if (memspace >= 0)
 					{
 						// We select the slab in memory
 						hsize_t dim_memoffset[1] = {0};
 						hsize_t dim_memslab[1] = {dim_slab[0]};
-						status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, dim_memoffset, 0, dim_memslab, 0);
+						status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, dim_memoffset, nullptr, dim_memslab, nullptr);
 						if (status >= 0)
 						{
 							status = H5Sselect_valid(memspace);
 							if (status >= 0)
 							{
-								status = H5Dwrite(dataset, getTypeValue<T>(), memspace, dataspace, H5P_DEFAULT, slice_data[i]);
+								status = H5Dwrite(dataset, GetTypeValue<T>(), memspace, dataspace, H5P_DEFAULT, slice_data[i]);
 							}
 						}
 

@@ -17,13 +17,13 @@
 #include "gdcmFile.h"
 
 //----------------------------------------------------------------------------
-//vtkCxxRevisionMacro(vtkGDCMMedicalImageProperties, "1.21")
+// vtkCxxRevisionMacro(vtkGDCMMedicalImageProperties, "1.21")
 vtkStandardNewMacro(vtkGDCMMedicalImageProperties)
 
-class vtkGDCMMedicalImagePropertiesInternals
+  class vtkGDCMMedicalImagePropertiesInternals
 {
 public:
-  std::vector< gdcm::SmartPointer<gdcm::File> > Files;
+  std::vector<gdcm::SmartPointer<gdcm::File>> Files;
 };
 
 //----------------------------------------------------------------------------
@@ -36,10 +36,10 @@ vtkGDCMMedicalImageProperties::vtkGDCMMedicalImageProperties()
 vtkGDCMMedicalImageProperties::~vtkGDCMMedicalImageProperties()
 {
   if (this->Internals)
-    {
+  {
     delete this->Internals;
-    this->Internals = NULL;
-    }
+    this->Internals = nullptr;
+  }
   this->Clear();
 }
 
@@ -50,18 +50,18 @@ void vtkGDCMMedicalImageProperties::Clear()
 }
 
 //----------------------------------------------------------------------------
-void vtkGDCMMedicalImageProperties::PushBackFile(gdcm::File const &f)
+void vtkGDCMMedicalImageProperties::PushBackFile(gdcm::File const& f)
 {
-  this->Internals->Files.push_back( f );
+  this->Internals->Files.push_back(f);
   size_t i = this->Internals->Files.size();
-  gdcm::DataSet &ds = this->Internals->Files[ i - 1 ]->GetDataSet();
-  ds.Remove( gdcm::Tag( 0x7fe0, 0x0010 ) );
+  gdcm::DataSet& ds = this->Internals->Files[i - 1]->GetDataSet();
+  ds.Remove(gdcm::Tag(0x7fe0, 0x0010));
 }
 
 //----------------------------------------------------------------------------
-gdcm::File const & vtkGDCMMedicalImageProperties::GetFile(unsigned int t)
+gdcm::File const& vtkGDCMMedicalImageProperties::GetFile(unsigned int t)
 {
-  return *this->Internals->Files[ t ];
+  return *this->Internals->Files[t];
 }
 
 //----------------------------------------------------------------------------

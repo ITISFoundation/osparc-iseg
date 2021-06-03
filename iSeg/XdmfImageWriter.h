@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -52,24 +52,20 @@ public:
 	bool WriteColorLookup(const ColorLookupTable* lut, bool naked = false);
 
 protected:
-	char* FileName;
-	unsigned NumberOfSlices;
-	unsigned Width;
-	unsigned Height;
-	int Compression;
-	float* PixelSize;
-	Transform ImageTransform;
-	float** ImageSlices;
-	float** WorkSlices;
-	tissues_size_t** TissueSlices;
-	bool CopyToContiguousMemory;
+	char* m_FileName;
+	unsigned m_NumberOfSlices;
+	unsigned m_Width;
+	unsigned m_Height;
+	int m_Compression;
+	float* m_PixelSize;
+	Transform m_ImageTransform;
+	float** m_ImageSlices;
+	float** m_WorkSlices;
+	tissues_size_t** m_TissueSlices;
+	bool m_CopyToContiguousMemory;
 
 private:
-	int InternalWrite(const char* filename, float** slicesbmp,
-			float** sliceswork, tissues_size_t** slicestissue,
-			unsigned nrslices, unsigned width, unsigned height,
-			float* pixelsize, Transform& transform, int compression,
-			bool naked);
+	int InternalWrite(const char* filename, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, unsigned nrslices, unsigned width, unsigned height, float* pixelsize, Transform& transform, int compression, bool naked);
 };
 
 } // namespace iseg

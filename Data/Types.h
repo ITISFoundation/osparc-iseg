@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -33,8 +33,8 @@ using tissues_size_t = std::uint8_t; // Original tissues size type
 using tissuelayers_size_t = std::uint8_t;
 
 enum eScaleMode {
-	kArbitraryRange= 1, ///< assumes an arbitrary range
-	kFixedRange = 2		///< intensities are assumed to be in range [0,255]
+	kArbitraryRange = 1, ///< assumes an arbitrary range
+	kFixedRange = 2			 ///< intensities are assumed to be in range [0,255]
 };
 
 } // namespace iseg

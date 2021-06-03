@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,32 +18,32 @@ namespace iseg {
 class ISEG_DATA_API Log
 {
 public:
-	static void debug(const char* format, ...);
-	template<class C, typename ...Args>
-	static void debug(const std::basic_string<C>& format, Args...args) { debug(format.c_str(), args...); }
+	static void Debug(const char* format, ...);
+	template<class C, typename... Args>
+	static void Debug(const std::basic_string<C>& format, Args... args) { Debug(format.c_str(), args...); }
 
-	static void info(const char* format, ...);
-	template<class C, typename ...Args>
-	static void info(const std::basic_string<C>& format, Args...args) { info(format.c_str(), args...); }
+	static void Info(const char* format, ...);
+	template<class C, typename... Args>
+	static void Info(const std::basic_string<C>& format, Args... args) { Info(format.c_str(), args...); }
 
-	static void warning(const char* format, ...);
-	template<class C, typename ...Args>
-	static void warning(const std::basic_string<C>& format, Args...args) { warning(format.c_str(), args...); }
+	static void Warning(const char* format, ...);
+	template<class C, typename... Args>
+	static void Warning(const std::basic_string<C>& format, Args... args) { Warning(format.c_str(), args...); }
 
-	static void error(const char* format, ...);
-	template<class C, typename ...Args>
-	static void error(const std::basic_string<C>& format, Args...args) { error(format.c_str(), args...); }
+	static void Error(const char* format, ...);
+	template<class C, typename... Args>
+	static void Error(const std::basic_string<C>& format, Args... args) { Error(format.c_str(), args...); }
 
-	static void note(const std::string& channel, const char* format, ...);
+	static void Note(const std::string& channel, const char* format, ...);
 
-	static bool attach_log_file(std::string const & logFileName, bool createNewFile = true);
-	static bool attach_console(bool on);
-	static bool intercept_cerr();
+	static bool AttachLogFile(std::string const& logFileName, bool createNewFile = true);
+	static bool AttachConsole(bool on);
+	static bool InterceptCerr();
 
-	static void close_log_file();
+	static void CloseLogFile();
 
-	static std::ostream& log_stream();
+	static std::ostream& LogStream();
 };
 
 ISEG_DATA_API void init_logging(const std::string& log_file_name, bool print_to_clog = true, bool print_debug_log = false, bool intercept_cerr = true);
-}
+} // namespace iseg

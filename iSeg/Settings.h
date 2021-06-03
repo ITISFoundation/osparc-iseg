@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -26,15 +26,15 @@ class Settings : public QDialog
 
 public:
 	explicit Settings(QWidget* parent = nullptr);
-	~Settings();
+	~Settings() override;
 
 public slots:
 	void accept() override;
 	void reject() override;
 
 private:
-	Ui::Settings* ui;
-	MainWindow* mainWindow;
+	Ui::Settings* m_Ui;
+	MainWindow* m_MainWindow;
 };
 
 } // namespace iseg

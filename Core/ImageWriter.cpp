@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -33,25 +33,25 @@
 namespace iseg {
 
 template<typename T>
-bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler)
+bool ImageWriter::WriteVolume(const std::string& filename, const std::vector<T*>& all_slices, eSliceSelection selection, const SlicesHandlerInterface* handler)
 {
-	unsigned dims[3] = {handler->width(), handler->height(), handler->num_slices()};
-	unsigned start=0, end = handler->num_slices();
-	switch(selection)
+	unsigned dims[3] = {handler->Width(), handler->Height(), handler->NumSlices()};
+	unsigned start = 0, end = handler->NumSlices();
+	switch (selection)
 	{
 	case eSliceSelection::kActiveSlices:
-		start = handler->start_slice();
-		end = handler->end_slice();
+		start = handler->StartSlice();
+		end = handler->EndSlice();
 		break;
 	case eSliceSelection::kSlice:
-		start = handler->active_slice();
-		end = handler->active_slice() + 1;
+		start = handler->ActiveSlice();
+		end = handler->ActiveSlice() + 1;
 		break;
 	default:
 		break;
 	}
 
-	auto image = wrapToITK(all_slices, dims, start, end, handler->spacing(), handler->transform());
+	auto image = wrapToITK(all_slices, dims, start, end, handler->Spacing(), handler->ImageTransform());
 	if (image)
 	{
 		boost::filesystem::path path(filename);
@@ -98,7 +98,7 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 			auto names_generator = itk::NumericSeriesFileNames::New();
 			names_generator->SetSeriesFormat(format.c_str());
 			names_generator->SetStartIndex(start);
-			names_generator->SetEndIndex(end-1);
+			names_generator->SetEndIndex(end - 1);
 			names_generator->SetIncrementIndex(1);
 
 			using rescale_type = itk::RescaleIntensityImageFilter<t_slices_type, t_image_type>;
@@ -107,8 +107,8 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 			rescale->SetOutputMinimum(0);
 			rescale->SetOutputMaximum(itk::NumericTraits<o_image_type::PixelType>::max());
 
-			using FilterType = itk::CastImageFilter<t_image_type, o_image_type>;
-			auto filter = FilterType::New();
+			using filter_type = itk::CastImageFilter<t_image_type, o_image_type>;
+			auto filter = filter_type::New();
 			filter->SetInput(rescale->GetOutput());
 
 			using writer_type = itk::ImageSeriesWriter<o_image_type, o_image2_type>;
@@ -153,18 +153,18 @@ bool ImageWriter::writeVolume(const std::string& filename, const std::vector<T*>
 	return false;
 }
 
-bool ImageWriter::writeVolume(const std::string& file_path, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection)
+bool ImageWriter::WriteVolume(const std::string& file_path, SlicesHandlerInterface* handler, eImageSelection img_selection, eSliceSelection slice_selection)
 {
 	switch (img_selection)
 	{
 	case eImageSelection::kSource:
-		return writeVolume<float>(file_path, handler->source_slices(), slice_selection, handler);
+		return WriteVolume<float>(file_path, handler->SourceSlices(), slice_selection, handler);
 	case eImageSelection::kTarget:
-		return writeVolume<float>(file_path, handler->target_slices(), slice_selection, handler);
+		return WriteVolume<float>(file_path, handler->TargetSlices(), slice_selection, handler);
 	case eImageSelection::kTissue:
-		return writeVolume<tissues_size_t>(file_path, handler->tissue_slices(handler->active_tissuelayer()), slice_selection, handler);
+		return WriteVolume<tissues_size_t>(file_path, handler->TissueSlices(handler->ActiveTissuelayer()), slice_selection, handler);
 	}
 	return false;
 }
 
-}// namespace iseg
+} // namespace iseg

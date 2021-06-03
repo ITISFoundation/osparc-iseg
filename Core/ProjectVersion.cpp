@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,8 +16,7 @@ int iseg::CombineTissuesVersion(const int version, const int tissuesVersion)
 	return (tissuesVersion << 8) + version;
 }
 
-void iseg::ExtractTissuesVersion(const int combinedVersion, int& version,
-								 int& tissuesVersion)
+void iseg::ExtractTissuesVersion(const int combinedVersion, int& version, int& tissuesVersion)
 {
 	tissuesVersion = combinedVersion >> 8;
 	version = combinedVersion & 0xFF;

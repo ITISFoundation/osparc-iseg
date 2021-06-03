@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,30 +18,28 @@ namespace iseg {
 
 SmoothSteps::SmoothSteps()
 {
-	mask = nullptr;
-	ownmask = false;
-	masklength = 0;
-	weights = nullptr;
-	return;
+	m_Mask = nullptr;
+	m_Ownmask = false;
+	m_Masklength = 0;
+	m_Weights = nullptr;
 }
 
 SmoothSteps::~SmoothSteps()
 {
-	for (tissues_size_t i = 0; i < nrtissues; i++)
+	for (tissues_size_t i = 0; i < m_Nrtissues; i++)
 	{
-		delete[] weights[i];
+		delete[] m_Weights[i];
 	}
-	delete[] weights;
-	if (ownmask)
-		delete[] mask;
-	return;
+	delete[] m_Weights;
+	if (m_Ownmask)
+		delete[] m_Mask;
 }
 
-void SmoothSteps::dostepsmooth(tissues_size_t* line)
+void SmoothSteps::Dostepsmooth(tissues_size_t* line)
 {
-	if (mask == nullptr || weights == nullptr)
+	if (m_Mask == nullptr || m_Weights == nullptr)
 		return;
-	if (linelength < masklength || linelength < 2)
+	if (m_Linelength < m_Masklength || m_Linelength < 2)
 		return;
 
 	/*int *counter=new int[linelength];
@@ -49,72 +47,72 @@ void SmoothSteps::dostepsmooth(tissues_size_t* line)
 	float *counterfloat=new float[linelength];
 	for(unsigned short i=0;i<linelength;i++) counterfloat[i]=0;*/
 
-	unsigned short n1 = masklength / 2;
-	for (tissues_size_t c = 0; c < nrtissues; c++)
+	unsigned short n1 = m_Masklength / 2;
+	for (tissues_size_t c = 0; c < m_Nrtissues; c++)
 	{
-		for (unsigned short i = 0; i < linelength; i++)
-			weights[c][i] = 0; //,counter[i]=0,counterfloat[i]=0;
+		for (unsigned short i = 0; i < m_Linelength; i++)
+			m_Weights[c][i] = 0; //,counter[i]=0,counterfloat[i]=0;
 	}
-	unsigned short upper = linelength + 1 - masklength;
+	unsigned short upper = m_Linelength + 1 - m_Masklength;
 	for (unsigned short i = 0; i < upper; i++)
 	{
 		tissues_size_t index = line[i + n1];
-		for (unsigned short j = 0; j < masklength; j++)
+		for (unsigned short j = 0; j < m_Masklength; j++)
 		{
-			weights[index][i + j] +=
-				mask[j]; //,counter[i+j]++,counterfloat[i+j]+=mask[j];
+			m_Weights[index][i + j] +=
+					m_Mask[j]; //,counter[i+j]++,counterfloat[i+j]+=mask[j];
 		}
 	}
 	for (unsigned short i = 0; i < n1; i++)
 	{
 		tissues_size_t index = line[i];
 		unsigned short k = 0;
-		for (unsigned short j = n1 - i; j < masklength; j++, k++)
+		for (unsigned short j = n1 - i; j < m_Masklength; j++, k++)
 		{
-			weights[index][k] +=
-				mask[j]; //,counter[k]++,counterfloat[k]+=mask[j];
+			m_Weights[index][k] +=
+					m_Mask[j]; //,counter[k]++,counterfloat[k]+=mask[j];
 		}
 	}
-	for (unsigned short i = linelength - masklength + n1 + 1; i < linelength;
-		 i++)
+	for (unsigned short i = m_Linelength - m_Masklength + n1 + 1; i < m_Linelength;
+			 i++)
 	{
 		tissues_size_t index = line[i];
 		unsigned short k = i - n1;
-		for (unsigned short j = 0; k < linelength; j++, k++)
+		for (unsigned short j = 0; k < m_Linelength; j++, k++)
 		{
-			weights[index][k] +=
-				mask[j]; //,counter[k]++,counterfloat[k]+=mask[j];
+			m_Weights[index][k] +=
+					m_Mask[j]; //,counter[k]++,counterfloat[k]+=mask[j];
 		}
 	}
 	tissues_size_t index = line[0];
-	upper = masklength - n1 - 1;
+	upper = m_Masklength - n1 - 1;
 	for (unsigned short i = 0; i < upper; i++)
 	{
-		for (unsigned short j = i + n1 + 1; j < masklength; j++)
+		for (unsigned short j = i + n1 + 1; j < m_Masklength; j++)
 		{
-			weights[index][i] +=
-				mask[j]; //,counter[i]++,counterfloat[i]+=mask[j];
+			m_Weights[index][i] +=
+					m_Mask[j]; //,counter[i]++,counterfloat[i]+=mask[j];
 		}
 	}
-	index = line[linelength - 1];
-	for (unsigned short i = linelength - n1, upper = 1; i < linelength;
-		 i++, upper++)
+	index = line[m_Linelength - 1];
+	for (unsigned short i = m_Linelength - n1, upper = 1; i < m_Linelength;
+			 i++, upper++)
 	{
 		for (unsigned short j = 0; j < upper; j++)
 		{
-			weights[index][i] +=
-				mask[j]; //,counter[i]++,counterfloat[i]+=mask[j];
+			m_Weights[index][i] +=
+					m_Mask[j]; //,counter[i]++,counterfloat[i]+=mask[j];
 		}
 	}
-	for (unsigned short i = 0; i < linelength; i++)
+	for (unsigned short i = 0; i < m_Linelength; i++)
 	{
 		float valmax = 0;
-		for (tissues_size_t c = 0; c < nrtissues; c++)
+		for (tissues_size_t c = 0; c < m_Nrtissues; c++)
 		{
-			if (weights[c][i] > valmax)
+			if (m_Weights[c][i] > valmax)
 			{
 				line[i] = c;
-				valmax = weights[c][i];
+				valmax = m_Weights[c][i];
 			}
 		}
 	}
@@ -125,69 +123,67 @@ void SmoothSteps::dostepsmooth(tissues_size_t* line)
 	//delete[] counterfloat;
 }
 
-void SmoothSteps::init(float* mask1, unsigned short masklength1,
-					   unsigned short linelength1, tissues_size_t nrtissues1)
+void SmoothSteps::Init(float* mask1, unsigned short masklength1, unsigned short linelength1, tissues_size_t nrtissues1)
 {
-	if (ownmask)
-		delete[] mask;
-	ownmask = false;
-	mask = mask1;
-	masklength = masklength1;
-	linelength = linelength1;
-	if (weights != nullptr)
+	if (m_Ownmask)
+		delete[] m_Mask;
+	m_Ownmask = false;
+	m_Mask = mask1;
+	m_Masklength = masklength1;
+	m_Linelength = linelength1;
+	if (m_Weights != nullptr)
 	{
-		for (tissues_size_t i = 0; i < nrtissues; i++)
+		for (tissues_size_t i = 0; i < m_Nrtissues; i++)
 		{
-			delete[] weights[i];
+			delete[] m_Weights[i];
 		}
-		delete[] weights;
+		delete[] m_Weights;
 	}
-	nrtissues = nrtissues1;
-	weights = new float*[nrtissues];
-	for (tissues_size_t i = 0; i < nrtissues; i++)
+	m_Nrtissues = nrtissues1;
+	m_Weights = new float*[m_Nrtissues];
+	for (tissues_size_t i = 0; i < m_Nrtissues; i++)
 	{
-		weights[i] = new float[linelength];
+		m_Weights[i] = new float[m_Linelength];
 	}
 }
 
-void SmoothSteps::init(unsigned short masklength1, unsigned short linelength1,
-					   tissues_size_t nrtissues1)
+void SmoothSteps::Init(unsigned short masklength1, unsigned short linelength1, tissues_size_t nrtissues1)
 {
-	if (ownmask)
-		delete[] mask;
-	mask = new float[masklength1];
-	masklength = masklength1;
-	generate_binommask();
-	ownmask = true;
-	linelength = linelength1;
-	if (weights != nullptr)
+	if (m_Ownmask)
+		delete[] m_Mask;
+	m_Mask = new float[masklength1];
+	m_Masklength = masklength1;
+	GenerateBinommask();
+	m_Ownmask = true;
+	m_Linelength = linelength1;
+	if (m_Weights != nullptr)
 	{
-		for (tissues_size_t i = 0; i < nrtissues; i++)
+		for (tissues_size_t i = 0; i < m_Nrtissues; i++)
 		{
-			delete[] weights[i];
+			delete[] m_Weights[i];
 		}
-		delete[] weights;
+		delete[] m_Weights;
 	}
-	nrtissues = nrtissues1;
-	weights = new float*[nrtissues];
-	for (tissues_size_t i = 0; i < nrtissues; i++)
+	m_Nrtissues = nrtissues1;
+	m_Weights = new float*[m_Nrtissues];
+	for (tissues_size_t i = 0; i < m_Nrtissues; i++)
 	{
-		weights[i] = new float[linelength];
+		m_Weights[i] = new float[m_Linelength];
 	}
 }
 
-void SmoothSteps::generate_binommask()
+void SmoothSteps::GenerateBinommask()
 {
-	mask[0] = 1.0f;
-	for (unsigned short i = 1; i < masklength; i++)
+	m_Mask[0] = 1.0f;
+	for (unsigned short i = 1; i < m_Masklength; i++)
 	{
-		mask[i] = 1.0;
+		m_Mask[i] = 1.0;
 		for (unsigned short j = i - 1; j > 0; j--)
 		{
-			mask[j] += mask[j - 1];
+			m_Mask[j] += m_Mask[j - 1];
 		}
 	}
-	mask[masklength / 2] += 0.1;
+	m_Mask[m_Masklength / 2] += 0.1;
 }
 
 } // namespace iseg

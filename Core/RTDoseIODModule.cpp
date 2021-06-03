@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,76 +20,76 @@ namespace iseg {
 
 RTDoseIODModule::RTDoseIODModule()
 {
-	PatientName = "";
-	PatientID = "";
-	PatientBirthDate[0] = 0;
-	PatientBirthDate[1] = 0;
-	PatientBirthDate[2] = 0;
-	PatientSex = Unspecified;
-	StudyInstanceUID = GenerateUID();
-	StudyDate[0] = 0;
-	StudyDate[1] = 0;
-	StudyDate[2] = 0;
-	StudyTime[0] = 0;
-	StudyTime[1] = 0;
-	StudyTime[2] = 0;
-	ReferringPhysicianName = "";
-	StudyID = "";
-	AccessionNumber = "";
-	SeriesInstanceUID = GenerateUID();
-	SeriesNumber = 0;
-	FrameOfReferenceUID = GenerateUID();
-	PositionReferenceIndicator = "";
-	Manufacturer = "";
-	InstanceNumber = 0;
-	PixelSpacing[0] = 0;
-	PixelSpacing[1] = 0;
-	ImageOrientationPatient[0] = 0.0;
-	ImageOrientationPatient[1] = 0.0;
-	ImageOrientationPatient[2] = 0.0;
-	ImageOrientationPatient[3] = 0.0;
-	ImageOrientationPatient[4] = 0.0;
-	ImageOrientationPatient[5] = 0.0;
-	ImagePositionPatient[0] = 0.0;
-	ImagePositionPatient[1] = 0.0;
-	ImagePositionPatient[2] = 0.0;
-	SliceThickness = 0.0;
-	Rows = 0;
-	Columns = 0;
-	BitsAllocated = 0;
-	PixelData = nullptr;
-	NumberOfFrames = 0;
-	DoseUnits = Gray;
-	DoseType = Physical;
-	DoseSummationType = Plan;
-	GridFrameOffsetVector = nullptr;
-	SOPInstanceUID = GenerateUID();
+	m_PatientName = "";
+	m_PatientId = "";
+	m_PatientBirthDate[0] = 0;
+	m_PatientBirthDate[1] = 0;
+	m_PatientBirthDate[2] = 0;
+	m_PatientSex = Unspecified;
+	m_StudyInstanceUid = GenerateUID();
+	m_StudyDate[0] = 0;
+	m_StudyDate[1] = 0;
+	m_StudyDate[2] = 0;
+	m_StudyTime[0] = 0;
+	m_StudyTime[1] = 0;
+	m_StudyTime[2] = 0;
+	m_ReferringPhysicianName = "";
+	m_StudyId = "";
+	m_AccessionNumber = "";
+	m_SeriesInstanceUid = GenerateUID();
+	m_SeriesNumber = 0;
+	m_FrameOfReferenceUid = GenerateUID();
+	m_PositionReferenceIndicator = "";
+	m_Manufacturer = "";
+	m_InstanceNumber = 0;
+	m_PixelSpacing[0] = 0;
+	m_PixelSpacing[1] = 0;
+	m_ImageOrientationPatient[0] = 0.0;
+	m_ImageOrientationPatient[1] = 0.0;
+	m_ImageOrientationPatient[2] = 0.0;
+	m_ImageOrientationPatient[3] = 0.0;
+	m_ImageOrientationPatient[4] = 0.0;
+	m_ImageOrientationPatient[5] = 0.0;
+	m_ImagePositionPatient[0] = 0.0;
+	m_ImagePositionPatient[1] = 0.0;
+	m_ImagePositionPatient[2] = 0.0;
+	m_SliceThickness = 0.0;
+	m_Rows = 0;
+	m_Columns = 0;
+	m_BitsAllocated = 0;
+	m_PixelData = nullptr;
+	m_NumberOfFrames = 0;
+	m_DoseUnits = Gray;
+	m_DoseType = Physical;
+	m_DoseSummationType = Plan;
+	m_GridFrameOffsetVector = nullptr;
+	m_SopInstanceUid = GenerateUID();
 }
 
-RTDoseIODModule::~RTDoseIODModule() {}
+RTDoseIODModule::~RTDoseIODModule() = default;
 
 std::string RTDoseIODModule::GenerateUID()
 {
-	gdcm::UIDGenerator uidGen;
-	return std::string(uidGen.Generate());
+	gdcm::UIDGenerator uid_gen;
+	return std::string(uid_gen.Generate());
 }
 
 double RTDoseIODModule::GetDoseGridScaling()
 {
-	float maxVal = 0.0f;
-	float* ptr = &PixelData[0];
-	for (unsigned long i = 0; i < Rows * Columns * NumberOfFrames; ++i)
+	float max_val = 0.0f;
+	float* ptr = &m_PixelData[0];
+	for (unsigned long i = 0; i < m_Rows * m_Columns * m_NumberOfFrames; ++i)
 	{
-		maxVal = std::max(maxVal, *ptr++);
+		max_val = std::max(max_val, *ptr++);
 	}
 
-	if (BitsAllocated == 16)
+	if (m_BitsAllocated == 16)
 	{
-		return maxVal / UINT16_MAX;
+		return max_val / UINT16_MAX;
 	}
 	else
 	{ // BitsAllocated == 32
-		return maxVal / UINT32_MAX;
+		return max_val / UINT32_MAX;
 	}
 }
 

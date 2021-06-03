@@ -1,5 +1,5 @@
 ##
-## Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+## Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 ## 
 ## This file is part of iSEG
 ## (see https://github.com/ITISFoundation/osparc-iseg).
@@ -49,6 +49,8 @@ MSVC_ONLY_EDIT_PROJECT( ProjectFiles
 	LICENSE
 	README.md
 	.travis.yml
+	.clang-format
+	.clang-tidy
 )
 
 
@@ -63,7 +65,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
 SET_COMPILER_AND_LINKER_FLAGS()
 
-
+# TODO: consider using INCLUDE_DIRECTORIES(SYSTEM
 INCLUDE_DIRECTORIES(
 	${CMAKE_BINARY_DIR}
 	${CMAKE_SOURCE_DIR}
@@ -82,4 +84,5 @@ ADD_SUBDIRECTORY(Thirdparty)
 
 
 # copy dlls and images to build folder
+# TODO: be more clear about what happens during install vs configure
 INSTALL_ALL_USED_LIBRARIES()

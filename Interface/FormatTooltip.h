@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,10 +11,17 @@
 
 #pragma once
 
-inline QString Format(const char *tooltip)
+inline QString Format(const char* tooltip)
 {
 	QString fmt = "<html>\n";
 	fmt += "<div style=\"width: 400px;\">" + QString(tooltip) + "</div>";
+	fmt += "</html>";
+	return fmt;
+}
+inline QString Format(const std::string& tooltip)
+{
+	QString fmt = "<html>\n";
+	fmt += "<div style=\"width: 400px;\">" + QString::fromStdString(tooltip) + "</div>";
 	fmt += "</html>";
 	return fmt;
 }

@@ -29,66 +29,63 @@
 #include "../Format.h"
 #include "StopWatch.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+namespace Time {
+/***********************************************************************************/
+
+// Time measuring is disabled by default
+bool StopWatch::ms_is_enabled = false;
+
+/***********************************************************************************/
+
+void StopWatch::Start(const char * func, Int32 line, const char * msg)
 {
-    namespace System
+    m_has_start = ms_is_enabled;
+
+    if (ms_is_enabled)
     {
-        namespace Time
+        if (func == nullptr)
         {
-            /***********************************************************************************/
-
-            // Time measuring is disabled by default
-            bool StopWatch::ms_is_enabled = false;
-
-            /***********************************************************************************/
-
-            void StopWatch::Start(const char *func, Int32 line, const char *msg)
-            {
-                m_has_start = ms_is_enabled;
-
-                if (ms_is_enabled)
-                {
-                    if (func == NULL)
-                    {
-                        throw ArgumentException(__FUNCTION__, __LINE__, "Method name must be non-NULL.");
-                    }
-
-                    m_func = func; 
-                    if (msg != NULL)
-                    {
-                        m_msg = msg;
-                    }
-                    else
-                    {
-                        m_msg.clear();
-                    }
-                    m_line = line;
-                    m_start = clock();
-                }
-            }
-
-            /***********************************************************************************/
-
-            void StopWatch::End()
-            {
-                if (m_has_start && ms_is_enabled)
-                {
-                    clock_t end = clock();
-                    if (m_msg.empty())
-                    {
-                        Log::Message(Format("{0}[{1}]: {2} sec") << m_func << m_line
-                            << (end - m_start) / float(CLOCKS_PER_SEC));
-                    }
-                    else
-                    {
-                        Log::Message(Format("{0}[{1}] ({2}): {3} sec") << m_func.c_str()
-                            << m_line << m_msg << (end - m_start) / float(CLOCKS_PER_SEC));
-                    }
-                    m_has_start = false;
-                }
-            }
-
-            /***********************************************************************************/
+            throw ArgumentException(__FUNCTION__, __LINE__, "Method name must be non-NULL.");
         }
+
+        m_func = func;
+        if (msg != nullptr)
+        {
+            m_msg = msg;
+        }
+        else
+        {
+            m_msg.clear();
+        }
+        m_line = line;
+        m_start = clock();
     }
 }
+
+/***********************************************************************************/
+
+void StopWatch::End()
+{
+    if (m_has_start && ms_is_enabled)
+    {
+        clock_t end = clock();
+        if (m_msg.empty())
+        {
+            Log::Message(Format("{0}[{1}]: {2} sec") << m_func << m_line
+                                                     << (end - m_start) / float(CLOCKS_PER_SEC));
+        }
+        else
+        {
+            Log::Message(Format("{0}[{1}] ({2}): {3} sec") << m_func.c_str()
+                                                           << m_line << m_msg << (end - m_start) / float(CLOCKS_PER_SEC));
+        }
+        m_has_start = false;
+    }
+}
+
+/***********************************************************************************/
+}
+}
+} // namespace Gc::System::Time

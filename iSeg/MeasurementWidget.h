@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,8 +15,8 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <qcombobox.h>
-#include <qradiobutton.h>
+#include <QComboBox>
+#include <QRadioButton>
 
 class QStackedWidget;
 class QLabel;
@@ -27,71 +27,72 @@ class MeasurementWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	MeasurementWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~MeasurementWidget() {}
+	MeasurementWidget(SlicesHandler* hand3D);
+	~MeasurementWidget() override = default;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void init() override;
-	void cleanup() override;
-	void newloaded() override;
-	float calculatevec(unsigned short orient);
+	void Init() override;
+	void Cleanup() override;
+	void NewLoaded() override;
+	float Calculatevec(unsigned short orient);
 	std::string GetName() override { return std::string("Measurement"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("measurement.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("measurement.png"))); }
 
 private:
-	void on_mouse_clicked(Point p) override;
-	void on_mouse_moved(Point p) override;
+	void OnMouseClicked(Point p) override;
+	void OnMouseMoved(Point p) override;
+	void MarksChanged() override;
 
-	void getlabels();
-	float calculate();
-	void set_coord(unsigned short posit, Point p, unsigned short slicenr);
+	void Getlabels();
+	float Calculate();
+	void SetCoord(unsigned short Posit, Point p, unsigned short slicenr);
 
-	enum eActiveLabels { kP1, kP2, kP3, kP4 };
-	void setActiveLabels(eActiveLabels labels);
+	enum eActiveLabels { kP1,
+		kP2,
+		kP3,
+		kP4 };
+	void SetActiveLabels(eActiveLabels labels);
 
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	std::vector<augmentedmark> labels;
-	unsigned short activeslice;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	std::vector<AugmentedMark> m_Labels;
+	unsigned short m_Activeslice;
 
-	QRadioButton* rb_vector;
-	QRadioButton* rb_dist;
-	QRadioButton* rb_thick;
-	QRadioButton* rb_angle;
-	QRadioButton* rb_4ptangle;
-	QRadioButton* rb_vol;
-	QWidget* input_area;
-	QRadioButton* rb_pts;
-	QRadioButton* rb_lbls;
+	QRadioButton* m_RbVector;
+	QRadioButton* m_RbDist;
+	QRadioButton* m_RbThick;
+	QRadioButton* m_RbAngle;
+	QRadioButton* m_Rb4ptangle;
+	QRadioButton* m_RbVol;
+	QWidget* m_InputArea;
+	QRadioButton* m_RbPts;
+	QRadioButton* m_RbLbls;
 
-	QStackedWidget* stacked_widget;
-	QLabel* txt_displayer;
-	QWidget* labels_area;
-	QComboBox* cbb_lb1;
-	QComboBox* cbb_lb2;
-	QComboBox* cbb_lb3;
-	QComboBox* cbb_lb4;
+	QStackedWidget* m_StackedWidget;
+	QLabel* m_TxtDisplayer;
+	QWidget* m_LabelsArea;
+	QComboBox* m_CbbLb1;
+	QComboBox* m_CbbLb2;
+	QComboBox* m_CbbLb3;
+	QComboBox* m_CbbLb4;
 
-	int state;
-	int pt[4][3];
-	bool drawing;
-	std::vector<Point> established;
-	std::vector<Point> dynamic;
-	Point p1;
+	int m_State;
+	int m_Pt[4][3];
+	bool m_Drawing;
+	std::vector<Point> m_Established;
+	std::vector<Point> m_Dynamic;
+	Point m_P1;
 
 signals:
-	void vp1_changed(std::vector<Point>* vp1);
-	void vp1dyn_changed(std::vector<Point>* vp1, std::vector<Point>* vpdyn,
-			bool also_points = false);
+	void Vp1Changed(std::vector<Point>* vp1);
+	void Vp1dynChanged(std::vector<Point>* vp1, std::vector<Point>* vpdyn, bool also_points = false);
 
 private slots:
-	void marks_changed();
-	void bmphand_changed(bmphandler* bmph);
-	void cbb_changed(int);
-	void method_changed(int);
-	void inputtype_changed(int);
-	void update_visualization();
+	void BmphandChanged(Bmphandler* bmph);
+	void CbbChanged(int);
+	void MethodChanged(int);
+	void InputtypeChanged(int);
+	void UpdateVisualization();
 };
 
 } // namespace iseg

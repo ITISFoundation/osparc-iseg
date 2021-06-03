@@ -1,5 +1,5 @@
 ##
-## Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+## Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 ## 
 ## This file is part of iSEG
 ## (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,6 +18,8 @@ IF(ISEG_BUILD_TESTING)
 		test_Brush.cpp
 		test_Logging.cpp
 		test_iSegImageAdaptor.cpp
+		#test_SuperPixel.cpp
+		test_Properties.cpp
 		test_Transform.cpp
 	)
 	

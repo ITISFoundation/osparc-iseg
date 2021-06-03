@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -22,193 +22,191 @@ class QAction;
 
 namespace iseg {
 
-class bmphandler;
+class Bmphandler;
 class SlicesHandler;
 
 class ImageViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	ImageViewerWidget(QWidget* parent = 0, const char* name = 0,
-			Qt::WindowFlags wFlags = 0);
-	~ImageViewerWidget();
-	void init(SlicesHandler* hand3D, bool bmporwork);
+	ImageViewerWidget(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~ImageViewerWidget() override;
+	void Init(SlicesHandler* hand3D, bool bmporwork);
 	void update();
 	void update(QRect rect);
-	void update_range();
-	void update_range(unsigned short slicenr);
-	bool toggle_tissuevisible();
-	bool toggle_picturevisible();
-	bool toggle_markvisible();
-	bool toggle_overlayvisible();
-	bool toggle_workbordervisible();
-	void set_crosshairxvisible(bool on);
-	void set_crosshairyvisible(bool on);
-	void get_scaleoffsetfactor(float& offset1, float& factor1);
+	void UpdateRange();
+	void UpdateRange(unsigned short slicenr);
+	bool ToggleTissuevisible();
+	bool TogglePicturevisible();
+	bool ToggleMarkvisible();
+	bool ToggleOverlayvisible();
+	bool ToggleWorkbordervisible();
+	void SetCrosshairxvisible(bool on);
+	void SetCrosshairyvisible(bool on);
+	void GetScaleoffsetfactor(float& offset1, float& factor1) const;
 
-	bool return_workbordervisible();
+	bool ReturnWorkbordervisible() const;
 
-	void setIsBmp(bool isBmpOrNot) { isBmp = isBmpOrNot; }
-	void setMousePosZoom(QPoint point) { mousePosZoom = point; }
+	void SetIsBmp(bool isBmpOrNot) { m_IsBmp = isBmpOrNot; }
+	void SetMousePosZoom(QPoint point) { m_MousePosZoom = point; }
 
 protected:
-	void paintEvent(QPaintEvent* e);
-	void mousePressEvent(QMouseEvent* e);
-	void mouseReleaseEvent(QMouseEvent* e);
-	void mouseDoubleClickEvent(QMouseEvent* e);
-	void mouseMoveEvent(QMouseEvent* e);
-	void wheelEvent(QWheelEvent* e);
-	void contextMenuEvent(QContextMenuEvent* e);
-	void update_scaleoffsetfactor();
+	void paintEvent(QPaintEvent* e) override;
+	void mousePressEvent(QMouseEvent* e) override;
+	void mouseReleaseEvent(QMouseEvent* e) override;
+	void mouseDoubleClickEvent(QMouseEvent* e) override;
+	void mouseMoveEvent(QMouseEvent* e) override;
+	void wheelEvent(QWheelEvent* e) override;
+	void contextMenuEvent(QContextMenuEvent* e) override;
+	void UpdateScaleoffsetfactor();
 
 signals:
-	void addmark_sign(Point p);
-	void addlabel_sign(Point p, std::string str);
-	void clearmarks_sign();
-	void removemark_sign(Point p);
-	void addtissue_sign(Point p);
-	void addtissueconnected_sign(Point p);
-	void addtissuelarger_sign(Point p);
-	void subtissue_sign(Point p);
-	void addtissue3D_sign(Point p);
-	void selecttissue_sign(Point p, bool clear_selection);
-	void viewtissue_sign(Point p);
-	void viewtarget_sign(Point p);
-	void mousepressed_sign(Point p);
-	void mousereleased_sign(Point p);
-	void mousepressedmid_sign(Point p);
-	void mousedoubleclick_sign(Point p);
-	void mousedoubleclickmid_sign(Point p);
-	void mousemoved_sign(Point p);
-	void wheelrotated_sign(int delta);
-	void wheelrotatedctrl_sign(int delta);
-	void scaleoffsetfactor_changed(float scaleoffset1, float scalefactor1, bool bmporwork1);
-	void setcenter_sign(int x, int y);
-	void mousePosZoom_sign(QPoint mousePosZoom);
+	void AddmarkSign(Point p);
+	void AddlabelSign(Point p, std::string str);
+	void ClearmarksSign();
+	void RemovemarkSign(Point p);
+	void AddtissueSign(Point p);
+	void AddtissueconnectedSign(Point p);
+	void AddtissuelargerSign(Point p);
+	void SubtissueSign(Point p);
+	void Addtissue3DSign(Point p);
+	void SelecttissueSign(Point p, bool clear_selection);
+	void ViewtissueSign(Point p);
+	void ViewtargetSign(Point p);
+	void MousepressedSign(Point p);
+	void MousereleasedSign(Point p);
+	void MousepressedmidSign(Point p);
+	void MousedoubleclickSign(Point p);
+	void MousedoubleclickmidSign(Point p);
+	void MousemovedSign(Point p);
+	void WheelrotatedSign(int delta);
+	void WheelrotatedctrlSign(int delta);
+	void ScaleoffsetfactorChanged(float scaleoffset1, float scalefactor1, bool bmporwork1);
+	void SetcenterSign(int x, int y);
+	void MousePosZoomSign(QPoint mousePosZoom);
 
 private:
-	void reload_bits();
-	void vp_to_image_decorator();
-	void vp_changed();
-	void vp_changed(QRect rect);
-	void vpdyn_changed();
-	void vp1dyn_changed();
-	void mode_changed(unsigned char newmode, bool updatescale = true);
+	void ReloadBits();
+	void VpToImageDecorator();
+	void VpChanged();
+	void VpChanged(QRect rect);
+	void VpdynChanged();
+	void Vp1dynChanged();
+	void ModeChanged(unsigned char newmode, bool updatescale = true);
 
-	QPainter* painter;
-	unsigned char mode;
-	float brightness;
-	float contrast;
-	float scaleoffset;
-	float scalefactor;
-	double zoom;
-	bool crosshairxvisible;
-	bool crosshairyvisible;
-	int crosshairxpos;
-	int crosshairypos;
-	Pair pixelsize;
-	QColor actual_color;
-	QColor outline_color;
+	QPainter* m_Painter;
+	unsigned char m_Mode;
+	float m_Brightness;
+	float m_Contrast;
+	float m_Scaleoffset;
+	float m_Scalefactor;
+	double m_Zoom;
+	bool m_Crosshairxvisible = false;
+	bool m_Crosshairyvisible = false;
+	int m_Crosshairxpos;
+	int m_Crosshairypos;
+	Pair m_Pixelsize;
+	QColor m_ActualColor;
+	QColor m_OutlineColor;
 
-	QImage image;
-	QImage image_decorated;
+	QImage m_Image;
+	QImage m_ImageDecorated;
 
-	unsigned short width, height;
-	bmphandler* bmphand;
-	SlicesHandler* handler3D;
-	unsigned short activeslice;
-	float** bmpbits;
-	float* overlaybits;
-	tissues_size_t** tissue;
-	Pair range_mode1;
-	bool tissuevisible;
-	bool picturevisible;
-	bool overlayvisible;
-	float overlayalpha;
-	bool markvisible;
-	bool bmporwork;
-	bool workborder;
-	bool workborderlimit;
-	bool isBmp;
-	QPoint mousePosZoom;
-	std::vector<Mark>* marks;
-	int eventx, eventy;
-	QAction* addmark;
-	QAction* addlabel;
-	QAction* clearmarks;
-	QAction* removemark;
-	QAction* addtissue;
-	QAction* addtissueconnected;
-	QAction* subtissue;
-	QAction* addtissue3D;
-	QAction* addtissuelarger;
-	QAction* selecttissue;
-	QAction* addtoselection;
-	QAction* viewtissue;
-	QAction* viewtarget;
-	QAction* nexttargetslice;
-	std::vector<Point> vp;
-	std::vector<Point> vp_old;
-	std::vector<Point> vp1;
-	std::vector<Point> vp1_old;
-	std::vector<Point> vpdyn;
-	std::vector<Point> vpdyn_old;
-	std::vector<Point> limit_points;
-	std::vector<Mark> vm;
-	std::vector<Mark> vm_old;
+	unsigned short m_Width, m_Height;
+	Bmphandler* m_Bmphand;
+	SlicesHandler* m_Handler3D;
+	unsigned short m_Activeslice;
+	float** m_Bmpbits;
+	float* m_Overlaybits;
+	tissues_size_t** m_Tissue;
+	Pair m_RangeMode1;
+	bool m_Tissuevisible = true;
+	bool m_Picturevisible = true;
+	bool m_Overlayvisible = false;
+	float m_Overlayalpha;
+	bool m_Markvisible = true;
+	bool m_Bmporwork;
+	bool m_Workborder = false;
+	bool m_Workborderlimit;
+	bool m_IsBmp;
+	QPoint m_MousePosZoom;
+	std::vector<Mark>* m_Marks;
+	int m_Eventx, m_Eventy;
+	QAction* m_Addmark;
+	QAction* m_Addlabel;
+	QAction* m_Clearmarks;
+	QAction* m_Removemark;
+	QAction* m_Addtissue;
+	QAction* m_Addtissueconnected;
+	QAction* m_Subtissue;
+	QAction* m_Addtissue3D;
+	QAction* m_Addtissuelarger;
+	QAction* m_Selecttissue;
+	QAction* m_Addtoselection;
+	QAction* m_Viewtissue;
+	QAction* m_Viewtarget;
+	QAction* m_Nexttargetslice;
+	std::vector<Point> m_Vp;
+	std::vector<Point> m_VpOld;
+	std::vector<Point> m_Vp1;
+	std::vector<Point> m_Vp1Old;
+	std::vector<Point> m_Vpdyn;
+	std::vector<Point> m_VpdynOld;
+	std::vector<Point> m_LimitPoints;
+	std::vector<Mark> m_Vm;
+	std::vector<Mark> m_VmOld;
 
 public slots:
-	void set_brightnesscontrast(float bright, float contr, bool paint = true);
-	void set_tissuevisible(bool on);
-	void set_picturevisible(bool on);
-	void set_markvisible(bool on);
-	void set_overlayvisible(bool on);
-	void set_overlayalpha(float alpha);
-	void set_workbordervisible(bool on);
-	void set_outline_color(const QColor&);
-	void slicenr_changed();
-	void tissue_changed();
-	void tissue_changed(QRect rect);
-	void zoom_in();
-	void zoom_out();
-	void unzoom();
-	double return_zoom();
-	void set_zoom(double z);
-	void pixelsize_changed(Pair pixelsize1);
+	void SetBrightnesscontrast(float bright, float contr, bool paint = true);
+	void SetTissuevisible(bool on);
+	void SetPicturevisible(bool on);
+	void SetMarkvisible(bool on);
+	void SetOverlayvisible(bool on);
+	void SetOverlayalpha(float alpha);
+	void SetWorkbordervisible(bool on);
+	void SetOutlineColor(const QColor&);
+	void SlicenrChanged();
+	void TissueChanged();
+	void TissueChanged(QRect rect);
+	void ZoomIn();
+	void ZoomOut();
+	void Unzoom();
+	double ReturnZoom() const;
+	void SetZoom(double z);
+	void PixelsizeChanged(Pair pixelsize1);
 
 private slots:
-	void bmphand_changed(bmphandler* bmph);
-	void add_mark();
-	void add_label();
-	void clear_marks();
-	void remove_mark();
-	void add_tissue();
-	void add_tissue_connected();
-	void sub_tissue();
-	void add_tissue_3D();
-	void add_tissuelarger();
-	void select_tissue();
-	void view_tissue_surface();
-	void view_target_surface();
-	void next_target_slice();
-	void add_to_selected_tissues();
-	void mark_changed();
-	void bmp_changed();
-	void overlay_changed();
-	void overlay_changed(QRect rect);
-	void workborder_changed();
-	void workborder_changed(QRect rect);
-	void recompute_workborder();
-	void set_vp1(std::vector<Point>* vp1_arg);
-	void set_vm(std::vector<Mark>* vm_arg);
-	void set_vpdyn(std::vector<Point>* vpdyn_arg);
-	void set_vp1_dyn(std::vector<Point>* vp1_arg, std::vector<Point>* vpdyn_arg,
-			const bool also_points = false);
+	void BmphandChanged(Bmphandler* bmph);
+	void AddMark();
+	void AddLabel();
+	void ClearMarks();
+	void RemoveMark();
+	void AddTissue();
+	void AddTissueConnected();
+	void SubTissue();
+	void AddTissue3D();
+	void AddTissuelarger();
+	void SelectTissue();
+	void ViewTissueSurface();
+	void ViewTargetSurface();
+	void NextTargetSlice();
+	void AddToSelectedTissues();
+	void MarkChanged();
+	void BmpChanged();
+	void OverlayChanged();
+	void OverlayChanged(QRect rect);
+	void WorkborderChanged();
+	void WorkborderChanged(QRect rect);
+	void RecomputeWorkborder();
+	void SetVp1(std::vector<Point>* vp1_arg);
+	void SetVm(std::vector<Mark>* vm_arg);
+	void SetVpdyn(std::vector<Point>* vpdyn_arg);
+	void SetVp1Dyn(std::vector<Point>* vp1_arg, std::vector<Point>* vpdyn_arg, bool also_points = false);
 
 public slots:
-	void color_changed(int tissue);
-	void crosshairx_changed(int i);
-	void crosshairy_changed(int i);
+	void ColorChanged(int tissue);
+	void CrosshairxChanged(int i);
+	void CrosshairyChanged(int i);
 };
 
 } // namespace iseg

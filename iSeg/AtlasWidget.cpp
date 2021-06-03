@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -12,136 +12,124 @@
 #include "AtlasWidget.h"
 #include "WidgetCollection.h"
 
+#include "Interface/QtConnect.h"
+
 #include "Core/ProjectVersion.h"
 
+#include <QApplication>
 #include <QCloseEvent>
+#include <QColor>
 #include <QContextMenuEvent>
+#include <QEvent>
+#include <QImage>
+#include <QLineEdit>
 #include <QMouseEvent>
 #include <QPaintEvent>
+#include <QPainter>
+#include <QPen>
 #include <QScrollBar>
 #include <QSlider>
+#include <QVBoxLayout>
 #include <QWheelEvent>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qinputdialog.h>
-#include <qlineedit.h>
-#include <qpainter.h>
-#include <qpen.h>
-#include <qwidget.h>
 
 namespace iseg {
 
-AtlasWidget::AtlasWidget(const char *filename, QDir picpath, QWidget *parent,
-		const char *name, Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags)
 {
-	isOK = false;
+	m_IsOk = false;
 	QString title("Atlas - ");
 	title = title + QFileInfo(filename).completeBaseName();
 	setCaption(title);
-	tissue = nullptr;
-	image = nullptr;
-	if (!loadfile(filename))
+	m_Tissue = nullptr;
+	m_Image = nullptr;
+	if (!Loadfile(filename))
 	{
 		return;
 	}
-	isOK = true;
-	m_picpath = picpath;
+	m_IsOk = true;
+	m_MPicpath = picpath;
 
-	QVBoxLayout *vbox1 = new QVBoxLayout;
-	QHBoxLayout *hbox1 = new QHBoxLayout;
-	QHBoxLayout *hbox2 = new QHBoxLayout;
-	QHBoxLayout *hbox3 = new QHBoxLayout;
+	QVBoxLayout* vbox1 = new QVBoxLayout;
+	QHBoxLayout* hbox1 = new QHBoxLayout;
+	QHBoxLayout* hbox2 = new QHBoxLayout;
+	QHBoxLayout* hbox3 = new QHBoxLayout;
 
-	sl_contrast = new QSlider(Qt::Horizontal, this);
-	sl_contrast->setRange(0, 99);
-	sl_contrast->setValue(0);
-	sl_brightness = new QSlider(Qt::Horizontal, this);
-	sl_brightness->setRange(0, 100);
-	sl_brightness->setValue(50);
-	lb_contrast = new QLabel("C:", this);
-	lb_contrast->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-contrast.png")).ascii())
-					.pixmap());
-	lb_brightness = new QLabel("B:", this);
-	lb_brightness->setPixmap(
-			QIcon(m_picpath.absFilePath(QString("icon-brightness.png")).ascii())
-					.pixmap());
-	hbox1->addWidget(lb_contrast);
-	hbox1->addWidget(sl_contrast);
-	hbox1->addWidget(lb_brightness);
-	hbox1->addWidget(sl_brightness);
+	m_SlContrast = new QSlider(Qt::Horizontal, this);
+	m_SlContrast->setRange(0, 99);
+	m_SlContrast->setValue(0);
+	m_SlBrightness = new QSlider(Qt::Horizontal, this);
+	m_SlBrightness->setRange(0, 100);
+	m_SlBrightness->setValue(50);
+	m_LbContrast = new QLabel("C:", this);
+	m_LbContrast->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
+	m_LbBrightness = new QLabel("B:", this);
+	m_LbBrightness->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png"))).pixmap());
+	hbox1->addWidget(m_LbContrast);
+	hbox1->addWidget(m_SlContrast);
+	hbox1->addWidget(m_LbBrightness);
+	hbox1->addWidget(m_SlBrightness);
 
 	vbox1->setSpacing(0);
 	vbox1->setMargin(2);
 	vbox1->addLayout(hbox1);
-	sa_viewer = new QScrollArea(this);
-	atlasViewer = new AtlasViewer(image, tissue, 2, dimx, dimy, dimz, dx, dy,
-			dz, &color_r, &color_g, &color_b, this);
-	sa_viewer->setWidget(atlasViewer);
-	vbox1->addWidget(sa_viewer);
-	scb_slicenr = new QScrollBar(0, dimz - 1, 1, 5, 0, Qt::Horizontal, this);
-	vbox1->addWidget(scb_slicenr);
+	m_SaViewer = new QScrollArea(this);
+	m_AtlasViewer = new AtlasViewer(m_Image, m_Tissue, 2, m_Dimx, m_Dimy, m_Dimz, m_Dx, m_Dy, m_Dz, &m_ColorR, &m_ColorG, &m_ColorB, this);
+	m_SaViewer->setWidget(m_AtlasViewer);
+	vbox1->addWidget(m_SaViewer);
+	m_ScbSlicenr = new QScrollBar(0, m_Dimz - 1, 1, 5, 0, Qt::Horizontal, this);
+	vbox1->addWidget(m_ScbSlicenr);
 
-	bg_orient = new QButtonGroup(this);
+	m_BgOrient = new QButtonGroup(this);
 	//	imgorval->hide();
-	rb_x = new QRadioButton(QString("x"), this);
-	rb_y = new QRadioButton(QString("y"), this);
-	rb_z = new QRadioButton(QString("z"), this);
-	bg_orient->insert(rb_x);
-	bg_orient->insert(rb_y);
-	bg_orient->insert(rb_z);
-	rb_z->setChecked(TRUE);
-	hbox2->addWidget(rb_x);
-	hbox2->addWidget(rb_y);
-	hbox2->addWidget(rb_z);
+	m_RbX = new QRadioButton(QString("x"), this);
+	m_RbY = new QRadioButton(QString("y"), this);
+	m_RbZ = new QRadioButton(QString("z"), this);
+	m_BgOrient->insert(m_RbX);
+	m_BgOrient->insert(m_RbY);
+	m_BgOrient->insert(m_RbZ);
+	m_RbZ->setChecked(TRUE);
+	hbox2->addWidget(m_RbX);
+	hbox2->addWidget(m_RbY);
+	hbox2->addWidget(m_RbZ);
 
-	sl_transp = new QSlider(Qt::Horizontal, this);
-	sl_transp->setRange(0, 100);
-	sl_transp->setValue(50);
-	lb_transp = new QLabel("Transp:", this);
-	hbox3->addWidget(lb_transp);
-	hbox3->addWidget(sl_transp);
+	m_SlTransp = new QSlider(Qt::Horizontal, this);
+	m_SlTransp->setRange(0, 100);
+	m_SlTransp->setValue(50);
+	m_LbTransp = new QLabel("Transp:", this);
+	hbox3->addWidget(m_LbTransp);
+	hbox3->addWidget(m_SlTransp);
 
 	vbox1->addLayout(hbox2);
 	vbox1->addLayout(hbox3);
-	zoomer = new ZoomWidget(1.0, m_picpath, this);
-	zoomer->setFixedSize(zoomer->sizeHint());
-	vbox1->addWidget(zoomer);
-	lb_name = new QLabel(QString("jljlfds"), this);
-	vbox1->addWidget(lb_name);
+	m_Zoomer = new ZoomWidget(1.0, m_MPicpath, this);
+	m_Zoomer->setFixedSize(m_Zoomer->sizeHint());
+	vbox1->addWidget(m_Zoomer);
+	m_LbName = new QLabel(QString("jljlfds"), this);
+	vbox1->addWidget(m_LbName);
 	setLayout(vbox1);
 
-	QObject::connect(scb_slicenr, SIGNAL(valueChanged(int)), this,
-			SLOT(scb_slicenr_changed()));
-	QObject::connect(sl_transp, SIGNAL(valueChanged(int)), this,
-			SLOT(sl_transp_changed()));
-	QObject::connect(bg_orient, SIGNAL(buttonClicked(int)), this,
-			SLOT(xyz_changed()));
-	QObject::connect(zoomer, SIGNAL(set_zoom(double)), atlasViewer,
-			SLOT(set_zoom(double)));
-	QObject::connect(sl_brightness, SIGNAL(valueChanged(int)), this,
-			SLOT(sl_brightcontr_moved()));
-	QObject::connect(sl_contrast, SIGNAL(valueChanged(int)), this,
-			SLOT(sl_brightcontr_moved()));
+	QObject_connect(m_ScbSlicenr, SIGNAL(valueChanged(int)), this, SLOT(ScbSlicenrChanged()));
+	QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(SlTranspChanged()));
+	QObject_connect(m_BgOrient, SIGNAL(buttonClicked(int)), this, SLOT(XyzChanged()));
+	QObject_connect(m_Zoomer, SIGNAL(SetZoom(double)), m_AtlasViewer, SLOT(SetZoom(double)));
+	QObject_connect(m_SlBrightness, SIGNAL(valueChanged(int)), this, SLOT(SlBrightcontrMoved()));
+	QObject_connect(m_SlContrast, SIGNAL(valueChanged(int)), this, SLOT(SlBrightcontrMoved()));
 
-	QObject::connect(atlasViewer, SIGNAL(mousemoved_sign(tissues_size_t)), this,
-			SLOT(pt_moved(tissues_size_t)));
-	atlasViewer->setMouseTracking(true);
+	QObject_connect(m_AtlasViewer, SIGNAL(MousemovedSign(tissues_size_t)), this, SLOT(PtMoved(tissues_size_t)));
+	m_AtlasViewer->setMouseTracking(true);
 }
 
 AtlasWidget::~AtlasWidget()
 {
-	delete[] tissue;
-	delete[] image;
+	delete[] m_Tissue;
+	delete[] m_Image;
 }
 
-bool AtlasWidget::loadfile(const char *filename)
+bool AtlasWidget::Loadfile(const char* filename)
 {
-	dimx = dimy = dimz = 10;
-	dx = dy = dz = 1.0;
+	m_Dimx = m_Dimy = m_Dimz = 10;
+	m_Dx = m_Dy = m_Dz = 1.0;
 
 	QFile file(filename);
 	file.open(QIODevice::ReadOnly);
@@ -154,10 +142,10 @@ bool AtlasWidget::loadfile(const char *filename)
 		return false;
 
 	// Read the version
-	qint32 combinedVersion;
-	in >> combinedVersion;
-	int version, tissuesVersion;
-	iseg::ExtractTissuesVersion((int)combinedVersion, version, tissuesVersion);
+	qint32 combined_version;
+	in >> combined_version;
+	int version, tissues_version;
+	iseg::ExtractTissuesVersion((int)combined_version, version, tissues_version);
 	if (version < 1)
 		return false;
 	if (version > 1)
@@ -167,70 +155,69 @@ bool AtlasWidget::loadfile(const char *filename)
 
 	qint32 dummy;
 	in >> dummy;
-	dimx = (unsigned short)dummy;
+	m_Dimx = (unsigned short)dummy;
 	in >> dummy;
-	dimy = (unsigned short)dummy;
+	m_Dimy = (unsigned short)dummy;
 	in >> dummy;
-	dimz = (unsigned short)dummy;
-	in >> dx >> dy >> dz;
+	m_Dimz = (unsigned short)dummy;
+	in >> m_Dx >> m_Dy >> m_Dz;
 	in >> dummy;
 	tissues_size_t nrtissues = (tissues_size_t)dummy;
-	tissue_names.resize(nrtissues);
-	color_r.resize(nrtissues);
-	color_g.resize(nrtissues);
-	color_b.resize(nrtissues);
+	m_TissueNames.resize(nrtissues);
+	m_ColorR.resize(nrtissues);
+	m_ColorG.resize(nrtissues);
+	m_ColorB.resize(nrtissues);
 
-	unsigned dimtot = unsigned(dimx) * unsigned(dimy) * dimz;
-	image = new float[dimtot];
-	if (image == nullptr)
+	unsigned dimtot = unsigned(m_Dimx) * unsigned(m_Dimy) * m_Dimz;
+	m_Image = new float[dimtot];
+	if (m_Image == nullptr)
 		return false;
-	tissue = new tissues_size_t[dimtot];
-	if (tissue == nullptr)
+	m_Tissue = new tissues_size_t[dimtot];
+	if (m_Tissue == nullptr)
 	{
-		delete[] image;
+		delete[] m_Image;
 		return false;
 	}
 
 	for (tissues_size_t i = 0; i < nrtissues; i++)
 	{
-		in >> tissue_names[i] >> color_r[i] >> color_g[i] >> color_b[i];
+		in >> m_TissueNames[i] >> m_ColorR[i] >> m_ColorG[i] >> m_ColorB[i];
 	}
 
-	int area = dimx * (int)dimy;
-	if (tissuesVersion > 0)
+	int area = m_Dimx * (int)m_Dimy;
+	if (tissues_version > 0)
 	{
-		for (unsigned short i = 0; i < dimz; i++)
+		for (unsigned short i = 0; i < m_Dimz; i++)
 		{
-			in.readRawData((char *)&(image[area * i]), area * sizeof(float));
-			in.readRawData((char *)&(tissue[area * i]),
-					area * sizeof(tissues_size_t));
+			in.readRawData((char*)&(m_Image[area * i]), area * sizeof(float));
+			in.readRawData((char*)&(m_Tissue[area * i]), area * sizeof(tissues_size_t));
 		}
 	}
 	else
 	{
-		char *charBuffer = new char[area];
-		for (unsigned short i = 0; i < dimz; i++)
+		char* char_buffer = new char[area];
+		for (unsigned short i = 0; i < m_Dimz; i++)
 		{
-			in.readRawData((char *)&(image[area * i]), area * sizeof(float));
-			in.readRawData(charBuffer, area);
+			in.readRawData((char*)&(m_Image[area * i]), area * sizeof(float));
+			in.readRawData(char_buffer, area);
 			for (int j = 0; j < area; j++)
 			{
-				tissue[area * i + j] = charBuffer[j];
+				m_Tissue[area * i + j] = char_buffer[j];
 			}
 		}
-		delete[] charBuffer;
+		delete[] char_buffer;
 	}
 
 	//for(unsigned i=0;i<dimtot;i++) image[i]=10*(i%10);
 	//for(unsigned i=0;i<dimtot;i++) tissue[i]=((i/10)%10);
 
-	minval = maxval = image[0];
+	m_Minval = m_Maxval = m_Image[0];
 	for (unsigned i = 1; i < dimtot; i++)
 	{
-		if (minval > image[i])
-			minval = image[i];
-		if (maxval < image[i])
-			maxval = image[i];
+		if (m_Minval > m_Image[i])
+			m_Minval = m_Image[i];
+		if (m_Maxval < m_Image[i])
+			m_Maxval = m_Image[i];
 	}
 
 	//tissue_names.push_back(QString("a"));
@@ -279,52 +266,52 @@ bool AtlasWidget::loadfile(const char *filename)
 	return true;
 }
 
-void AtlasWidget::scb_slicenr_changed()
+void AtlasWidget::ScbSlicenrChanged()
 {
-	atlasViewer->slicenr_changed(scb_slicenr->value());
+	m_AtlasViewer->SlicenrChanged(m_ScbSlicenr->value());
 }
 
-void AtlasWidget::sl_transp_changed()
+void AtlasWidget::SlTranspChanged()
 {
-	atlasViewer->set_tissueopac(1.0f - sl_transp->value() * 0.01f);
+	m_AtlasViewer->SetTissueopac(1.0f - m_SlTransp->value() * 0.01f);
 }
 
-void AtlasWidget::xyz_changed()
+void AtlasWidget::XyzChanged()
 {
-	scb_slicenr->setValue(0);
-	if (rb_x->isChecked())
+	m_ScbSlicenr->setValue(0);
+	if (m_RbX->isChecked())
 	{
-		scb_slicenr->setMaxValue(dimx - 1);
-		atlasViewer->orient_changed(0);
+		m_ScbSlicenr->setMaxValue(m_Dimx - 1);
+		m_AtlasViewer->OrientChanged(0);
 	}
-	else if (rb_y->isChecked())
+	else if (m_RbY->isChecked())
 	{
-		scb_slicenr->setMaxValue(dimy - 1);
-		atlasViewer->orient_changed(1);
+		m_ScbSlicenr->setMaxValue(m_Dimy - 1);
+		m_AtlasViewer->OrientChanged(1);
 	}
-	else if (rb_z->isChecked())
+	else if (m_RbZ->isChecked())
 	{
-		scb_slicenr->setMaxValue(dimz - 1);
-		atlasViewer->orient_changed(2);
+		m_ScbSlicenr->setMaxValue(m_Dimz - 1);
+		m_AtlasViewer->OrientChanged(2);
 	}
 }
 
-void AtlasWidget::pt_moved(tissues_size_t val)
+void AtlasWidget::PtMoved(tissues_size_t val)
 {
 	if (val == 0)
-		lb_name->setText("Background");
+		m_LbName->setText("Background");
 	else
-		lb_name->setText(tissue_names[val - 1]);
+		m_LbName->setText(m_TissueNames[val - 1]);
 }
 
-void AtlasWidget::sl_brightcontr_moved()
+void AtlasWidget::SlBrightcontrMoved()
 {
 	float factor, offset;
-	factor = 255.0f * (1 + sl_contrast->value()) / (maxval - minval);
+	factor = 255.0f * (1 + m_SlContrast->value()) / (m_Maxval - m_Minval);
 	offset =
-			(127.5f - maxval * factor) * (1.0f - sl_brightness->value() * 0.01f) +
-			0.01f * (127.5f - minval * factor) * sl_brightness->value();
-	atlasViewer->set_scale(offset, factor);
+			(127.5f - m_Maxval * factor) * (1.0f - m_SlBrightness->value() * 0.01f) +
+			0.01f * (127.5f - m_Minval * factor) * m_SlBrightness->value();
+	m_AtlasViewer->SetScale(offset, factor);
 }
 
 } // namespace iseg

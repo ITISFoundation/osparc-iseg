@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,14 +16,13 @@ namespace iseg { namespace plugin {
 class PanelAutoTracingPlugin : public Plugin
 {
 public:
-	PanelAutoTracingPlugin() {}
-	~PanelAutoTracingPlugin() {}
-	virtual std::string name() const { return "Panel AutoTracing Plugin "; }
+	PanelAutoTracingPlugin() = default;
+	~PanelAutoTracingPlugin() = default;
+	std::string Name() const override { return "Panel AutoTracing Plugin "; }
 
-	virtual std::string description() const { return "Panel AutoTracing Plugin"; }
+	std::string Description() const override { return "Panel AutoTracing Plugin"; }
 
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-			Qt::WindowFlags wFlags) const;
+	WidgetInterface* CreateWidget() const override;
 };
 
 }} // namespace iseg::plugin

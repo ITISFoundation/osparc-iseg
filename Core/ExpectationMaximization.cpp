@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,68 +18,60 @@
 
 namespace iseg {
 
-void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
-		short dimension, float** bit, float* weight)
+void ExpectationMaximization::Init(short unsigned wi, short unsigned h, short nrclass, short dimension, float** bit, float* weight)
 {
-	width = wi;
-	height = h;
-	area = unsigned(wi) * h;
-	nrclasses = nrclass;
-	dim = dimension;
-	bits = bit;
-	weights = weight;
-	m = (short*)malloc(sizeof(short) * area * nrclasses);
-	w = (float*)malloc(sizeof(float) * area * nrclasses);
-	sw = (float*)malloc(sizeof(float) * nrclasses);
-	centers = (float*)malloc(sizeof(float) * dim * nrclass);
-	devs = (float*)malloc(sizeof(float) * nrclass);
-	ampls = (float*)malloc(sizeof(float) * nrclass);
+	m_Width = wi;
+	m_Height = h;
+	m_Area = unsigned(wi) * h;
+	m_Nrclasses = nrclass;
+	m_Dim = dimension;
+	m_Bits = bit;
+	m_Weights = weight;
+	m_M = (short*)malloc(sizeof(short) * m_Area * m_Nrclasses);
+	m_W = (float*)malloc(sizeof(float) * m_Area * m_Nrclasses);
+	m_Sw = (float*)malloc(sizeof(float) * m_Nrclasses);
+	m_Centers = (float*)malloc(sizeof(float) * m_Dim * nrclass);
+	m_Devs = (float*)malloc(sizeof(float) * nrclass);
+	m_Ampls = (float*)malloc(sizeof(float) * nrclass);
 
-	init_centers();
-	//	init_centers_rand();
-
-	return;
+	InitCenters();
 }
 
-void ExpectationMaximization::init(short unsigned wi, short unsigned h, short nrclass,
-		short dimension, float** bit, float* weight, float* center,
-		float* dev, float* ampl)
+void ExpectationMaximization::Init(short unsigned wi, short unsigned h, short nrclass, short dimension, float** bit, float* weight, float* center, float* dev, float* ampl)
 {
-	width = wi;
-	height = h;
-	area = unsigned(wi) * h;
-	nrclasses = nrclass;
-	dim = dimension;
-	bits = bit;
-	weights = weight;
-	m = (short*)malloc(sizeof(short) * area * nrclasses);
-	w = (float*)malloc(sizeof(float) * area * nrclasses);
-	sw = (float*)malloc(sizeof(float) * nrclasses);
-	centers = (float*)malloc(sizeof(float) * dim * nrclass);
+	m_Width = wi;
+	m_Height = h;
+	m_Area = unsigned(wi) * h;
+	m_Nrclasses = nrclass;
+	m_Dim = dimension;
+	m_Bits = bit;
+	m_Weights = weight;
+	m_M = (short*)malloc(sizeof(short) * m_Area * m_Nrclasses);
+	m_W = (float*)malloc(sizeof(float) * m_Area * m_Nrclasses);
+	m_Sw = (float*)malloc(sizeof(float) * m_Nrclasses);
+	m_Centers = (float*)malloc(sizeof(float) * m_Dim * nrclass);
 	for (short i = 0; i < nrclass * dimension; i++)
-		centers[i] = center[i];
-	devs = (float*)malloc(sizeof(float) * nrclass);
+		m_Centers[i] = center[i];
+	m_Devs = (float*)malloc(sizeof(float) * nrclass);
 	for (short i = 0; i < nrclass; i++)
-		devs[i] = dev[i];
-	ampls = (float*)malloc(sizeof(float) * nrclass);
+		m_Devs[i] = dev[i];
+	m_Ampls = (float*)malloc(sizeof(float) * nrclass);
 	for (short i = 0; i < nrclass; i++)
-		ampls[i] = ampl[i];
-	for (unsigned i = 0; i < area; i++)
-		m[i] = -1;
-
-	return;
+		m_Ampls[i] = ampl[i];
+	for (unsigned i = 0; i < m_Area; i++)
+		m_M[i] = -1;
 }
 
-unsigned ExpectationMaximization::make_iter(unsigned maxiter, unsigned converged)
+unsigned ExpectationMaximization::MakeIter(unsigned maxiter, unsigned converged)
 {
 	unsigned iter = 0;
-	unsigned conv = area;
+	unsigned conv = m_Area;
 	while (iter++ < maxiter && conv > converged)
 	{
 		//		cout << iter<<":" <<conv << " ";
-		conv = recompute_membership();
+		conv = RecomputeMembership();
 		//		cout << ":";
-		recompute_centers();
+		RecomputeCenters();
 		//		cout << ";";
 		//		cout << conv << " ";
 	}
@@ -87,139 +79,134 @@ unsigned ExpectationMaximization::make_iter(unsigned maxiter, unsigned converged
 	return iter;
 }
 
-void ExpectationMaximization::classify(float* result_bits)
+void ExpectationMaximization::Classify(float* result_bits)
 {
-	for (unsigned i = 0; i < area; i++)
-		result_bits[i] = 255.0f / (nrclasses - 1) * m[i];
-	return;
+	for (unsigned i = 0; i < m_Area; i++)
+		result_bits[i] = 255.0f / (m_Nrclasses - 1) * m_M[i];
 }
 
-void ExpectationMaximization::apply_to(float** /* sources */, float* result_bits)
+void ExpectationMaximization::ApplyTo(float** /* sources */, float* result_bits)
 {
 	float dist, wmax, wdummy;
 	short unsigned cindex;
 	short dummy;
 
-	for (unsigned i = 0; i < area; i++)
+	for (unsigned i = 0; i < m_Area; i++)
 	{
 		dummy = 0;
 		dist = 0;
-		for (short n = 0; n < dim; n++)
+		for (short n = 0; n < m_Dim; n++)
 		{
-			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
-							weights[n];
+			dist += (m_Bits[n][i] - m_Centers[n]) * (m_Bits[n][i] - m_Centers[n]) *
+							m_Weights[n];
 		}
-		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
-		cindex = dim;
-		for (short l = 1; l < nrclasses; l++)
+		wmax = exp(-dist / (2 * m_Devs[0])) / sqrt(m_Devs[0]);
+		cindex = m_Dim;
+		for (short l = 1; l < m_Nrclasses; l++)
 		{
 			dist = 0;
-			for (short n = 0; n < dim; n++)
+			for (short n = 0; n < m_Dim; n++)
 			{
-				dist += (bits[n][i] - centers[cindex]) *
-								(bits[n][i] - centers[cindex]) * weights[n];
+				dist += (m_Bits[n][i] - m_Centers[cindex]) *
+								(m_Bits[n][i] - m_Centers[cindex]) * m_Weights[n];
 				cindex++;
 			}
-			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
+			wdummy = exp(-dist / (2 * m_Devs[l])) / sqrt(m_Devs[l]);
 			if (wdummy > wmax)
 			{
 				wmax = wdummy;
 				dummy = l;
 			}
 		}
-		result_bits[i] = 255.0f / (nrclasses - 1) * dummy;
+		result_bits[i] = 255.0f / (m_Nrclasses - 1) * dummy;
 	}
-
-	return;
 }
 
-void ExpectationMaximization::recompute_centers()
+void ExpectationMaximization::RecomputeCenters()
 {
 	float devold;
-	for (short i = 0; i < nrclasses; i++)
+	for (short i = 0; i < m_Nrclasses; i++)
 	{
-		ampls[i] = sw[i] / area;
+		m_Ampls[i] = m_Sw[i] / m_Area;
 		//		cout << "x"<<ampls[i];
 	}
 	//	cout << endl;
 
-	for (short i = 0; i < nrclasses; i++)
+	for (short i = 0; i < m_Nrclasses; i++)
 	{
-		if (sw[i] != 0)
+		if (m_Sw[i] != 0)
 		{
-			for (short k = 0; k < dim; k++)
+			for (short k = 0; k < m_Dim; k++)
 			{
-				centers[k + i * dim] = 0;
-				for (unsigned j = 0; j < area; j++)
+				m_Centers[k + i * m_Dim] = 0;
+				for (unsigned j = 0; j < m_Area; j++)
 				{
-					centers[k + i * dim] += w[j + area * i] * bits[k][j];
+					m_Centers[k + i * m_Dim] += m_W[j + m_Area * i] * m_Bits[k][j];
 				}
-				centers[k + i * dim] /= sw[i];
+				m_Centers[k + i * m_Dim] /= m_Sw[i];
 				//				cout << "y"<<centers[k+i*dim];
 			}
 
-			devold = devs[i];
-			devs[i] = 0;
-			for (unsigned j = 0; j < area; j++)
+			devold = m_Devs[i];
+			m_Devs[i] = 0;
+			for (unsigned j = 0; j < m_Area; j++)
 			{
-				for (short k = 0; k < dim; k++)
+				for (short k = 0; k < m_Dim; k++)
 				{
-					devs[i] += w[j + area * i] *
-										 (bits[k][j] - centers[k + i * dim]) *
-										 (bits[k][j] - centers[k + i * dim]) * weights[k];
+					m_Devs[i] += m_W[j + m_Area * i] *
+											 (m_Bits[k][j] - m_Centers[k + i * m_Dim]) *
+											 (m_Bits[k][j] - m_Centers[k + i * m_Dim]) * m_Weights[k];
 				}
 			}
-			devs[i] /= sw[i];
-			if (devs[i] == 0)
-				devs[i] = devold;
+			m_Devs[i] /= m_Sw[i];
+			if (m_Devs[i] == 0)
+				m_Devs[i] = devold;
 			//			cout << "z"<<devs[i]<<" ";
 		}
 	}
 	//	cout << endl;
 	//	cout << endl;
-
-	return;
 }
 
-unsigned ExpectationMaximization::recompute_membership()
+unsigned ExpectationMaximization::RecomputeMembership()
 {
 	unsigned count = 0;
 	float dist, wmax, wsum, wdummy;
 	short unsigned cindex;
 	short dummy;
 
-	for (short l = 0; l < nrclasses; l++)
+	for (short l = 0; l < m_Nrclasses; l++)
 	{
-		sw[l] = 0;
+		m_Sw[l] = 0;
 	}
 
-	for (unsigned i = 0; i < area; i++)
+	for (unsigned i = 0; i < m_Area; i++)
 	{
 		dummy = 0;
 		dist = 0;
-		for (short n = 0; n < dim; n++)
+		for (short n = 0; n < m_Dim; n++)
 		{
-			dist += (bits[n][i] - centers[n]) * (bits[n][i] - centers[n]) *
-							weights[n];
+			dist += (m_Bits[n][i] - m_Centers[n]) * (m_Bits[n][i] - m_Centers[n]) *
+							m_Weights[n];
 		}
 		//		wsum=wmax=w[i]=exp(-dist/(2*devs[0]))/sqrt(devs[0])*ampls[0];
-		wmax = exp(-dist / (2 * devs[0])) / sqrt(devs[0]);
-		wsum = w[i] = wmax * ampls[0];
+		wmax = exp(-dist / (2 * m_Devs[0])) / sqrt(m_Devs[0]);
+		wsum = m_W[i] = wmax * m_Ampls[0];
 		//		sw[0]+=wmin;
-		cindex = dim;
-		for (short l = 1; l < nrclasses; l++)
+		cindex = m_Dim;
+		for (short l = 1; l < m_Nrclasses; l++)
 		{
 			dist = 0;
-			for (short n = 0; n < dim; n++)
+			for (short n = 0; n < m_Dim; n++)
 			{
-				dist += (bits[n][i] - centers[cindex]) *
-								(bits[n][i] - centers[cindex]) * weights[n];
+				dist += (m_Bits[n][i] - m_Centers[cindex]) *
+								(m_Bits[n][i] - m_Centers[cindex]) * m_Weights[n];
 				cindex++;
 			}
-			wdummy = exp(-dist / (2 * devs[l])) / sqrt(devs[l]);
-			w[i + area * l] = wdummy * ampls[l];
+			wdummy = exp(-dist / (2 * m_Devs[l])) / sqrt(m_Devs[l]);
+			m_W[i + m_Area * l] = wdummy * m_Ampls[l];
 			//			w[i+area*l]=exp(-dist/(2*devs[l]))/sqrt(devs[l])*ampls[l];
-			wsum += w[i + area * l];
+			wsum += m_W[i + m_Area * l];
 			if (wdummy > wmax)
 			{
 				wmax = wdummy;
@@ -227,30 +214,30 @@ unsigned ExpectationMaximization::recompute_membership()
 			}
 			//			if(w[i+area*l]>wmax) {wmax=w[i+area*l]; dummy=l;}
 		}
-		if (m[i] != dummy)
+		if (m_M[i] != dummy)
 		{
 			count++;
-			m[i] = dummy;
+			m_M[i] = dummy;
 		}
-		for (short l = 0; l < nrclasses; l++)
+		for (short l = 0; l < m_Nrclasses; l++)
 		{
 			if (wsum == 0)
 			{
-				w[i + area * l] = 1.0f / nrclasses;
+				m_W[i + m_Area * l] = 1.0f / m_Nrclasses;
 			}
 			else
 			{
-				w[i + area * l] /= wsum;
+				m_W[i + m_Area * l] /= wsum;
 			}
 			//			sw[l]/=wsum;
 		}
 	}
 
-	for (short l = 0; l < nrclasses; l++)
+	for (short l = 0; l < m_Nrclasses; l++)
 	{
-		for (unsigned i = 0; i < area; i++)
+		for (unsigned i = 0; i < m_Area; i++)
 		{
-			sw[l] += w[i + l * area];
+			m_Sw[l] += m_W[i + l * m_Area];
 		}
 	}
 
@@ -259,89 +246,83 @@ unsigned ExpectationMaximization::recompute_membership()
 	return count;
 }
 
-void ExpectationMaximization::init_centers()
+void ExpectationMaximization::InitCenters()
 {
-	for (short j = 0; j < nrclasses; j++)
-		sw[j] = 0;
-	for (short j = 0; j < nrclasses; j++)
+	for (short j = 0; j < m_Nrclasses; j++)
+		m_Sw[j] = 0;
+	for (short j = 0; j < m_Nrclasses; j++)
 	{
-		for (unsigned i = 0; i < area; i++)
-			w[i + area * j] = 0;
-		for (unsigned i = j; i < area; i += nrclasses)
+		for (unsigned i = 0; i < m_Area; i++)
+			m_W[i + m_Area * j] = 0;
+		for (unsigned i = j; i < m_Area; i += m_Nrclasses)
 		{
-			w[i + area * j] = 1;
-			sw[j]++;
+			m_W[i + m_Area * j] = 1;
+			m_Sw[j]++;
 		}
 	}
 
-	recompute_centers();
+	RecomputeCenters();
 
-	for (short i = 0; i < nrclasses; i++)
-		ampls[i] = 1.0f / nrclasses;
-
-	return;
+	for (short i = 0; i < m_Nrclasses; i++)
+		m_Ampls[i] = 1.0f / m_Nrclasses;
 }
 
-void ExpectationMaximization::init_centers_rand()
+void ExpectationMaximization::InitCentersRand()
 {
 	unsigned j;
 
-	for (short i = 0; i < nrclasses; i++)
+	for (short i = 0; i < m_Nrclasses; i++)
 	{
-		j = unsigned(area * float(rand()) / RAND_MAX);
-		for (short k = 0; k < dim; k++)
+		j = unsigned(m_Area * float(rand()) / RAND_MAX);
+		for (short k = 0; k < m_Dim; k++)
 		{
-			centers[i + k * dim] = bits[k][j];
+			m_Centers[i + k * m_Dim] = m_Bits[k][j];
 		}
 	}
 
 	float dist = 0;
 	float minim, maxim;
-	for (short i = 0; i < dim; i++)
+	for (short i = 0; i < m_Dim; i++)
 	{
-		minim = maxim = bits[i][0];
-		for (j = 1; j < area; j++)
+		minim = maxim = m_Bits[i][0];
+		for (j = 1; j < m_Area; j++)
 		{
-			minim = std::min(bits[i][j], minim);
-			maxim = std::max(bits[i][j], maxim);
+			minim = std::min(m_Bits[i][j], minim);
+			maxim = std::max(m_Bits[i][j], maxim);
 		}
 		dist += (maxim - minim) * (maxim - minim);
 	}
 
-	for (short i = 0; i < nrclasses; i++)
-		devs[i] = dist / (nrclasses * nrclasses);
+	for (short i = 0; i < m_Nrclasses; i++)
+		m_Devs[i] = dist / (m_Nrclasses * m_Nrclasses);
 
-	for (short i = 0; i < nrclasses; i++)
-		ampls[i] = 1.0f / nrclasses;
-
-	return;
+	for (short i = 0; i < m_Nrclasses; i++)
+		m_Ampls[i] = 1.0f / m_Nrclasses;
 }
 
-void ExpectationMaximization::init_centers(float* center, float* dev, float* ampl)
+void ExpectationMaximization::InitCenters(float* center, float* dev, float* ampl)
 {
-	for (short i = 0; i < nrclasses * dim; i++)
-		centers[i] = center[i];
-	for (short i = 0; i < nrclasses; i++)
-		devs[i] = dev[i];
-	for (short i = 0; i < nrclasses; i++)
-		ampls[i] = ampl[i];
-	return;
+	for (short i = 0; i < m_Nrclasses * m_Dim; i++)
+		m_Centers[i] = center[i];
+	for (short i = 0; i < m_Nrclasses; i++)
+		m_Devs[i] = dev[i];
+	for (short i = 0; i < m_Nrclasses; i++)
+		m_Ampls[i] = ampl[i];
 }
 
-float* ExpectationMaximization::return_centers() { return centers; }
+float* ExpectationMaximization::ReturnCenters() { return m_Centers; }
 
-float* ExpectationMaximization::return_devs() { return devs; }
+float* ExpectationMaximization::ReturnDevs() { return m_Devs; }
 
-float* ExpectationMaximization::return_ampls() { return ampls; }
+float* ExpectationMaximization::ReturnAmpls() { return m_Ampls; }
 
 ExpectationMaximization::~ExpectationMaximization()
 {
-	free(w);
-	free(sw);
-	free(centers);
-	free(devs);
-	free(ampls);
-	return;
+	free(m_W);
+	free(m_Sw);
+	free(m_Centers);
+	free(m_Devs);
+	free(m_Ampls);
 }
 
 } // namespace iseg

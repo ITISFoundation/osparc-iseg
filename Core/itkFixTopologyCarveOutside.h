@@ -27,7 +27,7 @@ class /*ITK_TEMPLATE_EXPORT*/ FixTopologyCarveOutside : public ImageToImageFilte
 public:
 	ITK_DISALLOW_COPY_AND_ASSIGN(FixTopologyCarveOutside);
 
-	/** Standard class typedefs. */
+	/** Standard class type aliases. */
 	using Self = FixTopologyCarveOutside;
 	using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
 	using Pointer = SmartPointer<Self>;

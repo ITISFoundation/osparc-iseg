@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -13,6 +13,8 @@
 #include "TissueHierarchy.h"
 #include "TissueInfos.h"
 #include "TissueTreeWidget.h"
+
+#include "Interface/QtConnect.h"
 
 #include <QDropEvent>
 
@@ -36,10 +38,9 @@ inline bool SearchFilter(const std::string& text, const std::string& filter)
 		algo::trim(search_text);
 
 		std::vector<std::string> search_tokens;
-		algo::split(search_tokens, search_text, algo::is_space(),
-				algo::token_compress_on);
+		algo::split(search_tokens, search_text, algo::is_space(), algo::token_compress_on);
 
-		for (auto tok : search_tokens)
+		for (const auto& tok : search_tokens)
 		{
 			if (!tok.empty() && !algo::icontains(text, tok))
 			{
@@ -51,13 +52,12 @@ inline bool SearchFilter(const std::string& text, const std::string& filter)
 }
 } // namespace
 
-TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath,
-		QWidget* parent)
-		: QTreeWidget(parent), hierarchies(hierarchy)
+TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath, QWidget* parent)
+		: QTreeWidget(parent), m_Hierarchies(hierarchy)
 {
-	picturePath = picpath;
-	sortByNameAscending = true;
-	sortByTypeAscending = true;
+	m_PicturePath = picpath;
+	m_SortByNameAscending = true;
+	m_SortByTypeAscending = true;
 
 	setColumnCount(TISSUETREEWIDGET_COLUMN_COUNT);
 	hideColumn(TISSUETREEWIDGET_COLUMN_TYPE);
@@ -71,39 +71,37 @@ TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath,
 	setRootIsDecorated(true);
 	//xxxb	setFixedHeight(250);
 	//xxxb	setFixedWidth(110);
-	QObject::connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this,
-			SLOT(resize_columns_to_contents(QTreeWidgetItem*)));
-	QObject::connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this,
-			SLOT(resize_columns_to_contents(QTreeWidgetItem*)));
-	initialize();
+	QObject_connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
+	QObject_connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
+	Initialize();
 }
 
-TissueTreeWidget::~TissueTreeWidget() {}
+TissueTreeWidget::~TissueTreeWidget() = default;
 
-void TissueTreeWidget::initialize()
+void TissueTreeWidget::Initialize()
 {
 	// Clear internal representations
-	hierarchies->initialize();
+	m_Hierarchies->Initialize();
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 }
 
-void TissueTreeWidget::set_tissue_filter(const QString& filter)
+void TissueTreeWidget::SetTissueFilter(const QString& filter)
 {
-	if (filter.toStdString() != tissue_filter)
+	if (filter.toStdString() != m_TissueFilter)
 	{
-		tissue_filter = filter.toStdString();
+		m_TissueFilter = filter.toStdString();
 
 		// set visibility on items
-		update_visibility();
+		UpdateVisibility();
 	}
 }
 
-bool TissueTreeWidget::is_visible(tissues_size_t type) const
+bool TissueTreeWidget::IsVisible(tissues_size_t type) const
 {
 	if (type > 0)
 	{
-		if (auto item = find_tissue_item(type))
+		if (auto item = FindTissueItem(type))
 		{
 			return !item->isHidden();
 		}
@@ -111,19 +109,19 @@ bool TissueTreeWidget::is_visible(tissues_size_t type) const
 	return false;
 }
 
-void TissueTreeWidget::update_visibility()
+void TissueTreeWidget::UpdateVisibility()
 {
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
-		update_visibility_recursive(topLevelItem(i));
+		UpdateVisibilityRecursive(topLevelItem(i));
 	}
 }
 
-void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem* current)
+void TissueTreeWidget::UpdateVisibilityRecursive(QTreeWidgetItem* current)
 {
 	// setHidden hides/shows recursively
-	bool const matches = SearchFilter(get_name(current).toStdString(), tissue_filter);
-	bool const is_folder = get_is_folder(current);
+	bool const matches = SearchFilter(GetName(current).toStdString(), m_TissueFilter);
+	bool const is_folder = GetIsFolder(current);
 	if (matches || !is_folder)
 	{
 		current->setHidden(!matches);
@@ -131,7 +129,7 @@ void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem* current)
 	}
 
 	// first make all visible
-	if (get_is_folder(current))
+	if (GetIsFolder(current))
 	{
 		current->setHidden(false);
 	}
@@ -141,7 +139,7 @@ void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem* current)
 	for (int i = 0; i < current->childCount(); ++i)
 	{
 		QTreeWidgetItem* child = current->child(i);
-		update_visibility_recursive(child);
+		UpdateVisibilityRecursive(child);
 
 		if (!child->isHidden())
 		{
@@ -156,13 +154,13 @@ void TissueTreeWidget::update_visibility_recursive(QTreeWidgetItem* current)
 	}
 }
 
-void TissueTreeWidget::update_hierarchy()
+void TissueTreeWidget::UpdateHierarchy()
 {
-	modified = true;
-	hierarchies->set_selected_hierarchy(create_current_hierarchy());
+	m_Modified = true;
+	m_Hierarchies->SetSelectedHierarchy(CreateCurrentHierarchy());
 }
 
-TissueHierarchyItem* TissueTreeWidget::create_current_hierarchy()
+TissueHierarchyItem* TissueTreeWidget::CreateCurrentHierarchy()
 {
 	// Create internal representation from current QTreeWidget
 	TissueHierarchyItem* root = new TissueHierarchyItem(true, QString("root"));
@@ -170,41 +168,40 @@ TissueHierarchyItem* TissueTreeWidget::create_current_hierarchy()
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
 		// Add top-level child
-		QTreeWidgetItem* currWidgetItem = topLevelItem(i);
-		TissueHierarchyItem* newTreeItem = create_hierarchy_item(currWidgetItem);
-		root->AddChild(newTreeItem);
+		QTreeWidgetItem* curr_widget_item = topLevelItem(i);
+		TissueHierarchyItem* new_tree_item = CreateHierarchyItem(curr_widget_item);
+		root->AddChild(new_tree_item);
 
 		// Subtree of current child
-		if (newTreeItem->GetIsFolder())
+		if (new_tree_item->GetIsFolder())
 		{
-			create_hierarchy_recursively(currWidgetItem, newTreeItem);
+			CreateHierarchyRecursively(curr_widget_item, new_tree_item);
 		}
 	}
 
 	return root;
 }
 
-void TissueTreeWidget::create_hierarchy_recursively(
-		QTreeWidgetItem* parentIn, TissueHierarchyItem* parentOut)
+void TissueTreeWidget::CreateHierarchyRecursively(QTreeWidgetItem* parentIn, TissueHierarchyItem* parentOut)
 {
 	for (int i = 0; i < parentIn->childCount(); ++i)
 	{
 		// Add child
-		QTreeWidgetItem* currWidgetItem = parentIn->child(i);
-		TissueHierarchyItem* newTreeItem = create_hierarchy_item(currWidgetItem);
-		parentOut->AddChild(newTreeItem);
+		QTreeWidgetItem* curr_widget_item = parentIn->child(i);
+		TissueHierarchyItem* new_tree_item = CreateHierarchyItem(curr_widget_item);
+		parentOut->AddChild(new_tree_item);
 
 		// Subtree of current child
-		if (newTreeItem->GetIsFolder())
+		if (new_tree_item->GetIsFolder())
 		{
-			create_hierarchy_recursively(currWidgetItem, newTreeItem);
+			CreateHierarchyRecursively(curr_widget_item, new_tree_item);
 		}
 	}
 }
 
-TissueHierarchyItem* TissueTreeWidget::create_hierarchy_item(QTreeWidgetItem* item)
+TissueHierarchyItem* TissueTreeWidget::CreateHierarchyItem(QTreeWidgetItem* item)
 {
-	return new TissueHierarchyItem(get_is_folder(item), item->text(TISSUETREEWIDGET_COLUMN_NAME));
+	return new TissueHierarchyItem(GetIsFolder(item), item->text(TISSUETREEWIDGET_COLUMN_NAME));
 }
 
 namespace {
@@ -218,20 +215,20 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 		return abc;
 	}
 	unsigned char r, g, b;
-	TissueInfo* tissueInfo = TissueInfos::GetTissueInfo(tissuenr);
-	std::tie(r, g, b) = tissueInfo->color.toUChar();
+	TissueInfo* tissue_info = TissueInfos::GetTissueInfo(tissuenr);
+	std::tie(r, g, b) = tissue_info->m_Color.ToUChar();
 	abc.fill(QColor(r, g, b));
-	if (tissueInfo->locked)
+	if (tissue_info->m_Locked)
 	{
 		QPainter painter(&abc);
 		float r, g, b;
-		r = (tissueInfo->color[0] + 0.5f);
+		r = (tissue_info->m_Color[0] + 0.5f);
 		if (r >= 1.0f)
 			r = r - 1.0f;
-		g = (tissueInfo->color[1] + 0.5f);
+		g = (tissue_info->m_Color[1] + 0.5f);
 		if (g >= 1.0f)
 			g = g - 1.0f;
-		b = (tissueInfo->color[2] + 0.5f);
+		b = (tissue_info->m_Color[2] + 0.5f);
 		if (b >= 1.0f)
 			b = b - 1.0f;
 		painter.setPen(QColor(int(r * 255), int(g * 255), int(b * 255)));
@@ -245,184 +242,180 @@ QPixmap generatePixmap(tissues_size_t tissuenr)
 
 } // namespace
 
-QTreeWidgetItem* TissueTreeWidget::create_hierarchy_item(bool isFolder, const QString& name)
+QTreeWidgetItem* TissueTreeWidget::CreateHierarchyItem(bool isFolder, const QString& name)
 {
 	if (isFolder)
 	{
-		QTreeWidgetItem* newFolder = new QTreeWidgetItem();
-		newFolder->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(picturePath.absFilePath(QString("fileopen.png")).ascii()));
-		newFolder->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
-		newFolder->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
-		newFolder->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
-		newFolder->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-		return newFolder;
+		QTreeWidgetItem* new_folder = new QTreeWidgetItem();
+		new_folder->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("fileopen.png")).ascii()));
+		new_folder->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
+		new_folder->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
+		new_folder->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
+		new_folder->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+		return new_folder;
 	}
 	else
 	{
 		tissues_size_t type = TissueInfos::GetTissueType(ToStd(name));
-		QTreeWidgetItem* newTissue = new QTreeWidgetItem();
-		newTissue->setIcon(TISSUETREEWIDGET_COLUMN_NAME, generatePixmap(type));
-		newTissue->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
-		newTissue->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
-		newTissue->setText(TISSUETREEWIDGET_COLUMN_FOLDER,
-				QString::number(isFolder));
-		newTissue->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
-		newTissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled |
-												Qt::ItemIsDragEnabled);
-		return newTissue;
+		QTreeWidgetItem* new_tissue = new QTreeWidgetItem();
+		new_tissue->setIcon(TISSUETREEWIDGET_COLUMN_NAME, generatePixmap(type));
+		new_tissue->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
+		new_tissue->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(type));
+		new_tissue->setText(TISSUETREEWIDGET_COLUMN_FOLDER, QString::number(isFolder));
+		new_tissue->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicator);
+		new_tissue->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled);
+		return new_tissue;
 	}
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString& name)
+void TissueTreeWidget::InsertItem(bool isFolder, const QString& name)
 {
-	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* new_item = CreateHierarchyItem(isFolder, name);
 
-	if (QTreeWidgetItem* currItem = currentItem())
+	if (QTreeWidgetItem* curr_item = currentItem())
 	{
-		if (get_is_folder(currItem) && currItem->isExpanded())
+		if (GetIsFolder(curr_item) && curr_item->isExpanded())
 		{
 			// Insert as first child of current folder
-			currItem->insertChild(0, newItem);
+			curr_item->insertChild(0, new_item);
 		}
 		else
 		{
 			// Insert at current position
-			QTreeWidgetItem* currParent = currItem->parent();
-			if (currParent == 0)
+			QTreeWidgetItem* curr_parent = curr_item->parent();
+			if (curr_parent == nullptr)
 			{
-				insertTopLevelItem(indexOfTopLevelItem(currItem), newItem);
+				insertTopLevelItem(indexOfTopLevelItem(curr_item), new_item);
 			}
 			else
 			{
-				currParent->insertChild(currParent->indexOfChild(currItem), newItem);
+				curr_parent->insertChild(curr_parent->indexOfChild(curr_item), new_item);
 			}
 		}
 	}
 	else // empty tissue list
 	{
-		invisibleRootItem()->insertChild(0, newItem);
+		invisibleRootItem()->insertChild(0, new_item);
 	}
 
-	setCurrentItem(newItem);
+	setCurrentItem(new_item);
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString& name,
-		QTreeWidgetItem* insertAbove)
+void TissueTreeWidget::InsertItem(bool isFolder, const QString& name, QTreeWidgetItem* insertAbove)
 {
-	if (insertAbove == 0)
+	if (insertAbove == nullptr)
 	{
 		return;
 	}
 
-	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* new_item = CreateHierarchyItem(isFolder, name);
 
 	QTreeWidgetItem* parent = insertAbove->parent();
-	if (parent == 0)
+	if (parent == nullptr)
 	{
-		insertTopLevelItem(indexOfTopLevelItem(insertAbove), newItem);
+		insertTopLevelItem(indexOfTopLevelItem(insertAbove), new_item);
 	}
 	else
 	{
-		parent->insertChild(parent->indexOfChild(insertAbove), newItem);
+		parent->insertChild(parent->indexOfChild(insertAbove), new_item);
 	}
 
-	setCurrentItem(newItem);
+	setCurrentItem(new_item);
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 }
 
-void TissueTreeWidget::insert_item(bool isFolder, const QString& name,
-		QTreeWidgetItem* parent, unsigned int index)
+void TissueTreeWidget::InsertItem(bool isFolder, const QString& name, QTreeWidgetItem* parent, unsigned int index)
 {
-	QTreeWidgetItem* newItem = create_hierarchy_item(isFolder, name);
+	QTreeWidgetItem* new_item = CreateHierarchyItem(isFolder, name);
 
-	if (parent == 0)
+	if (parent == nullptr)
 	{
-		insertTopLevelItem(index, newItem);
+		insertTopLevelItem(index, new_item);
 	}
 	else
 	{
-		parent->insertChild(index, newItem);
+		parent->insertChild(index, new_item);
 	}
 
-	setCurrentItem(newItem);
+	setCurrentItem(new_item);
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 }
 
-void TissueTreeWidget::remove_tissue(const QString& name)
+void TissueTreeWidget::RemoveTissue(const QString& name)
 {
 	// Removes a tissue completely from all hierarchies
 	blockSignals(true);
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
-		QTreeWidgetItem* currItem = topLevelItem(i);
-		if (get_is_folder(currItem))
+		QTreeWidgetItem* curr_item = topLevelItem(i);
+		if (GetIsFolder(curr_item))
 		{
-			remove_tissue_recursively(currItem, name);
+			RemoveTissueRecursively(curr_item, name);
 		}
-		else if (get_name(currItem).compare(name) == 0)
+		else if (GetName(curr_item).compare(name) == 0)
 		{
 			// Delete tissue item
 			takeTopLevelItem(i);
-			delete currItem;
+			delete curr_item;
 			--i;
 		}
 		else
 		{
 			// Update tissue type
-			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(newType));
+			tissues_size_t new_type = TissueInfos::GetTissueType(ToStd(curr_item->text(TISSUETREEWIDGET_COLUMN_NAME)));
+			curr_item->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(new_type));
 		}
 	}
 	blockSignals(false);
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 
 	// Propagate tissue removal to other hierarchies
-	hierarchies->update_hierarchies();
+	m_Hierarchies->UpdateHierarchies();
 }
 
-void TissueTreeWidget::remove_tissue_recursively(QTreeWidgetItem* parent, const QString& name)
+void TissueTreeWidget::RemoveTissueRecursively(QTreeWidgetItem* parent, const QString& name)
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
-		QTreeWidgetItem* currItem = parent->child(i);
-		if (get_is_folder(currItem))
+		QTreeWidgetItem* curr_item = parent->child(i);
+		if (GetIsFolder(curr_item))
 		{
-			remove_tissue_recursively(currItem, name);
+			RemoveTissueRecursively(curr_item, name);
 		}
-		else if (get_name(currItem).compare(name) == 0)
+		else if (GetName(curr_item).compare(name) == 0)
 		{
 			// Delete tissue item
 			parent->takeChild(i);
-			delete currItem;
+			delete curr_item;
 			--i;
 		}
 		else
 		{
 			// Update tissue type
-			tissues_size_t newType = TissueInfos::GetTissueType(ToStd(currItem->text(TISSUETREEWIDGET_COLUMN_NAME)));
-			currItem->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(newType));
+			tissues_size_t new_type = TissueInfos::GetTissueType(ToStd(curr_item->text(TISSUETREEWIDGET_COLUMN_NAME)));
+			curr_item->setText(TISSUETREEWIDGET_COLUMN_TYPE, QString::number(new_type));
 		}
 	}
 }
 
-void TissueTreeWidget::remove_items(const std::vector<QTreeWidgetItem*>& items)
+void TissueTreeWidget::RemoveItems(const std::vector<QTreeWidgetItem*>& items)
 {
 	std::set<QTreeWidgetItem*> deleted;
-	for (auto currItem : items)
+	for (auto curr_item : items)
 	{
-		if (deleted.count(currItem) == 0)
+		if (deleted.count(curr_item) == 0)
 		{
-			remove_item(currItem, false, false);
-			deleted.insert(currItem);
+			RemoveItem(curr_item, false, false);
+			deleted.insert(curr_item);
 		}
 		else
 		{
@@ -431,49 +424,49 @@ void TissueTreeWidget::remove_items(const std::vector<QTreeWidgetItem*>& items)
 	}
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 
 	// Propagate tissue removal to other hierarchies
-	hierarchies->update_hierarchies();
+	m_Hierarchies->UpdateHierarchies();
 
 	// Update tissue indices
-	update_tissue_indices();
+	UpdateTissueIndices();
 }
 
-void TissueTreeWidget::remove_item(QTreeWidgetItem* currItem, bool removeChildren, bool updateRepresentation)
+void TissueTreeWidget::RemoveItem(QTreeWidgetItem* currItem, bool removeChildren, bool updateRepresentation)
 {
 	// Removes item in QTreeWidget and internal representations
-	QTreeWidgetItem* currParent = currItem->parent();
-	bool updateTissues = false;
+	QTreeWidgetItem* curr_parent = currItem->parent();
+	bool update_tissues = false;
 
-	if (get_is_folder(currItem))
+	if (GetIsFolder(currItem))
 	{
 		// Delete folder
 		if (removeChildren)
 		{
 			// Delete all children of current item
 			QList<QTreeWidgetItem*> children;
-			take_children_recursively(currItem, children);
+			TakeChildrenRecursively(currItem, children);
 			qDeleteAll(children);
 
 			// Delete current item
-			if (currParent == 0)
+			if (curr_parent == nullptr)
 			{
 				takeTopLevelItem(indexOfTopLevelItem(currItem));
 				delete currItem;
 			}
 			else
 			{
-				currParent->removeChild(currItem);
+				curr_parent->removeChild(currItem);
 				delete currItem;
 			}
 
-			updateTissues = true;
+			update_tissues = true;
 		}
 		else
 		{
 			// Insert children into parent and delete current item
-			if (currParent == 0)
+			if (curr_parent == nullptr)
 			{
 				insertTopLevelItems(indexOfTopLevelItem(currItem), currItem->takeChildren());
 				takeTopLevelItem(indexOfTopLevelItem(currItem));
@@ -481,8 +474,8 @@ void TissueTreeWidget::remove_item(QTreeWidgetItem* currItem, bool removeChildre
 			}
 			else
 			{
-				currParent->insertChildren(currParent->indexOfChild(currItem), currItem->takeChildren());
-				currParent->removeChild(currItem);
+				curr_parent->insertChildren(curr_parent->indexOfChild(currItem), currItem->takeChildren());
+				curr_parent->removeChild(currItem);
 				delete currItem;
 			}
 		}
@@ -490,58 +483,58 @@ void TissueTreeWidget::remove_item(QTreeWidgetItem* currItem, bool removeChildre
 	else
 	{
 		// Delete tissue
-		if (currParent == 0)
+		if (curr_parent == nullptr)
 		{
 			takeTopLevelItem(indexOfTopLevelItem(currItem));
 			delete currItem;
 		}
 		else
 		{
-			currParent->removeChild(currItem);
+			curr_parent->removeChild(currItem);
 			delete currItem;
 		}
 
-		updateTissues = true;
+		update_tissues = true;
 	}
 
 	// Update internal representation
 	if (updateRepresentation)
 	{
-		update_hierarchy();
+		UpdateHierarchy();
 
 		// Propagate tissue removal to other hierarchies
-		if (updateTissues)
+		if (update_tissues)
 		{
-			hierarchies->update_hierarchies();
+			m_Hierarchies->UpdateHierarchies();
 
 			// Update tissue indices
-			update_tissue_indices();
+			UpdateTissueIndices();
 		}
 	}
 }
 
-void TissueTreeWidget::remove_all_folders(bool removeChildren)
+void TissueTreeWidget::RemoveAllFolders(bool removeChildren)
 {
 	// Removes all folders in QTreeWidget and internal representations
 
-	bool updateTissues = false;
+	bool update_tissues = false;
 	blockSignals(true);
 	if (removeChildren)
 	{
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
 			QTreeWidgetItem* item = topLevelItem(i);
-			if (get_is_folder(item))
+			if (GetIsFolder(item))
 			{
 				// Delete all children of item
 				QList<QTreeWidgetItem*> children;
-				take_children_recursively(item, children);
+				TakeChildrenRecursively(item, children);
 				qDeleteAll(children);
 
 				// Delete item
 				takeTopLevelItem(i);
 				delete item;
-				updateTissues = true;
+				update_tissues = true;
 				--i;
 			}
 		}
@@ -551,7 +544,7 @@ void TissueTreeWidget::remove_all_folders(bool removeChildren)
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
 			QTreeWidgetItem* item = topLevelItem(i);
-			if (get_is_folder(item))
+			if (GetIsFolder(item))
 			{
 				// Insert children into parent and delete item
 				insertTopLevelItems(i, item->takeChildren());
@@ -564,17 +557,16 @@ void TissueTreeWidget::remove_all_folders(bool removeChildren)
 	blockSignals(false);
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 
 	// Propagate tissue removal to other hierarchies
-	if (updateTissues)
+	if (update_tissues)
 	{
-		hierarchies->update_hierarchies();
+		m_Hierarchies->UpdateHierarchies();
 	}
 }
 
-void TissueTreeWidget::update_tissue_name(const QString& oldName,
-		const QString& newName)
+void TissueTreeWidget::UpdateTissueName(const QString& oldName, const QString& newName)
 {
 	if (oldName.compare(newName) == 0)
 	{
@@ -582,43 +574,40 @@ void TissueTreeWidget::update_tissue_name(const QString& oldName,
 	}
 
 	// Update tissue name in internal representations
-	auto& hierarchyTrees = hierarchies->hierarchies();
-	for (unsigned int i = 0; i < hierarchyTrees.size(); ++i)
+	auto& hierarchy_trees = m_Hierarchies->Hierarchies();
+	for (auto & hierarchy_tree : hierarchy_trees)
 	{
-		hierarchyTrees[i]->UpdateTissueNameRecursively(oldName, newName);
+		hierarchy_tree->UpdateTissueNameRecursively(oldName, newName);
 	}
 
 	// Update tissue name in tree widget
-	update_tissue_name_widget(oldName, newName);
+	UpdateTissueNameWidget(oldName, newName);
 }
 
-void TissueTreeWidget::update_tissue_name_widget(const QString& oldName,
-		const QString& newName,
-		QTreeWidgetItem* parent)
+void TissueTreeWidget::UpdateTissueNameWidget(const QString& oldName, const QString& newName, QTreeWidgetItem* parent)
 {
-	if (parent == 0)
+	if (parent == nullptr)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			update_tissue_name_widget(oldName, newName, topLevelItem(i));
+			UpdateTissueNameWidget(oldName, newName, topLevelItem(i));
 		}
 	}
 	else
 	{
-		if (get_is_folder(parent))
+		if (GetIsFolder(parent))
 		{
 			// Recursion with children
 			for (int i = 0; i < parent->childCount(); ++i)
 			{
-				update_tissue_name_widget(oldName, newName, parent->child(i));
+				UpdateTissueNameWidget(oldName, newName, parent->child(i));
 			}
 		}
 		else
 		{
 			// Update tissue name
-			if (parent->text(TISSUETREEWIDGET_COLUMN_NAME).compare(oldName) ==
-					0)
+			if (parent->text(TISSUETREEWIDGET_COLUMN_NAME).compare(oldName) == 0)
 			{
 				parent->setText(TISSUETREEWIDGET_COLUMN_NAME, newName);
 			}
@@ -626,125 +615,117 @@ void TissueTreeWidget::update_tissue_name_widget(const QString& oldName,
 	}
 }
 
-void TissueTreeWidget::update_tissue_icons(QTreeWidgetItem* parent)
+void TissueTreeWidget::UpdateTissueIcons(QTreeWidgetItem* parent)
 {
-	if (parent == 0)
+	if (parent == nullptr)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			update_tissue_icons(topLevelItem(i));
+			UpdateTissueIcons(topLevelItem(i));
 		}
 	}
 	else
 	{
-		if (get_is_folder(parent))
+		if (GetIsFolder(parent))
 		{
 			// Recursion with children
 			for (int i = 0; i < parent->childCount(); ++i)
 			{
-				update_tissue_icons(parent->child(i));
+				UpdateTissueIcons(parent->child(i));
 			}
 		}
 		else
 		{
 			// Update tissue icon
-			parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME,
-					generatePixmap(get_type(parent)));
+			parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, generatePixmap(GetType(parent)));
 		}
 	}
 }
 
-void TissueTreeWidget::update_folder_icons(QTreeWidgetItem* parent)
+void TissueTreeWidget::UpdateFolderIcons(QTreeWidgetItem* parent)
 {
 	// Updates the folder icons based on the lock state of the child tissues
 	// This only works if the tree widget is completely built
 
-	if (parent == 0)
+	if (parent == nullptr)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			update_folder_icons(topLevelItem(i));
+			UpdateFolderIcons(topLevelItem(i));
 		}
 	}
 	else
 	{
-		if (get_is_folder(parent))
+		if (GetIsFolder(parent))
 		{
 			// Update folder icon
-			short lockStates = get_child_lockstates(parent);
-			if (lockStates == 0)
+			short lock_states = GetChildLockstates(parent);
+			if (lock_states == 0)
 			{
 				// All child tissues unlocked
-				parent->setIcon(
-						TISSUETREEWIDGET_COLUMN_NAME,
-						QIcon(picturePath.absFilePath(QString("fileopen.png"))
-											.ascii()));
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("fileopen.png"))
+																																.ascii()));
 			}
-			else if (lockStates == 1)
+			else if (lock_states == 1)
 			{
 				// All child tissues locked
-				parent->setIcon(
-						TISSUETREEWIDGET_COLUMN_NAME,
-						QIcon(picturePath.absFilePath(QString("folderlock1.png"))
-											.ascii()));
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("folderlock1.png"))
+																																.ascii()));
 			}
 			else
 			{
 				// Mixed locked/unlocked
-				parent->setIcon(
-						TISSUETREEWIDGET_COLUMN_NAME,
-						QIcon(picturePath.absFilePath(QString("folderlock2.png"))
-											.ascii()));
+				parent->setIcon(TISSUETREEWIDGET_COLUMN_NAME, QIcon(m_PicturePath.absoluteFilePath(QString("folderlock2.png"))
+																																.ascii()));
 			}
 
 			// Recursion with children
 			for (int i = 0; i < parent->childCount(); ++i)
 			{
-				update_folder_icons(parent->child(i));
+				UpdateFolderIcons(parent->child(i));
 			}
 		}
 	}
 }
 
 // TODO: Optimize by introducing folder map / hidden flag
-short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem* folder)
+short TissueTreeWidget::GetChildLockstates(QTreeWidgetItem* folder)
 {
 	// Returns whether all child tissues (including subfolders) are
-	// unlocked (return value 0),
-	// locked (return value 1), or
+	// unlocked (return value 0), // locked (return value 1), or
 	// mixed locked and unlocked (-1)
 
 	// Get lock state of first child (non-empty folder or tissue)
 	int i;
-	short lockStates = 0; // Empty folders are considered to be unlocked
+	short lock_states = 0; // Empty folders are considered to be unlocked
 	for (i = 0; i < folder->childCount(); ++i)
 	{
-		QTreeWidgetItem* currChild = folder->child(i);
-		if (get_is_folder(currChild))
+		QTreeWidgetItem* curr_child = folder->child(i);
+		if (GetIsFolder(curr_child))
 		{
-			if (currChild->childCount() > 0)
+			if (curr_child->childCount() > 0)
 			{
-				lockStates = get_child_lockstates(currChild);
+				lock_states = GetChildLockstates(curr_child);
 			}
 			else
 			{
 				continue;
 			}
 		}
-		else if (TissueInfos::GetTissueLocked(get_type(currChild)))
+		else if (TissueInfos::GetTissueLocked(GetType(curr_child)))
 		{
-			lockStates = 1;
+			lock_states = 1;
 			break;
 		}
 		else
 		{
-			lockStates = 0;
+			lock_states = 0;
 			break;
 		}
 	}
-	if (lockStates == -1)
+	if (lock_states == -1)
 	{
 		return -1;
 	}
@@ -752,26 +733,26 @@ short TissueTreeWidget::get_child_lockstates(QTreeWidgetItem* folder)
 	// Test against lock states of other children
 	for (int i = 1; i < folder->childCount(); ++i)
 	{
-		QTreeWidgetItem* currChild = folder->child(i);
-		if (get_is_folder(currChild))
+		QTreeWidgetItem* curr_child = folder->child(i);
+		if (GetIsFolder(curr_child))
 		{
 			// Skip empty folders
-			if (currChild->childCount() > 0 &&
-					(lockStates != get_child_lockstates(currChild)))
+			if (curr_child->childCount() > 0 &&
+					(lock_states != GetChildLockstates(curr_child)))
 			{
 				return -1;
 			}
 		}
-		else if ((bool)lockStates !=
-						 TissueInfos::GetTissueLocked(get_type(currChild)))
+		else if ((bool)lock_states !=
+						 TissueInfos::GetTissueLocked(GetType(curr_child)))
 		{
 			return -1;
 		}
 	}
-	return lockStates;
+	return lock_states;
 }
 
-void TissueTreeWidget::pad_tissue_indices()
+void TissueTreeWidget::PadTissueIndices()
 {
 	// Get maximal number of digits
 	unsigned short digits = 0;
@@ -785,54 +766,53 @@ void TissueTreeWidget::pad_tissue_indices()
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
 		QTreeWidgetItem* item = topLevelItem(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			pad_tissue_indices_recursively(item, digits);
+			PadTissueIndicesRecursively(item, digits);
 		}
 		else
 		{
 			// Pad with leading zeroes
-			QString paddedText = item->text(TISSUETREEWIDGET_COLUMN_TYPE);
-			while (paddedText.length() < digits)
+			QString padded_text = item->text(TISSUETREEWIDGET_COLUMN_TYPE);
+			while (padded_text.length() < digits)
 			{
-				paddedText = paddedText.prepend('0');
+				padded_text = padded_text.prepend('0');
 			}
-			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, paddedText);
+			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, padded_text);
 		}
 	}
 }
 
-void TissueTreeWidget::pad_tissue_indices_recursively(QTreeWidgetItem* parent,
-		unsigned short digits)
+void TissueTreeWidget::PadTissueIndicesRecursively(QTreeWidgetItem* parent, unsigned short digits)
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
 		QTreeWidgetItem* item = parent->child(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			pad_tissue_indices_recursively(item, digits);
+			PadTissueIndicesRecursively(item, digits);
 		}
 		else
 		{
 			// Pad with leading zeroes
-			QString paddedText = item->text(TISSUETREEWIDGET_COLUMN_TYPE);
-			while (paddedText.length() < digits)
+			QString padded_text = item->text(TISSUETREEWIDGET_COLUMN_TYPE);
+			while (padded_text.length() < digits)
 			{
-				paddedText = paddedText.prepend('0');
+				padded_text = padded_text.prepend('0');
 			}
-			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, paddedText);
+			item->setText(TISSUETREEWIDGET_COLUMN_TYPE, padded_text);
 		}
 	}
 }
 
-void TissueTreeWidget::update_tissue_indices()
+void TissueTreeWidget::UpdateTissueIndices()
 {
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
 		QTreeWidgetItem* item = topLevelItem(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			update_tissue_indices_recursively(item);
+			UpdateTissueIndicesRecursively(item);
 		}
 		else
 		{
@@ -842,15 +822,14 @@ void TissueTreeWidget::update_tissue_indices()
 	}
 }
 
-void TissueTreeWidget::update_tissue_indices_recursively(
-		QTreeWidgetItem* parent)
+void TissueTreeWidget::UpdateTissueIndicesRecursively(QTreeWidgetItem* parent)
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
 		QTreeWidgetItem* item = parent->child(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			update_tissue_indices_recursively(item);
+			UpdateTissueIndicesRecursively(item);
 		}
 		else
 		{
@@ -860,18 +839,18 @@ void TissueTreeWidget::update_tissue_indices_recursively(
 	}
 }
 
-void TissueTreeWidget::set_current_folder_name(const QString& name)
+void TissueTreeWidget::SetCurrentFolderName(const QString& name)
 {
-	if (get_current_is_folder())
+	if (GetCurrentIsFolder())
 	{
 		currentItem()->setText(TISSUETREEWIDGET_COLUMN_NAME, name);
 
 		// Update internal representation
-		update_hierarchy();
+		UpdateHierarchy();
 	}
 }
 
-void TissueTreeWidget::set_current_item(QTreeWidgetItem* item)
+void TissueTreeWidget::SetCurrentItem(QTreeWidgetItem* item)
 {
 	if (item)
 	{
@@ -883,14 +862,14 @@ void TissueTreeWidget::set_current_item(QTreeWidgetItem* item)
 	}
 }
 
-void TissueTreeWidget::set_current_tissue(tissues_size_t type)
+void TissueTreeWidget::SetCurrentTissue(tissues_size_t type)
 {
 	if (type > 0 && type <= TissueInfos::GetTissueCount())
 	{
-		QTreeWidgetItem* item = find_tissue_item(type);
+		QTreeWidgetItem* item = FindTissueItem(type);
 		setCurrentItem(item);
 		QTreeWidgetItem* parent = item->parent();
-		if (parent != 0)
+		if (parent != nullptr)
 		{
 			parent->setExpanded(true);
 		}
@@ -901,72 +880,71 @@ void TissueTreeWidget::set_current_tissue(tissues_size_t type)
 	}
 }
 
-QTreeWidgetItem* TissueTreeWidget::find_tissue_item(tissues_size_t type, QTreeWidgetItem* parent) const
+QTreeWidgetItem* TissueTreeWidget::FindTissueItem(tissues_size_t type, QTreeWidgetItem* parent) const
 {
-	if (parent == 0)
+	if (parent == nullptr)
 	{
 		// Recursion with top level children
 		for (int i = 0; i < topLevelItemCount(); ++i)
 		{
-			QTreeWidgetItem* recursiveRes = find_tissue_item(type, topLevelItem(i));
-			if (recursiveRes != 0)
+			QTreeWidgetItem* recursive_res = FindTissueItem(type, topLevelItem(i));
+			if (recursive_res != nullptr)
 			{
-				return recursiveRes;
+				return recursive_res;
 			}
 		}
 	}
 	else
 	{
 		// Check if parent is searched item
-		if (type == get_type(parent))
+		if (type == GetType(parent))
 		{
 			return parent;
 		}
 		// Recursion with children
 		for (int i = 0; i < parent->childCount(); ++i)
 		{
-			QTreeWidgetItem* recursiveRes = find_tissue_item(type, parent->child(i));
-			if (recursiveRes != 0)
+			QTreeWidgetItem* recursive_res = FindTissueItem(type, parent->child(i));
+			if (recursive_res != nullptr)
 			{
-				return recursiveRes;
+				return recursive_res;
 			}
 		}
 	}
-	return (QTreeWidgetItem*)0;
+	return (QTreeWidgetItem*)nullptr;
 }
 
-tissues_size_t TissueTreeWidget::get_current_type() const
+tissues_size_t TissueTreeWidget::GetCurrentType() const
 {
-	return get_type(currentItem());
+	return GetType(currentItem());
 }
 
-QString TissueTreeWidget::get_current_name() const { return get_name(currentItem()); }
+QString TissueTreeWidget::GetCurrentName() const { return GetName(currentItem()); }
 
-bool TissueTreeWidget::get_current_is_folder() const
+bool TissueTreeWidget::GetCurrentIsFolder() const
 {
-	return get_is_folder(currentItem());
+	return GetIsFolder(currentItem());
 }
 
-bool TissueTreeWidget::get_is_folder(QTreeWidgetItem* item) const
+bool TissueTreeWidget::GetIsFolder(const QTreeWidgetItem* item) const
 {
 	if (item)
 	{
-		return item->text(TISSUETREEWIDGET_COLUMN_FOLDER).toUShort();
+		return item->text(TISSUETREEWIDGET_COLUMN_FOLDER).toUShort() != 0;
 	}
 	return true;
 }
 
-tissues_size_t TissueTreeWidget::get_type(QTreeWidgetItem* item) const
+tissues_size_t TissueTreeWidget::GetType(const QTreeWidgetItem* item) const
 {
-	if (item && !get_is_folder(item))
+	if (item && !GetIsFolder(item))
 	{
-		return (tissues_size_t)item->text(TISSUETREEWIDGET_COLUMN_TYPE)
-				.toUInt();
+		return (tissues_size_t)item->text(TISSUETREEWIDGET_COLUMN_TYPE).toUInt();
 	}
 	return 0;
 }
 
-QString TissueTreeWidget::get_name(QTreeWidgetItem* item) const
+QString TissueTreeWidget::GetName(const QTreeWidgetItem* item) const
 {
 	if (item)
 	{
@@ -975,9 +953,9 @@ QString TissueTreeWidget::get_name(QTreeWidgetItem* item) const
 	return "";
 }
 
-bool TissueTreeWidget::get_current_has_children() const
+bool TissueTreeWidget::GetCurrentHasChildren() const
 {
-	if (currentItem() == 0)
+	if (currentItem() == nullptr)
 	{
 		return false;
 	}
@@ -987,98 +965,98 @@ bool TissueTreeWidget::get_current_has_children() const
 	}
 }
 
-void TissueTreeWidget::get_current_child_tissues(std::map<tissues_size_t, unsigned short>& types) const
+void TissueTreeWidget::GetCurrentChildTissues(std::map<tissues_size_t, unsigned short>& types) const
 {
 	types.clear();
-	if (currentItem() != 0)
+	if (currentItem() != nullptr)
 	{
-		get_child_tissues_recursively(currentItem(), types);
+		GetChildTissuesRecursively(currentItem(), types);
 	}
 }
 
-void TissueTreeWidget::get_sublevel_child_tissues(std::map<tissues_size_t, unsigned short>& types) const
+void TissueTreeWidget::GetSublevelChildTissues(std::map<tissues_size_t, unsigned short>& types) const
 {
 	types.clear();
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
 		QTreeWidgetItem* item = topLevelItem(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			get_child_tissues_recursively(item, types);
+			GetChildTissuesRecursively(item, types);
 		}
 	}
 }
 
-void TissueTreeWidget::get_child_tissues_recursively(QTreeWidgetItem* parent, std::map<tissues_size_t, unsigned short>& types) const
+void TissueTreeWidget::GetChildTissuesRecursively(QTreeWidgetItem* parent, std::map<tissues_size_t, unsigned short>& types) const
 {
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
-		tissues_size_t currType = (tissues_size_t)parent->child(i)
-																	->text(TISSUETREEWIDGET_COLUMN_TYPE)
-																	.toUInt();
-		if (currType > 0)
+		tissues_size_t curr_type = (tissues_size_t)parent->child(i)
+																	 ->text(TISSUETREEWIDGET_COLUMN_TYPE)
+																	 .toUInt();
+		if (curr_type > 0)
 		{
 			// Insert tissue
-			if (types.find(currType) != types.end())
+			if (types.find(curr_type) != types.end())
 			{
-				types[currType]++;
+				types[curr_type]++;
 			}
 			else
 			{
-				types[currType] = 1;
+				types[curr_type] = 1;
 			}
 		}
 		else
 		{
 			// Get tissues in subfolder
-			get_child_tissues_recursively(parent->child(i), types);
+			GetChildTissuesRecursively(parent->child(i), types);
 		}
 	}
 }
 
-unsigned short TissueTreeWidget::get_selected_hierarchy() const
+unsigned short TissueTreeWidget::GetSelectedHierarchy() const
 {
-	return hierarchies->get_selected_hierarchy();
+	return m_Hierarchies->GetSelectedHierarchy();
 }
 
-unsigned short TissueTreeWidget::get_hierarchy_count() const
+unsigned short TissueTreeWidget::GetHierarchyCount() const
 {
-	return hierarchies->get_hierarchy_count();
+	return m_Hierarchies->GetHierarchyCount();
 }
 
-std::vector<QString>* TissueTreeWidget::get_hierarchy_names_ptr() const
+std::vector<QString>* TissueTreeWidget::GetHierarchyNamesPtr() const
 {
-	return hierarchies->get_hierarchy_names_ptr();
+	return m_Hierarchies->GetHierarchyNamesPtr();
 }
 
-QString TissueTreeWidget::get_current_hierarchy_name() const
+QString TissueTreeWidget::GetCurrentHierarchyName() const
 {
-	return hierarchies->get_current_hierarchy_name();
+	return m_Hierarchies->GetCurrentHierarchyName();
 }
 
-void TissueTreeWidget::reset_default_hierarchy()
+void TissueTreeWidget::ResetDefaultHierarchy()
 {
-	hierarchies->reset_default_hierarchy();
+	m_Hierarchies->ResetDefaultHierarchy();
 }
 
-void TissueTreeWidget::set_hierarchy(unsigned short index)
+void TissueTreeWidget::SetHierarchy(unsigned short index)
 {
-	if (!hierarchies->set_hierarchy(index))
+	if (!m_Hierarchies->SetHierarchy(index))
 	{
 		return;
 	}
 
-	tissues_size_t currentType = get_current_type();
+	tissues_size_t current_type = GetCurrentType();
 
 	// Build QTreeWidgetItems from TissueTreeItems
 	blockSignals(true);
-	build_tree_widget(hierarchies->selected_hierarchy());
+	BuildTreeWidget(m_Hierarchies->SelectedHierarchy());
 	blockSignals(false);
 
 	// Restore item selection
-	if (currentType > 0)
+	if (current_type > 0)
 	{
-		set_current_tissue(currentType);
+		SetCurrentTissue(current_type);
 	}
 	else
 	{
@@ -1086,84 +1064,82 @@ void TissueTreeWidget::set_hierarchy(unsigned short index)
 	}
 
 	// Resize columns
-	resize_columns_to_contents();
+	ResizeColumnsToContents();
 }
 
-void TissueTreeWidget::build_tree_widget(TissueHierarchyItem* root)
+void TissueTreeWidget::BuildTreeWidget(TissueHierarchyItem* root)
 {
 	clear();
 
 	// Create pool of existing tissues
-	std::set<tissues_size_t> tissueTypes;
+	std::set<tissues_size_t> tissue_types;
 	for (tissues_size_t type = 1; type <= TissueInfos::GetTissueCount(); ++type)
 	{
-		tissueTypes.insert(type);
+		tissue_types.insert(type);
 	}
 
 	std::vector<TissueHierarchyItem*>* children = root->GetChildren();
 	for (auto iter = children->begin(); iter != children->end(); ++iter)
 	{
 		// Add top-level item
-		TissueHierarchyItem* currItem = *iter;
-		if (currItem->GetIsFolder())
+		TissueHierarchyItem* curr_item = *iter;
+		if (curr_item->GetIsFolder())
 		{
-			QTreeWidgetItem* newFolder = create_hierarchy_item(true, currItem->GetName());
-			addTopLevelItem(newFolder);
-			build_tree_widget_recursively(currItem, newFolder, &tissueTypes);
+			QTreeWidgetItem* new_folder = CreateHierarchyItem(true, curr_item->GetName());
+			addTopLevelItem(new_folder);
+			BuildTreeWidgetRecursively(curr_item, new_folder, &tissue_types);
 		}
 		else
 		{
-			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(curr_item->GetName()));
 			if (type > 0)
 			{
-				QTreeWidgetItem* newTissue =
-						create_hierarchy_item(false, currItem->GetName());
-				addTopLevelItem(newTissue);
+				QTreeWidgetItem* new_tissue =
+						CreateHierarchyItem(false, curr_item->GetName());
+				addTopLevelItem(new_tissue);
 				std::set<tissues_size_t>::iterator iter =
-						tissueTypes.find(type);
-				if (iter != tissueTypes.end())
+						tissue_types.find(type);
+				if (iter != tissue_types.end())
 				{
-					tissueTypes.erase(iter);
+					tissue_types.erase(iter);
 				}
 			}
 		}
 	}
 
 	// Add all missing tissues at top level
-	for (auto iter = tissueTypes.begin(); iter != tissueTypes.end(); ++iter)
+	for (auto iter = tissue_types.begin(); iter != tissue_types.end(); ++iter)
 	{
-		addTopLevelItem(create_hierarchy_item(false, ToQ(TissueInfos::GetTissueName(*iter))));
+		addTopLevelItem(CreateHierarchyItem(false, ToQ(TissueInfos::GetTissueName(*iter))));
 	}
 
 	// Update folder icons
-	update_folder_icons();
+	UpdateFolderIcons();
 
-	modified = false;
+	m_Modified = false;
 }
 
-void TissueTreeWidget::build_tree_widget_recursively(
-		TissueHierarchyItem* parentIn, QTreeWidgetItem* parentOut,
-		std::set<tissues_size_t>* tissueTypes)
+void TissueTreeWidget::BuildTreeWidgetRecursively(TissueHierarchyItem* parentIn, QTreeWidgetItem* parentOut, std::set<tissues_size_t>* tissueTypes)
 {
 	std::vector<TissueHierarchyItem*>* children = parentIn->GetChildren();
 	for (auto iter = children->begin(); iter != children->end(); ++iter)
 	{
 		// Add item to parentOut
-		TissueHierarchyItem* currItem = *iter;
-		if (currItem->GetIsFolder())
+		TissueHierarchyItem* curr_item = *iter;
+		if (curr_item->GetIsFolder())
 		{
-			QTreeWidgetItem* newFolder =
-					create_hierarchy_item(true, currItem->GetName());
-			parentOut->addChild(newFolder);
-			build_tree_widget_recursively(currItem, newFolder, tissueTypes);
+			QTreeWidgetItem* new_folder =
+					CreateHierarchyItem(true, curr_item->GetName());
+			parentOut->addChild(new_folder);
+			BuildTreeWidgetRecursively(curr_item, new_folder, tissueTypes);
 		}
 		else
 		{
-			tissues_size_t type = TissueInfos::GetTissueType(ToStd(currItem->GetName()));
+			tissues_size_t type = TissueInfos::GetTissueType(ToStd(curr_item->GetName()));
 			if (type > 0)
 			{
-				QTreeWidgetItem* newTissue = create_hierarchy_item(false, currItem->GetName());
-				parentOut->addChild(newTissue);
+				QTreeWidgetItem* new_tissue = CreateHierarchyItem(false, curr_item->GetName());
+				parentOut->addChild(new_tissue);
 				auto iter = tissueTypes->find(type);
 				if (iter != tissueTypes->end())
 				{
@@ -1174,92 +1150,89 @@ void TissueTreeWidget::build_tree_widget_recursively(
 	}
 }
 
-void TissueTreeWidget::add_new_hierarchy(const QString& name)
+void TissueTreeWidget::AddNewHierarchy(const QString& name)
 {
 	// Create and select default hierarchy
-	hierarchies->add_new_hierarchy(name);
+	m_Hierarchies->AddNewHierarchy(name);
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 }
 
-bool TissueTreeWidget::load_hierarchy(const QString& path)
+bool TissueTreeWidget::LoadHierarchy(const QString& path)
 {
-	if (!hierarchies->load_hierarchy(path))
+	if (!m_Hierarchies->LoadHierarchy(path))
 	{
 		return false;
 	}
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 
 	return true;
 }
 
-void TissueTreeWidget::take_children_recursively(
-		QTreeWidgetItem* parent, QList<QTreeWidgetItem*>& appendTo)
+void TissueTreeWidget::TakeChildrenRecursively(QTreeWidgetItem* parent, QList<QTreeWidgetItem*>& appendTo)
 {
 	// Recursion with children
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
-		take_children_recursively(parent->child(i), appendTo);
+		TakeChildrenRecursively(parent->child(i), appendTo);
 	}
 	// Append children to list
 	appendTo.append(parent->takeChildren());
 }
 
-void TissueTreeWidget::update_tree_widget()
+void TissueTreeWidget::UpdateTreeWidget()
 {
-	reset_default_hierarchy();
-	set_hierarchy(hierarchies->get_selected_hierarchy());
+	ResetDefaultHierarchy();
+	SetHierarchy(m_Hierarchies->GetSelectedHierarchy());
 }
 
-bool TissueTreeWidget::save_hierarchy_as(const QString& name,
-		const QString& path)
+bool TissueTreeWidget::SaveHierarchyAs(const QString& name, const QString& path)
 {
-	if (hierarchies->get_selected_hierarchy() == 0)
+	if (m_Hierarchies->GetSelectedHierarchy() == 0)
 	{
 		// Do not override default hierarchy: Append to list
-		hierarchies->add_new_hierarchy(name, create_current_hierarchy());
+		m_Hierarchies->AddNewHierarchy(name, CreateCurrentHierarchy());
 
 		// Reset default hierarchy
-		hierarchies->reset_default_hierarchy();
-		emit hierarchy_list_changed();
+		m_Hierarchies->ResetDefaultHierarchy();
+		emit HierarchyListChanged();
 	}
 	else
 	{
 		// Update hierarchy name and internal representation
-		hierarchies->selected_hierarchy_name() = name;
-		emit hierarchy_list_changed();
-		update_hierarchy();
+		m_Hierarchies->SelectedHierarchyName() = name;
+		emit HierarchyListChanged();
+		UpdateHierarchy();
 	}
 
-	modified = false;
+	m_Modified = false;
 
-	return hierarchies->save_hierarchy_as(name, path);
+	return m_Hierarchies->SaveHierarchyAs(name, path);
 }
 
-void TissueTreeWidget::remove_current_hierarchy()
+void TissueTreeWidget::RemoveCurrentHierarchy()
 {
-	if (hierarchies->remove_current_hierarchy())
+	if (m_Hierarchies->RemoveCurrentHierarchy())
 	{
-		modified = true;
+		m_Modified = true;
 	}
 
 	// \bug it seems the folders are not refreshed properly
-	set_hierarchy(hierarchies->get_selected_hierarchy());
+	SetHierarchy(m_Hierarchies->GetSelectedHierarchy());
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 }
 
-void TissueTreeWidget::toggle_show_tissue_indices()
+void TissueTreeWidget::ToggleShowTissueIndices()
 {
-	setColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE,
-			!isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE));
-	resize_columns_to_contents();
+	setColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE, !isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE));
+	ResizeColumnsToContents();
 }
 
-void TissueTreeWidget::sort_by_tissue_name()
+void TissueTreeWidget::SortByTissueName()
 {
-	if (sortByNameAscending)
+	if (m_SortByNameAscending)
 	{
 		sortItems(TISSUETREEWIDGET_COLUMN_NAME, Qt::AscendingOrder);
 	}
@@ -1267,18 +1240,18 @@ void TissueTreeWidget::sort_by_tissue_name()
 	{
 		sortItems(TISSUETREEWIDGET_COLUMN_NAME, Qt::DescendingOrder);
 	}
-	sortByNameAscending = !sortByNameAscending;
+	m_SortByNameAscending = !m_SortByNameAscending;
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 }
 
-void TissueTreeWidget::sort_by_tissue_index()
+void TissueTreeWidget::SortByTissueIndex()
 {
 	// Pad tissue indices with zeroes because of lexical sorting
-	pad_tissue_indices();
+	PadTissueIndices();
 
-	if (sortByTypeAscending)
+	if (m_SortByTypeAscending)
 	{
 		sortItems(TISSUETREEWIDGET_COLUMN_TYPE, Qt::AscendingOrder);
 	}
@@ -1286,25 +1259,25 @@ void TissueTreeWidget::sort_by_tissue_index()
 	{
 		sortItems(TISSUETREEWIDGET_COLUMN_TYPE, Qt::DescendingOrder);
 	}
-	sortByTypeAscending = !sortByTypeAscending;
+	m_SortByTypeAscending = !m_SortByTypeAscending;
 
 	// Update tissue indices to undo padding
-	update_tissue_indices();
+	UpdateTissueIndices();
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 }
 
-bool TissueTreeWidget::get_tissue_indices_hidden() const
+bool TissueTreeWidget::GetTissueIndicesHidden() const
 {
 	return isColumnHidden(TISSUETREEWIDGET_COLUMN_TYPE);
 }
 
-std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeWidgetItem*>& list) const
+std::vector<QTreeWidgetItem*> TissueTreeWidget::Collect(const std::vector<QTreeWidgetItem*>& list) const
 {
 	std::vector<QTreeWidgetItem*> my_children;
 
-	for (auto item : list)
+	for (const auto& item : list)
 	{
 		if (item != invisibleRootItem())
 		{
@@ -1313,7 +1286,7 @@ std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeW
 
 		for (int i = 0; i < item->childCount(); ++i)
 		{
-			auto extra = collect({item->child(i)});
+			auto extra = Collect({item->child(i)});
 			my_children.insert(my_children.end(), extra.begin(), extra.end());
 		}
 	}
@@ -1321,20 +1294,19 @@ std::vector<QTreeWidgetItem*> TissueTreeWidget::collect(const std::vector<QTreeW
 	return my_children;
 }
 
-std::vector<QTreeWidgetItem*> TissueTreeWidget::get_all_items(bool leaves_only) const
+std::vector<QTreeWidgetItem*> TissueTreeWidget::GetAllItems(bool leaves_only) const
 {
-	auto all = collect({invisibleRootItem()});
+	auto all = Collect({invisibleRootItem()});
 	if (leaves_only)
 	{
 		std::vector<QTreeWidgetItem*> leaves;
-		std::copy_if(all.begin(), all.end(), std::back_inserter(leaves),
-				[this](QTreeWidgetItem* item) { return !get_is_folder(item); });
+		std::copy_if(all.begin(), all.end(), std::back_inserter(leaves), [this](QTreeWidgetItem* item) { return !GetIsFolder(item); });
 		return leaves;
 	}
 	return all;
 }
 
-void TissueTreeWidget::resize_columns_to_contents()
+void TissueTreeWidget::ResizeColumnsToContents()
 {
 	for (int col = 0; col < TISSUETREEWIDGET_COLUMN_COUNT; ++col)
 	{
@@ -1342,27 +1314,27 @@ void TissueTreeWidget::resize_columns_to_contents()
 	}
 }
 
-void TissueTreeWidget::resize_columns_to_contents(QTreeWidgetItem* item)
+void TissueTreeWidget::ResizeColumnsToContents(QTreeWidgetItem* item)
 {
-	resize_columns_to_contents();
+	ResizeColumnsToContents();
 }
 
-bool TissueTreeWidget::get_hierarchy_modified() const { return modified; }
+bool TissueTreeWidget::GetHierarchyModified() const { return m_Modified; }
 
-void TissueTreeWidget::set_hierarchy_modified(bool val) { modified = val; }
+void TissueTreeWidget::SetHierarchyModified(bool val) { m_Modified = val; }
 
-unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type) const
+unsigned short TissueTreeWidget::GetTissueInstanceCount(tissues_size_t type) const
 {
 	// Get number of items in tissue tree corresponding to the same tissue type
 	unsigned short res = 0;
 	for (int i = 0; i < topLevelItemCount(); ++i)
 	{
 		QTreeWidgetItem* item = topLevelItem(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			res += get_tissue_instance_count_recursively(item, type);
+			res += GetTissueInstanceCountRecursively(item, type);
 		}
-		else if (get_type(item) == type)
+		else if (GetType(item) == type)
 		{
 			res++;
 		}
@@ -1370,18 +1342,17 @@ unsigned short TissueTreeWidget::get_tissue_instance_count(tissues_size_t type) 
 	return res;
 }
 
-unsigned short TissueTreeWidget::get_tissue_instance_count_recursively(
-		QTreeWidgetItem* parent, tissues_size_t type) const
+unsigned short TissueTreeWidget::GetTissueInstanceCountRecursively(QTreeWidgetItem* parent, tissues_size_t type) const
 {
 	unsigned short res = 0;
 	for (int i = 0; i < parent->childCount(); ++i)
 	{
 		QTreeWidgetItem* item = parent->child(i);
-		if (get_is_folder(item))
+		if (GetIsFolder(item))
 		{
-			res += get_tissue_instance_count_recursively(item, type);
+			res += GetTissueInstanceCountRecursively(item, type);
 		}
-		else if (get_type(item) == type)
+		else if (GetType(item) == type)
 		{
 			res++;
 		}
@@ -1391,37 +1362,37 @@ unsigned short TissueTreeWidget::get_tissue_instance_count_recursively(
 
 FILE* TissueTreeWidget::SaveParams(FILE* fp, int version)
 {
-	return hierarchies->SaveParams(fp, version);
+	return m_Hierarchies->SaveParams(fp, version);
 }
 
 FILE* TissueTreeWidget::LoadParams(FILE* fp, int version)
 {
-	fp = hierarchies->LoadParams(fp, version);
+	fp = m_Hierarchies->LoadParams(fp, version);
 
 	// rebuild of tree view
-	set_hierarchy(hierarchies->get_selected_hierarchy());
+	SetHierarchy(m_Hierarchies->GetSelectedHierarchy());
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 
 	return fp;
 }
 
-FILE* TissueTreeWidget::save_hierarchy(FILE* fp, unsigned short idx)
+FILE* TissueTreeWidget::SaveHierarchy(FILE* fp, unsigned short idx)
 {
-	return hierarchies->save_hierarchy(fp, idx);
+	return m_Hierarchies->SaveHierarchy(fp, idx);
 }
 
-FILE* TissueTreeWidget::load_hierarchy(FILE* fp)
+FILE* TissueTreeWidget::LoadHierarchy(FILE* fp)
 {
-	fp = hierarchies->load_hierarchy(fp);
+	fp = m_Hierarchies->LoadHierarchy(fp);
 
 	// Update folder icons
-	update_folder_icons();
+	UpdateFolderIcons();
 
 	// rebuild of tree view
-	set_hierarchy(hierarchies->get_selected_hierarchy());
+	SetHierarchy(m_Hierarchies->GetSelectedHierarchy());
 
-	emit hierarchy_list_changed();
+	emit HierarchyListChanged();
 
 	return fp;
 }
@@ -1434,45 +1405,45 @@ void TissueTreeWidget::dropEvent(QDropEvent* de)
 		return;
 	}
 
-	if (!get_current_is_folder() &&
+	if (!GetCurrentIsFolder() &&
 			(de->keyboardModifiers() & Qt::ShiftModifier))
 	{
 		// Move the item and insert a duplicate at the original position
-		QTreeWidgetItem* currItem = currentItem();
-		QTreeWidgetItem* currParent = currItem->parent();
+		QTreeWidgetItem* curr_item = currentItem();
+		QTreeWidgetItem* curr_parent = curr_item->parent();
 
 		// Get original index
-		unsigned int oldIdx = 0;
-		if (currParent == 0)
+		unsigned int old_idx = 0;
+		if (curr_parent == nullptr)
 		{
-			oldIdx = indexOfTopLevelItem(currItem);
+			old_idx = indexOfTopLevelItem(curr_item);
 		}
 		else
 		{
-			oldIdx = currParent->indexOfChild(currItem);
+			old_idx = curr_parent->indexOfChild(curr_item);
 		}
 
 		// Move item
 		QTreeWidget::dropEvent(de);
-		setCurrentItem(currItem);
+		setCurrentItem(curr_item);
 
 		// Get new index
-		unsigned int newIdx = 0;
-		if (currParent == 0)
+		unsigned int new_idx = 0;
+		if (curr_parent == nullptr)
 		{
-			newIdx = indexOfTopLevelItem(currItem);
+			new_idx = indexOfTopLevelItem(curr_item);
 		}
 		else
 		{
-			newIdx = currParent->indexOfChild(currItem);
+			new_idx = curr_parent->indexOfChild(curr_item);
 		}
 
 		// Insert copy
-		if (newIdx < oldIdx)
+		if (new_idx < old_idx)
 		{
-			oldIdx++;
+			old_idx++;
 		}
-		insert_item(false, get_current_name(), currParent, oldIdx);
+		InsertItem(false, GetCurrentName(), curr_parent, old_idx);
 	}
 	else
 	{
@@ -1481,25 +1452,25 @@ void TissueTreeWidget::dropEvent(QDropEvent* de)
 	}
 
 	// Update internal representation
-	update_hierarchy();
+	UpdateHierarchy();
 
 	// Update folder icons
-	update_folder_icons();
+	UpdateFolderIcons();
 }
 
 void TissueTreeWidget::selectAll()
 {
-	bool wasBlocked = blockSignals(true);
-	for (auto item : get_all_items())
+	bool was_blocked = blockSignals(true);
+	for (auto item : GetAllItems())
 	{
-		if (!get_is_folder(item))
+		if (!GetIsFolder(item))
 		{
 			item->setSelected(!item->isHidden());
 		}
 	}
-	blockSignals(wasBlocked);
+	blockSignals(was_blocked);
 
-	itemSelectionChanged();
+	emit itemSelectionChanged();
 }
 
 void TissueTreeWidget::scrollToItem(QTreeWidgetItem* item)

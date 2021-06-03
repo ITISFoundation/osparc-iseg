@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include "InterfaceApi.h"
+#include "iSegInterface.h"
 
 #include "FormatTooltip.h"
 
@@ -28,45 +28,51 @@ class ISEG_INTERFACE_API WidgetInterface : public QWidget
 {
 	Q_OBJECT
 public:
-	WidgetInterface(QWidget* parent, const char* name, Qt::WindowFlags wFlags);
-	virtual void init() {}
-	virtual void newloaded() {}
-	virtual void cleanup() {}
+	WidgetInterface(QWidget* parent = nullptr);
+	virtual void Init() {}
+	virtual void NewLoaded() {}
+	virtual void Cleanup() {}
 	virtual FILE* SaveParams(FILE* fp, int version) { return fp; };
 	virtual FILE* LoadParams(FILE* fp, int version) { return fp; };
-	virtual void hideparams_changed() {}
-	static void set_hideparams(bool hide) { hideparams = hide; }
-	static bool get_hideparams() { return hideparams; }
-	virtual std::string GetName() { return std::string(""); }
+	virtual void HideParamsChanged() {}
+	static void SetHideParams(bool hide) { hideparams = hide; }
+	static bool GetHideParams() { return hideparams; }
+	virtual std::string GetName() { return ""; }
 	virtual QIcon GetIcon(QDir picdir) = 0;
 
-	virtual void on_tissuenr_changed(int i) {}
-	virtual void on_slicenr_changed() {}
+	virtual void OnTissuenrChanged(int i) {}
+	virtual void OnSlicenrChanged() {}
 
-	virtual void on_mouse_clicked(Point p) {}
-	virtual void on_mouse_released(Point p) {}
-	virtual void on_mouse_moved(Point p) {}
-
-	QCursor* get_cursor() { return m_cursor; }
-
-signals:
-	void vm_changed(std::vector<Mark>* vm1);
-	void vpdyn_changed(std::vector<Point>* vpdyn_arg);
-
-	void begin_datachange(iseg::DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
-	void end_datachange(QWidget* sender = nullptr, iseg::EndUndoAction undoAction = iseg::EndUndo);
-
-protected slots:
-	void tissuenr_changed(int i) { on_tissuenr_changed(i); }
-	void slicenr_changed() { on_slicenr_changed(); }
-
-	// \todo duplicate slots (and connections) and pass argument source_or_target to callbacks
-	void mouse_clicked(Point p) { on_mouse_clicked(p); }
-	void mouse_released(Point p) { on_mouse_released(p); }
-	void mouse_moved(Point p) { on_mouse_moved(p); }
+	QCursor* GetCursor() { return m_MCursor; }
 
 protected:
-	QCursor* m_cursor;
+	virtual void OnMouseClicked(Point p) {}
+	virtual void OnMouseReleased(Point p) {}
+	virtual void OnMouseMoved(Point p) {}
+
+signals:
+	void VmChanged(std::vector<Mark>* vm1);
+	void VpdynChanged(std::vector<Point>* vpdyn_arg);
+
+	void BeginDatachange(DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
+	void EndDatachange(QWidget* sender = nullptr, eEndUndoAction undoAction = iseg::EndUndo);
+
+public slots:
+	virtual void BmpChanged() {}
+	virtual void WorkChanged() {}
+	virtual void TissuesChanged() {}
+	virtual void MarksChanged() {}
+
+	void TissuenrChanged(int i) { OnTissuenrChanged(i); }
+	void SlicenrChanged() { OnSlicenrChanged(); }
+
+	// \todo duplicate slots (and connections) and pass argument source_or_target to callbacks
+	void MouseClicked(Point p) { OnMouseClicked(p); }
+	void MouseReleased(Point p) { OnMouseReleased(p); }
+	void MouseMoved(Point p) { OnMouseMoved(p); }
+
+protected:
+	QCursor* m_MCursor;
 
 	static bool hideparams;
 };

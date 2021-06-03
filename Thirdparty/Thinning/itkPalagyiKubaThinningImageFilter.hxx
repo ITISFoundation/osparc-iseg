@@ -102,7 +102,7 @@ void PalagyiKubaThinningImageFilter<TInputImage>::GenerateData()
 	itk::ImageRegionIterator<OutputImage> oit(thinImage, region);
 	for (iit.GoToBegin(), oit.GoToBegin(); !iit.IsAtEnd(); ++iit, ++oit)
 	{
-		bool change = iit.Get() != 0;
+		//bool change = iit.Get() != 0;
 		oit.Set(iit.Get() != 0 ? SpecialValues::OBJECT : 0);
 	}
 

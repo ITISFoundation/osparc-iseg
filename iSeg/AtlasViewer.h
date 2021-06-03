@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,8 +15,8 @@
 
 #include "Core/Pair.h"
 
-#include <qimage.h>
-#include <qwidget.h>
+#include <QImage>
+#include <QWidget>
 
 #include <vector>
 
@@ -26,60 +26,55 @@ class AtlasViewer : public QWidget
 {
 	Q_OBJECT
 public:
-	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1,
-			unsigned short dimx1, unsigned short dimy1,
-			unsigned short dimz1, float dx1, float dy1, float dz1,
-			std::vector<float>* r, std::vector<float>* g,
-			std::vector<float>* b, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~AtlasViewer();
-	void init();
+	AtlasViewer(float* bmpbits1, tissues_size_t* tissue1, unsigned char orient1, unsigned short dimx1, unsigned short dimy1, unsigned short dimz1, float dx1, float dy1, float dz1, std::vector<float>* r, std::vector<float>* g, std::vector<float>* b, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~AtlasViewer() override;
+	void Init();
 	void update();
 	void update(QRect rect);
 
 signals:
-	void mousemoved_sign(tissues_size_t t);
+	void MousemovedSign(tissues_size_t t);
 
 protected:
-	void paintEvent(QPaintEvent* e);
-	void mouseMoveEvent(QMouseEvent* e);
+	void paintEvent(QPaintEvent* e) override;
+	void mouseMoveEvent(QMouseEvent* e) override;
 
 private:
-	QPainter* painter;
-	float scalefactor;
-	float scaleoffset;
-	double zoom;
-	Pair pixelsize;
-	void reload_bits();
-	void get_slice();
-	QImage image;
-	unsigned char orient;
+	QPainter* m_Painter;
+	float m_Scalefactor;
+	float m_Scaleoffset;
+	double m_Zoom;
+	Pair m_Pixelsize;
+	void ReloadBits();
+	void GetSlice();
+	QImage m_Image;
+	unsigned char m_Orient;
 
-	unsigned short width, height, slicenr;
-	unsigned short dimx, dimy, dimz;
-	float dx, dy, dz;
-	float tissueopac;
-	float* bmpbits;
-	tissues_size_t* tissue;
-	float* current_bmpbits;
-	tissues_size_t* current_tissue;
-	std::vector<float>* color_r;
-	std::vector<float>* color_g;
-	std::vector<float>* color_b;
+	unsigned short m_Width, m_Height, m_Slicenr;
+	unsigned short m_Dimx, m_Dimy, m_Dimz;
+	float m_Dx, m_Dy, m_Dz;
+	float m_Tissueopac;
+	float* m_Bmpbits;
+	tissues_size_t* m_Tissue;
+	float* m_CurrentBmpbits;
+	tissues_size_t* m_CurrentTissue;
+	std::vector<float>* m_ColorR;
+	std::vector<float>* m_ColorG;
+	std::vector<float>* m_ColorB;
 
 public slots:
-	void set_scale(float offset1, float factor1);
-	void set_scaleoffset(float offset1);
-	void set_scalefactor(float factor1);
-	void zoom_in();
-	void zoom_out();
-	void unzoom();
-	double return_zoom();
-	void set_zoom(double z);
-	void slicenr_changed(unsigned short slicenr1);
-	void orient_changed(unsigned char orient1);
-	void set_tissueopac(float tissueopac1);
-	void pixelsize_changed(Pair pixelsize1);
+	void SetScale(float offset1, float factor1);
+	void SetScaleoffset(float offset1);
+	void SetScalefactor(float factor1);
+	void ZoomIn();
+	void ZoomOut();
+	void Unzoom();
+	double ReturnZoom() const;
+	void SetZoom(double z);
+	void SlicenrChanged(unsigned short slicenr1);
+	void OrientChanged(unsigned char orient1);
+	void SetTissueopac(float tissueopac1);
+	void PixelsizeChanged(Pair pixelsize1);
 };
 
 } // namespace iseg

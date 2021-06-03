@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,12 +20,7 @@
 
 namespace iseg {
 
-size_t VotingReplaceLabel(SlicesHandlerInterface* handler,
-		tissues_size_t foreground,
-		tissues_size_t background,
-		std::array<unsigned int, 3> iradius,
-		unsigned int majority_threshold,
-		unsigned int max_iterations)
+size_t VotingReplaceLabel(SlicesHandlerInterface* handler, tissues_size_t foreground, tissues_size_t background, std::array<unsigned int, 3> iradius, unsigned int majority_threshold, unsigned int max_iterations)
 {
 	using image_type = itk::Image<tissues_size_t, 3>;
 	using voting_filter_type = itk::LabelVotingBinaryImageFilter<image_type, image_type>;

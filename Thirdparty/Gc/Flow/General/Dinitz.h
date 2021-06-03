@@ -32,13 +32,10 @@
 #include "../IMaxFlow.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        namespace General
-        {
-            /** Implementation of Dinitz's maximum flow algorithm.
+namespace Gc {
+namespace Flow {
+namespace General {
+/** Implementation of Dinitz's maximum flow algorithm.
 
                 Description of this algorithm can be found in:
                 - Yefim %Dinitz: <em>Dinitz's Algorithm: The Original Version and 
@@ -60,85 +57,83 @@ namespace Gc
                 @tparam TFLOW %Data type used for the flow value.
                 @tparam TCAP %Data type used for arc capacity values.
             */
-		    template <class TFLOW, class TCAP>
-		    class GC_DLL_EXPORT Dinitz 
-                : public IMaxFlow<TFLOW,TCAP,TCAP>
-		    {
-		    private:
-                // Forward declaration
-			    struct Node;
+template <class TFLOW, class TCAP>
+class GC_DLL_EXPORT Dinitz
+    : public IMaxFlow<TFLOW, TCAP, TCAP>
+{
+  private:
+    // Forward declaration
+    struct Node;
 
-                /** Structure used for storing arcs in the network. */
-			    struct Arc
-			    {
-                    /** Residual capacity. */
-				    TCAP m_res_cap;
-                    /** Pointer to the next arc the same tail. */
-				    Arc *m_next;
-                    /** Pointer to the arc going in the opposite direction. */
-				    Arc *m_sister;
-                    /** Head node of this arc. */
-				    Node *m_head;
-			    };
+    /** Structure used for storing arcs in the network. */
+    struct Arc
+    {
+        /** Residual capacity. */
+        TCAP m_res_cap;
+        /** Pointer to the next arc the same tail. */
+        Arc * m_next;
+        /** Pointer to the arc going in the opposite direction. */
+        Arc * m_sister;
+        /** Head node of this arc. */
+        Node * m_head;
+    };
 
-                /** Structure used for storing nodes in the network. */
-			    struct Node
-			    {
-                    /** Pointer to the first arc going from this node. */
-				    Arc *m_first;
-                    /** Pointer to the next arc to be traversed in the DFS phase. */
-				    Arc *m_current;
-                    /** Parent node in the DFS tree. */
-                    Node *m_previous;
-                    /** Distance to the sink. */
-                    Size m_rank;
-			    };
+    /** Structure used for storing nodes in the network. */
+    struct Node
+    {
+        /** Pointer to the first arc going from this node. */
+        Arc * m_first;
+        /** Pointer to the next arc to be traversed in the DFS phase. */
+        Arc * m_current;
+        /** Parent node in the DFS tree. */
+        Node * m_previous;
+        /** Distance to the sink. */
+        Size m_rank;
+    };
 
-                /** Node array. */
-                System::Collection::Array<1,Node> m_node_list;
-                /** Node heap. It has the same size as _node_list and can be used for 
+    /** Node array. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Node heap. It has the same size as _node_list and can be used for 
                     storing temporary node structures like stacks or queues without \
                     the need to allocate/deallocate memory. */
-                System::Collection::Array<1,Node *> m_node_heap;
-                /** Arc array. */
-                System::Collection::Array<1,Arc> m_arc_list;
-                /** Arc count. */
-			    Size m_arcs;
-                /** Total flow */
-                TFLOW m_flow;
+    System::Collection::Array<1, Node *> m_node_heap;
+    /** Arc array. */
+    System::Collection::Array<1, Arc> m_arc_list;
+    /** Arc count. */
+    Size m_arcs = 0;
+    /** Total flow */
+    TFLOW m_flow;
 
-                /** Current stage. Used to check correct method calling order. */
-                Uint8 m_stage;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		    public:
-			    /** Constructor. */
-			    Dinitz()
-				    : m_arcs(0), m_stage(0)
-			    {}
+  public:
+    /** Constructor. */
+    Dinitz() = default;
 
-			    /** Destructor. */
-			    virtual ~Dinitz()
-			    {
-				    Dispose();
-			    }
+    /** Destructor. */
+    ~Dinitz() override
+    {
+        Dispose();
+    }
 
-			    virtual void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs);
+    void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs) override;
 
-			    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap)
-                {
-                    AddArcInternal(n1 + 2, n2 + 2, cap, rcap);
-                }
+    void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) override
+    {
+        AddArcInternal(n1 + 2, n2 + 2, cap, rcap);
+    }
 
-			    virtual void SetTerminalArcCap(Size node, TCAP csrc, TCAP csnk);
+    void SetTerminalArcCap(Size node, TCAP csrc, TCAP csnk) override;
 
-			    virtual TFLOW FindMaxFlow();
+    TFLOW FindMaxFlow() override;
 
-			    virtual Origin NodeOrigin(Size node) const;
+    Origin NodeOrigin(Size node) const override;
 
-			    virtual void Dispose();
+    void Dispose() override;
 
-		    private:
-			    /** Add bidirectional arc between two nodes. 
+  private:
+    /** Add bidirectional arc between two nodes. 
                 
                     Source is node 0, sink is node 1.
 
@@ -147,23 +142,23 @@ namespace Gc
 				    @param[in] cap \c n1 -> \c n2 arc capacity.
 				    @param[in] rcap \c n2 -> \c n1 arc capacity.
 			    */
-			    void AddArcInternal(Size n1, Size n2, TCAP cap, TCAP rcap);
+    void AddArcInternal(Size n1, Size n2, TCAP cap, TCAP rcap);
 
-                /** For each node find the shortest distance to the sink.
+    /** For each node find the shortest distance to the sink.
 
                     @return \c True if the source was reached, \c false otherwise.
                 */
-                bool BuildNodeRanks();
+    bool BuildNodeRanks();
 
-                /** Traverse the layered graph using depth first search.
+    /** Traverse the layered graph using depth first search.
 
                     @param[in] start The node where the traversing should start.
                     @return \c True if the sink was reached, \c false otherwise.
                 */
-                bool TraverseLayersUsingDFS(Node *start_node);
-		    };
-        }
-	}
+    bool TraverseLayersUsingDFS(Node * start_node);
+};
 }
+}
+} // namespace Gc::Flow::General
 
 #endif

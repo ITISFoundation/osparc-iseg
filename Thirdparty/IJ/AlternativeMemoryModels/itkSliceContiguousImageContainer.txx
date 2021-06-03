@@ -64,7 +64,7 @@ void
 SliceContiguousImageContainer< TElementIdentifier , TElement >
 ::Reserve(ElementIdentifier numberOfSlices, ElementIdentifier sizeOfSlice)
 {
-  if ( m_SlicesArray.size() > 0 )
+  if ( !m_SlicesArray.empty() )
     {
     // Ensure the existing size is the same as new size to reserve
     if ( sizeOfSlice != m_SizeOfSlice )
@@ -136,7 +136,7 @@ SliceContiguousImageContainer< TElementIdentifier , TElement >
 template <typename TElementIdentifier, typename TElement>
 void
 SliceContiguousImageContainer< TElementIdentifier , TElement >
-::Squeeze(void)
+::Squeeze()
 {
   if ( m_SlicesArray.size() > 0 )
     {
@@ -166,7 +166,7 @@ SliceContiguousImageContainer< TElementIdentifier , TElement >
 template <typename TElementIdentifier, typename TElement>
 void
 SliceContiguousImageContainer< TElementIdentifier , TElement >
-::Initialize(void)
+::Initialize()
 {
   if ( m_SlicesArray.size() > 0 )
     {

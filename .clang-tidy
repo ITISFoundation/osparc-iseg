@@ -1,0 +1,19 @@
+HeaderFilterRegex: '*.h *.cuh'
+FormatStyle: 'file'
+Checks: '-*,readability-identifier-naming,readability-misleading-indentation,readability-non-const-parameter,modernize-use-default-member-init'
+CheckOptions:
+  - key: readability-identifier-naming.AggressiveDependentMemberLookup
+    value: 'true'
+  - key: readability-identifier-naming.MethodCase
+    value: 'CamelCase'
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.StaticVariableCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.GlobalPointerCase
+    value: 'lower_case'
+  - key: readability-identifier-naming.LocalVariableCase
+    value: 'lower_case'
+  - key: modernize-use-default-member-init.UseAssignment
+    value: 'true'
+

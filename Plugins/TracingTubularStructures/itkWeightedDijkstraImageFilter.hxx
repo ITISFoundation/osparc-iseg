@@ -80,7 +80,6 @@ void WeightedDijkstraImageFilter<TInputImageType, TMetric>::
 			is_boundary.at(ijk2index(it.GetIndex())) = true;
 		}
 	}
-	bool any_boundary = std::count(is_boundary.begin(), is_boundary.end(), true);
 
 	std::vector<weight_t> min_distance(N, std::numeric_limits<weight_t>::max());
 	static const vertex_t kInvalidIndex = {-1, -1, -1};

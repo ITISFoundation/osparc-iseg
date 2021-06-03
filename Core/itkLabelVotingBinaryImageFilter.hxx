@@ -118,18 +118,18 @@ LabelVotingBinaryImageFilter< TInputImage, TOutputImage >
 	class DenseMap
 	{
 	public:
-		typedef PixelType                          K;
-		typedef unsigned int                       V;
-		typedef std::pair<K, V>                    value_type;
-		typedef std::vector<value_type>            container_type;
-		typedef typename container_type::iterator  iterator;
+		using K  = PixelType;
+		using V = unsigned int;
+		using value_type = std::pair<K, V>;
+		using container_type = std::vector<value_type> ;
+		using iterator = typename container_type::iterator;
 
 		inline size_t size() const { return m_Data.size(); }
 		inline void clear(){ m_Data.clear(); }
 		inline void reserve(size_t sz) { m_Data.reserve(sz); }
 
-		inline iterator begin() { return m_Data.begin(); }
-		inline iterator end() { return m_Data.end(); }
+		iterator begin() { return m_Data.begin(); }
+		iterator end() { return m_Data.end(); }
 
 		inline V &operator[](const K &key)
 		{

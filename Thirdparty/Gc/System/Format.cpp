@@ -28,27 +28,25 @@
 #include <sstream>
 #include "Format.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+/***********************************************************************************/
+
+void Format::InsertString(const std::string & s)
 {
-    namespace System
+    std::ostringstream ns;
+    ns << '{' << m_idx << '}';
+
+    size_t sof = 0, sp;
+    while ((sp = m_str.find(ns.str(), sof)) != std::string::npos)
     {
-        /***********************************************************************************/
-
-        void Format::InsertString (const std::string &s)
-        {
-            std::ostringstream ns;
-            ns << '{' << m_idx << '}';
-            
-            size_t sof = 0, sp;
-            while ((sp = m_str.find(ns.str(), sof)) != std::string::npos)
-            {
-                m_str.replace(sp, ns.str().size(), s);
-                sp++;
-            }
-
-            m_idx++;
-        }
-
-        /***********************************************************************************/
+        m_str.replace(sp, ns.str().size(), s);
+        sp++;
     }
+
+    m_idx++;
 }
+
+/***********************************************************************************/
+}
+} // namespace Gc::System

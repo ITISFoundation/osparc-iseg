@@ -32,17 +32,13 @@
 #include "../../System/Collection/Array.h"
 #include "../../System/Collection/IArrayMask.h"
 
-namespace Gc
-{
-	namespace Algo
-	{
-        /** %Clustering algorithms. */
-        namespace Clustering
-        {
-            /** Namespace containing different %KMeans clustering implementations. */
-            namespace KMeans
-            {
-                /** This method computes a weighted %KMeans clustering of the intensities in 
+namespace Gc {
+namespace Algo {
+/** %Clustering algorithms. */
+namespace Clustering {
+/** Namespace containing different %KMeans clustering implementations. */
+namespace KMeans {
+/** This method computes a weighted %KMeans clustering of the intensities in 
                     the input image using Lloyd's algorithm.
 
                     @remarks It has been shown, that %KMeans clustering provides very good initial guess
@@ -64,24 +60,24 @@ namespace Gc
                     @tparam N Number of dimensions.
                     @tparam T Type of the input data and also precision used during the computation.
                 */
-                template <Size N, class T>
-                Size Lloyd(const System::Collection::Array<N,T> &im, Size k, 
-                    const System::Collection::Array<1,T> &lambda, T conv_crit, 
-                    Size max_iter, System::Collection::Array<1,T> &mean);
+template <Size N, class T>
+Size Lloyd(const System::Collection::Array<N, T> & im, Size k,
+           const System::Collection::Array<1, T> & lambda, T conv_crit,
+           Size max_iter, System::Collection::Array<1, T> & mean);
 
-                /** This method computes weighted %KMeans clustering of the intensities in 
+/** This method computes weighted %KMeans clustering of the intensities in 
                     a masked input image using Lloyd's algorithm.
 
                     @see Lloyd().
                 */
-                template <Size N, class T>
-                Size LloydMasked(const System::Collection::Array<N,T> &im, 
-                    const System::Collection::IArrayMask<N> &mask, Size k, 
-                    const System::Collection::Array<1,T> &lambda, T conv_crit, 
-                    Size max_iter, System::Collection::Array<1,T> &mean);
-            }
-        }
-	}
+template <Size N, class T>
+Size LloydMasked(const System::Collection::Array<N, T> & im,
+                 const System::Collection::IArrayMask<N> & mask, Size k,
+                 const System::Collection::Array<1, T> & lambda, T conv_crit,
+                 Size max_iter, System::Collection::Array<1, T> & mean);
+} // namespace KMeans
+} // namespace Clustering
 }
+} // namespace Gc::Algo
 
 #endif

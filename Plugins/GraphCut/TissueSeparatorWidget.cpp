@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -11,10 +11,10 @@
 
 #include "GraphCutAlgorithms.h"
 
-#include "Data/LogApi.h"
 #include "Data/ItkUtils.h"
-#include "Data/addLine.h"
+#include "Data/LogApi.h"
 #include "Data/SlicesHandlerITKInterface.h"
+#include "Data/addLine.h"
 
 #include <itkBinaryThresholdImageFilter.h>
 
@@ -28,149 +28,147 @@
 
 namespace iseg {
 
-TissueSeparatorWidget::TissueSeparatorWidget(
-		SlicesHandlerInterface* hand3D, QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags)
-		: WidgetInterface(parent, name, wFlags), slice_handler(hand3D)
+TissueSeparatorWidget::TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+		: m_SliceHandler(hand3D)
 {
-	current_slice = slice_handler->active_slice();
+	m_CurrentSlice = m_SliceHandler->ActiveSlice();
 
 	// create options
-	all_slices = new QCheckBox;
-	use_source = new QCheckBox;
-	use_source->setToolTip(QString("Use information from Source image, or split purely based on minimum cut through segmentation."));
-	sigma_edit = new QLineEdit(QString::number(1.0));
-	clear_lines = new QPushButton("Clear lines");
-	execute_button = new QPushButton("Execute");
+	m_AllSlices = new QCheckBox;
+	m_UseSource = new QCheckBox;
+	m_UseSource->setToolTip(QString("Use information from Source image, or split purely based on minimum cut through segmentation."));
+	m_SigmaEdit = new QLineEdit(QString::number(1.0));
+	m_ClearLines = new QPushButton("Clear lines");
+	m_ExecuteButton = new QPushButton("Execute");
 
 	// setup layout
 	auto top_layout = new QFormLayout;
 	// add options ?
-	top_layout->addRow(QString("Apply to all slices"), all_slices);
-	top_layout->addRow(QString("Use source"), use_source);
-	top_layout->addRow(QString("Sigma"), sigma_edit);
-	top_layout->addRow(clear_lines);
-	top_layout->addRow(execute_button);
+	top_layout->addRow(QString("Apply to all slices"), m_AllSlices);
+	top_layout->addRow(QString("Use source"), m_UseSource);
+	top_layout->addRow(QString("Sigma"), m_SigmaEdit);
+	top_layout->addRow(m_ClearLines);
+	top_layout->addRow(m_ExecuteButton);
 
 	setLayout(top_layout);
 
 	// connect signals
-	QObject::connect(clear_lines, SIGNAL(clicked()), this, SLOT(clearmarks()));
-	QObject::connect(execute_button, SIGNAL(clicked()), this, SLOT(execute()));
+	QObject_connect(m_ClearLines, SIGNAL(clicked()), this, SLOT(Clearmarks()));
+	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(Execute()));
 }
 
-void TissueSeparatorWidget::init()
+void TissueSeparatorWidget::Init()
 {
-	on_slicenr_changed();
-	hideparams_changed();
+	OnSlicenrChanged();
+	HideParamsChanged();
 }
 
-void TissueSeparatorWidget::newloaded()
+void TissueSeparatorWidget::NewLoaded()
 {
-	current_slice = slice_handler->active_slice();
+	m_CurrentSlice = m_SliceHandler->ActiveSlice();
 }
 
-void TissueSeparatorWidget::cleanup()
+void TissueSeparatorWidget::Cleanup()
 {
-	vpdyn.clear();
-	emit vpdyn_changed(&vpdyn);
+	m_Vpdyn.clear();
+	emit VpdynChanged(&m_Vpdyn);
 
 	std::vector<iseg::Mark> vmempty;
-	emit vm_changed(&vmempty);
+	emit VmChanged(&vmempty);
 }
 
-void TissueSeparatorWidget::clearmarks()
+void TissueSeparatorWidget::Clearmarks()
 {
-	vpdyn.clear();
-	vm.clear();
+	m_Vpdyn.clear();
+	m_Vm.clear();
 	//bmphand->clear_vvm();  \todo BL is this needed?
-	emit vpdyn_changed(&vpdyn);
+	emit VpdynChanged(&m_Vpdyn);
 
 	std::vector<Mark> dummy;
-	emit vm_changed(&dummy);
+	emit VmChanged(&dummy);
 }
 
-void TissueSeparatorWidget::on_tissuenr_changed(int i)
+void TissueSeparatorWidget::OnTissuenrChanged(int i)
 {
-	tissuenr = (unsigned)i + 1;
+	m_Tissuenr = (unsigned)i + 1;
 }
 
-void TissueSeparatorWidget::on_slicenr_changed()
+void TissueSeparatorWidget::OnSlicenrChanged()
 {
-	current_slice = slice_handler->active_slice();
+	m_CurrentSlice = m_SliceHandler->ActiveSlice();
 
-	auto& vm_slice = vm[current_slice];
-	emit vm_changed(&vm_slice);
+	auto& vm_slice = m_Vm[m_CurrentSlice];
+	emit VmChanged(&vm_slice);
 }
 
-void TissueSeparatorWidget::on_mouse_clicked(Point p)
+void TissueSeparatorWidget::OnMouseClicked(Point p)
 {
-	last_pt = p;
+	m_LastPt = p;
 }
 
-void TissueSeparatorWidget::on_mouse_moved(Point p)
+void TissueSeparatorWidget::OnMouseMoved(Point p)
 {
-	addLine(&vpdyn, last_pt, p);
-	last_pt = p;
-	emit vpdyn_changed(&vpdyn);
+	addLine(&m_Vpdyn, m_LastPt, p);
+	m_LastPt = p;
+	emit VpdynChanged(&m_Vpdyn);
 }
 
-void TissueSeparatorWidget::on_mouse_released(Point p)
+void TissueSeparatorWidget::OnMouseReleased(Point p)
 {
-	addLine(&vpdyn, last_pt, p);
-	Mark m(tissuenr);
+	addLine(&m_Vpdyn, m_LastPt, p);
+	Mark m(m_Tissuenr);
 	std::vector<Mark> vmdummy;
-	for (auto& p : vpdyn)
+	for (auto& p : m_Vpdyn)
 	{
 		m.p = p;
 		vmdummy.push_back(m);
 
 		// \note I could write directly into image, e.g. for automatic update
 	}
-	auto& vm_slice = vm[current_slice];
+	auto& vm_slice = m_Vm[m_CurrentSlice];
 	vm_slice.insert(vm_slice.end(), vmdummy.begin(), vmdummy.end());
-	vpdyn.clear();
+	m_Vpdyn.clear();
 
 	std::set<unsigned> labels;
 	for (auto& m : vm_slice)
 	{
 		labels.insert(m.mark);
 	}
-	bool const auto_update = (!all_slices->isChecked()) && labels.size() >= 2;
+	bool const auto_update = (!m_AllSlices->isChecked()) && labels.size() >= 2;
 
-	iseg::DataSelection dataSelection;
-	dataSelection.sliceNr = slice_handler->active_slice();
-	dataSelection.work = auto_update;
-	dataSelection.vvm = true;
-	emit begin_datachange(dataSelection, this);
-	emit vpdyn_changed(&vpdyn);
-	emit vm_changed(&vm_slice);
+	iseg::DataSelection data_selection;
+	data_selection.sliceNr = m_SliceHandler->ActiveSlice();
+	data_selection.work = auto_update;
+	data_selection.vvm = true;
+	emit BeginDatachange(data_selection, this);
+	emit VpdynChanged(&m_Vpdyn);
+	emit VmChanged(&vm_slice);
 
 	// run 2d (current slice) algorithm
 	if (auto_update)
 	{
-		do_work_current_slice();
+		DoWorkCurrentSlice();
 	}
 
-	emit end_datachange(this);
+	emit EndDatachange(this);
 }
 
-void TissueSeparatorWidget::execute()
+void TissueSeparatorWidget::Execute()
 {
-	if (all_slices->isChecked())
+	if (m_AllSlices->isChecked())
 	{
-		do_work_all_slices();
+		DoWorkAllSlices();
 	}
 	else
 	{
-		do_work_current_slice();
+		DoWorkCurrentSlice();
 	}
 }
 
-void TissueSeparatorWidget::do_work_all_slices()
+void TissueSeparatorWidget::DoWorkAllSlices()
 {
 	QProgressDialog progress("Running Graph Cut...", "Abort", 0, 0, this);
-	progress.setCancelButton(0);
+	progress.setCancelButton(nullptr);
 	progress.setMinimum(0);
 	progress.setMaximum(0);
 	progress.setWindowModality(Qt::WindowModal);
@@ -182,27 +180,27 @@ void TissueSeparatorWidget::do_work_all_slices()
 	using source_type = itk::SliceContiguousImage<float>;
 	using mask_type = itk::Image<unsigned char, 3>;
 
-	SlicesHandlerITKInterface wrapper(slice_handler);
+	SlicesHandlerITKInterface wrapper(m_SliceHandler);
 	auto source = wrapper.GetSource(false);
 	auto target = wrapper.GetTarget(false);
 
 	auto start = target->GetLargestPossibleRegion().GetIndex();
-	start[2] = slice_handler->start_slice();
+	start[2] = m_SliceHandler->StartSlice();
 
 	auto size = target->GetLargestPossibleRegion().GetSize();
-	size[2] = slice_handler->end_slice() - start[2];
+	size[2] = m_SliceHandler->EndSlice() - start[2];
 
-	auto output = do_work<3, source_type>(source, target, mask_type::RegionType(start, size));
+	auto output = DoWork<3, source_type>(source, target, mask_type::RegionType(start, size));
 	if (output)
 	{
-		iseg::DataSelection dataSelection;
-		dataSelection.allSlices = true;
-		dataSelection.work = true;
-		emit begin_datachange(dataSelection, this);
+		iseg::DataSelection data_selection;
+		data_selection.allSlices = true;
+		data_selection.work = true;
+		emit BeginDatachange(data_selection, this);
 
-		iseg::Paste<unsigned char, float>(output, target, slice_handler->start_slice(), slice_handler->end_slice());
+		iseg::Paste<unsigned char, float>(output, target, m_SliceHandler->StartSlice(), m_SliceHandler->EndSlice());
 
-		emit end_datachange(this);
+		emit EndDatachange(this);
 	}
 	else
 	{
@@ -213,22 +211,21 @@ void TissueSeparatorWidget::do_work_all_slices()
 	progress.setValue(1);
 }
 
-void TissueSeparatorWidget::do_work_current_slice()
+void TissueSeparatorWidget::DoWorkCurrentSlice()
 {
 	using source_type = itk::Image<float, 2>;
 
-	SlicesHandlerITKInterface wrapper(slice_handler);
+	SlicesHandlerITKInterface wrapper(m_SliceHandler);
 	auto source = wrapper.GetSourceSlice();
 	auto target = wrapper.GetTargetSlice();
 
-	auto output = do_work<2, source_type>(source, target, target->GetLargestPossibleRegion());
+	auto output = DoWork<2, source_type>(source, target, target->GetLargestPossibleRegion());
 	if (output)
 	{
 		auto buffer_size = target->GetPixelContainer()->Size();
 		auto target_buffer = target->GetPixelContainer()->GetImportPointer();
 		auto output_buffer = output->GetPixelContainer()->GetImportPointer();
-		std::transform(output_buffer, output_buffer + buffer_size, target_buffer,
-				[](unsigned char v) { return static_cast<float>(v); });
+		std::transform(output_buffer, output_buffer + buffer_size, target_buffer, [](unsigned char v) { return static_cast<float>(v); });
 
 		std::cerr << "Computed GC in 2D\n";
 	}
@@ -236,14 +233,14 @@ void TissueSeparatorWidget::do_work_current_slice()
 
 template<unsigned int Dim, typename TInput>
 typename itk::Image<unsigned char, Dim>::Pointer
-		TissueSeparatorWidget::do_work(TInput* source, TInput* target, const typename itk::Image<unsigned char, Dim>::RegionType& requested_region)
+		TissueSeparatorWidget::DoWork(TInput* source, TInput* target, const typename itk::Image<unsigned char, Dim>::RegionType& requested_region)
 {
 	using tissue_value_type = SlicesHandlerInterface::tissue_type;
-	tissue_value_type const OBJECT_1 = 127;
-	tissue_value_type const OBJECT_2 = 255;
+	tissue_value_type const object_1 = 127;
+	tissue_value_type const object_2 = 255;
 	bool has_sigma;
-	auto sigma = sigma_edit->text().toDouble(&has_sigma);
-	bool use_gradient_magnitude = use_source->isChecked();
+	auto sigma = m_SigmaEdit->text().toDouble(&has_sigma);
+	bool use_gradient_magnitude = m_UseSource->isChecked();
 	bool use_full_neighborhood = true;
 
 	using source_type = TInput;
@@ -260,15 +257,15 @@ typename itk::Image<unsigned char, Dim>::Pointer
 
 	auto mask = threshold->GetOutput();
 	auto mask_buffer = mask->GetPixelContainer()->GetImportPointer();
-	size_t const width = slice_handler->width();
-	size_t const height = slice_handler->width();
+	size_t const width = m_SliceHandler->Width();
+	size_t const height = m_SliceHandler->Width();
 
 	unsigned first_mark = -1;
 	bool found_other_mark = false;
-	for (auto slice_marks : vm)
+	for (const auto& slice_marks : m_Vm)
 	{
 		auto slice = slice_marks.first;
-		if (slice == current_slice || Dim == 3)
+		if (slice == m_CurrentSlice || Dim == 3)
 		{
 			size_t const zoffset = (Dim == 3) ? slice * width * height : 0;
 			for (auto& m : slice_marks.second)
@@ -277,7 +274,7 @@ typename itk::Image<unsigned char, Dim>::Pointer
 				{
 					first_mark = m.mark;
 				}
-				mask_buffer[m.p.px + m.p.py * width + zoffset] = (m.mark == first_mark) ? OBJECT_1 : OBJECT_2;
+				mask_buffer[m.p.px + m.p.py * width + zoffset] = (m.mark == first_mark) ? object_1 : object_2;
 				found_other_mark = found_other_mark || (m.mark != first_mark);
 			}
 		}
@@ -286,8 +283,8 @@ typename itk::Image<unsigned char, Dim>::Pointer
 
 	auto cutter = gc_filter_type::New();
 	cutter->SetBackgroundValue(0);
-	cutter->SetObject1Value(OBJECT_1);
-	cutter->SetObject2Value(OBJECT_2);
+	cutter->SetObject1Value(object_1);
+	cutter->SetObject2Value(object_2);
 	cutter->SetVerboseOutput(true);
 	cutter->SetUseGradientMagnitude(use_gradient_magnitude);
 	if (has_sigma)
@@ -310,11 +307,11 @@ typename itk::Image<unsigned char, Dim>::Pointer
 	}
 	catch (itk::ExceptionObject e)
 	{
-		iseg::Log::error(e.what());
+		iseg::Log::Error(e.what());
 	}
 	catch (std::exception e)
 	{
-		iseg::Log::error(e.what());
+		iseg::Log::Error(e.what());
 	}
 	return nullptr;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -32,75 +32,66 @@ namespace iseg {
 
 XdmfImageMerger::XdmfImageMerger()
 {
-	this->NumberOfSlices = 0;
-	this->Width = 0;
-	this->Height = 0;
-	this->Compression = 1;
-	this->PixelSize = 0;
-	this->ImageSlices = 0;
-	this->WorkSlices = 0;
-	this->TissueSlices = 0;
-	this->FileName = 0;
+	this->m_NumberOfSlices = 0;
+	this->m_Width = 0;
+	this->m_Height = 0;
+	this->m_Compression = 1;
+	this->m_PixelSize = nullptr;
+	this->m_ImageSlices = nullptr;
+	this->m_WorkSlices = nullptr;
+	this->m_TissueSlices = nullptr;
+	this->m_FileName = nullptr;
 }
 
-XdmfImageMerger::~XdmfImageMerger() { delete[] this->FileName; }
+XdmfImageMerger::~XdmfImageMerger() { delete[] this->m_FileName; }
 
 int XdmfImageMerger::Write()
 {
-	return this->InternalWrite(FileName, MergeFileNames, ImageSlices,
-			WorkSlices, TissueSlices, NumberOfSlices,
-			TotalNumberOfSlices, Width, Height, PixelSize,
-			ImageTransform, Compression);
+	return this->InternalWrite(m_FileName, m_MergeFileNames, m_ImageSlices, m_WorkSlices, m_TissueSlices, m_NumberOfSlices, m_TotalNumberOfSlices, m_Width, m_Height, m_PixelSize, m_ImageTransform, m_Compression);
 }
 
-int XdmfImageMerger::InternalWrite(
-		const char* filename, std::vector<QString>& mergefilenames,
-		float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue,
-		unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height,
-		float* pixelsize, const Transform& transform, int compression)
+int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& mergefilenames, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, unsigned nrslices, unsigned nrslicesTotal, unsigned width, unsigned height, float* pixelsize, const Transform& transform, int compression)
 {
 	// Parse xml files of merged projects
-	std::vector<XdmfImageReader*> imageReaders;
-	std::vector<QString>::iterator iterFilename;
-	for (iterFilename = mergefilenames.begin(); iterFilename != mergefilenames.end(); ++iterFilename)
+	std::vector<XdmfImageReader*> image_readers;
+	std::vector<QString>::iterator iter_filename;
+	for (iter_filename = mergefilenames.begin(); iter_filename != mergefilenames.end(); ++iter_filename)
 	{
 		XdmfImageReader* reader = new XdmfImageReader();
-		QString imageFilename = QFileInfo(*iterFilename).completeBaseName() + ".xmf";
-		reader->SetFileName(QFileInfo(*iterFilename).dir().absFilePath(imageFilename).toAscii().data());
+		QString image_filename = QFileInfo(*iter_filename).completeBaseName() + ".xmf";
+		reader->SetFileName(QFileInfo(*iter_filename).dir().absoluteFilePath(image_filename).toAscii().data());
 		if (reader->ParseXML() == 0)
 		{
 			ISEG_ERROR_MSG("XdmfImageMerger::InternalWrite while parsing xmls");
 			return 0;
 		}
-		imageReaders.push_back(reader);
+		image_readers.push_back(reader);
 	}
 
-	QString qFileName(filename);
-	QFileInfo fileInfo(qFileName);
-	QString basename = fileInfo.completeBaseName();
-	QString suffix = fileInfo.suffix();
+	QString q_file_name(filename);
+	QFileInfo file_info(q_file_name);
+	QString basename = file_info.completeBaseName();
 
 	// save working directory
 	QDir oldcwd = QDir::current();
 
 	// enter the xmf file folder so relative names for hdf5 files work
-	QDir::setCurrent(fileInfo.absolutePath());
+	QDir::setCurrent(file_info.absolutePath());
 
-	const size_t N = (size_t)width * (size_t)height * (size_t)nrslicesTotal;
 	const size_t slice_size = static_cast<size_t>(width) * height;
 
 	float offset[3];
-	transform.getOffset(offset);
+	transform.GetOffset(offset);
 
 	ISEG_INFO("Writing " << width << " x " << height << " x " << nrslicesTotal);
 
 	HDF5Writer writer;
 	const QString fname = basename + ".h5";
-	if (!writer.open(fname.toStdString()))
+	if (!writer.Open(fname.toStdString()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 	}
-	writer.compression = compression;
+	writer.m_Compression = compression;
 
 	{
 		//write dimensions, pixelsize, offset, dc,
@@ -112,7 +103,7 @@ int XdmfImageMerger::InternalWrite(
 		dimension[2] = nrslicesTotal;
 
 		float dc[6];
-		transform.getDirectionCosines(dc);
+		transform.GetDirectionCosines(dc);
 
 		float rotation[9];
 		for (int k = 0; k < 3; ++k)
@@ -123,27 +114,27 @@ int XdmfImageMerger::InternalWrite(
 		}
 
 		shape[0] = 3;
-		if (!writer.write(dimension, shape, std::string("dimensions")))
+		if (!writer.Write(dimension, shape, std::string("dimensions")))
 		{
 			ISEG_ERROR_MSG("writing dimensions");
 		}
-		if (!writer.write(offset, shape, std::string("offset")))
+		if (!writer.Write(offset, shape, std::string("offset")))
 		{
 			ISEG_ERROR_MSG("writing offset");
 		}
-		if (!writer.write(pixelsize, shape, std::string("pixelsize")))
+		if (!writer.Write(pixelsize, shape, std::string("pixelsize")))
 		{
 			ISEG_ERROR_MSG("writing pixelsize");
 		}
 
 		shape[0] = 6;
-		if (!writer.write(dc, shape, std::string("dc")))
+		if (!writer.Write(dc, shape, std::string("dc")))
 		{
 			ISEG_ERROR_MSG("writing dc");
 		}
 
 		shape[0] = 9;
-		if (!writer.write(rotation, shape, std::string("rotation")))
+		if (!writer.Write(rotation, shape, std::string("rotation")))
 		{
 			ISEG_ERROR_MSG("writing rotation");
 		}
@@ -156,36 +147,33 @@ int XdmfImageMerger::InternalWrite(
 		ISEG_INFO_MSG("writing Source");
 		// allocate in file
 		float** const null = nullptr;
-		if (writer.write(null, nrslicesTotal, slice_size, "Source"))
+		if (writer.Write(null, nrslicesTotal, slice_size, "Source"))
 		{
 			size_t offset = 0;
 
 			// Current project
-			writer.write(slicesbmp, nrslices, slice_size, "Source", offset);
+			writer.Write(slicesbmp, nrslices, slice_size, "Source", offset);
 			offset += nrslices * slice_size;
 
 			// Merged projects
 			std::vector<float> project_buffer;
-			std::vector<XdmfImageReader*>::iterator iterReader;
-			for (iterFilename = mergefilenames.begin(),
-					iterReader = imageReaders.begin();
-					 iterFilename != mergefilenames.end();
-					 ++iterFilename, ++iterReader)
+			std::vector<XdmfImageReader*>::iterator iter_reader;
+			for (iter_filename = mergefilenames.begin(), iter_reader = image_readers.begin();
+					 iter_filename != mergefilenames.end();
+					 ++iter_filename, ++iter_reader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-						(*iterReader)->GetNumberOfSlices();
+						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadSource(*iterReader, (*iterFilename).toAscii().data(),
-						project_buffer, junk);
+				ReadSource(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
 				{
 					slices[i] = &project_buffer[i * slice_size];
 				}
-				writer.write(slices.data(), project_slices, slice_size,
-						"Source", offset);
+				writer.Write(slices.data(), project_slices, slice_size, "Source", offset);
 				offset += project_slices * slice_size;
 			}
 		}
@@ -196,36 +184,33 @@ int XdmfImageMerger::InternalWrite(
 		ISEG_INFO_MSG("writing Target");
 		// allocate in file
 		float** const null = nullptr;
-		if (writer.write(null, nrslicesTotal, slice_size, "Target"))
+		if (writer.Write(null, nrslicesTotal, slice_size, "Target"))
 		{
 			size_t offset = 0;
 
 			// Current project
-			writer.write(sliceswork, nrslices, slice_size, "Target", offset);
+			writer.Write(sliceswork, nrslices, slice_size, "Target", offset);
 			offset += nrslices * slice_size;
 
 			// Merged projects
 			std::vector<float> project_buffer;
-			std::vector<XdmfImageReader*>::iterator iterReader;
-			for (iterFilename = mergefilenames.begin(),
-					iterReader = imageReaders.begin();
-					 iterFilename != mergefilenames.end();
-					 ++iterFilename, ++iterReader)
+			std::vector<XdmfImageReader*>::iterator iter_reader;
+			for (iter_filename = mergefilenames.begin(), iter_reader = image_readers.begin();
+					 iter_filename != mergefilenames.end();
+					 ++iter_filename, ++iter_reader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-						(*iterReader)->GetNumberOfSlices();
+						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadTarget(*iterReader, (*iterFilename).toAscii().data(),
-						project_buffer, junk);
+				ReadTarget(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
 				{
 					slices[i] = &project_buffer[i * slice_size];
 				}
-				writer.write(slices.data(), project_slices, slice_size,
-						"Target", offset);
+				writer.Write(slices.data(), project_slices, slice_size, "Target", offset);
 				offset += project_slices * slice_size;
 			}
 		}
@@ -236,42 +221,39 @@ int XdmfImageMerger::InternalWrite(
 		ISEG_INFO_MSG("writing Tissue");
 		// allocate in file
 		tissues_size_t** const null = nullptr;
-		if (writer.write(null, nrslicesTotal, slice_size, "Tissue"))
+		if (writer.Write(null, nrslicesTotal, slice_size, "Tissue"))
 		{
 			size_t offset = 0;
 
 			// Current project
-			writer.write(slicestissue, nrslices, slice_size, "Tissue", offset);
+			writer.Write(slicestissue, nrslices, slice_size, "Tissue", offset);
 			offset += nrslices * slice_size;
 
 			// Merged projects
 			std::vector<tissues_size_t> project_buffer;
-			std::vector<XdmfImageReader*>::iterator iterReader;
-			for (iterFilename = mergefilenames.begin(),
-					iterReader = imageReaders.begin();
-					 iterFilename != mergefilenames.end();
-					 ++iterFilename, ++iterReader)
+			std::vector<XdmfImageReader*>::iterator iter_reader;
+			for (iter_filename = mergefilenames.begin(), iter_reader = image_readers.begin();
+					 iter_filename != mergefilenames.end();
+					 ++iter_filename, ++iter_reader)
 			{
 				size_t junk = 0;
 				size_t const project_slices =
-						(*iterReader)->GetNumberOfSlices();
+						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadTissues(*iterReader, (*iterFilename).toAscii().data(),
-						project_buffer, junk);
+				ReadTissues(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
 
 				std::vector<tissues_size_t*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
 				{
 					slices[i] = &project_buffer[i * slice_size];
 				}
-				writer.write(slices.data(), project_slices, slice_size,
-						"Tissue", offset);
+				writer.Write(slices.data(), project_slices, slice_size, "Tissue", offset);
 				offset += project_slices * slice_size;
 			}
 		}
 	}
 
-	writer.close();
+	writer.Close();
 
 	// Write XML file
 	QDomElement dataitem, attribute;
@@ -389,7 +371,7 @@ int XdmfImageMerger::InternalWrite(
 	attribute.appendChild(dataitem);
 	grid.appendChild(attribute);
 
-	QFile file(qFileName);
+	QFile file(q_file_name);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return 0;
 
@@ -400,7 +382,7 @@ int XdmfImageMerger::InternalWrite(
 	// restore working directory
 	QDir::setCurrent(oldcwd.absolutePath());
 
-	for (XdmfImageReader* r : imageReaders)
+	for (XdmfImageReader* r : image_readers)
 	{
 		delete r;
 	}
@@ -408,39 +390,34 @@ int XdmfImageMerger::InternalWrite(
 	return 1;
 }
 
-int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
-		const char* filename,
-		std::vector<float>& bufferFloat,
-		size_t& sliceoffset)
+int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader, const char* filename, std::vector<float>& bufferFloat, size_t& sliceoffset) const
 {
-	QFileInfo fileInfo(filename);
-	QString basename = fileInfo.completeBaseName();
-	QString suffix = fileInfo.suffix();
+	QFileInfo file_info(filename);
+	QString basename = file_info.completeBaseName();
 
 	// save working directory
 	QDir oldcwd = QDir::current();
 
 	// enter the xmf file folder so relative names for hdf5 files work
-	QDir::setCurrent(fileInfo.absolutePath());
+	QDir::setCurrent(file_info.absolutePath());
 
 	HDF5Reader reader;
-	reader.loud = 1;
+	reader.m_Loud = true;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toStdString()))
+	if (!reader.Open(fname.toStdString()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 		return 0;
 	}
 
 	// Source
-	QString mapSourceName = imageReader->GetMapArrayNames()["Source"];
-	if (mapSourceName.isEmpty())
+	QString map_source_name = imageReader->GetMapArrayNames()["Source"];
+	if (map_source_name.isEmpty())
 	{
 		ISEG_ERROR_MSG("no Source array...");
 		return 0;
 	}
-	if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
-					mapSourceName.toAscii().data()))
+	if (!reader.Read(&bufferFloat[sliceoffset * this->m_Width * this->m_Height], map_source_name.toStdString()))
 	{
 		ISEG_ERROR_MSG("reading Source dataset...");
 		return 0;
@@ -453,41 +430,36 @@ int XdmfImageMerger::ReadSource(XdmfImageReader* imageReader,
 	return 1;
 }
 
-int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
-		const char* filename,
-		std::vector<float>& bufferFloat,
-		size_t& sliceoffset)
+int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader, const char* filename, std::vector<float>& bufferFloat, size_t& sliceoffset) const
 {
-	QFileInfo fileInfo(filename);
-	QString basename = fileInfo.completeBaseName();
-	QString suffix = fileInfo.suffix();
+	QFileInfo file_info(filename);
+	QString basename = file_info.completeBaseName();
 
 	// save working directory
 	QDir oldcwd = QDir::current();
 
 	// enter the xmf file folder so relative names for hdf5 files work
-	QDir::setCurrent(fileInfo.absolutePath());
+	QDir::setCurrent(file_info.absolutePath());
 
 	HDF5Reader reader;
-	reader.loud = 1;
+	reader.m_Loud = true;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toStdString()))
+	if (!reader.Open(fname.toStdString()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 		return 0;
 	}
 
 	// Target
-	QString mapTargetName = imageReader->GetMapArrayNames()["Target"];
-	if (mapTargetName.isEmpty())
+	QString map_target_name = imageReader->GetMapArrayNames()["Target"];
+	if (map_target_name.isEmpty())
 	{
 		ISEG_WARNING_MSG("no Target array, will initialize to 0...");
 		bufferFloat.assign(bufferFloat.size(), 0.0f);
 	}
 	else
 	{
-		if (!reader.read(&bufferFloat[sliceoffset * this->Width * this->Height],
-						mapTargetName.toAscii().data()))
+		if (!reader.Read(&bufferFloat[sliceoffset * this->m_Width * this->m_Height], map_target_name.toAscii().data()))
 		{
 			ISEG_ERROR_MSG("reading Target dataset...");
 			return 0;
@@ -501,133 +473,127 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader,
 	return 1;
 }
 
-int XdmfImageMerger::ReadTissues(
-		XdmfImageReader* imageReader, const char* filename,
-		std::vector<tissues_size_t>& bufferTissuesSizeT, size_t& sliceoffset)
+int XdmfImageMerger::ReadTissues(XdmfImageReader* imageReader, const char* filename, std::vector<tissues_size_t>& bufferTissuesSizeT, size_t& sliceoffset) const
 {
-	QFileInfo fileInfo(filename);
-	QString basename = fileInfo.completeBaseName();
-	QString suffix = fileInfo.suffix();
+	QFileInfo file_info(filename);
+	QString basename = file_info.completeBaseName();
 
 	// save working directory
 	QDir oldcwd = QDir::current();
 
 	// enter the xmf file folder so relative names for hdf5 files work
-	QDir::setCurrent(fileInfo.absolutePath());
+	QDir::setCurrent(file_info.absolutePath());
 
 	HDF5Reader reader;
 	const QString fname = basename + ".h5";
-	if (!reader.open(fname.toStdString()))
+	if (!reader.Open(fname.toStdString()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 		return 0;
 	}
 
 	// Tissue
-	QString mapTissueName = imageReader->GetMapArrayNames()["Tissue"];
+	QString map_tissue_name = imageReader->GetMapArrayNames()["Tissue"];
 	std::string type;
 	std::vector<HDF5Reader::size_type> dims;
-	if (!reader.getDatasetInfo(type, dims, mapTissueName.toAscii().data()))
+	if (!reader.GetDatasetInfo(type, dims, map_tissue_name.toAscii().data()))
 	{
 		ISEG_ERROR_MSG("reading Tissue data type...");
 		return 0;
 	}
 
-	size_t const currNrslices = imageReader->GetNumberOfSlices();
-	size_t const N = (currNrslices * this->Width) * this->Height;
+	size_t const curr_nrslices = imageReader->GetNumberOfSlices();
+	size_t const n = (curr_nrslices * this->m_Width) * this->m_Height;
 
-	if (type.compare("unsigned char") == 0)
+	if (type == "unsigned char")
 	{
-		std::vector<unsigned char> bufferUChar;
+		std::vector<unsigned char> buffer_u_char;
 		try
 		{
-			bufferUChar.resize(N);
+			buffer_u_char.resize(n);
 		}
 		catch (std::length_error& le)
 		{
 			std::cerr << "bufferUChar length error: " << le.what();
 			return 0;
 		}
-		if (mapTissueName.isEmpty())
+		if (map_tissue_name.isEmpty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.read(&bufferUChar[0], mapTissueName.toAscii().data()))
+		if (!reader.Read(&buffer_u_char[0], map_tissue_name.toAscii().data()))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;
 		}
-		std::vector<unsigned char>::iterator iterFrom = bufferUChar.begin();
-		std::vector<tissues_size_t>::iterator iterTo =
+		std::vector<unsigned char>::iterator iter_from = buffer_u_char.begin();
+		std::vector<tissues_size_t>::iterator iter_to =
 				bufferTissuesSizeT.begin() +
-				(sliceoffset * this->Width) * this->Height;
-		for (unsigned int k = 0; k < currNrslices; k++)
+				(sliceoffset * this->m_Width) * this->m_Height;
+		for (unsigned int k = 0; k < curr_nrslices; k++)
 		{
-			for (unsigned int j = 0; j < this->Height; j++)
+			for (unsigned int j = 0; j < this->m_Height; j++)
 			{
-				for (unsigned int i = 0; i < this->Width; i++)
+				for (unsigned int i = 0; i < this->m_Width; i++)
 				{
-					(*iterTo++) = (tissues_size_t)(*iterFrom++);
+					(*iter_to++) = (tissues_size_t)(*iter_from++);
 				}
 			}
 		}
-		bufferUChar.clear();
+		buffer_u_char.clear();
 	}
-	else if (type.compare("unsigned short") == 0)
+	else if (type == "unsigned short")
 	{
-		static_assert(std::is_same<unsigned short, tissues_size_t>::value,
-				"Special case we read directly into the buffer.");
-		if (mapTissueName.isEmpty())
+		static_assert(std::is_same<unsigned short, tissues_size_t>::value, "Special case we read directly into the buffer.");
+		if (map_tissue_name.isEmpty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.read(
-						&bufferTissuesSizeT[(sliceoffset * this->Width) * this->Height],
-						mapTissueName.toAscii().data()))
+		if (!reader.Read(&bufferTissuesSizeT[(sliceoffset * this->m_Width) * this->m_Height], map_tissue_name.toAscii().data()))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;
 		}
 	}
-	else if (type.compare("unsigned int") == 0)
+	else if (type == "unsigned int")
 	{
-		std::vector<unsigned int> bufferUInt;
+		std::vector<unsigned int> buffer_u_int;
 		try
 		{
-			bufferUInt.resize(N);
+			buffer_u_int.resize(n);
 		}
 		catch (std::length_error& le)
 		{
 			ISEG_ERROR("bufferUInt length error: " << le.what());
 			return 0;
 		}
-		if (mapTissueName.isEmpty())
+		if (map_tissue_name.isEmpty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.read(&bufferUInt[0], mapTissueName.toAscii().data()))
+		if (!reader.Read(&buffer_u_int[0], map_tissue_name.toAscii().data()))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;
 		}
-		std::vector<unsigned int>::iterator iterFrom = bufferUInt.begin();
-		std::vector<tissues_size_t>::iterator iterTo =
+		std::vector<unsigned int>::iterator iter_from = buffer_u_int.begin();
+		std::vector<tissues_size_t>::iterator iter_to =
 				bufferTissuesSizeT.begin() +
-				sliceoffset * this->Width * this->Height;
-		for (unsigned int k = 0; k < currNrslices; k++)
+				sliceoffset * this->m_Width * this->m_Height;
+		for (unsigned int k = 0; k < curr_nrslices; k++)
 		{
-			for (unsigned int j = 0; j < this->Height; j++)
+			for (unsigned int j = 0; j < this->m_Height; j++)
 			{
-				for (unsigned int i = 0; i < this->Width; i++)
+				for (unsigned int i = 0; i < this->m_Width; i++)
 				{
-					(*iterTo++) = (tissues_size_t)(*iterFrom++);
+					(*iter_to++) = (tissues_size_t)(*iter_from++);
 				}
 			}
 		}
-		bufferUInt.clear();
+		buffer_u_int.clear();
 	}
 	else
 	{

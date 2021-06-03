@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -25,18 +25,18 @@
 class vtkGenericDataSetWriter : public vtkDataSetAlgorithm
 {
 public:
-	static vtkGenericDataSetWriter *New();
+	static vtkGenericDataSetWriter* New();
 	vtkTypeMacro(vtkGenericDataSetWriter, vtkDataSetAlgorithm);
-	void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
+	void PrintSelf(ostream& os, vtkIndent indent) override;
 
 	// Set the input dataset
-	void SetInput(int index, vtkDataObject *input);
-	void SetInput(vtkDataObject *input);
+	void SetInput(int index, vtkDataObject* input);
+	void SetInput(vtkDataObject* input);
 
 	// Set/get the file name. Will be used to choose the correct reader
 	vtkSetStringMacro(FileName) vtkGetStringMacro(FileName);
 
-			// Alias for Update
+	// Alias for Update
 	void Write()
 	{
 		this->Update();
@@ -71,31 +71,29 @@ public:
 	vtkSetMacro(Loud, int);
 	vtkBooleanMacro(Loud, int);
 
-protected: 
+protected:
 	vtkGenericDataSetWriter();
-	~vtkGenericDataSetWriter();
+	~vtkGenericDataSetWriter() override;
 
-	int RequestData(vtkInformation *, vtkInformationVector **,
-									vtkInformationVector *) VTK_OVERRIDE;
+	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 	//BTX
-	void decomposeFileName(std::string &bname, std::string &extname,
-												 const std::string &fname);
+	void DecomposeFileName(std::string& bname, std::string& extname, const std::string& fname);
 	//ETX
 
-	bool WriteEsraTriangles(vtkPolyData *, const char *);
+	bool WriteEsraTriangles(vtkPolyData*, const char*);
 
-	char *FileName;
+	char* FileName;
 	int FileType;
 	int DataMode;
 	int EncodeAppendedData;
-	char *MaterialArrayName;
+	char* MaterialArrayName;
 	bool FlipTriangles;
 	int Loud;
 
 private:
-	vtkGenericDataSetWriter(const vtkGenericDataSetWriter &); // Not implemented.
-	void operator=(const vtkGenericDataSetWriter &);					// Not implemented.
+	vtkGenericDataSetWriter(const vtkGenericDataSetWriter&) = delete; 
+	void operator=(const vtkGenericDataSetWriter&) = delete;					 
 };
 
 #endif

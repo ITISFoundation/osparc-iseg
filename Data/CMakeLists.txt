@@ -1,5 +1,5 @@
 ##
-## Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+## Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 ## 
 ## This file is part of iSEG
 ## (see https://github.com/ITISFoundation/osparc-iseg).
@@ -20,6 +20,7 @@ SET(SOURCES
 	ImageToITK.cpp
 	ItkProgressObserver.cpp
 	LogApi.cpp
+	Property.cpp
 	SlicesHandlerITKInterface.cpp
 	Transform.cpp
 )

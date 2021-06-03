@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -12,8 +12,7 @@
 #include <QColor>
 #include <QPushButton>
 
-namespace iseg
-{
+namespace iseg {
 
 class SelectColorButton : public QPushButton
 {
@@ -21,18 +20,18 @@ class SelectColorButton : public QPushButton
 public:
 	SelectColorButton(QWidget* parent);
 
-	void setColor(const QColor& color);
-	const QColor& getColor();
+	void SetColor(const QColor& color);
+	const QColor& GetColor();
 
 signals:
-	void onColorChanged(QColor color);
+	void OnColorChanged(QColor color);
 
 private slots:
-	void updateColor();
-	void changeColor();
+	void UpdateColor();
+	void ChangeColor();
 
 private:
-	QColor color;
+	QColor m_Color;
 };
 
 } // namespace iseg

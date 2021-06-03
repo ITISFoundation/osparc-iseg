@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,62 +27,55 @@ class TissueHierarchySaxHandler : public QXmlDefaultHandler
 public:
 	TissueHierarchySaxHandler(TissueHierarchyItem* root);
 
-	bool startElement(const QString& namespaceURI, const QString& localName,
-					  const QString& qName, const QXmlAttributes& attributes);
+	bool startElement(const QString& namespaceURI, const QString& localName, const QString& qName, const QXmlAttributes& attributes) override;
 
-	bool endElement(const QString& namespaceURI, const QString& localName,
-					const QString& qName);
+	bool endElement(const QString& namespaceURI, const QString& localName, const QString& qName) override;
 
-	bool fatalError(const QXmlParseException& exception);
+	bool fatalError(const QXmlParseException& exception) override;
 
-	QString getHierarchyName();
+	QString GetHierarchyName();
 
 private:
-	TissueHierarchyItem* currentFolder;
-	QString currentText;
-	QString loadedHierarchyName;
+	TissueHierarchyItem* m_CurrentFolder;
+	QString m_CurrentText;
+	QString m_LoadedHierarchyName;
 };
 
 TissueHierarchySaxHandler::TissueHierarchySaxHandler(TissueHierarchyItem* root)
 {
-	currentFolder = root;
-	loadedHierarchyName = QString();
+	m_CurrentFolder = root;
+	m_LoadedHierarchyName = QString();
 }
 
-bool TissueHierarchySaxHandler::startElement(const QString& /* namespaceURI */,
-											 const QString& /* localName */,
-											 const QString& qName,
-											 const QXmlAttributes& attributes)
+bool TissueHierarchySaxHandler::startElement(const QString& /* namespaceURI */, const QString& /* localName */, const QString& qName, const QXmlAttributes& attributes)
 {
 	if (qName == "hierarchy")
 	{
-		loadedHierarchyName = attributes.value("name");
+		m_LoadedHierarchyName = attributes.value("name");
 	}
 	else if (qName == "tissue")
 	{
 		// Add tissue with given name
-		QString tissueName(attributes.value("name"));
-		currentFolder->AddChild(new TissueHierarchyItem(false, tissueName));
+		QString tissue_name(attributes.value("name"));
+		m_CurrentFolder->AddChild(new TissueHierarchyItem(false, tissue_name));
 	}
 	else if (qName == "folder")
 	{
 		// Add as subfolder to last folder
-		QString folderName(attributes.value("name"));
-		TissueHierarchyItem* lastFolder = currentFolder;
-		currentFolder = new TissueHierarchyItem(true, folderName);
-		lastFolder->AddChild(currentFolder);
+		QString folder_name(attributes.value("name"));
+		TissueHierarchyItem* last_folder = m_CurrentFolder;
+		m_CurrentFolder = new TissueHierarchyItem(true, folder_name);
+		last_folder->AddChild(m_CurrentFolder);
 	}
 	return true;
 }
 
-bool TissueHierarchySaxHandler::endElement(const QString& /* namespaceURI */,
-										   const QString& /* localName */,
-										   const QString& qName)
+bool TissueHierarchySaxHandler::endElement(const QString& /* namespaceURI */, const QString& /* localName */, const QString& qName)
 {
 	if (qName == "folder")
 	{
 		// Set current folder to parent
-		currentFolder = currentFolder->GetParent();
+		m_CurrentFolder = m_CurrentFolder->GetParent();
 	}
 	return true;
 }
@@ -98,63 +91,62 @@ bool TissueHierarchySaxHandler::fatalError(const QXmlParseException& exception)
 	return false;
 }
 
-QString TissueHierarchySaxHandler::getHierarchyName()
+QString TissueHierarchySaxHandler::GetHierarchyName()
 {
-	return loadedHierarchyName;
+	return m_LoadedHierarchyName;
 }
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
 
-TissueHierarchyItem::TissueHierarchyItem(bool folderItem,
-										 const QString& itemName)
+TissueHierarchyItem::TissueHierarchyItem(bool folderItem, const QString& itemName)
 {
-	isFolder = folderItem;
-	name = itemName;
-	parent = 0;
+	m_IsFolder = folderItem;
+	m_Name = itemName;
+	m_Parent = nullptr;
 }
 
-TissueHierarchyItem::~TissueHierarchyItem() { children.clear(); }
+TissueHierarchyItem::~TissueHierarchyItem() { m_Children.clear(); }
 
-bool TissueHierarchyItem::GetIsFolder() { return isFolder; }
+bool TissueHierarchyItem::GetIsFolder() const { return m_IsFolder; }
 
-QString TissueHierarchyItem::GetName() { return name; }
+QString TissueHierarchyItem::GetName() { return m_Name; }
 
 unsigned int TissueHierarchyItem::GetChildCount()
 {
-	return static_cast<unsigned int>(children.size());
+	return static_cast<unsigned int>(m_Children.size());
 }
 
-TissueHierarchyItem* TissueHierarchyItem::GetParent() { return parent; }
+TissueHierarchyItem* TissueHierarchyItem::GetParent() { return m_Parent; }
 
 std::vector<TissueHierarchyItem*>* TissueHierarchyItem::GetChildren()
 {
-	return &children;
+	return &m_Children;
 }
 
 void TissueHierarchyItem::AddChild(TissueHierarchyItem* child)
 {
 	child->SetParent(this);
-	children.push_back(child);
+	m_Children.push_back(child);
 }
 
 void TissueHierarchyItem::UpdateTissuesRecursively()
 {
 	// Remove tissues which have been deleted from the tissue list
-	for (std::vector<TissueHierarchyItem*>::iterator iter = children.begin();
-		 iter != children.end();)
+	for (std::vector<TissueHierarchyItem*>::iterator iter = m_Children.begin();
+			 iter != m_Children.end();)
 	{
-		TissueHierarchyItem* currChild = *iter;
-		if (currChild->GetIsFolder())
+		TissueHierarchyItem* curr_child = *iter;
+		if (curr_child->GetIsFolder())
 		{
 			// Recursion with current folder child
-			currChild->UpdateTissuesRecursively();
+			curr_child->UpdateTissuesRecursively();
 			++iter;
 		}
-		else if (!TissueInfos::GetTissueType(ToStd(currChild->GetName())))
+		else if (!TissueInfos::GetTissueType(ToStd(curr_child->GetName())))
 		{
 			// Delete tissue
-			iter = children.erase(iter);
+			iter = m_Children.erase(iter);
 		}
 		else
 		{
@@ -163,18 +155,17 @@ void TissueHierarchyItem::UpdateTissuesRecursively()
 	}
 }
 
-void TissueHierarchyItem::UpdateTissueNameRecursively(const QString& oldName,
-													  const QString& newName)
+void TissueHierarchyItem::UpdateTissueNameRecursively(const QString& oldName, const QString& newName)
 {
 	// Update tissue name
-	if (!isFolder && name.compare(oldName) == 0)
+	if (!m_IsFolder && m_Name.compare(oldName) == 0)
 	{
-		name = newName;
+		m_Name = newName;
 	}
 
 	// Recursion with children
-	for (std::vector<TissueHierarchyItem*>::iterator iter = children.begin();
-		 iter != children.end(); ++iter)
+	for (std::vector<TissueHierarchyItem*>::iterator iter = m_Children.begin();
+			 iter != m_Children.end(); ++iter)
 	{
 		(*iter)->UpdateTissueNameRecursively(oldName, newName);
 	}
@@ -182,129 +173,128 @@ void TissueHierarchyItem::UpdateTissueNameRecursively(const QString& oldName,
 
 void TissueHierarchyItem::SetParent(TissueHierarchyItem* parentItem)
 {
-	parent = parentItem;
+	m_Parent = parentItem;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void TissueHiearchy::initialize()
+void TissueHiearchy::Initialize()
 {
 	// Clear internal representations
-	hierarchyNames.clear();
-	for (unsigned int i = 0; i < hierarchyTrees.size(); ++i)
+	m_HierarchyNames.clear();
+	for (unsigned int i = 0; i < m_HierarchyTrees.size(); ++i)
 	{
-		delete hierarchyTrees[i];
+		delete m_HierarchyTrees[i];
 	}
-	hierarchyTrees.clear();
+	m_HierarchyTrees.clear();
 
 	// Create and select default hierarchy
-	hierarchyNames.push_back("(Default)");
-	hierarchyTrees.push_back(create_default_hierarchy());
-	set_hierarchy(0);
+	m_HierarchyNames.push_back("(Default)");
+	m_HierarchyTrees.push_back(CreateDefaultHierarchy());
+	SetHierarchy(0);
 }
 
-TissueHierarchyItem* TissueHiearchy::create_default_hierarchy()
+TissueHierarchyItem* TissueHiearchy::CreateDefaultHierarchy()
 {
 	// Create internal representation of default hierarchy
 	return new TissueHierarchyItem(true, QString("root"));
 }
 
-TissueHierarchyItem* TissueHiearchy::selected_hierarchy()
+TissueHierarchyItem* TissueHiearchy::SelectedHierarchy()
 {
-	if (selectedHierarchy < hierarchyTrees.size())
+	if (m_SelectedHierarchy < m_HierarchyTrees.size())
 	{
-		return hierarchyTrees.at(selectedHierarchy);
+		return m_HierarchyTrees.at(m_SelectedHierarchy);
 	}
 	return nullptr;
 }
 
-void TissueHiearchy::set_selected_hierarchy(TissueHierarchyItem* h)
+void TissueHiearchy::SetSelectedHierarchy(TissueHierarchyItem* h)
 {
-	if (h != hierarchyTrees[selectedHierarchy])
+	if (h != m_HierarchyTrees[m_SelectedHierarchy])
 	{
-		delete hierarchyTrees[selectedHierarchy];
-		hierarchyTrees[selectedHierarchy] = h;
+		delete m_HierarchyTrees[m_SelectedHierarchy];
+		m_HierarchyTrees[m_SelectedHierarchy] = h;
 	}
 }
 
-bool TissueHiearchy::remove_current_hierarchy()
+bool TissueHiearchy::RemoveCurrentHierarchy()
 {
-	if (selectedHierarchy == 0)
+	if (m_SelectedHierarchy == 0)
 	{
 		return false;
 	}
-	hierarchyNames.erase(hierarchyNames.begin() + selectedHierarchy);
-	delete hierarchyTrees[selectedHierarchy];
-	hierarchyTrees.erase(hierarchyTrees.begin() + selectedHierarchy);
+	m_HierarchyNames.erase(m_HierarchyNames.begin() + m_SelectedHierarchy);
+	delete m_HierarchyTrees[m_SelectedHierarchy];
+	m_HierarchyTrees.erase(m_HierarchyTrees.begin() + m_SelectedHierarchy);
 
 	// Set default hierarchy
-	set_hierarchy(0);
+	SetHierarchy(0);
 	return true;
 }
 
-bool TissueHiearchy::set_hierarchy(unsigned short index)
+bool TissueHiearchy::SetHierarchy(unsigned short index)
 {
-	if (index < 0 || index >= hierarchyTrees.size())
+	if (index < 0 || index >= m_HierarchyTrees.size())
 	{
 		return false;
 	}
 
-	selectedHierarchy = index;
+	m_SelectedHierarchy = index;
 	return true;
 }
 
-unsigned short TissueHiearchy::get_selected_hierarchy()
+unsigned short TissueHiearchy::GetSelectedHierarchy() const
 {
-	return selectedHierarchy;
+	return m_SelectedHierarchy;
 }
 
-unsigned short TissueHiearchy::get_hierarchy_count()
+unsigned short TissueHiearchy::GetHierarchyCount()
 {
-	return static_cast<unsigned short>(hierarchyNames.size());
+	return static_cast<unsigned short>(m_HierarchyNames.size());
 }
 
-std::vector<QString>* TissueHiearchy::get_hierarchy_names_ptr()
+std::vector<QString>* TissueHiearchy::GetHierarchyNamesPtr()
 {
-	return &hierarchyNames;
+	return &m_HierarchyNames;
 }
 
-QString TissueHiearchy::get_current_hierarchy_name()
+QString TissueHiearchy::GetCurrentHierarchyName()
 {
-	return hierarchyNames[selectedHierarchy];
+	return m_HierarchyNames[m_SelectedHierarchy];
 }
 
-void TissueHiearchy::reset_default_hierarchy()
+void TissueHiearchy::ResetDefaultHierarchy()
 {
-	delete hierarchyTrees[0];
-	hierarchyTrees[0] = create_default_hierarchy();
+	delete m_HierarchyTrees[0];
+	m_HierarchyTrees[0] = CreateDefaultHierarchy();
 }
 
-void TissueHiearchy::add_new_hierarchy(const QString& name)
+void TissueHiearchy::AddNewHierarchy(const QString& name)
 {
-	add_new_hierarchy(name, create_default_hierarchy());
+	AddNewHierarchy(name, CreateDefaultHierarchy());
 }
 
-void TissueHiearchy::add_new_hierarchy(const QString& name,
-									   TissueHierarchyItem* hierarchy)
+void TissueHiearchy::AddNewHierarchy(const QString& name, TissueHierarchyItem* hierarchy)
 {
 	// Create and select default hierarchy
-	hierarchyNames.push_back(name);
-	hierarchyTrees.push_back(hierarchy);
-	set_hierarchy(static_cast<unsigned short>(hierarchyTrees.size() - 1));
+	m_HierarchyNames.push_back(name);
+	m_HierarchyTrees.push_back(hierarchy);
+	SetHierarchy(static_cast<unsigned short>(m_HierarchyTrees.size() - 1));
 }
 
-void TissueHiearchy::update_hierarchies()
+void TissueHiearchy::UpdateHierarchies()
 {
-	for (unsigned int i = 0; i < hierarchyTrees.size(); ++i)
+	for (unsigned int i = 0; i < m_HierarchyTrees.size(); ++i)
 	{
-		if (i != selectedHierarchy)
+		if (i != m_SelectedHierarchy)
 		{
-			hierarchyTrees[i]->UpdateTissuesRecursively();
+			m_HierarchyTrees[i]->UpdateTissuesRecursively();
 		}
 	}
 }
 
-bool TissueHiearchy::load_hierarchy(const QString& path)
+bool TissueHiearchy::LoadHierarchy(const QString& path)
 {
 	// Get existing tissues by creating default hierarchy
 	TissueHierarchyItem* root = new TissueHierarchyItem(true, QString("root"));
@@ -316,25 +306,25 @@ bool TissueHiearchy::load_hierarchy(const QString& path)
 		delete root;
 		return false;
 	}
-	QXmlSimpleReader xmlReader;
+	QXmlSimpleReader xml_reader;
 	QXmlInputSource* source = new QXmlInputSource(file);
 	TissueHierarchySaxHandler handler(root);
-	xmlReader.setContentHandler(&handler);
-	xmlReader.setErrorHandler(&handler);
-	if (!xmlReader.parse(source))
+	xml_reader.setContentHandler(&handler);
+	xml_reader.setErrorHandler(&handler);
+	if (!xml_reader.parse(source))
 	{
 		delete root;
 		return false;
 	}
 
 	// Add hierarchy to list
-	hierarchyNames.push_back(handler.getHierarchyName());
-	hierarchyTrees.push_back(root);
+	m_HierarchyNames.push_back(handler.GetHierarchyName());
+	m_HierarchyTrees.push_back(root);
 
 	return true;
 }
 
-bool TissueHiearchy::save_hierarchy_as(const QString& name, const QString& path)
+bool TissueHiearchy::SaveHierarchyAs(const QString& name, const QString& path)
 {
 	// Open xml file
 	QFile file(path);
@@ -344,25 +334,24 @@ bool TissueHiearchy::save_hierarchy_as(const QString& name, const QString& path)
 	}
 
 	// Write xml
-	QXmlStreamWriter xmlStream(&file);
-	xmlStream.setAutoFormatting(true);
-	xmlStream.writeStartDocument();
-	xmlStream.writeStartElement("hierarchy");
-	xmlStream.writeAttribute("name", name);
-	std::vector<TissueHierarchyItem*>* topLevelChildren =
-		hierarchyTrees[selectedHierarchy]->GetChildren();
-	for (auto item : *topLevelChildren)
+	QXmlStreamWriter xml_stream(&file);
+	xml_stream.setAutoFormatting(true);
+	xml_stream.writeStartDocument();
+	xml_stream.writeStartElement("hierarchy");
+	xml_stream.writeAttribute("name", name);
+	std::vector<TissueHierarchyItem*>* top_level_children =
+			m_HierarchyTrees[m_SelectedHierarchy]->GetChildren();
+	for (auto item : *top_level_children)
 	{
-		write_children_recursively(item, &xmlStream);
+		WriteChildrenRecursively(item, &xml_stream);
 	}
-	xmlStream.writeEndElement(); // hierarchy
-	xmlStream.writeEndDocument();
+	xml_stream.writeEndElement(); // hierarchy
+	xml_stream.writeEndDocument();
 
 	return true;
 }
 
-void TissueHiearchy::write_children_recursively(TissueHierarchyItem* parent,
-												QXmlStreamWriter* xmlStream)
+void TissueHiearchy::WriteChildrenRecursively(TissueHierarchyItem* parent, QXmlStreamWriter* xmlStream)
 {
 	if (parent->GetIsFolder())
 	{
@@ -373,10 +362,10 @@ void TissueHiearchy::write_children_recursively(TissueHierarchyItem* parent,
 		// Write children
 		std::vector<TissueHierarchyItem*>* children = parent->GetChildren();
 		for (std::vector<TissueHierarchyItem*>::iterator iter =
-				 children->begin();
-			 iter != children->end(); ++iter)
+						 children->begin();
+				 iter != children->end(); ++iter)
 		{
-			write_children_recursively(*iter, xmlStream);
+			WriteChildrenRecursively(*iter, xmlStream);
 		}
 
 		// Write folder end element
@@ -397,17 +386,17 @@ FILE* TissueHiearchy::SaveParams(FILE* fp, int version)
 	{
 		// Write number of hierarchies (excluding default)
 		unsigned char len =
-			static_cast<unsigned char>(hierarchyNames.size() - 1);
+				static_cast<unsigned char>(m_HierarchyNames.size() - 1);
 		fwrite(&len, sizeof(unsigned char), 1, fp);
 
 		// Write hierarchies (excluding default)
 		for (unsigned short i = 1; i <= len; ++i)
 		{
-			fp = save_hierarchy(fp, i);
+			fp = SaveHierarchy(fp, i);
 		}
 
 		// Write selected hierarchy
-		len = selectedHierarchy;
+		len = m_SelectedHierarchy;
 		fwrite(&len, sizeof(unsigned char), 1, fp);
 	}
 
@@ -417,16 +406,16 @@ FILE* TissueHiearchy::SaveParams(FILE* fp, int version)
 FILE* TissueHiearchy::LoadParams(FILE* fp, int version)
 {
 	// Delete all hierarchies
-	hierarchyNames.clear();
-	for (unsigned int i = 0; i < hierarchyTrees.size(); ++i)
+	m_HierarchyNames.clear();
+	for (unsigned int i = 0; i < m_HierarchyTrees.size(); ++i)
 	{
-		delete hierarchyTrees[i];
+		delete m_HierarchyTrees[i];
 	}
-	hierarchyTrees.clear();
+	m_HierarchyTrees.clear();
 
 	// Add default hierarchy
-	hierarchyNames.push_back("(Default)");
-	hierarchyTrees.push_back(create_default_hierarchy());
+	m_HierarchyNames.push_back("(Default)");
+	m_HierarchyTrees.push_back(CreateDefaultHierarchy());
 
 	if (version >= 10)
 	{
@@ -437,37 +426,37 @@ FILE* TissueHiearchy::LoadParams(FILE* fp, int version)
 		// Read hierarchies (excluding default)
 		for (unsigned short i = 1; i <= len; ++i)
 		{
-			fp = load_hierarchy(fp);
+			fp = LoadHierarchy(fp);
 		}
 
 		// Read selected hierarchy
 		fread(&len, sizeof(unsigned char), 1, fp);
-		set_hierarchy(len);
+		SetHierarchy(len);
 	}
 	else
 	{
-		set_hierarchy(0);
+		SetHierarchy(0);
 	}
 
 	return fp;
 }
 
-FILE* TissueHiearchy::save_hierarchy(FILE* fp, unsigned short idx)
+FILE* TissueHiearchy::SaveHierarchy(FILE* fp, unsigned short idx)
 {
 	// Write hierarchy name
-	QString name = hierarchyNames[idx].append('\0');
+	QString name = m_HierarchyNames[idx].append('\0');
 	unsigned char len = (unsigned char)name.size();
 	fwrite(&len, sizeof(unsigned char), 1, fp);
 	fwrite(name.constData(), sizeof(QChar), len, fp);
 
 	// Write root item
-	TissueHierarchyItem* hierarchy = hierarchyTrees[idx];
-	fp = save_hierarchy_item(fp, hierarchy);
+	TissueHierarchyItem* hierarchy = m_HierarchyTrees[idx];
+	fp = SaveHierarchyItem(fp, hierarchy);
 
 	return fp;
 }
 
-FILE* TissueHiearchy::save_hierarchy_item(FILE* fp, TissueHierarchyItem* item)
+FILE* TissueHiearchy::SaveHierarchyItem(FILE* fp, TissueHierarchyItem* item)
 {
 	// Write folder flag
 	unsigned char flag = (unsigned char)item->GetIsFolder();
@@ -488,34 +477,34 @@ FILE* TissueHiearchy::save_hierarchy_item(FILE* fp, TissueHierarchyItem* item)
 		// Write folder children
 		for (auto child : *item->GetChildren())
 		{
-			fp = save_hierarchy_item(fp, child);
+			fp = SaveHierarchyItem(fp, child);
 		}
 	}
 
 	return fp;
 }
 
-FILE* TissueHiearchy::load_hierarchy(FILE* fp)
+FILE* TissueHiearchy::LoadHierarchy(FILE* fp)
 {
 	// Read hierarchy name
 	QChar name[256];
 	unsigned char len;
 	fread(&len, sizeof(unsigned char), 1, fp);
 	fread(name, sizeof(QChar), len, fp);
-	hierarchyNames.push_back(QString(name));
+	m_HierarchyNames.push_back(QString(name));
 
 	// Read root item
-	fp = load_hierarchy_item(fp, 0);
+	fp = LoadHierarchyItem(fp, nullptr);
 
 	return fp;
 }
 
-FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
+FILE* TissueHiearchy::LoadHierarchyItem(FILE* fp, TissueHierarchyItem* parent)
 {
 	// Read folder flag
 	unsigned char flag;
 	fread(&flag, sizeof(unsigned char), 1, fp);
-	bool isFolder = (bool)flag;
+	bool is_folder = (bool)flag;
 
 	// Read item name
 	QChar name[256];
@@ -525,7 +514,7 @@ FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
 
 	// Create item
 	TissueHierarchyItem* item = nullptr;
-	if (isFolder)
+	if (is_folder)
 	{
 		item = new TissueHierarchyItem(true, QString(name));
 	}
@@ -541,17 +530,17 @@ FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
 		item = new TissueHierarchyItem(false, QString(name));
 	}
 
-	if (parent == 0)
+	if (parent == nullptr)
 	{
 		// Root folder
-		hierarchyTrees.push_back(item);
+		m_HierarchyTrees.push_back(item);
 	}
 	else
 	{
 		parent->AddChild(item);
 	}
 
-	if (isFolder)
+	if (is_folder)
 	{
 		// Read number of children
 		unsigned int count;
@@ -560,7 +549,7 @@ FILE* TissueHiearchy::load_hierarchy_item(FILE* fp, TissueHierarchyItem* parent)
 		// Read folder children
 		for (unsigned int i = 0; i < count; ++i)
 		{
-			fp = load_hierarchy_item(fp, item);
+			fp = LoadHierarchyItem(fp, item);
 		}
 	}
 

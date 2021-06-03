@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -19,9 +19,7 @@
 class QGroupBox;
 class QRadioButton;
 class QPushButton;
-// Qt3
-class Q3HBoxLayout;
-class Q3VBoxLayout;
+class QVBoxLayout;
 
 namespace iseg {
 
@@ -42,9 +40,8 @@ public:
 		bool m_IsActive;
 	};
 
-	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = 0,
-			const char* name = 0, Qt::WindowFlags wFlags = 0);
-	~MultiDatasetWidget();
+	MultiDatasetWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+
 	void NewLoaded();
 	int GetNumberOfDatasets();
 	bool IsActive(const int multiDS_index);
@@ -57,22 +54,14 @@ protected:
 	void Initialize();
 	void ClearRadioButtons();
 
-	bool CheckInfoAndAddToList(SDatasetInfo& newRadioButton,
-			QStringList loadfilenames, unsigned short width,
-			unsigned short height, unsigned short nrofslices);
-	bool AddDatasetToList(SDatasetInfo& newRadioButton,
-			QStringList loadfilenames);
-	void CopyImagesSlices(
-			const std::vector<const float*>& bmp_slices,
-			const std::array<size_t, 3>& dims,
-			SDatasetInfo& newRadioButton);
+	bool CheckInfoAndAddToList(SDatasetInfo& newRadioButton, QStringList loadfilenames, unsigned short width, unsigned short height, unsigned short nrofslices);
+	bool AddDatasetToList(SDatasetInfo& newRadioButton, QStringList loadfilenames);
+	void CopyImagesSlices(const std::vector<const float*>& bmp_slices, const std::array<size_t, 3>& dims, SDatasetInfo& newRadioButton);
 
 signals:
-	void begin_datachange(iseg::DataSelection& dataSelection,
-			QWidget* sender = nullptr, bool beginUndo = true);
-	void end_datachange(QWidget* sender = nullptr,
-			iseg::EndUndoAction undoAction = iseg::EndUndo);
-	void dataset_changed();
+	void BeginDatachange(DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
+	void EndDatachange(QWidget* sender = nullptr, eEndUndoAction undoAction = iseg::EndUndo);
+	void DatasetChanged();
 
 private slots:
 	void AddDatasetPressed();
@@ -85,10 +74,8 @@ private:
 	SlicesHandler* m_Handler3D;
 	std::vector<SDatasetInfo> m_RadioButtons;
 
-	Q3HBoxLayout* hboxOverall;
-	Q3VBoxLayout* vboxOverall;
-	Q3VBoxLayout* m_VboxOverall;
-	Q3VBoxLayout* m_VboxDatasets;
+	QVBoxLayout* m_VboxDatasets;
+
 	QGroupBox* m_DatasetsGroupBox;
 	QPushButton* m_AddDatasetButton;
 	QPushButton* m_LoadDatasetButton;

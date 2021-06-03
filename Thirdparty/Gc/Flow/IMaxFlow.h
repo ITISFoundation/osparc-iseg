@@ -32,11 +32,9 @@
 #include "../Type.h"
 #include "Type.h"
 
-namespace Gc
-{    
-	namespace Flow
-	{
-        /** Common %interface of maximum flow algorithms on general directed and
+namespace Gc {
+namespace Flow {
+/** Common %interface of maximum flow algorithms on general directed and
             undirected graphs.
 
             Generally, the scenario should look like this:
@@ -51,15 +49,14 @@ namespace Gc
             @tparam TCAP %Data type used for terminal arc capacity values.
             @tparam TCAP %Data type used for arc capacity values.
         */
-	    template <class TFLOW, class TTCAP, class TCAP>
-	    class IMaxFlow
-	    {
-	    public:
-            /** Virtual destructor. */
-            virtual ~IMaxFlow()
-            {}
+template <class TFLOW, class TTCAP, class TCAP>
+class IMaxFlow
+{
+  public:
+    /** Virtual destructor. */
+    virtual ~IMaxFlow() = default;
 
-		    /** Initialize the flow network.
+    /** Initialize the flow network.
 
 			    @param[in] nodes Number of network nodes.
 			    @param[in] max_arcs Maximum number of non-terminal arcs.
@@ -72,9 +69,9 @@ namespace Gc
 
                 @see SetArcCap, SetTerminalArcCap.
 		    */
-		    virtual void Init(Size nodes, Size max_arcs, Size max_src_arcs, Size max_snk_arcs) = 0;
+    virtual void Init(Size nodes, Size max_arcs, Size max_src_arcs, Size max_snk_arcs) = 0;
 
-		    /** Set the capacity of a bidirectional arc between two non-terminal graph
+    /** Set the capacity of a bidirectional arc between two non-terminal graph
                 nodes.
 
                 Sets capacities of the arcs \c n1 -> \c n2 and \c n2 -> \c n1 to \c cap and
@@ -90,9 +87,9 @@ namespace Gc
 
                 @see Init.
 		    */
-		    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) = 0;
+    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) = 0;
 
-		    /** Set the capacity of the arcs connecting a node and the terminals.
+    /** Set the capacity of the arcs connecting a node and the terminals.
 
                 Using this method \c source -> \c node and \c node -> \c sink
                 arc capacity is set to \c cap_src and \c cap_sink, respectively.
@@ -109,35 +106,35 @@ namespace Gc
 
                 @see Init.
 		    */
-		    virtual void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk) = 0;
+    virtual void SetTerminalArcCap(Size node, TTCAP csrc, TTCAP csnk) = 0;
 
-		    /** Compute the maximum flow.                
+    /** Compute the maximum flow.                
 
                 For non-dynamic algorithms this method can be called usually only once for
                 each call to Init().
 
 			    @return %Flow value.
 		    */
-		    virtual TFLOW FindMaxFlow() = 0;
+    virtual TFLOW FindMaxFlow() = 0;
 
-		    /** Get node's origin after the flow computation.
+    /** Get node's origin after the flow computation.
 				
 			    @param[in] node Node index.
 			    @return Associated terminal node (source, sink or free).
                 @see Origin.
 		    */
-		    virtual Origin NodeOrigin(Size node) const = 0;
+    virtual Origin NodeOrigin(Size node) const = 0;
 
-            /** Checks wether this algorithm supports dynamic change of capacities. */
-            virtual bool IsDynamic() const
-            {
-                return false;
-            }
+    /** Checks wether this algorithm supports dynamic change of capacities. */
+    virtual bool IsDynamic() const
+    {
+        return false;
+    }
 
-		    /** Release the allocated memory. */
-		    virtual void Dispose() = 0;
-	    };
-	}
+    /** Release the allocated memory. */
+    virtual void Dispose() = 0;
+};
 }
+} // namespace Gc::Flow
 
 #endif

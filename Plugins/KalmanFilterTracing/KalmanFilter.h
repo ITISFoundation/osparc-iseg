@@ -18,113 +18,113 @@ class KalmanFilter
 public:
 	int N = 2;
 	KalmanFilter();
-	~KalmanFilter() {}
+	~KalmanFilter() = default;
 	KalmanFilter(const KalmanFilter& k);
 
-	bool ensure_probability(double probability);
+	bool EnsureProbability(double probability);
 
-	void set_measurement(std::vector<double>& params);
+	void SetMeasurement(std::vector<double>& params);
 
-	void state_prediction();
-	void measurement_prediction();
+	void StatePrediction();
+	void MeasurementPrediction();
 
-	void measurement_residual();
+	void MeasurementResidual();
 
-	void state_prediction_covariance();
-	void measurement_prediction_covariance();
+	void StatePredictionCovariance();
+	void MeasurementPredictionCovariance();
 
-	void gain();
+	void Gain();
 
-	void updated_state_estimate();
-	void updated_state_covariance();
+	void UpdatedStateEstimate();
+	void UpdatedStateCovariance();
 
-	void work();
+	void Work();
 
-	int get_iteration() const;
+	int GetIteration() const;
 
-	void set_iteration(int i);
+	void SetIteration(int i);
 
-	std::vector<double> get_measurement();
-	std::vector<double> get_prediction() const;
+	std::vector<double> GetMeasurement();
+	std::vector<double> GetPrediction() const;
 
-	double diff_btw_predicated_object(std::vector<double> object_params);
+	double DiffBtwPredicatedObject(std::vector<double> object_params);
 
-	double standard_deviation(const Eigen::VectorXd& v);
+	double StandardDeviation(const Eigen::VectorXd& v) const;
 
-	std::string get_label() const;
+	std::string GetLabel() const;
 
-	int get_slice() const;
-	void set_slice(int i);
+	int GetSlice() const;
+	void SetSlice(int i);
 
-	void set_label(std::string str);
+	void SetLabel(std::string str);
 
-	void set_last_slice(int i);
-	int get_last_slice() const;
+	void SetLastSlice(int i);
+	int GetLastSlice() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const KalmanFilter& k_filter)
 	{
 		os << "***************" << std::endl;
-		os << "Kalman Filter: " << k_filter.label << std::endl;
+		os << "Kalman Filter: " << k_filter.m_Label << std::endl;
 		//os << "State x: " << std::endl;
 		//os << k_filter.x << std::endl;
 		os << "Measurement Prediction z_hat: " << std::endl;
-		os << k_filter.z_hat << std::endl;
+		os << k_filter.m_ZHat << std::endl;
 		os << "Measurement z: " << std::endl;
-		os << k_filter.z << std::endl;
+		os << k_filter.m_Z << std::endl;
 		// os << "Covaraince P: " << std::endl;
 		//os << k_filter.P << std::endl;
 		//os << "Filter Gain W: " << std::endl;
 		//os << k_filter.W << std::endl;
-		os << "Iteration: " << k_filter.iteration << std::endl;
-		os << "First appeared in slice: " << k_filter.slice << std::endl;
-		os << "Last slice updated in: " << k_filter.last_slice << std::endl;
+		os << "Iteration: " << k_filter.m_Iteration << std::endl;
+		os << "First appeared in slice: " << k_filter.m_Slice << std::endl;
+		os << "Last slice updated in: " << k_filter.m_LastSlice << std::endl;
 		os << "***************" << std::endl;
 		return os;
 	}
 
-	Eigen::VectorXd get_z() const { return z; }
-	void set_z(Eigen::VectorXd _z) { z = _z; }
-	Eigen::VectorXd get_z_hat() const { return z_hat; }
-	void set_z_hat(Eigen::VectorXd _z_hat) { z_hat = _z_hat; }
-	Eigen::VectorXd get_x() const { return x; }
-	void set_x(Eigen::VectorXd _x) { x = _x; }
-	Eigen::VectorXd get_v() const { return v; }
-	void set_v(Eigen::VectorXd _v) { v = _v; }
-	Eigen::VectorXd get_n() const { return n; }
-	void set_n(Eigen::VectorXd _n) { n = _n; }
-	Eigen::VectorXd get_m() const { return m; }
-	void set_m(Eigen::VectorXd _m) { m = _m; }
-	Eigen::MatrixXd get_F() const { return F; }
-	void set_F(Eigen::MatrixXd _F) { F = _F; }
-	Eigen::MatrixXd get_H() const { return H; }
-	void set_H(Eigen::MatrixXd _H) { H = _H; }
-	Eigen::MatrixXd get_P() const { return P; }
-	void set_P(Eigen::MatrixXd _P) { P = _P; }
-	Eigen::MatrixXd get_Q() const { return Q; }
-	void set_Q(Eigen::MatrixXd _Q) { Q = _Q; }
-	Eigen::MatrixXd get_R() const { return R; }
-	void set_R(Eigen::MatrixXd _R) { R = _R; }
-	Eigen::MatrixXd get_W() const { return W; }
-	void set_W(Eigen::MatrixXd _W) { W = _W; }
-	Eigen::MatrixXd get_S() const { return S; }
-	void set_S(Eigen::MatrixXd _S) { S = _S; }
+	Eigen::VectorXd GetZ() const { return m_Z; }
+	void SetZ(Eigen::VectorXd _z) { m_Z = _z; }
+	Eigen::VectorXd GetZHat() const { return m_ZHat; }
+	void SetZHat(Eigen::VectorXd _z_hat) { m_ZHat = _z_hat; }
+	Eigen::VectorXd GetX() const { return m_X; }
+	void SetX(Eigen::VectorXd _x) { m_X = _x; }
+	Eigen::VectorXd GetV() const { return m_V; }
+	void SetV(Eigen::VectorXd _v) { m_V = _v; }
+	Eigen::VectorXd GetN() const { return m_N; }
+	void SetN(Eigen::VectorXd _n) { m_N = _n; }
+	Eigen::VectorXd GetM() const { return m_M; }
+	void SetM(Eigen::VectorXd _m) { m_M = _m; }
+	Eigen::MatrixXd GetF() const { return m_F; }
+	void SetF(Eigen::MatrixXd _F) { m_F = _F; }
+	Eigen::MatrixXd GetH() const { return m_H; }
+	void SetH(Eigen::MatrixXd _H) { m_H = _H; }
+	Eigen::MatrixXd GetP() const { return m_P; }
+	void SetP(Eigen::MatrixXd _P) { m_P = _P; }
+	Eigen::MatrixXd GetQ() const { return m_Q; }
+	void SetQ(Eigen::MatrixXd _Q) { m_Q = _Q; }
+	Eigen::MatrixXd GetR() const { return m_R; }
+	void SetR(Eigen::MatrixXd _R) { m_R = _R; }
+	Eigen::MatrixXd GetW() const { return m_W; }
+	void SetW(Eigen::MatrixXd _W) { m_W = _W; }
+	Eigen::MatrixXd GetS() const { return m_S; }
+	void SetS(Eigen::MatrixXd _S) { m_S = _S; }
 
 private:
-	Eigen::VectorXd z;
-	Eigen::VectorXd z_hat;
-	Eigen::VectorXd x;
-	Eigen::VectorXd v;
-	Eigen::VectorXd n;
-	Eigen::VectorXd m;
-	Eigen::MatrixXd F;
-	Eigen::MatrixXd H;
-	Eigen::MatrixXd P;
-	Eigen::MatrixXd Q;
-	Eigen::MatrixXd R;
-	Eigen::MatrixXd W;
-	Eigen::MatrixXd S;
-	std::string label = "";
-	int slice;
-	int iteration;
-	int last_slice;
+	Eigen::VectorXd m_Z;
+	Eigen::VectorXd m_ZHat;
+	Eigen::VectorXd m_X;
+	Eigen::VectorXd m_V;
+	Eigen::VectorXd m_N;
+	Eigen::VectorXd m_M;
+	Eigen::MatrixXd m_F;
+	Eigen::MatrixXd m_H;
+	Eigen::MatrixXd m_P;
+	Eigen::MatrixXd m_Q;
+	Eigen::MatrixXd m_R;
+	Eigen::MatrixXd m_W;
+	Eigen::MatrixXd m_S;
+	std::string m_Label = "";
+	int m_Slice = 0;
+	int m_Iteration = 0;
+	int m_LastSlice = -1;
 };

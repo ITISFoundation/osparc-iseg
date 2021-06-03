@@ -28,30 +28,27 @@
 #ifndef GC_SYSTEM_ALGO_FUNCTION_H
 #define GC_SYSTEM_ALGO_FUNCTION_H
 
-namespace Gc
+namespace Gc {
+namespace System {
+namespace Algo {
+/** Generic unary function. */
+template <class Arg, class Res>
+struct UnaryFunction
 {
-    namespace System
-    {
-        namespace Algo
-        {
-            /** Generic unary function. */
-            template <class Arg, class Res>
-            struct UnaryFunction
-            {                
-                typedef Arg ArgType;
-                typedef Res ResType;
-            };
+    using ArgType = Arg;
+    using ResType = Res;
+};
 
-            /** Generic binary function. */
-            template <class Arg1, class Arg2, class Res>
-            struct BinaryFunction
-            {                
-                typedef Arg1 Arg1Type;
-                typedef Arg2 Arg2Type;
-                typedef Res ResType;
-            };
-        }
-    }
+/** Generic binary function. */
+template <class Arg1, class Arg2, class Res>
+struct BinaryFunction
+{
+    using Arg1Type = Arg1;
+    using Arg2Type = Arg2;
+    using ResType = Res;
+};
 }
+}
+} // namespace Gc::System::Algo
 
 #endif

@@ -37,35 +37,36 @@ namespace itk
  * http://hdl.handle.net/10380/3068
  *
  */
-template< class TImage >
+template <class TImage>
 class SliceContiguousImageNeighborhoodAccessorFunctor
 {
 public:
-  typedef TImage                                ImageType;
-  typedef typename ImageType::PixelType         PixelType;
-  typedef typename ImageType::InternalPixelType InternalPixelType;
-  typedef unsigned int                          VectorLengthType;
-  typedef typename ImageType::OffsetType        OffsetType;
-  typedef typename ImageType::SizeType          SizeType;
-  typedef std::vector< PixelType * >            SliceArrayType;
+  using ImageType = TImage;
+  using PixelType = typename ImageType::PixelType;
+  using InternalPixelType = typename ImageType::InternalPixelType;
+  using VectorLengthType = unsigned int;
+  using OffsetType = typename ImageType::OffsetType;
+  using SizeType = typename ImageType::SizeType;
+  using SliceArrayType = std::vector<PixelType *>;
 
   itkStaticConstMacro(ImageDimension, unsigned int, 3);
 
-  typedef Neighborhood< InternalPixelType *, ImageDimension > NeighborhoodType;
+  using NeighborhoodType = Neighborhood<InternalPixelType *, ImageDimension>;
 
-  typedef ImageBoundaryCondition< ImageType > const 
-                          *ImageBoundaryConditionConstPointerType;
+  using ImageBoundaryConditionConstPointerType = ImageBoundaryCondition<ImageType> const *;
 
-  SliceContiguousImageNeighborhoodAccessorFunctor( SliceArrayType* slices, SizeType size )
-      : m_Slices( slices ), m_Size( size ), m_SizeOfSlice( size[0]*size[1] ) { };
-  SliceContiguousImageNeighborhoodAccessorFunctor()
-      : m_Slices( NULL ), m_SizeOfSlice( 1 ) {};
+  SliceContiguousImageNeighborhoodAccessorFunctor(SliceArrayType * slices, SizeType size)
+    : m_Slices(slices)
+    , m_Size(size)
+    , m_SizeOfSlice(size[0] * size[1])
+  {}
+  SliceContiguousImageNeighborhoodAccessorFunctor() = default;
 
   /** Set the pointer index to the start of the buffer.
    * This must be set by the iterators to the starting location of the buffer.
    * Typically a neighborhood iterator iterating on a neighborhood of an Image,
    * say \c image will set this in its constructor. For instance:
-   * 
+   *
    * \code
    * ConstNeighborhoodIterator( radius, image, )
    *   {
@@ -74,58 +75,65 @@ public:
    *   }
    * \endcode
    */
-  inline void SetBegin( const InternalPixelType * begin )  // NOTE: begin is always 0
-    { this->m_Begin = const_cast< InternalPixelType * >( begin ); }
+  inline void
+  SetBegin(const InternalPixelType * begin) // NOTE: begin is always 0
+  {
+    this->m_Begin = const_cast<InternalPixelType *>(begin);
+  }
 
-  /** Method to dereference a pixel pointer. This is used from the 
+  /** Method to dereference a pixel pointer. This is used from the
    * ConstNeighborhoodIterator as the equivalent operation to (*it).
-   * This method should be preferred over the former (*it) notation. 
-   * The reason is that dereferencing a pointer to a location of 
+   * This method should be preferred over the former (*it) notation.
+   * The reason is that dereferencing a pointer to a location of
    * VectorImage pixel involves a different operation that simply
    * dereferencing the pointer. Here a PixelType (array of InternalPixelType s)
    * is created on the stack and returned.  */
-  inline PixelType Get( const InternalPixelType *pixelPointer ) const
-    {
-    unsigned long offset = pixelPointer  - m_Begin; // NOTE: begin is always 0
+  inline PixelType
+  Get(const InternalPixelType * pixelPointer) const
+  {
+    unsigned long       offset = pixelPointer - m_Begin; // NOTE: begin is always 0
     const unsigned long slice = offset / m_SizeOfSlice;
     const unsigned long sliceOffset = offset % m_SizeOfSlice;
     return *(m_Slices->operator[](slice) + sliceOffset);
-    }
+  }
 
   /** Method to set the pixel value at a certain pixel pointer */
-  inline void Set( InternalPixelType* &pixelPointer, const PixelType &p ) const
-    {
-    unsigned long offset = pixelPointer - m_Begin; // NOTE: begin is always 0
+  inline void
+  Set(InternalPixelType *& pixelPointer, const PixelType & p) const
+  {
+    unsigned long       offset = pixelPointer - m_Begin; // NOTE: begin is always 0
     const unsigned long slice = offset / m_SizeOfSlice;
     const unsigned long sliceOffset = offset % m_SizeOfSlice;
-    InternalPixelType *truePixelPointer = (m_Slices->operator[](slice) + sliceOffset);
+    InternalPixelType * truePixelPointer = (m_Slices->operator[](slice) + sliceOffset);
     *truePixelPointer = p;
-    }
+  }
 
-  inline PixelType BoundaryCondition(
-      const OffsetType& point_index,
-      const OffsetType &boundary_offset,
-      const NeighborhoodType *data,
-      const ImageBoundaryConditionConstPointerType boundaryCondition) const
-    {
+  inline PixelType
+  BoundaryCondition(const OffsetType &                           point_index,
+                    const OffsetType &                           boundary_offset,
+                    const NeighborhoodType *                     data,
+                    const ImageBoundaryConditionConstPointerType boundaryCondition) const
+  {
     return boundaryCondition->operator()(point_index, boundary_offset, data, *this);
-    }
+  }
 
   /** Required for some filters to compile. */
-  void SetVectorLength( VectorLengthType length )
-    {
-    }
+  void
+  SetVectorLength(VectorLengthType length)
+  {}
 
   /** Required for some filters to compile. */
-  VectorLengthType SetVectorLength()
-    {
+  VectorLengthType
+  SetVectorLength()
+  {
     return 0;
-    }
+  }
+
 private:
-  SliceArrayType* m_Slices;
-  SizeType m_Size;
-  unsigned long m_SizeOfSlice; // Pre-computed for speed
-  InternalPixelType *m_Begin;  // Begin of the buffer, always 0
+  SliceArrayType *    m_Slices = nullptr;
+  SizeType            m_Size;
+  unsigned long       m_SizeOfSlice = 1; // Pre-computed for speed
+  InternalPixelType * m_Begin;           // Begin of the buffer, always 0
 };
 
 } // end namespace itk

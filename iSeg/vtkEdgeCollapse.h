@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -48,8 +48,8 @@ class vtkEdgeCollapse : public vtkPolyDataAlgorithm
 {
 public:
 	vtkTypeMacro(vtkEdgeCollapse, vtkPolyDataAlgorithm);
-	void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
-	static vtkEdgeCollapse *New();
+	void PrintSelf(ostream& os, vtkIndent indent) override;
+	static vtkEdgeCollapse* New();
 
 	// Edges with edge length shorter than MinimumEdgeLength are collapsed
 	vtkSetMacro(MinimumEdgeLength, double);
@@ -108,16 +108,15 @@ public:
 
 protected:
 	vtkEdgeCollapse();
-	~vtkEdgeCollapse();
+	~vtkEdgeCollapse() override;
 
 	// Implementation of algorithm
-	int RequestData(vtkInformation *, vtkInformationVector **,
-									vtkInformationVector *) VTK_OVERRIDE;
+	int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 	// Find all edges that will have an endpoint change ids because of an edge
 	// collapse.  p1Id and p2Id are the endpoints of the edge.  p2Id is the
 	// pointId being removed.
-	void FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id, vtkIdList *edges);
+	void FindAffectedEdges(vtkIdType p1Id, vtkIdType p2Id, vtkIdList* edges);
 
 	// Update the edge priority queue after a collapse
 	void UpdateEdgeData(vtkIdType p1Id, vtkIdType p2Id);
@@ -132,7 +131,7 @@ protected:
 	bool IsDegenerateTriangle(vtkIdType i0, vtkIdType i1, vtkIdType i2);
 
 	// Compute triangle normals on input surface
-	void ComputeNormals(vtkPolyData *);
+	void ComputeNormals(vtkPolyData*);
 
 	// Get normal at point closest to point
 	int GetOriginalNormal(double x[3], double normal[3]);
@@ -157,10 +156,10 @@ protected:
 	// then one copied and the other is set to empty. The 2 domain labels are mapped
 	// to a key value, which is later used in CreateDuplicateTriangles to reconstruct
 	// the domain-interface
-	void MapDuplicateTriangles(vtkDataArray *labels);
+	void MapDuplicateTriangles(vtkDataArray* labels);
 
 	// After doing collapse, create duplicates again
-	void CreateDuplicateTriangles(vtkPolyData *);
+	void CreateDuplicateTriangles(vtkPolyData*);
 
 	double MinimumEdgeLength;
 	double MaximumNormalAngleDeviation;
@@ -171,40 +170,40 @@ protected:
 	int Loud;
 	int IntersectionCheckLevel;
 	int NumberOfClosestPoints;
-	char *DomainLabelName;
+	char* DomainLabelName;
 	int NumberOfEdgeCollapses;
 	int NumberOfEdgeFlips;
 	int NumberOfEdgeDivisions;
 	double ActualReduction;
 	int InputIsNonmanifold;
 
-	vtkPolyData *Mesh;
-	vtkDataArray *Labels;
-	vtkEdgeTable *Edges;
-	vtkPriorityQueue *EdgeCosts;
-	vtkIdList *EndPoint1List;
-	vtkIdList *EndPoint2List;
-	vtkIdList *CollapseCellIds;
-	vtkIdList *Neighbors;
-	vtkIdList *PointIds;
-	vtkFloatArray *Normals;
-	vtkGenericCell *GCell;
-	vtkAbstractCellLocator *CellLocator;
+	vtkPolyData* Mesh;
+	vtkDataArray* Labels;
+	vtkEdgeTable* Edges;
+	vtkPriorityQueue* EdgeCosts;
+	vtkIdList* EndPoint1List;
+	vtkIdList* EndPoint2List;
+	vtkIdList* CollapseCellIds;
+	vtkIdList* Neighbors;
+	vtkIdList* PointIds;
+	vtkFloatArray* Normals;
+	vtkGenericCell* GCell;
+	vtkAbstractCellLocator* CellLocator;
 
 	double MinLength2;
 	double NormalDotProductThreshold;
 
 	//BTX
 	std::vector<bool> isboundary;
-	typedef std::pair<int, int> DuplicateLabel;
-	typedef std::map<DuplicateLabel, int> LabelMapType;
-	typedef std::map<int, DuplicateLabel> InverseLabelMapType;
+	using DuplicateLabel = std::pair<int, int>;
+	using LabelMapType = std::map<DuplicateLabel, int>;
+	using InverseLabelMapType = std::map<int, DuplicateLabel>;
 	InverseLabelMapType ilabelmap;
 	//ETX
 
 private:
-	vtkEdgeCollapse(const vtkEdgeCollapse &); // Not implemented.
-	void operator=(const vtkEdgeCollapse &);	// Not implemented.
+	vtkEdgeCollapse(const vtkEdgeCollapse&) = delete; 
+	void operator=(const vtkEdgeCollapse&) = delete;	 
 };
 
 #endif

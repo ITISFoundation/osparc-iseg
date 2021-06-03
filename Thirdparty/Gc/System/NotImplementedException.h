@@ -30,35 +30,33 @@
 
 #include "Exception.h"
 
-namespace Gc
+namespace Gc {
+namespace System {
+/** Overflow exception class. */
+class NotImplementedException
+    : public Exception
 {
-    namespace System
-    {
-        /** Overflow exception class. */
-        class NotImplementedException 
-            : public Exception
-        {
-        public:
-            /** Constructor. 
+  public:
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
             */
-            NotImplementedException(const char *func, int line)
-                : Exception(func, line, "Not implemented.")
-            {}
+    NotImplementedException(const char * func, int line)
+        : Exception(func, line, "Not implemented.")
+    {}
 
-            /** Constructor. 
+    /** Constructor. 
             
                 @param[in] func Function name.
                 @param[in] line Line number.
                 @param[in] msg String describing the exception and its cause.
             */
-            NotImplementedException(const char *func, int line, const std::string &msg)
-                : Exception(func, line, msg)
-            {}
-        };
-    }
+    NotImplementedException(const char * func, int line, const std::string & msg)
+        : Exception(func, line, msg)
+    {}
+};
 }
+} // namespace Gc::System
 
 #endif

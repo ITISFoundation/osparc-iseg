@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -14,20 +14,28 @@
 #include "MainWindow.h"
 #include "SlicesHandler.h"
 #include "TissueInfos.h"
-#include "bmp_read_1.h"
+//#include "bmp_read_1.h"
+#include "PlastiqueStyle.h"
+#include "UserDir.h"
+#include "vtkCustomOutputWindow.h"
 
-#include "Data/Logger.h"
+#include "Interface/PropertyWidget.h"
 
 #include "Core/BranchItem.h"
 #include "Core/Log.h"
 #include "Core/Pair.h"
 
-#include <QPlastiqueStyle>
+#include "Data/Logger.h"
+#include "Data/Property.h"
+
+#include "Thirdparty/QDarkStyleSheet/dark.h"
+
+#include <QApplication>
+#include <QDateTime>
+#include <QLabel>
+#include <QMessageBox>
 #include <QSplashScreen>
-#include <qapplication.h>
-#include <qdatetime.h>
-#include <qlabel.h>
-#include <qmessagebox.h>
+#include <QVBoxLayout>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -45,21 +53,16 @@
 #include <string>
 #include <vector>
 
-#include <vtkObjectFactory.h>
-#include <vtkOutputWindow.h>
-
 #pragma warning(disable : 4100)
 
 #define SHOWSPLASH
-
-using namespace iseg;
 
 namespace {
 
 std::string timestamped(const std::string prefix, const std::string& suffix)
 {
-	auto timeLocal = boost::posix_time::second_clock::local_time();
-	auto tod = boost::posix_time::to_iso_string(timeLocal);
+	auto time_local = boost::posix_time::second_clock::local_time();
+	auto tod = boost::posix_time::to_iso_string(time_local);
 	return prefix + "-" + tod + suffix;
 }
 
@@ -69,47 +72,19 @@ std::pair<std::string, std::string> custom_parser(const std::string& s)
 	{
 		return std::make_pair(std::string("s4l"), std::string());
 	}
-	else
-	{
-		return std::make_pair(std::string(), std::string());
-	}
+	return std::make_pair(std::string(), std::string());
 }
-
-// \brief Redirect VTK errors/warnings to file
-class vtkCustomOutputWindow : public vtkOutputWindow
-{
-public:
-	static vtkCustomOutputWindow* New();
-	vtkTypeMacro(vtkCustomOutputWindow, vtkOutputWindow);
-	virtual void PrintSelf(ostream& os, vtkIndent indent) override {}
-
-	// Put the text into the output stream.
-	virtual void DisplayText(const char* msg) override { std::cerr << msg << std::endl; }
-
-protected:
-	vtkCustomOutputWindow() {}
-
-private:
-	vtkCustomOutputWindow(const vtkCustomOutputWindow&); // Not implemented.
-	void operator=(const vtkCustomOutputWindow&);				 // Not implemented.
-};
-
-vtkStandardNewMacro(vtkCustomOutputWindow);
 
 } // namespace
 
-#ifdef NDEBUG
-bool _print_debug_log = false;
-#else
-bool _print_debug_log = true;
-#endif
 
 int main(int argc, char** argv)
 {
-	// parse program arguments
+	using namespace iseg;
 	namespace po = boost::program_options;
 	namespace fs = boost::filesystem;
 
+	// parse program arguments
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help", "produce help message")
@@ -139,45 +114,15 @@ int main(int argc, char** argv)
 	eow->SetInstance(eow);
 	eow->Delete();
 
-	QFileInfo fileinfo(argv[0]);
-
-	QDir tmpdir = QDir::home();
-	if (!tmpdir.exists("iSeg"))
-	{
-		std::cerr << "iSeg folder does not exist, creating..." << endl;
-		if (!tmpdir.mkdir(QString("iSeg")))
-		{
-			std::cerr << "failed to create iSeg folder, exiting..." << endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (!tmpdir.cd("iSeg"))
-	{
-		std::cerr << "failed to enter iSeg folder, exiting..." << endl;
-		exit(EXIT_FAILURE);
-	}
-
-	if (!tmpdir.exists("tmp"))
-	{
-		std::cerr << "tmp folder does not exist, creating..." << endl;
-		if (!tmpdir.mkdir(QString("tmp")))
-		{
-			std::cerr << "failed to create tmp folder, exiting..." << endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (!tmpdir.cd("tmp"))
-	{
-		std::cerr << "failed to enter tmp folder, exiting..." << endl;
-		exit(EXIT_FAILURE);
-	}
-
+	// start logging
+	QDir tmpdir = TempDir();
 	bool debug = vm.count("debug") ? vm["debug"].as<bool>() : false;
-	auto log_file_name = timestamped(tmpdir.absFilePath("iSeg").toStdString(), ".log");
+	auto log_file_name = timestamped(tmpdir.absoluteFilePath("iSeg").toStdString(), ".log");
 	init_logging(log_file_name, true, debug);
 
-	QDir fileDirectory = fileinfo.dir();
-	ISEG_INFO("fileDirectory = " << fileDirectory.absolutePath().toStdString());
+	QFileInfo fileinfo(argv[0]);
+	QDir file_directory = fileinfo.dir();
+	ISEG_INFO("fileDirectory = " << file_directory.absolutePath().toStdString());
 
 	QDir picpath = fileinfo.dir();
 	ISEG_INFO("picture path = " << picpath.absolutePath().toStdString());
@@ -192,65 +137,42 @@ int main(int argc, char** argv)
 		ISEG_WARNING_MSG("atlas folder does not exist");
 	}
 
-	QString splashpicpath = picpath.absFilePath(QString("splash.png"));
-	QString locationpath = fileDirectory.absPath();
-	QString latestprojpath = tmpdir.absFilePath(QString("latestproj.txt"));
-	QString settingspath = tmpdir.absFilePath(QString("settings.bin"));
+	QString splashpicpath = picpath.absoluteFilePath(QString("splash.png"));
+	QString locationpath = file_directory.absolutePath();
+	QString latestprojpath = tmpdir.absoluteFilePath(QString("latestproj.txt"));
+	QString settingspath = tmpdir.absoluteFilePath(QString("settings.bin"));
 
 	TissueInfos::InitTissues();
-	BranchItem::init_availablelabels();
+	BranchItem::InitAvailablelabels();
 
 	SlicesHandler slice_handler;
 
 	QApplication app(argc, argv);
-	QApplication::setStyle(new QPlastiqueStyle);
-
-	QPalette palette;
-	palette = app.palette();
-	palette.setColor(QPalette::Window, QColor(40, 40, 40));
-	palette.setColor(QPalette::Base, QColor(70, 70, 70));
-	palette.setColor(QPalette::WindowText, QColor(255, 255, 255));
-	palette.setColor(QPalette::Text, QColor(255, 255, 255));
-	palette.setColor(QPalette::Button, QColor(70, 70, 70));
-	palette.setColor(QPalette::Highlight, QColor(150, 150, 150));
-	palette.setColor(QPalette::ButtonText, QColor(255, 255, 255));
-	palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0));
-	qApp->setPalette(palette);
-	app.setPalette(palette);
+#ifdef PLASTIQUE
+	SetPlastiqueStyle(&app);
+#elif 1
+	dark::setStyleSheet(&app);
+#endif
 
 #ifdef SHOWSPLASH
-	QString pixmapstr = QString(splashpicpath.toAscii().data());
-	QPixmap pixmap(pixmapstr);
-
-	QSplashScreen splash_screen(pixmap.scaledToHeight(600, Qt::SmoothTransformation));
+	QSplashScreen splash_screen(QPixmap(splashpicpath).scaledToHeight(600, Qt::SmoothTransformation));
 	splash_screen.show();
 	QTime now = QTime::currentTime();
 #endif
 	app.processEvents();
 
-	MainWindow* mainWindow = new MainWindow(
-			&slice_handler, locationpath, picpath, tmpdir,
-			vm.count("s4l"), nullptr, "MainWindow",
-			Qt::WDestructiveClose | Qt::WResizeNoErase, plugin_dirs);
+	MainWindow* main_window = new MainWindow(&slice_handler, locationpath, picpath, tmpdir, vm.count("s4l"), plugin_dirs);
 
-	// needed on MacOS, but not WIN32?
-	app.setStyleSheet(
-			"QWidget { color: white; }"
-			"QPushButton:checked { background-color: rgb(150,150,150); font: bold }"
-			"QPushButton:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QComboBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }"
-			"QCheckBox:disabled  { background-color: rgb(40,40,40); color: rgb(128,128,128) }");
-
-	mainWindow->LoadLoadProj(latestprojpath);
-	mainWindow->LoadAtlas(atlasdir);
-	mainWindow->LoadSettings(settingspath.toAscii().data());
+	main_window->LoadLoadProj(latestprojpath);
+	main_window->LoadAtlas(atlasdir);
+	main_window->LoadSettings(settingspath.toAscii().data());
 	if (vm.count("s4l"))
 	{
-		mainWindow->loadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
+		main_window->LoadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
 	}
 	else if (vm.count("input-file"))
 	{
-		mainWindow->loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
+		main_window->Loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
 	}
 
 #ifdef SHOWSPLASH
@@ -259,14 +181,48 @@ int main(int argc, char** argv)
 	}
 #endif
 
-	mainWindow->showMaximized();
-	mainWindow->show();
+//#define TEST_PROPERTY
+#ifdef TEST_PROPERTY
+	auto group = PropertyGroup::Create("Settings");
+	auto pb1 = group->Add("Enable", PropertyBool::Create(true));
+	auto pb2 = group->Add("Visible", PropertyBool::Create(true));
+	auto child_group = group->Add("Child", PropertyGroup::Create("Child Settings"));
+	auto pi = child_group->Add("Int", PropertyEnum::Create({"A", "B", "C"}, 0));
+	pi->SetItemEnabled(1, false);
 
-#ifdef SHOWSPLASH
-	splash_screen.finish(mainWindow);
+	auto pbtn1 = group->Add("Toggle Enable", PropertyButton::Create([&]() {
+		child_group->SetEnabled(!child_group->Enabled());
+	}));
+	auto pbtn2 = group->Add("Toggle Visible", PropertyButton::Create([&]() {
+		child_group->SetVisible(!child_group->Visible());
+	}));
+
+	iseg::Connect(pb1->onModified, pi, [&](Property_ptr p, Property::eChangeType type) {
+		pi->SetEnabled(pb1->Value());
+	});
+	iseg::Connect(pb2->onModified, pi, [&](Property_ptr p, Property::eChangeType type) {
+		pi->SetVisible(pb2->Value());
+	});
+
+	auto dialog = new QDialog(main_window);
+	auto layout = new QVBoxLayout;
+	layout->addWidget(new PropertyWidget(group));
+	dialog->setLayout(layout);
+	dialog->setMinimumWidth(450);
+	dialog->setMinimumHeight(400);
+	dialog->raise();
+	dialog->exec();
+	exit(EXIT_SUCCESS);
 #endif
 
-	QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+	main_window->showMaximized();
+	main_window->show();
+
+#ifdef SHOWSPLASH
+	splash_screen.finish(main_window);
+#endif
+
+	QObject_connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
 	return app.exec();
 }

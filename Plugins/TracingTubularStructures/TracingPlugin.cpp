@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,19 +15,18 @@
 namespace iseg { namespace plugin {
 
 namespace {
-TracingPlugin _register_addon;
-AutoTracingPlugin _register_addon2;
+TracingPlugin register_addon;
+AutoTracingPlugin register_addon2;
 } // namespace
 
-iseg::WidgetInterface* TracingPlugin::create_widget(QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags) const
+iseg::WidgetInterface* TracingPlugin::CreateWidget() const
 {
-	return new TraceTubesWidget(slice_handler(), parent, name, wFlags);
+	return new TraceTubesWidget(SliceHandler());
 }
 
-iseg::WidgetInterface* AutoTracingPlugin::create_widget(QWidget* parent, const char* name, Qt::WindowFlags wFlags) const
+iseg::WidgetInterface* AutoTracingPlugin::CreateWidget() const
 {
-	return new AutoTubeWidget(slice_handler(), parent, name, wFlags);
+	return new AutoTubeWidget(SliceHandler());
 }
 
 }} // namespace iseg::plugin

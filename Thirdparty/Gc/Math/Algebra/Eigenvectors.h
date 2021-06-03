@@ -32,16 +32,12 @@
 #include "Matrix.h"
 #include "Vector.h"
 
-namespace Gc
-{
-    namespace Math
-    {
-        namespace Algebra
-        {
-            /** %Eigenvectors and eigenvalues computation routines. */
-            namespace Eigenvectors
-            {
-                /** Find eigenvectors and eigenvalues of a symmetric matrix.
+namespace Gc {
+namespace Math {
+namespace Algebra {
+/** %Eigenvectors and eigenvalues computation routines. */
+namespace Eigenvectors {
+/** Find eigenvectors and eigenvalues of a symmetric matrix.
 
                     @param[in] mat Input matrix.
                     @param[out] eig_vec Columns of this matrix are the eigenvectors.
@@ -49,11 +45,11 @@ namespace Gc
 
                     @remarks Based on the source from http://barnesc.blogspot.com/2007/02/eigenvectors-of-3x3-symmetric-matrix.html.
                 */
-                template <Size N, class T>
-                void GC_DLL_EXPORT DecomposeSymmetric(const Matrix<N,N,T> &mat, Matrix<N,N,T> &eig_vec, Vector<N,T> &eig_val);
-            }
-        }
-    }
+template <Size N, class T>
+void GC_DLL_EXPORT DecomposeSymmetric(const Matrix<N, N, T> & mat, Matrix<N, N, T> & eig_vec, Vector<N, T> & eig_val);
+} // namespace Eigenvectors
 }
+}
+} // namespace Gc::Math::Algebra
 
 #endif

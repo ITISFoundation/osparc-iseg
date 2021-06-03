@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -27,48 +27,45 @@ class TissueSeparatorWidget : public WidgetInterface
 {
 	Q_OBJECT
 public:
-	TissueSeparatorWidget(SlicesHandlerInterface* hand3D,
-			QWidget* parent = 0, const char* name = 0,
-			Qt::WindowFlags wFlags = 0);
-	~TissueSeparatorWidget() {}
-	void init() override;
-	void newloaded() override;
-	void cleanup() override;
+	TissueSeparatorWidget(SlicesHandlerInterface* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	~TissueSeparatorWidget() override = default;
+	void Init() override;
+	void NewLoaded() override;
+	void Cleanup() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
 
 private:
-	void on_tissuenr_changed(int i) override;
-	void on_slicenr_changed() override;
+	void OnTissuenrChanged(int i) override;
+	void OnSlicenrChanged() override;
 
-	void on_mouse_clicked(iseg::Point p) override;
-	void on_mouse_released(iseg::Point p) override;
-	void on_mouse_moved(iseg::Point p) override;
+	void OnMouseClicked(iseg::Point p) override;
+	void OnMouseReleased(iseg::Point p) override;
+	void OnMouseMoved(iseg::Point p) override;
 
 private slots:
-	void execute();
-	void clearmarks();
+	void Execute();
+	void Clearmarks();
 
 private:
-	void do_work_all_slices();
-	void do_work_current_slice();
+	void DoWorkAllSlices();
+	void DoWorkCurrentSlice();
 
 	template<unsigned int Dim, typename TInput>
-	typename itk::Image<unsigned char, Dim>::Pointer do_work(TInput* source, TInput* target,
-			const typename itk::Image<unsigned char, Dim>::RegionType& requested_region);
+	typename itk::Image<unsigned char, Dim>::Pointer DoWork(TInput* source, TInput* target, const typename itk::Image<unsigned char, Dim>::RegionType& requested_region);
 
-	iseg::SlicesHandlerInterface* slice_handler;
-	unsigned current_slice;
-	unsigned tissuenr;
-	iseg::Point last_pt;
-	std::vector<iseg::Point> vpdyn;
-	std::map<unsigned, std::vector<iseg::Mark>> vm;
+	iseg::SlicesHandlerInterface* m_SliceHandler;
+	unsigned m_CurrentSlice;
+	unsigned m_Tissuenr;
+	iseg::Point m_LastPt;
+	std::vector<iseg::Point> m_Vpdyn;
+	std::map<unsigned, std::vector<iseg::Mark>> m_Vm;
 
-	QCheckBox* all_slices;
-	QCheckBox* use_source;
-	QLineEdit* sigma_edit;
-	QPushButton* clear_lines;
-	QPushButton* execute_button;
+	QCheckBox* m_AllSlices;
+	QCheckBox* m_UseSource;
+	QLineEdit* m_SigmaEdit;
+	QPushButton* m_ClearLines;
+	QPushButton* m_ExecuteButton;
 };
 
-}
+} // namespace iseg

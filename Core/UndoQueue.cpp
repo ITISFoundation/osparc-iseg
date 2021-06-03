@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,86 +15,86 @@ namespace iseg {
 
 UndoQueue::UndoQueue()
 {
-	first = nrnow = nrin = nrundoarrays = 0;
-	nrundo = 50;
-	nrundoarraysmax = 20;
-	undos.resize(nrundo);
+	m_First = m_Nrnow = m_Nrin = m_Nrundoarrays = 0;
+	m_Nrundo = 50;
+	m_Nrundoarraysmax = 20;
+	m_Undos.resize(m_Nrundo);
 }
 
 UndoQueue::~UndoQueue()
 {
-	for (unsigned i = 0; i < nrin; i++)
-		delete undos[(first + i) % nrundo];
+	for (unsigned i = 0; i < m_Nrin; i++)
+		delete m_Undos[(m_First + i) % m_Nrundo];
 }
 
-void UndoQueue::sub_add_undo(UndoElem* ue)
+void UndoQueue::SubAddUndo(UndoElem* ue)
 {
-	if (nrnow == nrundo)
+	if (m_Nrnow == m_Nrundo)
 	{
-		nrundoarrays = (nrundoarrays + ue->arraynr()) - undos[first]->arraynr();
-		delete undos[first];
-		undos[first] = ue;
-		first = (first + 1) % nrundo;
-		while (nrundoarrays > nrundoarraysmax)
+		m_Nrundoarrays = (m_Nrundoarrays + ue->Arraynr()) - m_Undos[m_First]->Arraynr();
+		delete m_Undos[m_First];
+		m_Undos[m_First] = ue;
+		m_First = (m_First + 1) % m_Nrundo;
+		while (m_Nrundoarrays > m_Nrundoarraysmax)
 		{
-			nrundoarrays -= undos[first]->arraynr();
-			delete undos[first];
-			first = (first + 1) % nrundo;
-			nrnow--;
+			m_Nrundoarrays -= m_Undos[m_First]->Arraynr();
+			delete m_Undos[m_First];
+			m_First = (m_First + 1) % m_Nrundo;
+			m_Nrnow--;
 		}
 	}
 	else
 	{
-		nrundoarrays += ue->arraynr();
+		m_Nrundoarrays += ue->Arraynr();
 
-		for (unsigned i = nrnow; i < nrin; i++)
+		for (unsigned i = m_Nrnow; i < m_Nrin; i++)
 		{
-			nrundoarrays -= undos[(first + i) % nrundo]->arraynr();
-			delete undos[(first + i) % nrundo];
+			m_Nrundoarrays -= m_Undos[(m_First + i) % m_Nrundo]->Arraynr();
+			delete m_Undos[(m_First + i) % m_Nrundo];
 		}
-		undos[(first + nrnow) % nrundo] = ue;
-		nrnow++;
+		m_Undos[(m_First + m_Nrnow) % m_Nrundo] = ue;
+		m_Nrnow++;
 
-		while (nrundoarrays > nrundoarraysmax)
+		while (m_Nrundoarrays > m_Nrundoarraysmax)
 		{
-			nrundoarrays -= undos[first]->arraynr();
-			delete undos[first];
-			first = (first + 1) % nrundo;
-			nrnow--;
+			m_Nrundoarrays -= m_Undos[m_First]->Arraynr();
+			delete m_Undos[m_First];
+			m_First = (m_First + 1) % m_Nrundo;
+			m_Nrnow--;
 		}
 	}
-	nrin = nrnow;
+	m_Nrin = m_Nrnow;
 }
 
-void UndoQueue::merge_undo(UndoElem* ue)
+void UndoQueue::MergeUndo(UndoElem* ue)
 {
-	if (!ue->multi)
+	if (!ue->Multi())
 	{
-		if (nrin > 0)
+		if (m_Nrin > 0)
 		{
-			nrundoarrays -= undos[(first + nrin - 1) % nrundo]->arraynr();
-			undos[(first + nrin - 1) % nrundo]->merge(ue);
-			nrundoarrays += undos[(first + nrin - 1) % nrundo]->arraynr();
+			m_Nrundoarrays -= m_Undos[(m_First + m_Nrin - 1) % m_Nrundo]->Arraynr();
+			m_Undos[(m_First + m_Nrin - 1) % m_Nrundo]->Merge(ue);
+			m_Nrundoarrays += m_Undos[(m_First + m_Nrin - 1) % m_Nrundo]->Arraynr();
 
-			while (nrundoarrays > nrundoarraysmax)
+			while (m_Nrundoarrays > m_Nrundoarraysmax)
 			{
-				nrundoarrays -= undos[first]->arraynr();
-				delete undos[first];
-				first = (first + 1) % nrundo;
-				nrnow--;
+				m_Nrundoarrays -= m_Undos[m_First]->Arraynr();
+				delete m_Undos[m_First];
+				m_First = (m_First + 1) % m_Nrundo;
+				m_Nrnow--;
 			}
 		}
-		nrin = nrnow;
+		m_Nrin = m_Nrnow;
 	}
 }
 
-void UndoQueue::add_undo(UndoElem* ue) { sub_add_undo(ue); }
+void UndoQueue::AddUndo(UndoElem* ue) { SubAddUndo(ue); }
 
-bool UndoQueue::add_undo(MultiUndoElem* ue)
+bool UndoQueue::AddUndo(MultiUndoElem* ue)
 {
-	if (ue->arraynr() < nrundoarraysmax)
+	if (ue->Arraynr() < m_Nrundoarraysmax)
 	{
-		sub_add_undo(ue);
+		SubAddUndo(ue);
 		return true;
 	}
 	else
@@ -103,108 +103,106 @@ bool UndoQueue::add_undo(MultiUndoElem* ue)
 	}
 }
 
-UndoElem* UndoQueue::undo()
+UndoElem* UndoQueue::Undo()
 {
-	if (nrnow > 0)
+	if (m_Nrnow > 0)
 	{
-		return undos[((--nrnow) + first) % nrundo];
+		return m_Undos[((--m_Nrnow) + m_First) % m_Nrundo];
 	}
 	else
 		return nullptr;
 }
 
-UndoElem* UndoQueue::redo()
+UndoElem* UndoQueue::Redo()
 {
-	if (nrnow < nrin)
+	if (m_Nrnow < m_Nrin)
 	{
-		return undos[((nrnow++) + first) % nrundo];
+		return m_Undos[((m_Nrnow++) + m_First) % m_Nrundo];
 	}
 	else
 		return nullptr;
 }
 
-void UndoQueue::clear_undo()
+void UndoQueue::ClearUndo()
 {
-	for (unsigned i = 0; i < nrin; i++)
-		delete undos[(first + i) % nrundo];
-	first = nrnow = nrin = nrundoarrays = 0;
-	return;
+	for (unsigned i = 0; i < m_Nrin; i++)
+		delete m_Undos[(m_First + i) % m_Nrundo];
+	m_First = m_Nrnow = m_Nrin = m_Nrundoarrays = 0;
 }
 
-unsigned UndoQueue::return_nrundo() { return nrnow; }
+unsigned UndoQueue::ReturnNrundo() const { return m_Nrnow; }
 
-unsigned UndoQueue::return_nrredo() { return nrin - nrnow; }
+unsigned UndoQueue::ReturnNrredo() const { return m_Nrin - m_Nrnow; }
 
-unsigned UndoQueue::return_nrundoarraysmax() { return nrundoarraysmax; }
+unsigned UndoQueue::ReturnNrundoarraysmax() const { return m_Nrundoarraysmax; }
 
-unsigned UndoQueue::return_nrundomax() { return nrundo; }
+unsigned UndoQueue::ReturnNrundomax() const { return m_Nrundo; }
 
-void UndoQueue::set_nrundoarraysmax(unsigned nr)
+void UndoQueue::SetNrundoarraysmax(unsigned nr)
 {
-	if (nrundoarraysmax != nr)
+	if (m_Nrundoarraysmax != nr)
 	{
-		nrundoarraysmax = nr;
+		m_Nrundoarraysmax = nr;
 
-		while (nrundoarrays > nrundoarraysmax && nrnow > 0)
+		while (m_Nrundoarrays > m_Nrundoarraysmax && m_Nrnow > 0)
 		{
-			nrundoarrays -= undos[first]->arraynr();
-			delete undos[first];
-			first = (first + 1) % nrundo;
-			nrin--;
-			nrnow--;
+			m_Nrundoarrays -= m_Undos[m_First]->Arraynr();
+			delete m_Undos[m_First];
+			m_First = (m_First + 1) % m_Nrundo;
+			m_Nrin--;
+			m_Nrnow--;
 		}
 
-		while (nrundoarrays > nrundoarraysmax && nrin > 0)
+		while (m_Nrundoarrays > m_Nrundoarraysmax && m_Nrin > 0)
 		{
-			nrin--;
-			nrundoarrays -= undos[(first + nrin) % nrundo]->arraynr();
-			delete undos[(first + nrin) % nrundo];
+			m_Nrin--;
+			m_Nrundoarrays -= m_Undos[(m_First + m_Nrin) % m_Nrundo]->Arraynr();
+			delete m_Undos[(m_First + m_Nrin) % m_Nrundo];
 		}
 	}
 }
 
-void UndoQueue::set_nrundo(unsigned nr)
+void UndoQueue::SetNrundo(unsigned nr)
 {
-	if (nr != nrundo)
+	if (nr != m_Nrundo)
 	{
-		while (nrin > nr && nrnow > 0)
+		while (m_Nrin > nr && m_Nrnow > 0)
 		{
-			nrundoarrays -= undos[first]->arraynr();
-			delete undos[first];
-			first = (first + 1) % nrundo;
-			nrnow--;
-			nrin--;
+			m_Nrundoarrays -= m_Undos[m_First]->Arraynr();
+			delete m_Undos[m_First];
+			m_First = (m_First + 1) % m_Nrundo;
+			m_Nrnow--;
+			m_Nrin--;
 		}
 
-		while (nrin > nr)
+		while (m_Nrin > nr)
 		{
-			nrin--;
-			nrundoarrays -= undos[(first + nrin) % nrundo]->arraynr();
-			delete undos[(first + nrin) % nrundo];
+			m_Nrin--;
+			m_Nrundoarrays -= m_Undos[(m_First + m_Nrin) % m_Nrundo]->Arraynr();
+			delete m_Undos[(m_First + m_Nrin) % m_Nrundo];
 		}
 
 		std::vector<UndoElem*> vue;
 		vue.clear();
-		vue.insert(vue.begin(), undos.begin(), undos.end());
+		vue.insert(vue.begin(), m_Undos.begin(), m_Undos.end());
 
-		undos.resize(nr);
+		m_Undos.resize(nr);
 
-		for (unsigned i = 0; i < nrin; i++)
+		for (unsigned i = 0; i < m_Nrin; i++)
 		{
-			undos[i] = vue[(first + i) % nrundo];
+			m_Undos[i] = vue[(m_First + i) % m_Nrundo];
 		}
 
-		this->nrundo = nr;
+		this->m_Nrundo = nr;
 
-		first = 0;
+		m_First = 0;
 	}
 }
 
-void UndoQueue::reverse_undosliceorder(unsigned short nrslices)
+void UndoQueue::ReverseUndosliceorder(unsigned short nrslices)
 {
-	for (unsigned i = 0; i < nrin; i++)
-		undos[i]->dataSelection.sliceNr =
-				nrslices - 1 - undos[i]->dataSelection.sliceNr;
+	for (unsigned i = 0; i < m_Nrin; i++)
+		m_Undos[i]->m_DataSelection.sliceNr = nrslices - 1 - m_Undos[i]->m_DataSelection.sliceNr;
 }
 
 } // namespace iseg

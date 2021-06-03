@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+* Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
 *
 * This file is part of iSEG
 * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -15,8 +15,12 @@
 
 #include "QVTKWidget.h"
 
+#include "Interface/PropertyWidget.h"
+#include "Interface/QtConnect.h"
+
+#include <QHBoxLayout>
 #include <QResizeEvent>
-#include <Q3VBox>
+#include <QVBoxLayout>
 
 #include <vtkActor.h>
 #include <vtkColorTransferFunction.h>
@@ -39,838 +43,739 @@
 
 namespace iseg {
 
-VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1,
-		bool gpu_or_raycast, bool shade1,
-		QWidget* parent, const char* name,
-		Qt::WindowFlags wFlags)
-		: QWidget(parent, name, wFlags)
+VolumeViewerWidget::VolumeViewerWidget(SlicesHandler* hand3D1, bool bmportissue1, bool gpu_or_raycast, bool shade1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Bmportissue(bmportissue1), m_Hand3D(hand3D1)
 {
-	bmportissue = bmportissue1;
-	hand3D = hand3D1;
-	vbox1 = new Q3VBox(this);
-	vtkWidget = new QVTKWidget(vbox1);
-	vtkWidget->setFixedSize(600, 600);
-	//	resize( QSize(600, 600).expandedTo(minimumSizeHint()) );
+	// properties
+	auto group = PropertyGroup::Create("Volume Viewer Settings");
 
-	cb_shade = new QCheckBox("Shade", vbox1);
-	cb_shade->setChecked(shade1);
-	cb_shade->show();
-	cb_raytraceortexturemap = new QCheckBox("GPU / Software", vbox1);
-	cb_raytraceortexturemap->setChecked(gpu_or_raycast);
-	cb_raytraceortexturemap->show();
+	m_CbShade = group->Add("Shade", PropertyBool::Create(shade1));
 
-	cb_showslices = new QCheckBox("Show Slices", vbox1);
-	cb_showslices->setChecked(true);
-	cb_showslices->show();
-	cb_showslice1 = new QCheckBox("Enable Slicer 1", vbox1);
-	cb_showslice1->setChecked(false);
-	cb_showslice1->show();
-	cb_showslice2 = new QCheckBox("Enable Slicer 2", vbox1);
-	cb_showslice2->setChecked(false);
-	cb_showslice2->show();
-	cb_showvolume = new QCheckBox("Show Volume", vbox1);
-	cb_showvolume->setChecked(true);
-	cb_showvolume->show();
+	m_CbRaytraceortexturemap = group->Add("GPU", PropertyBool::Create(gpu_or_raycast));
 
-	hbox1 = new Q3HBox(vbox1);
-	lb_contr = new QLabel("Window:", hbox1);
-	sl_contr = new QSlider(Qt::Horizontal, hbox1);
-	sl_contr->setRange(0, 100);
-	sl_contr->setValue(100);
-	hbox1->setFixedHeight(hbox1->sizeHint().height());
-	hbox2 = new Q3HBox(vbox1);
-	lb_bright = new QLabel("Level:", hbox2);
-	sl_bright = new QSlider(Qt::Horizontal, hbox2);
-	sl_bright->setRange(0, 100);
-	sl_bright->setValue(50);
-	hbox2->setFixedHeight(hbox2->sizeHint().height());
-	hbox3 = new Q3HBox(vbox1);
-	lb_trans = new QLabel("Transp.:", hbox3);
-	sl_trans = new QSlider(Qt::Horizontal, hbox3);
-	sl_trans->setRange(0, 100);
-	sl_trans->setValue(50);
-	hbox3->setFixedHeight(hbox3->sizeHint().height());
+	m_CbShowslices = group->Add("ShowSlices", PropertyBool::Create(true));
+	m_CbShowslices->SetDescription("Show Slices");
 
-	bt_update = new QPushButton("Update", vbox1);
-	bt_update->show();
+	m_CbShowslice1 = group->Add("Slice1", PropertyBool::Create(false));
+	m_CbShowslice1->SetDescription("Enable Slicer 1");
 
-	if (bmportissue)
-	{
-		hbox3->hide();
-		hbox1->show();
-		hbox2->show();
-	}
-	else
-	{
-		hbox3->show();
-		hbox1->hide();
-		hbox2->hide();
-	}
+	m_CbShowslice2 = group->Add("Slice2", PropertyBool::Create(false));
+	m_CbShowslice2->SetDescription("Enable Slicer 2");
 
-	vbox1->show();
+	m_CbShowvolume = group->Add("ShowVolume", PropertyBool::Create(true));
+	m_CbShowvolume->SetDescription("Show Volume");
 
-	//	setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
-	//	vbox1->setFixedSize(vbox1->sizeHint());
-	resize(vbox1->sizeHint().expandedTo(minimumSizeHint()));
+	m_SlContr = group->Add("Window", PropertyReal::Create(100, 0, 100));
+	m_SlBright = group->Add("Level", PropertyReal::Create(50, 0, 100));
+	m_SlTrans = group->Add("Transparency", PropertyReal::Create(50, 0, 100));
 
-	QObject::connect(cb_shade, SIGNAL(clicked()), this, SLOT(shade_changed()));
-	QObject::connect(cb_raytraceortexturemap, SIGNAL(clicked()), this,
-			SLOT(raytraceortexturemap_changed()));
-	QObject::connect(bt_update, SIGNAL(clicked()), this, SLOT(reload()));
-	QObject::connect(cb_showslices, SIGNAL(clicked()), this,
-			SLOT(showslices_changed()));
-	QObject::connect(cb_showslice1, SIGNAL(clicked()), this,
-			SLOT(showslices_changed()));
-	QObject::connect(cb_showslice2, SIGNAL(clicked()), this,
-			SLOT(showslices_changed()));
-	QObject::connect(cb_showvolume, SIGNAL(clicked()), this,
-			SLOT(showvolume_changed()));
+	m_BtUpdate = group->Add("Update", PropertyButton::Create([this]() { Reload(); }));
 
-	QObject::connect(sl_bright, SIGNAL(sliderReleased()), this,
-			SLOT(contrbright_changed()));
-	QObject::connect(sl_contr, SIGNAL(sliderReleased()), this,
-			SLOT(contrbright_changed()));
-	QObject::connect(sl_trans, SIGNAL(sliderReleased()), this,
-			SLOT(transp_changed()));
+	m_SlContr->SetVisible(m_Bmportissue);
+	m_SlBright->SetVisible(m_Bmportissue);
+	m_SlTrans->SetVisible(!m_Bmportissue);
 
-	//   vtkStructuredPointsReader* reader = vtkStructuredPointsReader::New();
-	//  reader= vtkSmartPointer<vtkXMLImageDataReader>::New();
-	//  fnamei="D:\\Development\\bmp_read_QT\\bmp_read_3D_8\\qvtkViewer\\test2.vti";
-	//  reader->SetFileName(fnamei.c_str());
-
-	//  vtkImageData* input = (vtkImageData*)reader->GetOutput();
-	//  input->Update();
-
-	input = vtkSmartPointer<vtkImageData>::New();
-	input->SetExtent(0, (int)hand3D->width() - 1, 0,
-			(int)hand3D->height() - 1, 0,
-			(int)hand3D->num_slices() - 1);
-	Pair ps = hand3D->get_pixelsize();
-	if (bmportissue)
-	{
-		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
-		input->AllocateScalars(VTK_FLOAT, 1);
-		float* field = (float*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
+	// connections
+	auto on_slice_changed = [this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
 		{
-			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			ShowslicesChanged();
+		}
+	};
+
+	m_CbShowslices->onModified.connect(on_slice_changed);
+	m_CbShowslice1->onModified.connect(on_slice_changed);
+	m_CbShowslice2->onModified.connect(on_slice_changed);
+
+	m_CbShade->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			ShadeChanged();
+		}
+	});
+	m_CbRaytraceortexturemap->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			RaytraceortexturemapChanged();
+		}
+	});
+
+	m_CbShowvolume->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			ShowvolumeChanged();
+		}
+	});
+
+	m_SlBright->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			ContrbrightChanged();
+		}
+	});
+	m_SlContr->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			ContrbrightChanged();
+		}
+	});
+	m_SlTrans->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+		{
+			TranspChanged();
+		}
+	});
+
+	// ui widgets
+	m_VtkWidget = new QVTKWidget;
+
+	auto property_view = new PropertyWidget(group);
+	property_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+	auto layout = new QVBoxLayout;
+	layout->addWidget(m_VtkWidget, 1);
+	layout->addWidget(property_view);
+	setLayout(layout);
+
+	// vtk pipeline
+	m_Input = vtkSmartPointer<vtkImageData>::New();
+	m_Input->SetExtent(0, (int)m_Hand3D->Width() - 1, 0, (int)m_Hand3D->Height() - 1, 0, (int)m_Hand3D->NumSlices() - 1);
+	Pair ps = m_Hand3D->GetPixelsize();
+	if (m_Bmportissue)
+	{
+		m_Input->SetSpacing(ps.high, ps.low, m_Hand3D->GetSlicethickness());
+		m_Input->AllocateScalars(VTK_FLOAT, 1);
+		float* field = (float*)m_Input->GetScalarPointer(0, 0, 0);
+		for (unsigned short i = 0; i < m_Hand3D->NumSlices(); i++)
+		{
+			m_Hand3D->Copyfrombmp(i, &(field[i * (unsigned long long)m_Hand3D->ReturnArea()]));
 		}
 	}
 	else
 	{
 		switch (sizeof(tissues_size_t))
 		{
-		case 1: input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
-		case 2: input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
+		case 1: m_Input->AllocateScalars(VTK_UNSIGNED_CHAR, 1); break;
+		case 2: m_Input->AllocateScalars(VTK_UNSIGNED_SHORT, 1); break;
 		default:
 			std::cerr << "volumeviewer3D::volumeviewer3D: tissues_size_t not "
-							"implemented."
-					 << endl;
+									 "implemented."
+								<< endl;
 		}
-		input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
+		m_Input->SetSpacing(ps.high, ps.low, m_Hand3D->GetSlicethickness());
 		tissues_size_t* field =
-				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
+				(tissues_size_t*)m_Input->GetScalarPointer(0, 0, 0);
+		for (unsigned short i = 0; i < m_Hand3D->NumSlices(); i++)
 		{
-			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			m_Hand3D->Copyfromtissue(i, &(field[i * (unsigned long long)m_Hand3D->ReturnArea()]));
 		}
 	}
 
 	double bounds[6], center[3];
 
-	input->GetBounds(bounds);
-	input->GetCenter(center);
-	input->GetScalarRange(range);
-	std::cerr << "input range = " << range[0] << " " << range[1] << endl;
+	m_Input->GetBounds(bounds);
+	m_Input->GetCenter(center);
+	m_Input->GetScalarRange(m_Range);
+	std::cerr << "input range = " << m_Range[0] << " " << m_Range[1] << endl;
 
-	double level = 0.5 * (range[1] + range[0]);
-	double window = range[1] - range[0];
-	if (range[1] > 250)
+	double level = 0.5 * (m_Range[1] + m_Range[0]);
+	double window = m_Range[1] - m_Range[0];
+	if (m_Range[1] > 250)
 	{
 		level = 125;
 		window = 250;
-		sl_contr->setValue((101 * window / (range[1] - range[0])) - 1);
-		sl_bright->setValue(100 * (level - range[0]) / (range[1] - range[0]));
+		m_SlContr->SetValue((101 * window / (m_Range[1] - m_Range[0])) - 1);
+		m_SlBright->SetValue(100 * (level - m_Range[0]) / (m_Range[1] - m_Range[0]));
 	}
 
 	//
 	// Put a bounding box in the scene to help orient the user.
 	//
-	outlineGrid = vtkSmartPointer<vtkOutlineFilter>::New();
-	outlineGrid->SetInputData(input);
-	outlineGrid->Update();
-	outlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-	outlineMapper->SetInputConnection(outlineGrid->GetOutputPort());
-	outlineActor = vtkSmartPointer<vtkActor>::New();
-	outlineActor->SetMapper(outlineMapper);
+	m_OutlineGrid = vtkSmartPointer<vtkOutlineFilter>::New();
+	m_OutlineGrid->SetInputData(m_Input);
+	m_OutlineGrid->Update();
+	m_OutlineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+	m_OutlineMapper->SetInputConnection(m_OutlineGrid->GetOutputPort());
+	m_OutlineActor = vtkSmartPointer<vtkActor>::New();
+	m_OutlineActor->SetMapper(m_OutlineMapper);
 
 	// Add a PlaneWidget to interactively move the slice plane.
-	planeWidgetY = vtkSmartPointer<vtkImplicitPlaneWidget>::New();
-	planeWidgetY->SetInputData(input);
-	planeWidgetY->NormalToYAxisOn();
-	planeWidgetY->DrawPlaneOff();
-	planeWidgetY->SetScaleEnabled(0);
-	planeWidgetY->SetOriginTranslation(0);
-	planeWidgetY->SetOutsideBounds(0);
+	m_PlaneWidgetY = vtkSmartPointer<vtkImplicitPlaneWidget>::New();
+	m_PlaneWidgetY->SetInputData(m_Input);
+	m_PlaneWidgetY->NormalToYAxisOn();
+	m_PlaneWidgetY->DrawPlaneOff();
+	m_PlaneWidgetY->SetScaleEnabled(0);
+	m_PlaneWidgetY->SetOriginTranslation(0);
+	m_PlaneWidgetY->SetOutsideBounds(0);
 
 	// Attach a Cutter to the slice plane to sample the function.
-	sliceCutterY = vtkSmartPointer<vtkCutter>::New();
-	sliceCutterY->SetInputData(input);
-	slicePlaneY = vtkSmartPointer<vtkPlane>::New();
-	planeWidgetY->GetPlane(slicePlaneY);
-	sliceCutterY->SetCutFunction(slicePlaneY);
+	m_SliceCutterY = vtkSmartPointer<vtkCutter>::New();
+	m_SliceCutterY->SetInputData(m_Input);
+	m_SlicePlaneY = vtkSmartPointer<vtkPlane>::New();
+	m_PlaneWidgetY->GetPlane(m_SlicePlaneY);
+	m_SliceCutterY->SetCutFunction(m_SlicePlaneY);
 
 	// Add a PlaneWidget to interactively move the slice plane.
-	planeWidgetZ = vtkSmartPointer<vtkImplicitPlaneWidget>::New();
-	planeWidgetZ->SetInputData(input);
-	planeWidgetZ->NormalToZAxisOn();
-	planeWidgetZ->DrawPlaneOff();
-	planeWidgetZ->SetScaleEnabled(0);
-	planeWidgetZ->SetOriginTranslation(0);
-	planeWidgetZ->SetOutsideBounds(0);
+	m_PlaneWidgetZ = vtkSmartPointer<vtkImplicitPlaneWidget>::New();
+	m_PlaneWidgetZ->SetInputData(m_Input);
+	m_PlaneWidgetZ->NormalToZAxisOn();
+	m_PlaneWidgetZ->DrawPlaneOff();
+	m_PlaneWidgetZ->SetScaleEnabled(0);
+	m_PlaneWidgetZ->SetOriginTranslation(0);
+	m_PlaneWidgetZ->SetOutsideBounds(0);
 
 	// Attach a Cutter to the slice plane to sample the function.
-	sliceCutterZ = vtkSmartPointer<vtkCutter>::New();
-	sliceCutterZ->SetInputData(input);
-	slicePlaneZ = vtkSmartPointer<vtkPlane>::New();
-	planeWidgetZ->GetPlane(slicePlaneZ);
-	sliceCutterZ->SetCutFunction(slicePlaneZ);
+	m_SliceCutterZ = vtkSmartPointer<vtkCutter>::New();
+	m_SliceCutterZ->SetInputData(m_Input);
+	m_SlicePlaneZ = vtkSmartPointer<vtkPlane>::New();
+	m_PlaneWidgetZ->GetPlane(m_SlicePlaneZ);
+	m_SliceCutterZ->SetCutFunction(m_SlicePlaneZ);
 
 	//
 	// Create a lookup table to map the velocity magnitudes.
 	//
-	if (bmportissue)
+	if (m_Bmportissue)
 	{
-		lut = vtkSmartPointer<vtkLookupTable>::New();
-		lut->SetTableRange(range);
-		lut->SetHueRange(0, 0);
-		lut->SetSaturationRange(0, 0);
-		lut->SetValueRange(0, 1);
-		lut->Build(); //effective build
+		m_Lut = vtkSmartPointer<vtkLookupTable>::New();
+		m_Lut->SetTableRange(m_Range);
+		m_Lut->SetHueRange(0, 0);
+		m_Lut->SetSaturationRange(0, 0);
+		m_Lut->SetValueRange(0, 1);
+		m_Lut->Build(); //effective build
 	}
 	else
 	{
-		lut = vtkSmartPointer<vtkLookupTable>::New();
+		m_Lut = vtkSmartPointer<vtkLookupTable>::New();
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
-		lut->SetNumberOfColors(tissuecount + 1);
-		lut->Build();
-		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
+		m_Lut->SetNumberOfColors(tissuecount + 1);
+		m_Lut->Build();
+		m_Lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			auto tissuecolor = TissueInfos::GetTissueColor(i);
-			lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
+			m_Lut->SetTableValue(i, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
 		}
 	}
 	//
 	// Map the slice plane and create the geometry to be rendered.
 	//
-	sliceY = vtkSmartPointer<vtkPolyDataMapper>::New();
-	if (!bmportissue)
-		sliceY->SetColorModeToMapScalars();
-	sliceY->SetInputConnection(sliceCutterY->GetOutputPort());
+	m_SliceY = vtkSmartPointer<vtkPolyDataMapper>::New();
+	if (!m_Bmportissue)
+		m_SliceY->SetColorModeToMapScalars();
+	m_SliceY->SetInputConnection(m_SliceCutterY->GetOutputPort());
 	//   input->GetScalarRange( range );
 	//range[1] *= 0.7; // reduce the upper range by 30%
-	sliceY->SetScalarRange(range);
-	sliceY->SetLookupTable(lut);
+	m_SliceY->SetScalarRange(m_Range);
+	m_SliceY->SetLookupTable(m_Lut);
 	//   sliceY->SelectColorArray(argv[2]);
-	sliceY->Update();
-	sliceActorY = vtkSmartPointer<vtkActor>::New();
-	sliceActorY->SetMapper(sliceY);
+	m_SliceY->Update();
+	m_SliceActorY = vtkSmartPointer<vtkActor>::New();
+	m_SliceActorY->SetMapper(m_SliceY);
 
-	sliceZ = vtkSmartPointer<vtkPolyDataMapper>::New();
-	if (!bmportissue)
-		sliceZ->SetColorModeToMapScalars();
-	sliceZ->SetInputConnection(sliceCutterZ->GetOutputPort());
+	m_SliceZ = vtkSmartPointer<vtkPolyDataMapper>::New();
+	if (!m_Bmportissue)
+		m_SliceZ->SetColorModeToMapScalars();
+	m_SliceZ->SetInputConnection(m_SliceCutterZ->GetOutputPort());
 	//   input->GetScalarRange( range );
 	//range[1] *= 0.7; // reduce the upper range by 30%
-	sliceZ->SetScalarRange(range);
-	sliceZ->SetLookupTable(lut);
-	sliceZ->Update();
-	sliceActorZ = vtkSmartPointer<vtkActor>::New();
-	sliceActorZ->SetMapper(sliceZ);
+	m_SliceZ->SetScalarRange(m_Range);
+	m_SliceZ->SetLookupTable(m_Lut);
+	m_SliceZ->Update();
+	m_SliceActorZ = vtkSmartPointer<vtkActor>::New();
+	m_SliceActorZ->SetMapper(m_SliceZ);
 
-	if (!bmportissue)
+	if (!m_Bmportissue)
 	{
-		opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
-		opacityTransferFunction->AddPoint(0, 0);
+		m_OpacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+		m_OpacityTransferFunction->AddPoint(0, 0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
+			if (m_SlTrans->Value() > 50)
+				opac1 = opac1 * (100 - m_SlTrans->Value()) / 50;
 			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			opacityTransferFunction->AddPoint(i, opac1);
+				opac1 = 1.0f - (1.0 - opac1) * m_SlTrans->Value() / 50;
+			m_OpacityTransferFunction->AddPoint(i, opac1);
 		}
 
-		colorTransferFunction =
+		m_ColorTransferFunction =
 				vtkSmartPointer<vtkColorTransferFunction>::New();
-		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+		m_ColorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			auto tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+			m_ColorTransferFunction->AddRGBPoint((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
 		auto tissuecolor = TissueInfos::GetTissueColor(tissuecount);
-		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+		m_ColorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 	}
 	else
 	{
-		opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
-		opacityTransferFunction->AddPoint(level - window / 2, 0.0);
-		opacityTransferFunction->AddPoint(level + window / 2, 1.0);
-		colorTransferFunction =
+		m_OpacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+		m_OpacityTransferFunction->AddPoint(level - window / 2, 0.0);
+		m_OpacityTransferFunction->AddPoint(level + window / 2, 1.0);
+		m_ColorTransferFunction =
 				vtkSmartPointer<vtkColorTransferFunction>::New();
-		colorTransferFunction->AddRGBPoint(level - window / 2, 0.0, 0.0, 0.0);
-		colorTransferFunction->AddRGBPoint(level + window / 2, 1.0, 1.0, 1.0);
+		m_ColorTransferFunction->AddRGBPoint(level - window / 2, 0.0, 0.0, 0.0);
+		m_ColorTransferFunction->AddRGBPoint(level + window / 2, 1.0, 1.0, 1.0);
 	}
 
-	volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-	volumeProperty->SetColor(colorTransferFunction);
-	volumeProperty->SetScalarOpacity(opacityTransferFunction);
+	m_VolumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+	m_VolumeProperty->SetColor(m_ColorTransferFunction);
+	m_VolumeProperty->SetScalarOpacity(m_OpacityTransferFunction);
 	if (shade1)
-		volumeProperty->ShadeOn();
+		m_VolumeProperty->ShadeOn();
 	else
-		volumeProperty->ShadeOff();
-	if (bmportissue)
-		volumeProperty->SetInterpolationTypeToLinear();
+		m_VolumeProperty->ShadeOff();
+	if (m_Bmportissue)
+		m_VolumeProperty->SetInterpolationTypeToLinear();
 	else
-		volumeProperty->SetInterpolationTypeToNearest();
+		m_VolumeProperty->SetInterpolationTypeToNearest();
 
-	volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
-	volumeMapper->SetRequestedRenderModeToDefault();
+	m_VolumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+	m_VolumeMapper->SetRequestedRenderModeToDefault();
 
-	cast = vtkSmartPointer<vtkImageShiftScale>::New();
-	if (bmportissue)
+	m_Cast = vtkSmartPointer<vtkImageShiftScale>::New();
+	if (m_Bmportissue)
 	{
-		double slope = 255 / (range[1] - range[0]);
-		double shift = -range[0];
-		cast->SetInputData(input);
-		cast->SetShift(shift);
-		cast->SetScale(slope);
-		cast->SetOutputScalarTypeToUnsignedShort();
-		volumeMapper->SetInputConnection(cast->GetOutputPort());
+		double slope = 255 / (m_Range[1] - m_Range[0]);
+		double shift = -m_Range[0];
+		m_Cast->SetInputData(m_Input);
+		m_Cast->SetShift(shift);
+		m_Cast->SetScale(slope);
+		m_Cast->SetOutputScalarTypeToUnsignedShort();
+		m_VolumeMapper->SetInputConnection(m_Cast->GetOutputPort());
 	}
 	else
 	{
-		volumeMapper->SetInputData(input);
+		m_VolumeMapper->SetInputData(m_Input);
 	}
 
-	volume = vtkSmartPointer<vtkVolume>::New();
+	m_Volume = vtkSmartPointer<vtkVolume>::New();
 	if (gpu_or_raycast)
-		volumeMapper->SetRequestedRenderModeToDefault();
+		m_VolumeMapper->SetRequestedRenderModeToDefault();
 	else
-		volumeMapper->SetRequestedRenderModeToRayCast();
+		m_VolumeMapper->SetRequestedRenderModeToRayCast();
 
-	volume->SetMapper(volumeMapper);
-	volume->SetProperty(volumeProperty);
+	m_Volume->SetMapper(m_VolumeMapper);
+	m_Volume->SetProperty(m_VolumeProperty);
 
 	//
 	// Create the renderers and assign actors to them.
 	//
-	ren3D = vtkSmartPointer<vtkRenderer>::New();
-	ren3D->AddActor(sliceActorY);
-	ren3D->AddActor(sliceActorZ);
-	ren3D->AddVolume(volume);
+	m_Ren3D = vtkSmartPointer<vtkRenderer>::New();
+	m_Ren3D->AddActor(m_SliceActorY);
+	m_Ren3D->AddActor(m_SliceActorZ);
+	m_Ren3D->AddVolume(m_Volume);
 
-	ren3D->AddActor(outlineActor);
-	ren3D->SetBackground(0, 0, 0);
-	ren3D->SetViewport(0.0, 0.0, 1.0, 1.0);
+	m_Ren3D->AddActor(m_OutlineActor);
+	m_Ren3D->SetBackground(0, 0, 0);
+	m_Ren3D->SetViewport(0.0, 0.0, 1.0, 1.0);
 
-	renWin = vtkSmartPointer<vtkRenderWindow>::New();
+	m_RenWin = vtkSmartPointer<vtkRenderWindow>::New();
 
-	vtkWidget->GetRenderWindow()->AddRenderer(ren3D);
-	vtkWidget->GetRenderWindow()->LineSmoothingOn();
-	vtkWidget->GetRenderWindow()->SetSize(600, 600);
+	m_VtkWidget->GetRenderWindow()->AddRenderer(m_Ren3D);
+	m_VtkWidget->GetRenderWindow()->LineSmoothingOn();
+	m_VtkWidget->GetRenderWindow()->SetSize(600, 600);
 
-	style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
+	m_Style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 
-	iren = vtkSmartPointer<QVTKInteractor>::New();
-	iren->SetInteractorStyle(style);
+	m_Iren = vtkSmartPointer<QVTKInteractor>::New();
+	m_Iren->SetInteractorStyle(m_Style);
 
-	iren->SetRenderWindow(vtkWidget->GetRenderWindow());
+	m_Iren->SetRenderWindow(m_VtkWidget->GetRenderWindow());
 
-	my_sliceDataY = vtkSmartPointer<vtkMySliceCallbackY>::New();
-	my_sliceDataY->slicePlaneY1 = slicePlaneY;
-	my_sliceDataY->sliceCutterY1 = sliceCutterY;
-	planeWidgetY->SetInteractor(iren);
-	planeWidgetY->AddObserver(vtkCommand::InteractionEvent, my_sliceDataY);
-	planeWidgetY->AddObserver(vtkCommand::EnableEvent, my_sliceDataY);
-	planeWidgetY->AddObserver(vtkCommand::StartInteractionEvent, my_sliceDataY);
-	planeWidgetY->AddObserver(vtkCommand::EndPickEvent, my_sliceDataY);
-	planeWidgetY->SetPlaceFactor(1.0);
-	planeWidgetY->PlaceWidget();
-	planeWidgetY->SetOrigin(center);
-	planeWidgetY->SetEnabled(cb_showslice1->isChecked());
-	planeWidgetY->PlaceWidget(bounds);
+	m_MySliceDataY = vtkSmartPointer<SliceCallbackY>::New();
+	m_MySliceDataY->m_SlicePlaneY1 = m_SlicePlaneY;
+	m_MySliceDataY->m_SliceCutterY1 = m_SliceCutterY;
+	m_PlaneWidgetY->SetInteractor(m_Iren);
+	m_PlaneWidgetY->AddObserver(vtkCommand::InteractionEvent, m_MySliceDataY);
+	m_PlaneWidgetY->AddObserver(vtkCommand::EnableEvent, m_MySliceDataY);
+	m_PlaneWidgetY->AddObserver(vtkCommand::StartInteractionEvent, m_MySliceDataY);
+	m_PlaneWidgetY->AddObserver(vtkCommand::EndPickEvent, m_MySliceDataY);
+	m_PlaneWidgetY->SetPlaceFactor(1.0);
+	m_PlaneWidgetY->PlaceWidget();
+	m_PlaneWidgetY->SetOrigin(center);
+	m_PlaneWidgetY->SetEnabled(m_CbShowslice1->Value());
+	m_PlaneWidgetY->PlaceWidget(bounds);
 
-	my_sliceDataZ = vtkSmartPointer<vtkMySliceCallbackZ>::New();
-	my_sliceDataZ->slicePlaneZ1 = slicePlaneZ;
-	my_sliceDataZ->sliceCutterZ1 = sliceCutterZ;
-	planeWidgetZ->SetInteractor(iren);
-	planeWidgetZ->AddObserver(vtkCommand::InteractionEvent, my_sliceDataZ);
-	planeWidgetZ->AddObserver(vtkCommand::EnableEvent, my_sliceDataZ);
-	planeWidgetZ->AddObserver(vtkCommand::StartInteractionEvent, my_sliceDataZ);
-	planeWidgetZ->AddObserver(vtkCommand::EndPickEvent, my_sliceDataZ);
-	planeWidgetZ->SetPlaceFactor(1.0);
-	planeWidgetZ->PlaceWidget();
-	planeWidgetZ->SetOrigin(center);
-	planeWidgetZ->SetEnabled(cb_showslice2->isChecked());
-	planeWidgetZ->PlaceWidget(bounds);
+	m_MySliceDataZ = vtkSmartPointer<SliceCallbackZ>::New();
+	m_MySliceDataZ->m_SlicePlaneZ1 = m_SlicePlaneZ;
+	m_MySliceDataZ->m_SliceCutterZ1 = m_SliceCutterZ;
+	m_PlaneWidgetZ->SetInteractor(m_Iren);
+	m_PlaneWidgetZ->AddObserver(vtkCommand::InteractionEvent, m_MySliceDataZ);
+	m_PlaneWidgetZ->AddObserver(vtkCommand::EnableEvent, m_MySliceDataZ);
+	m_PlaneWidgetZ->AddObserver(vtkCommand::StartInteractionEvent, m_MySliceDataZ);
+	m_PlaneWidgetZ->AddObserver(vtkCommand::EndPickEvent, m_MySliceDataZ);
+	m_PlaneWidgetZ->SetPlaceFactor(1.0);
+	m_PlaneWidgetZ->PlaceWidget();
+	m_PlaneWidgetZ->SetOrigin(center);
+	m_PlaneWidgetZ->SetEnabled(m_CbShowslice2->Value());
+	m_PlaneWidgetZ->PlaceWidget(bounds);
 
 	//
 	// Jump into the event loop and capture mouse and keyboard events.
 	//
 	//iren->Start();
-	vtkWidget->GetRenderWindow()->Render();
-}
+	m_VtkWidget->GetRenderWindow()->Render();
 
-void VolumeViewerWidget::resizeEvent(QResizeEvent* RE)
-{
-	QWidget::resizeEvent(RE);
-	QSize size1 = RE->size();
-
-	vbox1->setFixedSize(size1);
-
-	if (size1.height() > 300)
-		size1.setHeight(size1.height() - 300);
-	vtkWidget->setFixedSize(size1);
-	vtkWidget->GetRenderWindow()->SetSize(size1.width(), size1.height());
-	vtkWidget->GetRenderWindow()->Render();
+	resize(600, 600);
 }
 
 void VolumeViewerWidget::closeEvent(QCloseEvent* qce)
 {
-	emit hasbeenclosed();
+	emit Hasbeenclosed();
 	QWidget::closeEvent(qce);
 }
 
-VolumeViewerWidget::~VolumeViewerWidget() { delete vbox1; }
-
-void VolumeViewerWidget::shade_changed()
+void VolumeViewerWidget::ShadeChanged()
 {
-	if (cb_shade->isChecked())
+	if (m_CbShade->Value())
 	{
-		volumeProperty->ShadeOn();
+		m_VolumeProperty->ShadeOn();
 	}
 	else
 	{
-		volumeProperty->ShadeOff();
+		m_VolumeProperty->ShadeOff();
 	}
 
-	vtkWidget->GetRenderWindow()->Render();
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::raytraceortexturemap_changed()
+void VolumeViewerWidget::RaytraceortexturemapChanged()
 {
-	if (cb_raytraceortexturemap->isChecked())
+	if (m_CbRaytraceortexturemap->Value())
 	{
-		volumeMapper->SetRequestedRenderModeToDefault();
+		m_VolumeMapper->SetRequestedRenderModeToDefault();
 	}
 	else
 	{
-		volumeMapper->SetRequestedRenderModeToRayCast();
+		m_VolumeMapper->SetRequestedRenderModeToRayCast();
 	}
 
-	volume->Update();
-	vtkWidget->GetRenderWindow()->Render();
+	m_Volume->Update();
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::showslices_changed()
+void VolumeViewerWidget::ShowslicesChanged()
 {
 	bool changed = false;
-	if ((cb_showslices->isChecked() ? 1 : 0) != sliceActorY->GetVisibility())
+	if ((m_CbShowslices->Value() ? 1 : 0) != m_SliceActorY->GetVisibility())
 	{
-		sliceActorY->SetVisibility(cb_showslices->isChecked());
-		sliceActorZ->SetVisibility(cb_showslices->isChecked());
+		m_SliceActorY->SetVisibility(m_CbShowslices->Value());
+		m_SliceActorZ->SetVisibility(m_CbShowslices->Value());
 		changed = true;
 	}
-	if ((cb_showslice1->isChecked() ? 1 : 0) != planeWidgetY->GetEnabled())
+	if ((m_CbShowslice1->Value() ? 1 : 0) != m_PlaneWidgetY->GetEnabled())
 	{
-		planeWidgetY->SetEnabled(cb_showslice1->isChecked());
+		m_PlaneWidgetY->SetEnabled(m_CbShowslice1->Value());
 		changed = true;
 	}
-	if ((cb_showslice2->isChecked() ? 1 : 0) != planeWidgetZ->GetEnabled())
+	if ((m_CbShowslice2->Value() ? 1 : 0) != m_PlaneWidgetZ->GetEnabled())
 	{
-		planeWidgetZ->SetEnabled(cb_showslice2->isChecked());
+		m_PlaneWidgetZ->SetEnabled(m_CbShowslice2->Value());
 		changed = true;
 	}
 
 	if (changed)
 	{
-		vtkWidget->GetRenderWindow()->Render();
+		m_VtkWidget->GetRenderWindow()->Render();
 	}
 }
 
-void VolumeViewerWidget::showvolume_changed()
+void VolumeViewerWidget::ShowvolumeChanged()
 {
-	if (cb_showvolume->isChecked())
+	m_CbShade->SetVisible(m_CbShowvolume->Value());
+	m_CbRaytraceortexturemap->SetVisible(m_CbShowvolume->Value());
+
+	if (m_CbShowvolume->Value())
 	{
-		volume->SetVisibility(true);
-		cb_shade->show();
-		cb_raytraceortexturemap->show();
-		if (bmportissue)
+		m_Volume->SetVisibility(true);
+		if (m_Bmportissue)
 		{
-			hbox3->hide();
-			hbox1->show();
-			hbox2->show();
+			//BL m_Hbox3->hide();
+			//BL m_Hbox1->show();
+			//BL m_Hbox2->show();
 		}
 		else
 		{
-			hbox3->show();
-			hbox1->hide();
-			hbox2->show();
+			//BL m_Hbox3->show();
+			//BL m_Hbox1->hide();
+			//BL m_Hbox2->show();
 		}
 	}
 	else
 	{
-		volume->SetVisibility(false);
-		cb_shade->hide();
-		cb_raytraceortexturemap->hide();
-		hbox1->hide();
-		hbox2->hide();
-		hbox3->hide();
+		m_Volume->SetVisibility(false);
+		//BL m_Hbox1->hide();
+		//BL m_Hbox2->hide();
+		//BL m_Hbox3->hide();
 	}
-	vtkWidget->GetRenderWindow()->Render();
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::tissue_changed()
+void VolumeViewerWidget::TissueChanged()
 {
-	if (!bmportissue)
+	if (!m_Bmportissue)
 	{
-		colorTransferFunction->RemoveAllPoints();
-		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+		m_ColorTransferFunction->RemoveAllPoints();
+		m_ColorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			auto tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+			m_ColorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
 
-		opacityTransferFunction->RemoveAllPoints();
-		opacityTransferFunction->AddPoint(0, 0);
+		m_OpacityTransferFunction->RemoveAllPoints();
+		m_OpacityTransferFunction->AddPoint(0, 0);
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
+			if (m_SlTrans->Value() > 50)
+				opac1 = opac1 * (100 - m_SlTrans->Value()) / 50;
 			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			opacityTransferFunction->AddPoint(i, opac1);
+				opac1 = 1.0f - (1.0 - opac1) * m_SlTrans->Value() / 50;
+			m_OpacityTransferFunction->AddPoint(i, opac1);
 		}
 
-		vtkWidget->GetRenderWindow()->Render();
+		m_VtkWidget->GetRenderWindow()->Render();
 	}
 }
 
-void VolumeViewerWidget::transp_changed()
+void VolumeViewerWidget::TranspChanged()
 {
-	if (!bmportissue)
+	if (!m_Bmportissue)
 	{
-		opacityTransferFunction->RemoveAllPoints();
-		opacityTransferFunction->AddPoint(0, 0);
+		m_OpacityTransferFunction->RemoveAllPoints();
+		m_OpacityTransferFunction->AddPoint(0, 0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 		for (tissues_size_t i = 1; i <= tissuecount; i++)
 		{
 			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
+			if (m_SlTrans->Value() > 50)
+				opac1 = opac1 * (100 - m_SlTrans->Value()) / 50;
 			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			opacityTransferFunction->AddPoint(i, opac1);
+				opac1 = 1.0f - (1.0 - opac1) * m_SlTrans->Value() / 50;
+			m_OpacityTransferFunction->AddPoint(i, opac1);
 		}
 
-		vtkWidget->GetRenderWindow()->Render();
+		m_VtkWidget->GetRenderWindow()->Render();
 	}
 }
 
-void VolumeViewerWidget::contrbright_changed()
+void VolumeViewerWidget::ContrbrightChanged()
 {
-	if (bmportissue)
+	if (m_Bmportissue)
 	{
-		double level =
-				range[0] + (sl_bright->value() * (range[1] - range[0]) / 100);
-		double window = (range[1] - range[0]) / (sl_contr->value() + 1);
+		double level = m_Range[0] + (m_SlBright->Value() * (m_Range[1] - m_Range[0]) / 100);
+		double window = (m_Range[1] - m_Range[0]) / (m_SlContr->Value() + 1);
 
-		level = range[0] + (sl_bright->value() * (range[1] - range[0]) / 100);
-		window = (range[1] - range[0]) * (sl_contr->value() + 1) / 101;
+		level = m_Range[0] + (m_SlBright->Value() * (m_Range[1] - m_Range[0]) / 100);
+		window = (m_Range[1] - m_Range[0]) * (m_SlContr->Value() + 1) / 101;
 
-		opacityTransferFunction->RemoveAllPoints();
-		opacityTransferFunction->AddPoint(level - window / 2, 0.0);
-		opacityTransferFunction->AddPoint(level + window / 2, 1.0);
-		colorTransferFunction->RemoveAllPoints();
-		colorTransferFunction->AddRGBPoint(level - window / 2, 0.0, 0.0, 0.0);
-		colorTransferFunction->AddRGBPoint(level + window / 2, 1.0, 1.0, 1.0);
+		m_OpacityTransferFunction->RemoveAllPoints();
+		m_OpacityTransferFunction->AddPoint(level - window / 2, 0.0);
+		m_OpacityTransferFunction->AddPoint(level + window / 2, 1.0);
+		m_ColorTransferFunction->RemoveAllPoints();
+		m_ColorTransferFunction->AddRGBPoint(level - window / 2, 0.0, 0.0, 0.0);
+		m_ColorTransferFunction->AddRGBPoint(level + window / 2, 1.0, 1.0, 1.0);
 
-		vtkWidget->GetRenderWindow()->Render();
+		m_VtkWidget->GetRenderWindow()->Render();
 	}
 }
 
-void VolumeViewerWidget::pixelsize_changed(Pair p)
+void VolumeViewerWidget::PixelsizeChanged(Pair p)
 {
-	input->SetSpacing(p.high, p.low, hand3D->get_slicethickness());
-	//BL?
-	//vtkInformation* info = input->GetPipelineInformation();
-	//double spc[3];
-	//input->GetSpacing(spc);
-	//info->Set(vtkDataObject::SPACING(), spc, 3);
-	input->Modified();
+	m_Input->SetSpacing(p.high, p.low, m_Hand3D->GetSlicethickness());
+	m_Input->Modified();
 
 	double bounds[6], center[3];
 
-	input->GetBounds(bounds);
-	input->GetCenter(center);
+	m_Input->GetBounds(bounds);
+	m_Input->GetCenter(center);
 
-	planeWidgetY->SetOrigin(center);
-	planeWidgetY->PlaceWidget(bounds);
+	m_PlaneWidgetY->SetOrigin(center);
+	m_PlaneWidgetY->PlaceWidget(bounds);
 
-	planeWidgetZ->SetOrigin(center);
-	planeWidgetZ->PlaceWidget(bounds);
+	m_PlaneWidgetZ->SetOrigin(center);
+	m_PlaneWidgetZ->PlaceWidget(bounds);
 
-	vtkWidget->GetRenderWindow()->Render();
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::thickness_changed(float thick)
+void VolumeViewerWidget::ThicknessChanged(float thick)
 {
-	Pair p = hand3D->get_pixelsize();
-	input->SetSpacing(p.high, p.low, thick);
-	//BL? what does this do?
-	//vtkInformation* info = input->GetPipelineInformation();
-	//double spc[3];
-	//input->GetSpacing(spc);
-	//info->Set(vtkDataObject::SPACING(), spc, 3);
-	input->Modified();
+	Pair p = m_Hand3D->GetPixelsize();
+	m_Input->SetSpacing(p.high, p.low, thick);
+	m_Input->Modified();
 
 	double bounds[6], center[3];
-	input->GetBounds(bounds);
-	input->GetCenter(center);
+	m_Input->GetBounds(bounds);
+	m_Input->GetCenter(center);
 
-	planeWidgetY->SetOrigin(center);
-	planeWidgetY->PlaceWidget(bounds);
+	m_PlaneWidgetY->SetOrigin(center);
+	m_PlaneWidgetY->PlaceWidget(bounds);
 
-	planeWidgetZ->SetOrigin(center);
-	planeWidgetZ->PlaceWidget(bounds);
+	m_PlaneWidgetZ->SetOrigin(center);
+	m_PlaneWidgetZ->PlaceWidget(bounds);
 
-	//	outlineGrid->SetInput(input);
-	//	outlineGrid->Update();
-	//	outlineMapper->SetInput(outlineGrid->GetOutput());
-	//	outlineMapper->Update();
-
-	/*outlineMapper->Modified();
-	outlineActor->Modified();
-	ren3D->Modified();
-
-	volume->Update();*/
-
-	vtkWidget->GetRenderWindow()->Render();
-
-	/*iSAR_ShepInterpolate iSI;
-	int nx=16;
-	int ny=8;
-	float valin[128];
-	{
-	int pos=0;
-	for(int pos=0;pos<nx*ny;pos++) {
-	valin[pos]=0;
-	}
-	valin[19]=1;
-	}
-	float valout[256];
-
-	{
-	FILE *fp3=fopen("D:\\Development\\segmentation\\sample images\\test100.txt","w");
-
-	int pos=0;
-	for(int i=0;i<ny;i++) {
-	for(int j=0;j<nx;j++) {
-	if(i%2==1)
-	fprintf(fp3,"- %f ",valin[j*ny+i]);
-	else
-	fprintf(fp3,"%f - ",valin[j*ny+i]);
-	pos++;
-	}
-	fprintf(fp3,"\n");
-	}
-	fprintf(fp3,"\n\n");
-
-	fclose(fp3);
-	}
-
-	iSI.interpolate(16,8,15,10,7.5,valin,valout);*/
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::reload()
+void VolumeViewerWidget::Reload()
 {
-	int xm, xp, ym, yp, zm, zp;								//xxxa
-	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
+	int xm, xp, ym, yp, zm, zp;									//xxxa
+	m_Input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
 	int size1[3];
-	input->GetDimensions(size1);
-	int w = hand3D->width(); //xxxa
-	if ((hand3D->width() != size1[0]) ||
-			(hand3D->height() != size1[1]) ||
-			(hand3D->num_slices() != size1[2]))
+	m_Input->GetDimensions(size1);
+	//int w = hand3D->width(); //xxxa
+	if ((m_Hand3D->Width() != size1[0]) ||
+			(m_Hand3D->Height() != size1[1]) ||
+			(m_Hand3D->NumSlices() != size1[2]))
 	{
-		input->SetExtent(0, (int)hand3D->width() - 1, 0,
-				(int)hand3D->height() - 1, 0,
-				(int)hand3D->num_slices() - 1);
-		input->AllocateScalars(input->GetScalarType(),
-				input->GetNumberOfScalarComponents());
-		outlineGrid->SetInputData(input);
-		planeWidgetY->SetInputData(input);
-		sliceCutterY->SetInputData(input);
-		planeWidgetZ->SetInputData(input);
-		sliceCutterZ->SetInputData(input);
+		m_Input->SetExtent(0, (int)m_Hand3D->Width() - 1, 0, (int)m_Hand3D->Height() - 1, 0, (int)m_Hand3D->NumSlices() - 1);
+		m_Input->AllocateScalars(m_Input->GetScalarType(), m_Input->GetNumberOfScalarComponents());
+		m_OutlineGrid->SetInputData(m_Input);
+		m_PlaneWidgetY->SetInputData(m_Input);
+		m_SliceCutterY->SetInputData(m_Input);
+		m_PlaneWidgetZ->SetInputData(m_Input);
+		m_SliceCutterZ->SetInputData(m_Input);
 
 		double bounds[6], center[3];
-		input->GetBounds(bounds);
-		input->GetCenter(center);
-		planeWidgetY->SetOrigin(center);
-		planeWidgetY->PlaceWidget(bounds);
-		planeWidgetZ->SetOrigin(center);
-		planeWidgetZ->PlaceWidget(bounds);
-		if (!bmportissue)
+		m_Input->GetBounds(bounds);
+		m_Input->GetCenter(center);
+		m_PlaneWidgetY->SetOrigin(center);
+		m_PlaneWidgetY->PlaceWidget(bounds);
+		m_PlaneWidgetZ->SetOrigin(center);
+		m_PlaneWidgetZ->PlaceWidget(bounds);
+		if (!m_Bmportissue)
 		{
-			volumeMapper->SetInputData(input);
+			m_VolumeMapper->SetInputData(m_Input);
 		}
 		else
 		{
-			cast->SetInputData(input);
-			volumeMapper->SetInputConnection(cast->GetOutputPort());
+			m_Cast->SetInputData(m_Input);
+			m_VolumeMapper->SetInputConnection(m_Cast->GetOutputPort());
 		}
 	}
-	input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
-	input->GetDimensions(size1);							//xxxa
-	Pair ps = hand3D->get_pixelsize();
-	input->SetSpacing(ps.high, ps.low, hand3D->get_slicethickness());
+	m_Input->GetExtent(xm, xp, ym, yp, zm, zp); //xxxa
+	m_Input->GetDimensions(size1);							//xxxa
+	Pair ps = m_Hand3D->GetPixelsize();
+	m_Input->SetSpacing(ps.high, ps.low, m_Hand3D->GetSlicethickness());
 
-	if (bmportissue)
+	if (m_Bmportissue)
 	{
-		float* field = (float*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
+		float* field = (float*)m_Input->GetScalarPointer(0, 0, 0);
+		for (unsigned short i = 0; i < m_Hand3D->NumSlices(); i++)
 		{
-			hand3D->copyfrombmp(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			m_Hand3D->Copyfrombmp(i, &(field[i * (unsigned long long)m_Hand3D->ReturnArea()]));
 		}
 	}
 	else
 	{
 		tissues_size_t* field =
-				(tissues_size_t*)input->GetScalarPointer(0, 0, 0);
-		for (unsigned short i = 0; i < hand3D->num_slices(); i++)
+				(tissues_size_t*)m_Input->GetScalarPointer(0, 0, 0);
+		for (unsigned short i = 0; i < m_Hand3D->NumSlices(); i++)
 		{
-			hand3D->copyfromtissue(
-					i, &(field[i * (unsigned long long)hand3D->return_area()]));
+			m_Hand3D->Copyfromtissue(i, &(field[i * (unsigned long long)m_Hand3D->ReturnArea()]));
 		}
 	}
 
-	/*vtkInformation* info = input->GetPipelineInformation();
-	Pair p;
-	hand3D->get_bmprange(&p);
-	range[0]=p.low;
-	range[1]=p.high;
-	info->Set(vtkDataObject::FIELD_RANGE(),range,2);*/
-	input->Modified();
-	input->GetScalarRange(range);
-	if (bmportissue)
+	m_Input->Modified();
+	m_Input->GetScalarRange(m_Range);
+	if (m_Bmportissue)
 	{
 		Pair p;
 
-		hand3D->get_bmprange(&p);
-		range[0] = p.low;
-		range[1] = p.high;
-		lut->SetTableRange(range);
-		lut->Build(); //effective build
-		double slope = 255 / (range[1] - range[0]);
-		double shift = -range[0];
-		cast->SetShift(shift);
-		cast->SetScale(slope);
-		cast->SetOutputScalarTypeToUnsignedShort();
-		cast->Update();
+		m_Hand3D->GetBmprange(&p);
+		m_Range[0] = p.low;
+		m_Range[1] = p.high;
+		m_Lut->SetTableRange(m_Range);
+		m_Lut->Build(); //effective build
+		double slope = 255 / (m_Range[1] - m_Range[0]);
+		double shift = -m_Range[0];
+		m_Cast->SetShift(shift);
+		m_Cast->SetScale(slope);
+		m_Cast->SetOutputScalarTypeToUnsignedShort();
+		m_Cast->Update();
 	}
 	else
 	{
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
-		lut->SetNumberOfColors(tissuecount + 1);
-		lut->Build();
-		lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
+		m_Lut->SetNumberOfColors(tissuecount + 1);
+		m_Lut->Build();
+		m_Lut->SetTableValue(0, 0.0, 0.0, 0.0, 0.0);
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
 			auto tissuecolor = TissueInfos::GetTissueColor(i);
-			lut->SetTableValue((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
+			m_Lut->SetTableValue((double)i - 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2], 1.0);
 		}
 		auto tissuecolor = TissueInfos::GetTissueColor(tissuecount + 1);
-		colorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+		m_ColorTransferFunction->AddRGBPoint((double)tissuecount + 0.1, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 	}
-	sliceY->SetScalarRange(range);
-	sliceY->SetLookupTable(lut);
-	sliceY->Update();
-	sliceZ->SetScalarRange(range);
-	sliceZ->SetLookupTable(lut);
-	sliceZ->Update();
-	//		sliceY->Update();
-	//		sliceZ->Update();
-	//	} else {
-	//		tissues_size_t *field=(tissues_size_t *)input->GetScalarPointer(0,0,0);
-	//		for(unsigned short i=0;i<hand3D->return_nrslices();i++) {
-	//			hand3D->copyfromtissue(i,&(field[i*(unsigned long)hand3D->return_area()]));
-	//		}
-	if (!bmportissue)
+	m_SliceY->SetScalarRange(m_Range);
+	m_SliceY->SetLookupTable(m_Lut);
+	m_SliceY->Update();
+	m_SliceZ->SetScalarRange(m_Range);
+	m_SliceZ->SetLookupTable(m_Lut);
+	m_SliceZ->Update();
+
+	if (!m_Bmportissue)
 	{
-		opacityTransferFunction->RemoveAllPoints();
-		opacityTransferFunction->AddPoint(0, 0);
+		m_OpacityTransferFunction->RemoveAllPoints();
+		m_OpacityTransferFunction->AddPoint(0, 0);
 		tissues_size_t tissuecount = TissueInfos::GetTissueCount();
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
 			float opac1 = TissueInfos::GetTissueOpac(i);
-			if (sl_trans->value() > 50)
-				opac1 = opac1 * (100 - sl_trans->value()) / 50;
+			if (m_SlTrans->Value() > 50)
+				opac1 = opac1 * (100 - m_SlTrans->Value()) / 50;
 			else
-				opac1 = 1.0f - (1.0 - opac1) * sl_trans->value() / 50;
-			opacityTransferFunction->AddPoint(i, opac1);
+				opac1 = 1.0f - (1.0 - opac1) * m_SlTrans->Value() / 50;
+			m_OpacityTransferFunction->AddPoint(i, opac1);
 		}
 
-		colorTransferFunction->RemoveAllPoints();
-		colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+		m_ColorTransferFunction->RemoveAllPoints();
+		m_ColorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
 		for (tissues_size_t i = 1; i <= tissuecount; ++i)
 		{
 			auto tissuecolor = TissueInfos::GetTissueColor(i);
-			colorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
+			m_ColorTransferFunction->AddRGBPoint(i, tissuecolor[0], tissuecolor[1], tissuecolor[2]);
 		}
 	}
 
-	input->Modified();
-	outlineActor->Modified();
+	m_Input->Modified();
+	m_OutlineActor->Modified();
 
-	vtkWidget->GetRenderWindow()->Render();
+	m_VtkWidget->GetRenderWindow()->Render();
 }
 
-void VolumeViewerWidget::vtkMySliceCallbackY::Execute(vtkObject* caller, unsigned long, void*)
+void VolumeViewerWidget::SliceCallbackY::Execute(vtkObject* caller, unsigned long, void*)
 {
 	std::cerr << "ExecuteY\n";
 	//
 	// The plane has moved, update the sampled data values.
 	//
-	vtkImplicitPlaneWidget* planeWidget =
+	vtkImplicitPlaneWidget* plane_widget =
 			reinterpret_cast<vtkImplicitPlaneWidget*>(caller);
 	//planeWidget->GetPolyData( plane );
-	planeWidget->GetPlane(slicePlaneY1);
-	sliceCutterY1->SetCutFunction(slicePlaneY1);
+	plane_widget->GetPlane(m_SlicePlaneY1);
+	m_SliceCutterY1->SetCutFunction(m_SlicePlaneY1);
 }
 
-void iseg::VolumeViewerWidget::vtkMySliceCallbackZ::Execute(vtkObject* caller, unsigned long, void*)
+void iseg::VolumeViewerWidget::SliceCallbackZ::Execute(vtkObject* caller, unsigned long, void*)
 {
 	std::cerr << "ExecuteZ\n";
 	//
 	// The plane has moved, update the sampled data values.
 	//
-	vtkImplicitPlaneWidget* planeWidget =
+	vtkImplicitPlaneWidget* plane_widget =
 			reinterpret_cast<vtkImplicitPlaneWidget*>(caller);
 	//planeWidget->GetPolyData( plane );
-	planeWidget->GetPlane(slicePlaneZ1);
-	sliceCutterZ1->SetCutFunction(slicePlaneZ1);
+	plane_widget->GetPlane(m_SlicePlaneZ1);
+	m_SliceCutterZ1->SetCutFunction(m_SlicePlaneZ1);
 }
 
 } // namespace iseg

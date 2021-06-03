@@ -32,14 +32,11 @@
 #include "../IMaxFlow.h"
 #include "../../System/Collection/Array.h"
 
-namespace Gc
-{
-	namespace Flow
-	{
-        /** Maximum flow algorithms for general directed graphs. */
-        namespace General
-        {
-		    /** Implementation of the Ford/Fulkerson maximum flow algorithm for general 
+namespace Gc {
+namespace Flow {
+/** Maximum flow algorithms for general directed graphs. */
+namespace General {
+/** Implementation of the Ford/Fulkerson maximum flow algorithm for general 
                 directed graphs.
 
                 Description of this algorithm can be found in:
@@ -74,96 +71,94 @@ namespace Gc
 
                 @see EdmondsKarp
 		    */
-		    template <class TFLOW, class TCAP>
-		    class GC_DLL_EXPORT FordFulkerson 
-                : public IMaxFlow<TFLOW,TCAP,TCAP>
-		    {
-		    protected:
-                // Forward declaration
-			    struct Node;
+template <class TFLOW, class TCAP>
+class GC_DLL_EXPORT FordFulkerson
+    : public IMaxFlow<TFLOW, TCAP, TCAP>
+{
+  protected:
+    // Forward declaration
+    struct Node;
 
-                /** Structure used for storing arcs in the network. */
-			    struct Arc
-			    {
-                    /** Residual capacity. */
-				    TCAP m_res_cap;
-                    /** Pointer to the next arc with the same tail. */
-				    Arc *m_next;
-                    /** Pointer to the arc going in the opposite direction. */
-				    Arc *m_sister;
-                    /** Pointer to the head node. */
-				    Node *m_head;
-			    };
+    /** Structure used for storing arcs in the network. */
+    struct Arc
+    {
+        /** Residual capacity. */
+        TCAP m_res_cap;
+        /** Pointer to the next arc with the same tail. */
+        Arc * m_next;
+        /** Pointer to the arc going in the opposite direction. */
+        Arc * m_sister;
+        /** Pointer to the head node. */
+        Node * m_head;
+    };
 
-                /** Structure used for storing nodes in the network. */
-			    struct Node
-			    {
-                    /** Pointer to the first arc going from this node. */
-				    Arc *m_first;
-                    /** Pointer to the arc going to this node from its parent node. */
-				    Arc *m_parent;
-                    /** Timestamp. */
-				    Size m_ts;
-			    };
+    /** Structure used for storing nodes in the network. */
+    struct Node
+    {
+        /** Pointer to the first arc going from this node. */
+        Arc * m_first;
+        /** Pointer to the arc going to this node from its parent node. */
+        Arc * m_parent;
+        /** Timestamp. */
+        Size m_ts;
+    };
 
-                /** Node array. */
-                System::Collection::Array<1,Node> m_node_list;
-                /** Node heap. It has the same size as m_node_list and can be used 
+    /** Node array. */
+    System::Collection::Array<1, Node> m_node_list;
+    /** Node heap. It has the same size as m_node_list and can be used 
                     for storing temporary node structures like stack, queue or list 
                     without the need to allocate/deallocate memory. */
-                System::Collection::Array<1,Node *> m_node_heap;
-                /** Arc array. */
-                System::Collection::Array<1,Arc> m_arc_list;
-                /** Arc count. */
-			    Size m_arcs;
-                /** Global timestamp. */
-			    Size m_timestamp;
-                /** Total flow */
-                TFLOW m_flow;
+    System::Collection::Array<1, Node *> m_node_heap;
+    /** Arc array. */
+    System::Collection::Array<1, Arc> m_arc_list;
+    /** Arc count. */
+    Size m_arcs = 0;
+    /** Global timestamp. */
+    Size m_timestamp = 0;
+    /** Total flow */
+    TFLOW m_flow;
 
-                /** Highest arc capacity. */
-                TCAP m_max_arc_cap;
-                /** Capacity scaling coefficient. */
-                double m_cap_scale;
-                /** Current stage. Used to check correct method calling order. */
-                Uint8 m_stage;
+    /** Highest arc capacity. */
+    TCAP m_max_arc_cap;
+    /** Capacity scaling coefficient. */
+    double m_cap_scale = 0;
+    /** Current stage. Used to check correct method calling order. */
+    Uint8 m_stage = 0;
 
-		    public:
-			    /** Constructor. */
-			    FordFulkerson()
-				    : m_arcs(0), m_timestamp(0), m_cap_scale(0), m_stage(0)
-			    {}
+  public:
+    /** Constructor. */
+    FordFulkerson() = default;
 
-			    /** Destructor. */
-			    virtual ~FordFulkerson ()
-			    {
-				    Dispose();
-			    }
+    /** Destructor. */
+    ~FordFulkerson() override
+    {
+        Dispose();
+    }
 
-			    virtual void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs);
+    void Init(Size nodes, Size max_arcs, Size src_arcs, Size snk_arcs) override;
 
-			    virtual void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap)
-                {
-                    AddArcInternal(n1 + 2, n2 + 2, cap, rcap);
-                }
+    void SetArcCap(Size n1, Size n2, TCAP cap, TCAP rcap) override
+    {
+        AddArcInternal(n1 + 2, n2 + 2, cap, rcap);
+    }
 
-			    virtual void SetTerminalArcCap(Size node, TCAP csrc, TCAP csnk);
+    void SetTerminalArcCap(Size node, TCAP csrc, TCAP csnk) override;
 
-			    virtual TFLOW FindMaxFlow();
+    TFLOW FindMaxFlow() override;
 
-			    virtual Origin NodeOrigin(Size node) const;
+    Origin NodeOrigin(Size node) const override;
 
-			    virtual void Dispose();
+    void Dispose() override;
 
-                /** Enable capacity scaling and set scaling coefficient. 
+    /** Enable capacity scaling and set scaling coefficient. 
                 
                     @param[in] coef Capacity scaling coefficient. Has to be 
                         bigger than 1. Set to zero to disable capacity scaling.
                 */
-                void SetCapacityScaling(double coef = 2.0f);
+    void SetCapacityScaling(double coef = 2.0f);
 
-		    private:
-			    /** Find augmenting path from the source to the sink using a 
+  private:
+    /** Find augmenting path from the source to the sink using a 
                     particular method.
 
 				    @param[in] source Pointer to the source node.
@@ -175,13 +170,13 @@ namespace Gc
                         a new threshold).
 				    @return \c True if augmenting path exists, \c false otherwise.
 			    */
-			    virtual bool FindAugmentingPath (Node *source, Node *sink, 
-                    Size timestamp, TCAP scale, TCAP &maxrjcap)
-			    {
-				    return DepthFirstSearch (source, sink, timestamp, scale, maxrjcap);
-			    }
+    virtual bool FindAugmentingPath(Node * source, Node * sink,
+                                    Size timestamp, TCAP scale, TCAP & maxrjcap)
+    {
+        return DepthFirstSearch(source, sink, timestamp, scale, maxrjcap);
+    }
 
-			    /** Find augmenting path using depth-first search.
+    /** Find augmenting path using depth-first search.
 
 				    @param[in] source Pointer to the source node.
 				    @param[in] sink Pointer to the sink node.
@@ -192,9 +187,9 @@ namespace Gc
                         a new threshold).
                     @return \c True if augmenting path exists, \c false otherwise. 
 			    */
-			    bool DepthFirstSearch (Node *source, Node *sink, Size timestamp, TCAP scale, TCAP &maxrjcap);
+    bool DepthFirstSearch(Node * source, Node * sink, Size timestamp, TCAP scale, TCAP & maxrjcap);
 
-			    /** Add bidirectional arc between two nodes. 
+    /** Add bidirectional arc between two nodes. 
                 
                     Source is node 0, sink is node 1.
 
@@ -203,17 +198,17 @@ namespace Gc
 				    @param[in] cap \c n1 -> \c n2 arc capacity.
 				    @param[in] rcap \c n2 -> \c n1 arc capacity.
 			    */
-			    void AddArcInternal(Size n1, Size n2, TCAP cap, TCAP rcap);
+    void AddArcInternal(Size n1, Size n2, TCAP cap, TCAP rcap);
 
-                /** Augment accross the current path.
+    /** Augment accross the current path.
 
                     @param[in] source Source node.
                     @param[in] sink Sink node.
                 */
-                void Augment(Node *source, Node *sink);
-		    };
-        }
-	}
+    void Augment(Node * source, Node * sink);
+};
+} // namespace General
 }
+} // namespace Gc::Flow
 
 #endif

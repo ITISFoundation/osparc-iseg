@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -16,29 +16,27 @@ namespace iseg { namespace plugin {
 class TracingPlugin : public Plugin
 {
 public:
-	TracingPlugin() {}
-	~TracingPlugin() {}
+	TracingPlugin() = default;
+	~TracingPlugin() = default;
 
-	virtual std::string name() const { return "Tracing Plugin "; }
+	std::string Name() const override { return "Tracing Plugin "; }
 
-	virtual std::string description() const { return "Tracing Plugin"; }
+	std::string Description() const override { return "Tracing Plugin"; }
 
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-			Qt::WindowFlags wFlags) const;
+	WidgetInterface* CreateWidget() const override;
 };
 
 class AutoTracingPlugin : public Plugin
 {
 public:
-	AutoTracingPlugin() {}
-	~AutoTracingPlugin() {}
+	AutoTracingPlugin() = default;
+	~AutoTracingPlugin() = default;
 
-	virtual std::string name() const { return "AutoTracing Plugin "; }
+	std::string Name() const override { return "AutoTracing Plugin "; }
 
-	virtual std::string description() const { return "AutoTracing Plugin"; }
+	std::string Description() const override { return "AutoTracing Plugin"; }
 
-	virtual WidgetInterface* create_widget(QWidget* parent, const char* name,
-			Qt::WindowFlags wFlags) const;
+	WidgetInterface* CreateWidget() const override;
 };
 
 }} // namespace iseg::plugin

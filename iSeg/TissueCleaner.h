@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 The Foundation for Research on Information Technologies in Society (IT'IS).
+ * Copyright (c) 2021 The Foundation for Research on Information Technologies in Society (IT'IS).
  * 
  * This file is part of iSEG
  * (see https://github.com/ITISFoundation/osparc-iseg).
@@ -18,8 +18,7 @@ namespace iseg {
 class TissueCleaner
 {
 public:
-	TissueCleaner(tissues_size_t** slices1, unsigned short n1,
-			unsigned short width1, unsigned short height1);
+	TissueCleaner(tissues_size_t** slices1, unsigned short n1, unsigned short width1, unsigned short height1);
 	~TissueCleaner();
 	bool Allocate();
 	void ConnectedComponents();
@@ -27,15 +26,15 @@ public:
 	void MakeStat();
 
 private:
-	int base_connection(int c);
-	std::vector<int> map;
-	std::vector<tissues_size_t> tissuemap;
-	std::vector<unsigned> volumes;
-	unsigned totvolumes[TISSUES_SIZE_MAX + 1];
-	int* volume;
-	tissues_size_t** slices;
-	size_t width, height;
-	size_t nrslices;
+	int BaseConnection(int c);
+	std::vector<int> m_Map;
+	std::vector<tissues_size_t> m_Tissuemap;
+	std::vector<unsigned> m_Volumes;
+	unsigned m_Totvolumes[TISSUES_SIZE_MAX + 1];
+	int* m_Volume;
+	tissues_size_t** m_Slices;
+	size_t m_Width, m_Height;
+	size_t m_Nrslices;
 };
 
 } // namespace iseg
