@@ -15,16 +15,9 @@
 
 #include "vtkMyGDCMPolyDataReader.h"
 
-#include <q3hbox.h>
-#include <q3vbox.h>
-#include <QCheckBox>
-#include <QComboBox>
+#include "Data/Property.h"
+
 #include <QDialog>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QWidget>
 
 #include <vector>
 
@@ -40,24 +33,23 @@ public:
 private:
 	void Storeparams();
 	void Updatevisibility();
+	void SolidChanged(int);
+	void NewChanged();
+	void IgnoreChanged();
+	void OkPressed();
 
 	SlicesHandler* m_Handler3D;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3VBox* m_Vbox1;
-	QSpinBox* m_SbPriority;
-	QComboBox* m_CbSolids;
-	QComboBox* m_CbNames;
-	QLineEdit* m_LeName;
-	QLabel* m_LbPriority;
-	QLabel* m_LbNamele;
-	QLabel* m_LbNamecb;
-	QCheckBox* m_CbNew;
-	QCheckBox* m_CbIgnore;
-	QPushButton* m_PbCancel;
-	QPushButton* m_PbOk;
+
+	PropertyInt_ptr m_SbPriority;
+	PropertyEnum_ptr m_CbSolids;
+	PropertyEnum_ptr m_CbNames;
+	PropertyString_ptr m_LeName;
+	PropertyBool_ptr m_CbNew;
+	PropertyBool_ptr m_CbIgnore;
+
+	PropertyButton_ptr m_PbCancel;
+	PropertyButton_ptr m_PbOk;
+
 	gdcmvtk_rtstruct::tissuevec m_Tissues;
 	std::vector<bool> m_Vecnew;
 	std::vector<bool> m_Vecignore;
@@ -69,13 +61,6 @@ private:
 signals:
 	void BeginDatachange(DataSelection& dataSelection, QWidget* sender = nullptr, bool beginUndo = true);
 	void EndDatachange(QWidget* sender = nullptr, eEndUndoAction undoAction = iseg::EndUndo);
-
-private slots:
-	void SolidChanged(int);
-	void NewChanged();
-	void IgnoreChanged();
-	void OkPressed();
-	void ShowPriorityInfo();
 };
 
 } // namespace iseg

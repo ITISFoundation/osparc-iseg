@@ -91,15 +91,10 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D)
 	// add widget and layout
 	auto property_view = new PropertyWidget(group);
 
-	auto hbox = new QHBoxLayout;
-	hbox->addWidget(property_view);
-	hbox->addStretch();
-
-	auto main_layout = new QVBoxLayout;
-	main_layout->addLayout(hbox);
-	main_layout->addStretch();
-
-	setLayout(main_layout);
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
+	setLayout(layout);
 }
 
 EdgeWidget::~EdgeWidget() = default;
