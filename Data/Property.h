@@ -30,6 +30,7 @@ ISEG_DECL_CLASS_PTR(PropertyInt);
 ISEG_DECL_CLASS_PTR(PropertyReal);
 ISEG_DECL_CLASS_PTR(PropertyBool);
 ISEG_DECL_CLASS_PTR(PropertyEnum);
+ISEG_DECL_CLASS_PTR(PropertyString);
 ISEG_DECL_CLASS_PTR(PropertyButton);
 ISEG_DECL_CLASS_PTR(PropertySlider);
 ISEG_DECL_CLASS_PTR(PropertyGroup);
