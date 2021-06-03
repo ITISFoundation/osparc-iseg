@@ -44,6 +44,8 @@ signals:
 
 private slots:
 	void Edited();
+	void SliderPressed();
+	void SliderMoved();
 
 private:
 	void Build(Property_ptr p, QTreeWidgetItem* item, QTreeWidgetItem* parent_item);

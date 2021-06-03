@@ -31,10 +31,11 @@
 #include "Thirdparty/QDarkStyleSheet/dark.h"
 
 #include <QApplication>
-#include <QLabel>
-#include <QSplashScreen>
 #include <QDateTime>
+#include <QLabel>
 #include <QMessageBox>
+#include <QSplashScreen>
+#include <QVBoxLayout>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -182,40 +183,25 @@ int main(int argc, char** argv)
 
 //#define TEST_PROPERTY
 #ifdef TEST_PROPERTY
-	auto group = PropertyGroup::Create();
-	group->SetDescription("Settings");
-	auto pi = group->Add("Iterations", PropertyInt::Create(5));
-	pi->SetDescription("Number of iterations");
-	auto pf = group->Add("Relaxation", PropertyReal::Create(0.5));
-	auto child_group = group->Add("Advanced", PropertyGroup::Create());
-	child_group->SetDescription("Advanced Settings");
-	auto pi2 = child_group->Add("Internal Iterations", PropertyInt::Create(2));
-	auto pb = child_group->Add("Enable", PropertyBool::Create(true));
-	auto pb2 = child_group->Add("Visible", PropertyBool::Create(true));
-	auto pbtn0 = child_group->Add("Update", PropertyButton::Create([]() {}));
-	auto ps = child_group->Add("Name", PropertyString::Create("Bar"));
-	auto pe = child_group->Add("Method", PropertyEnum::Create({"Foo", "Bar", "Hello"}, 0));
-	auto child_group2 = group->Add("Extra", PropertyGroup::Create());
-	child_group2->SetDescription("Extra Settings");
-	auto pf2 = child_group2->Add("Alpha", PropertyReal::Create(0.5));
-	auto pbtn = group->Add("Update", PropertyButton::Create([&group, &child_group]() {
-		std::cerr << "PropertyButton triggered\n";
-		group->DumpTree();
+	auto group = PropertyGroup::Create("Settings");
+	auto pb1 = group->Add("Enable", PropertyBool::Create(true));
+	auto pb2 = group->Add("Visible", PropertyBool::Create(true));
+	auto child_group = group->Add("Child", PropertyGroup::Create("Child Settings"));
+	auto pi = child_group->Add("Int", PropertyEnum::Create({"A", "B", "C"}, 0));
+	pi->SetItemEnabled(1, false);
+
+	auto pbtn1 = group->Add("Toggle Enable", PropertyButton::Create([&]() {
 		child_group->SetEnabled(!child_group->Enabled());
 	}));
+	auto pbtn2 = group->Add("Toggle Visible", PropertyButton::Create([&]() {
+		child_group->SetVisible(!child_group->Visible());
+	}));
 
-	iseg::Connect(group->onChildModified, group, [&](Property_ptr p, Property::eChangeType type) {
-		ISEG_INFO(p->Name() << " : " << p->StringValue());
+	iseg::Connect(pb1->onModified, pi, [&](Property_ptr p, Property::eChangeType type) {
+		pi->SetEnabled(pb1->Value());
 	});
-	iseg::Connect(pb->onModified, pbtn, [&](Property_ptr p, Property::eChangeType type) {
-		pbtn->SetEnabled(pb->Value());
-		pe->SetVisible(pb->Value());
-		child_group2->SetEnabled(pb2->Value());
-	});
-	iseg::Connect(pb2->onModified, pbtn0, [&](Property_ptr p, Property::eChangeType type) {
-		pi2->SetEnabled(pb2->Value());
-		pbtn0->SetVisible(pb2->Value());
-		child_group2->SetVisible(pb2->Value());
+	iseg::Connect(pb2->onModified, pi, [&](Property_ptr p, Property::eChangeType type) {
+		pi->SetVisible(pb2->Value());
 	});
 
 	auto dialog = new QDialog(main_window);

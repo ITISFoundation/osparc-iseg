@@ -49,13 +49,13 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D)
 	m_Modegroup->SetDescription("Method");
 	m_Modegroup->SetToolTip("Select a method to detect edge features");
 
-	m_SlSigma = group->Add("Sigma", PropertyInt::Create(30, 1, 100));
+	m_SlSigma = group->Add("Sigma", PropertySlider::Create(30, 1, 100));
 	m_SlSigma->SetDescription("Sigma");
 
-	m_SlThresh1 = group->Add("ThresholdLo", PropertyInt::Create(20, 1, 100));
+	m_SlThresh1 = group->Add("ThresholdLo", PropertySlider::Create(20, 1, 100));
 	m_SlThresh1->SetDescription("Lower Threshold");
 
-	m_SlThresh2 = group->Add("ThresholdHi", PropertyInt::Create(80, 1, 100));
+	m_SlThresh2 = group->Add("ThresholdHi", PropertySlider::Create(80, 1, 100));
 	m_SlThresh2->SetDescription("Upper Threshold");
 
 	m_Cb3d = group->Add("Skeletonize3D", PropertyBool::Create(true));

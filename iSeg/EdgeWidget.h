@@ -60,9 +60,9 @@ private:
 	};
 	std::shared_ptr<PropertyEnum> m_Modegroup;
 
-	std::shared_ptr<PropertyInt> m_SlSigma; // scaled to [0,5]
-	std::shared_ptr<PropertyInt> m_SlThresh1; // scaled to [0,150]
-	std::shared_ptr<PropertyInt> m_SlThresh2; // scaled to [0,150]
+	std::shared_ptr<PropertySlider> m_SlSigma; // scaled to [0,5]
+	std::shared_ptr<PropertySlider> m_SlThresh1; // scaled to [0,150]
+	std::shared_ptr<PropertySlider> m_SlThresh2; // scaled to [0,150]
 	std::shared_ptr<PropertyBool> m_Cb3d;
 
 	std::shared_ptr<PropertyButton> m_BtnExportCenterlines;

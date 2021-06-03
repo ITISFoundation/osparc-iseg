@@ -11,8 +11,8 @@
 
 #include "iSegData.h"
 
-#include "Signals.h"
 #include "SharedPtr.h"
+#include "Signals.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -44,12 +44,14 @@ public:
 		kBool,
 		kEnum,
 		kButton,
+		kSlider,
 		kGroup,
 		kePropertyTypeSize
 	};
 
 	enum eChangeType {
 		kValueChanged,
+		kValueRangeChanged,
 		kDescriptionChanged,
 		kStateChanged
 	};
@@ -160,10 +162,24 @@ public:
 	using value_type = T;
 
 	value_type Minimum() const { return m_Minimum; }
-	void SetMinimum(value_type v) { m_Minimum = v; }
+	void SetMinimum(value_type v) 
+	{
+		if (v != m_Minimum)
+		{
+			m_Minimum = v;
+			this->OnModified(Property::kValueRangeChanged);
+		}
+	}
 
 	value_type Maximum() const { return m_Maximum; }
-	void SetMaximum(value_type v) { m_Maximum = v; }
+	void SetMaximum(value_type v)
+	{
+		if (v != m_Maximum)
+		{
+			m_Maximum = v;
+			this->OnModified(Property::kValueRangeChanged);
+		}
+	}
 
 protected:
 	PropertyTR(value_type value, value_type min_value, value_type max_value)
@@ -249,7 +265,7 @@ class ISEG_DATA_API PropertyButton : public Property
 public:
 	using value_type = std::function<void()>;
 
-	static std::shared_ptr<PropertyButton> Create(value_type value, const std::string& txt="");
+	static std::shared_ptr<PropertyButton> Create(value_type value, const std::string& txt = "");
 
 	const value_type& Value() const { return m_Value; }
 	void SetValue(value_type v)
@@ -336,6 +352,25 @@ private:
 	std::map<value_type, std::string> m_ToolTips;
 	/// Invalid value description. Default: L"#Invalid"
 	description_type m_Invalid;
+};
+
+class ISEG_DATA_API PropertySlider : public PropertyInt
+{
+public:
+	static std::shared_ptr<PropertySlider> Create(value_type value, value_type min_value = 0, value_type max_value = 100);
+
+	ePropertyType Type() const override { return ePropertyType::kSlider; }
+
+	using slider_signal_type = boost::signals2::signal<void(int)>;
+
+	slider_signal_type onPressed; // NOLINT
+	slider_signal_type onMoved; // NOLINT
+
+protected:
+	PropertySlider(value_type value, value_type min_value, value_type max_value)
+			: PropertyInt(value, min_value, max_value)
+	{
+	}
 };
 
 class ISEG_DATA_API PropertyGroup : public Property

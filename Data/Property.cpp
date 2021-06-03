@@ -140,6 +140,11 @@ std::shared_ptr<PropertyButton> PropertyButton::Create(value_type value, const s
 	return std::shared_ptr<PropertyButton>(new PropertyButton(value, txt));
 }
 
+std::shared_ptr<PropertySlider> PropertySlider::Create(value_type value, value_type min_value, value_type max_value)
+{
+	return std::shared_ptr<PropertySlider>(new PropertySlider(value, min_value, max_value));
+}
+
 std::shared_ptr<PropertyGroup> PropertyGroup::Create(const std::string& description)
 {
 	std::shared_ptr<PropertyGroup> group(new PropertyGroup);

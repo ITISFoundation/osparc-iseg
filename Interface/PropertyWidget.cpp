@@ -19,6 +19,8 @@
 #include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include <QSignalMapper>
+#include <QSlider>
 #include <QStandardItemModel>
 #include <QTreeWidget>
 
@@ -288,6 +290,7 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 
 	const auto label_text = prop.Description().empty() ? prop.Name() : prop.Description();
 
+	static_assert(Property::kePropertyTypeSize == 8, "Property types changed");
 	switch (prop.Type())
 	{
 	case Property::kInteger: {
@@ -301,6 +304,11 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			{
 				auto ptyped = static_cast<const PropertyInt*>(p.get());
 				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kValueRangeChanged)
+			{
+				auto ptyped = static_cast<const PropertyInt*>(p.get());
+				edit->setValidator(new QIntValidator(ptyped->Minimum(), ptyped->Maximum()));
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
@@ -324,6 +332,11 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 			{
 				auto ptyped = static_cast<const PropertyReal*>(p.get());
 				edit->setText(QString::number(ptyped->Value()));
+			}
+			else if (type == Property::eChangeType::kValueRangeChanged)
+			{
+				auto ptyped = static_cast<const PropertyReal*>(p.get());
+				edit->setValidator(new QDoubleValidator(ptyped->Minimum(), ptyped->Maximum(), 10));
 			}
 			else if (type == Property::eChangeType::kStateChanged)
 			{
@@ -435,6 +448,39 @@ QWidget* PropertyWidget::MakePropertyUi(Property& prop, QTreeWidgetItem* item)
 		});
 		return button;
 	}
+	case Property::kSlider: {
+		auto ptyped = static_cast<const PropertySlider*>(&prop);
+		auto slider = new QSlider(Qt::Horizontal);
+		slider->setValue(ptyped->Value());
+		slider->setRange(ptyped->Minimum(), ptyped->Maximum());
+		UpdateState(item, prop.shared_from_this());
+
+		QObject_connect(slider, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
+		QObject_connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved()));
+		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(Edited()));
+
+		Connect(prop.onModified, m_Lifespan, [slider, item, this](Property_ptr p, Property::eChangeType type) {
+			if (type == Property::eChangeType::kValueChanged)
+			{
+				auto ptyped = static_cast<const PropertySlider*>(p.get());
+				slider->setValue(ptyped->Value());
+			}
+			else if (type == Property::eChangeType::kValueRangeChanged)
+			{
+				auto ptyped = static_cast<const PropertySlider*>(p.get());
+				slider->setRange(ptyped->Minimum(), ptyped->Maximum());
+			}
+			else if (type == Property::eChangeType::kStateChanged)
+			{
+				UpdateState(item, p);
+			}
+			else if (type == Property::eChangeType::kDescriptionChanged)
+			{
+				UpdateDescription(slider, p);
+			}
+		});
+		return slider;
+	}
 	default:
 		assert(false && "Unexpected property type");
 		return new QWidget; // \todo handle PropertyGroup here?
@@ -531,6 +577,7 @@ void PropertyWidget::Edited()
 	{
 		if (auto prop = std::dynamic_pointer_cast<Property>(m_WidgetPropertyMap[w].lock()))
 		{
+			static_assert(Property::kePropertyTypeSize == 8, "Property types changed");
 			switch (prop->Type())
 			{
 			case Property::kInteger: {
@@ -606,9 +653,44 @@ void PropertyWidget::Edited()
 				}
 				break;
 			}
+			case Property::kSlider: {
+				if (auto slider = dynamic_cast<QSlider*>(w))
+				{
+					auto prop_typed = std::static_pointer_cast<PropertySlider>(prop);
+					auto v = slider->value();
+					if (v != prop_typed->Value())
+					{
+						prop_typed->SetValue(v);
+						emit OnPropertyEdited(prop);
+					}
+				}
+				break;
+			}
 			default:
 				break;
 			}
+		}
+	}
+}
+
+void PropertyWidget::SliderPressed()
+{
+	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->onPressed(w->value());
+		}
+	}
+}
+
+void PropertyWidget::SliderMoved()
+{
+	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->onMoved(w->value());
 		}
 	}
 }
