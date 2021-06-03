@@ -20,11 +20,11 @@ class QListWidget;
 
 namespace iseg {
 
-class SaveOutlinesWidget : public QDialog
+class SaveOutlinesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SaveOutlinesDialog(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
 private:
 	void ModeChanged();

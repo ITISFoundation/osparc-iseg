@@ -9,7 +9,7 @@
  */
 #include "Precompiled.h"
 
-#include "SaveOutlinesWidget.h"
+#include "SaveOutlinesDialog.h"
 #include "SlicesHandler.h"
 #include "StdStringToQString.h"
 #include "TissueInfos.h"
@@ -26,7 +26,7 @@
 
 namespace iseg {
 
-SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
+SaveOutlinesDialog::SaveOutlinesDialog(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
 		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
 	setModal(true);
@@ -95,7 +95,7 @@ SaveOutlinesWidget::SaveOutlinesWidget(SlicesHandler* hand3D, QWidget* parent, Q
 	ExtrusionChanged();
 }
 
-void SaveOutlinesWidget::ModeChanged()
+void SaveOutlinesDialog::ModeChanged()
 {
 	const bool lines = m_Filetype->Value() == eOutputType::kLine;
 
@@ -112,19 +112,19 @@ void SaveOutlinesWidget::ModeChanged()
 	m_CbMarchingcubes->SetVisible(!lines);
 }
 
-void SaveOutlinesWidget::SimplifyChanged()
+void SaveOutlinesDialog::SimplifyChanged()
 {
 	m_SbDist->SetVisible(m_SimplifyLines->Value() == eSimplifyLines::kDist);
 	m_SlF->SetVisible(m_SimplifyLines->Value() == eSimplifyLines::kDougpeuck);
 }
 
-void SaveOutlinesWidget::ExtrusionChanged()
+void SaveOutlinesDialog::ExtrusionChanged()
 {
 	m_SbTopextrusion->SetEnabled(m_CbExtrusion->Value());
 	m_SbBottomextrusion->SetEnabled(m_CbExtrusion->Value());
 }
 
-void SaveOutlinesWidget::SavePushed()
+void SaveOutlinesDialog::SavePushed()
 {
 	std::vector<tissues_size_t> vtissues;
 	for (tissues_size_t i = 0; i < TissueInfos::GetTissueCount(); i++)

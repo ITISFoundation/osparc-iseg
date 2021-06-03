@@ -30,7 +30,7 @@
 #include "MultiDatasetWidget.h"
 #include "OutlineCorrectionWidget.h"
 #include "PickerWidget.h"
-#include "SaveOutlinesWidget.h"
+#include "SaveOutlinesDialog.h"
 #include "SelectColorButton.h"
 #include "Settings.h"
 #include "SliceViewerWidget.h"
@@ -1639,7 +1639,7 @@ void MainWindow::ExecuteSaveContours()
 	data_selection.tissues = true;
 	emit BeginDataexport(data_selection, this);
 
-	SaveOutlinesWidget sow(m_Handler3D, this);
+	SaveOutlinesDialog sow(m_Handler3D, this);
 	sow.move(QCursor::pos());
 	sow.exec();
 
