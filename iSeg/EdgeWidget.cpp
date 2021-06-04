@@ -69,23 +69,19 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D)
 
 	// create signal-slot connections
 	m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			MethodChanged();
+		MethodChanged();
 	});
 
-	m_SlSigma->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlSigma->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
-	m_SlThresh1->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlThresh1->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
-	m_SlThresh2->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlThresh2->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
 	// add widget and layout

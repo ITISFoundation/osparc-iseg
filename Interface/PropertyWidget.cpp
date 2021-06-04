@@ -2,6 +2,7 @@
 
 #include "CollapsibleWidget.h"
 #include "FormatTooltip.h"
+#include "QSliderEditableRange.h"
 #include "SplitterHandle.h"
 
 #include "../Data/Logger.h"
@@ -20,7 +21,6 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QSignalMapper>
-#include <QSlider>
 #include <QStandardItemModel>
 #include <QTreeWidget>
 
@@ -287,7 +287,7 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 
 QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 {
-	const auto make_line_edit = [this, item](const Property* p) {
+	const auto make_line_edit = [this](const Property* p) {
 		// generic attributes
 		auto edit = new QLineEdit(this);
 		edit->setFrame(false);
@@ -452,13 +452,16 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 	}
 	case Property::kSlider: {
 		auto ptyped = static_cast<const PropertySlider*>(prop);
-		auto slider = new QSlider(Qt::Horizontal);
+		auto slider = new QSliderEditableRange;
 		slider->setValue(ptyped->Value());
 		slider->setRange(ptyped->Minimum(), ptyped->Maximum());
+		slider->setMinimumVisible(ptyped->EditMinimum());
+		slider->setMaximumVisible(ptyped->EditMaximum());
 
 		QObject_connect(slider, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
 		QObject_connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved()));
-		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(Edited()));
+		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
+		QObject_connect(slider, SIGNAL(rangeChanged(int,int)), this, SLOT(SliderRangeEdited()));
 
 		Connect(prop->onModified, m_Lifespan, [slider, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
@@ -647,7 +650,7 @@ void PropertyWidget::Edited()
 				break;
 			}
 			case Property::kSlider: {
-				if (auto slider = dynamic_cast<QSlider*>(w))
+				if (auto slider = dynamic_cast<QSliderEditableRange*>(w))
 				{
 					auto prop_typed = std::static_pointer_cast<PropertySlider>(prop);
 					auto v = slider->value();
@@ -668,7 +671,7 @@ void PropertyWidget::Edited()
 
 void PropertyWidget::SliderPressed()
 {
-	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
 	{
 		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
 		{
@@ -679,11 +682,37 @@ void PropertyWidget::SliderPressed()
 
 void PropertyWidget::SliderMoved()
 {
-	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
 	{
 		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
 		{
 			prop->onMoved(w->value());
+		}
+	}
+}
+
+void PropertyWidget::SliderReleased()
+{
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->SetValue(w->value());
+			prop->onReleased(w->value());
+			emit OnPropertyEdited(prop);
+		}
+	}
+}
+
+void PropertyWidget::SliderRangeEdited()
+{
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->SetMinimum(w->minimum());
+			prop->SetMaximum(w->maximum());
+			emit OnPropertyEdited(prop);
 		}
 	}
 }

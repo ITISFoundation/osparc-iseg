@@ -18,6 +18,7 @@ SET(SOURCES
 	PropertyWidget.cpp
 	Plugin.cpp
 	RecentPlaces.cpp
+	QSliderEditableRange.cpp
 	SplitterHandle.cpp
 	WidgetInterface.cpp
 )
@@ -26,6 +27,7 @@ QT4_WRAP_CPP(MOCSrcs
 	CollapsibleWidget.h
 	ProgressDialog.h
 	PropertyWidget.h
+	QSliderEditableRange.h
 	SplitterHandle.h
 	WidgetInterface.h
 )

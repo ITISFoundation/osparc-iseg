@@ -98,6 +98,8 @@ protected:
 	Property(const Property&) = delete;
 	Property& operator=(const Property&) = delete;
 
+	Property_ptr Self();
+
 	Property_ptr Parent() { return m_Parent.lock(); }
 	Property_cptr Parent() const { return m_Parent.lock(); }
 
@@ -269,6 +271,8 @@ public:
 
 	static std::shared_ptr<PropertyButton> Create(value_type value, const std::string& txt = "");
 
+	ePropertyType Type() const override { return ePropertyType::kButton; }
+
 	const value_type& Value() const { return m_Value; }
 	void SetValue(value_type v)
 	{
@@ -279,13 +283,19 @@ public:
 	const std::string& ButtonText() const { return m_ButtonText; }
 	void SetButtonText(const std::string& v) { m_ButtonText = v; }
 
-	ePropertyType Type() const override { return ePropertyType::kButton; }
+	bool Checkable() const { return m_Checkable; }
+	void SetCheckable(bool v);
+
+	bool Checked() const { return m_Checked; }
+	void SetChecked(bool v);
 
 protected:
 	PropertyButton(value_type value, const std::string& txt) : m_Value(value), m_ButtonText(txt) {}
 
 private:
 	std::string m_ButtonText;
+	bool m_Checkable = false;
+	bool m_Checked = false;
 	value_type m_Value;
 };
 
@@ -327,15 +337,15 @@ public:
 	void ReplaceDescriptions(descriptions_type const& new_descr);
 
 	/// Enable/disable individual options
-	void SetEnabled(value_type index, bool on);
 	bool Enabled(value_type index) const;
+	void SetEnabled(value_type index, bool on);
 
 	/// Check if any items have been enabled/disabled
 	bool HasEnabledFlags() const { return !m_Enabled.empty(); }
 
 	/// Item tooltip
-	void SetItemToolTip(value_type index, const std::string& v);
 	std::string ItemToolTip(value_type index) const;
+	void SetItemToolTip(value_type index, const std::string& v);
 
 	/// Check if any items have tool tips
 	bool HasItemToolTips() const { return !m_ToolTips.empty(); }
@@ -365,17 +375,26 @@ public:
 	static std::shared_ptr<PropertySlider> Create(value_type value, value_type min_value = 0, value_type max_value = 100);
 
 	ePropertyType Type() const override { return ePropertyType::kSlider; }
-
 	using slider_signal_type = boost::signals2::signal<void(int)>;
+
+	bool EditMinimum() const { return m_EditMinimum; }
+	void SetEditMinimum(bool v) { m_EditMinimum = v; }
+
+	bool EditMaximum() const { return m_EditMaximum; }
+	void SetEditMaximum(bool v) { m_EditMaximum = v; }
 
 	slider_signal_type onPressed; // NOLINT
 	slider_signal_type onMoved; // NOLINT
+	slider_signal_type onReleased; // NOLINT
 
 protected:
 	PropertySlider(value_type value, value_type min_value, value_type max_value)
 			: PropertyInt(value, min_value, max_value)
 	{
 	}
+
+	bool m_EditMinimum = false;
+	bool m_EditMaximum = false;
 };
 
 class ISEG_DATA_API PropertyGroup : public Property

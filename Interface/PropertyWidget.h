@@ -46,6 +46,8 @@ private slots:
 	void Edited();
 	void SliderPressed();
 	void SliderMoved();
+	void SliderReleased();
+	void SliderRangeEdited();
 
 private:
 	void Build(Property_ptr p, QTreeWidgetItem* item, QTreeWidgetItem* parent_item);
