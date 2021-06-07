@@ -80,6 +80,8 @@
 #include <QTextEdit>
 #include <QToolTip>
 
+#include <Q3ScrollView>
+
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
@@ -4443,7 +4445,7 @@ void MainWindow::ExecuteXslice()
 
 	if (m_Xsliceshower == nullptr)
 	{
-		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
+		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr);
 		m_Xsliceshower->ZposChanged();
 		if (m_Ysliceshower != nullptr)
 		{
@@ -4468,6 +4470,7 @@ void MainWindow::ExecuteXslice()
 
 	m_Xsliceshower->show();
 	m_Xsliceshower->raise(); //xxxa
+	m_Xsliceshower->activateWindow();
 
 	emit EndDataexport(this);
 }
@@ -4482,7 +4485,7 @@ void MainWindow::ExecuteYslice()
 
 	if (m_Ysliceshower == nullptr)
 	{
-		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
+		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr);
 		m_Ysliceshower->ZposChanged();
 		if (m_Xsliceshower != nullptr)
 		{
@@ -4505,8 +4508,10 @@ void MainWindow::ExecuteYslice()
 		QObject_connect(m_ZoomWidget, SIGNAL(SetZoom(double)), m_Ysliceshower, SLOT(SetZoom(double)));
 	}
 
+	m_Ysliceshower->resize(600, 600);
 	m_Ysliceshower->show();
 	m_Ysliceshower->raise();
+	m_Ysliceshower->activateWindow();
 
 	emit EndDataexport(this);
 }

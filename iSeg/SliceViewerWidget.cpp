@@ -15,28 +15,23 @@
 
 #include "Interface/QtConnect.h"
 
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
-#include <QCloseEvent>
-#include <QPaintEvent>
-#include <QApplication>
+#include <QBoxLayout>
 #include <QButtonGroup>
-#include <QColor>
-#include <QEvent>
-#include <QImage>
+#include <QCheckBox>
+#include <QPaintEvent>
 #include <QPainter>
-#include <QPen>
 #include <QRadioButton>
-#include <QWidget>
+#include <QScrollArea>
+#include <QScrollBar>
 
 #include <algorithm>
 
 namespace iseg {
 
 Bmptissuesliceshower::Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short slicenr1, float thickness1, float zoom1, bool orientation, bool bmpon, bool tissuevisible1, bool zposvisible1, bool xyposvisible1, int xypos1, QWidget* parent, Qt::WindowFlags wFlags)
-		: QWidget(parent, wFlags), m_Tissuevisible(tissuevisible1), m_Handler3D(hand3D), m_Slicenr(slicenr1), m_Directionx(orientation), m_Bmporwork(bmpon), m_Thickness(thickness1), m_Zposvisible(zposvisible1), m_Xyposvisible(xyposvisible1), m_Xypos(xypos1), m_Zoom(zoom1)
+		: QWidget(parent, wFlags), m_Tissuevisible(tissuevisible1), m_Handler3D(hand3D), m_Slicenr(slicenr1), m_DirectionX(orientation), m_Bmporwork(bmpon), m_Thickness(thickness1), m_Zposvisible(zposvisible1), m_Xyposvisible(xyposvisible1), m_Xypos(xypos1), m_Zoom(zoom1)
 {
-	if (m_Directionx)
+	if (m_DirectionX)
 	{
 		if (m_Bmporwork)
 			m_Bmpbits = m_Handler3D->SlicebmpX(m_Slicenr);
@@ -67,7 +62,7 @@ Bmptissuesliceshower::Bmptissuesliceshower(SlicesHandler* hand3D, unsigned short
 	m_Image.create(int(m_Width), int(m_Height), 32);
 
 	setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	show();
 
 	ReloadBits();
@@ -114,7 +109,7 @@ void Bmptissuesliceshower::update()
 	ISEG_DEBUG("SliceViewerWidget::update (slice:" << m_Handler3D->ActiveSlice() << ")");
 	unsigned short w, h;
 
-	if (m_Directionx)
+	if (m_DirectionX)
 	{
 		w = m_Handler3D->Height();
 		h = m_Handler3D->NumSlices();
@@ -133,7 +128,7 @@ void Bmptissuesliceshower::update()
 		setFixedSize((int)(w * m_D * m_Zoom), (int)(h * m_Thickness * m_Zoom));
 		free(m_Bmpbits);
 		free(m_Tissue);
-		if (m_Directionx)
+		if (m_DirectionX)
 		{
 			if (m_Bmporwork)
 				m_Bmpbits = m_Handler3D->SlicebmpX(m_Slicenr);
@@ -152,7 +147,7 @@ void Bmptissuesliceshower::update()
 	}
 	else
 	{
-		if (m_Directionx)
+		if (m_DirectionX)
 		{
 			if (m_Bmporwork)
 				m_Handler3D->SlicebmpX(m_Bmpbits, m_Slicenr);
@@ -297,7 +292,7 @@ void Bmptissuesliceshower::SetScalefactor(float factor1, bool bmporwork1)
 
 void Bmptissuesliceshower::TissueChanged()
 {
-	if (m_Directionx)
+	if (m_DirectionX)
 	{
 		m_Handler3D->SlicetissueX(m_Tissue, m_Slicenr);
 	}
@@ -336,7 +331,7 @@ void Bmptissuesliceshower::ThicknessChanged(float thickness1)
 void Bmptissuesliceshower::PixelsizeChanged(Pair pixelsize1)
 {
 	float d1;
-	if (m_Directionx)
+	if (m_DirectionX)
 		d1 = pixelsize1.low;
 	else
 		d1 = pixelsize1.high;
@@ -349,7 +344,7 @@ void Bmptissuesliceshower::PixelsizeChanged(Pair pixelsize1)
 
 		repaint();
 
-		if (m_Directionx)
+		if (m_DirectionX)
 		{
 			setFixedSize((int)(m_Width * m_D * m_Zoom), (int)(m_Height * m_Thickness * m_Zoom));
 		}
@@ -400,53 +395,60 @@ void Bmptissuesliceshower::SetZoom(double z)
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent, Qt::WindowFlags wFlags)
-		: QWidget(parent, wFlags), m_Handler3D(hand3D), m_Directionx(orientation), m_Xyexists(false)
+SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool direction_x, float thickness1, float zoom1, QWidget* parent, Qt::WindowFlags wFlags)
+		: QWidget(parent, wFlags), m_Handler3D(hand3D), m_DirectionX(direction_x), m_Xyexists(false)
 {
-	if (m_Directionx)
+	if (m_DirectionX)
 		m_Nrslices = m_Handler3D->Width();
 	else
 		m_Nrslices = m_Handler3D->Height();
 
-	m_Vbox = new Q3VBoxLayout(this);
+	// widgets
+	m_Shower = new Bmptissuesliceshower(m_Handler3D, 0, thickness1, zoom1, m_DirectionX, true, true, false, false, 0, this);
 
-	m_Scroller = new Q3ScrollView(this);
-	m_Shower = new Bmptissuesliceshower(m_Handler3D, 0, thickness1, zoom1, m_Directionx, true, true, false, false, 0, this);
+	//auto scroller = new QScrollArea;
+	//scroller->setWidget(m_Shower);
 
-	m_Vbox->addWidget(m_Scroller);
-	m_Scroller->addChild(m_Shower);
-
-	m_Hbox = new Q3HBoxLayout(this);
-	m_Vbox->addLayout(m_Hbox);
-	m_Hbox2 = new Q3HBoxLayout(this);
-	m_Vbox->addLayout(m_Hbox2);
-
-	m_CbTissuevisible = new QCheckBox("Show tissues", this);
-	m_Hbox->addWidget(m_CbTissuevisible);
+	m_CbTissuevisible = new QCheckBox("Show tissues");
 	m_CbTissuevisible->setChecked(true);
 
-	m_RbBmp = new QRadioButton("Source", this);
-	m_Hbox->addWidget(m_RbBmp);
-	m_RbWork = new QRadioButton("Target", this);
-	m_Hbox->addWidget(m_RbWork);
+	m_RbBmp = new QRadioButton("Source");
+	m_RbWork = new QRadioButton("Target");
 
 	m_BgBmporwork = new QButtonGroup(this);
 	m_BgBmporwork->insert(m_RbBmp);
 	m_BgBmporwork->insert(m_RbWork);
+	m_RbBmp->setChecked(true);
 
-	m_CbZposvisible = new QCheckBox("Show zpos", this);
-	m_Hbox2->addWidget(m_CbZposvisible);
+	m_CbZposvisible = new QCheckBox("Show zpos");
 	m_CbZposvisible->setChecked(false);
-	m_CbXyposvisible = new QCheckBox("Show xypos", this);
-	m_Hbox2->addWidget(m_CbXyposvisible);
+	m_CbXyposvisible = new QCheckBox("Show xypos");
 	m_CbXyposvisible->setChecked(false);
 	m_CbXyposvisible->setEnabled(false);
 
-	m_RbBmp->setChecked(TRUE);
+	m_QsbSlicenr = new QScrollBar(Qt::Horizontal);
+	m_QsbSlicenr->setValue(1);
+	m_QsbSlicenr->setRange(1, m_Nrslices);
+	m_QsbSlicenr->setPageStep(5);
 
-	m_QsbSlicenr = new QScrollBar(1, m_Nrslices, 1, 5, 1, Qt::Horizontal, this);
-	m_Vbox->addWidget(m_QsbSlicenr);
+	// layout
+	auto hbox1 = new QHBoxLayout;
+	hbox1->addWidget(m_CbTissuevisible);
+	hbox1->addWidget(m_RbBmp);
+	hbox1->addWidget(m_RbWork);
 
+	auto hbox2 = new QHBoxLayout;
+	hbox2->addWidget(m_CbZposvisible);
+	hbox2->addWidget(m_CbXyposvisible);
+
+	auto layout = new QVBoxLayout;
+	layout->addWidget(m_Shower);
+	layout->addLayout(hbox1);
+	layout->addLayout(hbox2);
+	layout->addWidget(m_QsbSlicenr);
+	setLayout(layout);
+
+	// connections
 	QObject_connect(m_QsbSlicenr, SIGNAL(valueChanged(int)), this, SLOT(SlicenrChanged(int)));
 	QObject_connect(m_CbTissuevisible, SIGNAL(clicked()), this, SLOT(TissuevisibleChanged()));
 	QObject_connect(m_BgBmporwork, SIGNAL(buttonClicked(int)), this, SLOT(WorkorbmpChanged()));
@@ -459,16 +461,6 @@ SliceViewerWidget::SliceViewerWidget(SlicesHandler* hand3D, bool orientation, fl
 
 SliceViewerWidget::~SliceViewerWidget()
 {
-	delete m_Vbox;
-	delete m_Shower;
-	delete m_Scroller;
-	delete m_CbTissuevisible;
-	delete m_CbZposvisible;
-	delete m_CbXyposvisible;
-	delete m_RbBmp;
-	delete m_RbWork;
-	delete m_BgBmporwork;
-	delete m_QsbSlicenr;
 }
 
 void SliceViewerWidget::closeEvent(QCloseEvent* qce)
@@ -490,7 +482,7 @@ void SliceViewerWidget::BmpChanged()
 	if (m_RbBmp->isChecked())
 	{
 		unsigned short nrslicesnew;
-		if (m_Directionx)
+		if (m_DirectionX)
 			nrslicesnew = m_Handler3D->Width();
 		else
 			nrslicesnew = m_Handler3D->Height();
@@ -514,7 +506,7 @@ void SliceViewerWidget::WorkChanged()
 	if (m_RbWork->isChecked())
 	{
 		unsigned short nrslicesnew;
-		if (m_Directionx)
+		if (m_DirectionX)
 			nrslicesnew = m_Handler3D->Width();
 		else
 			nrslicesnew = m_Handler3D->Height();

@@ -264,18 +264,18 @@ private:
 
 	QLabel* m_LbSource;
 	QLabel* m_LbTarget;
-	Q3ScrollView* m_BmpScroller;
-	Q3ScrollView* m_WorkScroller;
+	Q3ScrollView* m_BmpScroller = nullptr;
+	Q3ScrollView* m_WorkScroller = nullptr;
 	bool m_TomoveScroller;
-	ZoomWidget* m_ZoomWidget;
+	ZoomWidget* m_ZoomWidget = nullptr;
 	//	float thickness;
-	SliceViewerWidget* m_Xsliceshower;
-	SliceViewerWidget* m_Ysliceshower;
-	SurfaceViewerWidget* m_SurfaceViewer;
-	VolumeViewerWidget* m_VV3D;
-	VolumeViewerWidget* m_VV3Dbmp;
-	QAction* m_Undonr;
-	QAction* m_Redonr;
+	SliceViewerWidget* m_Xsliceshower = nullptr;
+	SliceViewerWidget* m_Ysliceshower = nullptr;
+	SurfaceViewerWidget* m_SurfaceViewer = nullptr;
+	VolumeViewerWidget* m_VV3D = nullptr;
+	VolumeViewerWidget* m_VV3Dbmp = nullptr;
+	QAction* m_Undonr = nullptr;
+	QAction* m_Redonr = nullptr;
 	QString m_MSaveprojfilename;
 	QString m_S4Lcommunicationfilename;
 	Project m_MLoadprojfilename;
