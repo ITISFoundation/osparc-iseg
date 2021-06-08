@@ -13,24 +13,13 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPixmap>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
+#include "Data/Property.h"
 
 namespace iseg {
 
 class TransformWidget : public WidgetInterface
 {
 	Q_OBJECT
-
 public:
 	TransformWidget(SlicesHandler* hand3D);
 	~TransformWidget() override;
@@ -40,13 +29,20 @@ public:
 	void NewLoaded() override;
 	void HideParamsChanged() override;
 
-	QSize sizeHint() const override;
 	std::string GetName() override { return std::string("Transform"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("transform.png"))); }
 
 	void GetDataSelection(bool& source, bool& target, bool& tissues);
 
+	void CancelTransform();
+
 private:
+	void OnSlicenrChanged() override;
+	void OnMouseClicked(Point p) override;
+	void BmpChanged() override;
+	void WorkChanged() override;
+	void TissuesChanged() override;
+
 	struct TransformParametersStruct
 	{
 		int m_TranslationOffset[2];
@@ -64,12 +60,12 @@ private:
 	void ResetWidgets();
 	void BitsChanged();
 
-private:
-	void OnSlicenrChanged() override;
-	void OnMouseClicked(Point p) override;
-	void BmpChanged() override;
-	void WorkChanged() override;
-	void TissuesChanged() override;
+	void Execute();
+	void TransformChanged();
+	void SelectSourceChanged();
+	void SelectTargetChanged();
+	void SelectTissuesChanged();
+	void FlipPushButtonClicked();
 
 	// Image data
 	SlicesHandler* m_Handler3D;
@@ -78,70 +74,41 @@ private:
 	SliceTransform* m_SliceTransform;
 
 	// Widgets
-	Q3HBox* m_HBoxOverall;
-	Q3VBox* m_VBoxTransforms;
-	Q3VBox* m_VBoxParams;
-	Q3HBox* m_HBoxSelectData;
-	Q3HBox* m_HBoxSlider1;
-	Q3HBox* m_HBoxSlider2;
-	Q3HBox* m_HBoxFlip;
-	Q3HBox* m_HBoxAxisSelection;
-	Q3HBox* m_HBoxCenter;
-	Q3HBox* m_HBoxExecute;
+	PropertyBool_ptr m_TransformSourceCheckBox;
+	PropertyBool_ptr m_TransformTargetCheckBox;
+	PropertyBool_ptr m_TransformTissuesCheckBox;
+	PropertyBool_ptr m_AllSlicesCheckBox;
 
-	QCheckBox* m_TransformSourceCheckBox;
-	QCheckBox* m_TransformTargetCheckBox;
-	QCheckBox* m_TransformTissuesCheckBox;
+	enum eTransformType {
+		kTranslate,
+		kRotate,
+		kScale,
+		kShear,
+		kFlip
+	};
+	PropertyEnum_ptr m_TransformType;
 
-	QCheckBox* m_AllSlicesCheckBox;
-	QPushButton* m_ExecutePushButton;
-	QPushButton* m_CancelPushButton;
+	enum eAxisDirection {
+		kX,
+		kY
+	};
+	PropertyEnum_ptr m_AxisSelection;
+	PropertyBool_ptr m_FlipCheckBox;
 
-	QRadioButton* m_TranslateRadioButton;
-	QRadioButton* m_RotateRadioButton;
-	QRadioButton* m_ScaleRadioButton;
-	QRadioButton* m_ShearRadioButton;
-	QRadioButton* m_FlipRadioButton;
-	//QRadioButton *matrixRadioButton;
-	QButtonGroup* m_TransformButtonGroup;
+	PropertyButton_ptr m_CenterSelectPushButton;
+	PropertyString_ptr m_CenterCoordsLabel;
 
-	QLabel* m_Slider1Label;
-	QLabel* m_Slider2Label;
-	QSlider* m_Slider1;
-	QSlider* m_Slider2;
-	QLineEdit* m_LineEdit1;
-	QLineEdit* m_LineEdit2;
+	PropertyInt_ptr m_TranslateX, m_TranslateY;
+	PropertyReal_ptr m_ScaleX, m_ScaleY;
+	PropertyReal_ptr m_RotationAngle;
+	PropertyReal_ptr m_ShearingAngle;
 
-	QRadioButton* m_XAxisRadioButton;
-	QRadioButton* m_YAxisRadioButton;
-	QButtonGroup* m_AxisButtonGroup;
-
-	QPushButton* m_FlipPushButton;
-
-	QLabel* m_CenterLabel;
-	QLabel* m_CenterCoordsLabel;
-	QPushButton* m_CenterSelectPushButton;
+	PropertyButton_ptr m_ExecutePushButton;
+	PropertyButton_ptr m_CancelPushButton;
 
 	// Transform parameters
 	bool m_DisableUpdatePreview;
-	double m_UpdateParameter1;
-	double m_UpdateParameter2;
 	TransformParametersStruct m_TransformParameters;
-
-public slots:
-	void CancelPushButtonClicked();
-	void ExecutePushButtonClicked();
-
-private slots:
-	void Slider1Changed(int value);
-	void Slider2Changed(int value);
-	void LineEdit1Edited();
-	void LineEdit2Edited();
-	void TransformChanged(int index);
-	void SelectSourceChanged(int state);
-	void SelectTargetChanged(int state);
-	void SelectTissuesChanged(int state);
-	void FlipPushButtonClicked();
 };
 
 } // namespace iseg

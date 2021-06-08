@@ -7,30 +7,28 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef LOADERWIDGET
-#define LOADERWIDGET
+#pragma once
 
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
 #include "Data/Point.h"
 
-#include <q3boxlayout.h>
-#include <q3hbox.h>
-#include <q3vbox.h>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QComboBox>
 #include <QDialog>
 #include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QSpinBox>
-#include <QStringList>
-#include <QWidget>
 
 #include <array>
+
+class QButtonGroup;
+class QCheckBox;
+class QComboBox;
+class QDialog;
+class QLineEdit;
+class QPushButton;
+class QRadioButton;
+class QSlider;
+class QSpinBox;
+class QStringList;
 
 namespace iseg {
 
@@ -48,36 +46,25 @@ private:
 	Point m_P;
 	unsigned short m_Dx;
 	unsigned short m_Dy;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3HBox* m_Hbox5;
-	Q3HBox* m_Hbox6;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	Q3VBox* m_Vbox3;
-	Q3VBox* m_Vbox4;
-	Q3VBox* m_Vbox5;
-	Q3VBox* m_Vbox6;
-	QPushButton* m_LoadFile;
-	QPushButton* m_CancelBut;
+
+	QCheckBox* m_CbSubsect;
+	QWidget* m_SubsectArea;
 	QSpinBox* m_Xoffset;
 	QSpinBox* m_Yoffset;
 	QSpinBox* m_Xlength;
 	QSpinBox* m_Ylength;
-	QCheckBox* m_CbSubsect;
+
 	QCheckBox* m_CbCt;
+	QWidget* m_CtWeightArea;
 	QCheckBox* m_CbCrop;
 	QButtonGroup* m_BgWeight;
 	QRadioButton* m_RbMuscle;
 	QRadioButton* m_RbBone;
-	QLabel* m_Xoffs;
-	QLabel* m_Yoffs;
-	QLabel* m_Xl;
-	QLabel* m_Yl;
-	QLabel* m_LbTitle;
 	QComboBox* m_Seriesnrselection;
+
+	QPushButton* m_LoadFile;
+	QPushButton* m_CancelBut;
+
 	std::vector<unsigned> m_Dicomseriesnr;
 	std::vector<unsigned> m_Dicomseriesnrlist;
 
@@ -165,61 +152,38 @@ private:
 	std::vector<const char*> m_MFilenames;
 	SlicesHandler* m_Handler3D;
 
-	Q3VBox* m_HboxChannelOptions;
-
-	Q3VBox* m_VboxMain;
-
-	Q3HBox* m_HboxImageAndControl;
-
-	Q3VBox* m_HboxControl;
-	Q3HBox* m_HboxButtons;
-
-	Q3HBox* m_HboxImageSource;
 	ClickableLabel* m_ImageSourceLabel;
-
-	Q3HBox* m_HboxImage;
 	QLabel* m_ImageLabel;
-
-	Q3HBox* m_VboxRed;
-	Q3HBox* m_VboxBlue;
-	Q3HBox* m_VboxGreen;
-	Q3HBox* m_VboxSlice;
-
-	QLabel* m_LabelRed;
-	QSlider* m_SliderRed;
-	QLineEdit* m_LabelRedValue;
-	QRadioButton* m_ButtonRed;
-
-	QLabel* m_LabelGreen;
-	QSlider* m_SliderGreen;
-	QLineEdit* m_LabelGreenValue;
-	QRadioButton* m_ButtonGreen;
-
-	QLabel* m_LabelBlue;
-	QSlider* m_SliderBlue;
-	QLineEdit* m_LabelBlueValue;
-	QRadioButton* m_ButtonBlue;
-
 	QLabel* m_LabelPreviewAlgorithm;
 
+	QSlider* m_SliderRed;
+	QLineEdit* m_LabelRedValue;
+
+	QSlider* m_SliderGreen;
+	QLineEdit* m_LabelGreenValue;
+
+	QSlider* m_SliderBlue;
+	QLineEdit* m_LabelBlueValue;
+
 	QSpinBox* m_SpinSlice;
-	QLabel* m_LabelSliceValue;
 
 	QPushButton* m_LoadFile;
 	QPushButton* m_CancelBut;
 
-	int m_RedFactor;
-	int m_GreenFactor;
-	int m_BlueFactor;
+	int m_RedFactorPv = 30;
+	int m_GreenFactorPv = 59;
+	int m_BlueFactorPv = 11;
 
-	int m_RedFactorPv;
-	int m_GreenFactorPv;
-	int m_BlueFactorPv;
-	int m_SelectedSlice;
+	int m_RedFactor = 30;
+	int m_GreenFactor = 59;
+	int m_BlueFactor = 11;
+
+	double m_ScaleX = 400;
+	double m_ScaleY = 500;
+
+	int m_SelectedSlice = 0;
 
 	QImage m_SourceImage;
-	double m_ScaleX;
-	double m_ScaleY;
 
 	QPoint m_PreviewCenter;
 
@@ -248,10 +212,6 @@ private slots:
 	void LabelGreenValueChanged(QString text);
 	void LabelBlueValueChanged(QString text);
 
-	void ButtonRedPushed(bool checked);
-	void ButtonGreenPushed(bool checked);
-	void ButtonBluePushed(bool checked);
-
 	void SliceValueChanged(int value);
 
 	void CancelToggled();
@@ -262,7 +222,7 @@ class LoaderRaw : public QDialog
 {
 	Q_OBJECT
 public:
-	LoaderRaw(SlicesHandler* nullptrand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LoaderRaw(SlicesHandler* nullptrand3D, const QString& file_path, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~LoaderRaw() override;
 
 	QString GetFileName() const;
@@ -276,55 +236,31 @@ public:
 
 private:
 	SlicesHandler* m_Handler3D;
+	QString m_FileName;
 	bool m_SkipReading = true;
-	char* m_Filename;
-	short unsigned m_W;
-	short unsigned m_H;
-	unsigned m_Bitdepth;
-	unsigned short m_Slicenr;
-	Point m_P;
-	unsigned short m_Dx;
-	unsigned short m_Dy;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3HBox* m_Hbox5;
-	Q3HBox* m_Hbox6;
-	Q3HBox* m_Hbox7;
-	Q3HBox* m_Hbox8;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	QPushButton* m_SelectFile;
-	QPushButton* m_LoadFile;
-	QPushButton* m_CancelBut;
+
+	QButtonGroup* m_Bitselect;
+	QRadioButton* m_Bit8;
+	QRadioButton* m_Bit16;
+
+	QCheckBox* m_Subsect;
+	QWidget* m_SubsectArea;
 	QSpinBox* m_Xoffset;
 	QSpinBox* m_Yoffset;
 	QSpinBox* m_Xlength;
 	QSpinBox* m_Ylength;
 	QSpinBox* m_Xlength1;
 	QSpinBox* m_Ylength1;
+
 	QSpinBox* m_Slicenrbox;
 	QSpinBox* m_SbNrslices;
-	QCheckBox* m_Subsect;
-	QLineEdit* m_NameEdit;
-	QLabel* m_FileName;
-	QButtonGroup* m_Bitselect;
-	QRadioButton* m_Bit8;
-	QRadioButton* m_Bit16;
-	QLabel* m_Nrslice;
-	QLabel* m_Xoffs;
-	QLabel* m_Yoffs;
-	QLabel* m_Xl;
-	QLabel* m_Yl;
-	QLabel* m_Xl1;
-	QLabel* m_Yl1;
-	QLabel* m_LbNrslices;
+
+	QPushButton* m_LoadFile;
+	QPushButton* m_CancelBut;
 
 private slots:
 	void SubsectToggled();
 	void LoadPushed();
-	void SelectPushed();
 };
 
 class ExportImg : public QDialog
@@ -352,25 +288,17 @@ class ReloaderBmp2 : public QDialog
 public:
 	ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ReloaderBmp2() override;
-	//	void update();
-	//protected:
 
 private:
 	std::vector<const char*> m_MFilenames;
 	SlicesHandler* m_Handler3D;
-	char* m_Filename;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3VBox* m_Vbox1;
+	
 	QPushButton* m_LoadFile;
 	QPushButton* m_CancelBut;
+	QCheckBox* m_Subsect;
+	QWidget* m_SubsectArea;
 	QSpinBox* m_Xoffset;
 	QSpinBox* m_Yoffset;
-	QCheckBox* m_Subsect;
-	QLabel* m_Xoffs;
-	QLabel* m_Yoffs;
 
 private slots:
 	void SubsectToggled();
@@ -381,49 +309,31 @@ class ReloaderRaw : public QDialog
 {
 	Q_OBJECT
 public:
-	ReloaderRaw(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ReloaderRaw(SlicesHandler* hand3D, const QString& file_path, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ReloaderRaw() override;
-	//	void update();
-	//protected:
 
 private:
 	SlicesHandler* m_Handler3D;
-	char* m_Filename;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3HBox* m_Hbox5;
-	Q3HBox* m_Hbox6;
-	//	QHBox *hbox7;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	QPushButton* m_SelectFile;
-	QPushButton* m_LoadFile;
-	QPushButton* m_CancelBut;
-	QSpinBox* m_Xoffset;
-	QSpinBox* m_Yoffset;
-	QSpinBox* m_Xlength1;
-	QSpinBox* m_Ylength1;
-	QSpinBox* m_Slicenrbox;
-	//	QSpinBox *sb_startnr;
-	QCheckBox* m_Subsect;
-	QLineEdit* m_NameEdit;
-	QLabel* m_FileName;
+	QString m_FileName;
+
 	QButtonGroup* m_Bitselect;
 	QRadioButton* m_Bit8;
 	QRadioButton* m_Bit16;
-	QLabel* m_Nrslice;
-	QLabel* m_Xoffs;
-	QLabel* m_Yoffs;
-	QLabel* m_Xl1;
-	QLabel* m_Yl1;
-	//	QLabel *lb_startnr;
+
+	QCheckBox* m_Subsect;
+	QWidget* m_SubsectArea;
+	QSpinBox* m_Xlength1;
+	QSpinBox* m_Ylength1;
+	QSpinBox* m_Xoffset;
+	QSpinBox* m_Yoffset;
+	QSpinBox* m_Slicenrbox;
+
+	QPushButton* m_LoadFile;
+	QPushButton* m_CancelBut;
 
 private slots:
 	void SubsectToggled();
 	void LoadPushed();
-	void SelectPushed();
 };
 
 class NewImg : public QDialog
@@ -434,24 +344,16 @@ public:
 	~NewImg() override;
 
 	bool NewPressed() const;
-	//	void update();
-	//protected:
 
 private:
 	SlicesHandler* m_Handler3D;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3VBox* m_Vbox1;
+	bool m_NewPressed;
+
 	QPushButton* m_NewFile;
 	QPushButton* m_CancelBut;
 	QSpinBox* m_Xlength;
 	QSpinBox* m_Ylength;
 	QSpinBox* m_SbNrslices;
-	QLabel* m_Xl;
-	QLabel* m_Yl;
-	QLabel* m_LbNrslices;
-	bool m_NewPressed;
 
 private slots:
 	void NewPushed();
@@ -469,10 +371,6 @@ public:
 	~EditText() override;
 
 private:
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3VBox* m_Vbox1;
-
 	QPushButton* m_SaveBut;
 	QPushButton* m_CancelBut;
 
@@ -518,4 +416,3 @@ private:
 
 } // namespace iseg
 
-#endif

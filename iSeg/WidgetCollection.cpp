@@ -23,15 +23,16 @@
 #include "Interface/RecentPlaces.h"
 
 #include <QApplication>
-#include <QButtonGroup>
+#include <QComboBox>
 #include <QFileDialog>
-#include <QGroupBox>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QListWidget>
 #include <QPaintEvent>
 #include <QProgressDialog>
 #include <QTableWidget>
+#include <QVBoxLayout>
 
 #include <algorithm>
 #include <fstream>
@@ -39,7 +40,6 @@
 namespace iseg {
 
 ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, Qt::WindowFlags wFlags)
-		//  : QWidget( parent, name, wFlags ),handler3D(hand3D)
 		: QDialog(parent, wFlags), m_Handler3D(hand3D)
 {
 	setModal(true);
@@ -47,50 +47,58 @@ ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, Qt::W
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
 
-	m_Vbox1 = new Q3VBox(this);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_LL = new QLabel(QString("Low: "), m_Hbox1);
-	m_LL->show();
-	m_LimitLow = new QLineEdit(QString::number((int)0), m_Hbox1);
-	m_LimitLow->show();
-	m_Hbox1->show();
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_LH = new QLabel(QString("High: "), m_Hbox2);
-	m_LH->show();
-	m_LimitHigh = new QLineEdit(QString::number((int)255), m_Hbox2);
-	m_LimitHigh->show();
-	m_Hbox2->show();
-	m_Allslices = new QCheckBox(QString("3D"), m_Vbox1);
-	m_GetRange = new QPushButton("Get Range", m_Vbox1);
-	m_GetRange->show();
-	m_DoScale = new QPushButton("Scale", m_Vbox1);
-	m_DoScale->show();
-	m_DoCrop = new QPushButton("Clamp", m_Vbox1);
-	m_DoCrop->show();
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_LbBrightness = new QLabel(QString("B: "), m_Hbox3);
-	m_LbBrightness->show();
-	m_LbBrightness->setPixmap(QIcon(picpath.absoluteFilePath(QString("icon-brightness.png")).ascii())
-																.pixmap());
-	m_SlBrighness = new QSlider(Qt::Horizontal, m_Hbox3);
+	m_LimitLow = new QLineEdit(QString::number(0));
+	m_LimitHigh = new QLineEdit(QString::number(255));
+
+	auto lb_brightness = new QLabel("B: ");
+	lb_brightness->setPixmap(QIcon(picpath.absoluteFilePath("icon-brightness.png")).pixmap());
+	m_SlBrighness = new QSlider(Qt::Horizontal);
 	m_SlBrighness->setRange(0, 100);
 	m_SlBrighness->setValue(30);
-	m_Hbox3->show();
-	m_Hbox4 = new Q3HBox(m_Vbox1);
-	m_LbContrast = new QLabel(QString("C: "), m_Hbox4);
-	m_LbContrast->show();
-	m_LbContrast->setPixmap(QIcon(picpath.absoluteFilePath(QString("icon-contrast.png")).ascii())
-															.pixmap());
-	m_SlContrast = new QSlider(Qt::Horizontal, m_Hbox4);
+
+	auto lb_contrast = new QLabel("C: ");
+	lb_contrast->setPixmap(QIcon(picpath.absoluteFilePath("icon-contrast.png")).pixmap());
+	m_SlContrast = new QSlider(Qt::Horizontal);
 	m_SlContrast->setRange(0, 99);
 	m_SlContrast->setValue(30);
-	m_Hbox4->show();
 
-	m_CloseButton = new QPushButton("Close", m_Vbox1);
+	m_Allslices = new QCheckBox("3D");
+	m_GetRange = new QPushButton("Get Range");
+	m_DoScale = new QPushButton("Scale");
+	m_DoCrop = new QPushButton("Clamp");
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	setFixedSize(m_Vbox1->size());
+	m_CloseButton = new QPushButton("Close");
 
+	// layout
+	auto hbox1 = new QHBoxLayout;
+	hbox1->addWidget(new QLabel("Low: "));
+	hbox1->addWidget(m_LimitLow);
+
+	auto hbox2 = new QHBoxLayout;
+	hbox2->addWidget(new QLabel("High: "));
+	hbox2->addWidget(m_LimitHigh);
+
+	auto hbox3 = new QHBoxLayout;
+	hbox3->addWidget(lb_brightness);
+	hbox3->addWidget(m_SlBrighness);
+
+	auto hbox4 = new QHBoxLayout;
+	hbox4->addWidget(lb_contrast);
+	hbox4->addWidget(m_SlContrast);
+
+	auto main_layout = new QVBoxLayout;
+	main_layout->addLayout(hbox1);
+	main_layout->addLayout(hbox2);
+	main_layout->addLayout(hbox3);
+	main_layout->addLayout(hbox4);
+	main_layout->addWidget(m_Allslices);
+	main_layout->addWidget(m_GetRange);
+	main_layout->addWidget(m_DoScale);
+	main_layout->addWidget(m_DoCrop);
+	main_layout->addWidget(m_CloseButton);
+	setLayout(main_layout);
+
+	// connections
 	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
 	QObject_connect(m_GetRange, SIGNAL(clicked()), this, SLOT(GetrangePushed()));
 	QObject_connect(m_DoScale, SIGNAL(clicked()), this, SLOT(ScalePushed()));
@@ -105,7 +113,7 @@ ScaleWork::ScaleWork(SlicesHandler* hand3D, QDir picpath, QWidget* parent, Qt::W
 	GetrangePushed();
 }
 
-ScaleWork::~ScaleWork() { delete m_Vbox1; }
+ScaleWork::~ScaleWork() {}
 
 void ScaleWork::GetrangePushed()
 {
@@ -213,10 +221,8 @@ void ScaleWork::CropPushed()
 
 void ScaleWork::SlicenrChanged()
 {
-	//	if(activeslice!=handler3D->get_activeslice()){
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	BmphandChanged(m_Handler3D->GetActivebmphandler());
-	//	}
 }
 
 void ScaleWork::BmphandChanged(Bmphandler* bmph)
@@ -343,85 +349,85 @@ ShowHisto::ShowHisto(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFl
 
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
-
-	m_Vbox1 = new Q3VBox(this);
 	m_Bmphand->MakeHistogram(true);
-	m_Histwindow = new HistoWin(m_Bmphand->ReturnHistogram(), m_Vbox1, wFlags);
+
+	m_Histwindow = new HistoWin(m_Bmphand->ReturnHistogram());
 	m_Histwindow->setFixedSize(258, 258);
 
-	m_Hbox1 = new Q3HBox(m_Vbox1);
 	m_Pictselect = new QButtonGroup(this);
-	//	pictselect->hide();
-	m_Bmppict = new QRadioButton(QString("Source"), m_Hbox1);
-	m_Workpict = new QRadioButton(QString("Target"), m_Hbox1);
+	m_Bmppict = new QRadioButton("Source");
+	m_Workpict = new QRadioButton("Target");
 	m_Pictselect->insert(m_Bmppict);
 	m_Pictselect->insert(m_Workpict);
-	m_Workpict->setChecked(TRUE);
-	m_Workpict->show();
-	m_Bmppict->show();
-	m_Hbox1->show();
+	m_Workpict->setChecked(true);
 
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Subsect = new QCheckBox(QString("Subsection "), m_Hbox2);
-	m_Subsect->setChecked(TRUE);
-	m_Subsect->show();
-	m_Vbox2 = new Q3VBox(m_Hbox2);
-	m_Hbox3 = new Q3HBox(m_Vbox2);
-	m_Xoffs = new QLabel(QString("x-Offset: "), m_Hbox3);
-	m_Xoffset = new QSpinBox(0, (int)m_Bmphand->ReturnWidth(), 1, m_Hbox3);
+	m_Subsect = new QCheckBox("Subsection ");
+	m_Subsect->setChecked(true);
+
+	m_Xoffset = new QSpinBox;
+	m_Xoffset->setValue((int)m_Bmphand->ReturnWidth());
 	m_Xoffset->setValue(0);
-	m_Xoffset->show();
-	m_Yoffs = new QLabel(QString("y-Offset: "), m_Hbox3);
-	m_Yoffset = new QSpinBox(0, (int)m_Bmphand->ReturnHeight(), 1, m_Hbox3);
-	m_Yoffset->show();
-	m_Xoffset->setValue(0);
-	m_Hbox3->show();
-	m_Hbox4 = new Q3HBox(m_Vbox2);
-	m_Xl = new QLabel(QString("x-Length: "), m_Hbox4);
-	m_Xlength = new QSpinBox(0, (int)m_Bmphand->ReturnWidth(), 1, m_Hbox4);
-	m_Xlength->show();
+	m_Yoffset = new QSpinBox;
+	m_Yoffset->setRange(0, (int)m_Bmphand->ReturnHeight());
+	m_Yoffset->setValue(0);
+
+	m_Xlength = new QSpinBox;
+	m_Xlength->setRange(0, (int)m_Bmphand->ReturnWidth());
 	m_Xlength->setValue((int)m_Bmphand->ReturnWidth());
-	m_Yl = new QLabel(QString("y-Length: "), m_Hbox4);
-	m_Ylength = new QSpinBox(0, (int)m_Bmphand->ReturnHeight(), 1, m_Hbox4);
-	m_Ylength->show();
+	m_Ylength = new QSpinBox;
+	m_Ylength->setRange(0, (int)m_Bmphand->ReturnHeight());
 	m_Ylength->setValue((int)m_Bmphand->ReturnHeight());
-	m_Hbox4->show();
-	m_UpdateSubsect = new QPushButton("Update Subsection", m_Vbox2);
-	m_Vbox2->show();
-	m_Hbox2->show();
-	m_CloseButton = new QPushButton("Close", m_Vbox1);
 
+	m_UpdateSubsect = new QPushButton("Update Subsection");
+	m_CloseButton = new QPushButton("Close");
+
+	// layout
+	auto m_Hbox1 = new QHBoxLayout;
+	m_Hbox1->addWidget(m_Bmppict);
+	m_Hbox1->addWidget(m_Workpict);
+
+	m_SubsectArea = new QWidget;
+	{
+		auto m_Hbox3 = new QHBoxLayout;
+		m_Hbox3->addWidget(new QLabel("x-Offset: "));
+		m_Hbox3->addWidget(m_Xoffset);
+		m_Hbox3->addWidget(new QLabel("y-Offset: "));
+		m_Hbox3->addWidget(m_Yoffset);
+
+		auto m_Hbox4 = new QHBoxLayout;
+		m_Hbox4->addWidget(new QLabel("x-Length: "));
+		m_Hbox4->addWidget(m_Xlength);
+		m_Hbox4->addWidget(new QLabel("y-Length: "));
+		m_Hbox4->addWidget(m_Ylength);
+
+		auto m_Vbox2 = new QVBoxLayout;
+		m_Vbox2->addLayout(m_Hbox3);
+		m_Vbox2->addLayout(m_Hbox4);
+		m_Vbox2->addWidget(m_UpdateSubsect);
+		m_SubsectArea->setLayout(m_Vbox2);
+	}
+
+	auto m_Vbox1 = new QVBoxLayout;
+	m_Vbox1->addWidget(m_Histwindow);
+	m_Vbox1->addLayout(m_Hbox1);
+	m_Vbox1->addWidget(m_Subsect);
+	m_Vbox1->addWidget(m_SubsectArea);
+	m_Vbox1->addWidget(m_CloseButton);
+	setLayout(m_Vbox1);
+
+	// initialize
 	DrawHisto();
-	m_Histwindow->show();
 
-	m_Vbox1->show();
-
+	// connections
 	QObject_connect(m_UpdateSubsect, SIGNAL(clicked()), this, SLOT(SubsectUpdate()));
 	QObject_connect(m_Workpict, SIGNAL(toggled(bool)), this, SLOT(PictToggled(bool)));
 	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
 	QObject_connect(m_Subsect, SIGNAL(clicked()), this, SLOT(SubsectToggled()));
-
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	setFixedSize(m_Vbox1->size());
-}
-
-ShowHisto::~ShowHisto()
-{
-	delete m_Vbox1;
-	delete m_Pictselect;
 }
 
 void ShowHisto::SubsectToggled()
 {
-	bool isset = m_Subsect->isChecked();
-	if (isset)
-	{
-		m_Vbox2->show();
-	}
-	else
-	{
-		m_Vbox2->hide();
-	}
+	m_SubsectArea->setVisible(m_Subsect->isChecked());
 	DrawHisto();
 }
 
@@ -437,7 +443,6 @@ void ShowHisto::SubsectUpdate()
 
 void ShowHisto::DrawHisto()
 {
-	//Point p;
 	if (m_Bmppict->isChecked())
 	{
 		m_Bmphand->SwapBmpwork();
@@ -534,72 +539,63 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 
 	m_Modify = modifyTissue;
 
-	m_Vbox1 = new Q3VBoxLayout(this);
-	m_Hbox1 = new Q3HBoxLayout(this);
-	m_Vbox1->addLayout(m_Hbox1);
-	m_Tissuename = new QLabel(QString("Tissue Name: "), this);
-	m_NameField = new QLineEdit(this);
-	m_Hbox1->addWidget(m_Tissuename);
-	m_Hbox1->addWidget(m_NameField);
-	m_Hbox2 = new Q3HBoxLayout(this);
+	m_NameField = new QLineEdit;
 	m_Cs = new Colorshower(50, 50, this);
-	m_Hbox2->addWidget(m_Cs);
-	m_Vbox2 = new Q3VBoxLayout(this);
-	m_Vbox3 = new Q3VBoxLayout(this);
-	m_Vbox4 = new Q3VBoxLayout(this);
 
-	m_R = new QSlider(Qt::Horizontal, this);
+	m_R = new QSlider(Qt::Horizontal);
 	m_R->setRange(0, 255);
-	m_Red = new QLabel(QString("Red: "), this);
-	//	hboxr=new QHBoxLayout(this);
-	//	hboxr->addWidget(red);
-	//	hboxr->addWidget(r);
-	m_G = new QSlider(Qt::Horizontal, this);
+	m_G = new QSlider(Qt::Horizontal);
 	m_G->setRange(0, 255);
-	m_Green = new QLabel(QString("Green: "), this);
-	//	hboxg=new QHBoxLayout(this);
-	//	hboxg->addWidget(green);
-	//	hboxg->addWidget(g);
-	m_B = new QSlider(Qt::Horizontal, this);
+	m_B = new QSlider(Qt::Horizontal);
 	m_B->setRange(0, 255);
-	m_Blue = new QLabel(QString("Blue: "), this);
-	m_SlTransp = new QSlider(Qt::Horizontal, this);
+	m_SlTransp = new QSlider(Qt::Horizontal);
 	m_SlTransp->setRange(0, 100);
-	m_Opac = new QLabel(QString("Transp.: "), this);
 	m_SbR = new QSpinBox(0, 255, 1, this);
 	m_SbG = new QSpinBox(0, 255, 1, this);
 	m_SbB = new QSpinBox(0, 255, 1, this);
 	m_SbTransp = new QSpinBox(0, 100, 1, this);
 
-	//	hboxb=new QHBoxLayout(this);
-	//	hboxb->addWidget(blue);
-	//	hboxb->addWidget(b);
-	/*	vbox2->addLayout(hboxr);
-			vbox2->addLayout(hboxg);
-			vbox2->addLayout(hboxb);*/
-	m_Vbox2->addWidget(m_Red);
-	m_Vbox2->addWidget(m_Green);
-	m_Vbox2->addWidget(m_Blue);
-	m_Vbox2->addWidget(m_Opac);
-	m_Vbox3->addWidget(m_R);
-	m_Vbox3->addWidget(m_G);
-	m_Vbox3->addWidget(m_B);
-	m_Vbox3->addWidget(m_SlTransp);
-	m_Vbox4->addWidget(m_SbR);
-	m_Vbox4->addWidget(m_SbG);
-	m_Vbox4->addWidget(m_SbB);
-	m_Vbox4->addWidget(m_SbTransp);
-	m_Hbox2->addLayout(m_Vbox2);
-	m_Hbox2->addLayout(m_Vbox3);
-	m_Hbox2->addLayout(m_Vbox4);
-	m_Vbox1->addLayout(m_Hbox2);
-	m_Hbox3 = new Q3HBoxLayout(this);
+	m_AddTissue = new QPushButton("");
+	m_CloseButton = new QPushButton("Close");
 
-	m_AddTissue = new QPushButton("", this);
-	m_CloseButton = new QPushButton("Close", this);
-	m_Hbox3->addWidget(m_AddTissue);
-	m_Hbox3->addWidget(m_CloseButton);
-	m_Vbox1->addLayout(m_Hbox3);
+	// layout 
+	auto hbox1 = new QHBoxLayout;
+	hbox1->addWidget(new QLabel("Tissue Name: "));
+	hbox1->addWidget(m_NameField);
+
+	auto vbox_labels = new QVBoxLayout;
+	vbox_labels->addWidget(new QLabel("Red: "));
+	vbox_labels->addWidget(new QLabel("Green: "));
+	vbox_labels->addWidget(new QLabel("Blue: "));
+	vbox_labels->addWidget(new QLabel("Transp.: "));
+
+	auto vbox_edit = new QVBoxLayout;
+	vbox_edit->addWidget(m_R);
+	vbox_edit->addWidget(m_G);
+	vbox_edit->addWidget(m_B);
+	vbox_edit->addWidget(m_SlTransp);
+
+	auto vbox_edit2 = new QVBoxLayout;
+	vbox_edit2->addWidget(m_SbR);
+	vbox_edit2->addWidget(m_SbG);
+	vbox_edit2->addWidget(m_SbB);
+	vbox_edit2->addWidget(m_SbTransp);
+
+	auto hbox2 = new QHBoxLayout;
+	hbox2->addWidget(m_Cs);
+	hbox2->addLayout(vbox_labels);
+	hbox2->addLayout(vbox_edit);
+	hbox2->addLayout(vbox_edit2);
+
+	auto hbox3 = new QHBoxLayout;
+	hbox3->addWidget(m_AddTissue);
+	hbox3->addWidget(m_CloseButton);
+
+	auto main_layout = new QVBoxLayout;
+	main_layout->addLayout(hbox1);
+	main_layout->addLayout(hbox2);
+	main_layout->addLayout(hbox3);
+	setLayout(main_layout);
 
 	if (m_Modify)
 	{
@@ -620,20 +616,6 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 		m_Fg1 = float(m_G->value()) / 255;
 		m_Fb1 = float(m_B->value()) / 255;
 		m_Transp1 = float(m_SlTransp->value()) / 100;
-
-		QObject_connect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
-		QObject_connect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
-		QObject_connect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
-		QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
-		QObject_connect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
-		QObject_connect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
-		QObject_connect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
-		QObject_connect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
-		QObject_connect(m_AddTissue, SIGNAL(clicked()), this, SLOT(AddPressed()));
-		QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
-		QObject_connect(this, SIGNAL(ColorChanged(float,float,float,float)), m_Cs, SLOT(ColorChanged(float,float,float,float)));
-
-		emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0 - m_Transp1);
 	}
 	else
 	{
@@ -652,108 +634,91 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 		m_Fg1 = float(m_G->value()) / 255;
 		m_Fb1 = float(m_B->value()) / 255;
 		m_Transp1 = float(m_SlTransp->value()) / 100;
-
-		QObject_connect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
-		QObject_connect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
-		QObject_connect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
-		QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
-		QObject_connect(m_AddTissue, SIGNAL(clicked()), this, SLOT(AddPressed()));
-		QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
-		QObject_connect(this, SIGNAL(ColorChanged(float,float,float,float)), m_Cs, SLOT(ColorChanged(float,float,float,float)));
 	}
 
-	}
+	QObject_connect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
+	QObject_connect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
+	QObject_connect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
+	QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
+	QObject_connect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
+	QObject_connect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
+	QObject_connect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
+	QObject_connect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
+	QObject_connect(m_AddTissue, SIGNAL(clicked()), this, SLOT(AddPressed()));
+	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
+	QObject_connect(this, SIGNAL(ColorChanged(float, float, float, float)), m_Cs, SLOT(ColorChanged(float, float, float, float)));
 
-TissueAdder::~TissueAdder()
-{
-	delete m_Cs;
-	delete m_Vbox1;
-	delete m_CloseButton;
-	delete m_AddTissue;
-	delete m_Red;
-	delete m_Green;
-	delete m_Blue;
-	delete m_Opac;
-	delete m_Tissuename;
-	delete m_NameField;
-	delete m_R;
-	delete m_G;
-	delete m_B;
-	delete m_SlTransp;
-	delete m_SbR;
-	delete m_SbG;
-	delete m_SbB;
-	delete m_SbTransp;
+	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0 - m_Transp1);
 }
 
 void TissueAdder::UpdateColorR(int v)
 {
-	QObject_disconnect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
+	m_SbR->blockSignals(true);
 	m_SbR->setValue(v);
-	QObject_connect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
+	m_SbR->blockSignals(false);
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorG(int v)
 {
-	QObject_disconnect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
+	m_SbG->blockSignals(true);
 	m_SbG->setValue(v);
-	QObject_connect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
+	m_SbG->blockSignals(false);
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorB(int v)
 {
-	QObject_disconnect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
+	m_SbB->blockSignals(true);
 	m_SbB->setValue(v);
-	QObject_connect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
+	m_SbB->blockSignals(false);
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpac(int v)
 {
-	QObject_disconnect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
+	m_SbTransp->blockSignals(true);
 	m_SbTransp->setValue(v);
-	QObject_connect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
+	m_SbTransp->blockSignals(false);
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorRsb(int v)
 {
-	QObject_disconnect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
+	m_R->blockSignals(true);
 	m_R->setValue(v);
-	QObject_connect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
+	m_R->blockSignals(false);
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorGsb(int v)
 {
-	QObject_disconnect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
+	m_G->blockSignals(true);
 	m_G->setValue(v);
-	QObject_connect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
+	m_G->blockSignals(false);
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorBsb(int v)
 {
-	QObject_disconnect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
+	m_B->blockSignals(true);
 	m_B->setValue(v);
-	QObject_connect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
+	m_B->blockSignals(false);
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpacsb(int v)
 {
-	QObject_disconnect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
+	m_SlTransp->blockSignals(true);
 	m_SlTransp->setValue(v);
-	QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
+	m_SlTransp->blockSignals(false);
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
@@ -811,46 +776,42 @@ void TissueAdder::AddPressed()
 			close();
 		}
 	}
-
-	//	fprintf(fp,"%f %f %f",tissuecolor[1][0],tissuecolor[1][1],tissuecolor[1][2]);
-	//	fclose(fp);
-
-	}
+}
 
 TissueFolderAdder::TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent, Qt::WindowFlags wFlags)
 		: QDialog(parent, wFlags), m_TissueTreeWidget(tissueTree)
 {
 	setModal(true);
 
+	// TODO BL: fixed size
 	setFixedWidth(235);
 	setFixedHeight(161);
 
-	m_HboxOverall = new Q3HBoxLayout(this);
-	m_VboxOverall = new Q3VBoxLayout(this);
-	m_HboxFolderName = new Q3HBoxLayout(this);
-	m_HboxPushButtons = new Q3HBoxLayout(this);
-	m_HboxOverall->addLayout(m_VboxOverall);
-
 	// Folder name line edit
-	m_NameLabel = new QLabel(QString("Folder Name: "), this);
+	m_NameLabel = new QLabel("Folder Name: ");
 	m_NameLineEdit = new QLineEdit(this);
 	m_NameLineEdit->setText("New folder");
-	m_HboxFolderName->addWidget(m_NameLabel);
-	m_HboxFolderName->addWidget(m_NameLineEdit);
-	m_VboxOverall->addLayout(m_HboxFolderName);
 
 	// Buttons
-	m_AddButton = new QPushButton("Add", this);
-	m_CloseButton = new QPushButton("Close", this);
-	m_HboxPushButtons->addWidget(m_AddButton);
-	m_HboxPushButtons->addWidget(m_CloseButton);
-	m_VboxOverall->addLayout(m_HboxPushButtons);
+	m_AddButton = new QPushButton("Add");
+	m_CloseButton = new QPushButton("Close");
+
+	auto hbox_folders = new QHBoxLayout;
+	hbox_folders->addWidget(m_NameLabel);
+	hbox_folders->addWidget(m_NameLineEdit);
+
+	auto hbox_buttons = new QHBoxLayout;
+	hbox_buttons->addWidget(m_AddButton);
+	hbox_buttons->addWidget(m_CloseButton);
+
+	auto layout = new QVBoxLayout;
+	layout->addLayout(hbox_folders);
+	layout->addLayout(hbox_buttons);
+	setLayout(layout);
 
 	QObject_connect(m_AddButton, SIGNAL(clicked()), this, SLOT(AddPressed()));
 	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
 }
-
-TissueFolderAdder::~TissueFolderAdder() { delete m_HboxOverall; }
 
 void TissueFolderAdder::AddPressed()
 {
@@ -861,38 +822,36 @@ void TissueFolderAdder::AddPressed()
 TissueHierarchyWidget::TissueHierarchyWidget(TissueTreeWidget* tissueTree, QWidget* parent, Qt::WindowFlags wFlags)
 		: QWidget(parent, wFlags), m_TissueTreeWidget(tissueTree)
 {
-	m_HboxOverall = new Q3HBoxLayout(this);
-	m_VboxOverall = new Q3VBoxLayout();
-	m_VboxHierarchyButtons = new Q3VBoxLayout();
-	m_HboxOverall->addLayout(m_VboxOverall);
-
 	// Hierarchy selection combo box
-	m_HierarchyComboBox = new QComboBox(this);
-	m_VboxOverall->addWidget(m_HierarchyComboBox);
+	m_HierarchyComboBox = new QComboBox;
 
 	// Hierarchy buttons
-	m_NewHierarchyButton = new QPushButton("New Hierarchy...", this);
-	m_LoadHierarchyButton = new QPushButton("Load Hierarchy...", this);
-	m_SaveHierarchyAsButton = new QPushButton("Save Hierarchy As...", this);
-	m_RemoveHierarchyButton = new QPushButton("Remove Hierarchy", this);
-	m_VboxHierarchyButtons->addWidget(m_NewHierarchyButton);
-	m_VboxHierarchyButtons->addWidget(m_LoadHierarchyButton);
-	m_VboxHierarchyButtons->addWidget(m_SaveHierarchyAsButton);
-	m_VboxHierarchyButtons->addWidget(m_RemoveHierarchyButton);
-	m_VboxOverall->addLayout(m_VboxHierarchyButtons);
+	m_NewHierarchyButton = new QPushButton("New Hierarchy...");
+	m_LoadHierarchyButton = new QPushButton("Load Hierarchy...");
+	m_SaveHierarchyAsButton = new QPushButton("Save Hierarchy As...");
+	m_RemoveHierarchyButton = new QPushButton("Remove Hierarchy");
 
+	// layout
+	auto vbox_buttons = new QVBoxLayout;
+	vbox_buttons->addWidget(m_NewHierarchyButton);
+	vbox_buttons->addWidget(m_LoadHierarchyButton);
+	vbox_buttons->addWidget(m_SaveHierarchyAsButton);
+	vbox_buttons->addWidget(m_RemoveHierarchyButton);
+
+	auto layout = new QVBoxLayout();
+	layout->addLayout(vbox_buttons);
+	layout->addWidget(m_HierarchyComboBox);
+	setLayout(layout);
+
+	// connections
 	QObject_connect(m_HierarchyComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(HierarchyChanged(int)));
-
 	QObject_connect(m_NewHierarchyButton, SIGNAL(clicked()), this, SLOT(NewHierarchyPressed()));
 	QObject_connect(m_LoadHierarchyButton, SIGNAL(clicked()), this, SLOT(LoadHierarchyPressed()));
 	QObject_connect(m_SaveHierarchyAsButton, SIGNAL(clicked()), this, SLOT(SaveHierarchyAsPressed()));
 	QObject_connect(m_RemoveHierarchyButton, SIGNAL(clicked()), this, SLOT(RemoveHierarchyPressed()));
-
 	QObject_connect(m_TissueTreeWidget, SIGNAL(HierarchyListChanged()), this, SLOT(UpdateHierarchyComboBox()));
 
 	UpdateHierarchyComboBox();
-
-	setFixedHeight(m_HboxOverall->sizeHint().height());
 }
 
 void TissueHierarchyWidget::UpdateHierarchyComboBox()
@@ -908,29 +867,8 @@ void TissueHierarchyWidget::UpdateHierarchyComboBox()
 	m_HierarchyComboBox->blockSignals(false);
 }
 
-TissueHierarchyWidget::~TissueHierarchyWidget() { delete m_HboxOverall; }
-
 bool TissueHierarchyWidget::HandleChangedHierarchy()
 {
-#if 0 // Version: Ask user whether to save xml
-	if (tissueTreeWidget->get_hierarchy_modified())
-	{
-		int ret = QMessageBox::warning(this, "iSeg", QString("Do you want to save changes to hierarchy %1?").arg(tissueTreeWidget->get_current_hierarchy_name()), QMessageBox::Yes | QMessageBox::Default, QMessageBox::No, QMessageBox::Cancel | QMessageBox::Escape);
-		if (ret == QMessageBox::Yes)
-		{
-			// Save hierarchy as...
-			save_hierarchy_as_pressed();
-		}
-		else if (ret == QMessageBox::Cancel)
-		{
-			// Update internal representation of current hierarchy
-			tissueTreeWidget->update_hierarchy();
-			return false;
-		}
-		tissueTreeWidget->set_hierarchy_modified(false);
-	}
-	return true;
-#else // Version: Commit change, but only save to xml if default hierarchy changed
 	if (m_TissueTreeWidget->GetSelectedHierarchy() == 0 &&
 			m_TissueTreeWidget->GetHierarchyModified())
 	{
@@ -963,7 +901,6 @@ bool TissueHierarchyWidget::HandleChangedHierarchy()
 		m_TissueTreeWidget->SetHierarchyModified(false);
 	}
 	return true;
-#endif
 }
 
 void TissueHierarchyWidget::HierarchyChanged(int index)
@@ -1066,34 +1003,38 @@ void TissueHierarchyWidget::RemoveHierarchyPressed()
 BitsStack::BitsStack(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFlags)
 		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
-	m_BitsNames = new QListWidget(this);
-	m_Hbox1 = new Q3HBoxLayout(this);
-	m_Hbox1->addWidget(m_BitsNames);
-	m_Vbox1 = new Q3VBoxLayout(m_Hbox1);
-	m_Pushwork = new QPushButton("Copy Target...", this);
-	m_Pushbmp = new QPushButton("Copy Source...", this);
-	m_Pushtissue = new QPushButton("Copy Tissue...", this);
-	m_Popwork = new QPushButton("Paste Target", this);
-	m_Popbmp = new QPushButton("Paste Source", this);
-	m_Poptissue = new QPushButton("Paste Tissue", this);
-	m_Deletebtn = new QPushButton("Delete", this);
-	m_Saveitem = new QPushButton("Save Item(s)", this);
-	m_Loaditem = new QPushButton("Open Item(s)", this);
-	m_Vbox1->addWidget(m_Pushwork);
-	m_Vbox1->addWidget(m_Pushbmp);
-	m_Vbox1->addWidget(m_Pushtissue);
-	m_Vbox1->addWidget(m_Popwork);
-	m_Vbox1->addWidget(m_Popbmp);
-	m_Vbox1->addWidget(m_Poptissue);
-	m_Vbox1->addWidget(m_Deletebtn);
-	m_Vbox1->addWidget(m_Saveitem);
-	m_Vbox1->addWidget(m_Loaditem);
-
+	m_BitsNames = new QListWidget;
 	m_BitsNames->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_BitsNames->setDragEnabled(true);
 	m_BitsNames->setDragDropMode(QAbstractItemView::InternalMove);
 	m_BitsNames->viewport()->setAcceptDrops(true);
 	m_BitsNames->setDropIndicatorShown(true);
+
+	m_Pushwork = new QPushButton("Copy Target...");
+	m_Pushbmp = new QPushButton("Copy Source...");
+	m_Pushtissue = new QPushButton("Copy Tissue...");
+	m_Popwork = new QPushButton("Paste Target");
+	m_Popbmp = new QPushButton("Paste Source");
+	m_Poptissue = new QPushButton("Paste Tissue");
+	m_Deletebtn = new QPushButton("Delete");
+	m_Saveitem = new QPushButton("Save Item(s)");
+	m_Loaditem = new QPushButton("Open Item(s)");
+
+	auto vbox_buttons = new QVBoxLayout;
+	vbox_buttons->addWidget(m_Pushwork);
+	vbox_buttons->addWidget(m_Pushbmp);
+	vbox_buttons->addWidget(m_Pushtissue);
+	vbox_buttons->addWidget(m_Popwork);
+	vbox_buttons->addWidget(m_Popbmp);
+	vbox_buttons->addWidget(m_Poptissue);
+	vbox_buttons->addWidget(m_Deletebtn);
+	vbox_buttons->addWidget(m_Saveitem);
+	vbox_buttons->addWidget(m_Loaditem);
+
+	auto layout = new QHBoxLayout;
+	layout->addLayout(vbox_buttons);
+	layout->addWidget(m_BitsNames);
+	setLayout(layout);
 
 	QObject_connect(m_Pushwork, SIGNAL(clicked()), this, SLOT(PushworkPressed()));
 	QObject_connect(m_Pushbmp, SIGNAL(clicked()), this, SLOT(PushbmpPressed()));
@@ -1109,20 +1050,6 @@ BitsStack::BitsStack(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFl
 	m_Oldh = m_Handler3D->Height();
 
 	m_Tissuenr = 0;
-}
-
-BitsStack::~BitsStack()
-{
-	delete m_BitsNames;
-	delete m_Pushwork;
-	delete m_Pushbmp;
-	delete m_Pushtissue;
-	delete m_Popwork;
-	delete m_Popbmp;
-	delete m_Poptissue;
-	delete m_Deletebtn;
-	delete m_Saveitem;
-	delete m_Loaditem;
 }
 
 void BitsStack::TissuenrChanged(unsigned short i) { m_Tissuenr = i + 1; }
@@ -1166,16 +1093,11 @@ void BitsStack::PushHelper(bool source, bool target, bool tissue)
 		// Copy current slice
 		bool ok;
 		QString new_text = QInputDialog::getText("Name", "Enter a name for the picture:", QLineEdit::Normal, "", &ok, this);
-		new_text = new_text + QString(" (") +
-							 QString::number(m_Handler3D->ActiveSlice() + 1) +
-							 QString(")");
-		while (ok &&
-					 !m_BitsNames->findItems(new_text, Qt::MatchExactly).empty())
+		new_text = new_text + QString(" (%1)").arg(m_Handler3D->ActiveSlice() + 1);
+		while (ok && !m_BitsNames->findItems(new_text, Qt::MatchExactly).empty())
 		{
 			new_text = QInputDialog::getText("Name", "Enter a !new! name for the picture:", QLineEdit::Normal, "", &ok, this);
-			new_text = new_text + QString(" (") +
-								 QString::number(m_Handler3D->ActiveSlice() + 1) +
-								 QString(")");
+			new_text = new_text + QString(" (%1)").arg(m_Handler3D->ActiveSlice() + 1);
 		}
 		if (ok)
 		{
@@ -1570,22 +1492,11 @@ ExtoverlayWidget::ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent, Qt::W
 		m_SliderPrecision++;
 	}
 
-	m_HboxOverall = new Q3HBoxLayout(this);
-	m_VboxOverall = new Q3VBoxLayout();
-	m_HboxAlpha = new Q3HBoxLayout();
-	m_HboxDisplaySrcTgt = new Q3HBoxLayout();
-	m_HboxOverall->addLayout(m_VboxOverall);
-
-	// Dataset selection combo box
 	m_DatasetComboBox = new QComboBox(this);
-	m_VboxOverall->addWidget(m_DatasetComboBox);
 
-	// Dataset buttons
-	m_LoadDatasetButton = new QPushButton("Load Dataset...", this);
-	m_VboxOverall->addWidget(m_LoadDatasetButton);
+	m_LoadDatasetButton = new QPushButton("Load Dataset...");
 
-	// Alpha value slider
-	m_LbAlpha = new QLabel(QString("Alpha: "));
+	auto m_LbAlpha = new QLabel(QString("Alpha: "));
 	m_SlAlpha = new QSlider(Qt::Horizontal);
 	m_SlAlpha->setRange(0, m_SliderMax);
 	m_SlAlpha->setValue(m_Alpha * m_SliderMax);
@@ -1596,20 +1507,29 @@ ExtoverlayWidget::ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent, Qt::W
 	QFontMetrics fm = m_LeAlpha->fontMetrics();
 	QRect rect = fm.boundingRect(text);
 	m_LeAlpha->setFixedSize(rect.width() + 10, rect.height() + 4);
-	m_HboxAlpha->addWidget(m_LbAlpha);
-	m_HboxAlpha->addWidget(m_SlAlpha);
-	m_HboxAlpha->addWidget(m_LeAlpha);
-	m_VboxOverall->addLayout(m_HboxAlpha);
 
 	// Display checkboxes
 	m_SrcCheckBox = new QCheckBox(QString("Source"));
 	m_TgtCheckBox = new QCheckBox(QString("Target"));
-	m_HboxDisplaySrcTgt->addWidget(m_SrcCheckBox);
-	m_HboxDisplaySrcTgt->addWidget(m_TgtCheckBox);
-	m_VboxOverall->addLayout(m_HboxDisplaySrcTgt);
 
-	setFixedHeight(m_HboxOverall->sizeHint().height());
+	// layout
+	auto hbox_soure_target = new QHBoxLayout();
+	hbox_soure_target->addWidget(m_SrcCheckBox);
+	hbox_soure_target->addWidget(m_TgtCheckBox);
 
+	auto hbox_alpha = new QHBoxLayout();
+	hbox_alpha->addWidget(m_LbAlpha);
+	hbox_alpha->addWidget(m_SlAlpha);
+	hbox_alpha->addWidget(m_LeAlpha);
+
+	auto layout = new QVBoxLayout();
+	layout->addWidget(m_DatasetComboBox);
+	layout->addWidget(m_LoadDatasetButton);
+	layout->addLayout(hbox_alpha);
+	layout->addLayout(hbox_soure_target);
+	setLayout(layout);
+
+	// connections
 	QObject_connect(m_DatasetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(DatasetChanged(int)));
 	QObject_connect(m_LoadDatasetButton, SIGNAL(clicked()), this, SLOT(LoadDatasetPressed()));
 	QObject_connect(m_LeAlpha, SIGNAL(editingFinished()), this, SLOT(AlphaChanged()));
@@ -1707,19 +1627,14 @@ void ExtoverlayWidget::DatasetChanged(int index)
 	ReloadOverlay();
 }
 
-ExtoverlayWidget::~ExtoverlayWidget()
-{
-	m_DatasetNames.clear();
-	m_DatasetFilepaths.clear();
-	delete m_HboxOverall;
-}
-
 void ExtoverlayWidget::LoadDatasetPressed()
 {
-	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\n"
-																																												 "Raw files (*.raw)\n"
-																																												 "NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-																																												 "All (*.*)");
+	QString loadfilename = RecentPlaces::GetOpenFileName(
+			this, "Open file", QString::null,
+			"VTK (*.vti *.vtk)\n"
+			"Raw files (*.raw)\n"
+			"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
+			"All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		AddDataset(loadfilename);
@@ -1776,50 +1691,61 @@ BitsStackPushdialog::BitsStackPushdialog(QWidget* parent, Qt::WindowFlags wFlags
 {
 	setModal(false);
 
-	m_Vboxoverall = new Q3VBox(this);
-	m_Hboxparams = new Q3HBox(m_Vboxoverall);
-	m_Vboxsliceselection = new Q3VBox(m_Hboxparams);
-	m_Vboxdelimiter = new Q3VBox(m_Hboxparams);
-	m_Hboxslicerange = new Q3HBox(m_Hboxparams);
-	m_Vboxslicerangelabels = new Q3VBox(m_Hboxslicerange);
-	m_Vboxslicerangelineedits = new Q3VBox(m_Hboxslicerange);
-	m_Hboxpushbuttons = new Q3HBox(m_Vboxoverall);
-
-	m_RbCurrentslice = new QRadioButton(QString("Current slice"), m_Vboxsliceselection);
-	m_RbMultislices = new QRadioButton(QString("Slice range"), m_Vboxsliceselection);
+	m_RbCurrentslice = new QRadioButton("Current slice");
+	m_RbMultislices = new QRadioButton("Slice range");
 	m_Slicegroup = new QButtonGroup(this);
 	m_Slicegroup->insert(m_RbCurrentslice);
 	m_Slicegroup->insert(m_RbMultislices);
 	m_RbCurrentslice->setChecked(TRUE);
 
-	m_LbStartslice = new QLabel(QString("Start slice:"), m_Vboxslicerangelabels);
-	m_LbEndslice = new QLabel(QString("End slice:"), m_Vboxslicerangelabels);
-	m_LeStartslice = new QLineEdit(QString(""), m_Vboxslicerangelineedits);
-	m_LeEndslice = new QLineEdit(QString(""), m_Vboxslicerangelineedits);
+	m_LeStartslice = new QLineEdit("");
+	m_LeEndslice = new QLineEdit("");
 
-	m_Pushexec = new QPushButton(QString("OK"), m_Hboxpushbuttons);
-	m_Pushcancel = new QPushButton(QString("Cancel"), m_Hboxpushbuttons);
+	m_Pushexec = new QPushButton("OK");
+	m_Pushcancel = new QPushButton("Cancel");
 
-	m_Vboxoverall->setMargin(5);
-	m_Hboxslicerange->setMargin(5);
-	m_Vboxsliceselection->setMargin(5);
-	m_Hboxpushbuttons->setMargin(5);
-	m_Vboxdelimiter->setMargin(5);
-	m_Vboxsliceselection->layout()->setAlignment(Qt::AlignTop);
-	m_Vboxdelimiter->setFixedSize(15, m_Hboxslicerange->height());
-	this->setFixedSize(m_Vboxoverall->sizeHint());
+	// layout
+	auto vbox_slice_selection = new QVBoxLayout;
+	vbox_slice_selection->addWidget(m_RbCurrentslice);
+	vbox_slice_selection->addWidget(m_RbMultislices);
 
-	m_Hboxslicerange->hide();
+	m_SliceRangeArea = new QWidget;
+	{
+		auto vbox_labels = new QVBoxLayout;
+		vbox_labels->addWidget(new QLabel("Start slice:"));
+		vbox_labels->addWidget(new QLabel("End slice:"));
 
+		auto vbox_edits = new QVBoxLayout;
+		vbox_edits->addWidget(m_LeStartslice);
+		vbox_edits->addWidget(m_LeEndslice);
+
+		auto hbox_slice_range = new QHBoxLayout;
+		hbox_slice_range->addLayout(vbox_labels);
+		hbox_slice_range->addLayout(vbox_edits);
+		m_SliceRangeArea->setLayout(hbox_slice_range);
+	}
+
+	auto hbox_params = new QHBoxLayout;
+	hbox_params->addLayout(vbox_slice_selection);
+	hbox_params->addStretch(1);
+	hbox_params->addWidget(m_SliceRangeArea);
+
+	auto hbox_buttons = new QHBoxLayout;
+	hbox_buttons->addWidget(m_Pushexec);
+	hbox_buttons->addWidget(m_Pushcancel);
+
+	auto main_layout = new QVBoxLayout(this);
+	main_layout->addLayout(hbox_params);
+	main_layout->addLayout(hbox_buttons);
+	setLayout(main_layout);
+
+	// initialize
+	SliceselectionChanged();
+
+	// connections
 	QObject_connect(m_Pushexec, SIGNAL(clicked()), this, SLOT(accept()));
 	QObject_connect(m_Pushcancel, SIGNAL(clicked()), this, SLOT(reject()));
 	QObject_connect(m_Slicegroup, SIGNAL(buttonClicked(int)), this, SLOT(SliceselectionChanged()));
-}
-
-BitsStackPushdialog::~BitsStackPushdialog()
-{
-	delete m_Slicegroup;
-	delete m_Vboxoverall;
 }
 
 bool BitsStackPushdialog::GetPushcurrentslice()
@@ -1839,14 +1765,7 @@ unsigned int BitsStackPushdialog::GetEndslice(bool* ok)
 
 void BitsStackPushdialog::SliceselectionChanged()
 {
-	if (m_RbCurrentslice->isChecked())
-	{
-		m_Hboxslicerange->hide();
-	}
-	else
-	{
-		m_Hboxslicerange->show();
-	}
+	m_SliceRangeArea->setVisible(!m_RbCurrentslice->isChecked());
 }
 
 //xxxxxxxxxxxxxxxxxxxxxx histo xxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -1855,39 +1774,29 @@ ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent, Qt::WindowFl
 		: QWidget(parent, wFlags)
 {
 	m_Zoom = zoom1;
-	m_Vbox1 = new Q3VBoxLayout(this);
-	m_Pushzoomin = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomin.png"))), "Zoom in", this);
-	m_Pushzoomout = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomout.png"))), "Zoom out", this);
-	m_Pushunzoom = new QPushButton(QIcon(picpath.absoluteFilePath(QString("unzoom.png"))), "Unzoom", this);
+	m_Pushzoomin = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomin.png"))), "Zoom in");
+	m_Pushzoomout = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomout.png"))), "Zoom out");
+	m_Pushunzoom = new QPushButton(QIcon(picpath.absoluteFilePath(QString("unzoom.png"))), "Unzoom");
 
 	m_ZoomF = new QLabel(QString("x"), this);
 	m_LeZoomF = new QLineEdit(QString::number(m_Zoom, 'g', 4), this);
 	m_LeZoomF->setFixedWidth(80);
 
-	m_Vbox1->addWidget(m_Pushzoomin);
-	m_Vbox1->addWidget(m_Pushzoomout);
-	m_Vbox1->addWidget(m_Pushunzoom);
+	auto hbox = new QHBoxLayout;
+	hbox->addWidget(m_ZoomF);
+	hbox->addWidget(m_LeZoomF);
 
-	m_Hbox1 = new Q3HBoxLayout(m_Vbox1);
-	m_Hbox1->addWidget(m_ZoomF);
-	m_Hbox1->addWidget(m_LeZoomF);
-
-	setFixedHeight(m_Vbox1->sizeHint().height());
+	auto layout = new QVBoxLayout;
+	layout->addWidget(m_Pushzoomin);
+	layout->addWidget(m_Pushzoomout);
+	layout->addWidget(m_Pushunzoom);
+	layout->addLayout(hbox);
+	setLayout(layout);
 
 	QObject_connect(m_Pushzoomin, SIGNAL(clicked()), this, SLOT(ZoominPushed()));
 	QObject_connect(m_Pushzoomout, SIGNAL(clicked()), this, SLOT(ZoomoutPushed()));
 	QObject_connect(m_Pushunzoom, SIGNAL(clicked()), this, SLOT(UnzoomPushed()));
 	QObject_connect(m_LeZoomF, SIGNAL(editingFinished()), this, SLOT(LeZoomChanged()));
-}
-
-ZoomWidget::~ZoomWidget()
-{
-	delete m_Vbox1;
-	delete m_Pushzoomin;
-	delete m_Pushzoomout;
-	delete m_Pushunzoom;
-	delete m_LeZoomF;
-	delete m_ZoomF;
 }
 
 double ZoomWidget::GetZoom() const { return m_Zoom; }
@@ -1971,49 +1880,57 @@ ImageMath::ImageMath(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFl
 
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
+	m_Val = 0;
 
-	m_Vbox1 = new Q3VBox(this);
-
-	m_Hbox1 = new Q3HBox(m_Vbox1);
 	m_Imgorval = new QButtonGroup(this);
-	//	imgorval->hide();
-	m_RbImg = new QRadioButton(QString("Image"), m_Hbox1);
-	m_RbVal = new QRadioButton(QString("Value"), m_Hbox1);
+	m_RbImg = new QRadioButton("Image");
+	m_RbVal = new QRadioButton("Value");
 	m_Imgorval->insert(m_RbImg);
 	m_Imgorval->insert(m_RbVal);
-	m_RbImg->setChecked(TRUE);
-	m_RbImg->show();
-	m_RbVal->show();
-	m_Hbox1->show();
+	m_RbImg->setChecked(true);
 
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_LbVal = new QLabel(QString("Value: "), m_Hbox2);
-	m_LbVal->show();
-	m_LeVal = new QLineEdit(QString::number((int)0), m_Hbox2);
-	m_LeVal->show();
-	m_Val = 0;
-	m_Hbox2->show();
+	m_LeVal = new QLineEdit(QString::number(0));
+	m_LeVal->setValidator(new QDoubleValidator);
 
-	m_Allslices = new QCheckBox(QString("3D"), m_Vbox1);
+	m_Allslices = new QCheckBox("3D");
 
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_DoAdd = new QPushButton("Add.", m_Hbox3);
-	m_DoAdd->show();
-	m_DoSub = new QPushButton("Subt.", m_Hbox3);
-	m_DoSub->show();
-	m_DoMult = new QPushButton("Mult.", m_Hbox3);
-	m_DoMult->show();
-	m_DoNeg = new QPushButton("Neg.", m_Hbox3);
-	m_DoNeg->show();
-	m_Hbox3->show();
+	m_DoAdd = new QPushButton("Add.");
+	m_DoSub = new QPushButton("Subt.");
+	m_DoMult = new QPushButton("Mult.");
+	m_DoNeg = new QPushButton("Neg.");
 
-	m_CloseButton = new QPushButton("Close", m_Vbox1);
+	m_CloseButton = new QPushButton("Close");
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	setFixedSize(m_Vbox1->size());
+	// layout
+	auto hbox1 = new QHBoxLayout;
+	hbox1->addWidget(m_RbImg);
+	hbox1->addWidget(m_RbVal);
+
+	m_ValArea = new QWidget;
+	{
+		auto hbox2 = new QHBoxLayout;
+		hbox2->addWidget(new QLabel("Value: "));
+		hbox2->addWidget(m_LeVal);
+		m_ValArea->setLayout(hbox2);
+	}
+
+	auto hbox3 = new QHBoxLayout;
+	hbox3->addWidget(m_DoAdd);
+	hbox3->addWidget(m_DoSub);
+	hbox3->addWidget(m_DoMult);
+	hbox3->addWidget(m_DoNeg);
+
+	auto vbox1 = new QVBoxLayout;
+	vbox1->addLayout(hbox1);
+	vbox1->addWidget(m_ValArea);
+	vbox1->addLayout(hbox3);
+	hbox1->addWidget(m_Allslices);
+	vbox1->addWidget(m_CloseButton);
+	setLayout(vbox1);
 
 	ImgorvalChanged(0);
 
+	// connections
 	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
 	QObject_connect(m_DoAdd, SIGNAL(clicked()), this, SLOT(AddPushed()));
 	QObject_connect(m_DoSub, SIGNAL(clicked()), this, SLOT(SubPushed()));
@@ -2021,21 +1938,11 @@ ImageMath::ImageMath(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFlags wFl
 	QObject_connect(m_DoNeg, SIGNAL(clicked()), this, SLOT(NegPushed()));
 	QObject_connect(m_Imgorval, SIGNAL(buttonClicked(int)), this, SLOT(ImgorvalChanged(int)));
 	QObject_connect(m_LeVal, SIGNAL(editingFinished()), this, SLOT(ValueChanged()));
-
-	}
-
-ImageMath::~ImageMath() { delete m_Vbox1; }
+}
 
 void ImageMath::ImgorvalChanged(int)
 {
-	if (m_RbVal->isChecked())
-	{
-		m_Hbox2->show();
-	}
-	else
-	{
-		m_Hbox2->hide();
-	}
+	m_ValArea->setVisible(m_RbVal->isChecked());
 }
 
 void ImageMath::AddPushed()
@@ -2223,49 +2130,48 @@ ImageOverlay::ImageOverlay(SlicesHandler* hand3D, QWidget* parent, Qt::WindowFla
 		m_SliderPrecision++;
 	}
 
-	m_Vbox1 = new Q3VBox(this);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_LbAlpha = new QLabel(QString("Alpha: "), m_Hbox1);
-	m_LbAlpha->show();
-	m_SlAlpha = new QSlider(Qt::Horizontal, m_Hbox1);
+	m_SlAlpha = new QSlider(Qt::Horizontal);
 	m_SlAlpha->setRange(0, m_SliderMax);
 	m_SlAlpha->setValue(m_Alpha * m_SliderMax);
-	m_SlAlpha->show();
-	m_LeAlpha = new QLineEdit(QString::number((int)0), m_Hbox1);
+
+	m_LeAlpha = new QLineEdit("0");
 	m_LeAlpha->setAlignment(Qt::AlignRight);
 	m_LeAlpha->setText(QString::number(m_Alpha, 'f', m_SliderPrecision));
-	QString text = m_LeAlpha->text();
-	QFontMetrics fm = m_LeAlpha->fontMetrics();
-	QRect rect = fm.boundingRect(text);
-	m_LeAlpha->setFixedSize(rect.width() + 10, rect.height() + 4);
-	m_LeAlpha->show();
-	m_Hbox1->show();
 
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Allslices = new QCheckBox(QString("3D"), m_Hbox2);
-	m_Allslices->show();
-	m_Hbox2->show();
+	m_Allslices = new QCheckBox("3D");
 
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_CloseButton = new QPushButton("Close", m_Hbox3);
-	m_CloseButton->show();
-	m_ApplyButton = new QPushButton("Apply", m_Hbox3);
-	m_ApplyButton->show();
-	m_Hbox3->show();
+	m_CloseButton = new QPushButton("Close");
+	m_ApplyButton = new QPushButton("Apply");
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	setFixedSize(m_Vbox1->size());
+	// layout
+	auto hbox1 = new QHBoxLayout;
+	hbox1->addWidget(new QLabel("Alpha: "));
+	hbox1->addWidget(m_SlAlpha);
+	hbox1->addWidget(m_LeAlpha);
 
+	auto hbox2 = new QHBoxLayout;
+	hbox2->addWidget(m_Allslices);
+
+	auto hbox3 = new QHBoxLayout;
+	hbox3->addWidget(m_CloseButton);
+	hbox3->addWidget(m_ApplyButton);
+
+	auto main_layout = new QVBoxLayout;
+	main_layout->addLayout(hbox1);
+	main_layout->addLayout(hbox2);
+	main_layout->addLayout(hbox3);
+	setLayout(main_layout);
+
+	// connections
 	QObject_connect(m_CloseButton, SIGNAL(clicked()), this, SLOT(close()));
 	QObject_connect(m_ApplyButton, SIGNAL(clicked()), this, SLOT(ApplyPushed()));
 	QObject_connect(m_LeAlpha, SIGNAL(editingFinished()), this, SLOT(AlphaChanged()));
 	QObject_connect(m_SlAlpha, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged(int)));
 
-	}
+}
 
 ImageOverlay::~ImageOverlay()
 {
-	delete m_Vbox1;
 	free(m_BkpWork);
 }
 
@@ -2332,8 +2238,7 @@ void ImageOverlay::BmphandChanged(Bmphandler* bmph)
 void ImageOverlay::Newloaded()
 {
 	free(m_BkpWork);
-	m_BkpWork = (float*)malloc(sizeof(float) *
-														 m_Handler3D->GetActivebmphandler()->ReturnArea());
+	m_BkpWork = (float*)malloc(sizeof(float) * m_Handler3D->GetActivebmphandler()->ReturnArea());
 }
 
 void ImageOverlay::AlphaChanged()
@@ -2393,27 +2298,40 @@ CleanerParams::CleanerParams(int* rate1, int* minsize1, QWidget* parent, Qt::Win
 {
 	m_Rate = rate1;
 	m_Minsize = minsize1;
-	m_Hbox1 = new Q3HBox(this);
-	m_Vbox1 = new Q3VBox(m_Hbox1);
-	m_Vbox2 = new Q3VBox(m_Hbox1);
-	m_LbRate = new QLabel(QString("Rate: "), m_Vbox1);
-	m_LbMinsize = new QLabel(QString("Pixel Size: "), m_Vbox1);
-	m_PbDoit = new QPushButton("OK", m_Vbox1);
-	m_SbRate = new QSpinBox(3, 10000, 1, m_Vbox2);
+
+	m_SbRate = new QSpinBox;
+	m_SbRate->setRange(3, 10000);
 	m_SbRate->setValue(4);
 	m_SbRate->setToolTip(Format("1/rate is the percentage of the total (tissue) volume needed to force small regions to be kept (overrides Pixel Size criterion)."));
-	m_SbMinsize = new QSpinBox(2, 10000, 1, m_Vbox2);
+	
+	m_SbMinsize = new QSpinBox;
+	m_SbMinsize->setRange(2, 10000);
 	m_SbMinsize->setValue(10);
 	m_SbMinsize->setToolTip(Format("Minimum number of pixels required by an island."));
-	m_PbDontdoit = new QPushButton("Cancel", m_Vbox2);
+
+	m_PbDoit = new QPushButton("OK");
+	m_PbDontdoit = new QPushButton("Cancel");
+
+	auto vbox1 = new QVBoxLayout;
+	vbox1->addWidget(new QLabel("Rate: "));
+	vbox1->addWidget(new QLabel("Pixel Size: "));
+	auto vbox2 = new QVBoxLayout;
+	vbox2->addWidget(m_SbRate);
+	vbox2->addWidget(m_SbMinsize);
+
+	auto hbox_buttons = new QHBoxLayout;
+	hbox_buttons->addWidget(m_PbDoit);
+	hbox_buttons->addWidget(m_PbDontdoit);
+
+	auto layout = new QHBoxLayout;
+	layout->addLayout(vbox1);
+	layout->addLayout(vbox2);
+	layout->addLayout(hbox_buttons);
+	setLayout(layout);
+
 	QObject_connect(m_PbDoit, SIGNAL(clicked()), this, SLOT(DoitPressed()));
 	QObject_connect(m_PbDontdoit, SIGNAL(clicked()), this, SLOT(DontdoitPressed()));
-
-	m_Hbox1->setFixedSize(m_Hbox1->sizeHint());
-	setFixedSize(m_Hbox1->size());
 }
-
-CleanerParams::~CleanerParams() { delete m_Hbox1; }
 
 void CleanerParams::DoitPressed()
 {
@@ -2434,43 +2352,40 @@ MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, Qt::WindowFlags wFlags
 {
 	setModal(true);
 
-	m_HboxOverall = new Q3HBoxLayout(this);
-	m_VboxFileList = new Q3VBoxLayout(this);
-	m_VboxButtons = new Q3VBoxLayout(this);
-	m_VboxEditButtons = new Q3VBoxLayout(this);
-	m_VboxExecuteButtons = new Q3VBoxLayout(this);
-
-	m_FileListWidget = new QListWidget(this);
+	m_FileListWidget = new QListWidget;
 	m_FileListWidget->setSelectionMode(QAbstractItemView::ContiguousSelection);
 
-	m_AddButton = new QPushButton("Add...", this);
-	m_RemoveButton = new QPushButton("Remove", this);
-	m_MoveUpButton = new QPushButton("Move up", this);
-	m_MoveDownButton = new QPushButton("Move down", this);
-	m_ExecuteButton = new QPushButton("Execute", this);
-	m_CancelButton = new QPushButton("Cancel", this);
+	m_AddButton = new QPushButton("Add...");
+	m_RemoveButton = new QPushButton("Remove");
+	m_MoveUpButton = new QPushButton("Move up");
+	m_MoveDownButton = new QPushButton("Move down");
+	m_ExecuteButton = new QPushButton("Execute");
+	m_CancelButton = new QPushButton("Cancel");
 
-	m_HboxOverall->setMargin(10);
+	// layout
+	auto vbox_edit_buttons = new QVBoxLayout;
+	vbox_edit_buttons->setAlignment(Qt::AlignTop);
+	vbox_edit_buttons->addWidget(m_AddButton);
+	vbox_edit_buttons->addWidget(m_RemoveButton);
+	vbox_edit_buttons->addWidget(m_MoveUpButton);
+	vbox_edit_buttons->addWidget(m_MoveDownButton);
 
-	m_VboxFileList->addWidget(m_FileListWidget);
+	auto vbox_execute_buttons = new QVBoxLayout;
+	vbox_execute_buttons->setAlignment(Qt::AlignBottom);
+	vbox_execute_buttons->addWidget(m_ExecuteButton);
+	vbox_execute_buttons->addWidget(m_CancelButton);
 
-	m_VboxEditButtons->setAlignment(Qt::AlignTop);
-	m_VboxEditButtons->addWidget(m_AddButton);
-	m_VboxEditButtons->addWidget(m_RemoveButton);
-	m_VboxEditButtons->addWidget(m_MoveUpButton);
-	m_VboxEditButtons->addWidget(m_MoveDownButton);
+	auto vbox_buttons = new QVBoxLayout;
+	vbox_buttons->addLayout(vbox_edit_buttons);
+	vbox_buttons->addLayout(vbox_execute_buttons);
 
-	m_VboxExecuteButtons->setAlignment(Qt::AlignBottom);
-	m_VboxExecuteButtons->addWidget(m_ExecuteButton);
-	m_VboxExecuteButtons->addWidget(m_CancelButton);
+	auto main_layout = new QHBoxLayout;
+	main_layout->addWidget(m_FileListWidget);
+	main_layout->addSpacing(10);
+	main_layout->addLayout(vbox_buttons);
+	setLayout(main_layout);
 
-	m_VboxButtons->addLayout(m_VboxEditButtons);
-	m_VboxButtons->addLayout(m_VboxExecuteButtons);
-
-	m_HboxOverall->addLayout(m_VboxFileList);
-	m_HboxOverall->addSpacing(10);
-	m_HboxOverall->addLayout(m_VboxButtons);
-
+	// connections
 	QObject_connect(m_AddButton, SIGNAL(clicked()), this, SLOT(AddPressed()));
 	QObject_connect(m_RemoveButton, SIGNAL(clicked()), this, SLOT(RemovePressed()));
 	QObject_connect(m_MoveUpButton, SIGNAL(clicked()), this, SLOT(MoveUpPressed()));
@@ -2480,8 +2395,6 @@ MergeProjectsDialog::MergeProjectsDialog(QWidget* parent, Qt::WindowFlags wFlags
 
 	setWindowTitle("Merge Projects");
 }
-
-MergeProjectsDialog::~MergeProjectsDialog() { delete m_HboxOverall; }
 
 void MergeProjectsDialog::AddPressed()
 {
@@ -2547,56 +2460,52 @@ void MergeProjectsDialog::GetFilenames(std::vector<QString>& filenames)
 CheckBoneConnectivityDialog::CheckBoneConnectivityDialog(SlicesHandler* hand3D, const char* name, QWidget* parent /*=0*/, Qt::WindowFlags wFlags /*=0*/)
 		: QWidget(parent, wFlags), m_Handler3D(hand3D)
 {
-	m_MainBox = new Q3HBox(this);
-	m_Vbox1 = new Q3VBox(m_MainBox);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_Hbox4 = new Q3HBox(m_Vbox1);
-
-	m_Vbox1->setMargin(3);
-	m_Hbox1->setMargin(3);
-	m_Hbox2->setMargin(3);
-	m_Hbox3->setMargin(3);
-	m_Hbox4->setMargin(3);
-
-	m_MainBox->setFixedSize(QSize(420, 420));
-
-	m_Hbox1->setMaximumHeight(30);
-	m_Hbox2->setMaximumHeight(30);
-
-	m_BonesFoundCb = new QCheckBox(QString("Bones Found"), m_Hbox1);
+	m_BonesFoundCb = new QCheckBox("Bones Found");
 	m_BonesFoundCb->setEnabled(false);
 
-	m_ExecuteButton = new QPushButton("Execute", m_Hbox2);
-	m_CancelButton = new QPushButton("Cancel", m_Hbox2);
+	m_ExecuteButton = new QPushButton("Execute");
+	m_CancelButton = new QPushButton("Cancel");
 
-	m_FoundConnectionsTable = new QTableWidget(m_Hbox3);
+	m_FoundConnectionsTable = new QTableWidget;
 	m_FoundConnectionsTable->setColumnCount(eBoneConnectionColumn::kColumnNumber);
 
-	m_ExportButton = new QPushButton("Export", m_Hbox4);
+	m_ExportButton = new QPushButton("Export");
 	m_ExportButton->setMaximumWidth(60);
 	m_ExportButton->setEnabled(false);
-	m_ProgressText = new QLabel(m_Hbox4);
+	m_ProgressText = new QLabel;
 	m_ProgressText->setAlignment(Qt::AlignRight);
 
 	QStringList table_header;
-	table_header << "Bone 1"
-							 << "Bone 2"
-							 << "Slice #";
+	table_header << "Bone 1" << "Bone 2" << "Slice #";
 	m_FoundConnectionsTable->setHorizontalHeaderLabels(table_header);
 	m_FoundConnectionsTable->verticalHeader()->setVisible(false);
 	m_FoundConnectionsTable->setColumnWidth(eBoneConnectionColumn::kTissue1, 160);
 	m_FoundConnectionsTable->setColumnWidth(eBoneConnectionColumn::kTissue2, 160);
 	m_FoundConnectionsTable->setColumnWidth(eBoneConnectionColumn::kSliceNumber, 60);
 
-	m_Hbox1->show();
-	m_Hbox2->show();
-	m_Hbox3->show();
-	m_Hbox4->show();
-	m_Vbox1->show();
+	// layout
+	auto hbox_execute = new QHBoxLayout;
+	hbox_execute->addWidget(m_ExecuteButton);
+	hbox_execute->addWidget(m_CancelButton);
 
-	m_MainBox->show();
+	auto hbox_export = new QHBoxLayout;
+	hbox_export->addWidget(m_ExportButton);
+	hbox_export->addWidget(m_ProgressText);
+
+	auto m_Vbox1 = new QVBoxLayout;
+	m_Vbox1->addWidget(m_BonesFoundCb);
+	m_Vbox1->addLayout(hbox_execute);
+	m_Vbox1->addWidget(m_FoundConnectionsTable);
+	m_Vbox1->addLayout(hbox_export);
+
+	m_BonesFoundCb->setMaximumHeight(30);
+	m_ExecuteButton->setMaximumHeight(30);
+	m_CancelButton->setMaximumHeight(30);
+	m_ExportButton->setMaximumHeight(30);
+
+	auto m_MainBox = new QHBoxLayout;
+	m_MainBox->addLayout(m_Vbox1);
+	setLayout(m_MainBox);
 
 	QObject_connect(m_ExecuteButton, SIGNAL(clicked()), this, SLOT(ExecutePressed()));
 	QObject_connect(m_CancelButton, SIGNAL(clicked()), this, SLOT(CancelPressed()));
@@ -2686,7 +2595,7 @@ void CheckBoneConnectivityDialog::LookForConnections()
 	unsigned short end_sl = m_Handler3D->EndSlice();
 
 	int num_tasks = end_sl - start_sl;
-	QProgressDialog progress("Looking for connected bones...", "Cancel", 0, num_tasks, m_MainBox);
+	QProgressDialog progress("Looking for connected bones...", "Cancel", 0, num_tasks, this);
 	progress.show();
 	progress.setWindowModality(Qt::WindowModal);
 	progress.setModal(true);

@@ -58,15 +58,19 @@ auto toType(QString const& q)
 	return toType(q, Type<T>{});
 }
 
-int CountProps(Property_cptr parent)
+int CountVisible(Property_cptr parent)
 {
-	int count = 1;
-
-	for (const auto& child : parent->Properties())
+	if (parent->Visible())
 	{
-		count += CountProps(child);
+		int count = 1;
+
+		for (const auto& child : parent->Properties())
+		{
+			count += CountVisible(child);
+		}
+		return count;
 	}
-	return count;
+	return 0;
 }
 
 } // namespace
@@ -141,7 +145,7 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFla
 		UpdateState(root, prop.get());
 	}
 
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
@@ -149,7 +153,7 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFla
 QSize PropertyWidget::minimumSizeHint() const
 {
 	auto sz = QTreeWidget::minimumSizeHint();
-	sz.setHeight(CountProps(m_Property) * (row_height+2));
+	sz.setHeight(std::min(200, CountVisible(m_Property) * (row_height + 2)));
 	return sz;
 }
 
@@ -432,9 +436,11 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 		return combo;
 	}
 	case Property::kButton: {
-		auto p = dynamic_cast<PropertyButton*>(prop);
-		const auto button_text = p->ButtonText().empty() ? p->Name() : p->ButtonText();
+		auto ptyped = dynamic_cast<PropertyButton*>(prop);
+		const auto button_text = ptyped->ButtonText().empty() ? ptyped->Name() : ptyped->ButtonText();
 		auto button = new QPushButton(QString::fromStdString(button_text), this);
+		button->setChecked(ptyped->Checked());
+		button->setCheckable(ptyped->Checkable());
 		button->setAutoDefault(false);
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 
@@ -442,6 +448,9 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 			if (type == Property::eChangeType::kStateChanged)
 			{
 				UpdateState(item, p.get());
+				auto ptyped = static_cast<const PropertyButton*>(p.get());
+				button->setChecked(ptyped->Checked());
+				button->setCheckable(ptyped->Checkable());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
@@ -646,6 +655,10 @@ void PropertyWidget::Edited()
 				if (prop_typed->Value())
 				{
 					prop_typed->Value()();
+				}
+				if (auto pb = dynamic_cast<QPushButton*>(w))
+				{
+					prop_typed->SetChecked(pb->isChecked());
 				}
 				break;
 			}

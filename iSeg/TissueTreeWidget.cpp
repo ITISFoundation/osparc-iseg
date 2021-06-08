@@ -66,11 +66,8 @@ TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath, QWid
 	setDragDropMode(QTreeWidget::InternalMove);
 	setExpandsOnDoubleClick(false);
 	setHeaderHidden(true);
-	//setIndentation(20);
 	setItemsExpandable(true);
 	setRootIsDecorated(true);
-	//xxxb	setFixedHeight(250);
-	//xxxb	setFixedWidth(110);
 	QObject_connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
 	QObject_connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
 	Initialize();

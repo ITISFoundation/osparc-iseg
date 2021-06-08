@@ -451,7 +451,6 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* pa
 		m_ImageSourceLabel->SetScaledValue(small_image.height() / 400.0);
 
 	QImage scaled_image = small_image.scaled(400, 400, Qt::KeepAspectRatio);
-	//m_ImageSourceLabel->setScaledContents(true);
 	m_ImageSourceLabel->setPixmap(QPixmap::fromImage(scaled_image));
 	m_ImageSourceLabel->setAlignment(Qt::AlignCenter);
 

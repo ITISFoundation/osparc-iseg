@@ -185,6 +185,16 @@ public:
 		}
 	}
 
+	void SetRange(value_type vmin, value_type vmax)
+	{
+		if (vmin != m_Minimum || vmax != m_Maximum)
+		{
+			m_Minimum = vmin;
+			m_Maximum = vmax;
+			this->OnModified(Property::kValueRangeChanged);
+		}
+	}
+
 protected:
 	PropertyTR(value_type value, value_type min_value, value_type max_value)
 			: PropertyT<T>(value), m_Minimum(min_value), m_Maximum(max_value)
@@ -288,6 +298,12 @@ public:
 
 	bool Checked() const { return m_Checked; }
 	void SetChecked(bool v);
+
+	void Toggle()
+	{
+		if (Checkable())
+			SetChecked(!Checked());
+	}
 
 protected:
 	PropertyButton(value_type value, const std::string& txt) : m_Value(value), m_ButtonText(txt) {}

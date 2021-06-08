@@ -2053,7 +2053,10 @@ void MainWindow::EnableActionsAfterPrjLoaded(const bool enable)
 
 void MainWindow::ExecuteLoadImageSeries()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QStringList files = QFileDialog::getOpenFileNames(
 			this, "Select one or more files to open", QString::null, "Images (*.bmp);;Images (*.png);;Images (*.jpg *.jpeg);;Images (*.tif *.tiff);;All (*.*)");
@@ -2112,7 +2115,10 @@ void MainWindow::ExecuteLoadImageSeries()
 
 void MainWindow::ExecuteLoaddicom()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QStringList files = QFileDialog::getOpenFileNames(
 			this, "Select one or more files to open", QString::null, "Images (*.dcm *.dicom)\nAll (*)");
@@ -2177,7 +2183,16 @@ void MainWindow::ExecuteReloaddicom()
 
 void MainWindow::ExecuteLoadraw()
 {
-	MaybeSafe();
+	QString file_path = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
+	if (file_path.isEmpty())
+	{
+		return;
+	}
+
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2186,17 +2201,11 @@ void MainWindow::ExecuteLoadraw()
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	LoaderRaw lr(m_Handler3D, this);
+	LoaderRaw lr(m_Handler3D, file_path, this);
 	lr.move(QCursor::pos());
 	lr.exec();
 
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->WorkborderChanged();
-
 	emit EndDatachange(this, iseg::ClearUndo);
-
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 	ResetBrightnesscontrast();
 
@@ -2205,7 +2214,10 @@ void MainWindow::ExecuteLoadraw()
 
 void MainWindow::ExecuteLoadMedicalImage()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2233,7 +2245,10 @@ void MainWindow::ExecuteLoadMedicalImage()
 
 void MainWindow::ExecuteLoadvtk()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2265,7 +2280,10 @@ void MainWindow::ExecuteLoadvtk()
 
 void MainWindow::ExecuteLoadavw()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2295,8 +2313,7 @@ void MainWindow::ExecuteReloadbmp()
 			this, "Select one or more files to open", QString::null, "Images (*.bmp)\nAll (*.*)");
 
 	if ((unsigned short)files.size() == m_Handler3D->NumSlices() ||
-			(unsigned short)files.size() ==
-					(m_Handler3D->EndSlice() - m_Handler3D->StartSlice()))
+			(unsigned short)files.size() == (m_Handler3D->EndSlice() - m_Handler3D->StartSlice()))
 	{
 		files.sort();
 
@@ -2326,13 +2343,8 @@ void MainWindow::ExecuteReloadbmp()
 		rb.move(QCursor::pos());
 		rb.exec();
 
-		//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->WorkborderChanged();
-
 		emit EndDatachange(this, iseg::ClearUndo);
 
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 		ResetBrightnesscontrast();
 	}
 	else
@@ -2346,6 +2358,12 @@ void MainWindow::ExecuteReloadbmp()
 
 void MainWindow::ExecuteReloadraw()
 {
+	QString file_path = RecentPlaces::GetOpenFileName(this, QString::null, QString::null, QString::null);
+	if (file_path.isEmpty())
+	{
+		return;
+	}
+
 	DataSelection data_selection;
 	data_selection.allSlices = true;
 	data_selection.bmp = true;
@@ -2353,16 +2371,11 @@ void MainWindow::ExecuteReloadraw()
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	ReloaderRaw rr(m_Handler3D, this);
+	ReloaderRaw rr(m_Handler3D, file_path, this);
 	rr.move(QCursor::pos());
 	rr.exec();
 
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->WorkborderChanged();
-
 	emit EndDatachange(this, iseg::ClearUndo);
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 	ResetBrightnesscontrast();
 }
@@ -2425,7 +2438,10 @@ void MainWindow::ExecuteReloadvtk()
 
 void MainWindow::ExecuteLoadsurface()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	bool ok = true;
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Import Surface/Lines", QString::null, "Surfaces & Polylines (*.stl *.vtk)");
@@ -2493,7 +2509,10 @@ void MainWindow::ExecuteLoadrtstruct()
 
 void MainWindow::ExecuteLoadrtdose()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -3336,7 +3355,10 @@ void MainWindow::UpdateSlice() { SliceChanged(); }
 
 void MainWindow::ExecuteLoadproj()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "Projects (*.prj)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
@@ -3347,7 +3369,10 @@ void MainWindow::ExecuteLoadproj()
 
 void MainWindow::ExecuteLoadproj1()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[0];
 
@@ -3359,7 +3384,10 @@ void MainWindow::ExecuteLoadproj1()
 
 void MainWindow::ExecuteLoadproj2()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[1];
 
@@ -3371,7 +3399,10 @@ void MainWindow::ExecuteLoadproj2()
 
 void MainWindow::ExecuteLoadproj3()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[2];
 
@@ -3383,7 +3414,10 @@ void MainWindow::ExecuteLoadproj3()
 
 void MainWindow::ExecuteLoadproj4()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[3];
 
@@ -6742,7 +6776,7 @@ void MainWindow::CancelTransformHelper()
 {
 	QObject_disconnect(m_TransformWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
 	QObject_disconnect(m_TransformWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
-	m_TransformWidget->CancelPushButtonClicked();
+	m_TransformWidget->CancelTransform();
 	QObject_connect(m_TransformWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
 	QObject_connect(m_TransformWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
 
@@ -6766,8 +6800,7 @@ void MainWindow::CancelTransformHelper()
 void MainWindow::HandleBeginDataexport(DataSelection& dataSelection, QWidget* sender)
 {
 	// Handle pending transforms
-	if (m_MethodTab->currentWidget() == m_TransformWidget &&
-			(dataSelection.bmp || dataSelection.work || dataSelection.tissues))
+	if (m_MethodTab->currentWidget() == m_TransformWidget && (dataSelection.bmp || dataSelection.work || dataSelection.tissues))
 	{
 		CancelTransformHelper();
 	}
