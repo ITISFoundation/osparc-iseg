@@ -68,8 +68,12 @@ TissueTreeWidget::TissueTreeWidget(TissueHiearchy* hierarchy, QDir picpath, QWid
 	setHeaderHidden(true);
 	setItemsExpandable(true);
 	setRootIsDecorated(true);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 	QObject_connect(this, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
 	QObject_connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem*)), this, SLOT(ResizeColumnsToContents(QTreeWidgetItem*)));
+
 	Initialize();
 }
 

@@ -284,11 +284,6 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 	return ok;
 }
 
-void style_dockwidget(QDockWidget* dockwidg)
-{
-	//dockwidg->setStyleSheet("QDockWidget { color: black; } QDockWidget::title { background: gray; padding-left: 5px; padding-top: 3px; color: darkgray} QDockWidget::close-button, QDockWidget::float-button { background: gray; }");
-}
-
 bool MenuWTT::event(QEvent* e)
 {
 	// not needed from Qt 5.1 -> see QMenu::setToolTipVisible
@@ -867,19 +862,14 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtabsw->setFixedWidth(hboxtabs->sizeHint().width());
 
 	QDockWidget* tabswdock = new QDockWidget(tr("Methods"), this);
-	style_dockwidget(tabswdock);
 	tabswdock->setObjectName("Methods");
 	tabswdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	tabswdock->setWidget(hboxtabsw);
 	addDockWidget(Qt::BottomDockWidgetArea, tabswdock);
 
 	QDockWidget* method_tabdock = new QDockWidget(tr("Parameters"), this);
-	style_dockwidget(method_tabdock);
 	method_tabdock->setObjectName("Parameters");
 	method_tabdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-	//	Q3ScrollView *tab_scroller=new Q3ScrollView(this);xxxa
-	//	tab_scroller->addChild(methodTab);
-	//	methodTabdock->setWidget(tab_scroller);
 	method_tabdock->setWidget(m_MethodTab);
 	addDockWidget(Qt::BottomDockWidgetArea, method_tabdock);
 
@@ -888,28 +878,24 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	vboxnotes->setMargin(0);
 
 	QDockWidget* notesdock = new QDockWidget(tr("Notes"), this);
-	style_dockwidget(notesdock);
 	notesdock->setObjectName("Notes");
 	notesdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	notesdock->setWidget(m_MNotes);
 	addDockWidget(Qt::BottomDockWidgetArea, notesdock);
 
 	QDockWidget* bitstackdock = new QDockWidget(tr("Img Clipboard"), this);
-	style_dockwidget(bitstackdock);
 	bitstackdock->setObjectName("Clipboard");
 	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	bitstackdock->setWidget(m_BitstackWidget);
 	addDockWidget(Qt::BottomDockWidgetArea, bitstackdock);
 
 	QDockWidget* multi_dataset_dock = new QDockWidget(tr("Multi Dataset"), this);
-	style_dockwidget(multi_dataset_dock);
 	multi_dataset_dock->setObjectName("Multi Dataset");
 	multi_dataset_dock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	multi_dataset_dock->setWidget(m_MultidatasetWidget);
 	addDockWidget(Qt::BottomDockWidgetArea, multi_dataset_dock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
-	style_dockwidget(overlaydock);
 	overlaydock->setObjectName("Overlay");
 	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	overlaydock->setWidget(m_OverlayWidget);
@@ -951,16 +937,17 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtissueremove->addWidget(m_RemoveTissueFolderAll);
 	vboxtissue->addLayout(hboxtissueremove);
 	vboxtissue->addWidget(m_Tissue3Dopt);
+
 	QHBoxLayout* hboxtissueget = new QHBoxLayout;
 	hboxtissueget->addWidget(m_GetTissue);
 	hboxtissueget->addWidget(m_GetTissueAll);
 	vboxtissue->addLayout(hboxtissueget);
+
 	QHBoxLayout* hboxtissueclear = new QHBoxLayout;
 	hboxtissueclear->addWidget(m_ClearTissue);
 	hboxtissueclear->addWidget(m_ClearTissues);
 	vboxtissue->addLayout(hboxtissueclear);
 	vboxtissuew->setLayout(vboxtissue);
-	//xxxb	vboxtissuew->setFixedHeight(vboxtissue->sizeHint().height());
 
 	QVBoxLayout* vboxtissueadder1 = new QVBoxLayout;
 	vboxtissueadder1->setSpacing(0);
@@ -989,39 +976,33 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtissueadder->addWidget(vboxtissueadder2w);
 	hboxtissueadderw->setLayout(hboxtissueadder);
 	hboxtissueadderw->setFixedHeight(hboxtissueadder->sizeHint().height());
-	//xxxb	hboxtissueadderw->setFixedWidth(vboxtissue->sizeHint().width());
 
 	QDockWidget* zoomdock = new QDockWidget(tr("Zoom"), this);
-	style_dockwidget(zoomdock);
 	zoomdock->setObjectName("Zoom");
 	zoomdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	zoomdock->setWidget(m_ZoomWidget);
 	addDockWidget(Qt::RightDockWidgetArea, zoomdock);
 
 	QDockWidget* tissuewdock = new QDockWidget(tr("Tissues"), this);
-	style_dockwidget(tissuewdock);
 	tissuewdock->setObjectName("Tissues");
 	tissuewdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuewdock->setWidget(vboxtissuew);
 	addDockWidget(Qt::RightDockWidgetArea, tissuewdock);
 	m_TissuesDock = tissuewdock;
 
-	QDockWidget* tissuehierarchydock =
-			new QDockWidget(tr("Tissue Hierarchy"), this);
-	style_dockwidget(tissuehierarchydock);
-	tissuehierarchydock->setToolTip(Format("The tissue hierarchy allows to group and organize complex "
-																				 "segmentations into a hierarchy."));
+	QDockWidget* tissuehierarchydock = new QDockWidget(tr("Tissue Hierarchy"), this);
+	tissuehierarchydock->setToolTip(Format("The tissue hierarchy allows to group and organize complex segmentations into a hierarchy."));
 	tissuehierarchydock->setObjectName("Tissue Hierarchy");
 	tissuehierarchydock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuehierarchydock->setWidget(m_TissueHierarchyWidget);
 	addDockWidget(Qt::RightDockWidgetArea, tissuehierarchydock);
 
 	QDockWidget* tissueadddock = new QDockWidget(tr("Adder"), this);
-	style_dockwidget(tissueadddock);
-	tissueadddock->setToolTip(Format("The tissue adder provides functionality "
-																	 "to add/remove an object selected/picked in "
-																	 "the Target to/from the selected tissue."
-																	 "Note: Only one tissue can be selected."));
+	tissueadddock->setToolTip(Format(
+			"The tissue adder provides functionality "
+			"to add/remove an object selected/picked in "
+			"the Target to/from the selected tissue."
+			"Note: Only one tissue can be selected."));
 	tissueadddock->setObjectName("Adder");
 	tissueadddock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissueadddock->setWidget(hboxtissueadderw);
@@ -1044,7 +1025,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	vboxmaskingw->setLayout(vboxmasking);
 
 	QDockWidget* maskdock = new QDockWidget(tr("Mask"), this);
-	style_dockwidget(maskdock);
 	maskdock->setObjectName("Mask");
 	maskdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	maskdock->setWidget(vboxmaskingw);
