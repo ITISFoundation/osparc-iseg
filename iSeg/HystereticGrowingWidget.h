@@ -14,23 +14,10 @@
 
 #include "Interface/WidgetInterface.h"
 
-#include <q3vbox.h>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QDialog>
-#include <QImage>
-#include <QLabel>
-#include <qlayout.h>
-#include <QLineEdit>
-#include <QPainter>
-#include <qpixmap.h>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
+#include "Data/Property.h"
 
 #include <algorithm>
+#include <array>
 
 namespace iseg {
 
@@ -39,14 +26,11 @@ class HystereticGrowingWidget : public WidgetInterface
 	Q_OBJECT
 public:
 	HystereticGrowingWidget(SlicesHandler* hand3D);
-	~HystereticGrowingWidget() override = default;
 	void Init() override;
 	void NewLoaded() override;
 	void Cleanup() override;
-	QSize sizeHint() const override;
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
-	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Growing"); }
 	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("growing.png"))); }
 
@@ -69,40 +53,35 @@ private:
 	unsigned short m_Activeslice;
 	float m_UpperLimit;
 	float m_LowerLimit;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox2a;
-	Q3HBox* m_Hbox3;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	Q3VBox* m_Vbox3;
-	Q3VBox* m_Vbox4;
-	Q3VBox* m_Vbox5;
-	Q3VBox* m_Vbox6;
-	Q3VBox* m_Vbox7;
-	QLabel* m_TxtLower;
-	QLabel* m_TxtUpper;
-	QLabel* m_TxtLowerhyster;
-	QLabel* m_TxtUpperhyster;
-	QSlider* m_SlLower;
-	QSlider* m_SlUpper;
-	QSlider* m_SlLowerhyster;
-	QSlider* m_SlUpperhyster;
-	QPushButton* m_Pushexec;
-	QPushButton* m_Drawlimit;
-	QPushButton* m_Clearlimit;
 	bool m_Limitdrawing;
-	QCheckBox* m_Autoseed;
-	QCheckBox* m_Allslices;
 	std::vector<Point> m_Vp1;
 	std::vector<Point> m_Vpdyn;
 	bool m_Dontundo;
-	QLineEdit* m_LeBordervall;
-	QLineEdit* m_LeBordervalu;
-	QLineEdit* m_LeBordervallh;
-	QLineEdit* m_LeBordervaluh;
-	QPushButton* m_PbSaveborders;
-	QPushButton* m_PbLoadborders;
+
+	enum eSlider {
+		kLower = 0,
+		kUpper,
+		kLowerHyst,
+		kUpperHyst
+	};
+	std::array<int, 4> m_Thresholds;
+
+	PropertySlider_ptr m_SlLower;
+	PropertySlider_ptr m_SlUpper;
+	PropertySlider_ptr m_SlLowerhyster;
+	PropertySlider_ptr m_SlUpperhyster;
+
+	PropertyButton_ptr m_Drawlimit;
+	PropertyButton_ptr m_Clearlimit;
+	PropertyButton_ptr m_Pushexec;
+
+	PropertyBool_ptr m_Autoseed;
+	PropertyBool_ptr m_Allslices;
+
+	PropertyReal_ptr m_LeBordervall;
+	PropertyReal_ptr m_LeBordervalu;
+	PropertyReal_ptr m_LeBordervallh;
+	PropertyReal_ptr m_LeBordervaluh;
 
 signals:
 	void Vp1Changed(std::vector<Point>* vp1_arg);
@@ -115,11 +94,9 @@ private slots:
 	void Execute();
 	void Limitpressed();
 	void Clearpressed();
-	void SliderChanged();
+	void SliderChanged(eSlider which, int new_value);
 	void SliderPressed();
 	void SliderReleased();
-	void SavebordersExecute();
-	void LoadbordersExecute();
 	void LeBordervallReturnpressed();
 	void LeBordervaluReturnpressed();
 	void LeBordervallhReturnpressed();
