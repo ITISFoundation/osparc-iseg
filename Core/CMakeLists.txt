@@ -46,6 +46,7 @@ SET(SOURCES
 	SliceProvider.cpp
 	SmoothSteps.cpp
 	SmoothTissues.cpp
+	TopologyEditing.cpp
 	UndoElem.cpp
 	UndoQueue.cpp
 	VotingReplaceLabel.cpp

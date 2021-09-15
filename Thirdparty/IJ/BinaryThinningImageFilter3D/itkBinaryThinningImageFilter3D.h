@@ -1,5 +1,22 @@
-#ifndef __itkBinaryThinningImageFilter3D_h
-#define __itkBinaryThinningImageFilter3D_h
+/*=========================================================================
+ *
+ *  Copyright NumFOCUS
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *=========================================================================*/
+#ifndef itkBinaryThinningImageFilter3D_h
+#define itkBinaryThinningImageFilter3D_h
 
 #include <itkNeighborhoodIterator.h>
 #include <itkImageToImageFilter.h>
@@ -37,14 +54,16 @@ namespace itk
  * \author Hanno Homann, Oxford University, Wolfson Medical Vision Lab, UK.
  *
  * \sa MorphologyImageFilter
- * \ingroup ImageEnhancement MathematicalMorphologyImageFilters
+ * \ingroup ImageEnhancement MathematicalMorphologyImageFilters Thickness3D
  */
 
 template <class TInputImage, class TOutputImage>
-class BinaryThinningImageFilter3D : public ImageToImageFilter<TInputImage, TOutputImage>
+class ITK_TEMPLATE_EXPORT BinaryThinningImageFilter3D : public ImageToImageFilter<TInputImage, TOutputImage>
 {
 public:
-  /** Standard class type aliases. */
+  //ITK_DISALLOW_COPY_AND_MOVE(BinaryThinningImageFilter3D);
+
+  /** Standard class typedefs. */
   using Self = BinaryThinningImageFilter3D;
   using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
   using Pointer = SmartPointer<Self>;
@@ -59,7 +78,7 @@ public:
   /** Type for input image. */
   using InputImageType = TInputImage;
 
-  /** Type for output image: Skelenton of the object.  */
+  /** Type for output image: Skeleton of the object.  */
   using OutputImageType = TOutputImage;
 
   /** Type for the region of the input image. */
@@ -92,7 +111,7 @@ public:
   /** Neighborhood type */
   using NeighborhoodType = typename NeighborhoodIteratorType::NeighborhoodType;
 
-  /** Get Skelenton by thinning image. */
+  /** Get Skeleton by thinning image. */
   OutputImageType *
   GetThinning();
 
@@ -125,27 +144,35 @@ protected:
   void
   PrepareData();
 
-  /**  Compute thinning Image. */
+  /** Compute thinning image. */
   void
   ComputeThinImage();
 
-  /**  isEulerInvariant [Lee94] */
+  /** Check for Euler invariance (see [Lee94]). */
   bool
-  isEulerInvariant(NeighborhoodType neighbors, int * LUT);
-  void
-  fillEulerLUT(int * LUT);
-  /**  isSimplePoint [Lee94] */
-  bool
-  isSimplePoint(NeighborhoodType neighbors);
-  /**  Octree_labeling [Lee94] */
-  void
-  Octree_labeling(int octant, int label, int * cube);
+  IsEulerInvariant(NeighborhoodType neighbors, const int * LUT);
 
+  /** Fill the Euler look-up table (LUT) for later check of the Euler
+   * invariance (see [Lee94]). */
+  void
+  FillEulerLUT(int * LUT);
+
+  /** Check if the current point is a simple point.
+   * This method is named 'N(v)_labeling' in [Lee94].
+   * Outputs the number of connected objects in a neighborhood of a point
+   * after this point would have been removed. */
+  bool
+  IsSimplePoint(NeighborhoodType neighbors);
+
+  /** Recursive method that calculates the number of connected components in
+   * the 3D neighbourhood after the center pixel would have been removed (see)
+   * [Lee94]). */
+  void
+  OctreeLabeling(int octant, int label, int * cube);
 
 private:
   BinaryThinningImageFilter3D(const Self &) = delete;
-  void
-  operator=(const Self &) = delete;
+  void operator=(const Self &) = delete;
 
 }; // end of BinaryThinningImageFilter3D class
 
@@ -155,4 +182,4 @@ private:
 #  include "itkBinaryThinningImageFilter3D.hxx"
 #endif
 
-#endif
+#endif // itkBinaryThinningImageFilter3D_h

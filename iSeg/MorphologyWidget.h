@@ -47,6 +47,7 @@ private:
 	QRadioButton* m_RbClose;
 	QRadioButton* m_RbErode;
 	QRadioButton* m_RbDilate;
+	QRadioButton* m_RbFillGaps;
 	QCheckBox* m_NodeConnectivity;
 	QCheckBox* m_True3d;
 	QLineEdit* m_OperationRadius;
