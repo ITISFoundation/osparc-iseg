@@ -1,9 +1,11 @@
 #include "TopologyEditing.h"
 
 #include "Morpho.h"
+#include "itkFixTopologyCarveOutside2.h"
 #include "itkLabelRegionCalculator.h"
 
 #include "../Data/ItkUtils.h"
+#include "../Data/Logger.h"
 #include "../Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryThinningImageFilter3D.h>
@@ -29,41 +31,21 @@ bool FillLoopsAndGaps(SlicesHandlerInterface* handler, boost::variant<int, float
 	cast->SetOutsideValue(0);
 	cast->Update();
 	SAFE_UPDATE(cast, return false);
+	ISEG_INFO_MSG("Casted/threshold done");
 
 	auto mask = cast->GetOutput();
-	auto region = itk::GetLabelRegion<mask_type>(mask, 1);
-
-	auto working_region = region;
+	auto working_region = itk::GetLabelRegion<mask_type>(mask, 1);
 	working_region.PadByRadius(1);
+	working_region.Crop(target_region);
 
-	// working region is inside whole region, simply crop it
-	if (target_region.IsInside(working_region))
-	{
-		auto crop = itk::ExtractImageFilter<mask_type, mask_type>::New();
-		crop->SetInput(mask);
-		crop->SetExtractionRegion(working_region);
-		SAFE_UPDATE(crop, return false);
-		mask = crop->GetOutput();
-	}
-	else
-	{
-		auto crop = itk::ExtractImageFilter<mask_type, mask_type>::New();
-		crop->SetInput(mask);
-		crop->SetExtractionRegion(region);
+	auto crop = itk::ExtractImageFilter<mask_type, mask_type>::New();
+	crop->SetInput(mask);
+	crop->SetExtractionRegion(working_region);
+	SAFE_UPDATE(crop, return false);
+	mask = crop->GetOutput();
+	ISEG_INFO_MSG("Cropping done");
 
-		auto pad = itk::ConstantPadImageFilter<mask_type, mask_type>::New();
-		pad->SetInput(crop->GetOutput());
-		pad->SetConstant(0);
-		pad->SetPadBound(itk::Size<3>{1, 1, 1});
-		SAFE_UPDATE(pad, return false);
-		mask = pad->GetOutput();
-
-		if (mask->GetBufferedRegion() != working_region)
-		{
-			throw std::runtime_error("Something is wrong with logic - unpexpected working region");
-		}
-	}
-
+#if 0
 	// dilate
 	using kernel_type = itk::FlatStructuringElement<3>;
 	auto ball = MakeBall<mask_type>(mask, radius);
@@ -74,15 +56,26 @@ bool FillLoopsAndGaps(SlicesHandlerInterface* handler, boost::variant<int, float
 	dilate->SetDilateValue(1);
 	SAFE_UPDATE(dilate, return false);
 	auto dilated = dilate->GetOutput();
+	ISEG_INFO_MSG("Dilation done");
+    dump_image(dilated, "/Users/lloyd/_dilated.nii.gz");
 
 	// get surface skeleton of dilated mask
 	auto thinning = itk::BinaryThinningImageFilter3D<mask_type, mask_type>::New();
 	thinning->SetInput(dilated);
 	SAFE_UPDATE(thinning, return false);
 	auto surface_skeleton = thinning->GetOutput();
-
+	ISEG_INFO_MSG("Skeletonization done");
+	dump_image(surface_skeleton, "/Users/lloyd/_skeleton.nii.gz");
+#else
+	auto thinning = itk::FixTopologyCarveOutside2<mask_type, mask_type>::New();
+	thinning->SetInput(mask);
+	thinning->SetRadius(boost::get<float>(radius));
+	SAFE_UPDATE(thinning, return false);
+	auto surface_skeleton = thinning->GetOutput();
+	ISEG_INFO_MSG("Skeletonization done");
+	dump_image(surface_skeleton, "/Users/lloyd/_skeleton.nii.gz");
+#endif
 	// copy skeleton to target
-	working_region.Crop(target_region);
 	itk::ImageRegionConstIterator<mask_type> sit(surface_skeleton, working_region);
 	itk::ImageRegionIterator<target_image_type> tit(target, working_region);
 	for (sit.GoToBegin(), tit.GoToBegin(); !sit.IsAtEnd() && !tit.IsAtEnd(); ++sit, ++tit)
