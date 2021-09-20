@@ -15,6 +15,7 @@
  *  limitations under the License.
  *
  *=========================================================================*/
+// clang-format off
 #ifndef itkFixTopologyCarveOutside2_hxx
 #define itkFixTopologyCarveOutside2_hxx
 
@@ -24,6 +25,7 @@
 #include "itkImageAlgorithm.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
+#include "itkNeighborhoodAlgorithm.h"
 #include "itkNeighborhoodIterator.h"
 #include "itkSignedMaurerDistanceMapImageFilter.h"
 
@@ -105,10 +107,196 @@ FixTopologyCarveOutside2<TInputImage, TOutputImage>::PrepareData()
   auto dilate = itk::BinaryDilateImageFilter<TOutputImage, TOutputImage, kernel_type>::New();
   dilate->SetInput(thinImage);
   dilate->SetKernel(ball);
-  dilate->SetDilateValue(NumericTraits<OutputImagePixelType>::One);
+  dilate->SetDilateValue(2 * NumericTraits<OutputImagePixelType>::One);
   dilate->Update();
 
   itk::ImageAlgorithm::Copy<TOutputImage, TOutputImage>(dilate->GetOutput(), thinImage, region, region);
+}
+
+template <class TInputImage, class TOutputImage>
+void
+FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
+{
+  class NeighborAccessor
+  {
+  public:
+    using value_type = OutputImagePixelType;
+    using id_type = size_t;
+
+    NeighborAccessor(value_type* buffer, const itk::Size<3>& dims)
+        : m_Data(buffer)
+    {
+      std::ptrdiff_t m_StrideJ = dims[0], m_StrideK = dims[0]*dims[1];
+      // assume non-boundary 'id'
+      m_Offsets[0] = - 1 - m_StrideJ - m_StrideK;
+      m_Offsets[1] = - m_StrideJ - m_StrideK;
+      m_Offsets[2] = + 1 - m_StrideJ - m_StrideK;
+      m_Offsets[3] = - 1 - m_StrideK;
+      m_Offsets[4] = - m_StrideK;
+      m_Offsets[5] = + 1 - m_StrideK;
+      m_Offsets[6] = - 1 + m_StrideJ - m_StrideK;
+      m_Offsets[7] = + m_StrideJ - m_StrideK;
+      m_Offsets[8] = + 1 + m_StrideJ - m_StrideK;
+
+      m_Offsets[9]  = - 1 - m_StrideJ;
+      m_Offsets[10] = - m_StrideJ;
+      m_Offsets[11] = + 1 - m_StrideJ;
+      m_Offsets[12] = - 1;
+      //m_Offsets[0] = 0; center is not neighbor
+      m_Offsets[13] = + 1;
+      m_Offsets[14] = - 1 + m_StrideJ;
+      m_Offsets[15] = + m_StrideJ;
+      m_Offsets[16] = + 1 + m_StrideJ;
+
+      m_Offsets[17] = - 1 - m_StrideJ + m_StrideK;
+      m_Offsets[18] = - m_StrideJ + m_StrideK;
+      m_Offsets[19] = + 1 - m_StrideJ + m_StrideK;
+      m_Offsets[20] = - 1 + m_StrideK;
+      m_Offsets[21] = + m_StrideK;
+      m_Offsets[22] = + 1 + m_StrideK;
+      m_Offsets[23] = - 1 + m_StrideJ + m_StrideK;
+      m_Offsets[24] = + m_StrideJ + m_StrideK;
+      m_Offsets[25] = + 1 + m_StrideJ + m_StrideK;
+    }
+
+    void GetNeighbors(size_t id, std::array<value_type, 26>& vals) const
+    {
+      ;
+    }
+
+    const std::array<std::ptrdiff_t, 26>& Offsets() { return m_Offsets; }
+
+  private:
+    std::array<std::ptrdiff_t, 26> m_Offsets;
+    std::ptrdiff_t m_StrideJ, m_StrideK;
+    value_type* m_Data;
+  };
+
+  InputImagePointer inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
+  OutputImagePointer thinImage = GetThinning();
+
+  auto region = thinImage->GetRequestedRegion();
+
+  // region id convention
+  enum eValueType
+  {
+    kBackground = 0,
+    kHardForeground,
+    kDilated,
+    kVisited
+  };
+
+  // boundary('2'): image faces where '2', or interface '2'-'0'
+  itk::Size<3> radius = {1,1,1};
+  itk::NeighborhoodAlgorithm::ImageBoundaryFacesCalculator<TOutputImage> face_calculator;
+  auto faces = face_calculator(thinImage, region, radius);
+  if (faces.size() == 7)
+  {
+    faces.pop_front();
+  }
+
+  // add seed points image faces where '2'
+  for (const auto& face: faces)
+  {
+    auto bit = itk::ImageRegionIterator<TOutputImage>(thinImage, face);
+    for (bit.GoToBegin(); !bit.IsAtEnd(); ++bit)
+    {
+      if (bit.Get() == kDilated)
+      {
+        bit.Set(kVisited);
+      }
+    }
+  }
+
+  // now add seed points at interface '2'-'0'
+  const auto dims = region.Size();
+  const size_t dim2d[][2] = {{1, 2}, {0, 2}, {0, 1}};
+  const std::ptrdiff_t strides[] = {1, dims[0], dims[0] * dims[1]};
+
+  const auto process_line = [](size_t pos, size_t stride, size_t N) {
+    OutputImagePixelType prev_label = -1;
+    OutputImagePixelType* tissues;
+
+    size_t idx = pos;
+    for (size_t i = 0; i < N; ++i, idx += stride)
+    {
+      // find interface
+      if (tissues[idx] != prev_label)
+      {
+        if (prev_label == kBackground && tissues[idx] == kDilated)
+        {
+          tissues[idx] = kVisited;
+        }
+        else if (prev_label == kDilated && tissues[idx] == kBackground)
+        {
+          tissues[idx-stride] = kVisited;
+        }
+        prev_label = tissues[idx];
+      }
+    }
+  };
+
+  for (size_t d0 = 0; d0 < 3; ++d0)
+  {
+    size_t d1 = dim2d[d0][0], d2 = dim2d[d0][1];
+    const size_t Nd = dims[d0];
+    const size_t N1 = dims[d1];
+    const size_t N2 = dims[d2];
+
+    for (size_t i1 = 0; i1 < N1; ++i1)
+    {
+      for (size_t i2 = 0; i2 < N2; ++i2)
+      {
+        // test along direction 'd'
+        process_line(i1 * strides[d1] + i2 * strides[d2], strides[d0], Nd);
+      }
+    }
+  }
+
+  // get seeds
+  using node_t = std::pair<float, size_t>;
+  std::priority_queue<node_t, std::vector<node_t>, std::greater<node_t>> queue;
+  auto bit = itk::ImageConstIteratorWithIndex<TOutputImage>(thinImage, region);
+  for (bit.GoToBegin(); !bit.IsAtEnd(); ++bit)
+  {
+    if (bit.Get() == kVisited)
+    {
+      auto idx = bit.GetIndex();
+      auto sdf = m_DistanceMap->GetPixel(idx);
+      queue.push(node_t(sdf, idx[0] + idx[1] * strides[1] + idx[2] * strides[2]));
+    }
+  }
+
+  OutputImagePixelType* thin_image_p = thinImage->GetPixelContainer()->GetImportPointer();
+  const float* distance_p = m_DistanceMap->GetPixelContainer()->GetImportPointer();
+
+  NeighborAccessor na(thin_image_p, dims);
+  std::array<OutputImagePixelType, 26> vals;
+  const auto& offsets = na.Offsets();
+
+  // erode while topology does not change
+  while (!queue.empty())
+  {
+    auto id = queue.top().second;
+    queue.pop();
+
+    // check if pixel can be eroded
+    if (thin_image_p[id] == kVisited)
+    {
+      na.GetNeighbors(id, vals);
+    }
+
+    // add unvisited neighbors to queue
+    for (auto offset: offsets)
+    {
+      const size_t nid = id + offset;
+      if (thin_image_p[nid] == kDilated)
+      {
+        thin_image_p[nid] = kVisited;
+        queue.push(node_t(distance_p[nid], nid));
+      }
+    }
+  }
 }
 
 template <class TInputImage, class TOutputImage>
@@ -202,6 +390,7 @@ FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage()
         {
           continue; // current point is not deletable
         }
+
         if (!this->IsSimplePoint(ot.GetNeighborhood(), false))
         {
           continue; // current point is not deletable
@@ -1123,3 +1312,4 @@ FixTopologyCarveOutside2<TInputImage, TOutputImage>::PrintSelf(std::ostream & os
 } // end namespace itk
 
 #endif // itkFixTopologyCarveOutside2_hxx
+// clang-format on

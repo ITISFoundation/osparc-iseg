@@ -150,6 +150,8 @@ protected:
   /** Compute thinning image. */
   void
   ComputeThinImage();
+  void
+  ComputeThinImage2();
 
   /** Check for Euler invariance (see [Lee94]). */
   bool
