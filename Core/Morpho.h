@@ -169,8 +169,8 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler, boost::varian
 		using input_type = itk::Image<float, 2>;
 		using output_type = itk::Image<unsigned char, 2>;
 
-		size_t startslice = handler->StartSlice();
-		size_t endslice = handler->EndSlice();
+		std::int64_t startslice = handler->StartSlice();
+		std::int64_t endslice = handler->EndSlice();
 
 		if (progress)
 		{

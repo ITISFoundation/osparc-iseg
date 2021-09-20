@@ -176,6 +176,7 @@ protected:
   OctreeLabeling(int octant, int label, int * cube);
 
 private:
+  OutputImagePointer m_PaddedMask;
   itk::Image<float, 3>::Pointer m_DistanceMap;
   float m_Radius = 1.f;
 }; // end of FixTopologyCarveOutside2 class

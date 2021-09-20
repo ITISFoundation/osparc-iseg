@@ -16,11 +16,13 @@ template<class TLabelImage, typename TPredicate>
 typename TLabelImage::RegionType GetSelectedRegion(const TLabelImage* label_input, const TPredicate& is_selected)
 {
 	itkStaticConstMacro(imageDimension, unsigned int, TLabelImage::ImageDimension);
-	std::vector<size_t> boundingBox(imageDimension * 2);
+	using index_t = ::itk::IndexValueType;
+
+	std::vector<index_t> boundingBox(imageDimension * 2);
 	for (unsigned int i = 0; i < imageDimension * 2; i += 2)
 	{
-		boundingBox[i] = std::numeric_limits<size_t>::max();
-		boundingBox[i + 1] = std::numeric_limits<size_t>::lowest();
+		boundingBox[i] = std::numeric_limits<index_t>::max();
+		boundingBox[i + 1] = std::numeric_limits<index_t>::lowest();
 	}
 
 	// do the work

@@ -10,6 +10,7 @@ FIND_PACKAGE(ITK COMPONENTS
 		ITKLabelMap ITKVTK ITKCurvatureFlow ITKBiasCorrection ITKImageFeature ITKFastMarching
 		ITKImageIO
 		ITKReview
+		ITKGDCM
 		# ITKSuperPixel
 		REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
