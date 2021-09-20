@@ -73,7 +73,11 @@ bool FillLoopsAndGaps(SlicesHandlerInterface* handler, boost::variant<int, float
 	SAFE_UPDATE(thinning, return false);
 	auto surface_skeleton = thinning->GetOutput();
 	ISEG_INFO_MSG("Skeletonization done");
+#ifdef WIN32
+	dump_image(surface_skeleton, "F:\\Temp\\_skeleton.nii.gz");
+#else
 	dump_image(surface_skeleton, "/Users/lloyd/_skeleton.nii.gz");
+#endif
 #endif
 	// copy skeleton to target
 	itk::ImageRegionConstIterator<mask_type> sit(surface_skeleton, working_region);

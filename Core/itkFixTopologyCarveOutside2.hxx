@@ -18,6 +18,8 @@
 #ifndef itkFixTopologyCarveOutside2_hxx
 #define itkFixTopologyCarveOutside2_hxx
 
+#include "../Data/ItkUtils.h"
+
 #include "itkBinaryErodeImageFilter.h"
 #include "itkFixTopologyCarveOutside2.h"
 #include "itkFlatStructuringElement.h"
@@ -106,13 +108,20 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::PrepareData()
 	auto ball = kernel_type::Ball(radius, false);
 
 	auto dilate = itk::BinaryDilateImageFilter<TOutputImage, TOutputImage, kernel_type>::New();
-	dilate->SetInput(thinImage);
+	dilate->SetInput(m_PaddedMask);
 	dilate->SetKernel(ball);
-	dilate->SetDilateValue(2 * NumericTraits<OutputImagePixelType>::One);
+	dilate->SetForegroundValue(NumericTraits<OutputImagePixelType>::One);
 	dilate->Update();
 
-	// copy dilated mask, but without boundary faces
-	itk::ImageAlgorithm::Copy<TOutputImage, TOutputImage>(dilate->GetOutput(), m_PaddedMask, region, region);
+	// mark dilated as '2', but don't copy padding layer
+	ImageRegionConstIterator<TOutputImage> dt(dilate->GetOutput(), region);
+	for (dt.GoToBegin(), ot.GoToBegin(); !ot.IsAtEnd(); ++dt, ++ot)
+	{
+		if (dt.Get() != ot.Get())
+		{
+			ot.Set(2 * NumericTraits<OutputImagePixelType>::One);
+		}
+	}
 }
 
 template<class TInputImage, class TOutputImage>
@@ -184,7 +193,6 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 
 	// buffers of mask/distance map
 	OutputImagePixelType* mask_p = m_PaddedMask->GetPixelContainer()->GetImportPointer();
-	const float* distance_p = m_DistanceMap->GetPixelContainer()->GetImportPointer();
 
 	// region id convention
 	enum eValueType {
@@ -239,17 +247,15 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 
 	for (size_t d0 = 0; d0 < 3; ++d0)
 	{
-		size_t d1 = dim2d[d0][0], d2 = dim2d[d0][1];
-		const size_t Nd = dims[d0];
-		const size_t N1 = dims[d1];
-		const size_t N2 = dims[d2];
+		size_t d1 = dim2d[d0][0];
+		size_t d2 = dim2d[d0][1];
 
-		for (size_t i1 = 0; i1 < N1; ++i1)
+		for (size_t i1 = 0; i1 < dims[d1]; ++i1)
 		{
-			for (size_t i2 = 0; i2 < N2; ++i2)
+			for (size_t i2 = 0; i2 < dims[d2]; ++i2)
 			{
 				// test along direction 'd'
-				process_line(i1 * strides[d1] + i2 * strides[d2], strides[d0], Nd);
+				process_line(i1 * strides[d1] + i2 * strides[d2], strides[d0], dims[d0]);
 			}
 		}
 	}
@@ -305,8 +311,7 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 			offset_type{1, 0, 1},
 			offset_type{-1, 1, 1},
 			offset_type{0, 1, 1},
-			offset_type{1, 1, 1}
-	};
+			offset_type{1, 1, 1}};
 
 	// erode while topology does not change
 	while (!queue.empty())
@@ -331,17 +336,23 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 				this->IsSimplePoint(vals, true) &&
 				this->IsSimplePoint(vals, false))
 		{
-			m_PaddedMask->SetPixel(id, kBackground);
+			vals[13] = 0;
+
+			if (this->IsSimplePoint(vals, true))
+			{
+				// We cannot delete current point, so reset
+				m_PaddedMask->SetPixel(id, kBackground);
+			}
 		}
 
 		// add unvisited neighbors to queue
-		for (auto offset : neighbors)
+		for (const auto& offset : neighbors)
 		{
 			const auto nid = id + offset;
 			if (m_PaddedMask->GetPixel(nid) == kDilated)
 			{
 				// mark as visited
-				m_PaddedMask->SetPixel(id, kVisited);
+				m_PaddedMask->SetPixel(nid, kVisited);
 
 				// add to queue
 				queue.push(node_t(m_DistanceMap->GetPixel(nid), nid));
