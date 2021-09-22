@@ -17,7 +17,6 @@
 #include "Data/Point.h"
 
 #include "Core/Morpho.h"
-#include "Core/TopologyEditing.h"
 
 #include "Interface/ProgressDialog.h"
 
@@ -47,7 +46,6 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D)
 	modegroup->insert(m_RbClose = new QRadioButton(QString("Close")));
 	modegroup->insert(m_RbErode = new QRadioButton(QString("Erode")));
 	modegroup->insert(m_RbDilate = new QRadioButton(QString("Dilate")));
-	modegroup->insert(m_RbFillGaps = new QRadioButton(QString("Fill Gaps")));
 	m_RbOpen->setChecked(true);
 
 	m_RbOpen->setToolTip(Format("First shrinking before growing is called Open and results in the "
@@ -56,7 +54,6 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D)
 															 "closing of small (< 2n) gaps and holes."));
 	m_RbErode->setToolTip(Format("Erode or shrink the boundaries of regions of foreground pixels."));
 	m_RbDilate->setToolTip(Format("Enlarge the boundaries of regions of foreground pixels."));
-	m_RbFillGaps->setToolTip(Format("Dilate with specified radius to get skeleton surface. Add skeleton to current FG."));
 
 	// method layout
 	auto method_vbox = new QVBoxLayout;
@@ -103,7 +100,7 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D)
 	auto params_area = new QWidget(this);
 	params_area->setLayout(params_layout);
 
-	// top-level layot
+	// top-level layout
 	auto top_layout = new QHBoxLayout;
 	top_layout->addWidget(method_area);
 	top_layout->addWidget(params_area);
@@ -156,15 +153,10 @@ void MorphologyWidget::Execute()
 			ProgressDialog progress("Morphological erosion ...", this);
 			MorphologicalOperation(m_Handler3D, radius, iseg::kErode, true3d, &progress);
 		}
-		else if (m_RbDilate->isChecked())
+		else //if (m_RbDilate->isChecked())
 		{
 			ProgressDialog progress("Morphological dilation ...", this);
 			MorphologicalOperation(m_Handler3D, radius, iseg::kDilate, true3d, &progress);
-		}
-		else
-		{
-			ProgressDialog progress("Morphological editing ...", this);
-			FillLoopsAndGaps(m_Handler3D, radius);
 		}
 	}
 	else

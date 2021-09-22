@@ -248,12 +248,17 @@ public:
 	float ObjectValue() const override { return m_ObjectValue->text().toFloat(); }
 	void SetObjectValue(float v) override;
 
+private slots:
+	void UpdateState();
+
+public:
 	// params
 	QRadioButton* m_Target;
 	QRadioButton* m_Tissues;
 
 	QPushButton* m_SelectObject;
 	QLineEdit* m_ObjectValue;
+	QLineEdit* m_Radius;
 
 	QRadioButton* m_CarveOutside;
 	QRadioButton* m_CarveInside;

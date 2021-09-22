@@ -32,6 +32,7 @@
 #include <itkBinaryThresholdImageFilter.h>
 #include <itkMeanImageFilter.h>
 #include <itkSliceBySliceImageFilter.h>
+#include <itkExtractImageFilter.h>
 
 #include <QDialog>
 #include <QFormLayout>
@@ -976,6 +977,8 @@ float OutlineCorrectionWidget::GetObjectValue() const
 
 void OutlineCorrectionWidget::CarvePushed()
 {
+	ISEG_INFO_MSG("Spherize ...");
+
 	DataSelection data_selection;
 	data_selection.allSlices = true;
 	data_selection.work = true;
@@ -990,6 +993,10 @@ void OutlineCorrectionWidget::CarvePushed()
 	auto target = wrapper.GetTarget(true);
 
 	const unsigned char fg = 255;
+
+	ProgressDialog progress("Spherize ...", this);
+	auto observer = iseg::ItkProgressObserver::New();
+	observer->SetProgressInfo(&progress);
 
 	image_type::Pointer input;
 	if (m_SpherizeParams->Work())
@@ -1016,30 +1023,47 @@ void OutlineCorrectionWidget::CarvePushed()
 		threshold->Update();
 		input = threshold->GetOutput();
 	}
+	ISEG_INFO_MSG("Casted/threshold done");
+
+	// crop to reduce computation time
+	auto input_region = input->GetBufferedRegion();
+	auto working_region = itk::GetLabelRegion<image_type>(input, fg);
+	working_region.PadByRadius(1);
+	working_region.Crop(input_region);
+
+	auto crop = itk::ExtractImageFilter<image_type, image_type>::New();
+	crop->SetInput(input);
+	crop->SetExtractionRegion(working_region);
+	SAFE_UPDATE(crop, return);
+	auto input_cropped = crop->GetOutput();
+	ISEG_INFO_MSG("Cropping done");
 
 	image_type::Pointer output;
 	if (m_SpherizeParams->m_CarveInside->isChecked())
 	{
 		auto carve = itk::FixTopologyCarveInside<image_type, image_type>::New();
-		carve->SetInput(input);
+		carve->SetInput(input_cropped);
 		carve->SetInsideValue(fg);
 		carve->SetOutsideValue(0);
-		carve->Update();
+		carve->AddObserver(itk::ProgressEvent(), observer);
+		SAFE_UPDATE(carve, return );
 		output = carve->GetOutput();
 	}
 	else
 	{
 		auto carve = itk::FixTopologyCarveOutside<image_type, image_type>::New();
-		carve->SetInput(input);
+		carve->SetInput(input_cropped);
 		carve->SetInsideValue(fg);
-		carve->SetOutsideValue(0);
-		carve->Update();
+		carve->SetRadius(m_SpherizeParams->m_Radius->text().toFloat());
+		carve->AddObserver(itk::ProgressEvent(), observer);
+		SAFE_UPDATE(carve, return );
 		output = carve->GetOutput();
 	}
+	ISEG_INFO_MSG("Skeletonization done");
 
 	if (output)
 	{
-		iseg::Paste<image_type, target_image_type>(output, target);
+		iseg::Paste<image_type, target_image_type>(output, target, working_region);
 		m_Handler3D->SetModeall(eScaleMode::kFixedRange, false);
 	}
 

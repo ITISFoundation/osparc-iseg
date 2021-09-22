@@ -433,13 +433,17 @@ SpherizeParamView::SpherizeParamView(QWidget* parent /*= 0*/)
 	m_ObjectValue = new QLineEdit(QString::number(255));
 	m_ObjectValue->setValidator(new QDoubleValidator);
 
+	m_Radius = new QLineEdit(QString::number(5));
+	m_Radius->setValidator(new QDoubleValidator);
+	m_Radius->setToolTip(Format("Fill gaps/handles smaller than specified radius."));
+
 	m_CarveInside = new QRadioButton(tr("Carve inside"));
-	m_CarveInside->setToolTip(Format("Remove voxels from inside the selected object to open handles and enfore a genus '0'."));
+	m_CarveInside->setToolTip(Format("Remove voxels from inside the selected object to open handles and enforce a genus '0'."));
 	m_CarveOutside = new QRadioButton(tr("Carve from outside"));
-	m_CarveOutside->setToolTip(Format("Add voxels around the selected object to close handles and cavities and enfore a genus '0'."));
+	m_CarveOutside->setToolTip(Format("Add voxels around the selected object to close handles and cavities and enforce a genus '0'."));
 
 	auto how_group = make_button_group(this, {m_CarveInside, m_CarveOutside});
-	m_CarveInside->setChecked(true);
+	m_CarveOutside->setChecked(true);
 
 	auto input_hbox = make_hbox({m_Target, m_Tissues});
 	auto object_hbox = make_hbox({m_SelectObject, m_ObjectValue});
@@ -450,15 +454,23 @@ SpherizeParamView::SpherizeParamView(QWidget* parent /*= 0*/)
 	auto layout = new QFormLayout;
 	layout->addRow(tr("Input image"), input_hbox);
 	layout->addRow(tr("Object value"), object_hbox);
+	layout->addRow(tr("Radius"), m_Radius);
 	layout->addRow(tr("Method"), carve_hbox);
 	layout->addRow(m_Execute);
 	setLayout(layout);
+
+	QObject_connect(how_group, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(UpdateState()));
 }
 
 void SpherizeParamView::SetObjectValue(float v)
 {
 	m_ObjectValue->setText(QString::number(v));
 	m_SelectObject->setChecked(false);
+}
+
+void SpherizeParamView::UpdateState()
+{
+	m_Radius->setReadOnly(m_CarveInside->isChecked());
 }
 
 } // namespace iseg

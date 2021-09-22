@@ -1,20 +1,21 @@
-/// \file itkFixTopologyCarveOutside.h
+/// \file itkFixTopologyCarveInside.h
 ///
 /// \author Bryn Lloyd
 /// \copyright 2020, IT'IS Foundation
 
-#ifndef itkFixTopologyCarveOutside_h
-#define itkFixTopologyCarveOutside_h
+#ifndef itkFixTopologyCarveOutside
+#define itkFixTopologyCarveOutside
 
-#include <itkConstantBoundaryCondition.h>
 #include <itkImageRegionIteratorWithIndex.h>
 #include <itkImageToImageFilter.h>
 #include <itkNeighborhoodIterator.h>
+#include <itkProgressAccumulator.h>
+#include <itkProgressReporter.h>
 
 namespace itk {
-/** \class FixTopologyCarveOutside
+/** \class FixTopologyCarveInside
  *
- * \brief This filter adds voxels to the "inside" region making it manifold with genus 0.
+ * \brief This filter dilates the foreground, and then erodes from the "outside" while preserving the topology
  *
  * This filter implements ideas from:
  *
@@ -27,7 +28,7 @@ class /*ITK_TEMPLATE_EXPORT*/ FixTopologyCarveOutside : public ImageToImageFilte
 public:
 	ITK_DISALLOW_COPY_AND_ASSIGN(FixTopologyCarveOutside);
 
-	/** Standard class type aliases. */
+	/** Standard class typedefs. */
 	using Self = FixTopologyCarveOutside;
 	using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
 	using Pointer = SmartPointer<Self>;
@@ -67,22 +68,19 @@ public:
 	using OutputImagePointer = typename OutputImageType::Pointer;
 
 	/** Boundary condition type for the neighborhood iterator */
-	using ConstBoundaryConditionType = ConstantBoundaryCondition<TOutputImage>;
+	using ConstBoundaryConditionType = ConstantBoundaryCondition<TInputImage>;
 
 	/** Neighborhood iterator type */
-	using NeighborhoodIteratorType = NeighborhoodIterator<TOutputImage, ConstBoundaryConditionType>;
+	using NeighborhoodIteratorType = NeighborhoodIterator<TInputImage, ConstBoundaryConditionType>;
 
 	/** Neighborhood type */
 	using NeighborhoodType = typename NeighborhoodIteratorType::NeighborhoodType;
 
+	itkSetMacro(Radius, float);
+	itkGetConstMacro(Radius, float);
+
 	itkSetMacro(InsideValue, InputImagePixelType);
 	itkGetConstMacro(InsideValue, InputImagePixelType);
-
-	itkSetMacro(OutsideValue, InputImagePixelType);
-	itkGetConstMacro(OutsideValue, InputImagePixelType);
-
-	itkSetMacro(EnforceManifold, bool);
-	itkGetConstMacro(EnforceManifold, bool);
 
 	/** Get Skeleton by thinning image. */
 	OutputImageType* GetThinning();
@@ -111,16 +109,25 @@ protected:
 	void GenerateData() override;
 
 	/** Prepare data. */
-	void PrepareData();
+	void PrepareData(ProgressAccumulator* progress);
 
 	/** Compute thinning image. */
-	void ComputeThinImage();
+	void ComputeThinImage(ProgressAccumulator* progress);
 
 private:
-	InputImagePixelType m_InsideValue = 1;
-	InputImagePixelType m_OutsideValue = 0;
-	bool m_EnforceManifold = true;
+	// region id convention
+	enum ePixelState : OutputImagePixelType {
+		kBackground = 0,
+		kHardForeground,
+		kDilated,
+		kVisited
+	};
 
+	OutputImagePointer m_PaddedMask;
+	itk::Image<float, 3>::Pointer m_DistanceMap;
+
+	float m_Radius = 1.f;
+	InputImagePixelType m_InsideValue = 1;
 }; // end of FixTopologyCarveOutside class
 
 } // end namespace itk
@@ -129,4 +136,4 @@ private:
 #	include "itkFixTopologyCarveOutside.hxx"
 #endif
 
-#endif // itkFixTopologyCarveOutside_h
+#endif // itkFixTopologyCarveOutside
