@@ -12,24 +12,27 @@ jobs:
       steps:
       - uses: actions/checkout@v2
       - name: install thirdparties
-      run: |
-        sudo apt install -y cmake 
-        sudo apt install -y libboost-filesystem-dev libboost-test-dev libboost-date-time-dev libboost-program-options-dev
-        sudo apt install -y libhdf5-dev
-        sudo apt install -y libeigen3-dev
-        sudo apt install -y libqt4-opengl-dev
-        mkdir -p deps
-        docker pull itisfoundation/iseg-ubuntu-vtk:8.2
-        docker create --name vtkcontainer itisfoundation/iseg-ubuntu-vtk:8.2 bash
-        docker cp vtkcontainer:/work deps/vtk
-        docker pull itisfoundation/iseg-ubuntu-itk:5.0.1
-        docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:5.0.1 bash
-        docker cp itkcontainer:/work deps/itk
+        run: |
+          sudo apt install -y cmake 
+          sudo apt install -y libboost-filesystem-dev libboost-test-dev libboost-date-time-dev libboost-program-options-dev
+          sudo apt install -y libhdf5-dev
+          sudo apt install -y libeigen3-dev
+          sudo apt install -y libqt4-opengl-dev
+          mkdir -p deps
+          docker pull itisfoundation/iseg-ubuntu-vtk:8.2
+          docker create --name vtkcontainer itisfoundation/iseg-ubuntu-vtk:8.2 bash
+          docker cp vtkcontainer:/work deps/vtk
+          docker pull itisfoundation/iseg-ubuntu-itk:5.0.1
+          docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:5.0.1 bash
+          docker cp itkcontainer:/work deps/itk
+
       - name: configure
-      run: cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=Release -DHDF5_ROOT=/usr -DVTK_DIR=`ls -d -1 deps/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 deps/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4 -Wdev
-      - name: cmake --build CIBuild
-      run: make
+        run: cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=Release -DHDF5_ROOT=/usr -DVTK_DIR=`ls -d -1 deps/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 deps/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4 -Wdev
+
+      - name: make
+        run: cmake --build CIBuild
+
       - name: make test
-      run: |
-        cd CIBuild
-        ctest -V
+        run: |
+          cd CIBuild
+          ctest -V
