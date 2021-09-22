@@ -25,6 +25,7 @@
 
 namespace iseg {
 
+namespace details {
 template<unsigned int Dimension>
 itk::FlatStructuringElement<Dimension> MakeBall(const typename itk::ImageBase<Dimension>::SpacingType& spacing, double radius)
 {
@@ -37,6 +38,39 @@ itk::FlatStructuringElement<Dimension> MakeBall(const itk::Size<Dimension>& radi
 {
 	bool radius_is_parametric = true;
 	return itk::FlatStructuringElement<Dimension>::Ball(radius, radius_is_parametric);
+}
+}
+
+template<class TInputImage>
+itk::FlatStructuringElement<TInputImage::ImageDimension> MakeBall(typename TInputImage::Pointer input, boost::variant<int, float> radius)
+{
+	itkStaticConstMacro(Dimension, unsigned int, TInputImage::ImageDimension);
+	using spacing_type = typename TInputImage::SpacingType;
+
+	class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<Dimension>>
+	{
+	public:
+		explicit MyVisitor(const spacing_type& spacing) : m_Spacing(spacing) {}
+
+		itk::FlatStructuringElement<Dimension> operator()(int r) const
+		{
+			itk::Size<Dimension> radius;
+			radius.Fill(r);
+
+			return details::MakeBall<Dimension>(radius);
+		}
+
+		itk::FlatStructuringElement<Dimension> operator()(float r) const
+		{
+			return details::MakeBall<Dimension>(m_Spacing, static_cast<double>(r));
+		}
+
+	private:
+		spacing_type m_Spacing;
+	};
+
+	auto ball = boost::apply_visitor(MyVisitor(input->GetSpacing()), radius);
+	return ball;
 }
 
 enum eOperation {
@@ -54,31 +88,8 @@ typename TOutputImage::Pointer
 	using image_type = TOutputImage;
 	itkStaticConstMacro(Dimension, unsigned int, TInputImage::ImageDimension);
 	using kernel_type = itk::FlatStructuringElement<Dimension>;
-	using spacing_type = typename itk::ImageBase<Dimension>::SpacingType;
 
-	class MyVisitor : public boost::static_visitor<itk::FlatStructuringElement<Dimension>>
-	{
-	public:
-		explicit MyVisitor(const spacing_type& spacing) : m_Spacing(spacing) {}
-
-		itk::FlatStructuringElement<Dimension> operator()(int r) const
-		{
-			itk::Size<Dimension> radius;
-			radius.Fill(r);
-
-			return iseg::MakeBall<Dimension>(radius);
-		}
-
-		itk::FlatStructuringElement<Dimension> operator()(float r) const
-		{
-			return iseg::MakeBall<Dimension>(m_Spacing, static_cast<double>(r));
-		}
-
-	private:
-		spacing_type m_Spacing;
-	};
-
-	auto ball = boost::apply_visitor(MyVisitor(input->GetSpacing()), radius);
+	auto ball = MakeBall<TInputImage>(input, radius);
 
 	unsigned char foreground_value = 255;
 
@@ -158,8 +169,8 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler, boost::varian
 		using input_type = itk::Image<float, 2>;
 		using output_type = itk::Image<unsigned char, 2>;
 
-		size_t startslice = handler->StartSlice();
-		size_t endslice = handler->EndSlice();
+		std::int64_t startslice = handler->StartSlice();
+		std::int64_t endslice = handler->EndSlice();
 
 		if (progress)
 		{
