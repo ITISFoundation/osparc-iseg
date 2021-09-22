@@ -18,6 +18,8 @@
 #ifndef itkFixTopologyCarveOutside2_hxx
 #define itkFixTopologyCarveOutside2_hxx
 
+#include "TopologyInvariants.h"
+
 #include "../Data/ItkUtils.h"
 
 #include "itkBinaryErodeImageFilter.h"
@@ -40,8 +42,8 @@ FixTopologyCarveOutside2<TInputImage, TOutputImage>::FixTopologyCarveOutside2()
 {
 	this->SetNumberOfRequiredOutputs(1);
 
-	// OutputImagePointer thinImage = OutputImageType::New();
-	// this->SetNthOutput(0, thinImage.GetPointer());
+	// OutputImagePointer thin_image = OutputImageType::New();
+	// this->SetNthOutput(0, thin_image.GetPointer());
 }
 
 template<class TInputImage, class TOutputImage>
@@ -54,22 +56,23 @@ typename FixTopologyCarveOutside2<TInputImage, TOutputImage>::OutputImageType*
 template<class TInputImage, class TOutputImage>
 void FixTopologyCarveOutside2<TInputImage, TOutputImage>::PrepareData()
 {
-	InputImagePointer inputImage = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
-	OutputImagePointer thinImage = GetThinning();
-	thinImage->SetBufferedRegion(thinImage->GetRequestedRegion());
-	thinImage->Allocate();
+	InputImagePointer input_image = dynamic_cast<const TInputImage*>(ProcessObject::GetInput(0));
+	OutputImagePointer thin_image = GetThinning();
+	thin_image->SetBufferedRegion(thin_image->GetRequestedRegion());
+	thin_image->Allocate();
 
 	// pad by 1 layer so we can get 1x1x1 neighborhood without checking if we are at boundary
-	auto region = thinImage->GetRequestedRegion();
+	auto region = thin_image->GetRequestedRegion();
 	auto padded_region = region;
 	padded_region.PadByRadius(1);
 
 	m_PaddedMask = OutputImageType::New();
 	m_PaddedMask->SetRegions(padded_region);
+	m_PaddedMask->SetSpacing(thin_image->GetSpacing());
 	m_PaddedMask->Allocate();
 	m_PaddedMask->FillBuffer(0);
 
-	ImageRegionConstIterator<TInputImage> it(inputImage, region);
+	ImageRegionConstIterator<TInputImage> it(input_image, region);
 	ImageRegionIterator<TOutputImage> ot(m_PaddedMask, region);
 
 	it.GoToBegin();
@@ -262,7 +265,11 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 
 	// get seeds
 	using node_t = std::pair<float, IndexType>;
-	std::priority_queue<node_t, std::vector<node_t>, std::greater<node_t>> queue;
+	struct comp
+	{
+		bool operator()(const node_t& l, const node_t& r) const { return (l.first < r.first); }
+	};
+	std::priority_queue<node_t, std::vector<node_t>, comp> queue;
 	auto bit = itk::ImageRegionConstIteratorWithIndex<TOutputImage>(m_PaddedMask, region);
 	for (bit.GoToBegin(); !bit.IsAtEnd(); ++bit)
 	{
@@ -275,14 +282,13 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 	}
 
 	// prepare Euler LUT [Lee94]
-	int eulerLUT[256];
-	this->FillEulerLUT(eulerLUT);
+	int euler_lut[256];
+	this->FillEulerLUT(euler_lut);
 
 	// neighborhood iterator
 	NeighborhoodIteratorType ot(radius, m_PaddedMask, region);
-	const auto modify_neighbors = [](NeighborhoodType& n) { for (auto& v : n.GetBufferReference()) v = (v != 0) ? 1 : 0; };
 	using offset_type = typename NeighborhoodIteratorType::OffsetType;
-	std::array<offset_type, 26> neighbors = {
+	std::array<offset_type, 26> neighbors_full = {
 			offset_type{-1, -1, -1},
 			offset_type{0, -1, -1},
 			offset_type{1, -1, -1},
@@ -312,37 +318,42 @@ void FixTopologyCarveOutside2<TInputImage, TOutputImage>::ComputeThinImage2()
 			offset_type{-1, 1, 1},
 			offset_type{0, 1, 1},
 			offset_type{1, 1, 1}};
+	std::array<offset_type, 6> neighbors = {
+			offset_type{-1, 0, 0},
+			offset_type{1, 0, 0},
+			offset_type{0, -1, 0},
+			offset_type{0, 1, 0},
+			offset_type{0, 0, -1},
+			offset_type{0, 0, 1}
+	};
+	const auto modify_neighbors = [](NeighborhoodType& n) { for (auto& v : n.GetBufferReference()) v = (v != 0) ? 1 : 0; };
 
 	// erode while topology does not change
 	while (!queue.empty())
 	{
-		auto id = queue.top().second;
+		auto node = queue.top();
+		auto id = node.second;
 		queue.pop();
 
 		if (m_PaddedMask->GetPixel(id) != kVisited)
 		{
+			assert(m_PaddedMask->GetPixel(id) == kVisited);
 			continue;
 		}
 
 		ot.SetLocation(id);
 		auto vals = ot.GetNeighborhood();
-
-		// overwrite 2->1
 		modify_neighbors(vals);
+		assert(vals.Size() == 27);
 
 		// check if pixel can be eroded
 		// check if point is simple (deletion does not change connectivity in the 3x3x3 neighborhood)
-		if (this->IsEulerInvariant(vals, eulerLUT) &&
-				this->IsSimplePoint(vals, true) &&
-				this->IsSimplePoint(vals, false))
+		if (topology::EulerInvariant(vals, 1) &&
+				topology::CCInvariant(vals, 1) &&
+				topology::CCInvariant(vals, 0))
 		{
-			vals[13] = 0;
-
-			if (this->IsSimplePoint(vals, true))
-			{
-				// We cannot delete current point, so reset
-				m_PaddedMask->SetPixel(id, kBackground);
-			}
+			// We cannot delete current point, so reset
+			m_PaddedMask->SetPixel(id, kBackground);
 		}
 
 		// add unvisited neighbors to queue
@@ -928,15 +939,16 @@ template<class TInputImage, class TOutputImage>
 bool FixTopologyCarveOutside2<TInputImage, TOutputImage>::IsSimplePoint(NeighborhoodType neighbors, bool FG)
 {
 	// Copy neighbors for labeling
+	const int fgbg[2] = {FG ? 1 : 0, FG ? 0 : 1};
 	int cube[26];
 	for (unsigned int i = 0; i < 13; ++i) // i =  0..12 -> cube[0..12]
 	{
-		cube[i] = FG ? neighbors[i] : neighbors[i] - 1;
+		cube[i] = neighbors[i] ? fgbg[0] : fgbg[1];
 	}
 	// i != 13 : ignore center pixel when counting (see [Lee94])
 	for (unsigned int i = 14; i < 27; ++i) // i = 14..26 -> cube[13..25]
 	{
-		cube[i - 1] = FG ? neighbors[i] : neighbors[i] - 1;
+		cube[i - 1] = neighbors[i] ? fgbg[0] : fgbg[1];
 	}
 	// Set initial label
 	int label = 2;
