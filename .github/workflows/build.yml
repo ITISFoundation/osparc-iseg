@@ -23,7 +23,7 @@ jobs:
           docker create --name vtkcontainer itisfoundation/iseg-ubuntu-vtk:8.2 bash
           docker cp vtkcontainer:/work deps/vtk
           docker pull itisfoundation/iseg-ubuntu-itk:5.2.1
-          docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:5.0.1 bash
+          docker create --name itkcontainer itisfoundation/iseg-ubuntu-itk:5.2.1 bash
           docker cp itkcontainer:/work deps/itk
 
       - name: configure
