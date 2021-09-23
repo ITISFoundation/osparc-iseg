@@ -36,7 +36,7 @@ jobs:
         run: cmake -H. -BCIBuild -DCMAKE_BUILD_TYPE=Release -DHDF5_ROOT=/usr -DVTK_DIR=`ls -d -1 deps/vtk/lib/cmake/vtk*` -DITK_DIR=`ls -d -1 deps/itk/lib/cmake/ITK*` -DQT_QMAKE_EXECUTABLE=/usr/bin/qmake-qt4 -Wdev
 
       - name: make
-        run: cmake --build CIBuild -j
+        run: cmake --build CIBuild -j2
 
       - name: make test
         run: |
