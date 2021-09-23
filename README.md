@@ -1,5 +1,5 @@
 ![iSEG logo](iSeg/images/isegicon.png)
-[![Build Actions Status](https://github.com/dyollb/osparc-iseg/workflows/C/C++%20CI/badge.svg)](https://github.com/dyollb/osparc-iseg/actions)
+[![Build Actions Status](https://github.com/ITISFoundation/osparc-iseg/workflows/C/C++%20CI/badge.svg)](https://github.com/ITISFoundation/osparc-iseg/actions)
 
 ## Description
 

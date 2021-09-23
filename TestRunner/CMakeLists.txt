@@ -29,7 +29,7 @@ IF(ISEG_BUILD_TESTING)
 				SET(lib_paths "${p}:${lib_paths}")
 			ENDFOREACH()
 			SET_TESTS_PROPERTIES(TestSuite PROPERTIES
-				ENVIRONMENT "LD_LIBRARY_PATH=\"${lib_paths}\"")
+				ENVIRONMENT "LD_LIBRARY_PATH=${lib_paths}")
 		ENDIF()
 	ENDIF()
 ENDIF()
