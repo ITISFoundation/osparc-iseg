@@ -12,6 +12,7 @@
 
 #include "Data/ItkProgressObserver.h"
 #include "Data/ItkUtils.h"
+#include "Data/ScopeExit.h"
 #include "Data/SlicesHandlerITKInterface.h"
 
 #include <itkBinaryDilateImageFilter.h>
@@ -20,6 +21,10 @@
 #include <itkFlatStructuringElement.h>
 #include <itkImageRegionIteratorWithIndex.h>
 #include <itkPasteImageFilter.h>
+
+#ifndef NO_OPENMP_SUPPORT
+#	include <omp.h>
+#endif
 
 #include <boost/variant.hpp>
 
@@ -176,6 +181,11 @@ void MorphologicalOperation(iseg::SlicesHandlerInterface* handler, boost::varian
 		{
 			progress->SetNumberOfSteps(endslice - startslice);
 		}
+
+#ifndef NO_OPENMP_SUPPORT
+		const auto guard = MakeScopeExit([nthreads = omp_get_num_threads()]() { omp_set_num_threads(nthreads); });
+		omp_set_num_threads(std::max<int>(2, std::thread::hardware_concurrency() / 2));
+#endif
 
 #pragma omp parallel for
 		for (std::int64_t slice = startslice; slice < endslice; ++slice)
