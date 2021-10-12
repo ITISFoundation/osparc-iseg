@@ -7839,14 +7839,12 @@ void SlicesHandler::MaskSource(bool all_slices, float maskvalue)
 		mask.at(label) = true;
 	}
 
-	const int i_n = m_Endslice - m_Startslice;
+	auto sources = SourceSlices();
+	auto tissues = TissueSlices(0);
 
-#pragma omp parallel for
-	for (int i = 0; i < i_n; ++i)
-	{
-		const int slice = m_Startslice + i;
-		const auto tissue = TissueSlices(0)[slice];
-		auto source = SourceSlices()[slice];
+	const auto mask_slice = [this, &sources, &tissues, &mask](int slice, float maskvalue) {
+		auto source = sources[slice];
+		auto tissue = tissues[slice];
 
 		for (unsigned int k = 0; k < m_Area; ++k)
 		{
@@ -7855,6 +7853,21 @@ void SlicesHandler::MaskSource(bool all_slices, float maskvalue)
 				source[k] = maskvalue;
 			}
 		}
+	};
+
+	if (all_slices)
+	{
+		const int i_n = m_Endslice - m_Startslice;
+
+#pragma omp parallel for
+		for (int i = 0; i < i_n; ++i)
+		{
+			mask_slice(m_Startslice + i, maskvalue);
+		}
+	}
+	else
+	{
+		mask_slice(m_Activeslice, maskvalue);
 	}
 }
 
