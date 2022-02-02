@@ -100,7 +100,7 @@ MorphologyWidget::MorphologyWidget(SlicesHandler* hand3D)
 	auto params_area = new QWidget(this);
 	params_area->setLayout(params_layout);
 
-	// top-level layot
+	// top-level layout
 	auto top_layout = new QHBoxLayout;
 	top_layout->addWidget(method_area);
 	top_layout->addWidget(params_area);
@@ -153,7 +153,7 @@ void MorphologyWidget::Execute()
 			ProgressDialog progress("Morphological erosion ...", this);
 			MorphologicalOperation(m_Handler3D, radius, iseg::kErode, true3d, &progress);
 		}
-		else
+		else //if (m_RbDilate->isChecked())
 		{
 			ProgressDialog progress("Morphological dilation ...", this);
 			MorphologicalOperation(m_Handler3D, radius, iseg::kDilate, true3d, &progress);

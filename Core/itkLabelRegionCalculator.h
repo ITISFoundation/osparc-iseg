@@ -12,22 +12,24 @@
 #include <vector>
 
 namespace itk {
-template<class TLabelImage>
-typename TLabelImage::RegionType GetLabelRegion(const TLabelImage* label_input, typename TLabelImage::PixelType selected_label)
+template<class TLabelImage, typename TPredicate>
+typename TLabelImage::RegionType GetSelectedRegion(const TLabelImage* label_input, const TPredicate& is_selected)
 {
 	itkStaticConstMacro(imageDimension, unsigned int, TLabelImage::ImageDimension);
-	std::vector<size_t> boundingBox(imageDimension * 2);
+	using index_t = ::itk::IndexValueType;
+
+	std::vector<index_t> boundingBox(imageDimension * 2);
 	for (unsigned int i = 0; i < imageDimension * 2; i += 2)
 	{
-		boundingBox[i] = std::numeric_limits<size_t>::max();
-		boundingBox[i + 1] = std::numeric_limits<size_t>::lowest();
+		boundingBox[i] = std::numeric_limits<index_t>::max();
+		boundingBox[i + 1] = std::numeric_limits<index_t>::lowest();
 	}
 
 	// do the work
 	auto it = itk::ImageRegionConstIterator<TLabelImage>(label_input, label_input->GetBufferedRegion());
 	for (it.GoToBegin(); !it.IsAtEnd(); ++it)
 	{
-		if (it.Get() == selected_label)
+		if (is_selected(it.Get()))
 		{
 			auto idx = it.GetIndex();
 			boundingBox[0] = boundingBox[0] > idx[0] ? idx[0] : boundingBox[0];
@@ -55,4 +57,11 @@ typename TLabelImage::RegionType GetLabelRegion(const TLabelImage* label_input, 
 	}
 	return typename TLabelImage::RegionType();
 }
+
+template<class TLabelImage>
+typename TLabelImage::RegionType GetLabelRegion(const TLabelImage* label_input, typename TLabelImage::PixelType selected_label)
+{
+	return GetSelectedRegion(label_input, [&](typename TLabelImage::PixelType p) { return p == selected_label; });
+}
+
 } // namespace itk

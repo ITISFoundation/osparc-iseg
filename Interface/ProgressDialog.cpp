@@ -20,6 +20,7 @@ ProgressDialog::ProgressDialog(const char* msg, QWidget* parent /*= 0*/)
 
 	m_Count.store(0);
 
+	QObject_connect(this, SIGNAL(OnValueChanged(int)), this, SLOT(UpdateValue(int)));
 	QObject_connect(cancel_button, SIGNAL(clicked()), this, SLOT(Cancel()));
 }
 
@@ -32,7 +33,7 @@ void ProgressDialog::SetNumberOfSteps(int N)
 void ProgressDialog::Increment()
 {
 	m_Count++;
-	m_Progress->setValue(m_Count);
+	OnValueChanged(m_Count);
 }
 
 bool ProgressDialog::WasCanceled() const
@@ -42,17 +43,23 @@ bool ProgressDialog::WasCanceled() const
 
 void ProgressDialog::SetValue(int percent)
 {
+	m_Count = percent;
+	OnValueChanged(percent);
+}
+
+void ProgressDialog::Cancel()
+{
+	m_Canceled = true;
+}
+
+void ProgressDialog::UpdateValue(int percent)
+{
 	if (m_Progress->value() != percent)
 	{
 		m_Progress->setValue(percent);
 
 		QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 	}
-}
-
-void ProgressDialog::Cancel()
-{
-	m_Canceled = true;
 }
 
 } // namespace iseg

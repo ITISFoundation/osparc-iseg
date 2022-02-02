@@ -167,7 +167,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	QObject_connect(m_SlTrans, SIGNAL(sliderReleased()), this, SLOT(TranspChanged()));
 	QObject_connect(m_BtUpdate, SIGNAL(clicked()), this, SLOT(Reload()));
 	QObject_connect(m_BtConnectivity, SIGNAL(clicked()), this, SLOT(SplitSurface()));
-	QObject_connect(m_Reduction, SIGNAL(editingFinished()), this, SLOT(reduction_changed));
+	QObject_connect(m_Reduction, SIGNAL(editingFinished()), this, SLOT(ReductionChanged()));
 
 	// setup vtk scene
 	m_Ren3D = vtkSmartPointer<vtkRenderer>::New();

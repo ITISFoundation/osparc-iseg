@@ -2559,18 +2559,17 @@ void MainWindow::ExecuteSaveimg()
 
 void MainWindow::ExecuteSaveprojas()
 {
-	DataSelection data_selection;
-	data_selection.bmp = true;
-	data_selection.work = true;
-	data_selection.tissues = true;
-	data_selection.tissueHierarchy = true;
-	emit BeginDataexport(data_selection, this);
-
 	QString savefilename = RecentPlaces::GetSaveFileName(this, "Save as", QString::null, "Projects (*.prj)");
-
-	if (!savefilename.isEmpty())
+	if (savefilename.length() > 4)
 	{
-		if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
+		DataSelection data_selection;
+		data_selection.bmp = true;
+		data_selection.work = true;
+		data_selection.tissues = true;
+		data_selection.tissueHierarchy = true;
+		emit BeginDataexport(data_selection, this);
+
+		if (!savefilename.endsWith(QString(".prj")))
 			savefilename.append(".prj");
 
 		m_MSaveprojfilename = savefilename;
@@ -2655,24 +2654,24 @@ void MainWindow::ExecuteSaveprojas()
 		QFile::rename(temp_file_name_without_extension + ".h5", source_file_name_without_extension + ".h5");
 
 		progress.setValue(num_tasks);
+
+		emit EndDataexport(this);
 	}
-	emit EndDataexport(this);
 }
 
 void MainWindow::ExecuteSavecopyas()
 {
-	DataSelection data_selection;
-	data_selection.bmp = true;
-	data_selection.work = true;
-	data_selection.tissues = true;
-	data_selection.tissueHierarchy = true;
-	emit BeginDataexport(data_selection, this);
-
-	QString savefilename = RecentPlaces::GetSaveFileName(this, "Save as", QString::null, "Projects (*.prj)");
-
-	if (!savefilename.isEmpty())
+	QString savefilename = RecentPlaces::GetSaveFileName(this, "Save copy as", QString::null, "Projects (*.prj)");
+	if (savefilename.length() > 4)
 	{
-		if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
+		DataSelection data_selection;
+		data_selection.bmp = true;
+		data_selection.work = true;
+		data_selection.tissues = true;
+		data_selection.tissueHierarchy = true;
+		emit BeginDataexport(data_selection, this);
+
+		if (!savefilename.endsWith(QString(".prj")))
 			savefilename.append(".prj");
 
 		FILE* fp = m_Handler3D->SaveProject(savefilename.ascii(), "xmf");
@@ -2705,8 +2704,9 @@ void MainWindow::ExecuteSavecopyas()
 		fp = SaveNotes(fp, save_proj_version);
 
 		fclose(fp);
+
+		emit EndDataexport(this);
 	}
-	emit EndDataexport(this);
 }
 
 void MainWindow::SaveSettings()

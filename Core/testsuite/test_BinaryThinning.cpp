@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(PalagyiKubaThinning_test)
 	thinning_filter->SetInput(input);
 	BOOST_CHECK_NO_THROW(thinning_filter->Update());
 
-	dump_image(thinning_filter->GetOutput(), "E:/temp/_pk_thinned.mha");
+	//dump_image(thinning_filter->GetOutput(), "E:/temp/_pk_thinned.mha");
 }
 
 // TestRunner.exe --run_test=iSeg_suite/BinaryThinning_suite/BinaryThinning_test --log_level=message

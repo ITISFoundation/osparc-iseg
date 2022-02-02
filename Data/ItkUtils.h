@@ -119,7 +119,7 @@ public:
 template<class T>
 void dump_image(T* img, const std::string& file_name)
 {
-#ifdef ENABLE_DUMP_IMAGE
+//#ifdef ENABLE_DUMP_IMAGE
 	if (!file_name.empty())
 	{
 		auto writer = itk::ImageFileWriter<T>::New();
@@ -127,7 +127,7 @@ void dump_image(T* img, const std::string& file_name)
 		writer->SetFileName(file_name);
 		writer->Update();
 	}
-#endif
+//#endif
 }
 
 namespace detail {

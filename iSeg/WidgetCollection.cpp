@@ -551,15 +551,11 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 	m_R = new QSlider(Qt::Horizontal, this);
 	m_R->setRange(0, 255);
 	m_Red = new QLabel(QString("Red: "), this);
-	//	hboxr=new QHBoxLayout(this);
-	//	hboxr->addWidget(red);
-	//	hboxr->addWidget(r);
+
 	m_G = new QSlider(Qt::Horizontal, this);
 	m_G->setRange(0, 255);
 	m_Green = new QLabel(QString("Green: "), this);
-	//	hboxg=new QHBoxLayout(this);
-	//	hboxg->addWidget(green);
-	//	hboxg->addWidget(g);
+
 	m_B = new QSlider(Qt::Horizontal, this);
 	m_B->setRange(0, 255);
 	m_Blue = new QLabel(QString("Blue: "), this);
@@ -571,12 +567,6 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 	m_SbB = new QSpinBox(0, 255, 1, this);
 	m_SbTransp = new QSpinBox(0, 100, 1, this);
 
-	//	hboxb=new QHBoxLayout(this);
-	//	hboxb->addWidget(blue);
-	//	hboxb->addWidget(b);
-	/*	vbox2->addLayout(hboxr);
-			vbox2->addLayout(hboxg);
-			vbox2->addLayout(hboxb);*/
 	m_Vbox2->addWidget(m_Red);
 	m_Vbox2->addWidget(m_Green);
 	m_Vbox2->addWidget(m_Blue);
@@ -662,7 +652,7 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 		QObject_connect(this, SIGNAL(ColorChanged(float,float,float,float)), m_Cs, SLOT(ColorChanged(float,float,float,float)));
 	}
 
-	}
+}
 
 TissueAdder::~TissueAdder()
 {
@@ -686,74 +676,82 @@ TissueAdder::~TissueAdder()
 	delete m_SbTransp;
 }
 
+class SignalBlock
+{
+	QObject* m_Obejct;
+	bool m_Blocked;
+
+public:
+	SignalBlock(QObject* o) : m_Obejct(o)
+	{
+		m_Blocked = o->blockSignals(true);
+	}
+	~SignalBlock()
+	{
+		m_Obejct->blockSignals(m_Blocked);
+	}
+};
+
 void TissueAdder::UpdateColorR(int v)
 {
-	QObject_disconnect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
+	SignalBlock guard(m_SbR);
 	m_SbR->setValue(v);
-	QObject_connect(m_SbR, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorRsb(int)));
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorG(int v)
 {
-	QObject_disconnect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
+	SignalBlock guard(m_SbG);
 	m_SbG->setValue(v);
-	QObject_connect(m_SbG, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorGsb(int)));
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorB(int v)
 {
-	QObject_disconnect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
+	SignalBlock guard(m_SbB);
 	m_SbB->setValue(v);
-	QObject_connect(m_SbB, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorBsb(int)));
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpac(int v)
 {
-	QObject_disconnect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
+	SignalBlock guard(m_SbTransp);
 	m_SbTransp->setValue(v);
-	QObject_connect(m_SbTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpacsb(int)));
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorRsb(int v)
 {
-	QObject_disconnect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
+	SignalBlock guard(m_R);
 	m_R->setValue(v);
-	QObject_connect(m_R, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorR(int)));
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorGsb(int v)
 {
-	QObject_disconnect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
+	SignalBlock guard(m_G);
 	m_G->setValue(v);
-	QObject_connect(m_G, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorG(int)));
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorBsb(int v)
 {
-	QObject_disconnect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
+	SignalBlock guard(m_B);
 	m_B->setValue(v);
-	QObject_connect(m_B, SIGNAL(valueChanged(int)), this, SLOT(UpdateColorB(int)));
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpacsb(int v)
 {
-	QObject_disconnect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
+	SignalBlock guard(m_SlTransp);
 	m_SlTransp->setValue(v);
-	QObject_connect(m_SlTransp, SIGNAL(valueChanged(int)), this, SLOT(UpdateOpac(int)));
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
