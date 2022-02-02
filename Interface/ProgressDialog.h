@@ -35,8 +35,12 @@ public:
 	bool WasCanceled() const override;
 	void SetValue(int percent) override;
 
+signals:
+	void OnValueChanged(int);
+
 private slots:
 	void Cancel();
+	void UpdateValue(int);
 
 private:
 	bool m_Canceled = false;

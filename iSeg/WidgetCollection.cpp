@@ -651,74 +651,82 @@ TissueAdder::TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidge
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0 - m_Transp1);
 }
 
+class SignalBlock
+{
+	QObject* m_Obejct;
+	bool m_Blocked;
+
+public:
+	SignalBlock(QObject* o) : m_Obejct(o)
+	{
+		m_Blocked = o->blockSignals(true);
+	}
+	~SignalBlock()
+	{
+		m_Obejct->blockSignals(m_Blocked);
+	}
+};
+
 void TissueAdder::UpdateColorR(int v)
 {
-	m_SbR->blockSignals(true);
+	SignalBlock guard(m_SbR);
 	m_SbR->setValue(v);
-	m_SbR->blockSignals(false);
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorG(int v)
 {
-	m_SbG->blockSignals(true);
+	SignalBlock guard(m_SbG);
 	m_SbG->setValue(v);
-	m_SbG->blockSignals(false);
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorB(int v)
 {
-	m_SbB->blockSignals(true);
+	SignalBlock guard(m_SbB);
 	m_SbB->setValue(v);
-	m_SbB->blockSignals(false);
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpac(int v)
 {
-	m_SbTransp->blockSignals(true);
+	SignalBlock guard(m_SbTransp);
 	m_SbTransp->setValue(v);
-	m_SbTransp->blockSignals(false);
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorRsb(int v)
 {
-	m_R->blockSignals(true);
+	SignalBlock guard(m_R);
 	m_R->setValue(v);
-	m_R->blockSignals(false);
 	m_Fr1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorGsb(int v)
 {
-	m_G->blockSignals(true);
+	SignalBlock guard(m_G);
 	m_G->setValue(v);
-	m_G->blockSignals(false);
 	m_Fg1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateColorBsb(int v)
 {
-	m_B->blockSignals(true);
+	SignalBlock guard(m_B);
 	m_B->setValue(v);
-	m_B->blockSignals(false);
 	m_Fb1 = float(v) / 255;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
 
 void TissueAdder::UpdateOpacsb(int v)
 {
-	m_SlTransp->blockSignals(true);
+	SignalBlock guard(m_SlTransp);
 	m_SlTransp->setValue(v);
-	m_SlTransp->blockSignals(false);
 	m_Transp1 = float(v) / 100;
 	emit ColorChanged(m_Fr1, m_Fg1, m_Fb1, 1.0f - m_Transp1);
 }
