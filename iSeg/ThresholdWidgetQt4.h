@@ -30,7 +30,7 @@ public:
 	void HideParamsChanged() override;
 	// should be const'ed
 	std::string GetName() override { return std::string("Threshold"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("thresholding.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("thresholding.png")); }
 	FILE* SaveParams(FILE* fp, int version) override;
 	FILE* LoadParams(FILE* fp, int version) override;
 

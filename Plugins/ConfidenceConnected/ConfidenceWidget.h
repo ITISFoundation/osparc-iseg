@@ -32,7 +32,7 @@ public:
 	void NewLoaded() override;
 	void Cleanup() override;
 	std::string GetName() override { return std::string("Confidence Filter"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("Confidence.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("Confidence.png")); }
 
 protected:
 	void OnSlicenrChanged() override;

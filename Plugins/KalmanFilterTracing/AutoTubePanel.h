@@ -73,7 +73,7 @@ public:
 	void NewLoaded() override;
 	void Cleanup() override;
 	std::string GetName() override { return std::string("Root Tracer"); };
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("LevelSet.png"))); };
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("LevelSet.png")); };
 
 	void SaveLabelMap(FILE* fp, label_map_type::Pointer map);
 	label_map_type::Pointer LoadLabelMap(FILE* fi);

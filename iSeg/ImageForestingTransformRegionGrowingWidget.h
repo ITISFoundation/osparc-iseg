@@ -33,7 +33,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("IFT"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("iftrg.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("iftrg.png")); }
 
 protected:
 	void OnTissuenrChanged(int i) override;

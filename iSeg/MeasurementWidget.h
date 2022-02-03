@@ -36,7 +36,7 @@ public:
 	void NewLoaded() override;
 	float Calculatevec(unsigned short orient);
 	std::string GetName() override { return std::string("Measurement"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("measurement.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("measurement.png")); }
 
 private:
 	void OnMouseClicked(Point p) override;

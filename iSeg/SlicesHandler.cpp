@@ -2472,33 +2472,33 @@ bool SlicesHandler::SwapXY()
 	unsigned char mode1 = GetActivebmphandler()->ReturnMode(true);
 	unsigned char mode2 = GetActivebmphandler()->ReturnMode(false);
 
-	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("bmp_float.raw");
 	if (SaveRawXySwapped(str1.toAscii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("work_float.raw");
 	if (SaveRawXySwapped(str1.toAscii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath("tissues.raw");
 	if (SaveTissuesRawXySwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("work_float.raw");
 		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 		SetModeall(mode1, true);
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("bmp_float.raw");
 		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 		SetModeall(mode2, false);
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath("tissues.raw");
 		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
@@ -2535,31 +2535,31 @@ bool SlicesHandler::SwapYZ()
 	nrslices = Height();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("bmp_floatto.raw");
 	if (SaveRawYzSwapped(str1.toAscii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("work_floatto.raw");
 	if (SaveRawYzSwapped(str1.toAscii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath("tissuesto.raw");
 	if (SaveTissuesRawYzSwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("work_floatto.raw");
 		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("bmp_floatto.raw");
 		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath("tissuesto.raw");
 		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
@@ -2602,31 +2602,31 @@ bool SlicesHandler::SwapXZ()
 	//float thick = get_slicethickness();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("bmp_floatto.raw");
 	if (SaveRawXzSwapped(str1.toAscii(), false) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+	str1 = QDir::temp().absoluteFilePath("work_floatto.raw");
 	if (SaveRawXzSwapped(str1.toAscii(), true) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+	str1 = QDir::temp().absoluteFilePath("tissuesto.raw");
 	if (SaveTissuesRawXzSwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("work_floatto.raw");
 		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
+		str1 = QDir::temp().absoluteFilePath("bmp_floatto.raw");
 		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
+		str1 = QDir::temp().absoluteFilePath("tissuesto.raw");
 		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}

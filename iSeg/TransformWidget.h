@@ -30,7 +30,7 @@ public:
 	void HideParamsChanged() override;
 
 	std::string GetName() override { return std::string("Transform"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("transform.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("transform.png")); }
 
 	void GetDataSelection(bool& source, bool& target, bool& tissues);
 

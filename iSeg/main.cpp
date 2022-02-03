@@ -137,10 +137,10 @@ int main(int argc, char** argv)
 		ISEG_WARNING_MSG("atlas folder does not exist");
 	}
 
-	QString splashpicpath = picpath.absoluteFilePath(QString("splash.png"));
+	QString splashpicpath = picpath.absoluteFilePath("splash.png");
 	QString locationpath = file_directory.absolutePath();
-	QString latestprojpath = tmpdir.absoluteFilePath(QString("latestproj.txt"));
-	QString settingspath = tmpdir.absoluteFilePath(QString("settings.bin"));
+	QString latestprojpath = tmpdir.absoluteFilePath("latestproj.txt");
+	QString settingspath = tmpdir.absoluteFilePath("settings.bin");
 
 	TissueInfos::InitTissues();
 	BranchItem::InitAvailablelabels();

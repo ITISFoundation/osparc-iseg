@@ -1782,9 +1782,9 @@ ZoomWidget::ZoomWidget(double zoom1, QDir picpath, QWidget* parent, Qt::WindowFl
 		: QWidget(parent, wFlags)
 {
 	m_Zoom = zoom1;
-	m_Pushzoomin = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomin.png"))), "Zoom in");
-	m_Pushzoomout = new QPushButton(QIcon(picpath.absoluteFilePath(QString("zoomout.png"))), "Zoom out");
-	m_Pushunzoom = new QPushButton(QIcon(picpath.absoluteFilePath(QString("unzoom.png"))), "Unzoom");
+	m_Pushzoomin = new QPushButton(QIcon(picpath.absoluteFilePath("zoomin.png")), "Zoom in");
+	m_Pushzoomout = new QPushButton(QIcon(picpath.absoluteFilePath("zoomout.png")), "Zoom out");
+	m_Pushunzoom = new QPushButton(QIcon(picpath.absoluteFilePath("unzoom.png")), "Unzoom");
 
 	m_ZoomF = new QLabel(QString("x"), this);
 	m_LeZoomF = new QLineEdit(QString::number(m_Zoom, 'g', 4), this);
