@@ -252,7 +252,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();
-				reader->SetFileName(loadfilename.ascii());
+				reader->SetFileName(loadfilename.toStdString());
 				try
 				{
 					reader->Update();

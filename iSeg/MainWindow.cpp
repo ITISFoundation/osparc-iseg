@@ -321,9 +321,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_MEditingmode = editingmode;
 	m_TabOld = nullptr;
 
-	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+	setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
-	QIcon isegicon(m_MPicpath.absoluteFilePath(QString("isegicon.png")).ascii());
+	QIcon isegicon(m_MPicpath.absoluteFilePath(QString("isegicon.png")));
 	setWindowIcon(isegicon);
 	m_MLocationstring = locationstring;
 	m_MSaveprojfilename = "";
@@ -399,7 +399,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastbmpVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastbmpVal = new QLabel("x", this);
 	m_LbBrightnessbmp = new QLabel("B:", this);
-	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png")).ascii()).pixmap());
+	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png"))).pixmap());
 	m_LeBrightnessbmpVal = new QLineEdit(this);
 	m_LeBrightnessbmpVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessbmpVal->setText(QString("%1").arg(9999, 3));
@@ -1658,7 +1658,7 @@ void MainWindow::ExecuteSwapxy()
 			{
 				std::string temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawXySwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				if (SlicesHandler::SaveRawXySwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
@@ -1666,7 +1666,7 @@ void MainWindow::ExecuteSwapxy()
 					temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
 					str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1714,14 +1714,14 @@ void MainWindow::ExecuteSwapxz()
 			{
 				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawXzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				if (SlicesHandler::SaveRawXzSwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
 					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1773,14 +1773,14 @@ void MainWindow::ExecuteSwapyz()
 			{
 				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
 				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawYzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				if (SlicesHandler::SaveRawYzSwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
 					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
 					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1831,31 +1831,31 @@ void MainWindow::ExecuteResize(int resizetype)
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, false) != 0)
+	if (m_Handler3D->SaveRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp, false) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, true) != 0)
+	if (m_Handler3D->SaveRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp, true) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-	if (m_Handler3D->SaveTissuesRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp) != 0)
+	if (m_Handler3D->SaveTissuesRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp) != 0)
 		ok = false;
 
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-		if (m_Handler3D->ReadRawFloat(str1.ascii(), w + dxm + dxp, h + dym + dyp, 0, nrslices + dzm + dzp) != 1)
+		if (m_Handler3D->ReadRawFloat(str1.toAscii(), w + dxm + dxp, h + dym + dyp, 0, nrslices + dzm + dzp) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-		if (m_Handler3D->ReloadRawFloat(str1.ascii(), 0) != 1)
+		if (m_Handler3D->ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-		if (m_Handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		if (m_Handler3D->ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 		{
 			ok = false;
 		}
@@ -2054,10 +2054,10 @@ void MainWindow::ExecuteLoadImageSeries()
 			vi.push_back(bmpimgnr(&files[i]));
 		}
 
-		std::vector<const char*> vfilenames;
+		std::vector<std::string> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
-			vfilenames.push_back(files[i].ascii());
+			vfilenames.push_back(files[i].toStdString());
 		}
 
 		auto format = LoaderColorImages::kBMP;
@@ -2211,7 +2211,7 @@ void MainWindow::ExecuteLoadMedicalImage()
 																																												 "All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadImage(loadfilename.ascii());
+		m_Handler3D->ReadImage(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2241,7 +2241,7 @@ void MainWindow::ExecuteLoadvtk()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		res = m_Handler3D->ReadImage(loadfilename.ascii());
+		res = m_Handler3D->ReadImage(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2275,7 +2275,7 @@ void MainWindow::ExecuteLoadavw()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadAvw(loadfilename.ascii());
+		m_Handler3D->ReadAvw(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2306,10 +2306,10 @@ void MainWindow::ExecuteReloadbmp()
 			vi.push_back(bmpimgnr(&files[i]));
 		}
 
-		std::vector<const char*> vfilenames;
+		std::vector<std::string> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
-			vfilenames.push_back(files[i].ascii());
+			vfilenames.push_back(files[i].toStdString());
 		}
 
 		DataSelection data_selection;
@@ -2372,7 +2372,7 @@ void MainWindow::ExecuteReloadavw()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadAVW(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadAVW(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2392,7 +2392,7 @@ void MainWindow::ExecuteReloadMedicalImage()
 																																												 "All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadImage(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2410,7 +2410,7 @@ void MainWindow::ExecuteReloadvtk()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadImage(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2504,7 +2504,7 @@ void MainWindow::ExecuteLoadrtdose()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadRTdose(loadfilename.ascii());
+		m_Handler3D->ReadRTdose(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2528,7 +2528,7 @@ void MainWindow::ExecuteReloadrtdose()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadRTdose(loadfilename.ascii(), m_Handler3D->StartSlice()); // TODO: handle failure
+		m_Handler3D->ReloadRTdose(loadfilename.toAscii(), m_Handler3D->StartSlice()); // TODO: handle failure
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2603,13 +2603,13 @@ void MainWindow::ExecuteSaveprojas()
 		progress.setModal(true);
 		progress.setValue(1);
 
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+		setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 							 QString(" - ") + TruncateFileName(savefilename));
 
 		//m_saveprojfilename = tempFileName;
 		//AddLoadProj(tempFileName);
 		AddLoadProj(m_MSaveprojfilename);
-		FILE* fp = m_Handler3D->SaveProject(temp_file_name.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveProject(temp_file_name.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2675,7 +2675,7 @@ void MainWindow::ExecuteSavecopyas()
 		if (!savefilename.endsWith(QString(".prj")))
 			savefilename.append(".prj");
 
-		FILE* fp = m_Handler3D->SaveProject(savefilename.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveProject(savefilename.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2783,11 +2783,11 @@ void MainWindow::SaveSettings()
 	settings.sync();
 }
 
-void MainWindow::LoadSettings(const char* loadfilename)
+void MainWindow::LoadSettings(const std::string& loadfilename)
 {
 	m_Settingsfile = loadfilename;
 	FILE* fp;
-	if ((fp = fopen(loadfilename, "rb")) == nullptr)
+	if ((fp = fopen(loadfilename.c_str(), "rb")) == nullptr)
 	{
 		return;
 	}
@@ -2938,7 +2938,7 @@ void MainWindow::ExecuteSaveactiveslicesas()
 
 	if (!savefilename.isEmpty())
 	{
-		FILE* fp = m_Handler3D->SaveActiveSlices(savefilename.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveActiveSlices(savefilename.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2985,7 +2985,7 @@ void MainWindow::ExecuteSaveproj()
 	{
 		if (!m_S4Lcommunicationfilename.isEmpty())
 		{
-			m_Handler3D->SaveCommunicationFile(m_S4Lcommunicationfilename.ascii());
+			m_Handler3D->SaveCommunicationFile(m_S4Lcommunicationfilename.toAscii());
 		}
 	}
 	else
@@ -3022,13 +3022,13 @@ void MainWindow::ExecuteSaveproj()
 			progress.setModal(true);
 			progress.setValue(1);
 
-			setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+			setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 								 QString(" - ") + TruncateFileName(m_MSaveprojfilename));
 
 			m_MSaveprojfilename = temp_file_name;
 
-			//FILE *fp=handler3D->SaveProject(m_saveprojfilename.ascii(),"xmf");
-			FILE* fp = m_Handler3D->SaveProject(temp_file_name.ascii(), "xmf");
+			//FILE *fp=handler3D->SaveProject(m_saveprojfilename.toAscii(),"xmf");
+			FILE* fp = m_Handler3D->SaveProject(temp_file_name.toAscii(), "xmf");
 			fp = m_BitstackWidget->SaveProj(fp);
 			unsigned short save_proj_version = 12;
 			fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -3134,7 +3134,7 @@ void MainWindow::ExecuteSaveproj()
 void MainWindow::Loadproj(const QString& loadfilename)
 {
 	FILE* fp;
-	if ((fp = fopen(loadfilename.ascii(), "r")) == nullptr)
+	if ((fp = fopen(loadfilename.toAscii(), "r")) == nullptr)
 	{
 		return;
 	}
@@ -3154,10 +3154,10 @@ void MainWindow::Loadproj(const QString& loadfilename)
 	if (!loadfilename.isEmpty())
 	{
 		m_MSaveprojfilename = loadfilename;
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
+		setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
 		AddLoadProj(m_MSaveprojfilename);
 		int tissues_version = 0;
-		fp = m_Handler3D->LoadProject(loadfilename.ascii(), tissues_version);
+		fp = m_Handler3D->LoadProject(loadfilename.toAscii(), tissues_version);
 		fp = m_BitstackWidget->LoadProj(fp);
 		fp = TissueInfos::LoadTissues(fp, tissues_version);
 		stillopen = true;
@@ -3231,8 +3231,8 @@ void MainWindow::LoadS4Llink(const QString& loadfilename)
 
 	m_S4Lcommunicationfilename = loadfilename;
 	int tissues_version = 0;
-	m_Handler3D->LoadS4Llink(loadfilename.ascii(), tissues_version);
-	TissueInfos::LoadTissuesHDF(loadfilename.ascii(), tissues_version);
+	m_Handler3D->LoadS4Llink(loadfilename.toAscii(), tissues_version);
+	TissueInfos::LoadTissuesHDF(loadfilename.toAscii(), tissues_version);
 
 	emit EndDatachange(this, iseg::ClearUndo);
 	tissues_size_t m;
@@ -3275,7 +3275,7 @@ void MainWindow::ExecuteMergeprojects()
 
 	if (!savefilename.isEmpty() && !mergefilenames.empty())
 	{
-		FILE* fp = m_Handler3D->MergeProjects(savefilename.ascii(), mergefilenames);
+		FILE* fp = m_Handler3D->MergeProjects(savefilename.toAscii(), mergefilenames);
 		if (!fp)
 		{
 			QMessageBox::warning(this, "iSeg", "Merge projects failed.\n\nPlease make sure that "
@@ -3410,7 +3410,7 @@ void MainWindow::ExecuteLoadproj4()
 void MainWindow::ExecuteLoadatlas(int i)
 {
 	AtlasWidget* aw = new AtlasWidget(
-			m_MAtlasfilename.m_MAtlasdir.absoluteFilePath(m_MAtlasfilename.m_MAtlasfilename[i]).ascii(),
+			m_MAtlasfilename.m_MAtlasdir.absoluteFilePath(m_MAtlasfilename.m_MAtlasfilename[i]),
 			m_MPicpath);
 	if (aw->m_IsOk)
 	{
@@ -3544,7 +3544,7 @@ void MainWindow::ExecuteCreateatlas()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintAtlas(savefilename.ascii());
+		m_Handler3D->PrintAtlas(savefilename.toAscii());
 		LoadAtlas(m_MAtlasfilename.m_MAtlasdir);
 	}
 
@@ -3563,7 +3563,7 @@ void MainWindow::ExecuteSavetissues()
 	if (!savefilename.isEmpty())
 	{
 		unsigned short save_version = 7;
-		TissueInfos::SaveTissuesReadable(savefilename.ascii(), save_version);
+		TissueInfos::SaveTissuesReadable(savefilename.toAscii(), save_version);
 	}
 }
 
@@ -3580,7 +3580,7 @@ void MainWindow::ExecuteExportlabelfield()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintAmascii(savefilename.ascii());
+		m_Handler3D->PrintAmascii(savefilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3601,7 +3601,7 @@ void MainWindow::ExecuteExportmat()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintTissuemat(savefilename.ascii());
+		m_Handler3D->PrintTissuemat(savefilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3622,7 +3622,7 @@ void MainWindow::ExecuteExporthdf()
 		data_selection.tissues = true;
 		emit BeginDataexport(data_selection, this);
 
-		m_Handler3D->SaveCommunicationFile(savefilename.ascii());
+		m_Handler3D->SaveCommunicationFile(savefilename.toAscii());
 
 		emit EndDataexport(this);
 	}
@@ -3641,7 +3641,7 @@ void MainWindow::ExecuteExportvtkascii()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), false);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), false);
 	}
 
 	emit EndDataexport(this);
@@ -3660,7 +3660,7 @@ void MainWindow::ExecuteExportvtkbinary()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), true);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), true);
 	}
 
 	emit EndDataexport(this);
@@ -3679,7 +3679,7 @@ void MainWindow::ExecuteExportvtkcompressedascii()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), false);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), false);
 	}
 
 	emit EndDataexport(this);
@@ -3697,7 +3697,7 @@ void MainWindow::ExecuteExportvtkcompressedbinary()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), true);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), true);
 	}
 
 	emit EndDataexport(this);
@@ -3721,9 +3721,9 @@ void MainWindow::ExecuteExportxmlregionextent()
 	if (!savefilename.isEmpty())
 	{
 		if (relfilename.isEmpty())
-			m_Handler3D->PrintXmlregionextent(savefilename.ascii(), true);
+			m_Handler3D->PrintXmlregionextent(savefilename.toAscii(), true);
 		else
-			m_Handler3D->PrintXmlregionextent(savefilename.ascii(), true, relfilename.ascii());
+			m_Handler3D->PrintXmlregionextent(savefilename.toAscii(), true, relfilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3745,9 +3745,9 @@ void MainWindow::ExecuteExporttissueindex()
 	if (!savefilename.isEmpty())
 	{
 		if (relfilename.isEmpty())
-			m_Handler3D->PrintTissueindex(savefilename.ascii(), true);
+			m_Handler3D->PrintTissueindex(savefilename.toAscii(), true);
 		else
-			m_Handler3D->PrintTissueindex(savefilename.ascii(), true, relfilename.ascii());
+			m_Handler3D->PrintTissueindex(savefilename.toAscii(), true, relfilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3770,7 +3770,7 @@ void MainWindow::ExecuteLoadtissues()
 		tissues_size_t remove_tissues_range;
 		if (msg_box.clickedButton() == append_button)
 		{
-			TissueInfos::LoadTissuesReadable(loadfilename.ascii(), m_Handler3D, remove_tissues_range);
+			TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range);
 			int nr = m_TissueTreeWidget->GetCurrentType() - 1;
 			m_TissueTreeWidget->UpdateTreeWidget();
 
@@ -3782,7 +3782,7 @@ void MainWindow::ExecuteLoadtissues()
 		}
 		else if (msg_box.clickedButton() == replace_button)
 		{
-			if (TissueInfos::LoadTissuesReadable(loadfilename.ascii(), m_Handler3D, remove_tissues_range))
+			if (TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range))
 			{
 				if (remove_tissues_range > 0)
 				{
@@ -3862,7 +3862,7 @@ void MainWindow::ExecuteNew()
 	emit EndDatachange(this, iseg::ClearUndo);
 
 	m_MSaveprojfilename = "";
-	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+	setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
 	m_MNotes->clear();
 
@@ -4536,7 +4536,7 @@ void MainWindow::ExecuteRemovetissues()
 	if (!filename.isEmpty())
 	{
 		std::vector<tissues_size_t> types;
-		if (read_tissues(filename.ascii(), types))
+		if (read_tissues(filename.toAscii(), types))
 		{
 			// this actually goes through slices and removes it from segmentation
 			m_Handler3D->RemoveTissues(std::set<tissues_size_t>(types.begin(), types.end()));
@@ -4559,7 +4559,7 @@ void MainWindow::ExecuteGrouptissues()
 	if (!filename.isEmpty())
 	{
 		bool fail_on_unknown_tissue = true;
-		if (read_grouptissuescapped(filename.ascii(), olds, news, fail_on_unknown_tissue))
+		if (read_grouptissuescapped(filename.toAscii(), olds, news, fail_on_unknown_tissue))
 		{
 			DataSelection data_selection;
 			data_selection.allSlices = true;
@@ -5045,7 +5045,7 @@ void MainWindow::DoWork2tissueGrouped()
 	QString filename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "Text (*.txt)\nAll (*.*)");
 	if (!filename.isEmpty())
 	{
-		if (read_grouptissues(filename.ascii(), olds, news))
+		if (read_grouptissues(filename.toAscii(), olds, news))
 		{
 			DataSelection data_selection;
 			data_selection.allSlices = true;
@@ -6255,7 +6255,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 void MainWindow::LoadLoadProj(const QString& path1)
 {
 	unsigned short projcounter = 0;
-	FILE* fplatestproj = fopen(path1.ascii(), "r");
+	FILE* fplatestproj = fopen(path1.toAscii(), "r");
 	char c;
 	m_MLoadprojfilename.m_CurrentFilename = path1;
 	while (fplatestproj != nullptr && projcounter < 4)
@@ -6298,24 +6298,24 @@ void MainWindow::SaveLoadProj(const QString& latestprojpath) const
 {
 	if (latestprojpath == "")
 		return;
-	FILE* fplatestproj = fopen(latestprojpath.ascii(), "w");
+	FILE* fplatestproj = fopen(latestprojpath.toAscii(), "w");
 	if (fplatestproj != nullptr)
 	{
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[3] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[3].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[3].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[2] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[2].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[2].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[1] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[1].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[1].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[0] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[0].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[0].toStdString().c_str());
 		}
 
 		fclose(fplatestproj);
@@ -6526,7 +6526,7 @@ FILE* MainWindow::SaveNotes(FILE* fp, unsigned short version)
 		QString text = m_MNotes->toPlainText();
 		int dummy = (int)text.length();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		fwrite(text.ascii(), 1, dummy, fp);
+		fwrite(text.toAscii(), 1, dummy, fp);
 	}
 	return fp;
 }

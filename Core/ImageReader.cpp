@@ -50,7 +50,7 @@ public:
 };
 } // namespace
 
-bool ImageReader::GetInfo2D(const char* filename, unsigned& width, unsigned& height)
+bool ImageReader::GetInfo2D(const std::string& filename, unsigned& width, unsigned& height)
 {
 	unsigned nrslices;
 	float spacing[3];
@@ -58,7 +58,7 @@ bool ImageReader::GetInfo2D(const char* filename, unsigned& width, unsigned& hei
 	return ImageReader::GetInfo(filename, width, height, nrslices, spacing, tr);
 }
 
-bool ImageReader::GetImageStack(const std::vector<const char*>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey)
+bool ImageReader::GetImageStack(const std::vector<std::string>& filenames, float** img_stack, unsigned width, unsigned height, const std::function<float(unsigned char, unsigned char, unsigned char)>& color2grey)
 {
 	using rgbpixel_type = itk::RGBPixel<unsigned char>;
 	using input_image_type = itk::Image<rgbpixel_type, 3>;
@@ -104,12 +104,12 @@ bool ImageReader::GetImageStack(const std::vector<const char*>& filenames, float
 	return true;
 }
 
-bool ImageReader::GetSlice(const char* filename, float* slice, unsigned slicenr, unsigned width, unsigned height)
+bool ImageReader::GetSlice(const std::string& filename, float* slice, unsigned slicenr, unsigned width, unsigned height)
 {
 	return GetVolume(filename, &slice, slicenr, 1, width, height);
 }
 
-float* ImageReader::GetSliceInfo(const char* filename, unsigned slicenr, unsigned& width, unsigned& height)
+float* ImageReader::GetSliceInfo(const std::string& filename, unsigned slicenr, unsigned& width, unsigned& height)
 {
 	unsigned nrslices;
 	float spacing[3];
@@ -126,12 +126,12 @@ float* ImageReader::GetSliceInfo(const char* filename, unsigned slicenr, unsigne
 	return nullptr;
 }
 
-bool ImageReader::GetVolume(const char* filename, float** slices, unsigned nrslices, unsigned width, unsigned height)
+bool ImageReader::GetVolume(const std::string& filename, float** slices, unsigned nrslices, unsigned width, unsigned height)
 {
 	return GetVolume(filename, slices, 0, nrslices, width, height);
 }
 
-bool ImageReader::GetVolume(const char* filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height)
+bool ImageReader::GetVolume(const std::string& filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height)
 {
 	// ITK does not know how to load VTI
 	boost::filesystem::path path(filename);
@@ -180,9 +180,9 @@ bool ImageReader::GetVolume(const char* filename, float** slices, unsigned start
 	return true;
 }
 
-bool ImageReader::GetInfo(const char* filename, unsigned& width, unsigned& height, unsigned& nrslices, float spacing[3], Transform& transform)
+bool ImageReader::GetInfo(const std::string& filename, unsigned& width, unsigned& height, unsigned& nrslices, float spacing[3], Transform& transform)
 {
-	auto image_io = itk::ImageIOFactory::CreateImageIO(filename, itk::ImageIOFactory::ReadMode);
+	auto image_io = itk::ImageIOFactory::CreateImageIO(filename.c_str(), itk::ImageIOFactory::ReadMode);
 	if (image_io)
 	{
 		image_io->SetFileName(filename);

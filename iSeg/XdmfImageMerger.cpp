@@ -59,7 +59,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	{
 		XdmfImageReader* reader = new XdmfImageReader();
 		QString image_filename = QFileInfo(*iter_filename).completeBaseName() + ".xmf";
-		reader->SetFileName(QFileInfo(*iter_filename).dir().absoluteFilePath(image_filename).toAscii().data());
+		reader->SetFileName(QFileInfo(*iter_filename).dir().absoluteFilePath(image_filename).toStdString().c_str());
 		if (reader->ParseXML() == 0)
 		{
 			ISEG_ERROR_MSG("XdmfImageMerger::InternalWrite while parsing xmls");
@@ -166,7 +166,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 				size_t const project_slices =
 						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadSource(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
+				ReadSource(*iter_reader, (*iter_filename).toStdString().c_str(), project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -203,7 +203,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 				size_t const project_slices =
 						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadTarget(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
+				ReadTarget(*iter_reader, (*iter_filename).toStdString().c_str(), project_buffer, junk);
 
 				std::vector<float*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -240,7 +240,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 				size_t const project_slices =
 						(*iter_reader)->GetNumberOfSlices();
 				project_buffer.resize(slice_size * project_slices);
-				ReadTissues(*iter_reader, (*iter_filename).toAscii().data(), project_buffer, junk);
+				ReadTissues(*iter_reader, (*iter_filename).toStdString().c_str(), project_buffer, junk);
 
 				std::vector<tissues_size_t*> slices(project_slices, nullptr);
 				for (size_t i = 0; i < project_slices; ++i)
@@ -279,12 +279,7 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	dataitem.setAttribute("NumberType", "Float");
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Dimensions", 3);
-	text = doc.createTextNode(QString("%1 %2 %3")
-																.arg(offset[2])
-																.arg(offset[1])
-																.arg(offset[0])
-																.toAscii()
-																.data());
+	text = doc.createTextNode(QString("%1 %2 %3").arg(offset[2]).arg(offset[1]).arg(offset[0]));
 	dataitem.appendChild(text);
 	geometry.appendChild(dataitem);
 
@@ -294,27 +289,17 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	dataitem.setAttribute("NumberType", "Float");
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Dimensions", 3);
-	text = doc.createTextNode(QString("%1 %2 %3")
-																.arg(pixelsize[2])
-																.arg(pixelsize[1])
-																.arg(pixelsize[0])
-																.toAscii()
-																.data());
+	text = doc.createTextNode(QString("%1 %2 %3").arg(pixelsize[2]).arg(pixelsize[1]).arg(pixelsize[0]));
 	dataitem.appendChild(text);
 	geometry.appendChild(dataitem);
 
 	grid.appendChild(geometry);
 
-	QString qdims = QString("%1 %2 %3")
-											.arg(nrslicesTotal)
-											.arg(height)
-											.arg(width)
-											.toAscii()
-											.data();
+	QString qdims = QString("%1 %2 %3").arg(nrslicesTotal).arg(height).arg(width);
 
 	QDomElement topology = doc.createElement("Topology");
 	topology.setAttribute("Type", "3DCORECTMesh");
-	topology.setAttribute("Dimensions", qdims.toAscii().data());
+	topology.setAttribute("Dimensions", qdims);
 	grid.appendChild(topology);
 
 	attribute = doc.createElement("Attribute");
@@ -325,8 +310,8 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	dataitem.setAttribute("NumberType", "Float");
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Format", "HDF");
-	dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-	text = doc.createTextNode((basename + ".h5:/Source").toAscii().data());
+	dataitem.setAttribute("Dimensions", qdims);
+	text = doc.createTextNode((basename + ".h5:/Source"));
 	dataitem.appendChild(text);
 	attribute.appendChild(dataitem);
 	grid.appendChild(attribute);
@@ -339,8 +324,8 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 	dataitem.setAttribute("NumberType", "Float");
 	dataitem.setAttribute("Precision", 4);
 	dataitem.setAttribute("Format", "HDF");
-	dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-	text = doc.createTextNode((basename + ".h5:/Target").toAscii().data());
+	dataitem.setAttribute("Dimensions", qdims);
+	text = doc.createTextNode((basename + ".h5:/Target"));
 	dataitem.appendChild(text);
 	attribute.appendChild(dataitem);
 	grid.appendChild(attribute);
@@ -365,8 +350,8 @@ int XdmfImageMerger::InternalWrite(const char* filename, std::vector<QString>& m
 		return 0;
 	}
 	dataitem.setAttribute("Format", "HDF");
-	dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-	text = doc.createTextNode((basename + ".h5:/Tissue").toAscii().data());
+	dataitem.setAttribute("Dimensions", qdims);
+	text = doc.createTextNode((basename + ".h5:/Tissue"));
 	dataitem.appendChild(text);
 	attribute.appendChild(dataitem);
 	grid.appendChild(attribute);
@@ -451,15 +436,15 @@ int XdmfImageMerger::ReadTarget(XdmfImageReader* imageReader, const char* filena
 	}
 
 	// Target
-	QString map_target_name = imageReader->GetMapArrayNames()["Target"];
-	if (map_target_name.isEmpty())
+	auto map_target_name = imageReader->GetMapArrayNames()["Target"].toStdString();
+	if (map_target_name.empty())
 	{
 		ISEG_WARNING_MSG("no Target array, will initialize to 0...");
 		bufferFloat.assign(bufferFloat.size(), 0.0f);
 	}
 	else
 	{
-		if (!reader.Read(&bufferFloat[sliceoffset * this->m_Width * this->m_Height], map_target_name.toAscii().data()))
+		if (!reader.Read(&bufferFloat[sliceoffset * this->m_Width * this->m_Height], map_target_name))
 		{
 			ISEG_ERROR_MSG("reading Target dataset...");
 			return 0;
@@ -493,10 +478,10 @@ int XdmfImageMerger::ReadTissues(XdmfImageReader* imageReader, const char* filen
 	}
 
 	// Tissue
-	QString map_tissue_name = imageReader->GetMapArrayNames()["Tissue"];
+	auto map_tissue_name = imageReader->GetMapArrayNames()["Tissue"].toStdString();
 	std::string type;
 	std::vector<HDF5Reader::size_type> dims;
-	if (!reader.GetDatasetInfo(type, dims, map_tissue_name.toAscii().data()))
+	if (!reader.GetDatasetInfo(type, dims, map_tissue_name))
 	{
 		ISEG_ERROR_MSG("reading Tissue data type...");
 		return 0;
@@ -517,12 +502,12 @@ int XdmfImageMerger::ReadTissues(XdmfImageReader* imageReader, const char* filen
 			std::cerr << "bufferUChar length error: " << le.what();
 			return 0;
 		}
-		if (map_tissue_name.isEmpty())
+		if (map_tissue_name.empty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.Read(&buffer_u_char[0], map_tissue_name.toAscii().data()))
+		if (!reader.Read(&buffer_u_char[0], map_tissue_name))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;
@@ -546,12 +531,12 @@ int XdmfImageMerger::ReadTissues(XdmfImageReader* imageReader, const char* filen
 	else if (type == "unsigned short")
 	{
 		static_assert(std::is_same<unsigned short, tissues_size_t>::value, "Special case we read directly into the buffer.");
-		if (map_tissue_name.isEmpty())
+		if (map_tissue_name.empty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.Read(&bufferTissuesSizeT[(sliceoffset * this->m_Width) * this->m_Height], map_tissue_name.toAscii().data()))
+		if (!reader.Read(&bufferTissuesSizeT[(sliceoffset * this->m_Width) * this->m_Height], map_tissue_name))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;
@@ -569,12 +554,12 @@ int XdmfImageMerger::ReadTissues(XdmfImageReader* imageReader, const char* filen
 			ISEG_ERROR("bufferUInt length error: " << le.what());
 			return 0;
 		}
-		if (map_tissue_name.isEmpty())
+		if (map_tissue_name.empty())
 		{
 			ISEG_ERROR_MSG("no Tissue array...");
 			return 0;
 		}
-		if (!reader.Read(&buffer_u_int[0], map_tissue_name.toAscii().data()))
+		if (!reader.Read(&buffer_u_int[0], map_tissue_name))
 		{
 			ISEG_ERROR_MSG("reading Tissue dataset...");
 			return 0;

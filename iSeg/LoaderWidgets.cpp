@@ -222,10 +222,10 @@ LoaderDicom::LoaderDicom(SlicesHandler* hand3D, QStringList* lname, bool breload
 	m_Seriesnrselection = new QComboBox;
 	if (!m_Lnames->empty())
 	{
-		std::vector<const char*> vnames;
+		std::vector<std::string> vnames;
 		for (auto it = m_Lnames->begin(); it != m_Lnames->end(); it++)
 		{
-			vnames.push_back((*it).ascii());
+			vnames.push_back((*it).toStdString());
 		}
 		m_Dicomseriesnr.clear();
 		m_Handler3D->GetDICOMseriesnr(&vnames, &m_Dicomseriesnr, &m_Dicomseriesnrlist);
@@ -289,7 +289,7 @@ void LoaderDicom::LoadPushed()
 {
 	if (!m_Lnames->empty())
 	{
-		std::vector<const char*> vnames;
+		std::vector<std::string> vnames;
 		if (m_Dicomseriesnr.size() > 1)
 		{
 			unsigned pos = 0;
@@ -297,7 +297,7 @@ void LoaderDicom::LoadPushed()
 			{
 				if (m_Dicomseriesnrlist[pos++] == m_Dicomseriesnr[m_Seriesnrselection->currentIndex()])
 				{
-					vnames.push_back(name.ascii());
+					vnames.push_back(name.toStdString());
 				}
 			}
 		}
@@ -305,7 +305,7 @@ void LoaderDicom::LoadPushed()
 		{
 			for (const auto& name : *m_Lnames)
 			{
-				vnames.push_back(name.ascii());
+				vnames.push_back(name.toStdString());
 			}
 		}
 
@@ -701,7 +701,7 @@ void NewImg::OnClose()
 	close();
 }
 
-LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+LoaderColorImages::LoaderColorImages(SlicesHandler* hand3D, eImageType typ, const std::vector<std::string>& filenames, QWidget* parent, Qt::WindowFlags wFlags)
 		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_Type(typ), m_MFilenames(filenames)
 {
 	setModal(true);
@@ -870,8 +870,8 @@ void LoaderColorImages::LoadQuantize()
 
 void LoaderColorImages::LoadMixer()
 {
-	if ((m_Type == eImageType::kBMP && Bmphandler::CheckBMPDepth(m_MFilenames[0]) > 8) ||
-			(m_Type == eImageType::kPNG && Bmphandler::CheckPNGDepth(m_MFilenames[0]) > 8))
+	if ((m_Type == eImageType::kBMP && Bmphandler::CheckBMPDepth(m_MFilenames[0].c_str()) > 8) ||
+			(m_Type == eImageType::kPNG && Bmphandler::CheckPNGDepth(m_MFilenames[0].c_str()) > 8))
 	{
 		ChannelMixer channel_mixer(m_MFilenames, nullptr);
 		channel_mixer.move(QCursor::pos());
@@ -979,14 +979,14 @@ void ClickableLabel::paintEvent(QPaintEvent* e)
 	painter.drawPath(square);
 }
 
-ChannelMixer::ChannelMixer(std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+ChannelMixer::ChannelMixer(const std::vector<std::string>& filenames, QWidget* parent, Qt::WindowFlags wFlags)
 		: QDialog(parent, wFlags), m_MFilenames(filenames)
 {
 	setModal(true);
 
 	m_PreviewCenter.setX(0);
 	m_PreviewCenter.setY(0);
-	QString file_name = QString::fromUtf8(m_MFilenames[0]);
+	QString file_name = QString::fromStdString(m_MFilenames[0]);
 	if (!file_name.isEmpty())
 	{
 		m_SourceImage = QImage(file_name);
@@ -1209,7 +1209,7 @@ void ChannelMixer::ChangePreview()
 
 void ChannelMixer::RefreshSourceImage()
 {
-	QString file_name = QString::fromUtf8(m_MFilenames[m_SelectedSlice]);
+	QString file_name = QString::fromStdString(m_MFilenames[m_SelectedSlice]);
 	QImage small_image;
 	if (!file_name.isEmpty())
 	{
@@ -1274,7 +1274,7 @@ void ChannelMixer::RefreshSourceImage()
 
 void ChannelMixer::RefreshImage()
 {
-	QString file_name = QString::fromUtf8(m_MFilenames[m_SelectedSlice]);
+	QString file_name = QString::fromStdString(m_MFilenames[m_SelectedSlice]);
 	if (!file_name.isEmpty())
 	{
 		QImage image(file_name);
@@ -1353,7 +1353,7 @@ void ChannelMixer::LoadPushed()
 	accept();
 }
 
-ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent, Qt::WindowFlags wFlags)
+ReloaderBmp2::ReloaderBmp2(SlicesHandler* hand3D, const std::vector<std::string>& filenames, QWidget* parent, Qt::WindowFlags wFlags)
 		: QDialog(parent, wFlags), m_Handler3D(hand3D), m_MFilenames(filenames)
 {
 	setModal(true);

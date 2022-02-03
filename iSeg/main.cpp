@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 
 	main_window->LoadLoadProj(latestprojpath);
 	main_window->LoadAtlas(atlasdir);
-	main_window->LoadSettings(settingspath.toAscii().data());
+	main_window->LoadSettings(settingspath.toStdString());
 	if (vm.count("s4l"))
 	{
 		main_window->LoadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));

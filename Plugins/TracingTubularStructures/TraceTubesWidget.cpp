@@ -249,7 +249,7 @@ std::string TraceTubesWidget::GetName()
 
 QIcon TraceTubesWidget::GetIcon(QDir picdir)
 {
-	return QIcon(picdir.absFilePath(QString("Bias.png")).ascii());
+	return QIcon(picdir.absoluteFilePath("Bias.png"));
 }
 
 void TraceTubesWidget::OnMouseReleased(Point x)

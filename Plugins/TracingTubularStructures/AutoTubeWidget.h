@@ -31,7 +31,7 @@ public:
 	void NewLoaded() override;
 	void Cleanup() override;
 	std::string GetName() override { return std::string("Auto-Tubes"); };
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("LevelSet.png"))); };
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("LevelSet.png"))); };
 
 private:
 	void OnSlicenrChanged() override;

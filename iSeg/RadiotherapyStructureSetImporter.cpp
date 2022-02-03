@@ -36,7 +36,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	}
 
 	m_Tissues.clear();
-	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(), m_Tissues);
+	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.toAscii(), m_Tissues);
 
 	m_Vecignore.resize(m_Tissues.size());
 	m_Vecpriorities.resize(m_Tissues.size());

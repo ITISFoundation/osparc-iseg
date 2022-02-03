@@ -266,7 +266,7 @@ tissues_size_t* SlicesHandler::ReturnTissues(tissuelayers_size_t layeridx, unsig
 
 float* SlicesHandler::ReturnOverlay() { return m_Overlay; }
 
-int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
+int SlicesHandler::LoadDIBitmap(const std::vector<std::string>& filenames)
 {
 	UpdateColorLookupTable(nullptr);
 	m_Activeslice = 0;
@@ -279,7 +279,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	int j = 0;
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadDIBitmap(filenames[i]);
+		j += m_ImageSlices[i].LoadDIBitmap(filenames[i].c_str());
 	}
 
 	m_Width = m_ImageSlices[0].ReturnWidth();
@@ -314,7 +314,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames)
 	}
 }
 
-int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy)
+int SlicesHandler::LoadDIBitmap(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -328,7 +328,7 @@ int SlicesHandler::LoadDIBitmap(std::vector<const char*> filenames, Point p, uns
 
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadDIBitmap(filenames[i], p, dx, dy);
+		j += m_ImageSlices[i].LoadDIBitmap(filenames[i].c_str(), p, dx, dy);
 	}
 
 	if (j == m_Nrslices)
@@ -364,7 +364,7 @@ void SlicesHandler::SetRgbFactors(int redFactor, int greenFactor, int blueFactor
 }
 
 // TODO BL this function has a terrible impl, e.g. using member variables rgb, width/height, etc.
-int SlicesHandler::LoadPng(std::vector<const char*> filenames)
+int SlicesHandler::LoadPng(const std::vector<std::string>& filenames)
 {
 	UpdateColorLookupTable(nullptr); // BL: here we could quantize colors instead and build color
 
@@ -378,7 +378,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	int j = 0;
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadPNGBitmap(filenames[i]);
+		j += m_ImageSlices[i].LoadPNGBitmap(filenames[i].c_str());
 	}
 
 	m_Width = m_ImageSlices[0].ReturnWidth();
@@ -413,7 +413,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames)
 	}
 }
 
-int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy)
+int SlicesHandler::LoadPng(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -427,7 +427,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p, unsigned
 
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadDIBitmap(filenames[i], p, dx, dy);
+		j += m_ImageSlices[i].LoadDIBitmap(filenames[i].c_str(), p, dx, dy);
 	}
 
 	m_Width = dx;
@@ -455,7 +455,7 @@ int SlicesHandler::LoadPng(std::vector<const char*> filenames, Point p, unsigned
 	}
 }
 
-int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
+int SlicesHandler::LoadDIJpg(const std::vector<std::string>& filenames)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -470,7 +470,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
 
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadDIBitmap(filenames[i]);
+		j += m_ImageSlices[i].LoadDIBitmap(filenames[i].c_str());
 	}
 
 	m_Width = m_ImageSlices[0].ReturnWidth();
@@ -505,7 +505,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames)
 	}
 }
 
-int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy)
+int SlicesHandler::LoadDIJpg(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -519,7 +519,7 @@ int SlicesHandler::LoadDIJpg(std::vector<const char*> filenames, Point p, unsign
 
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		j += m_ImageSlices[i].LoadDIBitmap(filenames[i], p, dx, dy);
+		j += m_ImageSlices[i].LoadDIBitmap(filenames[i].c_str(), p, dx, dy);
 	}
 
 	m_Width = dx;
@@ -1294,7 +1294,7 @@ int SlicesHandler::ReadRawFloat(const char* filename, short unsigned w, short un
 	}
 }
 
-int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
+int SlicesHandler::ReloadDIBitmap(const std::vector<std::string>& filenames)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -1304,7 +1304,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
 	{
 		for (unsigned short i = 0; i < m_Nrslices; i++)
 		{
-			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i]);
+			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i].c_str());
 		}
 
 		for (unsigned short i = 0; i < m_Nrslices; i++)
@@ -1326,7 +1326,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
 	{
 		for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 		{
-			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i - m_Startslice]);
+			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i - m_Startslice].c_str());
 		}
 
 		for (unsigned short i = m_Startslice; i < m_Endslice; i++)
@@ -1348,7 +1348,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames)
 		return 0;
 }
 
-int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
+int SlicesHandler::ReloadDIBitmap(const std::vector<std::string>& filenames, Point p)
 {
 	UpdateColorLookupTable(nullptr);
 
@@ -1358,7 +1358,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
 	{
 		for (unsigned short i = 0; i < m_Nrslices; i++)
 		{
-			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i], p);
+			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i].c_str(), p);
 		}
 
 		if (j == m_Nrslices)
@@ -1373,7 +1373,7 @@ int SlicesHandler::ReloadDIBitmap(std::vector<const char*> filenames, Point p)
 	{
 		for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 		{
-			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i - m_Startslice], p);
+			j += m_ImageSlices[i].ReloadDIBitmap(filenames[i - m_Startslice].c_str(), p);
 		}
 
 		if (j == (m_Endslice - m_Startslice))
@@ -1780,7 +1780,7 @@ FILE* SlicesHandler::SaveProject(const char* filename, const char* imageFileExte
 	image_file_name =
 			image_file_name.remove(after_dot, image_file_name.length() - after_dot) +
 			imageFileExtension;
-	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toStdString().c_str(), this->m_Hdf5Compression, this->m_SaveTarget, false);
 
 	m_Startslice = startslice1;
 	m_Endslice = endslice1;
@@ -1795,7 +1795,7 @@ bool SlicesHandler::SaveCommunicationFile(const char* filename)
 	m_Startslice = 0;
 	m_Endslice = m_Nrslices;
 
-	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(filename).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, true);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(filename).toStdString().c_str(), this->m_Hdf5Compression, this->m_SaveTarget, true);
 
 	m_Startslice = startslice1;
 	m_Endslice = endslice1;
@@ -1830,7 +1830,7 @@ FILE* SlicesHandler::SaveActiveSlices(const char* filename, const char* imageFil
 	image_file_name =
 			image_file_name.remove(after_dot, image_file_name.length() - after_dot) +
 			imageFileExtension;
-	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data(), this->m_Hdf5Compression, this->m_SaveTarget, false);
+	SaveAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toStdString().c_str(), this->m_Hdf5Compression, this->m_SaveTarget, false);
 
 	return fp;
 }
@@ -1849,7 +1849,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString
 		FILE* fp_merge;
 		// Add number of slices to total
 		unsigned short nrslices_merge = 0;
-		if ((fp_merge = fopen(mergeFilenames[i].toAscii().data(), "rb")) == nullptr)
+		if ((fp_merge = fopen(mergeFilenames[i].toStdString().c_str(), "rb")) == nullptr)
 			return nullptr;
 		fread(&nrslices_merge, sizeof(unsigned short), 1, fp_merge);
 		nrslices_total += nrslices_merge;
@@ -1874,7 +1874,7 @@ FILE* SlicesHandler::MergeProjects(const char* savefilename, std::vector<QString
 	// Save merged project slices
 	for (unsigned short i = 0; i < mergeFilenames.size(); i++)
 	{
-		if ((fp_merge = fopen(mergeFilenames[i].toAscii().data(), "rb")) == nullptr)
+		if ((fp_merge = fopen(mergeFilenames[i].toStdString().c_str(), "rb")) == nullptr)
 		{
 			return nullptr;
 		}
@@ -2042,7 +2042,7 @@ FILE* SlicesHandler::LoadProject(const char* filename, int& tissuesVersion)
 
 		if (image_file_name.endsWith(".xmf", Qt::CaseInsensitive))
 		{
-			LoadAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toAscii().data());
+			LoadAllXdmf(QFileInfo(filename).dir().absoluteFilePath(image_file_name).toStdString().c_str());
 		}
 		else
 		{
@@ -2473,33 +2473,33 @@ bool SlicesHandler::SwapXY()
 	unsigned char mode2 = GetActivebmphandler()->ReturnMode(false);
 
 	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-	if (SaveRawXySwapped(str1.ascii(), false) != 0)
+	if (SaveRawXySwapped(str1.toAscii(), false) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-	if (SaveRawXySwapped(str1.ascii(), true) != 0)
+	if (SaveRawXySwapped(str1.toAscii(), true) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-	if (SaveTissuesRawXySwapped(str1.ascii()) != 0)
+	if (SaveTissuesRawXySwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
+		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 		SetModeall(mode1, true);
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-		if (ReloadRawFloat(str1.ascii(), 0) != 1)
+		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 		SetModeall(mode2, false);
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
 
@@ -2536,31 +2536,31 @@ bool SlicesHandler::SwapYZ()
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-	if (SaveRawYzSwapped(str1.ascii(), false) != 0)
+	if (SaveRawYzSwapped(str1.toAscii(), false) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-	if (SaveRawYzSwapped(str1.ascii(), true) != 0)
+	if (SaveRawYzSwapped(str1.toAscii(), true) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-	if (SaveTissuesRawYzSwapped(str1.ascii()) != 0)
+	if (SaveTissuesRawYzSwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
+		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-		if (ReloadRawFloat(str1.ascii(), 0) != 1)
+		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
 
@@ -2603,31 +2603,31 @@ bool SlicesHandler::SwapXZ()
 	QString str1;
 	bool ok = true;
 	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-	if (SaveRawXzSwapped(str1.ascii(), false) != 0)
+	if (SaveRawXzSwapped(str1.toAscii(), false) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-	if (SaveRawXzSwapped(str1.ascii(), true) != 0)
+	if (SaveRawXzSwapped(str1.toAscii(), true) != 0)
 		ok = false;
 	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-	if (SaveTissuesRawXzSwapped(str1.ascii()) != 0)
+	if (SaveTissuesRawXzSwapped(str1.toAscii()) != 0)
 		ok = false;
 
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-		if (ReadRawFloat(str1.ascii(), w, h, 0, nrslices) != 1)
+		if (ReadRawFloat(str1.toAscii(), w, h, 0, nrslices) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-		if (ReloadRawFloat(str1.ascii(), 0) != 1)
+		if (ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
 		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-		if (ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		if (ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 			ok = false;
 	}
 
@@ -7404,19 +7404,20 @@ void SlicesHandler::SetUndoarraynr(unsigned nr)
 	this->m_UndoQueue.SetNrundoarraysmax(nr);
 }
 
-int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
+int SlicesHandler::LoadDICOM(const std::vector<std::string>& filenames_unsorted)
 {
-	if (!lfilename.empty())
+	if (!filenames_unsorted.empty())
 	{
-		m_Endslice = m_Nrslices = (unsigned short)lfilename.size();
+		// make sure files are sorted according to z-position
+		std::vector<std::string> files(filenames_unsorted);
+		if (files.size() > 1)
+		{
+			DICOMsort(&files);
+		}
+
+		m_Endslice = m_Nrslices = (unsigned short)files.size();
 		m_Os.SetSizenr(m_Nrslices);
 		m_ImageSlices.resize(m_Nrslices);
-
-		// make sure files are sorted according to z-position
-		if (lfilename.size() > 1)
-		{
-			DICOMsort(&lfilename);
-		}
 
 		m_Activeslice = 0;
 		m_ActiveTissuelayer = 0;
@@ -7426,7 +7427,6 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 		float d, e, thick1;
 		float disp1[3];
 		float rot[3][3]; // rotation matrix
-		std::vector<std::string> files(lfilename.begin(), lfilename.end());
 		if (gdcmvtk_rtstruct::GetSizeUsingGDCM(files, a, b, c, d, e, thick1, disp1, rot[0], rot[1], rot[2]))
 		{
 			ISEG_INFO("Dicom series slice thickness: " << thick1)
@@ -7439,7 +7439,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 			SetTransform(tr);
 		}
 
-		if (lfilename.size() > 1)
+		if (files.size() > 1)
 		{
 			double new_thick = gdcmvtk_rtstruct::GetZSPacing(files);
 			if (new_thick)
@@ -7453,10 +7453,10 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 			}
 		}
 
-		for (int i = 0; i < lfilename.size(); i++)
+		for (int i = 0; i < files.size(); i++)
 		{
 			float dc1[6]; // not used
-			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[i], a, b, c, d, e, thick1, disp1, dc1))
+			if (gdcmvtk_rtstruct::GetSizeUsingGDCM(files[i].c_str(), a, b, c, d, e, thick1, disp1, dc1))
 			{
 				if (c >= 1)
 				{
@@ -7466,7 +7466,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 					if (bits.empty())
 						return 0;
 
-					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[i], bits.data(), a, b, c);
+					bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(files[i].c_str(), bits.data(), a, b, c);
 					if (!canload)
 					{
 						return 0;
@@ -7477,7 +7477,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 			}
 		}
 
-		m_Endslice = m_Nrslices = (unsigned short)(lfilename.size());
+		m_Endslice = m_Nrslices = (unsigned short)(files.size());
 		m_Os.SetSizenr(m_Nrslices);
 
 		// Ranges
@@ -7500,26 +7500,28 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename)
 	return false;
 }
 
-int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p, unsigned short dx, unsigned short dy)
+int SlicesHandler::LoadDICOM(const std::vector<std::string>& filenames_unsorted, Point p, unsigned short dx, unsigned short dy)
 {
+	std::vector<std::string> files(filenames_unsorted);
+
 	m_Activeslice = 0;
 	m_ActiveTissuelayer = 0;
 	m_Startslice = 0;
 
-	if (lfilename.size() == 1)
+	if (files.size() == 1)
 	{
 		unsigned short a, b, c;
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(files[0].c_str(), a, b, c, d, e, thick1, disp1, dc1);
 		if (c > 1)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
 			float* bits = (float*)malloc(sizeof(float) * totsize);
 			if (bits == nullptr)
 				return 0;
-			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[0], bits, a, b, c);
+			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(files[0].c_str(), bits, a, b, c);
 			if (!canload)
 			{
 				free(bits);
@@ -7567,16 +7569,16 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p, unsign
 		}
 	}
 
-	m_Endslice = m_Nrslices = (unsigned short)(lfilename.size());
+	m_Endslice = m_Nrslices = (unsigned short)(files.size());
 	m_Os.SetSizenr(m_Nrslices);
 
 	m_ImageSlices.resize(m_Nrslices);
 	int j = 0;
 
-	float thick1 = DICOMsort(&lfilename);
+	float thick1 = DICOMsort(&files);
 	for (unsigned short i = 0; i < m_Nrslices; i++)
 	{
-		if (m_ImageSlices[i].LoadDICOM(lfilename[i], p, dx, dy))
+		if (m_ImageSlices[i].LoadDICOM(files[i].c_str(), p, dx, dy))
 			j++;
 	}
 
@@ -7591,7 +7593,7 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p, unsign
 		m_Loaded = true;
 
 		DicomReader dcmr;
-		if (dcmr.Opendicom(lfilename[0]))
+		if (dcmr.Opendicom(files[0].c_str()))
 		{
 			Pair p1;
 			float disp1[3];
@@ -7628,16 +7630,18 @@ int SlicesHandler::LoadDICOM(std::vector<const char*> lfilename, Point p, unsign
 	}
 }
 
-int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
+int SlicesHandler::ReloadDICOM(const std::vector<std::string>& filenames_unsorted)
 {
-	if ((m_Endslice - m_Startslice) == (unsigned short)lfilename.size())
+	std::vector<std::string> files(filenames_unsorted);
+
+	if ((m_Endslice - m_Startslice) == (unsigned short)files.size())
 	{
 		int j = 0;
 
-		DICOMsort(&lfilename);
+		DICOMsort(&files);
 		for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 		{
-			if (m_ImageSlices[i].ReloadDICOM(lfilename[i - m_Startslice]))
+			if (m_ImageSlices[i].ReloadDICOM(files[i - m_Startslice].c_str()))
 				j++;
 		}
 
@@ -7646,14 +7650,14 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		else
 			return 0;
 	}
-	else if (m_Nrslices <= (unsigned short)lfilename.size())
+	else if (m_Nrslices <= (unsigned short)files.size())
 	{
 		int j = 0;
 
-		DICOMsort(&lfilename);
+		DICOMsort(&files);
 		for (unsigned short i = 0; i < m_Nrslices; i++)
 		{
-			if (m_ImageSlices[i].ReloadDICOM(lfilename[i]))
+			if (m_ImageSlices[i].ReloadDICOM(files[i].c_str()))
 				j++;
 		}
 
@@ -7662,20 +7666,20 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 		else
 			return 0;
 	}
-	else if (lfilename.size() == 1)
+	else if (files.size() == 1)
 	{
 		unsigned short a, b, c;
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(files[0].c_str(), a, b, c, d, e, thick1, disp1, dc1);
 		if (m_Nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
 			float* bits = (float*)malloc(sizeof(float) * totsize);
 			if (bits == nullptr)
 				return 0;
-			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[0], bits, a, b, c);
+			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(files[0].c_str(), bits, a, b, c);
 			if (!canload)
 			{
 				free(bits);
@@ -7685,8 +7689,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 			int j = 0;
 			for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 			{
-				if (m_ImageSlices[i]
-								.LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b))
+				if (m_ImageSlices[i].LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b))
 					j++;
 			}
 
@@ -7699,16 +7702,18 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename)
 	return 0;
 }
 
-int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
+int SlicesHandler::ReloadDICOM(const std::vector<std::string>& filenames_unsorted, Point p)
 {
-	if ((m_Endslice - m_Startslice) == (unsigned short)lfilename.size())
+	std::vector<std::string> files(filenames_unsorted);
+
+	if ((m_Endslice - m_Startslice) == (unsigned short)files.size())
 	{
 		int j = 0;
 
-		DICOMsort(&lfilename);
+		DICOMsort(&files);
 		for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 		{
-			if (m_ImageSlices[i].ReloadDICOM(lfilename[i - m_Startslice], p))
+			if (m_ImageSlices[i].ReloadDICOM(files[i - m_Startslice].c_str(), p))
 				j++;
 		}
 
@@ -7717,14 +7722,14 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		else
 			return 0;
 	}
-	else if (m_Nrslices <= (unsigned short)lfilename.size())
+	else if (m_Nrslices <= (unsigned short)files.size())
 	{
 		int j = 0;
 
-		DICOMsort(&lfilename);
+		DICOMsort(&files);
 		for (unsigned short i = 0; i < m_Nrslices; i++)
 		{
-			if (m_ImageSlices[i].ReloadDICOM(lfilename[i], p))
+			if (m_ImageSlices[i].ReloadDICOM(files[i].c_str(), p))
 				j++;
 		}
 
@@ -7733,20 +7738,20 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 		else
 			return 0;
 	}
-	else if (lfilename.size() == 1)
+	else if (files.size() == 1)
 	{
 		unsigned short a, b, c;
 		float d, e, thick1;
 		float disp1[3];
 		float dc1[6]; // direction cosines
-		gdcmvtk_rtstruct::GetSizeUsingGDCM(lfilename[0], a, b, c, d, e, thick1, disp1, dc1);
+		gdcmvtk_rtstruct::GetSizeUsingGDCM(files[0].c_str(), a, b, c, d, e, thick1, disp1, dc1);
 		if (m_Nrslices == c)
 		{
 			unsigned long totsize = (unsigned long)(a)*b * c;
 			float* bits = (float*)malloc(sizeof(float) * totsize);
 			if (bits == nullptr)
 				return 0;
-			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(lfilename[0], bits, a, b, c);
+			bool canload = gdcmvtk_rtstruct::GetDicomUsingGDCM(files[0].c_str(), bits, a, b, c);
 			if (!canload)
 			{
 				free(bits);
@@ -7756,8 +7761,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 			int j = 0;
 			for (unsigned short i = m_Startslice; i < m_Endslice; i++)
 			{
-				if (m_ImageSlices[i]
-								.LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p, m_Width, m_Height))
+				if (m_ImageSlices[i].LoadArray(&(bits[(unsigned long)(a)*b * i]), a, b, p, m_Width, m_Height))
 					j++;
 			}
 
@@ -7773,7 +7777,7 @@ int SlicesHandler::ReloadDICOM(std::vector<const char*> lfilename, Point p)
 	return 0;
 }
 
-float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
+float SlicesHandler::DICOMsort(std::vector<std::string>* lfilename)
 {
 	float retval = -1.0f;
 	DicomReader dcmread;
@@ -7781,7 +7785,7 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 
 	for (const auto& fname : *lfilename)
 	{
-		dcmread.Opendicom(fname);
+		dcmread.Opendicom(fname.c_str());
 		vpos.push_back(dcmread.Slicepos());
 		dcmread.Closedicom();
 	}
@@ -7808,14 +7812,14 @@ float SlicesHandler::DICOMsort(std::vector<const char*>* lfilename)
 	return retval;
 }
 
-void SlicesHandler::GetDICOMseriesnr(std::vector<const char*>* vnames, std::vector<unsigned>* dicomseriesnr, std::vector<unsigned>* dicomseriesnrlist)
+void SlicesHandler::GetDICOMseriesnr(std::vector<std::string>* vnames, std::vector<unsigned>* dicomseriesnr, std::vector<unsigned>* dicomseriesnrlist)
 {
 	DicomReader dcmread;
 
 	dicomseriesnr->clear();
 	for (const auto& fname : *vnames)
 	{
-		dcmread.Opendicom(fname);
+		dcmread.Opendicom(fname.c_str());
 		unsigned u = dcmread.Seriesnr();
 		dcmread.Closedicom();
 
@@ -8090,7 +8094,7 @@ bool SlicesHandler::PrintAmascii(const char* filename)
 			name_cpy = name_cpy.replace("�", "Oe");
 			name_cpy = name_cpy.replace("�", "ue");
 			name_cpy = name_cpy.replace("�", "Ue");
-			streamname << "        " << name_cpy.ascii() << " {" << endl;
+			streamname << "        " << name_cpy.toStdString() << " {" << endl;
 			streamname << "            Color " << tissue_info->m_Color[0] << " "
 								 << tissue_info->m_Color[1] << " " << tissue_info->m_Color[2]
 								 << "," << endl;

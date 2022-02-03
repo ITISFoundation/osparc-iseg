@@ -33,7 +33,7 @@ QString _getFileName(QWidget* parent, const QString& caption, const QString& dir
 	QFileDialog dialog(parent);
 	dialog.setAcceptMode(mode);
 	dialog.setFileMode(mode == QFileDialog::AcceptOpen ? QFileDialog::ExistingFile : QFileDialog::AnyFile);
-	dialog.setCaption(caption);
+	dialog.setWindowTitle(caption);
 	dialog.setFilter(filter);
 	dialog.setDirectory(last_dir);
 	dialog.setSidebarUrls(urls);

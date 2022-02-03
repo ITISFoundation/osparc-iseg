@@ -211,11 +211,11 @@ void SaveOutlinesDialog::SavePushed()
 				{
 					m_Handler3D->SetextrusionContours(m_SbTopextrusion->Value() - 1, m_SbBottomextrusion->Value() - 1);
 				}
-				m_Handler3D->SaveContours(loadfilename.ascii());
+				m_Handler3D->SaveContours(loadfilename.toAscii());
 
 #define ROTTERDAM
 #ifdef ROTTERDAM
-				FILE* fp = fopen(loadfilename.ascii(), "a");
+				FILE* fp = fopen(loadfilename.toAscii(), "a");
 				float disp[3];
 				m_Handler3D->GetDisplacement(disp);
 				fprintf(fp, "V1\nX%i %i %i %i O%f %f %f\n", -(int)m_Handler3D->Width(), (int)m_Handler3D->Width(), -(int)m_Handler3D->Height(), (int)m_Handler3D->Height(), disp[0], disp[1], disp[2]); // TODO: rotation
@@ -238,7 +238,7 @@ void SaveOutlinesDialog::SavePushed()
 			}
 			else
 			{
-				m_Handler3D->ExtractinterpolatesaveContours2Xmirrored(m_SbMinsize->Value(), vtissues, m_SbBetween->Value(), m_SimplifyLines->Value()==kDougpeuck, m_SlF->Value() * 0.05f, loadfilename.ascii());
+				m_Handler3D->ExtractinterpolatesaveContours2Xmirrored(m_SbMinsize->Value(), vtissues, m_SbBetween->Value(), m_SimplifyLines->Value()==kDougpeuck, m_SlF->Value() * 0.05f, loadfilename.toAscii());
 			}
 		}
 		close();

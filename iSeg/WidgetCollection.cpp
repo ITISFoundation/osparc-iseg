@@ -984,7 +984,7 @@ void TissueHierarchyWidget::LoadHierarchyPressed()
 bool TissueHierarchyWidget::SaveHierarchyAsPressed()
 {
 	// Get file name
-	QString file_name = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("XML files (*.xml)"));
+	QString file_name = QFileDialog::getSaveFileName(this, tr("Save As"), "", tr("XML files (*.xml)"));
 	if (file_name.isNull())
 	{
 		return false;
@@ -1338,7 +1338,7 @@ void BitsStack::LoaditemPressed()
 		if (ok)
 		{
 			unsigned dummy;
-			dummy = m_Handler3D->Loadstack(selected_files[0].ascii());
+			dummy = m_Handler3D->Loadstack(selected_files[0].toAscii());
 			if (dummy != 123456)
 			{
 				m_BitsNr[new_text] = dummy;
@@ -1385,13 +1385,13 @@ void BitsStack::SaveitemPressed()
 					savefilename +
 					QString("%1").arg(suffix++, field_width, 10, QChar('0')) +
 					QString(".stk");
-			m_Handler3D->Savestack(m_BitsNr[(*iter)->text()], savefilename_ext.ascii());
+			m_Handler3D->Savestack(m_BitsNr[(*iter)->text()], savefilename_ext.toAscii());
 		}
 	}
 	else
 	{
 		QString savefilename_ext = savefilename + QString(".stk");
-		m_Handler3D->Savestack(m_BitsNr[selected_items[0]->text()], savefilename_ext.ascii());
+		m_Handler3D->Savestack(m_BitsNr[selected_items[0]->text()], savefilename_ext.toAscii());
 	}
 }
 
@@ -1445,7 +1445,7 @@ FILE* BitsStack::SaveProj(FILE* fp)
 		QString item_name = m_BitsNames->item(j)->text();
 		int size1 = item_name.length();
 		fwrite(&size1, 1, sizeof(int), fp);
-		fwrite(item_name.ascii(), 1, sizeof(char) * size1, fp);
+		fwrite(item_name.toAscii(), 1, sizeof(char) * size1, fp);
 		unsigned int stack_idx = m_BitsNr[item_name];
 		fwrite(&stack_idx, 1, sizeof(unsigned), fp);
 	}

@@ -85,7 +85,7 @@ public:
 		kTIF
 	};
 
-	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	LoaderColorImages(SlicesHandler* hand3D, eImageType typ, const std::vector<std::string>& filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~LoaderColorImages() override;
 
 	eImageType m_Type = kPNG;
@@ -94,7 +94,7 @@ private:
 	void LoadMixer();
 	void LoadQuantize();
 
-	std::vector<const char*> m_MFilenames;
+	std::vector<std::string> m_MFilenames;
 	SlicesHandler* m_Handler3D;
 
 	QCheckBox* m_MapToLut;
@@ -141,7 +141,7 @@ class ChannelMixer : public QDialog
 {
 	Q_OBJECT
 public:
-	ChannelMixer(std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ChannelMixer(const std::vector<std::string>& filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ChannelMixer() override;
 
 	int GetRedFactor() const;
@@ -149,7 +149,7 @@ public:
 	int GetBlueFactor() const;
 
 private:
-	std::vector<const char*> m_MFilenames;
+	std::vector<std::string> m_MFilenames;
 	SlicesHandler* m_Handler3D;
 
 	ClickableLabel* m_ImageSourceLabel;
@@ -286,11 +286,11 @@ class ReloaderBmp2 : public QDialog
 {
 	Q_OBJECT
 public:
-	ReloaderBmp2(SlicesHandler* hand3D, std::vector<const char*> filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	ReloaderBmp2(SlicesHandler* hand3D, const std::vector<std::string>& filenames, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ReloaderBmp2() override;
 
 private:
-	std::vector<const char*> m_MFilenames;
+	std::vector<std::string> m_MFilenames;
 	SlicesHandler* m_Handler3D;
 	
 	QPushButton* m_LoadFile;

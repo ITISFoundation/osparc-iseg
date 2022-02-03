@@ -40,7 +40,7 @@ AtlasWidget::AtlasWidget(const char* filename, QDir picpath, QWidget* parent, Qt
 	m_IsOk = false;
 	QString title("Atlas - ");
 	title = title + QFileInfo(filename).completeBaseName();
-	setCaption(title);
+	setWindowTitle(title);
 	m_Tissue = nullptr;
 	m_Image = nullptr;
 	if (!Loadfile(filename))

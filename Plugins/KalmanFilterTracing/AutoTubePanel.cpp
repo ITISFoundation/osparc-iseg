@@ -303,7 +303,7 @@ AutoTubePanel::AutoTubePanel(iseg::SlicesHandlerInterface* hand3D)
 	auto scroll_area = new QScrollArea(this);
 	scroll_area->setWidget(big_view);
 
-	auto top_layout = new QGridLayout(1, 1);
+	auto top_layout = new QGridLayout;
 	top_layout->addWidget(scroll_area, 0, 0);
 	setLayout(top_layout);
 
@@ -1170,14 +1170,14 @@ std::vector<KalmanFilter> AutoTubePanel::LoadKFilters(FILE* fi)
 void AutoTubePanel::Save()
 {
 	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Projects (*.prj)\n", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(this, "Save As", QString::null, "Projects (*.prj)\n");
 
 	if (!savefilename.isEmpty())
 	{
 		if (savefilename.length() <= 4 || !savefilename.endsWith(QString(".prj")))
 			savefilename.append(".prj");
 		FILE* fo;
-		fo = fopen(savefilename.ascii(), "wb");
+		fo = fopen(savefilename.toAscii(), "wb");
 
 		int dummy;
 		dummy = m_Handler3D->NumSlices();
@@ -1233,13 +1233,11 @@ void AutoTubePanel::Save()
 void AutoTubePanel::Load()
 {
 	m_CachedData.Get(m_LabelMaps, m_Objects, m_LabelToText, m_KFilters, m_Probabilities, m_MaxActiveSliceReached);
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "Projects (*.prj)\n"
-																																		 "All (*.*)",
-			this); //, filename);
+	QString loadfilename = QFileDialog::getOpenFileName(this, "Open", QString::null, "Projects (*.prj)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		FILE* fi;
-		fi = fopen(loadfilename.ascii(), "rb");
+		fi = fopen(loadfilename.toAscii(), "rb");
 
 		int max_num_slices;
 		fread(&max_num_slices, sizeof(int), 1, fi);

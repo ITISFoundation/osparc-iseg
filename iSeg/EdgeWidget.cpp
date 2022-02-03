@@ -304,7 +304,7 @@ void EdgeWidget::Execute()
 
 void EdgeWidget::ExportCenterlines()
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
+	QString savefilename = QFileDialog::getSaveFileName(this, "Save As", QString::null, "VTK legacy file (*.vtk)\n");
 	if (!savefilename.isEmpty())
 	{
 		SlicesHandlerITKInterface wrapper(m_Handler3D);

@@ -99,7 +99,7 @@ public:
 	void AddLoadProj(const QString& path1);
 	void SaveLoadProj(const QString& latestprojpath) const;
 	void SaveSettings();
-	void LoadSettings(const char* loadfilename);
+	void LoadSettings(const std::string& loadfilename);
 	void Loadproj(const QString& loadfilename);
 	void LoadS4Llink(const QString& loadfilename);
 
