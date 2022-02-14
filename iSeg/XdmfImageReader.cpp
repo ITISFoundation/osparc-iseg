@@ -493,7 +493,7 @@ int XdmfImageReader::Read()
 		return 0;
 	}
 
-	int r = _Read(reader, m_NumberOfSlices, m_Width, m_Height, m_ReadContiguousMemory, this->m_MapArrayNames["Source"].toAscii().data(), m_ImageSlices, this->m_MapArrayNames["Target"].toAscii().data(), m_WorkSlices, this->m_MapArrayNames["Tissue"].toAscii().data(), m_TissueSlices);
+	int r = _Read(reader, m_NumberOfSlices, m_Width, m_Height, m_ReadContiguousMemory, this->m_MapArrayNames["Source"].toStdString().c_str(), m_ImageSlices, this->m_MapArrayNames["Target"].toStdString().c_str(), m_WorkSlices, this->m_MapArrayNames["Tissue"].toStdString().c_str(), m_TissueSlices);
 
 	reader.Close();
 
@@ -624,13 +624,13 @@ int HDFImageReader::Read()
 
 	HDF5Reader reader;
 	const QString fname = basename + "." + suffix;
-	if (!reader.Open(fname.toAscii().data()))
+	if (!reader.Open(fname.toStdString().c_str()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 		return 0;
 	}
 
-	_Read(reader, m_NumberOfSlices, m_Width, m_Height, m_ReadContiguousMemory, this->m_MapArrayNames["Source"].toAscii().data(), m_ImageSlices, this->m_MapArrayNames["Target"].toAscii().data(), m_WorkSlices, this->m_MapArrayNames["Tissue"].toAscii().data(), m_TissueSlices);
+	_Read(reader, m_NumberOfSlices, m_Width, m_Height, m_ReadContiguousMemory, this->m_MapArrayNames["Source"].toStdString().c_str(), m_ImageSlices, this->m_MapArrayNames["Target"].toStdString().c_str(), m_WorkSlices, this->m_MapArrayNames["Tissue"].toStdString().c_str(), m_TissueSlices);
 
 	reader.Close();
 

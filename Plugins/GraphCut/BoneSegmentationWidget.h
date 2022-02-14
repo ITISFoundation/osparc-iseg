@@ -27,7 +27,7 @@ public:
 	void Init() override;
 	void NewLoaded() override;
 	std::string GetName() override { return std::string("CT Auto-Bone"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("graphcut.png")); }
 
 private:
 	void OnSlicenrChanged() override;

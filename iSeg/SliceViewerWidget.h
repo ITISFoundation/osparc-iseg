@@ -7,29 +7,20 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef SLICESHOWER_29April05
-#define SLICESHOWER_29April05
+#pragma once
 
 #include "SlicesHandler.h"
 
 #include "Data/Point.h"
 
-#include <Q3HBoxLayout>
-#include <Q3VBoxLayout>
-#include <QCloseEvent>
-#include <QPaintEvent>
-#include <q3hbox.h>
-#include <q3scrollview.h>
-#include <QButtonGroup>
-#include <QCheckBox>
-#include <QDialog>
-#include <QEvent>
-#include <QImage>
-#include <QRadioButton>
-#include <QScrollBar>
 #include <QWidget>
 
 #include <vector>
+
+class QCheckBox;
+class QScrollBar;
+class QRadioButton;
+class QButtonGroup;
 
 namespace iseg {
 
@@ -58,7 +49,7 @@ private:
 	bool m_Zposvisible;
 	bool m_Xyposvisible;
 	int m_Xypos;
-	bool m_Directionx;
+	bool m_DirectionX;
 	bool m_Bmporwork;
 	SlicesHandler* m_Handler3D;
 	float m_Thickness;
@@ -90,7 +81,7 @@ class SliceViewerWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	SliceViewerWidget(SlicesHandler* hand3D, bool orientation, float thickness1, float zoom1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
+	SliceViewerWidget(SlicesHandler* hand3D, bool direction_x, float thickness1, float zoom1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~SliceViewerWidget() override;
 	int GetSlicenr();
 
@@ -98,24 +89,19 @@ protected:
 	void closeEvent(QCloseEvent*) override;
 
 private:
-	Q3VBoxLayout* m_Vbox;
-	Q3HBoxLayout* m_Hbox;
-	Q3HBoxLayout* m_Hbox2;
-	//	QHBox *hbox1;
 	QCheckBox* m_CbTissuevisible;
 	QCheckBox* m_CbZposvisible;
 	QCheckBox* m_CbXyposvisible;
 	Bmptissuesliceshower* m_Shower;
 	QScrollBar* m_QsbSlicenr;
-	unsigned short m_Nrslices;
-	bool m_Tissuevisible;
-	bool m_Directionx;
 	QRadioButton* m_RbBmp;
 	QRadioButton* m_RbWork;
 	QButtonGroup* m_BgBmporwork;
-	Q3ScrollView* m_Scroller;
 	SlicesHandler* m_Handler3D;
-	//	float thickness;
+
+	unsigned short m_Nrslices;
+	bool m_Tissuevisible;
+	bool m_DirectionX;
 	bool m_Xyexists;
 
 signals:
@@ -145,5 +131,3 @@ public slots:
 };
 
 } // namespace iseg
-
-#endif

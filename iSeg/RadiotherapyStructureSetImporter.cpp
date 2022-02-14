@@ -13,13 +13,14 @@
 #include "StdStringToQString.h"
 #include "TissueInfos.h"
 
-#include "Interface/QtConnect.h"
+#include "Interface/PropertyWidget.h"
 
 #include "Core/fillcontour.h"
 
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>
+#include <QBoxLayout>
 
 namespace iseg {
 
@@ -28,8 +29,6 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 {
 	setModal(true);
 
-	m_Vbox1 = nullptr;
-
 	if (loadfilename.isEmpty())
 	{
 		close();
@@ -37,7 +36,7 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 	}
 
 	m_Tissues.clear();
-	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.ascii(), m_Tissues);
+	gdcmvtk_rtstruct::RequestData_RTStructureSetStorage(loadfilename.toAscii(), m_Tissues);
 
 	m_Vecignore.resize(m_Tissues.size());
 	m_Vecpriorities.resize(m_Tissues.size());
@@ -81,57 +80,59 @@ RadiotherapyStructureSetImporter::RadiotherapyStructureSetImporter(QString loadf
 		}
 	}
 
-	m_Vbox1 = new Q3VBox(this);
-	m_CbSolids = new QComboBox(m_Vbox1);
+	// graphic user interface
+	auto group = PropertyGroup::Create("Settings");
+
+	PropertyEnum::descriptions_type solids;
 	for (size_t i = 0; i < m_Tissues.size(); i++)
 	{
-		m_CbSolids->insertItem(QString(m_Tissues[i]->name.c_str()));
+		solids.push_back(m_Tissues[i]->name);
 	}
+	m_CbSolids = group->Add("Tissues", PropertyEnum::Create(solids, m_Currentitem = 0));
+	m_CbIgnore = group->Add("Ignore", PropertyBool::Create(m_Vecignore[m_Currentitem]));
 
-	m_Currentitem = m_CbSolids->currentItem();
+	m_SbPriority = group->Add("Priority", PropertyInt::Create(m_Vecpriorities[m_Currentitem], 1, m_Tissues.size()));
+	m_SbPriority->SetToolTip(
+			"1) Tissues have been sorted so that higher priority is given to the smallest tissues.<br>"
+			"2) The higher number of priority, higher priority will have.");
 
-	m_CbIgnore = new QCheckBox("Ignore", m_Vbox1);
-	m_CbIgnore->setChecked(m_Vecignore[m_CbSolids->currentItem()]);
+	m_CbNew = group->Add("New Tissue", PropertyBool::Create(m_Vecnew[m_Currentitem]));
+	m_LeName = group->Add("Name", PropertyString::Create(m_Vectissuenames[m_Currentitem]));
 
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_LbPriority = new QLabel(QString("Priority: "), m_Hbox1);
-	m_SbPriority = new QSpinBox(1, m_Tissues.size(), 1, m_Hbox1);
-	m_SbPriority->setValue(m_Vecpriorities[m_CbSolids->currentItem()]);
-	QPushButton* info_button = new QPushButton(m_Hbox1);
-	info_button->setText("Info");
-
-	m_CbNew = new QCheckBox("New Tissue", m_Vbox1);
-	m_CbNew->setChecked(m_Vecnew[m_CbSolids->currentItem()]);
-
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_LbNamele = new QLabel(QString("Name: "), m_Hbox2);
-	m_LeName =
-			new QLineEdit(m_Vectissuenames[m_CbSolids->currentItem()].c_str(), m_Hbox2);
-
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_LbNamecb = new QLabel(QString("Name: "), m_Hbox3);
-	m_CbNames = new QComboBox(m_Hbox3);
-	for (tissues_size_t i = 1; i <= TissueInfos::GetTissueCount(); i++)
+	PropertyEnum::descriptions_type names;
+	for (size_t i = 0; i < m_Tissues.size(); i++)
 	{
-		m_CbNames->insertItem(ToQ(TissueInfos::GetTissueName(i)));
+		names.push_back(TissueInfos::GetTissueName(i));
 	}
-	m_CbNames->setCurrentIndex(m_Vectissuenrs[m_CbSolids->currentItem()]);
+	m_CbNames = group->Add("Name", PropertyEnum::Create(names, m_Vectissuenrs[m_Currentitem]));
 
-	m_Hbox4 = new Q3HBox(m_Vbox1);
-	m_PbOk = new QPushButton("OK", m_Hbox4);
-	m_PbCancel = new QPushButton("Cancel", m_Hbox4);
+	m_PbOk = group->Add("OK", PropertyButton::Create([this]() { OkPressed(); }));
+	m_PbCancel = group->Add("Cancel", PropertyButton::Create([this]() { close(); }));
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	setFixedSize(m_Vbox1->size());
+	// connections
+	m_CbSolids->onModified.connect([this](Property_ptr p, Property::eChangeType type){
+		if (type == Property::kValueChanged)
+			SolidChanged(m_CbSolids->Value());
+	});
+	m_CbNew->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			NewChanged();
+	});
+	m_CbIgnore->onModified.connect([this](Property_ptr p, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			IgnoreChanged();
+	});
 
+	// add widget and layout
+	auto property_view = new PropertyWidget(group);
+	property_view->setMinimumSize(300, 200);
+
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view);
+	setLayout(layout);
+
+	// initalize
 	Updatevisibility();
-
-	QObject_connect(m_CbSolids, SIGNAL(activated(int)), this, SLOT(SolidChanged(int)));
-	QObject_connect(m_PbCancel, SIGNAL(clicked()), this, SLOT(close()));
-	QObject_connect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
-	QObject_connect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
-	QObject_connect(m_PbOk, SIGNAL(clicked()), this, SLOT(OkPressed()));
-	QObject_connect(info_button, SIGNAL(clicked()), this, SLOT(ShowPriorityInfo()));
 }
 
 RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() = default;
@@ -139,16 +140,17 @@ RadiotherapyStructureSetImporter::~RadiotherapyStructureSetImporter() = default;
 void RadiotherapyStructureSetImporter::SolidChanged(int i)
 {
 	Storeparams();
-	QObject_disconnect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
-	QObject_disconnect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
+
+	BlockPropertySignal block_new(m_CbNew);
+	BlockPropertySignal block_ignore(m_CbIgnore);
+
 	m_Currentitem = i;
-	m_CbIgnore->setChecked(m_Vecignore[i]);
-	m_SbPriority->setValue(m_Vecpriorities[i]);
-	m_CbNew->setChecked(m_Vecnew[i]);
-	m_LeName->setText(m_Vectissuenames[i].c_str());
-	m_CbNames->setCurrentIndex(m_Vectissuenrs[i]);
-	QObject_connect(m_CbNew, SIGNAL(clicked()), this, SLOT(NewChanged()));
-	QObject_connect(m_CbIgnore, SIGNAL(clicked()), this, SLOT(IgnoreChanged()));
+	m_CbIgnore->SetValue(m_Vecignore[i]);
+	m_SbPriority->SetValue(m_Vecpriorities[i]);
+	m_CbNew->SetValue(m_Vecnew[i]);
+	m_LeName->SetValue(m_Vectissuenames[i]);
+	m_CbNames->SetValue(m_Vectissuenrs[i]);
+
 	Updatevisibility();
 }
 
@@ -265,7 +267,7 @@ void RadiotherapyStructureSetImporter::OkPressed()
 
 				if (slicenr < 0 && swap_z > 0.f)
 				{
-					ISEG_WARNING("RTStruct import: strange slice value " << slicenr);
+					ISEG_WARNING("RTStruct import: strange slice Value " << slicenr);
 					slicenr = end_sl + slicenr; // TODO this is strange!
 				}
 
@@ -300,13 +302,6 @@ void RadiotherapyStructureSetImporter::OkPressed()
 	close();
 }
 
-void RadiotherapyStructureSetImporter::ShowPriorityInfo()
-{
-	QMessageBox::information(this, "Priority Information", "1) Tissues have been sorted so that higher priority is given to the "
-																												 "smallest tissues.<br>"
-																												 "2) The higher number of priority, higher priority will have.");
-}
-
 void RadiotherapyStructureSetImporter::IgnoreChanged()
 {
 	Storeparams();
@@ -315,45 +310,31 @@ void RadiotherapyStructureSetImporter::IgnoreChanged()
 
 void RadiotherapyStructureSetImporter::Updatevisibility()
 {
-	if (m_Vecignore[m_CbSolids->currentItem()])
-	{
-		m_Hbox1->hide();
-		m_Hbox2->hide();
-		m_Hbox3->hide();
-		m_CbNew->hide();
-	}
-	else
-	{
-		m_Hbox1->show();
-		m_CbNew->show();
-		if (m_Vecnew[m_CbSolids->currentItem()])
-		{
-			m_Hbox2->show();
-			m_Hbox3->hide();
-		}
-		else
-		{
-			m_Hbox2->hide();
-			m_Hbox3->show();
-		}
-	}
+	m_CbNew->SetVisible(!m_Vecignore[m_CbSolids->Value()]);
+	m_SbPriority->SetVisible(!m_Vecignore[m_CbSolids->Value()]);
+	m_CbNew->SetVisible(!m_Vecignore[m_CbSolids->Value()]);
+
+	bool new_solid = m_Vecnew[m_CbSolids->Value()];
+	m_LeName->SetVisible(!m_Vecignore[m_CbSolids->Value()] && new_solid);
+	m_CbNames->SetVisible(!m_Vecignore[m_CbSolids->Value()] && !new_solid);
 }
 
 void RadiotherapyStructureSetImporter::Storeparams()
 {
 	int dummy = m_Vecpriorities[m_Currentitem];
 
-	m_Vecnew[m_Currentitem] = m_CbNew->isChecked();
-	m_Vecignore[m_Currentitem] = m_CbIgnore->isChecked();
-	m_Vectissuenrs[m_Currentitem] = m_CbNames->currentItem();
-	m_Vectissuenames[m_Currentitem] = m_LeName->text().toAscii().data();
+	m_Vecnew[m_Currentitem] = m_CbNew->Value();
+	m_Vecignore[m_Currentitem] = m_CbIgnore->Value();
+	m_Vectissuenrs[m_Currentitem] = m_CbNames->Value();
+	m_Vectissuenames[m_Currentitem] = m_LeName->Value();
 
-	if (dummy != m_SbPriority->value())
+	if (dummy != m_SbPriority->Value())
 	{
-		m_Vecpriorities[m_Currentitem] = m_SbPriority->value();
+		m_Vecpriorities[m_Currentitem] = m_SbPriority->Value();
 		int pos = 0;
 		if (m_Currentitem == 0)
 			pos = 1;
+
 		while (m_Vecpriorities[pos] != m_Vecpriorities[m_Currentitem])
 		{
 			pos++;

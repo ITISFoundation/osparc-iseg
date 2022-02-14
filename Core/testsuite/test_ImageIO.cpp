@@ -305,7 +305,7 @@ public:
 
 		std::vector<float> data(w * h, 0);
 		std::vector<float*> stack(1, data.data());
-		std::vector<const char*> files(1, file_path.c_str());
+		std::vector<std::string> files(1, file_path);
 		BOOST_REQUIRE(ImageReader::GetImageStack(files, stack.data(), w, h, [](unsigned char, unsigned char g, unsigned char) { return static_cast<float>(g); }));
 
 		itk::Index<2> idx = {0, 0};

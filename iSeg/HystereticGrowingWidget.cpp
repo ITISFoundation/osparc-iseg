@@ -13,31 +13,23 @@
 #include "SlicesHandler.h"
 #include "bmp_read_1.h"
 
-#include "Data/addLine.h"
+#include "Interface/PropertyWidget.h"
+#include "Interface/RecentPlaces.h"
 
 #include "Core/Pair.h"
 
-#include <QApplication>
-#include <QCheckBox>
-#include <QDialog>
-#include <QFileDialog>
-#include <QImage>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPainter>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QSlider>
-#include <QSpinBox>
-#include <QWidget>
+#include "Data/addLine.h"
+
+#include <QBoxLayout>
 
 namespace iseg {
 
 HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D)
 		: m_Handler3D(hand3D)
 {
-	setToolTip(Format("Segment a tissue by picking seed points and adding "
-										"neighboring pixels with similar intensities."));
+	setToolTip(Format(
+		"Segment a tissue by picking seed points and adding "
+		"neighboring pixels with similar intensities."));
 
 	m_Activeslice = m_Handler3D->ActiveSlice();
 	m_Bmphand = m_Handler3D->GetActivebmphandler();
@@ -48,93 +40,86 @@ HystereticGrowingWidget::HystereticGrowingWidget(SlicesHandler* hand3D)
 	m_LowerLimit = p.low;
 	m_UpperLimit = p.high;
 
-	m_Vbox1 = new Q3VBox(this);
-	m_Vbox1->setMargin(8);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Hbox2a = new Q3HBox(m_Vbox1);
-	m_Vbox2 = new Q3VBox(m_Hbox1);
-	m_Vbox3 = new Q3VBox(m_Hbox1);
-	m_Autoseed = new QCheckBox("AutoSeed: ", m_Hbox2);
-	if (m_Autoseed->isChecked())
-		m_Autoseed->toggle();
-	m_Vbox4 = new Q3VBox(m_Hbox2);
-	m_Vbox5 = new Q3VBox(m_Hbox2);
-	m_Vbox6 = new Q3VBox(m_Hbox1);
-	m_Vbox7 = new Q3VBox(m_Hbox2);
-	m_Allslices = new QCheckBox(QString("Apply to all slices"), m_Hbox2a);
-	m_PbSaveborders = new QPushButton("Save...", m_Hbox2a);
-	m_PbLoadborders = new QPushButton("Open...", m_Hbox2a);
-	m_TxtLower = new QLabel("Lower: ", m_Vbox2);
-	m_TxtUpper = new QLabel("Upper: ", m_Vbox2);
-	m_TxtLowerhyster = new QLabel("Lower: ", m_Vbox4);
-	m_TxtUpperhyster = new QLabel("Upper: ", m_Vbox4);
-	m_SlLower = new QSlider(Qt::Horizontal, m_Vbox3);
-	m_SlLower->setRange(0, 200);
-	m_SlLower->setValue(80);
-	m_LeBordervall = new QLineEdit(m_Vbox6);
-	m_LeBordervall->setFixedWidth(80);
-	m_SlUpper = new QSlider(Qt::Horizontal, m_Vbox3);
-	m_SlUpper->setRange(0, 200);
-	m_SlUpper->setValue(120);
-	m_LeBordervalu = new QLineEdit(m_Vbox6);
-	m_LeBordervalu->setFixedWidth(80);
-	m_SlLowerhyster = new QSlider(Qt::Horizontal, m_Vbox5);
-	m_SlLowerhyster->setRange(0, 200);
-	m_SlLowerhyster->setValue(60);
-	m_LeBordervallh = new QLineEdit(m_Vbox7);
-	m_LeBordervallh->setFixedWidth(80);
-	m_SlUpperhyster = new QSlider(Qt::Horizontal, m_Vbox5);
-	m_SlUpperhyster->setRange(0, 200);
-	m_SlUpperhyster->setValue(140);
-	m_LeBordervaluh = new QLineEdit(m_Vbox7);
-	m_LeBordervaluh->setFixedWidth(80);
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_Drawlimit = new QPushButton("Draw Limit", m_Hbox3);
-	m_Clearlimit = new QPushButton("Clear Limit", m_Hbox3);
-	m_Pushexec = new QPushButton("Execute", m_Vbox1);
+	auto group = PropertyGroup::Create("Settings");
 
-	m_SlLower->setFixedWidth(400);
-	m_SlLowerhyster->setFixedWidth(300);
+	m_SlLower = group->Add("Lower", PropertySlider::Create(80, 0, 200));
+	m_SlUpper = group->Add("Upper", PropertySlider::Create(120, 0, 200));
 
-	m_Vbox2->setFixedSize(m_Vbox2->sizeHint());
-	m_Vbox3->setFixedSize(m_Vbox3->sizeHint());
-	m_Vbox4->setFixedSize(m_Vbox4->sizeHint());
-	m_Vbox5->setFixedSize(m_Vbox5->sizeHint());
-	m_Vbox6->setFixedSize(m_Vbox6->sizeHint());
-	m_Vbox7->setFixedSize(m_Vbox7->sizeHint());
-	m_Hbox1->setFixedSize(m_Hbox1->sizeHint());
-	m_Hbox2->setFixedSize(m_Hbox2->sizeHint());
-	m_Hbox2a->setFixedSize(m_Hbox2a->sizeHint());
-	m_Hbox3->setFixedSize(m_Hbox3->sizeHint());
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
-	//	setFixedSize(vbox1->size());
+	// TODO BL
+	m_LeBordervall = group->Add("Lower MAX", PropertyReal::Create(200));
+	m_LeBordervalu = group->Add("Upper MAX", PropertyReal::Create(200));
 
-	QObject_connect(m_Pushexec, SIGNAL(clicked()), this, SLOT(Execute()));
-	QObject_connect(m_Drawlimit, SIGNAL(clicked()), this, SLOT(Limitpressed()));
-	QObject_connect(m_Clearlimit, SIGNAL(clicked()), this, SLOT(Clearpressed()));
-	QObject_connect(m_Autoseed, SIGNAL(clicked()), this, SLOT(AutoToggled()));
-	QObject_connect(m_SlLower, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-	QObject_connect(m_SlUpper, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-	QObject_connect(m_SlLowerhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-	QObject_connect(m_SlUpperhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-	QObject_connect(m_SlLower, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
-	QObject_connect(m_SlUpper, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
-	QObject_connect(m_SlLowerhyster, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
-	QObject_connect(m_SlUpperhyster, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
-	QObject_connect(m_SlLower, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
-	QObject_connect(m_SlUpper, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
-	QObject_connect(m_SlLowerhyster, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
-	QObject_connect(m_SlUpperhyster, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
+	m_Autoseed = group->Add("Auto-Seed", PropertyBool::Create(false));
+	m_Allslices = group->Add("All Slices", PropertyBool::Create(false));
 
-	QObject_connect(m_LeBordervall, SIGNAL(returnPressed()), this, SLOT(LeBordervallReturnpressed()));
-	QObject_connect(m_LeBordervalu, SIGNAL(returnPressed()), this, SLOT(LeBordervaluReturnpressed()));
-	QObject_connect(m_LeBordervallh, SIGNAL(returnPressed()), this, SLOT(LeBordervallhReturnpressed()));
-	QObject_connect(m_LeBordervaluh, SIGNAL(returnPressed()), this, SLOT(LeBordervaluhReturnpressed()));
+	m_SlLowerhyster = group->Add("Lower", PropertySlider::Create(60, 0, 200));
+	m_SlUpperhyster = group->Add("Upper", PropertySlider::Create(140, 0, 200));
 
-	QObject_connect(m_PbSaveborders, SIGNAL(clicked()), this, SLOT(SavebordersExecute()));
-	QObject_connect(m_PbLoadborders, SIGNAL(clicked()), this, SLOT(LoadbordersExecute()));
+	// TODO BL
+	m_LeBordervallh = group->Add("Lower MAX", PropertyReal::Create(200));
+	m_LeBordervaluh = group->Add("Upper MAX", PropertyReal::Create(200));
 
+	m_Drawlimit = group->Add("Draw Limit", PropertyButton::Create([this]() { Limitpressed(); }));
+	m_Clearlimit = group->Add("Clear Limit", PropertyButton::Create([this]() { Clearpressed(); }));
+	m_Pushexec = group->Add("Execute", PropertyButton::Create([this]() { Execute(); }));
+
+	// connections
+	m_Autoseed->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			AutoToggled();
+	});
+
+	const auto on_slider_pressed = [this](int) {
+		SliderPressed();
+	};
+	const auto on_slider_moved = [this](int v, eSlider which) {
+		SliderChanged(which, v);
+	};
+	const auto on_slider_released = [this](int) {
+		SliderReleased();
+	};
+
+	m_SlLower->onPressed.connect(on_slider_pressed);
+	m_SlUpper->onPressed.connect(on_slider_pressed);
+	m_SlLowerhyster->onPressed.connect(on_slider_pressed);
+	m_SlUpperhyster->onPressed.connect(on_slider_pressed);
+
+	m_SlLower->onMoved.connect(std::bind(on_slider_moved, std::placeholders::_1, kLower));
+	m_SlUpper->onMoved.connect(std::bind(on_slider_moved, std::placeholders::_1, kUpper));
+	m_SlLowerhyster->onMoved.connect(std::bind(on_slider_moved, std::placeholders::_1, kLowerHyst));
+	m_SlUpperhyster->onMoved.connect(std::bind(on_slider_moved, std::placeholders::_1, kUpperHyst));
+
+	m_SlLower->onReleased.connect(on_slider_released);
+	m_SlUpper->onReleased.connect(on_slider_released);
+	m_SlLowerhyster->onReleased.connect(on_slider_released);
+	m_SlUpperhyster->onReleased.connect(on_slider_released);
+
+	m_LeBordervall->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			LeBordervallReturnpressed();
+	});
+	m_LeBordervalu->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			LeBordervaluReturnpressed();
+	});
+	m_LeBordervallh->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			LeBordervallhReturnpressed();
+	});
+	m_LeBordervaluh->onModified.connect([this](Property_ptr, Property::eChangeType type) {
+		if (type == Property::kValueChanged)
+			LeBordervaluhReturnpressed();
+	});
+
+	// add widget and layout
+	auto property_view = new PropertyWidget(group);
+
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
+	setLayout(layout);
+
+	// initalize
 	UpdateVisible();
 	Getrange();
 	Init1();
@@ -163,7 +148,7 @@ void HystereticGrowingWidget::OnMouseClicked(Point p)
 	}
 	else
 	{
-		if (!m_Autoseed->isChecked())
+		if (!m_Autoseed->Value())
 		{
 			m_P1 = p;
 			Execute();
@@ -173,21 +158,18 @@ void HystereticGrowingWidget::OnMouseClicked(Point p)
 
 void HystereticGrowingWidget::UpdateVisible()
 {
-	if (m_Autoseed->isChecked())
+	m_SlLowerhyster->SetVisible(m_Autoseed->Value());
+	m_SlUpperhyster->SetVisible(m_Autoseed->Value());
+	m_LeBordervallh->SetVisible(m_Autoseed->Value());
+	m_LeBordervaluh->SetVisible(m_Autoseed->Value());
+
+	if (m_Autoseed->Value())
 	{
-		m_Vbox4->show();
-		m_Vbox5->show();
-		m_Vbox7->show();
-		m_Allslices->setText("Apply to all slices");
-		//		p1=nullptr;
+		m_Allslices->SetDescription("Apply to all slices");
 	}
 	else
 	{
-		m_Vbox4->hide();
-		m_Vbox5->hide();
-		m_Vbox7->hide();
-		m_Allslices->setText("3D");
-		//		if(p1!=nullptr)
+		m_Allslices->SetDescription("3D");
 	}
 }
 
@@ -195,7 +177,7 @@ void HystereticGrowingWidget::AutoToggled()
 {
 	UpdateVisible();
 
-	if (m_Autoseed->isChecked())
+	if (m_Autoseed->Value())
 	{
 		Execute();
 	}
@@ -205,9 +187,15 @@ void HystereticGrowingWidget::Execute()
 {
 	DataSelection data_selection;
 	data_selection.work = data_selection.limits = true;
-	data_selection.allSlices = m_Allslices->isChecked();
+	data_selection.allSlices = m_Allslices->Value();
 	data_selection.sliceNr = m_Handler3D->ActiveSlice();
 	emit BeginDatachange(data_selection, this);
+
+	// Execute1 gets the parameters from m_Thresholds, make sure they are updated now
+	m_Thresholds[eSlider::kLower] = m_SlLower->Value();
+	m_Thresholds[eSlider::kUpper] = m_SlUpper->Value();
+	m_Thresholds[eSlider::kLowerHyst] = m_SlLowerhyster->Value();
+	m_Thresholds[eSlider::kUpperHyst] = m_SlUpperhyster->Value();
 
 	Execute1();
 
@@ -216,32 +204,29 @@ void HystereticGrowingWidget::Execute()
 
 void HystereticGrowingWidget::Execute1()
 {
-	if (m_Autoseed->isChecked())
+	if (m_Autoseed->Value())
 	{
-		float ll = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-		float uu = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-		float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->value();
-		float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->value();
-		if (m_Allslices->isChecked())
+		float ll = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_Thresholds[eSlider::kLower];
+		float uu = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_Thresholds[eSlider::kUpper];
+		float ul = ll + (uu - ll) * 0.005f * m_Thresholds[eSlider::kLowerHyst];
+		float lu = ll + (uu - ll) * 0.005f * m_Thresholds[eSlider::kUpperHyst];
+
+		if (m_Allslices->Value())
 			m_Handler3D->DoubleHystereticAllslices(ll, ul, lu, uu, false, 255.0f);
 		else
 			m_Bmphand->DoubleHysteretic(ll, ul, lu, uu, false, 255.0f);
 
-		m_LeBordervall->setText(QString::number(ll, 'g', 3));
-		m_LeBordervalu->setText(QString::number(uu, 'g', 3));
-		m_LeBordervallh->setText(QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
-		m_LeBordervaluh->setText(QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
+		m_LeBordervall->SetValue(ll);
+		m_LeBordervalu->SetValue(uu);
+		m_LeBordervallh->SetValue(int(0.4f + (ul - ll) / (uu - ll) * 100));
+		m_LeBordervaluh->SetValue(int(0.4f + (lu - ll) / (uu - ll) * 100));
 	}
 	else
 	{
-		float ll = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-		float uu = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-		//		bmphand->thresholded_growing(p1,ll,uu,false,255.f);
-		if (m_Allslices->isChecked())
+		float ll = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_Thresholds[eSlider::kLower];
+		float uu = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_Thresholds[eSlider::kUpper];
+
+		if (m_Allslices->Value())
 		{
 			m_Handler3D->ThresholdedGrowing(m_Handler3D->ActiveSlice(), m_P1, ll, uu, 255.f);
 		}
@@ -250,19 +235,17 @@ void HystereticGrowingWidget::Execute1()
 			m_Bmphand->ThresholdedGrowinglimit(m_P1, ll, uu, false, 255.f);
 		}
 
-		m_LeBordervall->setText(QString::number(ll, 'g', 3));
-		m_LeBordervalu->setText(QString::number(uu, 'g', 3));
+		m_LeBordervall->SetValue(ll);
+		m_LeBordervalu->SetValue(uu);
 	}
 }
 
 void HystereticGrowingWidget::Getrange()
 {
-	float ll =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-	float uu =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-	float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->value();
-	float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->value();
+	float ll = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->Value();
+	float uu = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->Value();
+	float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->Value();
+	float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->Value();
 
 	Pair p;
 	m_Bmphand->GetBmprange(&p);
@@ -277,82 +260,80 @@ void HystereticGrowingWidget::GetrangeSub(float ll, float uu, float ul, float lu
 	if (ll < m_LowerLimit)
 	{
 		ll = m_LowerLimit;
-		m_SlLower->setValue(0);
+		m_SlLower->SetValue(0);
 	}
 	else if (ll > m_UpperLimit)
 	{
 		ll = m_UpperLimit;
-		m_SlLower->setValue(200);
+		m_SlLower->SetValue(200);
 	}
 	else
 	{
 		if (m_UpperLimit == m_LowerLimit)
-			m_SlLower->setValue(100);
+			m_SlLower->SetValue(100);
 		else
-			m_SlLower->setValue(int(0.5f + (ll - m_LowerLimit) / (m_UpperLimit - m_LowerLimit) * 200));
+			m_SlLower->SetValue(int(0.5f + (ll - m_LowerLimit) / (m_UpperLimit - m_LowerLimit) * 200));
 	}
 
 	if (uu < m_LowerLimit)
 	{
 		uu = m_LowerLimit;
-		m_SlUpper->setValue(0);
+		m_SlUpper->SetValue(0);
 	}
 	else if (uu > m_UpperLimit)
 	{
 		uu = m_UpperLimit;
-		m_SlUpper->setValue(200);
+		m_SlUpper->SetValue(200);
 	}
 	else
 	{
 		if (m_UpperLimit == m_LowerLimit)
-			m_SlUpper->setValue(100);
+			m_SlUpper->SetValue(100);
 		else
-			m_SlUpper->setValue(int(0.5f + (uu - m_LowerLimit) / (m_UpperLimit - m_LowerLimit) * 200));
+			m_SlUpper->SetValue(int(0.5f + (uu - m_LowerLimit) / (m_UpperLimit - m_LowerLimit) * 200));
 	}
 
 	if (ul < ll)
 	{
 		ul = ll;
-		m_SlLowerhyster->setValue(0);
+		m_SlLowerhyster->SetValue(0);
 	}
 	else if (ul > uu)
 	{
 		ul = uu;
-		m_SlLowerhyster->setValue(200);
+		m_SlLowerhyster->SetValue(200);
 	}
 	else
 	{
 		if (uu == ll)
-			m_SlLowerhyster->setValue(100);
+			m_SlLowerhyster->SetValue(100);
 		else
-			m_SlLowerhyster->setValue(int(0.5f + (ul - ll) / (uu - ll) * 200));
+			m_SlLowerhyster->SetValue(int(0.5f + (ul - ll) / (uu - ll) * 200));
 	}
 
 	if (lu < ll)
 	{
 		lu = ll;
-		m_SlUpperhyster->setValue(0);
+		m_SlUpperhyster->SetValue(0);
 	}
 	else if (lu > uu)
 	{
 		lu = uu;
-		m_SlUpperhyster->setValue(200);
+		m_SlUpperhyster->SetValue(200);
 	}
 	else
 	{
 		if (uu == ll)
-			m_SlUpperhyster->setValue(100);
+			m_SlUpperhyster->SetValue(100);
 		else
-			m_SlUpperhyster->setValue(int(0.5f + (lu - ll) / (uu - ll) * 200));
+			m_SlUpperhyster->SetValue(int(0.5f + (lu - ll) / (uu - ll) * 200));
 	}
 
-	m_LeBordervall->setText(QString::number(ll, 'g', 3));
-	m_LeBordervalu->setText(QString::number(uu, 'g', 3));
-	m_LeBordervallh->setText(QString::number(int(0.4f + (ul - ll) / (uu - ll) * 100), 'g', 3));
-	m_LeBordervaluh->setText(QString::number(int(0.4f + (lu - ll) / (uu - ll) * 100), 'g', 3));
+	m_LeBordervall->SetValue(ll);
+	m_LeBordervalu->SetValue(uu);
+	m_LeBordervallh->SetValue(int(0.4f + (ul - ll) / (uu - ll) * 100));
+	m_LeBordervaluh->SetValue(int(0.4f + (lu - ll) / (uu - ll) * 100));
 }
-
-void HystereticGrowingWidget::SliderChanged() { Execute1(); }
 
 void HystereticGrowingWidget::BmpChanged()
 {
@@ -360,8 +341,6 @@ void HystereticGrowingWidget::BmpChanged()
 
 	Getrange();
 }
-
-QSize HystereticGrowingWidget::sizeHint() const { return m_Vbox1->sizeHint(); }
 
 void HystereticGrowingWidget::Init()
 {
@@ -373,6 +352,11 @@ void HystereticGrowingWidget::Init()
 	}
 	Init1();
 	HideParamsChanged();
+
+	m_Thresholds[eSlider::kLower] = m_SlLower->Value();
+	m_Thresholds[eSlider::kUpper] = m_SlUpper->Value();
+	m_Thresholds[eSlider::kLowerHyst] = m_SlLowerhyster->Value();
+	m_Thresholds[eSlider::kUpperHyst] = m_SlUpperhyster->Value();
 }
 
 void HystereticGrowingWidget::NewLoaded()
@@ -392,7 +376,7 @@ void HystereticGrowingWidget::NewLoaded()
 void HystereticGrowingWidget::Init1()
 {
 	m_Limitdrawing = false;
-	m_Drawlimit->setDown(false);
+	m_Drawlimit->SetChecked(false);
 
 	std::vector<std::vector<Point>>* vvp = m_Bmphand->ReturnLimits();
 	m_Vp1.clear();
@@ -407,7 +391,7 @@ void HystereticGrowingWidget::Init1()
 void HystereticGrowingWidget::Cleanup()
 {
 	m_Limitdrawing = false;
-	m_Drawlimit->setDown(false);
+	m_Drawlimit->SetChecked(false);
 	m_Vpdyn.clear();
 	emit Vp1dynChanged(&m_Vpdyn, &m_Vpdyn);
 }
@@ -440,14 +424,14 @@ void HystereticGrowingWidget::OnMouseReleased(Point p)
 		emit EndDatachange(this);
 
 		m_Vpdyn.clear();
-		m_Drawlimit->setDown(false);
+		m_Drawlimit->SetChecked(false);
 		emit Vp1dynChanged(&m_Vp1, &m_Vpdyn);
 	}
 }
 
 void HystereticGrowingWidget::Limitpressed()
 {
-	m_Drawlimit->setDown(true);
+	m_Drawlimit->SetChecked(true);
 	m_Limitdrawing = true;
 	m_Vpdyn.clear();
 	emit VpdynChanged(&m_Vpdyn);
@@ -456,7 +440,7 @@ void HystereticGrowingWidget::Limitpressed()
 void HystereticGrowingWidget::Clearpressed()
 {
 	m_Limitdrawing = false;
-	m_Drawlimit->setDown(false);
+	m_Drawlimit->SetChecked(false);
 
 	DataSelection data_selection;
 	data_selection.limits = true;
@@ -476,227 +460,145 @@ void HystereticGrowingWidget::SliderPressed()
 {
 	DataSelection data_selection;
 	data_selection.work = data_selection.limits = true;
-	data_selection.allSlices = m_Allslices->isChecked();
+	data_selection.allSlices = m_Allslices->Value();
 	data_selection.sliceNr = m_Handler3D->ActiveSlice();
 	emit BeginDatachange(data_selection, this);
 }
 
-void HystereticGrowingWidget::SliderReleased() { emit EndDatachange(this); }
-
-void HystereticGrowingWidget::SavebordersExecute()
+void HystereticGrowingWidget::SliderChanged(eSlider which, int new_value)
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Thresholds (*.txt)\n", this); //, filename);
+	// Execute1 gets the parameters from m_Thresholds. Note, the properties may not
+	// be updated yet, since PropertySlider value is set when 'QSlider::sliderReleased' is triggered)
+	m_Thresholds[which] = new_value;
 
-	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
-		savefilename.append(".txt");
-
-	if (!savefilename.isEmpty())
-	{
-		float ll = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-		float uu = m_LowerLimit +
-							 (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-		float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->value();
-		float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->value();
-		FILE* fp = fopen(savefilename.ascii(), "w");
-		fprintf(fp, "%f %f %f %f \n", ll, ul, lu, uu);
-		fclose(fp);
-	}
+	Execute1();
 }
 
-void HystereticGrowingWidget::LoadbordersExecute()
-{
-	QString loadfilename = QFileDialog::getOpenFileName(QString::null, "Borders (*.txt)\n"
-																																		 "All (*.*)",
-			this);
-
-	if (!loadfilename.isEmpty())
-	{
-		FILE* fp = fopen(loadfilename.ascii(), "r");
-		if (fp != nullptr)
-		{
-			float ll, uu, lu, ul;
-			if (fscanf(fp, "%f %f %f %f", &ll, &ul, &lu, &uu) == 4)
-			{
-				GetrangeSub(ll, uu, ul, lu);
-			}
-		}
-		fclose(fp);
-	}
+void HystereticGrowingWidget::SliderReleased()
+{ 
+	emit EndDatachange(this);
 }
 
 void HystereticGrowingWidget::LeBordervallReturnpressed()
 {
-	bool b1;
-	float val = m_LeBordervall->text().toFloat(&b1);
-	float ll =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-	if (b1)
+	float val = m_LeBordervall->Value();
+	if (val < m_LowerLimit)
 	{
-		if (val < m_LowerLimit)
-		{
-			ll = m_LowerLimit;
-			m_SlLower->setValue(0);
-			m_LeBordervall->setText(QString::number(ll, 'g', 3));
-		}
-		else if (val > m_UpperLimit)
-		{
-			ll = m_UpperLimit;
-			m_SlLower->setValue(200);
-			m_LeBordervall->setText(QString::number(ll, 'g', 3));
-		}
-		else
-		{
-			if (m_UpperLimit == m_LowerLimit)
-			{
-				ll = m_UpperLimit;
-				m_SlLower->setValue(100);
-				m_LeBordervall->setText(QString::number(ll, 'g', 3));
-			}
-			else
-				m_SlLower->setValue(int(0.5f + (val - m_LowerLimit) /
-																					 (m_UpperLimit - m_LowerLimit) *
-																					 200));
-		}
-
-		Execute();
+		m_SlLower->SetValue(0);
+		m_LeBordervall->SetValue(m_LowerLimit);
+	}
+	else if (val > m_UpperLimit)
+	{
+		m_SlLower->SetValue(200);
+		m_LeBordervall->SetValue(m_UpperLimit);
 	}
 	else
 	{
-		QApplication::beep();
-		m_LeBordervall->setText(QString::number(ll, 'g', 3));
+		if (m_UpperLimit == m_LowerLimit)
+		{
+			m_SlLower->SetValue(100);
+			m_LeBordervall->SetValue(m_UpperLimit);
+		}
+		else
+			m_SlLower->SetValue(int(0.5f + (val - m_LowerLimit) / (m_UpperLimit - m_LowerLimit) * 200));
 	}
+
+	Execute();
 }
 
 void HystereticGrowingWidget::LeBordervaluReturnpressed()
 {
-	bool b1;
-	float val = m_LeBordervalu->text().toFloat(&b1);
-	float uu =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-	if (b1)
+	float val = m_LeBordervalu->Value();
+	if (val < m_LowerLimit)
 	{
-		if (val < m_LowerLimit)
-		{
-			uu = m_LowerLimit;
-			m_SlUpper->setValue(0);
-			m_LeBordervalu->setText(QString::number(uu, 'g', 3));
-		}
-		else if (val > m_UpperLimit)
-		{
-			uu = m_UpperLimit;
-			m_SlUpper->setValue(200);
-			m_LeBordervalu->setText(QString::number(uu, 'g', 3));
-		}
-		else
-		{
-			if (m_UpperLimit == m_LowerLimit)
-			{
-				uu = m_UpperLimit;
-				m_SlUpper->setValue(100);
-				m_LeBordervalu->setText(QString::number(uu, 'g', 3));
-			}
-			else
-				m_SlUpper->setValue(int(0.5f + (val - m_LowerLimit) /
-																					 (m_UpperLimit - m_LowerLimit) *
-																					 200));
-		}
-
-		Execute();
+		m_SlUpper->SetValue(0);
+		m_LeBordervalu->SetValue(m_LowerLimit);
+	}
+	else if (val > m_UpperLimit)
+	{
+		m_SlUpper->SetValue(200);
+		m_LeBordervalu->SetValue(m_UpperLimit);
 	}
 	else
 	{
-		QApplication::beep();
-		m_LeBordervall->setText(QString::number(uu, 'g', 3));
+		if (m_UpperLimit == m_LowerLimit)
+		{
+			m_SlUpper->SetValue(100);
+			m_LeBordervalu->SetValue(m_UpperLimit);
+		}
+		else
+			m_SlUpper->SetValue(int(0.5f + (val - m_LowerLimit) /(m_UpperLimit - m_LowerLimit) * 200));
 	}
+
+	Execute();
 }
 
 void HystereticGrowingWidget::LeBordervallhReturnpressed()
 {
-	bool b1;
-	float val = m_LeBordervallh->text().toFloat(&b1);
-	float ll =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-	float uu =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-	float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->value();
-	if (b1)
-	{
-		if (val < 0)
-		{
-			ul = ll;
-			m_SlLowerhyster->setValue(0);
-			m_LeBordervallh->setText(QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
-		}
-		else if (val > 100)
-		{
-			ul = uu;
-			m_SlLowerhyster->setValue(200);
-			m_LeBordervallh->setText(QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
-		}
-		else
-		{
-			if (uu == ll)
-			{
-				ul = uu;
-				m_SlLowerhyster->setValue(100);
-				m_LeBordervallh->setText(QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
-			}
-			else
-				m_SlLowerhyster->setValue(int(0.5f + val / 100 * 200));
-		}
+	float val = m_LeBordervallh->Value();
+	float ll = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->Value();
+	float uu = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->Value();
+	float ul = ll + (uu - ll) * 0.005f * m_SlLowerhyster->Value();
 
-		Execute();
+	if (val < 0)
+	{
+		ul = ll;
+		m_SlLowerhyster->SetValue(0);
+		m_LeBordervallh->SetValue(int((ul - ll) / (uu - ll) * 100));
+	}
+	else if (val > 100)
+	{
+		ul = uu;
+		m_SlLowerhyster->SetValue(200);
+		m_LeBordervallh->SetValue(int((ul - ll) / (uu - ll) * 100));
 	}
 	else
 	{
-		QApplication::beep();
-		m_LeBordervallh->setText(QString::number(int((ul - ll) / (uu - ll) * 100), 'g', 3));
+		if (uu == ll)
+		{
+			ul = uu;
+			m_SlLowerhyster->SetValue(100);
+			m_LeBordervallh->SetValue(int((ul - ll) / (uu - ll) * 100));
+		}
+		else
+			m_SlLowerhyster->SetValue(int(0.5f + val / 100 * 200));
 	}
+
+	Execute();
 }
 
 void HystereticGrowingWidget::LeBordervaluhReturnpressed()
 {
-	bool b1;
-	float val = m_LeBordervaluh->text().toFloat(&b1);
-	float ll =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->value();
-	float uu =
-			m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->value();
-	float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->value();
-	if (b1)
-	{
-		if (val < 0)
-		{
-			lu = ll;
-			m_SlUpperhyster->setValue(0);
-			m_LeBordervaluh->setText(QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
-		}
-		else if (val > 100)
-		{
-			lu = uu;
-			m_SlUpperhyster->setValue(200);
-			m_LeBordervaluh->setText(QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
-		}
-		else
-		{
-			if (uu == ll)
-			{
-				lu = uu;
-				m_SlUpperhyster->setValue(100);
-				m_LeBordervaluh->setText(QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
-			}
-			else
-				m_SlUpperhyster->setValue(int(0.5f + val / 100 * 200));
-		}
+	float val = m_LeBordervaluh->Value();
+	float ll = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlLower->Value();
+	float uu = m_LowerLimit + (m_UpperLimit - m_LowerLimit) * 0.005f * m_SlUpper->Value();
+	float lu = ll + (uu - ll) * 0.005f * m_SlUpperhyster->Value();
 
-		Execute();
+	if (val < 0)
+	{
+		lu = ll;
+		m_SlUpperhyster->SetValue(0);
+		m_LeBordervaluh->SetValue(int((lu - ll) / (uu - ll) * 100));
+	}
+	else if (val > 100)
+	{
+		lu = uu;
+		m_SlUpperhyster->SetValue(200);
+		m_LeBordervaluh->SetValue(int((lu - ll) / (uu - ll) * 100));
 	}
 	else
 	{
-		QApplication::beep();
-		m_LeBordervaluh->setText(QString::number(int((lu - ll) / (uu - ll) * 100), 'g', 3));
+		if (uu == ll)
+		{
+			lu = uu;
+			m_SlUpperhyster->SetValue(100);
+			m_LeBordervaluh->SetValue(int((lu - ll) / (uu - ll) * 100));
+		}
+		else
+			m_SlUpperhyster->SetValue(int(0.5f + val / 100 * 200));
 	}
+
+	Execute();
 }
 
 FILE* HystereticGrowingWidget::SaveParams(FILE* fp, int version)
@@ -704,17 +606,17 @@ FILE* HystereticGrowingWidget::SaveParams(FILE* fp, int version)
 	if (version >= 2)
 	{
 		int dummy;
-		dummy = m_SlLower->value();
+		dummy = m_SlLower->Value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = m_SlUpper->value();
+		dummy = m_SlUpper->Value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = m_SlLowerhyster->value();
+		dummy = m_SlLowerhyster->Value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = m_SlUpperhyster->value();
+		dummy = m_SlUpperhyster->Value();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(m_Autoseed->isChecked());
+		dummy = (int)(m_Autoseed->Value());
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		dummy = (int)(m_Allslices->isChecked());
+		dummy = (int)(m_Allslices->Value());
 		fwrite(&(dummy), 1, sizeof(int), fp);
 
 		fwrite(&m_UpperLimit, 1, sizeof(float), fp);
@@ -728,54 +630,32 @@ FILE* HystereticGrowingWidget::LoadParams(FILE* fp, int version)
 {
 	if (version >= 2)
 	{
-		QObject_disconnect(m_Autoseed, SIGNAL(clicked()), this, SLOT(AutoToggled()));
-		QObject_disconnect(m_SlLower, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_disconnect(m_SlUpper, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_disconnect(m_SlLowerhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_disconnect(m_SlUpperhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+		BlockPropertySignal autoseed_block(m_Autoseed);
+		BlockPropertySignal lower_block(m_SlLower);
+		BlockPropertySignal upper_block(m_SlUpper);
+		BlockPropertySignal lowerhyst_block(m_SlLowerhyster);
+		BlockPropertySignal upperhyst_block(m_SlUpperhyster);
 
-		int dummy;
-		fread(&dummy, sizeof(int), 1, fp);
-		m_SlLower->setValue(dummy);
-		fread(&dummy, sizeof(int), 1, fp);
-		m_SlUpper->setValue(dummy);
-		fread(&dummy, sizeof(int), 1, fp);
-		m_SlLowerhyster->setValue(dummy);
-		fread(&dummy, sizeof(int), 1, fp);
-		m_SlUpperhyster->setValue(dummy);
-		fread(&dummy, sizeof(int), 1, fp);
-		m_Autoseed->setChecked(dummy > 0);
-		fread(&dummy, sizeof(int), 1, fp);
-		m_Allslices->setChecked(dummy > 0);
-
-		UpdateVisible();
-
-		//		AutoToggled();
-
+		int lower, upper, lowerhyst, upperhyst, autoseed, all_slices;
+		fread(&lower, sizeof(int), 1, fp);
+		fread(&upper, sizeof(int), 1, fp);
+		fread(&lowerhyst, sizeof(int), 1, fp);
+		fread(&upperhyst, sizeof(int), 1, fp);
+		fread(&autoseed, sizeof(int), 1, fp);
+		fread(&all_slices, sizeof(int), 1, fp);
 		fread(&m_UpperLimit, sizeof(float), 1, fp);
 		fread(&m_LowerLimit, sizeof(float), 1, fp);
 
-		QObject_connect(m_Autoseed, SIGNAL(clicked()), this, SLOT(AutoToggled()));
-		QObject_connect(m_SlLower, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_connect(m_SlUpper, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_connect(m_SlLowerhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
-		QObject_connect(m_SlUpperhyster, SIGNAL(sliderMoved(int)), this, SLOT(SliderChanged()));
+		m_SlLower->SetValue(lower);
+		m_SlUpper->SetValue(upper);
+		m_SlLowerhyster->SetValue(lowerhyst);
+		m_SlUpperhyster->SetValue(upperhyst);
+		m_Autoseed->SetValue(autoseed != 0);
+		m_Allslices->SetValue(all_slices != 0);
+
+		UpdateVisible();
 	}
 	return fp;
-}
-
-void HystereticGrowingWidget::HideParamsChanged()
-{
-	if (hideparams)
-	{
-		m_PbSaveborders->hide();
-		m_PbLoadborders->hide();
-	}
-	else
-	{
-		m_PbSaveborders->show();
-		m_PbLoadborders->show();
-	}
 }
 
 } // namespace iseg

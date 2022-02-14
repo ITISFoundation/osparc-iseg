@@ -126,7 +126,7 @@ AutoTubeWidget::AutoTubeWidget(iseg::SlicesHandlerInterface* hand3D)
 	auto scroll_area = new QScrollArea(this);
 	scroll_area->setWidget(big_view);
 
-	auto top_layout = new QGridLayout(1, 1);
+	auto top_layout = new QGridLayout;
 	top_layout->addWidget(scroll_area, 0, 0);
 	setLayout(top_layout);
 

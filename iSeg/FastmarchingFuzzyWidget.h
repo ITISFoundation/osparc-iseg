@@ -38,7 +38,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Fuzzy"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("fuzzy.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("fuzzy.png")); }
 
 protected:
 	void OnSlicenrChanged() override;

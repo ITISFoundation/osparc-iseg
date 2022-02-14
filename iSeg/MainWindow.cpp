@@ -30,7 +30,7 @@
 #include "MultiDatasetWidget.h"
 #include "OutlineCorrectionWidget.h"
 #include "PickerWidget.h"
-#include "SaveOutlinesWidget.h"
+#include "SaveOutlinesDialog.h"
 #include "SelectColorButton.h"
 #include "Settings.h"
 #include "SliceViewerWidget.h"
@@ -79,6 +79,8 @@
 #include <QSettings>
 #include <QTextEdit>
 #include <QToolTip>
+
+#include <Q3ScrollView>
 
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
@@ -282,11 +284,6 @@ bool read_tissues(const char* filename, std::vector<tissues_size_t>& types)
 	return ok;
 }
 
-void style_dockwidget(QDockWidget* dockwidg)
-{
-	//dockwidg->setStyleSheet("QDockWidget { color: black; } QDockWidget::title { background: gray; padding-left: 5px; padding-top: 3px; color: darkgray} QDockWidget::close-button, QDockWidget::float-button { background: gray; }");
-}
-
 bool MenuWTT::event(QEvent* e)
 {
 	// not needed from Qt 5.1 -> see QMenu::setToolTipVisible
@@ -324,9 +321,9 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_MEditingmode = editingmode;
 	m_TabOld = nullptr;
 
-	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+	setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
-	QIcon isegicon(m_MPicpath.absoluteFilePath(QString("isegicon.png")).ascii());
+	QIcon isegicon(m_MPicpath.absoluteFilePath("isegicon.png"));
 	setWindowIcon(isegicon);
 	m_MLocationstring = locationstring;
 	m_MSaveprojfilename = "";
@@ -392,7 +389,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SlBrightnessbmp = new QSlider(Qt::Horizontal, this);
 	m_SlBrightnessbmp->setRange(0, 100);
 	m_LbContrastbmp = new QLabel("C:", this);
-	m_LbContrastbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
+	m_LbContrastbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath("icon-contrast.png")).pixmap());
 	m_LeContrastbmpVal = new QLineEdit(this);
 	m_LeContrastbmpVal->setAlignment(Qt::AlignRight);
 	m_LeContrastbmpVal->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -402,7 +399,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastbmpVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastbmpVal = new QLabel("x", this);
 	m_LbBrightnessbmp = new QLabel("B:", this);
-	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png")).ascii()).pixmap());
+	m_LbBrightnessbmp->setPixmap(QIcon(m_MPicpath.absoluteFilePath("icon-brightness.png")).pixmap());
 	m_LeBrightnessbmpVal = new QLineEdit(this);
 	m_LeBrightnessbmpVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessbmpVal->setText(QString("%1").arg(9999, 3));
@@ -417,13 +414,13 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_BmpShow->SetIsBmp(true);
 	m_BmpShow->update();
 
-	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("next.png"))), "", this);
+	m_ToworkBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath("next.png")), "", this);
 	m_ToworkBtn->setFixedWidth(50);
-	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("previous.png"))), "", this);
+	m_TobmpBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath("previous.png")), "", this);
 	m_TobmpBtn->setFixedWidth(50);
-	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("swap.png"))), "", this);
+	m_SwapBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath("swap.png")), "", this);
 	m_SwapBtn->setFixedWidth(50);
-	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath(QString("swap.png"))), "3D", this);
+	m_SwapAllBtn = new QPushButton(QIcon(m_MPicpath.absoluteFilePath("swap.png")), "3D", this);
 	m_SwapAllBtn->setFixedWidth(50);
 
 	m_WorkShow = new ImageViewerWidget(this);
@@ -432,7 +429,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_SlBrightnesswork = new QSlider(Qt::Horizontal, this);
 	m_SlBrightnesswork->setRange(0, 100);
 	m_LbContrastwork = new QLabel(this);
-	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-contrast.png"))).pixmap());
+	m_LbContrastwork->setPixmap(QIcon(m_MPicpath.absoluteFilePath("icon-contrast.png")).pixmap());
 	m_LeContrastworkVal = new QLineEdit(this);
 	m_LeContrastworkVal->setAlignment(Qt::AlignRight);
 	m_LeContrastworkVal->setText(QString("%1").arg(9999.99, 6, 'f', 2));
@@ -442,7 +439,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_LeContrastworkVal->setFixedSize(rect.width() + 4, rect.height() + 4);
 	m_LbContrastworkVal = new QLabel("x", this);
 	m_LbBrightnesswork = new QLabel(this);
-	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("icon-brightness.png"))).pixmap());
+	m_LbBrightnesswork->setPixmap(QIcon(m_MPicpath.absoluteFilePath("icon-brightness.png")).pixmap());
 	m_LeBrightnessworkVal = new QLineEdit(this);
 	m_LeBrightnessworkVal->setAlignment(Qt::AlignRight);
 	m_LeBrightnessworkVal->setText(QString("%1").arg(9999, 3));
@@ -471,7 +468,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_TissueHierarchyWidget = new TissueHierarchyWidget(m_TissueTreeWidget, this);
 	m_TissueTreeWidget->UpdateTreeWidget(); // Reload hierarchy
 	m_CbTissuelock = new QCheckBox(this);
-	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absoluteFilePath(QString("lock.png"))).pixmap());
+	m_CbTissuelock->setPixmap(QIcon(m_MPicpath.absoluteFilePath("lock.png")).pixmap());
 	m_CbTissuelock->setChecked(false);
 	m_LockTissues = new QPushButton("All", this);
 	m_LockTissues->setToggleButton(true);
@@ -865,19 +862,14 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtabsw->setFixedWidth(hboxtabs->sizeHint().width());
 
 	QDockWidget* tabswdock = new QDockWidget(tr("Methods"), this);
-	style_dockwidget(tabswdock);
 	tabswdock->setObjectName("Methods");
 	tabswdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	tabswdock->setWidget(hboxtabsw);
 	addDockWidget(Qt::BottomDockWidgetArea, tabswdock);
 
 	QDockWidget* method_tabdock = new QDockWidget(tr("Parameters"), this);
-	style_dockwidget(method_tabdock);
 	method_tabdock->setObjectName("Parameters");
 	method_tabdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-	//	Q3ScrollView *tab_scroller=new Q3ScrollView(this);xxxa
-	//	tab_scroller->addChild(methodTab);
-	//	methodTabdock->setWidget(tab_scroller);
 	method_tabdock->setWidget(m_MethodTab);
 	addDockWidget(Qt::BottomDockWidgetArea, method_tabdock);
 
@@ -886,28 +878,24 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	vboxnotes->setMargin(0);
 
 	QDockWidget* notesdock = new QDockWidget(tr("Notes"), this);
-	style_dockwidget(notesdock);
 	notesdock->setObjectName("Notes");
 	notesdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	notesdock->setWidget(m_MNotes);
 	addDockWidget(Qt::BottomDockWidgetArea, notesdock);
 
 	QDockWidget* bitstackdock = new QDockWidget(tr("Img Clipboard"), this);
-	style_dockwidget(bitstackdock);
 	bitstackdock->setObjectName("Clipboard");
 	bitstackdock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	bitstackdock->setWidget(m_BitstackWidget);
 	addDockWidget(Qt::BottomDockWidgetArea, bitstackdock);
 
 	QDockWidget* multi_dataset_dock = new QDockWidget(tr("Multi Dataset"), this);
-	style_dockwidget(multi_dataset_dock);
 	multi_dataset_dock->setObjectName("Multi Dataset");
 	multi_dataset_dock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	multi_dataset_dock->setWidget(m_MultidatasetWidget);
 	addDockWidget(Qt::BottomDockWidgetArea, multi_dataset_dock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
-	style_dockwidget(overlaydock);
 	overlaydock->setObjectName("Overlay");
 	overlaydock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	overlaydock->setWidget(m_OverlayWidget);
@@ -949,16 +937,17 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtissueremove->addWidget(m_RemoveTissueFolderAll);
 	vboxtissue->addLayout(hboxtissueremove);
 	vboxtissue->addWidget(m_Tissue3Dopt);
+
 	QHBoxLayout* hboxtissueget = new QHBoxLayout;
 	hboxtissueget->addWidget(m_GetTissue);
 	hboxtissueget->addWidget(m_GetTissueAll);
 	vboxtissue->addLayout(hboxtissueget);
+
 	QHBoxLayout* hboxtissueclear = new QHBoxLayout;
 	hboxtissueclear->addWidget(m_ClearTissue);
 	hboxtissueclear->addWidget(m_ClearTissues);
 	vboxtissue->addLayout(hboxtissueclear);
 	vboxtissuew->setLayout(vboxtissue);
-	//xxxb	vboxtissuew->setFixedHeight(vboxtissue->sizeHint().height());
 
 	QVBoxLayout* vboxtissueadder1 = new QVBoxLayout;
 	vboxtissueadder1->setSpacing(0);
@@ -987,39 +976,33 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	hboxtissueadder->addWidget(vboxtissueadder2w);
 	hboxtissueadderw->setLayout(hboxtissueadder);
 	hboxtissueadderw->setFixedHeight(hboxtissueadder->sizeHint().height());
-	//xxxb	hboxtissueadderw->setFixedWidth(vboxtissue->sizeHint().width());
 
 	QDockWidget* zoomdock = new QDockWidget(tr("Zoom"), this);
-	style_dockwidget(zoomdock);
 	zoomdock->setObjectName("Zoom");
 	zoomdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	zoomdock->setWidget(m_ZoomWidget);
 	addDockWidget(Qt::RightDockWidgetArea, zoomdock);
 
 	QDockWidget* tissuewdock = new QDockWidget(tr("Tissues"), this);
-	style_dockwidget(tissuewdock);
 	tissuewdock->setObjectName("Tissues");
 	tissuewdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuewdock->setWidget(vboxtissuew);
 	addDockWidget(Qt::RightDockWidgetArea, tissuewdock);
 	m_TissuesDock = tissuewdock;
 
-	QDockWidget* tissuehierarchydock =
-			new QDockWidget(tr("Tissue Hierarchy"), this);
-	style_dockwidget(tissuehierarchydock);
-	tissuehierarchydock->setToolTip(Format("The tissue hierarchy allows to group and organize complex "
-																				 "segmentations into a hierarchy."));
+	QDockWidget* tissuehierarchydock = new QDockWidget(tr("Tissue Hierarchy"), this);
+	tissuehierarchydock->setToolTip(Format("The tissue hierarchy allows to group and organize complex segmentations into a hierarchy."));
 	tissuehierarchydock->setObjectName("Tissue Hierarchy");
 	tissuehierarchydock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissuehierarchydock->setWidget(m_TissueHierarchyWidget);
 	addDockWidget(Qt::RightDockWidgetArea, tissuehierarchydock);
 
 	QDockWidget* tissueadddock = new QDockWidget(tr("Adder"), this);
-	style_dockwidget(tissueadddock);
-	tissueadddock->setToolTip(Format("The tissue adder provides functionality "
-																	 "to add/remove an object selected/picked in "
-																	 "the Target to/from the selected tissue."
-																	 "Note: Only one tissue can be selected."));
+	tissueadddock->setToolTip(Format(
+			"The tissue adder provides functionality "
+			"to add/remove an object selected/picked in "
+			"the Target to/from the selected tissue."
+			"Note: Only one tissue can be selected."));
 	tissueadddock->setObjectName("Adder");
 	tissueadddock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	tissueadddock->setWidget(hboxtissueadderw);
@@ -1042,7 +1025,6 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	vboxmaskingw->setLayout(vboxmasking);
 
 	QDockWidget* maskdock = new QDockWidget(tr("Mask"), this);
-	style_dockwidget(maskdock);
 	maskdock->setObjectName("Mask");
 	maskdock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	maskdock->setWidget(vboxmaskingw);
@@ -1068,7 +1050,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	menuBar()->addMenu(m_File);
 	if (!m_MEditingmode)
 	{
-		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("filenew.png"))), "&New...", this, SLOT(ExecuteNew()));
+		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath("filenew.png")), "&New...", this, SLOT(ExecuteNew()));
 		m_Loadmenu = m_File->addMenu("&Open");
 		m_Loadmenu->addAction("Open Dicom (.dcm...)", this, SLOT(ExecuteLoaddicom()));
 		m_Loadmenu->addAction("Open Image Series (.bmp, .png, ...)", this, SLOT(ExecuteLoadImageSeries()));
@@ -1127,11 +1109,11 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_File->addAction("Save &Project as...", this, SLOT(ExecuteSaveprojas()));
 	else
 		m_File->addAction("Save &Project-Copy as...", this, SLOT(ExecuteSavecopyas()));
-	m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("filesave.png"))), "Save Pro&ject", this, SLOT(ExecuteSaveproj()), QKeySequence("Ctrl+S"));
+	m_File->addAction(QIcon(m_MPicpath.absoluteFilePath("filesave.png")), "Save Pro&ject", this, SLOT(ExecuteSaveproj()), QKeySequence("Ctrl+S"));
 	m_File->addAction("Save Active Slices...", this, SLOT(ExecuteSaveactiveslicesas()));
 	if (!m_MEditingmode)
 	{
-		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("fileopen.png"))), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
+		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath("fileopen.png")), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
 	}
 	m_File->addSeparator();
 	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSavetissues()));
@@ -1165,7 +1147,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_Imagemenu->addAction("Pad...", this, SLOT(ExecutePad()));
 		m_Imagemenu->addAction("Crop...", this, SLOT(ExecuteCrop()));
 	}
-	m_Imagemenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("histo.png"))), "&Histogram...", this, SLOT(ExecuteHisto()));
+	m_Imagemenu->addAction(QIcon(m_MPicpath.absoluteFilePath("histo.png")), "&Histogram...", this, SLOT(ExecuteHisto()));
 	m_Imagemenu->addAction("&Contr./Bright. ...", this, SLOT(ExecuteScale()));
 	m_Imagemenu->addAction("&Image Math. ...", this, SLOT(ExecuteImagemath()));
 	m_Imagemenu->addAction("Unwrap", this, SLOT(ExecuteUnwrap()));
@@ -1188,8 +1170,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	}
 
 	m_Editmenu = menuBar()->addMenu(tr("E&dit"));
-	m_Undonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("undo.png"))), "&Undo", this, SLOT(ExecuteUndo()));
-	m_Redonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("redo.png"))), "Redo", this, SLOT(ExecuteRedo()));
+	m_Undonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath("undo.png")), "&Undo", this, SLOT(ExecuteUndo()));
+	m_Redonr = m_Editmenu->addAction(QIcon(m_MPicpath.absoluteFilePath("redo.png")), "Redo", this, SLOT(ExecuteRedo()));
 	m_Editmenu->addSeparator();
 	m_Editmenu->addAction("&Configure Undo...", this, SLOT(ExecuteUndoconf()));
 	m_Editmenu->addAction("&Active Slices...", this, SLOT(ExecuteActiveslicesconf()));
@@ -1319,7 +1301,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_MAtlasfilename.m_Separator->setVisible(false);
 
 	m_Helpmenu = menuBar()->addMenu(tr("Help"));
-	m_Helpmenu->addAction(QIcon(m_MPicpath.absoluteFilePath(QString("help.png"))), "About", this, SLOT(ExecuteAbout()));
+	m_Helpmenu->addAction(QIcon(m_MPicpath.absoluteFilePath("help.png")), "About", this, SLOT(ExecuteAbout()));
 
 	QObject_connect(m_ToworkBtn, SIGNAL(clicked()), this, SLOT(ExecuteBmp2work()));
 	QObject_connect(m_TobmpBtn, SIGNAL(clicked()), this, SLOT(ExecuteWork2bmp()));
@@ -1639,7 +1621,7 @@ void MainWindow::ExecuteSaveContours()
 	data_selection.tissues = true;
 	emit BeginDataexport(data_selection, this);
 
-	SaveOutlinesWidget sow(m_Handler3D, this);
+	SaveOutlinesDialog sow(m_Handler3D, this);
 	sow.move(QCursor::pos());
 	sow.exec();
 
@@ -1668,23 +1650,18 @@ void MainWindow::ExecuteSwapxy()
 		w = m_Handler3D->Height();
 		h = m_Handler3D->Width();
 		nrslices = m_Handler3D->NumSlices();
-		QString str1;
 		for (int i = 0; i < m_MultidatasetWidget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
-				std::string temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawXySwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				QString str1 = QDir::temp().absoluteFilePath(QString("bmp_float_eds_%1.raw").arg(i));
+				if (SlicesHandler::SaveRawXySwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
-					temp_file_name = "bmp_float_eds_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-					str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1724,22 +1701,18 @@ void MainWindow::ExecuteSwapxz()
 		w = m_Handler3D->NumSlices();
 		h = m_Handler3D->Height();
 		nrslices = m_Handler3D->Width();
-		QString str1;
 		for (int i = 0; i < m_MultidatasetWidget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
-				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawXzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				QString str1 = QDir::temp().absoluteFilePath(QString("bmp_float_%1.raw").arg(i));
+				if (SlicesHandler::SaveRawXzSwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
-					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1783,22 +1756,18 @@ void MainWindow::ExecuteSwapyz()
 		w = m_Handler3D->Width();
 		h = m_Handler3D->NumSlices();
 		nrslices = m_Handler3D->Height();
-		QString str1;
 		for (int i = 0; i < m_MultidatasetWidget->GetNumberOfDatasets(); i++)
 		{
 			// Swap all but the active one
 			if (!m_MultidatasetWidget->IsActive(i))
 			{
-				std::string temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-				str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-				if (SlicesHandler::SaveRawYzSwapped(str1.ascii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
+				QString str1 = QDir::temp().absoluteFilePath(QString("bmp_float_%1.raw").arg(i));
+				if (SlicesHandler::SaveRawYzSwapped(str1.toAscii(), m_MultidatasetWidget->GetBmpData(i), w, h, nrslices) != 0)
 					ok = false;
 
 				if (ok)
 				{
-					temp_file_name = "bmp_float_" + std::to_string(i) + ".raw";
-					str1 = QDir::temp().absoluteFilePath(QString(temp_file_name.c_str()));
-					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.ascii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
+					m_MultidatasetWidget->SetBmpData(i, SlicesHandler::LoadRawFloat(str1.toAscii(), m_Handler3D->StartSlice(), m_Handler3D->EndSlice(), 0, w * h));
 				}
 			}
 		}
@@ -1848,32 +1817,32 @@ void MainWindow::ExecuteResize(int resizetype)
 	nrslices = m_Handler3D->NumSlices();
 	QString str1;
 	bool ok = true;
-	str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, false) != 0)
+	str1 = QDir::temp().absoluteFilePath("bmp_float.raw");
+	if (m_Handler3D->SaveRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp, false) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-	if (m_Handler3D->SaveRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp, true) != 0)
+	str1 = QDir::temp().absoluteFilePath("work_float.raw");
+	if (m_Handler3D->SaveRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp, true) != 0)
 		ok = false;
-	str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-	if (m_Handler3D->SaveTissuesRawResized(str1.ascii(), dxm, dxp, dym, dyp, dzm, dzp) != 0)
+	str1 = QDir::temp().absoluteFilePath("tissues.raw");
+	if (m_Handler3D->SaveTissuesRawResized(str1.toAscii(), dxm, dxp, dym, dyp, dzm, dzp) != 0)
 		ok = false;
 
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("work_float.raw"));
-		if (m_Handler3D->ReadRawFloat(str1.ascii(), w + dxm + dxp, h + dym + dyp, 0, nrslices + dzm + dzp) != 1)
+		str1 = QDir::temp().absoluteFilePath("work_float.raw");
+		if (m_Handler3D->ReadRawFloat(str1.toAscii(), w + dxm + dxp, h + dym + dyp, 0, nrslices + dzm + dzp) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("bmp_float.raw"));
-		if (m_Handler3D->ReloadRawFloat(str1.ascii(), 0) != 1)
+		str1 = QDir::temp().absoluteFilePath("bmp_float.raw");
+		if (m_Handler3D->ReloadRawFloat(str1.toAscii(), 0) != 1)
 			ok = false;
 	}
 	if (ok)
 	{
-		str1 = QDir::temp().absoluteFilePath(QString("tissues.raw"));
-		if (m_Handler3D->ReloadRawTissues(str1.ascii(), sizeof(tissues_size_t) * 8, 0) != 1)
+		str1 = QDir::temp().absoluteFilePath("tissues.raw");
+		if (m_Handler3D->ReloadRawTissues(str1.toAscii(), sizeof(tissues_size_t) * 8, 0) != 1)
 		{
 			ok = false;
 		}
@@ -2051,7 +2020,10 @@ void MainWindow::EnableActionsAfterPrjLoaded(const bool enable)
 
 void MainWindow::ExecuteLoadImageSeries()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QStringList files = QFileDialog::getOpenFileNames(
 			this, "Select one or more files to open", QString::null, "Images (*.bmp);;Images (*.png);;Images (*.jpg *.jpeg);;Images (*.tif *.tiff);;All (*.*)");
@@ -2069,10 +2041,10 @@ void MainWindow::ExecuteLoadImageSeries()
 			vi.push_back(bmpimgnr(&files[i]));
 		}
 
-		std::vector<const char*> vfilenames;
+		std::vector<std::string> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
-			vfilenames.push_back(files[i].ascii());
+			vfilenames.push_back(files[i].toStdString());
 		}
 
 		auto format = LoaderColorImages::kBMP;
@@ -2110,7 +2082,10 @@ void MainWindow::ExecuteLoadImageSeries()
 
 void MainWindow::ExecuteLoaddicom()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QStringList files = QFileDialog::getOpenFileNames(
 			this, "Select one or more files to open", QString::null, "Images (*.dcm *.dicom)\nAll (*)");
@@ -2175,7 +2150,16 @@ void MainWindow::ExecuteReloaddicom()
 
 void MainWindow::ExecuteLoadraw()
 {
-	MaybeSafe();
+	QString file_path = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
+	if (file_path.isEmpty())
+	{
+		return;
+	}
+
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2184,17 +2168,11 @@ void MainWindow::ExecuteLoadraw()
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	LoaderRaw lr(m_Handler3D, this);
+	LoaderRaw lr(m_Handler3D, file_path, this);
 	lr.move(QCursor::pos());
 	lr.exec();
 
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->WorkborderChanged();
-
 	emit EndDatachange(this, iseg::ClearUndo);
-
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 	ResetBrightnesscontrast();
 
@@ -2203,7 +2181,10 @@ void MainWindow::ExecuteLoadraw()
 
 void MainWindow::ExecuteLoadMedicalImage()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2217,7 +2198,7 @@ void MainWindow::ExecuteLoadMedicalImage()
 																																												 "All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadImage(loadfilename.ascii());
+		m_Handler3D->ReadImage(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2231,7 +2212,10 @@ void MainWindow::ExecuteLoadMedicalImage()
 
 void MainWindow::ExecuteLoadvtk()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2244,7 +2228,7 @@ void MainWindow::ExecuteLoadvtk()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		res = m_Handler3D->ReadImage(loadfilename.ascii());
+		res = m_Handler3D->ReadImage(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2263,7 +2247,10 @@ void MainWindow::ExecuteLoadvtk()
 
 void MainWindow::ExecuteLoadavw()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2275,7 +2262,7 @@ void MainWindow::ExecuteLoadavw()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadAvw(loadfilename.ascii());
+		m_Handler3D->ReadAvw(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2293,8 +2280,7 @@ void MainWindow::ExecuteReloadbmp()
 			this, "Select one or more files to open", QString::null, "Images (*.bmp)\nAll (*.*)");
 
 	if ((unsigned short)files.size() == m_Handler3D->NumSlices() ||
-			(unsigned short)files.size() ==
-					(m_Handler3D->EndSlice() - m_Handler3D->StartSlice()))
+			(unsigned short)files.size() == (m_Handler3D->EndSlice() - m_Handler3D->StartSlice()))
 	{
 		files.sort();
 
@@ -2307,10 +2293,10 @@ void MainWindow::ExecuteReloadbmp()
 			vi.push_back(bmpimgnr(&files[i]));
 		}
 
-		std::vector<const char*> vfilenames;
+		std::vector<std::string> vfilenames;
 		for (short i = 0; i < nrelem; i++)
 		{
-			vfilenames.push_back(files[i].ascii());
+			vfilenames.push_back(files[i].toStdString());
 		}
 
 		DataSelection data_selection;
@@ -2324,13 +2310,8 @@ void MainWindow::ExecuteReloadbmp()
 		rb.move(QCursor::pos());
 		rb.exec();
 
-		//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-		//	bmp_show->WorkborderChanged();
-
 		emit EndDatachange(this, iseg::ClearUndo);
 
-		//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 		ResetBrightnesscontrast();
 	}
 	else
@@ -2344,6 +2325,12 @@ void MainWindow::ExecuteReloadbmp()
 
 void MainWindow::ExecuteReloadraw()
 {
+	QString file_path = RecentPlaces::GetOpenFileName(this, QString::null, QString::null, QString::null);
+	if (file_path.isEmpty())
+	{
+		return;
+	}
+
 	DataSelection data_selection;
 	data_selection.allSlices = true;
 	data_selection.bmp = true;
@@ -2351,16 +2338,11 @@ void MainWindow::ExecuteReloadraw()
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	ReloaderRaw rr(m_Handler3D, this);
+	ReloaderRaw rr(m_Handler3D, file_path, this);
 	rr.move(QCursor::pos());
 	rr.exec();
 
-	//	work_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->update();//(bmphand->return_width(),bmphand->return_height());
-	//	bmp_show->WorkborderChanged();
-
 	emit EndDatachange(this, iseg::ClearUndo);
-	//	hbox1->setFixedSize(bmphand->return_width()*2+vbox1->sizeHint().width(),bmphand->return_height());
 
 	ResetBrightnesscontrast();
 }
@@ -2377,7 +2359,7 @@ void MainWindow::ExecuteReloadavw()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "AnalzyeAVW (*.avw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadAVW(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadAVW(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2397,7 +2379,7 @@ void MainWindow::ExecuteReloadMedicalImage()
 																																												 "All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadImage(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2415,7 +2397,7 @@ void MainWindow::ExecuteReloadvtk()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadImage(loadfilename.ascii(), m_Handler3D->StartSlice());
+		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2423,7 +2405,10 @@ void MainWindow::ExecuteReloadvtk()
 
 void MainWindow::ExecuteLoadsurface()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	bool ok = true;
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Import Surface/Lines", QString::null, "Surfaces & Polylines (*.stl *.vtk)");
@@ -2491,7 +2476,10 @@ void MainWindow::ExecuteLoadrtstruct()
 
 void MainWindow::ExecuteLoadrtdose()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	DataSelection data_selection;
 	data_selection.allSlices = true;
@@ -2503,7 +2491,7 @@ void MainWindow::ExecuteLoadrtdose()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReadRTdose(loadfilename.ascii());
+		m_Handler3D->ReadRTdose(loadfilename.toAscii());
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2527,7 +2515,7 @@ void MainWindow::ExecuteReloadrtdose()
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "RTdose (*.dcm)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
-		m_Handler3D->ReloadRTdose(loadfilename.ascii(), m_Handler3D->StartSlice()); // TODO: handle failure
+		m_Handler3D->ReloadRTdose(loadfilename.toAscii(), m_Handler3D->StartSlice()); // TODO: handle failure
 		ResetBrightnesscontrast();
 	}
 	emit EndDatachange(this, iseg::ClearUndo);
@@ -2602,13 +2590,13 @@ void MainWindow::ExecuteSaveprojas()
 		progress.setModal(true);
 		progress.setValue(1);
 
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+		setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 							 QString(" - ") + TruncateFileName(savefilename));
 
 		//m_saveprojfilename = tempFileName;
 		//AddLoadProj(tempFileName);
 		AddLoadProj(m_MSaveprojfilename);
-		FILE* fp = m_Handler3D->SaveProject(temp_file_name.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveProject(temp_file_name.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2674,7 +2662,7 @@ void MainWindow::ExecuteSavecopyas()
 		if (!savefilename.endsWith(QString(".prj")))
 			savefilename.append(".prj");
 
-		FILE* fp = m_Handler3D->SaveProject(savefilename.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveProject(savefilename.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2782,11 +2770,11 @@ void MainWindow::SaveSettings()
 	settings.sync();
 }
 
-void MainWindow::LoadSettings(const char* loadfilename)
+void MainWindow::LoadSettings(const std::string& loadfilename)
 {
 	m_Settingsfile = loadfilename;
 	FILE* fp;
-	if ((fp = fopen(loadfilename, "rb")) == nullptr)
+	if ((fp = fopen(loadfilename.c_str(), "rb")) == nullptr)
 	{
 		return;
 	}
@@ -2860,7 +2848,7 @@ void MainWindow::LoadSettings(const char* loadfilename)
 	ExecuteShowtabtoggled(flag);
 
 	fp = TissueInfos::LoadTissues(fp, tissues_version);
-	const char* default_tissues_filename = m_MTmppath.absoluteFilePath(QString("def_tissues.txt"));
+	const char* default_tissues_filename = m_MTmppath.absoluteFilePath("def_tissues.txt");
 	FILE* fp_tmp = fopen(default_tissues_filename, "r");
 	if (fp_tmp != nullptr || TissueInfos::GetTissueCount() <= 0)
 	{
@@ -2937,7 +2925,7 @@ void MainWindow::ExecuteSaveactiveslicesas()
 
 	if (!savefilename.isEmpty())
 	{
-		FILE* fp = m_Handler3D->SaveActiveSlices(savefilename.ascii(), "xmf");
+		FILE* fp = m_Handler3D->SaveActiveSlices(savefilename.toAscii(), "xmf");
 		fp = m_BitstackWidget->SaveProj(fp);
 		unsigned short save_proj_version = 12;
 		fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -2984,7 +2972,7 @@ void MainWindow::ExecuteSaveproj()
 	{
 		if (!m_S4Lcommunicationfilename.isEmpty())
 		{
-			m_Handler3D->SaveCommunicationFile(m_S4Lcommunicationfilename.ascii());
+			m_Handler3D->SaveCommunicationFile(m_S4Lcommunicationfilename.toAscii());
 		}
 	}
 	else
@@ -3021,13 +3009,13 @@ void MainWindow::ExecuteSaveproj()
 			progress.setModal(true);
 			progress.setValue(1);
 
-			setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+			setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 								 QString(" - ") + TruncateFileName(m_MSaveprojfilename));
 
 			m_MSaveprojfilename = temp_file_name;
 
-			//FILE *fp=handler3D->SaveProject(m_saveprojfilename.ascii(),"xmf");
-			FILE* fp = m_Handler3D->SaveProject(temp_file_name.ascii(), "xmf");
+			//FILE *fp=handler3D->SaveProject(m_saveprojfilename.toAscii(),"xmf");
+			FILE* fp = m_Handler3D->SaveProject(temp_file_name.toAscii(), "xmf");
 			fp = m_BitstackWidget->SaveProj(fp);
 			unsigned short save_proj_version = 12;
 			fp = TissueInfos::SaveTissues(fp, save_proj_version);
@@ -3133,7 +3121,7 @@ void MainWindow::ExecuteSaveproj()
 void MainWindow::Loadproj(const QString& loadfilename)
 {
 	FILE* fp;
-	if ((fp = fopen(loadfilename.ascii(), "r")) == nullptr)
+	if ((fp = fopen(loadfilename.toAscii(), "r")) == nullptr)
 	{
 		return;
 	}
@@ -3153,10 +3141,10 @@ void MainWindow::Loadproj(const QString& loadfilename)
 	if (!loadfilename.isEmpty())
 	{
 		m_MSaveprojfilename = loadfilename;
-		setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
+		setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) + QString(" - ") + TruncateFileName(loadfilename));
 		AddLoadProj(m_MSaveprojfilename);
 		int tissues_version = 0;
-		fp = m_Handler3D->LoadProject(loadfilename.ascii(), tissues_version);
+		fp = m_Handler3D->LoadProject(loadfilename.toAscii(), tissues_version);
 		fp = m_BitstackWidget->LoadProj(fp);
 		fp = TissueInfos::LoadTissues(fp, tissues_version);
 		stillopen = true;
@@ -3230,8 +3218,8 @@ void MainWindow::LoadS4Llink(const QString& loadfilename)
 
 	m_S4Lcommunicationfilename = loadfilename;
 	int tissues_version = 0;
-	m_Handler3D->LoadS4Llink(loadfilename.ascii(), tissues_version);
-	TissueInfos::LoadTissuesHDF(loadfilename.ascii(), tissues_version);
+	m_Handler3D->LoadS4Llink(loadfilename.toAscii(), tissues_version);
+	TissueInfos::LoadTissuesHDF(loadfilename.toAscii(), tissues_version);
 
 	emit EndDatachange(this, iseg::ClearUndo);
 	tissues_size_t m;
@@ -3274,7 +3262,7 @@ void MainWindow::ExecuteMergeprojects()
 
 	if (!savefilename.isEmpty() && !mergefilenames.empty())
 	{
-		FILE* fp = m_Handler3D->MergeProjects(savefilename.ascii(), mergefilenames);
+		FILE* fp = m_Handler3D->MergeProjects(savefilename.toAscii(), mergefilenames);
 		if (!fp)
 		{
 			QMessageBox::warning(this, "iSeg", "Merge projects failed.\n\nPlease make sure that "
@@ -3334,7 +3322,10 @@ void MainWindow::UpdateSlice() { SliceChanged(); }
 
 void MainWindow::ExecuteLoadproj()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "Projects (*.prj)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
@@ -3345,7 +3336,10 @@ void MainWindow::ExecuteLoadproj()
 
 void MainWindow::ExecuteLoadproj1()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[0];
 
@@ -3357,7 +3351,10 @@ void MainWindow::ExecuteLoadproj1()
 
 void MainWindow::ExecuteLoadproj2()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[1];
 
@@ -3369,7 +3366,10 @@ void MainWindow::ExecuteLoadproj2()
 
 void MainWindow::ExecuteLoadproj3()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[2];
 
@@ -3381,7 +3381,10 @@ void MainWindow::ExecuteLoadproj3()
 
 void MainWindow::ExecuteLoadproj4()
 {
-	MaybeSafe();
+	if (!MaybeSafe())
+	{
+		return;
+	}
 
 	QString loadfilename = m_MLoadprojfilename.m_RecentProjectFileNames[3];
 
@@ -3394,7 +3397,7 @@ void MainWindow::ExecuteLoadproj4()
 void MainWindow::ExecuteLoadatlas(int i)
 {
 	AtlasWidget* aw = new AtlasWidget(
-			m_MAtlasfilename.m_MAtlasdir.absoluteFilePath(m_MAtlasfilename.m_MAtlasfilename[i]).ascii(),
+			m_MAtlasfilename.m_MAtlasdir.absoluteFilePath(m_MAtlasfilename.m_MAtlasfilename[i]),
 			m_MPicpath);
 	if (aw->m_IsOk)
 	{
@@ -3528,7 +3531,7 @@ void MainWindow::ExecuteCreateatlas()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintAtlas(savefilename.ascii());
+		m_Handler3D->PrintAtlas(savefilename.toAscii());
 		LoadAtlas(m_MAtlasfilename.m_MAtlasdir);
 	}
 
@@ -3547,7 +3550,7 @@ void MainWindow::ExecuteSavetissues()
 	if (!savefilename.isEmpty())
 	{
 		unsigned short save_version = 7;
-		TissueInfos::SaveTissuesReadable(savefilename.ascii(), save_version);
+		TissueInfos::SaveTissuesReadable(savefilename.toAscii(), save_version);
 	}
 }
 
@@ -3564,7 +3567,7 @@ void MainWindow::ExecuteExportlabelfield()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintAmascii(savefilename.ascii());
+		m_Handler3D->PrintAmascii(savefilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3585,7 +3588,7 @@ void MainWindow::ExecuteExportmat()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->PrintTissuemat(savefilename.ascii());
+		m_Handler3D->PrintTissuemat(savefilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3606,7 +3609,7 @@ void MainWindow::ExecuteExporthdf()
 		data_selection.tissues = true;
 		emit BeginDataexport(data_selection, this);
 
-		m_Handler3D->SaveCommunicationFile(savefilename.ascii());
+		m_Handler3D->SaveCommunicationFile(savefilename.toAscii());
 
 		emit EndDataexport(this);
 	}
@@ -3625,7 +3628,7 @@ void MainWindow::ExecuteExportvtkascii()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), false);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), false);
 	}
 
 	emit EndDataexport(this);
@@ -3644,7 +3647,7 @@ void MainWindow::ExecuteExportvtkbinary()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), true);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), true);
 	}
 
 	emit EndDataexport(this);
@@ -3663,7 +3666,7 @@ void MainWindow::ExecuteExportvtkcompressedascii()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), false);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), false);
 	}
 
 	emit EndDataexport(this);
@@ -3681,7 +3684,7 @@ void MainWindow::ExecuteExportvtkcompressedbinary()
 
 	if (!savefilename.isEmpty())
 	{
-		m_Handler3D->ExportTissue(savefilename.ascii(), true);
+		m_Handler3D->ExportTissue(savefilename.toAscii(), true);
 	}
 
 	emit EndDataexport(this);
@@ -3705,9 +3708,9 @@ void MainWindow::ExecuteExportxmlregionextent()
 	if (!savefilename.isEmpty())
 	{
 		if (relfilename.isEmpty())
-			m_Handler3D->PrintXmlregionextent(savefilename.ascii(), true);
+			m_Handler3D->PrintXmlregionextent(savefilename.toAscii(), true);
 		else
-			m_Handler3D->PrintXmlregionextent(savefilename.ascii(), true, relfilename.ascii());
+			m_Handler3D->PrintXmlregionextent(savefilename.toAscii(), true, relfilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3729,9 +3732,9 @@ void MainWindow::ExecuteExporttissueindex()
 	if (!savefilename.isEmpty())
 	{
 		if (relfilename.isEmpty())
-			m_Handler3D->PrintTissueindex(savefilename.ascii(), true);
+			m_Handler3D->PrintTissueindex(savefilename.toAscii(), true);
 		else
-			m_Handler3D->PrintTissueindex(savefilename.ascii(), true, relfilename.ascii());
+			m_Handler3D->PrintTissueindex(savefilename.toAscii(), true, relfilename.toAscii());
 	}
 
 	emit EndDataexport(this);
@@ -3754,7 +3757,7 @@ void MainWindow::ExecuteLoadtissues()
 		tissues_size_t remove_tissues_range;
 		if (msg_box.clickedButton() == append_button)
 		{
-			TissueInfos::LoadTissuesReadable(loadfilename.ascii(), m_Handler3D, remove_tissues_range);
+			TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range);
 			int nr = m_TissueTreeWidget->GetCurrentType() - 1;
 			m_TissueTreeWidget->UpdateTreeWidget();
 
@@ -3766,7 +3769,7 @@ void MainWindow::ExecuteLoadtissues()
 		}
 		else if (msg_box.clickedButton() == replace_button)
 		{
-			if (TissueInfos::LoadTissuesReadable(loadfilename.ascii(), m_Handler3D, remove_tissues_range))
+			if (TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range))
 			{
 				if (remove_tissues_range > 0)
 				{
@@ -3816,12 +3819,12 @@ void MainWindow::ExecuteLoadtissues()
 
 void MainWindow::ExecuteSettissuesasdef()
 {
-	TissueInfos::SaveDefaultTissueList(m_MTmppath.absoluteFilePath(QString("def_tissues.txt")));
+	TissueInfos::SaveDefaultTissueList(m_MTmppath.absoluteFilePath("def_tissues.txt"));
 }
 
 void MainWindow::ExecuteRemovedeftissues()
 {
-	remove(m_MTmppath.absoluteFilePath(QString("def_tissues.txt")));
+	remove(m_MTmppath.absoluteFilePath("def_tissues.txt"));
 }
 
 void MainWindow::ExecuteNew()
@@ -3846,7 +3849,7 @@ void MainWindow::ExecuteNew()
 	emit EndDatachange(this, iseg::ClearUndo);
 
 	m_MSaveprojfilename = "";
-	setCaption(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
+	setWindowTitle(QString(" iSeg ") + QString(xstr(ISEG_VERSION)) +
 						 QString(" - No Filename"));
 	m_MNotes->clear();
 
@@ -4443,7 +4446,7 @@ void MainWindow::ExecuteXslice()
 
 	if (m_Xsliceshower == nullptr)
 	{
-		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
+		m_Xsliceshower = new SliceViewerWidget(m_Handler3D, true, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr);
 		m_Xsliceshower->ZposChanged();
 		if (m_Ysliceshower != nullptr)
 		{
@@ -4468,6 +4471,7 @@ void MainWindow::ExecuteXslice()
 
 	m_Xsliceshower->show();
 	m_Xsliceshower->raise(); //xxxa
+	m_Xsliceshower->activateWindow();
 
 	emit EndDataexport(this);
 }
@@ -4482,7 +4486,7 @@ void MainWindow::ExecuteYslice()
 
 	if (m_Ysliceshower == nullptr)
 	{
-		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), this);
+		m_Ysliceshower = new SliceViewerWidget(m_Handler3D, false, m_Handler3D->GetSlicethickness(), m_ZoomWidget->GetZoom(), nullptr);
 		m_Ysliceshower->ZposChanged();
 		if (m_Xsliceshower != nullptr)
 		{
@@ -4505,8 +4509,10 @@ void MainWindow::ExecuteYslice()
 		QObject_connect(m_ZoomWidget, SIGNAL(SetZoom(double)), m_Ysliceshower, SLOT(SetZoom(double)));
 	}
 
+	m_Ysliceshower->resize(600, 600);
 	m_Ysliceshower->show();
 	m_Ysliceshower->raise();
+	m_Ysliceshower->activateWindow();
 
 	emit EndDataexport(this);
 }
@@ -4517,7 +4523,7 @@ void MainWindow::ExecuteRemovetissues()
 	if (!filename.isEmpty())
 	{
 		std::vector<tissues_size_t> types;
-		if (read_tissues(filename.ascii(), types))
+		if (read_tissues(filename.toAscii(), types))
 		{
 			// this actually goes through slices and removes it from segmentation
 			m_Handler3D->RemoveTissues(std::set<tissues_size_t>(types.begin(), types.end()));
@@ -4540,7 +4546,7 @@ void MainWindow::ExecuteGrouptissues()
 	if (!filename.isEmpty())
 	{
 		bool fail_on_unknown_tissue = true;
-		if (read_grouptissuescapped(filename.ascii(), olds, news, fail_on_unknown_tissue))
+		if (read_grouptissuescapped(filename.toAscii(), olds, news, fail_on_unknown_tissue))
 		{
 			DataSelection data_selection;
 			data_selection.allSlices = true;
@@ -5026,7 +5032,7 @@ void MainWindow::DoWork2tissueGrouped()
 	QString filename = RecentPlaces::GetOpenFileName(this, "Open file", QString(), "Text (*.txt)\nAll (*.*)");
 	if (!filename.isEmpty())
 	{
-		if (read_grouptissues(filename.ascii(), olds, news))
+		if (read_grouptissues(filename.toAscii(), olds, news))
 		{
 			DataSelection data_selection;
 			data_selection.allSlices = true;
@@ -6236,7 +6242,7 @@ void MainWindow::LoadAtlas(const QDir& path1)
 void MainWindow::LoadLoadProj(const QString& path1)
 {
 	unsigned short projcounter = 0;
-	FILE* fplatestproj = fopen(path1.ascii(), "r");
+	FILE* fplatestproj = fopen(path1.toAscii(), "r");
 	char c;
 	m_MLoadprojfilename.m_CurrentFilename = path1;
 	while (fplatestproj != nullptr && projcounter < 4)
@@ -6279,24 +6285,24 @@ void MainWindow::SaveLoadProj(const QString& latestprojpath) const
 {
 	if (latestprojpath == "")
 		return;
-	FILE* fplatestproj = fopen(latestprojpath.ascii(), "w");
+	FILE* fplatestproj = fopen(latestprojpath.toAscii(), "w");
 	if (fplatestproj != nullptr)
 	{
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[3] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[3].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[3].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[2] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[2].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[2].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[1] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[1].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[1].toStdString().c_str());
 		}
 		if (m_MLoadprojfilename.m_RecentProjectFileNames[0] != "")
 		{
-			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[0].ascii());
+			fprintf(fplatestproj, "%s\n", m_MLoadprojfilename.m_RecentProjectFileNames[0].toStdString().c_str());
 		}
 
 		fclose(fplatestproj);
@@ -6507,7 +6513,7 @@ FILE* MainWindow::SaveNotes(FILE* fp, unsigned short version)
 		QString text = m_MNotes->toPlainText();
 		int dummy = (int)text.length();
 		fwrite(&(dummy), 1, sizeof(int), fp);
-		fwrite(text.ascii(), 1, dummy, fp);
+		fwrite(text.toAscii(), 1, dummy, fp);
 	}
 	return fp;
 }
@@ -6737,7 +6743,7 @@ void MainWindow::CancelTransformHelper()
 {
 	QObject_disconnect(m_TransformWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
 	QObject_disconnect(m_TransformWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
-	m_TransformWidget->CancelPushButtonClicked();
+	m_TransformWidget->CancelTransform();
 	QObject_connect(m_TransformWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
 	QObject_connect(m_TransformWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
 
@@ -6761,8 +6767,7 @@ void MainWindow::CancelTransformHelper()
 void MainWindow::HandleBeginDataexport(DataSelection& dataSelection, QWidget* sender)
 {
 	// Handle pending transforms
-	if (m_MethodTab->currentWidget() == m_TransformWidget &&
-			(dataSelection.bmp || dataSelection.work || dataSelection.tissues))
+	if (m_MethodTab->currentWidget() == m_TransformWidget && (dataSelection.bmp || dataSelection.work || dataSelection.tissues))
 	{
 		CancelTransformHelper();
 	}

@@ -6,15 +6,7 @@ namespace iseg {
 
 void Property::OnModified(eChangeType change)
 {
-	Property_ptr me;
-	try
-	{
-		me = shared_from_this();
-	}
-	catch (const std::exception& e)
-	{
-		ISEG_WARNING_MSG(e.what());
-	}
+	auto me = Self();
 
 	// signal change
 	if (me && !m_BlockSignals)
@@ -29,6 +21,19 @@ void Property::OnModified(eChangeType change)
 			p = p->Parent();
 		}
 	}
+}
+
+Property_ptr Property::Self()
+{
+	try
+	{
+		return shared_from_this();
+	}
+	catch (const std::exception& e)
+	{
+		ISEG_WARNING_MSG(e.what());
+	}
+	return Property_ptr();
 }
 
 void Property::OnChildModified(Property_ptr child, eChangeType change) const
@@ -138,6 +143,24 @@ std::shared_ptr<PropertyString> PropertyString::Create(value_type value)
 std::shared_ptr<PropertyButton> PropertyButton::Create(value_type value, const std::string& txt)
 {
 	return std::shared_ptr<PropertyButton>(new PropertyButton(value, txt));
+}
+
+void PropertyButton::SetCheckable(bool v)
+{
+	if (v != m_Checkable)
+	{
+		m_Checkable = v;
+		OnModified(Property::kStateChanged);
+	}
+}
+
+void PropertyButton::SetChecked(bool v)
+{
+	if (v != m_Checked)
+	{
+		m_Checked = v;
+		OnModified(Property::kStateChanged);
+	}
 }
 
 std::shared_ptr<PropertySlider> PropertySlider::Create(value_type value, value_type min_value, value_type max_value)

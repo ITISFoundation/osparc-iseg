@@ -5,7 +5,7 @@
 # - preprocessor definitions needed by package
 #
 
-FIND_PACKAGE(Qt4 4.8.5 COMPONENTS QtCore QtGui QtScript Qt3Support QtXml QtOpenGL REQUIRED)
+FIND_PACKAGE(Qt4 4.8.5 COMPONENTS QtCore QtGui QtScript QtXml QtOpenGL Qt3Support REQUIRED)
 
 MACRO(USE_QT4)
 	SET(QT_USE_QTOPENGL TRUE)

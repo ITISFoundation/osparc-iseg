@@ -7,20 +7,15 @@
  * This software is released under the MIT License.
  *  https://opensource.org/licenses/MIT
  */
-#ifndef PIXELSIZE_28June05
-#define PIXELSIZE_28June05
+#pragma
 
 #include "Data/Vec3.h"
 
-#include <q3hbox.h>
-#include <q3vbox.h>
 #include <QDialog>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPainter>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QWidget>
 
 namespace iseg {
 
@@ -93,17 +88,7 @@ public:
 private:
 	float m_Rotation[3][3];
 	SlicesHandler* m_Handler3D;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	Q3VBox* m_Vbox3;
-	Q3VBox* m_Vbox4;
-	QLabel* m_LbDescr;
-	QLabel* m_LbC1;
-	QLabel* m_LbC2;
-	QLabel* m_LbC3;
+
 	QLineEdit* m_LeR11;
 	QLineEdit* m_LeR12;
 	QLineEdit* m_LeR13;
@@ -113,6 +98,7 @@ private:
 	QLineEdit* m_LeR31;
 	QLineEdit* m_LeR32;
 	QLineEdit* m_LeR33;
+
 	QPushButton* m_PbOrthonorm;
 	QPushButton* m_PbSet;
 	QPushButton* m_PbClose;
@@ -126,7 +112,6 @@ private slots:
 class ImagePVLabel : public QLabel
 {
 	Q_OBJECT
-
 public:
 	ImagePVLabel(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 
@@ -159,9 +144,11 @@ class ResizeDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	enum eResizeType { kOther = 0,
+	enum eResizeType {
+		kOther = 0,
 		kPad = 1,
-		kCrop = 2 };
+		kCrop = 2
+	};
 
 	ResizeDialog(SlicesHandler* hand3D, eResizeType type1 = kOther, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
 	~ResizeDialog() override;
@@ -170,19 +157,7 @@ public:
 private:
 	int m_D[6];
 	SlicesHandler* m_Handler3D;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
-	Q3VBox* m_Vbox3;
-	Q3VBox* m_Vbox4;
-	Q3VBox* m_Vbox5;
-	QLabel* m_LbDxm;
-	QLabel* m_LbDym;
-	QLabel* m_LbDzm;
-	QLabel* m_LbDxp;
-	QLabel* m_LbDyp;
-	QLabel* m_LbDzp;
+
 	QSpinBox* m_SbDxm;
 	QSpinBox* m_SbDym;
 	QSpinBox* m_SbDzm;
@@ -191,8 +166,7 @@ private:
 	QSpinBox* m_SbDzp;
 	QPushButton* m_PbSet;
 	QPushButton* m_PbClose;
-	Q3HBox* m_MainBox;
-	Q3VBox* m_VImagebox1;
+
 	ImagePVLabel* m_ImageSourceLabel;
 	eResizeType m_Resizetype;
 
@@ -202,4 +176,3 @@ private slots:
 
 } // namespace iseg
 
-#endif

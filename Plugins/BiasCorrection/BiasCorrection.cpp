@@ -116,14 +116,20 @@ BiasCorrectionWidget::BiasCorrectionWidget(iseg::SlicesHandlerInterface* hand3D)
 
 	auto bias_header = new QLabel("N4 Bias Correction");
 
-	m_NumberLevels = new QSpinBox(0, 50, 1, nullptr);
+	m_NumberLevels = new QSpinBox;
 	m_NumberLevels->setValue(4);
+	m_NumberLevels->setMinimum(0);
+	m_NumberLevels->setMaximum(50);
 
-	m_ShrinkFactor = new QSpinBox(1, 16, 1, nullptr);
+	m_ShrinkFactor = new QSpinBox;
 	m_ShrinkFactor->setValue(4);
+	m_ShrinkFactor->setMinimum(1);
+	m_ShrinkFactor->setMaximum(16);
 
-	m_NumberIterations = new QSpinBox(1, 200, 5, nullptr);
+	m_NumberIterations = new QSpinBox;
 	m_NumberIterations->setValue(50);
+	m_NumberIterations->setMinimum(1);
+	m_NumberIterations->setMaximum(200);
 
 	m_Execute = new QPushButton("Execute");
 
@@ -218,7 +224,7 @@ std::string BiasCorrectionWidget::GetName()
 
 QIcon BiasCorrectionWidget::GetIcon(QDir picdir)
 {
-	return QIcon(picdir.absFilePath(QString("Bias.png")).ascii());
+	return QIcon(picdir.absoluteFilePath("Bias.png"));
 }
 
 template<typename ImagePointer>

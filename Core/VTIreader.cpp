@@ -29,14 +29,14 @@
 
 namespace iseg {
 
-bool VTIreader::GetSlice(const char* filename, float* slice, unsigned slicenr, unsigned width, unsigned height)
+bool VTIreader::GetSlice(const std::string& filename, float* slice, unsigned slicenr, unsigned width, unsigned height)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		return false;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->Update();
 
 	int ext[6] = {0, 0, 0, 0, 0, 0};
@@ -104,14 +104,14 @@ bool VTIreader::GetSlice(const char* filename, float* slice, unsigned slicenr, u
 	return true;
 }
 
-float* VTIreader::GetSliceInfo(const char* filename, unsigned slicenr, unsigned& width, unsigned& height)
+float* VTIreader::GetSliceInfo(const std::string& filename, unsigned slicenr, unsigned& width, unsigned& height)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		return nullptr;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->Update();
 
 	int ext[6] = {0, 0, 0, 0, 0, 0};
@@ -179,16 +179,16 @@ float* VTIreader::GetSliceInfo(const char* filename, unsigned slicenr, unsigned&
 	return slice;
 }
 
-bool VTIreader::GetVolume(const char* filename, float** slices, unsigned nrslices, unsigned width, unsigned height, const std::string& arrayName)
+bool VTIreader::GetVolume(const std::string& filename, float** slices, unsigned nrslices, unsigned width, unsigned height, const std::string& arrayName)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		std::cerr << "VTIreader::getVolume() : can not read file " << filename
 							<< endl;
 		return false;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->Update();
 
 	int ext[6] = {0, 0, 0, 0, 0, 0};
@@ -268,14 +268,14 @@ bool VTIreader::GetVolume(const char* filename, float** slices, unsigned nrslice
 	return true;
 }
 
-bool VTIreader::GetVolumeAll(const char* filename, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, unsigned nrslices, unsigned width, unsigned height)
+bool VTIreader::GetVolumeAll(const std::string& filename, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, unsigned nrslices, unsigned width, unsigned height)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		return false;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->Update();
 
 	int ext[6] = {0, 0, 0, 0, 0, 0};
@@ -394,14 +394,14 @@ bool VTIreader::GetVolumeAll(const char* filename, float** slicesbmp, float** sl
 	return true;
 }
 
-bool VTIreader::GetVolume(const char* filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height, const std::string& arrayName)
+bool VTIreader::GetVolume(const std::string& filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height, const std::string& arrayName)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		return false;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->Update();
 
 	int ext[6] = {0, 0, 0, 0, 0, 0};
@@ -480,14 +480,14 @@ bool VTIreader::GetVolume(const char* filename, float** slices, unsigned startsl
 	return true;
 }
 
-bool VTIreader::GetInfo(const char* filename, unsigned& width, unsigned& height, unsigned& nrslices, float* pixelsize, float* offset, std::vector<std::string>& arrayNames)
+bool VTIreader::GetInfo(const std::string& filename, unsigned& width, unsigned& height, unsigned& nrslices, float* pixelsize, float* offset, std::vector<std::string>& arrayNames)
 {
 	vtkXMLImageDataReader* reader = vtkXMLImageDataReader::New();
-	if (reader->CanReadFile(filename) == 0)
+	if (reader->CanReadFile(filename.c_str()) == 0)
 	{
 		return false;
 	}
-	reader->SetFileName(filename);
+	reader->SetFileName(filename.c_str());
 	reader->UpdateInformation();
 	int extent[6];
 	double spacing[3];
@@ -528,7 +528,7 @@ bool VTIreader::GetInfo(const char* filename, unsigned& width, unsigned& height,
 	return true;
 }
 
-bool VTIwriter::WriteVolumeAll(const char* filename, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, tissues_size_t nrtissues, unsigned nrslices, unsigned width, unsigned height, float* pixelsize, float* offset, bool binary, bool compress)
+bool VTIwriter::WriteVolumeAll(const std::string& filename, float** slicesbmp, float** sliceswork, tissues_size_t** slicestissue, tissues_size_t nrtissues, unsigned nrslices, unsigned width, unsigned height, float* pixelsize, float* offset, bool binary, bool compress)
 {
 	vtkSmartPointer<vtkImageData> input = vtkSmartPointer<vtkImageData>::New();
 	input->SetExtent(0, (int)width - 1, 0, (int)height - 1, 0, (int)nrslices - 1);
@@ -650,7 +650,7 @@ bool VTIwriter::WriteVolumeAll(const char* filename, float** slicesbmp, float** 
 	writer->SetDataModeToAppended();
 	if (binary)
 		writer->EncodeAppendedDataOff();
-	writer->SetFileName(filename);
+	writer->SetFileName(filename.c_str());
 	writer->Write();
 
 	return true;

@@ -312,7 +312,7 @@ void ThresholdWidgetQt4::on_mLoadBordersPushButton_clicked()
 
 	std::vector<float> fvec;
 	// hope it's only american english... ;)
-	FILE* fp = fopen(loadfilename.ascii(), "r");
+	FILE* fp = fopen(loadfilename.toAscii(), "r");
 	float f;
 	if (fp != nullptr)
 	{
@@ -348,14 +348,14 @@ void ThresholdWidgetQt4::on_mLoadBordersPushButton_clicked()
 
 void ThresholdWidgetQt4::on_mSaveBordersPushButton_clicked()
 {
-	auto savefilename = QFileDialog::getSaveFileName(this, "Save file", QString::null, "Boarders (*.txt)\n");
+	auto savefilename = QFileDialog::getSaveFileName(this, "Save As", QString::null, "Boarders (*.txt)\n");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
 
 	if (!savefilename.isEmpty())
 	{
-		FILE* fp = fopen(savefilename.ascii(), "w");
+		FILE* fp = fopen(savefilename.toAscii(), "w");
 		for (int i = 1; i <= m_Ui.mManualLimitNrSpinBox->maxValue(); i++)
 			fprintf(fp, "%f\n", m_Threshs[i]);
 		fclose(fp);
@@ -731,7 +731,7 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 			fclose(fp);
 			std::vector<std::string> mhdfiles;
 			for (int i = 0; i + 1 < m_Ui.mKMeansDimsSpinBox->value(); i++)
-				mhdfiles.push_back(std::string(m_Filenames[i].ascii()));
+				mhdfiles.push_back(std::string(m_Filenames[i].toStdString()));
 			if (m_Ui.mAllSlicesCheckBox->isChecked())
 				m_Handler3D->GammaMhd(m_Handler3D->ActiveSlice(), (short)m_Ui.mKMeansNrTissuesSpinBox->value(), (short)m_Ui.mKMeansDimsSpinBox->value(), mhdfiles, m_Weights, centers, tol_f, tol_d);
 			else
@@ -746,7 +746,7 @@ void ThresholdWidgetQt4::on_mExecutePushButton_clicked()
 		{
 			std::vector<std::string> kmeansfiles;
 			for (int i = 0; i + 1 < m_Ui.mKMeansDimsSpinBox->value(); i++)
-				kmeansfiles.push_back(std::string(m_Filenames[i].ascii()));
+				kmeansfiles.push_back(std::string(m_Filenames[i].toStdString()));
 			if (!kmeansfiles.empty())
 			{
 				if (kmeansfiles[0].substr(kmeansfiles[0].find_last_of(".") +

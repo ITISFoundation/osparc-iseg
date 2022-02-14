@@ -39,7 +39,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Contour"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("contour.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("contour.png")); }
 
 private:
 	void OnSlicenrChanged() override;

@@ -322,7 +322,7 @@ void VesselWidget::OnSlicenrChanged()
 
 void VesselWidget::Savevessel()
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "Vessel-Tracks (*.txt)\n", this); //, filename);
+	QString savefilename = QFileDialog::getSaveFileName(this, "Save As", QString::null, "Vessel-Tracks (*.txt)\n");
 
 	if (savefilename.length() > 4 && !savefilename.endsWith(QString(".txt")))
 		savefilename.append(".txt");
@@ -334,7 +334,7 @@ void VesselWidget::Savevessel()
 		float thick = m_Handler3D->GetSlicethickness();
 		float epsilon = std::max(std::max(pair1.high, pair1.low), thick);
 		m_BranchTree.GetItem()->DougPeuckInclchildren(epsilon, pair1.high, pair1.low, thick, vp);
-		FILE* fp = fopen(savefilename.ascii(), "w");
+		FILE* fp = fopen(savefilename.toAscii(), "w");
 		int version = 2;
 		unsigned short w = m_Handler3D->Width();
 		unsigned short h = m_Handler3D->Height();
@@ -363,7 +363,7 @@ void VesselWidget::Cleanup()
 
 QIcon iseg::VesselWidget::GetIcon(QDir picdir)
 {
-	return QIcon(picdir.absoluteFilePath(QString("vessel.png")));
+	return QIcon(picdir.absoluteFilePath("vessel.png"));
 }
 
 } // namespace iseg

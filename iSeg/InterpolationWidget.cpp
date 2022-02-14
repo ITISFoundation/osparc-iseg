@@ -138,7 +138,6 @@ InterpolationWidget::InterpolationWidget(SlicesHandler* hand3D)
 
 	// add widget and layout
 	auto property_view = new PropertyWidget(group);
-	//property_view->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
 	auto layout = new QHBoxLayout;
 	layout->addWidget(property_view, 2);

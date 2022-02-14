@@ -47,7 +47,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("OLC"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("olc.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("olc.png")); }
 
 	void BmphandChanged(Bmphandler* bmph);
 

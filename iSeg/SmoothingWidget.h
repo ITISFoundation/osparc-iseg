@@ -32,7 +32,7 @@ public:
 	FILE* LoadParams(FILE* fp, int version) override;
 	void HideParamsChanged() override;
 	std::string GetName() override { return std::string("Smooth"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("smoothing.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("smoothing.png")); }
 
 private:
 	void OnSlicenrChanged() override;

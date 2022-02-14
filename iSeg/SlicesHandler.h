@@ -65,14 +65,14 @@ public:
 #endif // TISSUES_SIZE_TYPEDEF
 	void Copyfromtissuepadded(unsigned short slicenr, tissues_size_t* bits, unsigned short padding);
 	void SetRgbFactors(int redFactor, int greenFactor, int blueFactor);
-	int LoadDIBitmap(std::vector<const char*> filenames);
-	int LoadDIBitmap(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
-	int LoadPng(std::vector<const char*> filenames);
-	int LoadPng(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
-	int LoadDIJpg(std::vector<const char*> filenames);
-	int LoadDIJpg(std::vector<const char*> filenames, Point p, unsigned short dx, unsigned short dy);
-	int LoadDICOM(std::vector<const char*> lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
-	int LoadDICOM(std::vector<const char*> lfilename, Point p, unsigned short dx, unsigned short dy);
+	int LoadDIBitmap(const std::vector<std::string>& filenames);
+	int LoadDIBitmap(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy);
+	int LoadPng(const std::vector<std::string>& filenames);
+	int LoadPng(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy);
+	int LoadDIJpg(const std::vector<std::string>& filenames);
+	int LoadDIJpg(const std::vector<std::string>& filenames, Point p, unsigned short dx, unsigned short dy);
+	int LoadDICOM(const std::vector<std::string>& lfilename); //Assumption Filenames: fnxxx.bmp xxx: 3 digit number
+	int LoadDICOM(const std::vector<std::string>& lfilename, Point p, unsigned short dx, unsigned short dy);
 	int ReadImage(const char* filename);
 	int ReadOverlay(const char* filename, unsigned short slicenr);
 	int ReadAvw(const char* filename);
@@ -109,10 +109,10 @@ public:
 	int SaveTissuesRawXySwapped(const char* filename);
 	int SaveTissuesRawXzSwapped(const char* filename);
 	int SaveTissuesRawYzSwapped(const char* filename);
-	int ReloadDIBitmap(std::vector<const char*> filenames);
-	int ReloadDIBitmap(std::vector<const char*> filenames, Point p);
-	int ReloadDICOM(std::vector<const char*> lfilename);
-	int ReloadDICOM(std::vector<const char*> lfilename, Point p);
+	int ReloadDIBitmap(const std::vector<std::string>& filenames);
+	int ReloadDIBitmap(const std::vector<std::string>& filenames, Point p);
+	int ReloadDICOM(const std::vector<std::string>& lfilename);
+	int ReloadDICOM(const std::vector<std::string>& lfilename, Point p);
 	int ReloadRaw(const char* filename, unsigned bitdepth, unsigned short slicenr);
 	int ReloadRaw(const char* filename, short unsigned w, short unsigned h, unsigned bitdepth, unsigned short slicenr, Point p);
 	int ReloadRawFloat(const char* filename, unsigned short slicenr);
@@ -390,7 +390,7 @@ public:
 	void CapTissue(tissues_size_t maxval);
 	void Buildmissingtissues(tissues_size_t j);
 	void GroupTissues(std::vector<tissues_size_t>& olds, std::vector<tissues_size_t>& news);
-	void GetDICOMseriesnr(std::vector<const char*>* vnames, std::vector<unsigned>* dicomseriesnr, std::vector<unsigned>* dicomseriesnrlist);
+	void GetDICOMseriesnr(std::vector<std::string>* vnames, std::vector<unsigned>* dicomseriesnr, std::vector<unsigned>* dicomseriesnrlist);
 	void SetModeall(unsigned char mode, bool bmporwork);
 	bool PrintAmascii(const char* filename);
 	bool PrintTissuemat(const char* filename);
@@ -433,7 +433,7 @@ public:
 	void SetSaveTarget(bool v) { m_SaveTarget = v; }
 
 	int SaveRaw(const char* filename, bool work);
-	float DICOMsort(std::vector<const char*>* lfilename);
+	float DICOMsort(std::vector<std::string>* lfilename);
 
 	TissueHiearchy* GetTissueHierachy() { return m_TissueHierachy; }
 

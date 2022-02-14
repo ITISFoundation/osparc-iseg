@@ -18,8 +18,6 @@
 
 #include <QDoubleValidator>
 #include <QFormLayout>
-#include <q3hbox.h>
-#include <q3vbox.h>
 #include <QApplication>
 #include <QLabel>
 #include <QPushButton>
@@ -268,53 +266,63 @@ RotationDialog::RotationDialog(SlicesHandler* hand3D, QWidget* parent, Qt::Windo
 
 	m_Handler3D->ImageTransform().GetRotation(m_Rotation);
 
-	m_Vbox1 = new Q3VBox(this);
-	m_Vbox1->setMargin(5);
+	m_LeR11 = new QLineEdit(QString::number(m_Rotation[0][0]));
+	m_LeR21 = new QLineEdit(QString::number(m_Rotation[1][0]));
+	m_LeR31 = new QLineEdit(QString::number(m_Rotation[2][0]));
 
-	// Description
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_Hbox1->setMargin(5);
-	m_LbDescr = new QLabel(QString("The rotation matrix of the image data."), m_Hbox1);
+	m_LeR12 = new QLineEdit(QString::number(m_Rotation[0][1]));
+	m_LeR22 = new QLineEdit(QString::number(m_Rotation[1][1]));
+	m_LeR32 = new QLineEdit(QString::number(m_Rotation[2][1]));
 
-	// Values
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-	m_Hbox2->setMargin(5);
+	m_LeR13 = new QLineEdit(QString::number(m_Rotation[0][2]));
+	m_LeR23 = new QLineEdit(QString::number(m_Rotation[1][2]));
+	m_LeR33 = new QLineEdit(QString::number(m_Rotation[2][2]));
 
-	m_Vbox2 = new Q3VBox(m_Hbox2);
-	m_LbC1 = new QLabel(QString("Column 1"), m_Vbox2);
-	m_LeR11 = new QLineEdit(QString::number(m_Rotation[0][0]), m_Vbox2);
-	m_LeR21 = new QLineEdit(QString::number(m_Rotation[1][0]), m_Vbox2);
-	m_LeR31 = new QLineEdit(QString::number(m_Rotation[2][0]), m_Vbox2);
-
-	m_Vbox3 = new Q3VBox(m_Hbox2);
-	m_LbC2 = new QLabel(QString("Column 2"), m_Vbox3);
-	m_LeR12 = new QLineEdit(QString::number(m_Rotation[0][1]), m_Vbox3);
-	m_LeR22 = new QLineEdit(QString::number(m_Rotation[1][1]), m_Vbox3);
-	m_LeR32 = new QLineEdit(QString::number(m_Rotation[2][1]), m_Vbox3);
-
-	m_Vbox4 = new Q3VBox(m_Hbox2);
-	m_LbC3 = new QLabel(QString("Column 3"), m_Vbox4);
-	m_LeR13 = new QLineEdit(QString::number(m_Rotation[0][2]), m_Vbox4);
-	m_LeR23 = new QLineEdit(QString::number(m_Rotation[1][2]), m_Vbox4);
-	m_LeR33 = new QLineEdit(QString::number(m_Rotation[2][2]), m_Vbox4);
-
-	QLineEdit* rot[] = {
-			m_LeR11, m_LeR12, m_LeR13, m_LeR21, m_LeR22, m_LeR23, m_LeR31, m_LeR32, m_LeR33};
+	QLineEdit* rot[] = {m_LeR11, m_LeR12, m_LeR13, m_LeR21, m_LeR22, m_LeR23, m_LeR31, m_LeR32, m_LeR33};
 	for (auto le : rot)
 	{
 		le->setValidator(new QDoubleValidator);
 	}
 
-	// Buttons
-	m_Hbox3 = new Q3HBox(m_Vbox1);
-	m_Hbox3->setMargin(5);
-	m_PbOrthonorm = new QPushButton("Orthonormalize", m_Hbox3);
-	m_PbSet = new QPushButton("Set", m_Hbox3);
-	m_PbClose = new QPushButton("Cancel", m_Hbox3);
+	// buttons
+	m_PbOrthonorm = new QPushButton("Orthonormalize");
+	m_PbSet = new QPushButton("Set");
+	m_PbClose = new QPushButton("Cancel");
 
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	// layout
+	auto vbox1 = new QVBoxLayout;
+	vbox1->addWidget(new QLabel(QString("Column 1")));
+	vbox1->addWidget(m_LeR11);
+	vbox1->addWidget(m_LeR21);
+	vbox1->addWidget(m_LeR31);
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
+	auto vbox2 = new QVBoxLayout;
+	vbox2->addWidget(new QLabel(QString("Column 2")));
+	vbox2->addWidget(m_LeR12);
+	vbox2->addWidget(m_LeR22);
+	vbox2->addWidget(m_LeR32);
+
+	auto vbox3 = new QVBoxLayout;
+	vbox3->addWidget(new QLabel(QString("Column 3")));
+	vbox3->addWidget(m_LeR13);
+	vbox3->addWidget(m_LeR23);
+	vbox3->addWidget(m_LeR33);
+
+	auto hbox_rot = new QHBoxLayout;
+	hbox_rot->addLayout(vbox1);
+	hbox_rot->addLayout(vbox2);
+	hbox_rot->addLayout(vbox3);
+
+	auto hbox_buttons = new QHBoxLayout;
+	hbox_buttons->addWidget(m_PbOrthonorm);
+	hbox_buttons->addWidget(m_PbSet);
+	hbox_buttons->addWidget(m_PbClose);
+
+	auto main_layout = new QVBoxLayout;
+	main_layout->addWidget(new QLabel(QString("The rotation matrix of the image data")));
+	main_layout->addLayout(hbox_rot);
+	main_layout->addLayout(hbox_buttons);
+	setLayout(main_layout);
 
 	QObject_connect(m_PbOrthonorm, SIGNAL(clicked()), this, SLOT(OrthonormPressed()));
 	QObject_connect(m_PbSet, SIGNAL(clicked()), this, SLOT(SetPressed()));
@@ -410,20 +418,8 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* pa
 {
 	setModal(true);
 
-	m_MainBox = new Q3HBox(this);
-	m_Vbox1 = new Q3VBox(m_MainBox);
-	m_Hbox1 = new Q3HBox(m_Vbox1);
-	m_Vbox2 = new Q3VBox(m_Hbox1);
-	m_Vbox3 = new Q3VBox(m_Hbox1);
-	m_Vbox4 = new Q3VBox(m_Hbox1);
-	m_Vbox5 = new Q3VBox(m_Hbox1);
-	m_Hbox2 = new Q3HBox(m_Vbox1);
-
-	m_VImagebox1 = new Q3VBox(m_MainBox);
-	m_VImagebox1->setFixedSize(QSize(400, 400));
-
-	m_ImageSourceLabel = new ImagePVLabel(m_VImagebox1);
-	m_ImageSourceLabel->setFixedSize(m_VImagebox1->size());
+	m_ImageSourceLabel = new ImagePVLabel;
+	// TODO BL: m_ImageSourceLabel->setFixedSize(m_VImagebox1->size());
 
 	unsigned short active_slice = hand3D->ActiveSlice();
 	unsigned short source_width = hand3D->Width();
@@ -455,107 +451,91 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* pa
 		m_ImageSourceLabel->SetScaledValue(small_image.height() / 400.0);
 
 	QImage scaled_image = small_image.scaled(400, 400, Qt::KeepAspectRatio);
-	//m_ImageSourceLabel->setScaledContents(true);
 	m_ImageSourceLabel->setPixmap(QPixmap::fromImage(scaled_image));
 	m_ImageSourceLabel->setAlignment(Qt::AlignCenter);
 
-	/*
-	if( sourceWidth<400 )
-		vImagebox1->setFixedWidth(sourceWidth);
-	if( sourceHeight<400 )
-		vImagebox1->setFixedHeight(sourceHeight);
-	vImagebox1->update();
-	*/
+	m_SbDxm = new QSpinBox;
+	m_SbDxm->setValue(0);
+	m_SbDym = new QSpinBox;
+	m_SbDym->setValue(0);
+	m_SbDzm = new QSpinBox;
+	m_SbDzm->setValue(0);
 
+	m_SbDxp = new QSpinBox;
+	m_SbDxp->setValue(0);
+	m_SbDyp = new QSpinBox;
+	m_SbDyp->setValue(0);
+	m_SbDzp = new QSpinBox;
+	m_SbDzp->setValue(0);
+
+	QString op;
 	if (m_Resizetype != kCrop)
 	{
-		m_LbDxm = new QLabel(QString("padding x- (pixels): "), m_Vbox2);
-		m_LbDym = new QLabel(QString("padding y- (pixels): "), m_Vbox2);
-		m_LbDzm = new QLabel(QString("padding z- (pixels): "), m_Vbox2);
-
-		m_LbDxp = new QLabel(QString("padding x+ (pixels): "), m_Vbox4);
-		m_LbDyp = new QLabel(QString("padding y+ (pixels): "), m_Vbox4);
-		m_LbDzp = new QLabel(QString("padding z+ (pixels): "), m_Vbox4);
+		op = "Padding";
 
 		if (m_Resizetype == kOther) // BL TODO what is this for?
 		{
-			m_SbDxm = new QSpinBox(-(int)hand3D->Width(), 1000, 1, m_Vbox3);
-			m_SbDxm->setValue(0);
-			m_SbDym =
-					new QSpinBox(-(int)hand3D->Height(), 1000, 1, m_Vbox3);
-			m_SbDym->setValue(0);
-			m_SbDzm =
-					new QSpinBox(-(int)hand3D->NumSlices(), 1000, 1, m_Vbox3);
-			m_SbDzm->setValue(0);
-
-			m_SbDxp = new QSpinBox(-(int)hand3D->Width(), 1000, 1, m_Vbox5);
-			m_SbDxp->setValue(0);
-			m_SbDyp =
-					new QSpinBox(-(int)hand3D->Height(), 1000, 1, m_Vbox5);
-			m_SbDyp->setValue(0);
-			m_SbDzp =
-					new QSpinBox(-(int)hand3D->NumSlices(), 1000, 1, m_Vbox5);
-			m_SbDzp->setValue(0);
+			m_SbDxm->setRange(-(int)hand3D->Width(), 1000);
+			m_SbDym->setRange(-(int)hand3D->Width(), 1000);
+			m_SbDzm->setRange(-(int)hand3D->NumSlices(), 1000);
+			m_SbDxp->setRange(-(int)hand3D->Width(), 1000);
+			m_SbDyp->setRange(-(int)hand3D->Width(), 1000);
+			m_SbDzp->setRange(-(int)hand3D->NumSlices(), 1000);
 		}
 		else
 		{
-			m_SbDxm = new QSpinBox(0, 1000, 1, m_Vbox3);
-			m_SbDxm->setValue(0);
-			m_SbDym = new QSpinBox(0, 1000, 1, m_Vbox3);
-			m_SbDym->setValue(0);
-			m_SbDzm = new QSpinBox(0, 1000, 1, m_Vbox3);
-			m_SbDzm->setValue(0);
-
-			m_SbDxp = new QSpinBox(0, 1000, 1, m_Vbox5);
-			m_SbDxp->setValue(0);
-			m_SbDyp = new QSpinBox(0, 1000, 1, m_Vbox5);
-			m_SbDyp->setValue(0);
-			m_SbDzp = new QSpinBox(0, 1000, 1, m_Vbox5);
-			m_SbDzp->setValue(0);
+			m_SbDxm->setRange(0, 1000);
+			m_SbDym->setRange(0, 1000);
+			m_SbDzm->setRange(0, 1000);
+			m_SbDxp->setRange(0, 1000);
+			m_SbDyp->setRange(0, 1000);
+			m_SbDzp->setRange(0, 1000);
 		}
 	}
 	else
 	{
-		m_LbDxm = new QLabel(QString("crop x- (pixels): "), m_Vbox2);
-		m_LbDym = new QLabel(QString("crop y- (pixels): "), m_Vbox2);
-		m_LbDzm = new QLabel(QString("crop z- (pixels): "), m_Vbox2);
+		op = "Crop";
 
-		m_LbDxp = new QLabel(QString("crop x+ (pixels): "), m_Vbox4);
-		m_LbDyp = new QLabel(QString("crop y+ (pixels): "), m_Vbox4);
-		m_LbDzp = new QLabel(QString("crop z+ (pixels): "), m_Vbox4);
-
-		m_SbDxm = new QSpinBox(0, (int)hand3D->Width(), 1, m_Vbox3);
-		m_SbDxm->setValue(0);
-		m_SbDym = new QSpinBox(0, (int)hand3D->Height(), 1, m_Vbox3);
-		m_SbDym->setValue(0);
-		m_SbDzm = new QSpinBox(0, (int)hand3D->NumSlices(), 1, m_Vbox3);
-		m_SbDzm->setValue(0);
-
-		m_SbDxp = new QSpinBox(0, (int)hand3D->Width(), 1, m_Vbox5);
-		m_SbDxp->setValue(0);
-		m_SbDyp = new QSpinBox(0, (int)hand3D->Height(), 1, m_Vbox5);
-		m_SbDyp->setValue(0);
-		m_SbDzp = new QSpinBox(0, (int)hand3D->NumSlices(), 1, m_Vbox5);
-		m_SbDzp->setValue(0);
+		m_SbDxm->setRange(0, (int)hand3D->Width());
+		m_SbDym->setRange(0, (int)hand3D->Width());
+		m_SbDzm->setRange(0, (int)hand3D->NumSlices());
+		m_SbDxp->setRange(0, (int)hand3D->Width());
+		m_SbDyp->setRange(0, (int)hand3D->Width());
+		m_SbDzp->setRange(0, (int)hand3D->NumSlices());
 	}
 
-	m_PbSet = new QPushButton("Set", m_Hbox2);
-	m_PbClose = new QPushButton("Close", m_Hbox2);
+	m_PbSet = new QPushButton("Set");
+	m_PbClose = new QPushButton("Close");
 
-	m_Hbox2->show();
-	m_Vbox2->show();
-	m_Vbox3->show();
-	m_Vbox4->show();
-	m_Vbox5->show();
-	m_Hbox1->show();
-	m_Vbox1->show();
+	// layout
+	auto minus = new QFormLayout;
+	minus->addRow(op + " x-", m_SbDxm);
+	minus->addRow(op + " y-", m_SbDym);
+	minus->addRow(op + " z-", m_SbDzm);
 
-	m_MainBox->show();
+	auto plus = new QFormLayout;
+	plus->addRow(op + " x+", m_SbDxp);
+	plus->addRow(op + " y+", m_SbDyp);
+	plus->addRow(op + " z+", m_SbDzp);
 
-	setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+	auto options_layout = new QHBoxLayout;
+	options_layout->addLayout(minus);
+	options_layout->addLayout(plus);
 
-	m_Vbox1->setFixedSize(m_Vbox1->sizeHint());
+	auto buttons_layout = new QHBoxLayout;
+	buttons_layout->addWidget(m_PbSet);
+	buttons_layout->addWidget(m_PbClose);
 
+	auto left_layout = new QVBoxLayout;
+	left_layout->addLayout(options_layout);
+	left_layout->addLayout(buttons_layout);
+
+	auto main_layout = new QHBoxLayout;
+	main_layout->addLayout(left_layout);
+	main_layout->addWidget(m_ImageSourceLabel);
+	setLayout(main_layout);
+
+	// connections
 	QObject_connect(m_SbDxm, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetXMin(int)));
 	QObject_connect(m_SbDxp, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetXMax(int)));
 	QObject_connect(m_SbDym, SIGNAL(valueChanged(int)), m_ImageSourceLabel, SLOT(SetYMax(int)));
@@ -565,7 +545,7 @@ ResizeDialog::ResizeDialog(SlicesHandler* hand3D, eResizeType type1, QWidget* pa
 	QObject_connect(m_PbClose, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-ResizeDialog::~ResizeDialog() { delete m_Vbox1; }
+ResizeDialog::~ResizeDialog() = default;
 
 void ResizeDialog::SetPressed()
 {

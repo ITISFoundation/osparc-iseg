@@ -2,6 +2,7 @@
 
 #include "CollapsibleWidget.h"
 #include "FormatTooltip.h"
+#include "QSliderEditableRange.h"
 #include "SplitterHandle.h"
 
 #include "../Data/Logger.h"
@@ -20,7 +21,6 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QSignalMapper>
-#include <QSlider>
 #include <QStandardItemModel>
 #include <QTreeWidget>
 
@@ -58,15 +58,19 @@ auto toType(QString const& q)
 	return toType(q, Type<T>{});
 }
 
-int CountProps(Property_cptr parent)
+int CountVisible(Property_cptr parent)
 {
-	int count = 1;
-
-	for (const auto& child : parent->Properties())
+	if (parent->Visible())
 	{
-		count += CountProps(child);
+		int count = 1;
+
+		for (const auto& child : parent->Properties())
+		{
+			count += CountVisible(child);
+		}
+		return count;
 	}
-	return count;
+	return 0;
 }
 
 } // namespace
@@ -141,7 +145,7 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFla
 		UpdateState(root, prop.get());
 	}
 
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 }
@@ -149,7 +153,7 @@ PropertyWidget::PropertyWidget(Property_ptr prop, QWidget* parent, Qt::WindowFla
 QSize PropertyWidget::minimumSizeHint() const
 {
 	auto sz = QTreeWidget::minimumSizeHint();
-	sz.setHeight(CountProps(m_Property) * (row_height+2));
+	sz.setHeight(std::min(200, CountVisible(m_Property) * (row_height + 2)));
 	return sz;
 }
 
@@ -287,7 +291,7 @@ void PropertyWidget::Build(Property_ptr prop, QTreeWidgetItem* item, QTreeWidget
 
 QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 {
-	const auto make_line_edit = [this, item](const Property* p) {
+	const auto make_line_edit = [this](const Property* p) {
 		// generic attributes
 		auto edit = new QLineEdit(this);
 		edit->setFrame(false);
@@ -432,9 +436,11 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 		return combo;
 	}
 	case Property::kButton: {
-		auto p = dynamic_cast<PropertyButton*>(prop);
-		const auto button_text = p->ButtonText().empty() ? p->Name() : p->ButtonText();
+		auto ptyped = dynamic_cast<PropertyButton*>(prop);
+		const auto button_text = ptyped->ButtonText().empty() ? ptyped->Name() : ptyped->ButtonText();
 		auto button = new QPushButton(QString::fromStdString(button_text), this);
+		button->setChecked(ptyped->Checked());
+		button->setCheckable(ptyped->Checkable());
 		button->setAutoDefault(false);
 		QObject_connect(button, SIGNAL(released()), this, SLOT(Edited()));
 
@@ -442,6 +448,9 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 			if (type == Property::eChangeType::kStateChanged)
 			{
 				UpdateState(item, p.get());
+				auto ptyped = static_cast<const PropertyButton*>(p.get());
+				button->setChecked(ptyped->Checked());
+				button->setCheckable(ptyped->Checkable());
 			}
 			else if (type == Property::eChangeType::kDescriptionChanged)
 			{
@@ -452,13 +461,16 @@ QWidget* PropertyWidget::MakePropertyUi(Property* prop, QTreeWidgetItem* item)
 	}
 	case Property::kSlider: {
 		auto ptyped = static_cast<const PropertySlider*>(prop);
-		auto slider = new QSlider(Qt::Horizontal);
+		auto slider = new QSliderEditableRange;
 		slider->setValue(ptyped->Value());
 		slider->setRange(ptyped->Minimum(), ptyped->Maximum());
+		slider->setMinimumVisible(ptyped->EditMinimum());
+		slider->setMaximumVisible(ptyped->EditMaximum());
 
 		QObject_connect(slider, SIGNAL(sliderPressed()), this, SLOT(SliderPressed()));
 		QObject_connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(SliderMoved()));
-		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(Edited()));
+		QObject_connect(slider, SIGNAL(sliderReleased()), this, SLOT(SliderReleased()));
+		QObject_connect(slider, SIGNAL(rangeChanged(int,int)), this, SLOT(SliderRangeEdited()));
 
 		Connect(prop->onModified, m_Lifespan, [slider, item, this](Property_ptr p, Property::eChangeType type) {
 			if (type == Property::eChangeType::kValueChanged)
@@ -644,10 +656,14 @@ void PropertyWidget::Edited()
 				{
 					prop_typed->Value()();
 				}
+				if (auto pb = dynamic_cast<QPushButton*>(w))
+				{
+					prop_typed->SetChecked(pb->isChecked());
+				}
 				break;
 			}
 			case Property::kSlider: {
-				if (auto slider = dynamic_cast<QSlider*>(w))
+				if (auto slider = dynamic_cast<QSliderEditableRange*>(w))
 				{
 					auto prop_typed = std::static_pointer_cast<PropertySlider>(prop);
 					auto v = slider->value();
@@ -668,7 +684,7 @@ void PropertyWidget::Edited()
 
 void PropertyWidget::SliderPressed()
 {
-	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
 	{
 		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
 		{
@@ -679,11 +695,37 @@ void PropertyWidget::SliderPressed()
 
 void PropertyWidget::SliderMoved()
 {
-	if (auto w = dynamic_cast<QSlider*>(QObject::sender()))
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
 	{
 		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
 		{
 			prop->onMoved(w->value());
+		}
+	}
+}
+
+void PropertyWidget::SliderReleased()
+{
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->SetValue(w->value());
+			prop->onReleased(w->value());
+			emit OnPropertyEdited(prop);
+		}
+	}
+}
+
+void PropertyWidget::SliderRangeEdited()
+{
+	if (auto w = dynamic_cast<QSliderEditableRange*>(QObject::sender()))
+	{
+		if (auto prop = std::dynamic_pointer_cast<PropertySlider>(m_WidgetPropertyMap[w].lock()))
+		{
+			prop->SetMinimum(w->minimum());
+			prop->SetMaximum(w->maximum());
+			emit OnPropertyEdited(prop);
 		}
 	}
 }

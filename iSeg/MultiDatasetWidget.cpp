@@ -189,55 +189,58 @@ void MultiDatasetWidget::AddDatasetPressed()
 
 		case SupportedMultiDatasetTypes::eSupportedTypes::kRaw: {
 
-			LoaderRaw lr(nullptr, this);
-			lr.SetSkipReading(true);
-			lr.move(QCursor::pos());
-			lr.exec();
-
-			QString loadfilename = lr.GetFileName();
-			auto dims = lr.GetDimensions();
-			auto start = lr.GetSubregionStart();
-			auto size = lr.GetSubregionSize();
-			int bits = lr.GetBits();
-
-			loadfilenames.append(loadfilename);
-
-			auto region = itk::ImageIORegion(3);
-			region.SetIndex(std::vector<itk::IndexValueType>(start.begin(), start.end()));
-			region.SetSize(std::vector<itk::SizeValueType>(size.begin(), size.end()));
-
-			itk::ImageIOBase::Pointer rawio;
-			if (bits == 8)
+			QString file_path = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
+			if (!file_path.isEmpty())
 			{
-				auto uchar_rawio = itk::RawImageIO<unsigned char, 3>::New();
-				uchar_rawio->SetHeaderSize(0);
-				rawio = uchar_rawio;
-			}
-			else //if (bits == 16)
-			{
-				auto ushort_rawio = itk::RawImageIO<unsigned short, 3>::New();
-				ushort_rawio->SetHeaderSize(0);
-				rawio = ushort_rawio;
-			}
-			rawio->SetDimensions(0, dims[0]);
-			rawio->SetDimensions(1, dims[1]);
-			rawio->SetDimensions(2, start[2] + size[2]); // may be more, but at least this many
-			rawio->SetIORegion(region);
+				LoaderRaw lr(nullptr, file_path, this);
+				lr.SetSkipReading(true);
+				lr.move(QCursor::pos());
+				lr.exec();
 
-			auto reader = itk::ImageFileReader<image_type>::New();
-			reader->SetImageIO(rawio);
-			reader->SetFileName(loadfilename.ascii());
-			try
-			{
-				reader->Update();
+				auto dims = lr.GetDimensions();
+				auto start = lr.GetSubregionStart();
+				auto size = lr.GetSubregionSize();
+				int bits = lr.GetBits();
 
-				image = reader->GetOutput();
+				loadfilenames.append(file_path);
 
-				loadfilenames.append(loadfilename);
-			}
-			catch (itk::ExceptionObject& e)
-			{
-				ISEG_ERROR("Failed to load raw file: " << e.what());
+				auto region = itk::ImageIORegion(3);
+				region.SetIndex(std::vector<itk::IndexValueType>(start.begin(), start.end()));
+				region.SetSize(std::vector<itk::SizeValueType>(size.begin(), size.end()));
+
+				itk::ImageIOBase::Pointer rawio;
+				if (bits == 8)
+				{
+					auto uchar_rawio = itk::RawImageIO<unsigned char, 3>::New();
+					uchar_rawio->SetHeaderSize(0);
+					rawio = uchar_rawio;
+				}
+				else //if (bits == 16)
+				{
+					auto ushort_rawio = itk::RawImageIO<unsigned short, 3>::New();
+					ushort_rawio->SetHeaderSize(0);
+					rawio = ushort_rawio;
+				}
+				rawio->SetDimensions(0, dims[0]);
+				rawio->SetDimensions(1, dims[1]);
+				rawio->SetDimensions(2, start[2] + size[2]); // may be more, but at least this many
+				rawio->SetIORegion(region);
+
+				auto reader = itk::ImageFileReader<image_type>::New();
+				reader->SetImageIO(rawio);
+				reader->SetFileName(file_path.toStdString());
+				try
+				{
+					reader->Update();
+
+					image = reader->GetOutput();
+
+					loadfilenames.append(file_path);
+				}
+				catch (itk::ExceptionObject& e)
+				{
+					ISEG_ERROR("Failed to load raw file: " << e.what());
+				}
 			}
 		}
 		break;
@@ -249,7 +252,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();
-				reader->SetFileName(loadfilename.ascii());
+				reader->SetFileName(loadfilename.toStdString());
 				try
 				{
 					reader->Update();

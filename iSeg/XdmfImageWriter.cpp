@@ -86,9 +86,9 @@ bool XdmfImageWriter::WriteColorLookup(const ColorLookupTable* lut, bool naked)
 		fname = basename + "." + suffix;
 	else
 		fname = basename + ".h5";
-	if (!writer.Open(fname.toAscii().data(), "append"))
+	if (!writer.Open(fname.toStdString().c_str(), "append"))
 	{
-		ISEG_ERROR("opening " << fname.toAscii().data());
+		ISEG_ERROR("opening " << fname.toStdString().c_str());
 		return false;
 	}
 	writer.m_Compression = m_Compression;
@@ -140,7 +140,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 	// save working directory
 	QDir oldcwd = QDir::current();
 
-	std::string abc(file_info.absolutePath().toAscii().data());
+	std::string abc(file_info.absolutePath().toStdString());
 
 	// enter the xmf file folder so relative names for hdf5 files work
 	QDir::setCurrent(file_info.absolutePath());
@@ -161,7 +161,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		fname = basename + "." + suffix;
 	else
 		fname = basename + ".h5";
-	if (!writer.Open(fname.toAscii().data()))
+	if (!writer.Open(fname.toStdString().c_str()))
 	{
 		ISEG_ERROR("opening " << fname.toStdString());
 	}
@@ -356,12 +356,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Dimensions", 3);
-		text = doc.createTextNode(QString("%1 %2 %3")
-																	.arg(offset[2])
-																	.arg(offset[1])
-																	.arg(offset[0])
-																	.toAscii()
-																	.data());
+		text = doc.createTextNode(QString("%1 %2 %3").arg(offset[2]).arg(offset[1]).arg(offset[0]));
 		dataitem.appendChild(text);
 		geometry.appendChild(dataitem);
 
@@ -371,23 +366,13 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Dimensions", 3);
-		text = doc.createTextNode(QString("%1 %2 %3")
-																	.arg(pixelsize[2])
-																	.arg(pixelsize[1])
-																	.arg(pixelsize[0])
-																	.toAscii()
-																	.data());
+		text = doc.createTextNode(QString("%1 %2 %3").arg(pixelsize[2]).arg(pixelsize[1]).arg(pixelsize[0]));
 		dataitem.appendChild(text);
 		geometry.appendChild(dataitem);
 
 		grid.appendChild(geometry);
 
-		QString qdims = QString("%1 %2 %3")
-												.arg(nrslices)
-												.arg(height)
-												.arg(width)
-												.toAscii()
-												.data();
+		QString qdims = QString("%1 %2 %3").arg(nrslices).arg(height).arg(width);
 
 		QString real_name = basename;
 		if (basename.right(4) == QString("Temp"))
@@ -395,7 +380,7 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 
 		QDomElement topology = doc.createElement("Topology");
 		topology.setAttribute("Type", "3DCORECTMesh");
-		topology.setAttribute("Dimensions", qdims.toAscii().data());
+		topology.setAttribute("Dimensions", qdims);
 		grid.appendChild(topology);
 
 		attribute = doc.createElement("Attribute");
@@ -406,8 +391,8 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Format", "HDF");
-		dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-		text = doc.createTextNode((real_name + ".h5:/Source").toAscii().data());
+		dataitem.setAttribute("Dimensions", qdims);
+		text = doc.createTextNode((real_name + ".h5:/Source"));
 		dataitem.appendChild(text);
 		attribute.appendChild(dataitem);
 		grid.appendChild(attribute);
@@ -420,8 +405,8 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		dataitem.setAttribute("NumberType", "Float");
 		dataitem.setAttribute("Precision", 4);
 		dataitem.setAttribute("Format", "HDF");
-		dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-		text = doc.createTextNode((real_name + ".h5:/Target").toAscii().data());
+		dataitem.setAttribute("Dimensions", qdims);
+		text = doc.createTextNode((real_name + ".h5:/Target"));
 		dataitem.appendChild(text);
 		attribute.appendChild(dataitem);
 		grid.appendChild(attribute);
@@ -444,8 +429,8 @@ int XdmfImageWriter::InternalWrite(const char* filename, float** slicesbmp, floa
 		default: std::cerr << "tissues_size_t not supported!" << endl; return 0;
 		}
 		dataitem.setAttribute("Format", "HDF");
-		dataitem.setAttribute("Dimensions", qdims.toAscii().data());
-		text = doc.createTextNode((real_name + ".h5:/Tissue").toAscii().data());
+		dataitem.setAttribute("Dimensions", qdims);
+		text = doc.createTextNode((real_name + ".h5:/Tissue"));
 		dataitem.appendChild(text);
 		attribute.appendChild(dataitem);
 		grid.appendChild(attribute);

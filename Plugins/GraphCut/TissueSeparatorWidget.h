@@ -33,7 +33,7 @@ public:
 	void NewLoaded() override;
 	void Cleanup() override;
 	std::string GetName() override { return std::string("Separate Tissue"); }
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absFilePath(QString("graphcut.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("graphcut.png")); }
 
 private:
 	void OnTissuenrChanged(int i) override;

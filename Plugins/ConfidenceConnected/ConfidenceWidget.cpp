@@ -30,16 +30,20 @@ ConfidenceWidget::ConfidenceWidget(iseg::SlicesHandlerInterface* hand3D)
 
 	m_AllSlices = new QCheckBox;
 
-	m_Iterations = new QSpinBox(0, 50, 1, nullptr);
+	m_Iterations = new QSpinBox;
 	m_Iterations->setValue(1);
+	m_Iterations->setMinimum(0);
+	m_Iterations->setMaximum(50);
 	m_Iterations->setToolTip(Format("Number of growing iterations (each time image statistics of current region are recomputed)."));
 
 	m_Multiplier = new QLineEdit(QString::number(2.5));
 	m_Multiplier->setValidator(new QDoubleValidator(1.0, 1e6, 2));
 	m_Multiplier->setToolTip(Format("The confidence interval is the mean plus or minus the 'Multiplier' times the standard deviation."));
 
-	m_Radius = new QSpinBox(1, 10, 1, nullptr);
+	m_Radius = new QSpinBox;
 	m_Radius->setValue(2);
+	m_Radius->setMinimum(1);
+	m_Radius->setMaximum(10);
 	m_Radius->setToolTip(Format("The neighborhood side of the initial seed points used to compute the image statistics."));
 
 	m_ClearSeeds = new QPushButton("Clear seeds");

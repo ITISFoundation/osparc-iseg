@@ -33,11 +33,6 @@ class QRadioButton;
 class QListWidget;
 class QTableWidget;
 class QSlider;
-// Qt3
-class Q3HBoxLayout;
-class Q3VBoxLayout;
-class Q3HBox;
-class Q3VBox;
 
 namespace iseg {
 
@@ -45,7 +40,6 @@ class SlicesHandler;
 class TissueTreeWidget;
 class Bmphandler;
 
-//class ScaleWork : public QWidget
 class ScaleWork : public QDialog
 {
 	Q_OBJECT
@@ -57,11 +51,11 @@ private:
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-	Q3VBox* m_Vbox1;
+
+	float m_Minval, m_Maxval;
+	float m_Minval1, m_Maxval1;
+	bool m_Dontundo;
+
 	QPushButton* m_GetRange;
 	QPushButton* m_DoScale;
 	QPushButton* m_DoCrop;
@@ -69,14 +63,7 @@ private:
 	QSlider* m_SlContrast;
 	QLineEdit* m_LimitLow;
 	QLineEdit* m_LimitHigh;
-	QLabel* m_LL;
-	QLabel* m_LH;
-	QLabel* m_LbBrightness;
-	QLabel* m_LbContrast;
 	QCheckBox* m_Allslices;
-	float m_Minval, m_Maxval;
-	float m_Minval1, m_Maxval1;
-	bool m_Dontundo;
 	QPushButton* m_CloseButton;
 
 signals:
@@ -101,16 +88,13 @@ class ImageMath : public QDialog
 	Q_OBJECT
 public:
 	ImageMath(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~ImageMath() override;
 
 private:
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3VBox* m_Vbox1;
+	float m_Val;
+
 	QPushButton* m_DoAdd;
 	QPushButton* m_DoSub;
 	QPushButton* m_DoMult;
@@ -118,9 +102,8 @@ private:
 	QButtonGroup* m_Imgorval;
 	QRadioButton* m_RbImg;
 	QRadioButton* m_RbVal;
-	float m_Val;
 	QLineEdit* m_LeVal;
-	QLabel* m_LbVal;
+	QWidget* m_ValArea;
 	QCheckBox* m_Allslices;
 	QPushButton* m_CloseButton;
 
@@ -155,16 +138,13 @@ private:
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
-	Q3VBox* m_Vbox1;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	QLabel* m_LbAlpha;
+
 	QSlider* m_SlAlpha;
 	QLineEdit* m_LeAlpha;
 	QCheckBox* m_Allslices;
 	QPushButton* m_CloseButton;
 	QPushButton* m_ApplyButton;
+
 	float m_Alpha;
 	int m_SliderMax;
 	unsigned short m_SliderPrecision;
@@ -206,19 +186,13 @@ class ShowHisto : public QDialog
 	Q_OBJECT
 public:
 	ShowHisto(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~ShowHisto() override;
 
 private:
 	Bmphandler* m_Bmphand;
 	SlicesHandler* m_Handler3D;
 	unsigned short m_Activeslice;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
+
 	HistoWin* m_Histwindow;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
 	QPushButton* m_CloseButton;
 	QPushButton* m_UpdateSubsect;
 	QSpinBox* m_Xoffset;
@@ -226,10 +200,7 @@ private:
 	QSpinBox* m_Xlength;
 	QSpinBox* m_Ylength;
 	QCheckBox* m_Subsect;
-	QLabel* m_Xoffs;
-	QLabel* m_Yoffs;
-	QLabel* m_Xl;
-	QLabel* m_Yl;
+	QWidget* m_SubsectArea;
 	QButtonGroup* m_Pictselect;
 	QRadioButton* m_Workpict;
 	QRadioButton* m_Bmppict;
@@ -272,31 +243,13 @@ class TissueAdder : public QDialog
 	Q_OBJECT
 public:
 	TissueAdder(bool modifyTissue, TissueTreeWidget* tissueTree, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~TissueAdder() override;
-	//	FILE *save_proj(FILE *fp);
 
 private:
 	bool m_Modify;
 
-	Q3HBoxLayout* m_Hbox1;
-	Q3HBoxLayout* m_Hbox2;
-	Q3HBoxLayout* m_Hbox3;
-	/*	QHBoxLayout *hboxr;
-			QHBoxLayout *hboxg;
-			QHBoxLayout *hboxb;*/
 	Colorshower* m_Cs;
-	Q3VBoxLayout* m_Vbox1;
-	Q3VBoxLayout* m_Vbox2;
-	Q3VBoxLayout* m_Vbox3;
-	Q3VBoxLayout* m_Vbox4;
 	QPushButton* m_CloseButton;
-	//	QPushButton *colorButton;
 	QPushButton* m_AddTissue;
-	QLabel* m_Red;
-	QLabel* m_Green;
-	QLabel* m_Blue;
-	QLabel* m_Opac;
-	QLabel* m_Tissuename;
 	QLineEdit* m_NameField;
 	QSlider* m_R;
 	QSlider* m_G;
@@ -311,7 +264,6 @@ private:
 	float m_Fb1;
 	float m_Transp1;
 	TissueTreeWidget* m_TissueTreeWidget;
-	//	float **tc;
 
 signals:
 	void ColorChanged(float fr, float fg, float fb, float opac2);
@@ -333,13 +285,8 @@ class TissueFolderAdder : public QDialog
 	Q_OBJECT
 public:
 	TissueFolderAdder(TissueTreeWidget* tissueTree, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~TissueFolderAdder() override;
 
 private:
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxOverall;
-	Q3HBoxLayout* m_HboxFolderName;
-	Q3HBoxLayout* m_HboxPushButtons;
 	QLabel* m_NameLabel;
 	QLineEdit* m_NameLineEdit;
 	QPushButton* m_AddButton;
@@ -355,15 +302,11 @@ class TissueHierarchyWidget : public QWidget
 	Q_OBJECT
 public:
 	TissueHierarchyWidget(TissueTreeWidget* tissueTree, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~TissueHierarchyWidget() override;
 
 	bool HandleChangedHierarchy();
 
 private:
 	QDir m_PicturePath;
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxOverall;
-	Q3VBoxLayout* m_VboxHierarchyButtons;
 	QComboBox* m_HierarchyComboBox;
 	QPushButton* m_NewHierarchyButton;
 	QPushButton* m_LoadHierarchyButton;
@@ -387,7 +330,6 @@ class BitsStack : public QWidget
 	Q_OBJECT
 public:
 	BitsStack(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~BitsStack() override;
 	QMap<QString, unsigned int>* ReturnBitsnr();
 	void Newloaded();
 	FILE* SaveProj(FILE* fp);
@@ -401,9 +343,8 @@ protected:
 private:
 	unsigned short m_Oldw, m_Oldh;
 	SlicesHandler* m_Handler3D;
+
 	QListWidget* m_BitsNames;
-	Q3HBoxLayout* m_Hbox1;
-	Q3VBoxLayout* m_Vbox1;
 	QPushButton* m_Pushwork;
 	QPushButton* m_Pushbmp;
 	QPushButton* m_Pushtissue;
@@ -443,25 +384,15 @@ class BitsStackPushdialog : public QDialog
 	Q_OBJECT
 public:
 	BitsStackPushdialog(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Dialog); //TODO BL Qt::Widget
-	~BitsStackPushdialog() override;
 	bool GetPushcurrentslice();
 	unsigned int GetStartslice(bool* ok);
 	unsigned int GetEndslice(bool* ok);
 
 private:
-	Q3VBox* m_Vboxoverall;
-	Q3HBox* m_Hboxparams;
-	Q3VBox* m_Vboxsliceselection;
-	Q3VBox* m_Vboxdelimiter;
-	Q3HBox* m_Hboxslicerange;
-	Q3VBox* m_Vboxslicerangelabels;
-	Q3VBox* m_Vboxslicerangelineedits;
-	Q3HBox* m_Hboxpushbuttons;
+	QWidget* m_SliceRangeArea;
 	QRadioButton* m_RbCurrentslice;
 	QRadioButton* m_RbMultislices;
 	QButtonGroup* m_Slicegroup;
-	QLabel* m_LbStartslice;
-	QLabel* m_LbEndslice;
 	QLineEdit* m_LeStartslice;
 	QLineEdit* m_LeEndslice;
 	QPushButton* m_Pushexec;
@@ -476,7 +407,6 @@ class ExtoverlayWidget : public QWidget
 	Q_OBJECT
 public:
 	ExtoverlayWidget(SlicesHandler* hand3D, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~ExtoverlayWidget() override;
 	void Newloaded();
 
 private:
@@ -492,13 +422,8 @@ private:
 	int m_SliderMax;
 	unsigned short m_SliderPrecision;
 
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxOverall;
-	Q3HBoxLayout* m_HboxAlpha;
-	Q3HBoxLayout* m_HboxDisplaySrcTgt;
 	QComboBox* m_DatasetComboBox;
 	QPushButton* m_LoadDatasetButton;
-	QLabel* m_LbAlpha;
 	QSlider* m_SlAlpha;
 	QLineEdit* m_LeAlpha;
 	QCheckBox* m_SrcCheckBox;
@@ -533,7 +458,6 @@ class ZoomWidget : public QWidget
 	Q_OBJECT
 public:
 	ZoomWidget(double zoom1, QDir picpath, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~ZoomWidget() override;
 	double GetZoom() const;
 
 public slots:
@@ -541,8 +465,6 @@ public slots:
 
 private:
 	double m_Zoom;
-	Q3VBoxLayout* m_Vbox1;
-	Q3HBoxLayout* m_Hbox1;
 	QPushButton* m_Pushzoomin;
 	QPushButton* m_Pushzoomout;
 	QPushButton* m_Pushunzoom;
@@ -568,18 +490,13 @@ class CleanerParams : public QDialog
 	Q_OBJECT
 public:
 	CleanerParams(int* rate1, int* minsize1, QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~CleanerParams() override;
 
 private:
 	int* m_Rate;
 	int* m_Minsize;
-	Q3HBox* m_Hbox1;
-	Q3VBox* m_Vbox1;
-	Q3VBox* m_Vbox2;
+
 	QPushButton* m_PbDoit;
 	QPushButton* m_PbDontdoit;
-	QLabel* m_LbRate;
-	QLabel* m_LbMinsize;
 	QSpinBox* m_SbRate;
 	QSpinBox* m_SbMinsize;
 
@@ -593,16 +510,10 @@ class MergeProjectsDialog : public QDialog
 	Q_OBJECT
 public:
 	MergeProjectsDialog(QWidget* parent = nullptr, Qt::WindowFlags wFlags = Qt::Widget);
-	~MergeProjectsDialog() override;
 
 	void GetFilenames(std::vector<QString>& filenames);
 
 private:
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxFileList;
-	Q3VBoxLayout* m_VboxButtons;
-	Q3VBoxLayout* m_VboxEditButtons;
-	Q3VBoxLayout* m_VboxExecuteButtons;
 	QListWidget* m_FileListWidget;
 	QPushButton* m_AddButton;
 	QPushButton* m_RemoveButton;
@@ -682,13 +593,6 @@ private:
 private:
 	SlicesHandler* m_Handler3D;
 
-	Q3HBox* m_MainBox;
-	Q3VBox* m_Vbox1;
-	Q3HBox* m_Hbox1;
-	Q3HBox* m_Hbox2;
-	Q3HBox* m_Hbox3;
-	Q3HBox* m_Hbox4;
-
 	QCheckBox* m_BonesFoundCb;
 
 	QPushButton* m_ExecuteButton;
@@ -699,14 +603,9 @@ private:
 
 	QLabel* m_ProgressText;
 
-	std::vector<BoneConnectionInfo> m_FoundConnections;
-
-	Q3HBoxLayout* m_HboxOverall;
-	Q3VBoxLayout* m_VboxFileList;
-	Q3VBoxLayout* m_VboxButtons;
-	Q3VBoxLayout* m_VboxEditButtons;
-	Q3VBoxLayout* m_VboxExecuteButtons;
 	QListWidget* m_FileListWidget;
+
+	std::vector<BoneConnectionInfo> m_FoundConnections;
 
 private slots:
 	void CellClicked(int row, int col);

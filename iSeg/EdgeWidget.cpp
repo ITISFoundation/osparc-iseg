@@ -69,37 +69,28 @@ EdgeWidget::EdgeWidget(SlicesHandler* hand3D)
 
 	// create signal-slot connections
 	m_Modegroup->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			MethodChanged();
+		MethodChanged();
 	});
 
-	m_SlSigma->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlSigma->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
-	m_SlThresh1->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlThresh1->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
-	m_SlThresh2->onModified.connect([this](Property_ptr, Property::eChangeType type) {
-		if (type == Property::kValueChanged)
-			SliderChanged();
+	m_SlThresh2->onReleased.connect([this](int) {
+		SliderChanged();
 	});
 
 	// add widget and layout
 	auto property_view = new PropertyWidget(group);
 
-	auto hbox = new QHBoxLayout;
-	hbox->addWidget(property_view);
-	hbox->addStretch();
-
-	auto main_layout = new QVBoxLayout;
-	main_layout->addLayout(hbox);
-	main_layout->addStretch();
-
-	setLayout(main_layout);
+	auto layout = new QHBoxLayout;
+	layout->addWidget(property_view, 2);
+	layout->addStretch(1);
+	setLayout(layout);
 }
 
 EdgeWidget::~EdgeWidget() = default;
@@ -313,7 +304,7 @@ void EdgeWidget::Execute()
 
 void EdgeWidget::ExportCenterlines()
 {
-	QString savefilename = QFileDialog::getSaveFileName(QString::null, "VTK legacy file (*.vtk)\n", this);
+	QString savefilename = QFileDialog::getSaveFileName(this, "Save As", QString::null, "VTK legacy file (*.vtk)\n");
 	if (!savefilename.isEmpty())
 	{
 		SlicesHandlerITKInterface wrapper(m_Handler3D);

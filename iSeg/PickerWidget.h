@@ -31,7 +31,7 @@ public:
 	void Cleanup() override;
 	void NewLoaded() override;
 	std::string GetName() override { return std::string("Picker"); };
-	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath(QString("picker.png"))); }
+	QIcon GetIcon(QDir picdir) override { return QIcon(picdir.absoluteFilePath("picker.png")); }
 
 private:
 	void OnSlicenrChanged() override;
