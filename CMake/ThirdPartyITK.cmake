@@ -14,8 +14,8 @@ FIND_PACKAGE(ITK COMPONENTS
 		# ITKSuperPixel
 		REQUIRED)
 SET(_itk_version "${ITK_VERSION_MAJOR}.${ITK_VERSION_MINOR}.${ITK_VERSION_BUILD}")
-IF(${_itk_version} VERSION_LESS "5.0")
-	MESSAGE(FATAL_ERROR "ITK version (${_itk_version}) is lower than 5.0. Some parts of iSEG may depend on newer features")
+IF(${_itk_version} VERSION_LESS "5.1")
+	MESSAGE(FATAL_ERROR "ITK version (${_itk_version}) is lower than 5.1. Some parts of iSEG may depend on newer features")
 ENDIF()
 
 MACRO(USE_ITK)
