@@ -172,7 +172,7 @@ int main(int argc, char** argv)
 	}
 	else if (vm.count("input-file"))
 	{
-		main_window->Loadproj(QString::fromStdString(vm["input-file"].as<std::string>()));
+		main_window->LoadAny(QString::fromStdString(vm["input-file"].as<std::string>()));
 	}
 
 #ifdef SHOWSPLASH

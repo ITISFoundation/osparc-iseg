@@ -1,0 +1,40 @@
+{
+    "name": "Osparc iSeg Build",
+    "dockerComposeFile": "../docker/docker-compose.yml",
+    "service": "vscode-container-iseg",
+    "runServices": [
+        "vscode-container-iseg"
+    ],
+    "remoteEnv": {
+        "LD_LIBRARY_PATH": "/data/build/Debug/bin",
+    },
+    "workspaceFolder": "/data/osparc-iseg",
+    "extensions": [
+        "ms-vscode.cpptools",
+    ],
+    "settings": {
+        "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+        "launch": {
+            "version": "0.2.0",
+            "configurations": [
+                {
+                    "name": "Debug iSeg",
+                    "type": "cppdbg",
+                    "request": "launch",
+                    "program": "/data/build/Debug/bin/iSeg",
+                    "stopAtEntry": false,
+                    "cwd": "/data/build/Debug/bin",
+                    "externalConsole": false,
+                    "MIMode": "gdb",
+                    "setupCommands": [
+                        {
+                            "description": "Enable pretty-printing for gdb",
+                            "text": "-enable-pretty-printing",
+                            "ignoreFailures": true
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

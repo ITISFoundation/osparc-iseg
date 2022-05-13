@@ -101,6 +101,7 @@ public:
 	void SaveSettings();
 	void LoadSettings(const std::string& loadfilename);
 	void Loadproj(const QString& loadfilename);
+	void LoadAny(const QString& loadfilename);
 	void LoadS4Llink(const QString& loadfilename);
 
 protected:
@@ -328,10 +329,11 @@ private slots:
 	void ExecuteSaveContours();
 	void ExecuteLoaddicom();
 	void ExecuteLoadImageSeries();
-	void ExecuteLoadraw();
+	void ExecuteLoadraw(const QString& file_name=QString());
 	void ExecuteLoadavw();
-	void ExecuteLoadMedicalImage();
-	void ExecuteLoadvtk();
+	void ExecuteLoadMedicalImage(const QString& file_name=QString());
+
+	void ExecuteLoadvtk(const QString& file_name=QString());
 	void ExecuteReloaddicom();
 	void ExecuteReloadbmp();
 	void ExecuteReloadraw();
