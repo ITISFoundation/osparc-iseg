@@ -82,6 +82,8 @@
 
 #include <Q3ScrollView>
 
+#include <algorithm>
+
 #define str_macro(s) #s
 #define xstr(s) str_macro(s)
 
@@ -2148,9 +2150,9 @@ void MainWindow::ExecuteReloaddicom()
 	}
 }
 
-void MainWindow::ExecuteLoadraw()
+void MainWindow::ExecuteLoadraw(const QString& file_name)
 {
-	QString file_path = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
+	QString file_path = !file_name.isEmpty() ? file_name : RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
 	if (file_path.isEmpty())
 	{
 		return;
@@ -2179,7 +2181,7 @@ void MainWindow::ExecuteLoadraw()
 	EnableActionsAfterPrjLoaded(true);
 }
 
-void MainWindow::ExecuteLoadMedicalImage()
+void MainWindow::ExecuteLoadMedicalImage(const QString& file_name)
 {
 	if (!MaybeSafe())
 	{
@@ -2193,7 +2195,7 @@ void MainWindow::ExecuteLoadMedicalImage()
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Metaheader (*.mhd *.mha);;"
+	QString loadfilename = !file_name.isEmpty() ? file_name : RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Metaheader (*.mhd *.mha);;"
 																																												 "NIFTI (*.nii *.hdr *.img *.nii.gz);;"
 																																												 "All (*.*)");
 	if (!loadfilename.isEmpty())
@@ -2210,7 +2212,7 @@ void MainWindow::ExecuteLoadMedicalImage()
 	EnableActionsAfterPrjLoaded(true);
 }
 
-void MainWindow::ExecuteLoadvtk()
+void MainWindow::ExecuteLoadvtk(const QString& file_name)
 {
 	if (!MaybeSafe())
 	{
@@ -2225,7 +2227,7 @@ void MainWindow::ExecuteLoadvtk()
 	emit BeginDatachange(data_selection, this, false);
 
 	bool res = true;
-	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
+	QString loadfilename = !file_name.isEmpty() ? file_name : RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "VTK (*.vti *.vtk)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		res = m_Handler3D->ReadImage(loadfilename.toAscii());
@@ -3116,6 +3118,40 @@ void MainWindow::ExecuteSaveproj()
 		}
 	}
 	emit EndDataexport(this);
+}
+
+void MainWindow::LoadAny(const QString& loadfilename)
+{
+	const auto file_path = boost::filesystem::path(loadfilename.toStdString());
+	if (!boost::filesystem::exists(file_path))
+	{
+		return;
+	}
+	
+	// Deduce the importer from the file-ending
+	const auto extension = boost::filesystem::extension(file_path);
+
+	static const std::string proj_extenstion = ".proj";
+	static const std::string s4l_extenstion = ".h5";
+	static const std::vector<std::string> medical_image_extensions = {".mhd", ".mha", ".nii", ".hdr", ".img", ".gz"};
+	static const std::vector<std::string> vtk_extensions = {".vtk", ".vki"};
+
+	if (extension == proj_extenstion)
+	{
+		Loadproj(loadfilename);
+	}
+	else if (extension == s4l_extenstion)
+	{
+		LoadS4Llink(loadfilename);
+	}
+	else if (std::count(medical_image_extensions.begin(), medical_image_extensions.end(), extension))
+	{
+		ExecuteLoadMedicalImage(loadfilename);
+	}
+	else if (std::count(vtk_extensions.begin(), vtk_extensions.end(), extension))
+	{
+		ExecuteLoadvtk(loadfilename);
+	}
 }
 
 void MainWindow::Loadproj(const QString& loadfilename)

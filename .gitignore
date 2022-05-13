@@ -33,3 +33,10 @@
 *.out
 *.app
 .DS_Store
+
+# vscode
+.vscode
+.devcontainer
+
+# data
+assets/

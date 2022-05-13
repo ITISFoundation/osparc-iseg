@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  build:
+    image: ${BUILDKIT_IMAGE}
+    volumes: &vol
+      - ../:/data/osparc-iseg
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - iseg-build-volume:/data/build
+    environment: &env
+      - BUILD_DIR=/data/build/${BUILD_TYPE}
+      - DISPLAY=${DISPLAY}
+      - LD_LIBRARY_PATH=/data/build/${BUILD_TYPE}/bin
+      - BUILD_TYPE=${BUILD_TYPE}
+    command:
+      - /bin/bash
+      - -i
+      - /data/osparc-iseg/docker/build.sh
+  shell:
+    image: ${BUILDKIT_IMAGE}
+    ipc: host
+    volumes: *vol
+    environment: *env
+    command:
+      - /bin/bash
+  run:
+    image: ${BUILDKIT_IMAGE}
+    ipc: host
+    volumes: *vol
+    environment: *env
+    command:
+      - /data/build/${BUILD_TYPE}/bin/iSeg
+      # - -I
+      # - /data/osparc-iseg/assets/segmentation.nii.gz
+  vscode-container-iseg: 
+    image: ${BUILDKIT_IMAGE}
+    ipc: host
+    volumes: *vol
+    environment: *env
+    entrypoint: 
+      - /bin/bash
+    stdin_open: true
+    tty: true
+volumes:
+  iseg-build-volume:
+    name: iseg-build-volume
