@@ -40,3 +40,4 @@ For installing EIGEN just download and extract the [source code](http://eigen.tu
 - Windows/Visual Studio [instructions](Build/CompilingWindows.md)
 - MacOS/Clang++ [instructions](Build/CompilingMacOS.md)
 - Ubuntu [github action](.github/workflows/build.yml)
+- With Docker images [instructions](Build/CompilingInDocker.md)
