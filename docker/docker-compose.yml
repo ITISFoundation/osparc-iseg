@@ -29,8 +29,8 @@ services:
     environment: *env
     command:
       - /data/build/${BUILD_TYPE}/bin/iSeg
-      - -I
-      - /data/osparc-iseg/segmentation.nii.gz
+      # - -I
+      # - /data/osparc-iseg/assets/segmentation.nii.gz
   vscode-container-iseg: 
     image: ${BUILDKIT_IMAGE}
     ipc: host
