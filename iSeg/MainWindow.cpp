@@ -3131,7 +3131,7 @@ void MainWindow::LoadAny(const QString& loadfilename)
 	// Deduce the importer from the file-ending
 	const auto extension = boost::filesystem::extension(file_path);
 
-	static const std::string proj_extenstion = ".proj";
+	static const std::string proj_extenstion = ".prj";
 	static const std::string s4l_extenstion = ".h5";
 	static const std::vector<std::string> medical_image_extensions = {".mhd", ".mha", ".nii", ".hdr", ".img", ".gz"};
 	static const std::vector<std::string> vtk_extensions = {".vtk", ".vki"};
