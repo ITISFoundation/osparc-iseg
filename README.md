@@ -1,5 +1,6 @@
 ![iSEG logo](iSeg/images/isegicon.png)
 [![Build Actions Status](https://github.com/ITISFoundation/osparc-iseg/workflows/C/C++%20CI/badge.svg)](https://github.com/ITISFoundation/osparc-iseg/actions)
+[![DOI](https://zenodo.org/badge/124380478.svg)](https://zenodo.org/badge/latestdoi/124380478)
 
 ## Description
 
