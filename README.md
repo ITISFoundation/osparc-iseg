@@ -18,7 +18,7 @@ Instructions as to how these libraries must be installed and compiled are provid
 The applications below are needed in order to compile iSEG and its dependencies.
 
 - [CMake:](https://cmake.org/) 3.12 minimum
-- Visual Studio 2015 or Xcode/Clang on MacOS
+- C++14 compiler
 - [Git](https://git-scm.com/)
 
 ### Required 3rd party libraries
