@@ -8,16 +8,16 @@ authors:
     orcid: "https://orcid.org/0000-0003-0935-9530"
   - family-names: Maiz
     given-names: Odei
+    affiliation: "IT'IS Foundation"
   - family-names: Neufeld
     given-names: Esra
     orcid: "https://orcid.org/0000-0001-5528-6147"
   - family-names: Anderegg
     given-names: Sylvain
+    affiliation: "IT'IS Foundation"
   - family-names: Guidon
     given-names: Manuel
     orcid: "https://orcid.org/0000-0003-3543-6683"
-  - family-names: Crespo
-    given-names: Pedro
 version: 1.2.2
 date-released: "2022-05-16"
 identifiers:
