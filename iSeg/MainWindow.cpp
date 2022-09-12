@@ -1118,8 +1118,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath("fileopen.png")), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
 	}
 	m_File->addSeparator();
-	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSavetissues()));
-	m_File->addAction("Open T&issuelist...", this, SLOT(ExecuteLoadtissues()));
+	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSaveTissues()));
+	m_File->addAction("Open T&issuelist...", this, SLOT(ExecuteLoadTissues()));
 	m_File->addAction("Set Tissuelist as Default", this, SLOT(ExecuteSettissuesasdef()));
 	m_File->addAction("Remove Default Tissuelist", this, SLOT(ExecuteRemovedeftissues()));
 	m_File->addSeparator();
@@ -3574,7 +3574,7 @@ void MainWindow::ExecuteReloadatlases()
 	LoadAtlas(m_MAtlasfilename.m_MAtlasdir);
 }
 
-void MainWindow::ExecuteSavetissues()
+void MainWindow::ExecuteSaveTissues()
 {
 	QString savefilename = RecentPlaces::GetSaveFileName(this, "Save as", QString::null, QString::null);
 
@@ -3841,7 +3841,7 @@ void MainWindow::ReloadMedicalImage(const QString& loadfilename)
 	}
 }
 
-void MainWindow::ExecuteLoadtissues()
+void MainWindow::ExecuteLoadTissues()
 {
 	// no filter ?
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
@@ -5684,7 +5684,7 @@ void MainWindow::Slices3dChanged(bool new_bitstack)
 
 	for (size_t i = 0; i < m_Tabwidgets.size(); i++)
 	{
-		//((WidgetInterface*)(m_Tabwidgets[i]))->NewLoaded();
+		((WidgetInterface*)(m_Tabwidgets[i]))->NewLoaded();
 	}
 
 	WidgetInterface* qw = (WidgetInterface*)m_MethodTab->currentWidget();

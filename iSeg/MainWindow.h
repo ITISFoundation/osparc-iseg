@@ -384,7 +384,7 @@ private slots:
 	void ExecuteLoadatlas19();
 	void ExecuteCreateatlas();
 	void ExecuteReloadatlases();
-	void ExecuteSavetissues();
+	void ExecuteSaveTissues();
 	void ExecuteExportlabelfield();
 	void ExecuteExportmat();
 	void ExecuteExporthdf();
@@ -394,7 +394,7 @@ private slots:
 	void ExecuteExportvtkcompressedbinary();
 	void ExecuteExportxmlregionextent();
 	void ExecuteExporttissueindex();
-	void ExecuteLoadtissues();
+	void ExecuteLoadTissues();
 	void ExecuteSavecolorlookup();
 	void ExecuteSettissuesasdef();
 	void ExecuteRemovedeftissues();
