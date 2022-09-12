@@ -103,6 +103,9 @@ public:
 	void Loadproj(const QString& loadfilename);
 	void LoadAny(const QString& loadfilename);
 	void LoadS4Llink(const QString& loadfilename);
+	void LoadTissuelist(const QString& file_path, bool append, bool no_popup);
+	void ReloadMedicalImage(const QString& loadfilename);
+	void Work2Tissue() { DoWork2tissue(); }
 
 protected:
 	void StartSurfaceviewer(int mode);
