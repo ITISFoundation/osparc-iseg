@@ -1118,8 +1118,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		m_File->addAction(QIcon(m_MPicpath.absoluteFilePath("fileopen.png")), "Open P&roject...", this, SLOT(ExecuteLoadproj()));
 	}
 	m_File->addSeparator();
-	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSavetissues()));
-	m_File->addAction("Open T&issuelist...", this, SLOT(ExecuteLoadtissues()));
+	m_File->addAction("Save &Tissuelist...", this, SLOT(ExecuteSaveTissues()));
+	m_File->addAction("Open T&issuelist...", this, SLOT(ExecuteLoadTissues()));
 	m_File->addAction("Set Tissuelist as Default", this, SLOT(ExecuteSettissuesasdef()));
 	m_File->addAction("Remove Default Tissuelist", this, SLOT(ExecuteRemovedeftissues()));
 	m_File->addSeparator();
@@ -2369,22 +2369,12 @@ void MainWindow::ExecuteReloadavw()
 
 void MainWindow::ExecuteReloadMedicalImage()
 {
-	DataSelection data_selection;
-	data_selection.allSlices = true;
-	data_selection.bmp = true;
-	data_selection.work = true;
-	data_selection.tissues = true;
-	emit BeginDatachange(data_selection, this, false);
+	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null,
+			"Metaheader (*.mhd *.mha);;"
+			"NIFTI (*.nii *.hdr *.img *.nii.gz);;"
+			"All (*.*)");
 
-	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Metaheader (*.mhd *.mha);;"
-																																												 "NIFTI (*.nii *.hdr *.img *.nii.gz);;"
-																																												 "All (*.*)");
-	if (!loadfilename.isEmpty())
-	{
-		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
-		ResetBrightnesscontrast();
-	}
-	emit EndDatachange(this, iseg::ClearUndo);
+	ReloadMedicalImage(loadfilename);
 }
 
 void MainWindow::ExecuteReloadvtk()
@@ -3152,6 +3142,11 @@ void MainWindow::LoadAny(const QString& loadfilename)
 	{
 		ExecuteLoadvtk(loadfilename);
 	}
+	else
+	{
+		ISEG_WARNING("Could not load file: " << file_path.string()
+								 << " : unsupported extension: " << extension);
+	}
 }
 
 void MainWindow::Loadproj(const QString& loadfilename)
@@ -3579,7 +3574,7 @@ void MainWindow::ExecuteReloadatlases()
 	LoadAtlas(m_MAtlasfilename.m_MAtlasdir);
 }
 
-void MainWindow::ExecuteSavetissues()
+void MainWindow::ExecuteSaveTissues()
 {
 	QString savefilename = RecentPlaces::GetSaveFileName(this, "Save as", QString::null, QString::null);
 
@@ -3776,7 +3771,77 @@ void MainWindow::ExecuteExporttissueindex()
 	emit EndDataexport(this);
 }
 
-void MainWindow::ExecuteLoadtissues()
+void MainWindow::LoadTissuelist(const QString& loadfilename, bool append, bool no_popup)
+{
+	tissues_size_t remove_tissues_range;
+	TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range);
+
+	if (append)
+	{
+		int nr = m_TissueTreeWidget->GetCurrentType() - 1;
+		m_TissueTreeWidget->UpdateTreeWidget();
+
+		tissues_size_t curr_tissue_type = m_TissueTreeWidget->GetCurrentType();
+		if (nr != curr_tissue_type - 1)
+		{
+			TissuenrChanged(curr_tissue_type - 1);
+		}
+	}
+	else // replace
+	{
+		if (remove_tissues_range > 0)
+		{
+			const auto can_delete = [this]() {
+				return QMessageBox::question(this, "iSeg",
+						"Some of the previously existing tissues are\nnot "
+						"contained in the loaded tissue list.\n\nDo you want "
+						"to delete them?",
+						QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
+			};
+
+			if (no_popup || can_delete() == QMessageBox::Yes)
+			{
+				std::set<tissues_size_t> remove_tissues;
+				for (tissues_size_t type = 1; type <= remove_tissues_range; ++type)
+				{
+					remove_tissues.insert(type);
+				}
+				DataSelection data_selection;
+				data_selection.allSlices = true;
+				data_selection.tissues = true;
+				emit BeginDatachange(data_selection, this, false);
+				m_Handler3D->RemoveTissues(remove_tissues);
+				emit EndDatachange(this, iseg::ClearUndo);
+			}
+		}
+
+		tissues_size_t tissue_count = TissueInfos::GetTissueCount();
+		m_Handler3D->CapTissue(tissue_count);
+
+		m_TissueTreeWidget->UpdateTreeWidget();
+		TissuenrChanged(m_TissueTreeWidget->GetCurrentType() - 1);
+	}
+}
+
+void MainWindow::ReloadMedicalImage(const QString& loadfilename)
+{
+	if (!loadfilename.isEmpty())
+	{
+		DataSelection data_selection;
+		data_selection.allSlices = true;
+		data_selection.bmp = true;
+		data_selection.work = true;
+		data_selection.tissues = true;
+		emit BeginDatachange(data_selection, this, false);
+
+		m_Handler3D->ReloadImage(loadfilename.toAscii(), m_Handler3D->StartSlice());
+		ResetBrightnesscontrast();
+
+		emit EndDatachange(this, iseg::ClearUndo);
+	}
+}
+
+void MainWindow::ExecuteLoadTissues()
 {
 	// no filter ?
 	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, QString::null);
@@ -3790,65 +3855,9 @@ void MainWindow::ExecuteLoadtissues()
 		msg_box.setIcon(QMessageBox::Question);
 		msg_box.exec();
 
-		tissues_size_t remove_tissues_range;
-		if (msg_box.clickedButton() == append_button)
+		if (msg_box.clickedButton() == append_button || msg_box.clickedButton() == replace_button)
 		{
-			TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range);
-			int nr = m_TissueTreeWidget->GetCurrentType() - 1;
-			m_TissueTreeWidget->UpdateTreeWidget();
-
-			tissues_size_t curr_tissue_type = m_TissueTreeWidget->GetCurrentType();
-			if (nr != curr_tissue_type - 1)
-			{
-				TissuenrChanged(curr_tissue_type - 1);
-			}
-		}
-		else if (msg_box.clickedButton() == replace_button)
-		{
-			if (TissueInfos::LoadTissuesReadable(loadfilename.toAscii(), m_Handler3D, remove_tissues_range))
-			{
-				if (remove_tissues_range > 0)
-				{
-#if 1 // Version: Ask user whether to delete tissues
-					int ret = QMessageBox::question(this, "iSeg", "Some of the previously existing tissues are\nnot "
-																												"contained in "
-																												"the loaded tissue list.\n\nDo you want to delete "
-																												"them?",
-							QMessageBox::Yes | QMessageBox::Default, QMessageBox::No);
-					if (ret == QMessageBox::Yes)
-					{
-						std::set<tissues_size_t> remove_tissues;
-						for (tissues_size_t type = 1; type <= remove_tissues_range; ++type)
-						{
-							remove_tissues.insert(type);
-						}
-						DataSelection data_selection;
-						data_selection.allSlices = true;
-						data_selection.tissues = true;
-						emit BeginDatachange(data_selection, this, false);
-						m_Handler3D->RemoveTissues(remove_tissues);
-						emit EndDatachange(this, iseg::ClearUndo);
-					}
-#else
-					std::set<tissues_size_t> removeTissues;
-					for (tissues_size_t type = 1; type <= removeTissuesRange; ++type)
-					{
-						removeTissues.insert(type);
-					}
-					DataSelection dataSelection;
-					dataSelection.allSlices = true;
-					dataSelection.tissues = true;
-					emit BeginDatachange(dataSelection, this, false);
-					handler3D->remove_tissues(removeTissues);
-					emit EndDatachange(this, iseg::ClearUndo);
-#endif
-				}
-			}
-			tissues_size_t tissue_count = TissueInfos::GetTissueCount();
-			m_Handler3D->CapTissue(tissue_count);
-
-			m_TissueTreeWidget->UpdateTreeWidget();
-			TissuenrChanged(m_TissueTreeWidget->GetCurrentType() - 1);
+			LoadTissuelist(loadfilename, msg_box.clickedButton() == append_button, false);
 		}
 	}
 }

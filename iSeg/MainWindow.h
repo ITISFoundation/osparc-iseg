@@ -103,6 +103,9 @@ public:
 	void Loadproj(const QString& loadfilename);
 	void LoadAny(const QString& loadfilename);
 	void LoadS4Llink(const QString& loadfilename);
+	void LoadTissuelist(const QString& file_path, bool append, bool no_popup);
+	void ReloadMedicalImage(const QString& loadfilename);
+	void Work2Tissue() { DoWork2tissue(); }
 
 protected:
 	void StartSurfaceviewer(int mode);
@@ -381,7 +384,7 @@ private slots:
 	void ExecuteLoadatlas19();
 	void ExecuteCreateatlas();
 	void ExecuteReloadatlases();
-	void ExecuteSavetissues();
+	void ExecuteSaveTissues();
 	void ExecuteExportlabelfield();
 	void ExecuteExportmat();
 	void ExecuteExporthdf();
@@ -391,7 +394,7 @@ private slots:
 	void ExecuteExportvtkcompressedbinary();
 	void ExecuteExportxmlregionextent();
 	void ExecuteExporttissueindex();
-	void ExecuteLoadtissues();
+	void ExecuteLoadTissues();
 	void ExecuteSavecolorlookup();
 	void ExecuteSettissuesasdef();
 	void ExecuteRemovedeftissues();

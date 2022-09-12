@@ -88,8 +88,10 @@ int main(int argc, char** argv)
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help", "produce help message")
-		("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) file")
 		("s4l", po::value<std::string>(), "start iSEG in S4L link mode")
+		("input-file,I", po::value<std::string>(), "open iSEG project (*.prj) or any image file (e.g. *.nii.gz)")
+		("labels-file,L", po::value<std::string>(), "open labelfield (e.g. *.nii.gz) file")
+		("tissue-list,T", po::value<std::string>(), "open iSEG tissue list (*.txt) file")
 		("debug", po::bool_switch()->default_value(false), "show debug log messages")
 		("plugin-dirs,D", po::value<std::vector<std::string>>(), "additional directories to search for plugins");
 	po::variables_map vm;
@@ -170,9 +172,32 @@ int main(int argc, char** argv)
 	{
 		main_window->LoadS4Llink(QString::fromStdString(vm["s4l"].as<std::string>()));
 	}
-	else if (vm.count("input-file"))
+	else
 	{
-		main_window->LoadAny(QString::fromStdString(vm["input-file"].as<std::string>()));
+		if (vm.count("tissue-list"))
+		{
+			main_window->LoadTissuelist(QString::fromStdString(vm["tissue-list"].as<std::string>()), false, true);
+		}
+
+		if (vm.count("labels-file"))
+		{
+			ISEG_INFO_MSG(vm["labels-file"].as<std::string>());
+			main_window->LoadAny(QString::fromStdString(vm["labels-file"].as<std::string>()));
+			main_window->Work2Tissue();
+		}
+
+		if (vm.count("input-file"))
+		{
+			ISEG_INFO_MSG(vm["input-file"].as<std::string>());
+			if (vm.count("labels-file"))
+			{
+				main_window->ReloadMedicalImage(QString::fromStdString(vm["input-file"].as<std::string>()));
+			}
+			else
+			{
+				main_window->LoadAny(QString::fromStdString(vm["input-file"].as<std::string>()));
+			}
+		}
 	}
 
 #ifdef SHOWSPLASH
