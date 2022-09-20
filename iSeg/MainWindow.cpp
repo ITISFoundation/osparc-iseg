@@ -2195,9 +2195,7 @@ void MainWindow::ExecuteLoadMedicalImage(const QString& file_name)
 	data_selection.tissues = true;
 	emit BeginDatachange(data_selection, this, false);
 
-	QString loadfilename = !file_name.isEmpty() ? file_name : RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Metaheader (*.mhd *.mha);;"
-																																												 "NIFTI (*.nii *.hdr *.img *.nii.gz);;"
-																																												 "All (*.*)");
+	QString loadfilename = !file_name.isEmpty() ? file_name : RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Images (*.nii *.hdr *.img *.nii.gz *.mhd *.mha *.nrrd);;All (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		m_Handler3D->ReadImage(loadfilename.toAscii());
@@ -2369,12 +2367,9 @@ void MainWindow::ExecuteReloadavw()
 
 void MainWindow::ExecuteReloadMedicalImage()
 {
-	QString loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null,
-			"Metaheader (*.mhd *.mha);;"
-			"NIFTI (*.nii *.hdr *.img *.nii.gz);;"
-			"All (*.*)");
+	auto filename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Images (*.nii *.hdr *.img *.nii.gz *.mhd *.mha *.nrrd);;All (*.*)");
 
-	ReloadMedicalImage(loadfilename);
+	ReloadMedicalImage(filename);
 }
 
 void MainWindow::ExecuteReloadvtk()

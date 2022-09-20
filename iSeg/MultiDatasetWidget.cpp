@@ -248,7 +248,7 @@ void MultiDatasetWidget::AddDatasetPressed()
 		case SupportedMultiDatasetTypes::eSupportedTypes::kNifti:
 		case SupportedMultiDatasetTypes::eSupportedTypes::kMeta:
 		case SupportedMultiDatasetTypes::eSupportedTypes::kVTK: {
-			auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open File", "", "Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia *.mhd *.mha)");
+			auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open File", QString::null, "Images (*.vti *.vtk *.nii *.nii.gz *.hdr *.img *.nia *.mhd *.mha)");
 			if (!loadfilename.isEmpty())
 			{
 				auto reader = itk::ImageFileReader<image_type>::New();

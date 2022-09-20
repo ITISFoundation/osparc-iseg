@@ -1637,12 +1637,7 @@ void ExtoverlayWidget::DatasetChanged(int index)
 
 void ExtoverlayWidget::LoadDatasetPressed()
 {
-	QString loadfilename = RecentPlaces::GetOpenFileName(
-			this, "Open file", QString::null,
-			"VTK (*.vti *.vtk)\n"
-			"Raw files (*.raw)\n"
-			"NIFTI (*.nii *.hdr *.img *.nii.gz)\n"
-			"All (*.*)");
+	auto loadfilename = RecentPlaces::GetOpenFileName(this, "Open file", QString::null, "Images (*.nii *.hdr *.img *.nii.gz *.vti *.vtk *.raw)\nAll (*.*)");
 	if (!loadfilename.isEmpty())
 	{
 		AddDataset(loadfilename);
