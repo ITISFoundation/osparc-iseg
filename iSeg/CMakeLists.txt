@@ -152,25 +152,25 @@ IF(WIN32)
 		FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/images/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BUILD_TYPE}/images NO_SOURCE_PERMISSIONS FILES_MATCHING PATTERN "*.png" PATTERN ".svn" EXCLUDE)
 		CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/images/isegicon64.ico ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BUILD_TYPE}/images/isegicon.ico COPYONLY)
 	ENDFOREACH()
-ELSE()
-	IF(APPLE)
-		# NOTE: Don't include the path in MACOSX_BUNDLE_ICON_FILE -- this is
-		# the property added to Info.plist
-		SET(MACOSX_BUNDLE_ICON_FILE isegicon64.icns)
+ELSEIF(APPLE)
+	# NOTE: Don't include the path in MACOSX_BUNDLE_ICON_FILE -- this is
+	# the property added to Info.plist
+	SET(MACOSX_BUNDLE_ICON_FILE isegicon64.icns)
 
-		# and this part tells CMake where to find and install the file itself
-		SET_SOURCE_FILES_PROPERTIES(images/isegicon64.icns
-			PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
-		)
+	# and this part tells CMake where to find and install the file itself
+	SET_SOURCE_FILES_PROPERTIES(images/isegicon64.icns
+		PROPERTIES MACOSX_PACKAGE_LOCATION "Resources"
+	)
 
-		# install other icons
-		FILE(GLOB PNG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/*.png)
-		SET_SOURCE_FILES_PROPERTIES(${PNG_FILES}
-			PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS/images"
-		)
-		# TODO: do I need to add PNG_FILES here?
-		SET(ICON_FILES ${PNG_FILES} images/isegicon64.icns)
-	ENDIF()
+	# install other icons
+	FILE(GLOB PNG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/*.png)
+	SET_SOURCE_FILES_PROPERTIES(${PNG_FILES}
+		PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS/images"
+	)
+	# TODO: do I need to add PNG_FILES here?
+	SET(ICON_FILES ${PNG_FILES} images/isegicon64.icns)
+ELSEIF(UNIX)
+	FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/images/ DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images NO_SOURCE_PERMISSIONS FILES_MATCHING PATTERN "*.png" PATTERN ".svn" EXCLUDE)
 ENDIF()
 
 ADD_EXECUTABLE(iSeg WIN32 MACOSX_BUNDLE ${ViewerSrcs} ${MOCSrcs} ${ViewerHeaders} ${RCCSrcs} ${CMAKE_BINARY_DIR}/config.h iSeg.rc ${ICON_FILES})
