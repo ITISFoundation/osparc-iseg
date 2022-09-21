@@ -98,7 +98,7 @@ QString RecentPlaces::LastDirectory()
 {
 	if (!list.empty())
 		return list.front();
-	return QString::null;
+	return QDir::home().absolutePath();
 }
 
 std::deque<QString> RecentPlaces::RecentDirectories()
