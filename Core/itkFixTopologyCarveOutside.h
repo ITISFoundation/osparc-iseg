@@ -3,137 +3,153 @@
 /// \author Bryn Lloyd
 /// \copyright 2020, IT'IS Foundation
 
-#ifndef itkFixTopologyCarveOutside
-#define itkFixTopologyCarveOutside
+#ifndef itkFixTopologyCarveOutside_h
+#define itkFixTopologyCarveOutside_h
 
-#include <itkImageRegionIteratorWithIndex.h>
-#include <itkImageToImageFilter.h>
-#include <itkNeighborhoodIterator.h>
-#include <itkProgressAccumulator.h>
-#include <itkProgressReporter.h>
+#include "itkImageToImageFilter.h"
+#include "itkProgressAccumulator.h"
 
-namespace itk {
-/** \class FixTopologyCarveInside
+#include <vector>
+
+namespace itk
+{
+/** \class FixTopologyCarveOutside
  *
- * \brief This filter dilates the foreground, and then erodes from the "outside" while preserving the topology
+ * \brief This filter does morphological closing with topology constraints
  *
- * This filter implements ideas from:
+ * It works by doing following steps:
+ * 1. dilate the foreground
+ * 2. erode/carve the dilated voxels from the "outside" while preserving the topology of the dilated region.
  *
- * Vanderhyde, James. "Topology control of volumetric data." 
- * PhD diss., Georgia Institute of Technology, 2007..
+ * The first step closes holes and the second returns as close as possible to the input mask, while ensuring that the
+ * holes are not re-opened. Instead of using a dilation, a custom mask can be provided (e.g. a sphere around a hole).
+ *
+ * This filter implements ideas from: Vanderhyde, James. "Topology control of volumetric data.", PhD dissertation,
+ * Georgia Institute of Technology, 2007..
+ *
+ * \author Bryn Lloyd
+ * \ingroup TopologyControl
  */
-template<class TInputImage, class TOutputImage>
-class /*ITK_TEMPLATE_EXPORT*/ FixTopologyCarveOutside : public ImageToImageFilter<TInputImage, TOutputImage>
+template <class TInputImage, class TOutputImage, class TMaskImage = itk::Image<unsigned char, 3>>
+class ITK_TEMPLATE_EXPORT FixTopologyCarveOutside : public ImageToImageFilter<TInputImage, TOutputImage>
 {
 public:
-	ITK_DISALLOW_COPY_AND_ASSIGN(FixTopologyCarveOutside);
+  /** Extract dimension from input and output image. */
+  itkStaticConstMacro(InputImageDimension, unsigned int, TInputImage::ImageDimension);
+  itkStaticConstMacro(OutputImageDimension, unsigned int, TOutputImage::ImageDimension);
 
-	/** Standard class typedefs. */
-	using Self = FixTopologyCarveOutside;
-	using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
-	using Pointer = SmartPointer<Self>;
-	using ConstPointer = SmartPointer<const Self>;
+  static const unsigned int ImageDimension = InputImageDimension;
 
-	/** Method for creation through the object factory */
-	itkNewMacro(Self);
+  /** Standard class typedefs. */
+  using Self = FixTopologyCarveOutside;
+  using Superclass = ImageToImageFilter<TInputImage, TOutputImage>;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
 
-	/** Run-time type information (and related methods). */
-	itkTypeMacro(FixTopologyCarveOutside, ImageToImageFilter);
+  /** Method for creation through the object factory */
+  itkNewMacro(Self);
 
-	/** Type for input image. */
-	using InputImageType = TInputImage;
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(FixTopologyCarveOutside, ImageToImageFilter);
 
-	/** Type for output image: Skeleton of the object.  */
-	using OutputImageType = TOutputImage;
+  /** Type for input image. */
+  using InputImageType = TInputImage;
 
-	/** Type for the region of the input image. */
-	using RegionType = typename InputImageType::RegionType;
+  /** Type for output image: Skeleton of the object.  */
+  using OutputImageType = TOutputImage;
 
-	/** Type for the index of the input image. */
-	using IndexType = typename RegionType::IndexType;
+  /** Type for mask image  */
+  using MaskImageType = TMaskImage;
 
-	/** Type for the pixel type of the input image. */
-	using InputImagePixelType = typename InputImageType::PixelType;
+  /** Type for the pixel type of the input image. */
+  using InputImagePixelType = typename InputImageType::PixelType;
 
-	/** Type for the pixel type of the input image. */
-	using OutputImagePixelType = typename OutputImageType::PixelType;
+  /** Type for the pixel type of the input image. */
+  using OutputImagePixelType = typename OutputImageType::PixelType;
 
-	/** Type for the size of the input image. */
-	using SizeType = typename RegionType::SizeType;
+  /** Pointer Type for input image. */
+  using InputImagePointer = typename InputImageType::ConstPointer;
 
-	/** Pointer Type for input image. */
-	using InputImagePointer = typename InputImageType::ConstPointer;
+  /** Pointer Type for the output image. */
+  using OutputImagePointer = typename OutputImageType::Pointer;
 
-	/** Pointer Type for the output image. */
-	using OutputImagePointer = typename OutputImageType::Pointer;
+  /** Pointer Type for the mask image. */
+  using MaskImageTypePointer = typename MaskImageType::Pointer;
 
-	/** Boundary condition type for the neighborhood iterator */
-	using ConstBoundaryConditionType = ConstantBoundaryCondition<TInputImage>;
+  /** Optional mask (if none is provided the input mask is dilated by 'Radius') */
+  void
+  SetMaskImage(const TMaskImage * mask);
+  const TMaskImage *
+  GetMaskImage() const;
 
-	/** Neighborhood iterator type */
-	using NeighborhoodIteratorType = NeighborhoodIterator<TInputImage, ConstBoundaryConditionType>;
+  itkSetMacro(Radius, SizeValueType);
+  itkGetConstMacro(Radius, SizeValueType);
 
-	/** Neighborhood type */
-	using NeighborhoodType = typename NeighborhoodIteratorType::NeighborhoodType;
-
-	itkSetMacro(Radius, float);
-	itkGetConstMacro(Radius, float);
-
-	itkSetMacro(InsideValue, InputImagePixelType);
-	itkGetConstMacro(InsideValue, InputImagePixelType);
-
-	/** Get Skeleton by thinning image. */
-	OutputImageType* GetThinning();
-
-	/** ImageDimension enumeration   */
-	itkStaticConstMacro(InputImageDimension, unsigned int, TInputImage::ImageDimension);
-	itkStaticConstMacro(OutputImageDimension, unsigned int, TOutputImage::ImageDimension);
+  itkSetMacro(InsideValue, InputImagePixelType);
+  itkGetConstMacro(InsideValue, InputImagePixelType);
 
 #ifdef ITK_USE_CONCEPT_CHECKING
-	/** Begin concept checking */
-	itkConceptMacro(SameDimensionCheck, (Concept::SameDimension<InputImageDimension, 3>));
-	itkConceptMacro(SameTypeCheck, (Concept::SameType<InputImagePixelType, OutputImagePixelType>));
-	itkConceptMacro(InputAdditiveOperatorsCheck, (Concept::AdditiveOperators<InputImagePixelType>));
-	itkConceptMacro(InputConvertibleToIntCheck, (Concept::Convertible<InputImagePixelType, int>));
-	itkConceptMacro(IntConvertibleToInputCheck, (Concept::Convertible<int, InputImagePixelType>));
-	itkConceptMacro(InputIntComparableCheck, (Concept::Comparable<InputImagePixelType, int>));
-	/** End concept checking */
+  /** Begin concept checking */
+  itkConceptMacro(SameDimensionCheck, (Concept::SameDimension<InputImageDimension, 3>));
+  itkConceptMacro(SameTypeCheck, (Concept::SameType<InputImagePixelType, OutputImagePixelType>));
+  itkConceptMacro(InputAdditiveOperatorsCheck, (Concept::AdditiveOperators<InputImagePixelType>));
+  itkConceptMacro(InputConvertibleToIntCheck, (Concept::Convertible<InputImagePixelType, int>));
+  itkConceptMacro(IntConvertibleToInputCheck, (Concept::Convertible<int, InputImagePixelType>));
+  itkConceptMacro(InputIntComparableCheck, (Concept::Comparable<InputImagePixelType, int>));
+  /** End concept checking */
 #endif
 
 protected:
-	FixTopologyCarveOutside();
-	~FixTopologyCarveOutside() override = default;
-	void PrintSelf(std::ostream& os, Indent indent) const override;
+  FixTopologyCarveOutside();
+  ~FixTopologyCarveOutside() override = default;
+  void
+  PrintSelf(std::ostream & os, Indent indent) const override;
 
-	/** Compute thinning Image. */
-	void GenerateData() override;
+  void
+  GenerateData() override;
 
-	/** Prepare data. */
-	void PrepareData(ProgressAccumulator* progress);
+  void
+  PrepareData(ProgressAccumulator * progress);
 
-	/** Compute thinning image. */
-	void ComputeThinImage(ProgressAccumulator* progress);
+  void
+  ComputeThinImage(ProgressAccumulator * progress);
+
+  std::vector<typename InputImageType::OffsetType>
+  GetNeighborOffsets()
+  {
+    // 18-connectivity
+    using OffsetType = typename InputImageType::OffsetType;
+    return { OffsetType{ -1, 0, 0 }, OffsetType{ 1, 0, 0 }, OffsetType{ 0, -1, 0 },  OffsetType{ 0, 1, 0 },
+             OffsetType{ 0, 0, -1 }, OffsetType{ 0, 0, 1 }, OffsetType{ -1, -1, 0 }, OffsetType{ 1, -1, 0 },
+             OffsetType{ -1, 1, 0 }, OffsetType{ 1, 1, 0 }, OffsetType{ 0, -1, -1 }, OffsetType{ 0, 1, -1 },
+             OffsetType{ 0, -1, 1 }, OffsetType{ 0, 1, 1 }, OffsetType{ -1, 0, -1 }, OffsetType{ 1, 0, -1 },
+             OffsetType{ -1, 0, 1 }, OffsetType{ 1, 0, 1 } };
+  }
 
 private:
-	// region id convention
-	enum ePixelState : OutputImagePixelType {
-		kBackground = 0,
-		kHardForeground,
-		kDilated,
-		kVisited
-	};
+  ITK_DISALLOW_COPY_AND_ASSIGN(FixTopologyCarveOutside);
 
-	OutputImagePointer m_PaddedMask;
-	itk::Image<float, 3>::Pointer m_DistanceMap;
+  enum ePixelState : OutputImagePixelType
+  {
+    kBackground = 0,
+    kHardForeground,
+    kDilated,
+    kVisited
+  };
 
-	float m_Radius = 1.f;
-	InputImagePixelType m_InsideValue = 1;
+  MaskImageTypePointer m_PaddedOutput;
+
+  using RealImageType = itk::Image<float, 3>;
+  RealImageType::Pointer m_DistanceMap;
+
+  SizeValueType       m_Radius = 1;
+  InputImagePixelType m_InsideValue = 1;
 }; // end of FixTopologyCarveOutside class
 
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#	include "itkFixTopologyCarveOutside.hxx"
+#  include "itkFixTopologyCarveOutside.hxx"
 #endif
 
 #endif // itkFixTopologyCarveOutside
