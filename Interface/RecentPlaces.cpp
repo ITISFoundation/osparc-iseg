@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QList>
 #include <QUrl>
+#include <QProcessEnvironment>
 
 namespace iseg {
 
@@ -98,7 +99,8 @@ QString RecentPlaces::LastDirectory()
 {
 	if (!list.empty())
 		return list.front();
-	return QDir::home().absolutePath();
+	
+	return QProcessEnvironment::systemEnvironment().value("ISEG_DEFAULT_LAST_DIR", QDir::home().absolutePath());
 }
 
 std::deque<QString> RecentPlaces::RecentDirectories()

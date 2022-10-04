@@ -36,6 +36,7 @@
 #include <QMessageBox>
 #include <QSplashScreen>
 #include <QVBoxLayout>
+#include <QProcessEnvironment>
 
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -142,7 +143,10 @@ int main(int argc, char** argv)
 	QString splashpicpath = picpath.absoluteFilePath("splash.png");
 	QString locationpath = file_directory.absolutePath();
 	QString latestprojpath = tmpdir.absoluteFilePath("latestproj.txt");
-	QString settingspath = tmpdir.absoluteFilePath("settings.bin");
+
+	QDir settings_dir = QDir(QProcessEnvironment::systemEnvironment().value("ISEG_SETTINGS_DIR", tmpdir.absolutePath()));
+
+	QString settingspath = settings_dir.absoluteFilePath("settings.bin");
 
 	TissueInfos::InitTissues();
 	BranchItem::InitAvailablelabels();
