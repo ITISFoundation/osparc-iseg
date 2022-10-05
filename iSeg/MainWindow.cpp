@@ -2735,10 +2735,6 @@ void MainWindow::SaveSettings()
 
 	fclose(fp);
 
-	QString settings_path = QFileInfo(QString::fromStdString(m_Settingsfile)).absolutePath();
-
-	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings_path);
-
 	QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT", "iSeg");
 	settings.beginGroup("MainWindow");
 	settings.setValue("geometry", saveGeometry());
@@ -2764,6 +2760,11 @@ void MainWindow::SaveSettings()
 void MainWindow::LoadSettings(const std::string& loadfilename)
 {
 	m_Settingsfile = loadfilename;
+
+	// also make this the default path for user scope QSettings
+	QString settings_path = QFileInfo(QString::fromStdString(m_Settingsfile)).absolutePath();
+	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings_path);
+
 	FILE* fp;
 	if ((fp = fopen(loadfilename.c_str(), "rb")) == nullptr)
 	{
