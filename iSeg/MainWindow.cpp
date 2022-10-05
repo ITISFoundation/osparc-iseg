@@ -2735,6 +2735,10 @@ void MainWindow::SaveSettings()
 
 	fclose(fp);
 
+	QString settings_path = QFileInfo(QString::fromStdString(m_Settingsfile)).absolutePath();
+
+	QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settings_path);
+
 	QSettings settings(QSettings::IniFormat, QSettings::UserScope, "ZMT", "iSeg");
 	settings.beginGroup("MainWindow");
 	settings.setValue("geometry", saveGeometry());
