@@ -2462,7 +2462,7 @@ int SlicesHandler::SaveTissuesRawResized(const char* filename, int dxm, int dxp,
 void SlicesHandler::SwapAffine(const std::vector<unsigned int>& order)
 {
 	std::array<Vec3, 3> input_rot, output_rot;
-	transform().GetRotation(input_rot);
+	ImageTransform().GetRotation(input_rot);
 	Vec3 input_spacing = Spacing(), output_spacing;
 
 	// origin does not change by a Permute.  But spacing, directions do
@@ -2475,7 +2475,7 @@ void SlicesHandler::SwapAffine(const std::vector<unsigned int>& order)
 		}
 	}
 
-	auto tr = transform();
+	auto tr = ImageTransform();
 	tr.SetRotation(output_rot);
 	SetTransform(tr);
 	SetSpacing(output_spacing);
