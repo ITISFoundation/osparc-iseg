@@ -96,6 +96,7 @@ public:
 	int ReadRawOverlay(const char* filename, unsigned bitdepth, unsigned short slicenr);
 	int SaveRawResized(const char* filename, int dxm, int dxp, int dym, int dyp, int dzm, int dzp, bool work);
 	int SaveTissuesRawResized(const char* filename, int dxm, int dxp, int dym, int dyp, int dzm, int dzp);
+	void SwapAffine(const std::vector<unsigned int>& order);
 	bool SwapXY();
 	bool SwapYZ();
 	bool SwapXZ();
@@ -412,6 +413,7 @@ public:
 	Vec3 Spacing() const override;
 	Transform ImageTransform() const override;
 	Transform GetTransformActiveSlices() const;
+	void SetSpacing(const Vec3& s);
 	void SetTransform(const Transform& tr);
 	void GetDisplacement(float disp[3]) const;
 	void SetDisplacement(const float disp[3]);
