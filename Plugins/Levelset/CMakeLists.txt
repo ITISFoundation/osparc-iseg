@@ -7,7 +7,7 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-OPTION(PLUGIN_LEVELSET "Build levelset segmentation plugin" ON)
+OPTION(PLUGIN_LEVELSET "Build levelset segmentation plugin" OFF)
 IF(PLUGIN_LEVELSET)
 	USE_BOOST()
 	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/Thirdparty)

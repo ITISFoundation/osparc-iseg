@@ -7,7 +7,7 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-OPTION(PLUGIN_TRACE_TUBES "Build tubular structures tracing plugin" ON)
+OPTION(PLUGIN_TRACE_TUBES "Build tubular structures tracing plugin" OFF)
 IF(PLUGIN_TRACE_TUBES)
 	ADD_SUBDIRECTORY(testsuite)
 
