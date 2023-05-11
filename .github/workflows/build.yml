@@ -21,6 +21,8 @@ jobs:
           sudo apt install -y libboost-filesystem-dev libboost-test-dev libboost-date-time-dev libboost-program-options-dev
           sudo apt install -y libhdf5-dev
           sudo apt install -y libeigen3-dev
+          sudo add-apt-repository ppa:rock-core/qt4
+          sudo apt-get update
           sudo apt install -y libqt4-opengl-dev
           mkdir -p deps
           docker pull itisfoundation/iseg-ubuntu-vtk:8.2
