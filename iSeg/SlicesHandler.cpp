@@ -2459,6 +2459,28 @@ int SlicesHandler::SaveTissuesRawResized(const char* filename, int dxm, int dxp,
 	return 0;
 }
 
+void SlicesHandler::SwapAffine(const std::vector<unsigned int>& order)
+{
+	std::array<Vec3, 3> input_rot, output_rot;
+	ImageTransform().GetRotation(input_rot);
+	Vec3 input_spacing = Spacing(), output_spacing;
+
+	// origin does not change by a Permute.  But spacing, directions do
+	for (unsigned int j = 0; j < 3; j++)
+	{
+		output_spacing[j] = input_spacing[order[j]];
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			output_rot[i][j] = input_rot[i][order[j]];
+		}
+	}
+
+	auto tr = ImageTransform();
+	tr.SetRotation(output_rot);
+	SetTransform(tr);
+	SetSpacing(output_spacing);
+}
+
 bool SlicesHandler::SwapXY()
 {
 	auto lut = GetColorLookupTable();
@@ -2503,19 +2525,7 @@ bool SlicesHandler::SwapXY()
 			ok = false;
 	}
 
-	// BL TODO direction cosines don't reflect full transform
-	float disp[3];
-	GetDisplacement(disp);
-	float dummy = disp[1];
-	disp[1] = disp[0];
-	disp[0] = dummy;
-	SetDisplacement(disp);
-	float dc[6];
-	GetDirectionCosines(dc);
-	std::swap(dc[0], dc[3]);
-	std::swap(dc[1], dc[4]);
-	std::swap(dc[2], dc[5]);
-	SetDirectionCosines(dc);
+	SwapAffine({1, 0, 2});
 
 	// add color lookup table again
 	UpdateColorLookupTable(lut);
@@ -2564,23 +2574,7 @@ bool SlicesHandler::SwapYZ()
 			ok = false;
 	}
 
-	// BL TODO direction cosines don't reflect full transform
-	float disp[3];
-	GetDisplacement(disp);
-	float dummy = disp[2];
-	disp[2] = disp[1];
-	disp[1] = dummy;
-	SetDisplacement(disp);
-	float dc[6];
-	GetDirectionCosines(dc);
-	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	vtkMath::Cross(&dc[0], &dc[3], cross);
-	vtkMath::Normalize(cross);
-	for (unsigned short i = 0; i < 3; ++i)
-	{
-		dc[i + 3] = cross[i];
-	}
-	SetDirectionCosines(dc);
+	SwapAffine({0, 2, 1});
 
 	// add color lookup table again
 	UpdateColorLookupTable(lut);
@@ -2631,23 +2625,7 @@ bool SlicesHandler::SwapXZ()
 			ok = false;
 	}
 
-	// BL TODO direction cosines don't reflect full transform
-	float disp[3];
-	GetDisplacement(disp);
-	float dummy = disp[2];
-	disp[2] = disp[0];
-	disp[0] = dummy;
-	SetDisplacement(disp);
-	float dc[6];
-	GetDirectionCosines(dc);
-	float cross[3]; // direction cosines of z-axis (in image coordinate frame)
-	vtkMath::Cross(&dc[0], &dc[3], cross);
-	vtkMath::Normalize(cross);
-	for (unsigned short i = 0; i < 3; ++i)
-	{
-		dc[i] = cross[i];
-	}
-	SetDirectionCosines(dc);
+	SwapAffine({2, 1, 0});
 
 	// add color lookup table again
 	UpdateColorLookupTable(lut);
@@ -2659,49 +2637,7 @@ bool SlicesHandler::SwapXZ()
 
 int SlicesHandler::SaveRawXySwapped(const char* filename, bool work)
 {
-	FILE* fp;
-	float* bits_tmp;
-	float* p_bits;
-
-	bits_tmp = (float*)malloc(sizeof(float) * m_Area);
-	if (bits_tmp == nullptr)
-		return -1;
-
-	if ((fp = fopen(filename, "wb")) == nullptr)
-		return (-1);
-
-	unsigned int bitsize = m_Width * (unsigned)m_Height;
-
-	for (unsigned short j = 0; j < m_Nrslices; j++)
-	{
-		if (work)
-			p_bits = m_ImageSlices[j].ReturnWork();
-		else
-			p_bits = m_ImageSlices[j].ReturnBmp();
-		unsigned pos1, pos2;
-		pos1 = 0;
-		for (unsigned short y = 0; y < m_Height; y++)
-		{
-			pos2 = y;
-			for (unsigned short x = 0; x < m_Width; x++)
-			{
-				bits_tmp[pos2] = p_bits[pos1];
-				pos1++;
-				pos2 += m_Height;
-			}
-		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
-		{
-			fclose(fp);
-			return (-1);
-		}
-	}
-
-	free(bits_tmp);
-
-	fclose(fp);
-	return 0;
+	return SaveRawXySwapped(filename, work ? TargetSlices() : SourceSlices(), m_Width, m_Height, m_Nrslices);
 }
 
 int SlicesHandler::SaveRawXySwapped(const char* filename, std::vector<float*> bits_to_swap, short unsigned width, short unsigned height, short unsigned nrslices)
@@ -2710,14 +2646,13 @@ int SlicesHandler::SaveRawXySwapped(const char* filename, std::vector<float*> bi
 	float* bits_tmp;
 	float* p_bits;
 
-	bits_tmp = (float*)malloc(sizeof(float) * width * height);
+	const unsigned int bitsize = width * (unsigned)height;
+	bits_tmp = (float*)malloc(sizeof(float) * bitsize);
 	if (bits_tmp == nullptr)
 		return -1;
 
 	if ((fp = fopen(filename, "wb")) == nullptr)
 		return (-1);
-
-	unsigned int bitsize = width * (unsigned)height;
 
 	for (unsigned short j = 0; j < nrslices; j++)
 	{
@@ -2734,8 +2669,7 @@ int SlicesHandler::SaveRawXySwapped(const char* filename, std::vector<float*> bi
 				pos2 += height;
 			}
 		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
+		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) < sizeof(float) * bitsize)
 		{
 			fclose(fp);
 			return (-1);
@@ -2750,49 +2684,7 @@ int SlicesHandler::SaveRawXySwapped(const char* filename, std::vector<float*> bi
 
 int SlicesHandler::SaveRawXzSwapped(const char* filename, bool work)
 {
-	FILE* fp;
-	float* bits_tmp;
-	float* p_bits;
-
-	unsigned int bitsize = m_Nrslices * (unsigned)m_Height;
-	bits_tmp = (float*)malloc(sizeof(float) * bitsize);
-	if (bits_tmp == nullptr)
-		return -1;
-
-	if ((fp = fopen(filename, "wb")) == nullptr)
-		return (-1);
-
-	for (unsigned short x = 0; x < m_Width; x++)
-	{
-		unsigned pos1, pos2;
-		pos1 = 0;
-		for (unsigned short z = 0; z < m_Nrslices; z++)
-		{
-			if (work)
-				p_bits = (m_ImageSlices[z]).ReturnWork();
-			else
-				p_bits = (m_ImageSlices[z]).ReturnBmp();
-			pos2 = z;
-			pos1 = x;
-			for (unsigned short y = 0; y < m_Height; y++)
-			{
-				bits_tmp[pos2] = p_bits[pos1];
-				pos1 += m_Width;
-				pos2 += m_Nrslices;
-			}
-		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
-		{
-			fclose(fp);
-			return (-1);
-		}
-	}
-
-	free(bits_tmp);
-
-	fclose(fp);
-	return 0;
+	return SaveRawXzSwapped(filename, work ? TargetSlices() : SourceSlices(), m_Width, m_Height, m_Nrslices);
 }
 
 int SlicesHandler::SaveRawXzSwapped(const char* filename, std::vector<float*> bits_to_swap, short unsigned width, short unsigned height, short unsigned nrslices)
@@ -2801,7 +2693,7 @@ int SlicesHandler::SaveRawXzSwapped(const char* filename, std::vector<float*> bi
 	float* bits_tmp;
 	float* p_bits;
 
-	unsigned int bitsize = nrslices * (unsigned)height;
+	const unsigned int bitsize = nrslices * (unsigned)height;
 	bits_tmp = (float*)malloc(sizeof(float) * bitsize);
 	if (bits_tmp == nullptr)
 		return -1;
@@ -2825,8 +2717,7 @@ int SlicesHandler::SaveRawXzSwapped(const char* filename, std::vector<float*> bi
 				pos2 += nrslices;
 			}
 		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
+		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) < sizeof(float) * bitsize)
 		{
 			fclose(fp);
 			return (-1);
@@ -2841,49 +2732,7 @@ int SlicesHandler::SaveRawXzSwapped(const char* filename, std::vector<float*> bi
 
 int SlicesHandler::SaveRawYzSwapped(const char* filename, bool work)
 {
-	FILE* fp;
-	float* bits_tmp;
-	float* p_bits;
-
-	unsigned int bitsize = m_Nrslices * (unsigned)m_Width;
-	bits_tmp = (float*)malloc(sizeof(float) * bitsize);
-	if (bits_tmp == nullptr)
-		return -1;
-
-	if ((fp = fopen(filename, "wb")) == nullptr)
-		return (-1);
-
-	for (unsigned short y = 0; y < m_Height; y++)
-	{
-		unsigned pos1, pos2;
-		pos1 = 0;
-		for (unsigned short z = 0; z < m_Nrslices; z++)
-		{
-			if (work)
-				p_bits = (m_ImageSlices[z]).ReturnWork();
-			else
-				p_bits = (m_ImageSlices[z]).ReturnBmp();
-			pos2 = z * m_Width;
-			pos1 = y * m_Width;
-			for (unsigned short x = 0; x < m_Width; x++)
-			{
-				bits_tmp[pos2] = p_bits[pos1];
-				pos1++;
-				pos2++;
-			}
-		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
-		{
-			fclose(fp);
-			return (-1);
-		}
-	}
-
-	free(bits_tmp);
-
-	fclose(fp);
-	return 0;
+	return SaveRawYzSwapped(filename, work ? TargetSlices() : SourceSlices(), m_Width, m_Height, m_Nrslices);
 }
 
 int SlicesHandler::SaveRawYzSwapped(const char* filename, std::vector<float*> bits_to_swap, short unsigned width, short unsigned height, short unsigned nrslices)
@@ -2892,7 +2741,7 @@ int SlicesHandler::SaveRawYzSwapped(const char* filename, std::vector<float*> bi
 	float* bits_tmp;
 	float* p_bits;
 
-	unsigned int bitsize = nrslices * (unsigned)width;
+	const unsigned int bitsize = nrslices * (unsigned)width;
 	bits_tmp = (float*)malloc(sizeof(float) * bitsize);
 	if (bits_tmp == nullptr)
 		return -1;
@@ -2916,8 +2765,7 @@ int SlicesHandler::SaveRawYzSwapped(const char* filename, std::vector<float*> bi
 				pos2++;
 			}
 		}
-		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) <
-				sizeof(float) * (unsigned int)bitsize)
+		if (fwrite(bits_tmp, 1, sizeof(float) * bitsize, fp) < sizeof(float) * bitsize)
 		{
 			fclose(fp);
 			return (-1);
@@ -6120,6 +5968,13 @@ Transform SlicesHandler::GetTransformActiveSlices() const
 }
 
 void SlicesHandler::SetTransform(const Transform& tr) { m_Transform = tr; }
+
+void SlicesHandler::SetSpacing(const Vec3& s)
+{
+	m_Dx = s[0];
+	m_Dy = s[1];
+	m_Thickness = s[2];
+}
 
 Vec3 SlicesHandler::Spacing() const
 {

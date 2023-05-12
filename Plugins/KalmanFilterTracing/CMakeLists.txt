@@ -7,7 +7,7 @@
 ## This software is released under the MIT License.
 ##  https://opensource.org/licenses/MIT
 ##
-OPTION(PLUGIN_KALMAN_TRACER "Build Kalman filter tracing plugin" ON)
+OPTION(PLUGIN_KALMAN_TRACER "Build Kalman filter tracing plugin" OFF)
 IF(PLUGIN_KALMAN_TRACER)
 	#ADD_SUBDIRECTORY(testsuite)
 

@@ -1672,12 +1672,8 @@ void MainWindow::ExecuteSwapxy()
 	}
 
 	emit EndDatachange(this, iseg::ClearUndo);
-	Pair p = m_Handler3D->GetPixelsize();
-	if (p.low != p.high)
-	{
-		m_Handler3D->SetPixelsize(p.low, p.high);
-		PixelsizeChanged();
-	}
+
+	PixelsizeChanged();
 	ClearStack();
 }
 
@@ -1723,16 +1719,8 @@ void MainWindow::ExecuteSwapxz()
 
 	emit EndDatachange(this, iseg::ClearUndo);
 
-	Pair p = m_Handler3D->GetPixelsize();
-	float thick = m_Handler3D->GetSlicethickness();
-	if (thick != p.high)
-	{
-		m_Handler3D->SetPixelsize(thick, p.low);
-		m_Handler3D->SetSlicethickness(p.high);
-		PixelsizeChanged();
-		SlicethicknessChanged();
-	}
-
+	PixelsizeChanged();
+	SlicethicknessChanged();
 	ClearStack();
 }
 
@@ -1778,15 +1766,8 @@ void MainWindow::ExecuteSwapyz()
 
 	emit EndDatachange(this, iseg::ClearUndo);
 
-	Pair p = m_Handler3D->GetPixelsize();
-	float thick = m_Handler3D->GetSlicethickness();
-	if (thick != p.low)
-	{
-		m_Handler3D->SetPixelsize(p.high, thick);
-		m_Handler3D->SetSlicethickness(p.low);
-		PixelsizeChanged();
-		SlicethicknessChanged();
-	}
+	PixelsizeChanged();
+	SlicethicknessChanged();
 	ClearStack();
 }
 
