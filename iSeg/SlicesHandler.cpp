@@ -762,7 +762,10 @@ bool SlicesHandler::ReadVolume(const std::string& file_path, bool tissue)
 			slices[i] = tissue ? m_ImageSlices[i].ReturnWork() : m_ImageSlices[i].ReturnBmp();
 		}
 
-		ImageReader::GetVolume(file_path, slices.data(), m_Nrslices, m_Width, m_Height);
+		if (!ImageReader::GetVolume(file_path, slices.data(), m_Nrslices, m_Width, m_Height))
+		{
+			return false;
+		}
 
 		if (tissue)
 		{
@@ -810,7 +813,10 @@ bool SlicesHandler::ReadVolumeOrient(const std::string& file_path, bool tissue, 
 			slices[i] = tissue ? m_ImageSlices[i].ReturnWork() : m_ImageSlices[i].ReturnBmp();
 		}
 
-		ImageReader::CopySlices(buffer, slices.data(), 0, m_Nrslices, m_Width, m_Height);
+		if (!ImageReader::CopySlices(buffer, slices.data(), 0, m_Nrslices, m_Width, m_Height))
+		{
+			return false;
+		}
 
 		if (tissue)
 		{
@@ -3262,9 +3268,8 @@ bool SlicesHandler::ImportMarkers(const char* filename)
 		{
 			int num_landmarks = 0;
 			std::string line;
-			for (size_t line_idx = 0; !ifs.eof(); ++line_idx)
+			for (size_t line_idx = 0; std::getline(ifs, line); ++line_idx)
 			{
-				std::getline(ifs, line);
 				alg::trim(line);
 
 				std::vector<std::string> tokens;
@@ -3301,7 +3306,7 @@ bool SlicesHandler::ImportMarkers(const char* filename)
 		}
 		catch (const std::exception& e)
 		{
-			ISEG_ERROR("Failed to load markers" << e.what());
+			ISEG_ERROR("Failed to load markers: " << e.what());
 			return false;
 		}
 
