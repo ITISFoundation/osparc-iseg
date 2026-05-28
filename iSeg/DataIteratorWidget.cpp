@@ -103,7 +103,7 @@ DataIteratorWidget::DataIteratorWidget(iseg::SlicesHandler* hand3D, QWidget* par
 	m_SaveButton = new QPushButton("Save");
 	m_SaveButton->setToolTip("Save local changes to the labels to the 'Processed Output' folder.");
 	m_SaveMarksButton = new QPushButton("Save Marks");
-	m_SaveMarksButton->setToolTip("Save local changes to the labels to the 'Processed Output' folder.");
+	m_SaveMarksButton->setToolTip("Save marks/landmarks to the 'Processed Output' folder.");
 	m_NextButton = new QPushButton("Next");
 	m_NextButton->setToolTip("Load next image/label pair.");
 	m_NextUnprocessedButton = new QPushButton("Next Unprocessed");
@@ -153,7 +153,13 @@ void DataIteratorWidget::LoadNext(bool skip_processed)
 		m_FileTime.Modified();
 		current_pair = -1;
 
-		fs::directory_iterator dir_itr(m_CachedImageDir);
+		boost::system::error_code dir_ec;
+		fs::directory_iterator dir_itr(m_CachedImageDir, dir_ec);
+		if (dir_ec)
+		{
+			m_Status->setText(QString("[0/0] Cannot open directory: %1").arg(QString::fromStdString(m_CachedImageDir)));
+			return;
+		}
 		fs::directory_iterator end_iter;
 		for (; dir_itr != end_iter; ++dir_itr)
 		{
@@ -197,10 +203,7 @@ void DataIteratorWidget::LoadNext(bool skip_processed)
 				current_pair++;
 			}
 		}
-	}
 
-	if (current_pair < static_cast<int>(m_ImageLabelPairs.size()))
-	{
 		Load(current_pair);
 	}
 	else
@@ -231,7 +234,7 @@ void DataIteratorWidget::Load(int pair_idx)
 		}
 	}
 
-	if (pair_idx < static_cast<int>(m_ImageLabelPairs.size()))
+	if (pair_idx >= 0 && pair_idx < static_cast<int>(m_ImageLabelPairs.size()))
 	{
 		const auto image_path = m_ImageLabelPairs[pair_idx].first;
 		const auto labels_path = m_ImageLabelPairs[pair_idx].second;
@@ -315,7 +318,8 @@ void DataIteratorWidget::Save()
 		const fs::path image_path(m_ImageLabelPairs[m_CurrentPair].first);
 		const fs::path output_file_path = output_dir / image_path.filename();
 
-		if (!m_LoadProcessed->isChecked() && fs::exists(output_file_path))
+		boost::system::error_code ec2;
+		if (!m_LoadProcessed->isChecked() && fs::exists(output_file_path, ec2))
 		{
 			const int ret = QMessageBox::warning(
 					this, "iSeg", "The output file exists. Do you want to overwrite it with your changes?",
