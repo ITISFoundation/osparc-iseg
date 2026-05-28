@@ -40,3 +40,6 @@
 
 # data
 assets/
+
+# venv
+.venv/
