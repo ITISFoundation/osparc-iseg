@@ -39,6 +39,7 @@ SET(ViewerSrcs
 	bmp_read_1.cpp
 	ImageViewerWidget.cpp
 	ChannelExtractor.cpp
+	DataIteratorWidget.cpp
 	DicomReader.cpp
 	EdgeWidget.cpp
 	FastmarchingFuzzyWidget.cpp
@@ -97,6 +98,7 @@ SET(MyMocHeaders
 	ActiveSlicesConfigDialog.h
 	AtlasViewer.h
 	AtlasWidget.h
+	DataIteratorWidget.h
 	EdgeWidget.h
 	FastmarchingFuzzyWidget.h
 	FeatureWidget.h

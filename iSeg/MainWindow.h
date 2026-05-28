@@ -50,6 +50,7 @@ class TissueTreeWidget;
 class TissueHierarchyWidget;
 class BitsStack;
 class ExtoverlayWidget;
+class DataIteratorWidget;
 class MultiDatasetWidget;
 class ScaleWork;
 class ImageMath;
@@ -247,6 +248,7 @@ private:
 	BitsStack* m_BitstackWidget;
 	ExtoverlayWidget* m_OverlayWidget;
 	MultiDatasetWidget* m_MultidatasetWidget;
+	DataIteratorWidget* m_DataIteratorWidget;
 	QCheckBox* m_CbBmptissuevisible;
 	QCheckBox* m_CbBmpcrosshairvisible;
 	QCheckBox* m_CbBmpoutlinevisible;

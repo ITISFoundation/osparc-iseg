@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include "TimeStamp.h"
 #include "Transform.h"
 #include "Types.h"
 
@@ -56,6 +57,16 @@ public:
 	virtual void GetColor(size_t, unsigned char& r, unsigned char& g, unsigned char& b) const = 0;
 
 	virtual void SetTargetFixedRange(bool on) = 0;
+
+	virtual bool ReadVolume(const std::string& file_path, bool tissue) { return false; }
+	virtual void SignalVolumeChange(bool update_tissues) {}
+
+	void Modified() { m_ModifyTime.Modified(); }
+
+	const TimeStamp& ModifyTime() const { return m_ModifyTime; }
+
+private:
+	TimeStamp m_ModifyTime;
 };
 
 } // namespace iseg

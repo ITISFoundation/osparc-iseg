@@ -43,6 +43,7 @@
 #include <vtkQuadricLODActor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
+#include <vtkTransform.h>
 
 #include <vtkAutoInit.h>
 #ifdef ISEG_VTK_OPENGL2
@@ -173,6 +174,8 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	m_Ren3D = vtkSmartPointer<vtkRenderer>::New();
 	m_Ren3D->SetBackground(0, 0, 0);
 	m_Ren3D->SetViewport(0.0, 0.0, 1.0, 1.0);
+	m_Ren3D->SetLightFollowCamera(true);
+	m_Ren3D->SetTwoSidedLighting(true);
 
 	m_VtkWidget->GetRenderWindow()->AddRenderer(m_Ren3D);
 	m_VtkWidget->GetRenderWindow()->LineSmoothingOn();
@@ -182,6 +185,7 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	m_Iren = vtkSmartPointer<QVTKInteractor>::New();
 	m_Iren->SetInteractorStyle(m_Style);
 	m_Iren->SetRenderWindow(m_VtkWidget->GetRenderWindow());
+	m_Iren->SetLightFollowCamera(false);
 
 	QMenu* popup_actions = new QMenu(m_VtkWidget);
 	popup_actions->addAction("Select tissue")->setData(eActions::kSelectTissue);
@@ -195,7 +199,9 @@ SurfaceViewerWidget::SurfaceViewerWidget(SlicesHandler* hand3D1, eInputType inpu
 	// copy input data and setup VTK pipeline
 	m_Input = vtkSmartPointer<vtkImageData>::New();
 	m_DiscreteCubes = vtkSmartPointer<vtkDiscreteFlyingEdges3D>::New();
+	m_DiscreteCubes->SetComputeNormals(false);
 	m_Cubes = vtkSmartPointer<vtkFlyingEdges3D>::New();
+	m_Cubes->SetComputeNormals(false);
 	m_Decimate = vtkSmartPointer<vtkDecimatePro>::New();
 	m_Decimate->PreserveTopologyOn();
 	m_Decimate->BoundaryVertexDeletionOff();
@@ -220,6 +226,13 @@ void SurfaceViewerWidget::Load()
 {
 	auto tissue_selection = m_Hand3D->TissueSelection();
 	auto spacing = m_Hand3D->Spacing();
+	auto transform = m_Hand3D->ImageTransform().ToVector();
+	auto vtk_transform = vtkSmartPointer<vtkTransform>::New();
+	vtk_transform->SetMatrix(transform.data());
+
+	auto mirror = m_Hand3D->ImageTransform().HasFlip();
+	ISEG_INFO("The transform is mirrored: " << mirror);
+
 	size_t slice_size = static_cast<size_t>(m_Hand3D->Width()) * m_Hand3D->Height();
 
 	m_Input->SetExtent(0, (int)m_Hand3D->Width() - 1, 0, (int)m_Hand3D->Height() - 1, 0, (int)m_Hand3D->NumSlices() - 1);
@@ -329,8 +342,10 @@ void SurfaceViewerWidget::Load()
 	}
 
 	m_Actor->GetProperty()->SetOpacity(1.0 - 0.01 * m_SlTrans->value());
+	m_Actor->GetProperty()->SetBackfaceCulling(false);
 
 	m_Actor->SetMapper(m_Mapper);
+	m_Actor->SetUserMatrix(vtk_transform->GetMatrix());
 	m_Ren3D->AddActor(m_Actor);
 }
 
@@ -447,21 +462,31 @@ void SurfaceViewerWidget::SelectAction(QAction* action)
 		{
 			if (m_Input)
 			{
-				double* world_position = m_Picker->GetPickPosition();
+				auto transform = m_Hand3D->ImageTransform().ToVector();
+				auto vtk_transform = vtkSmartPointer<vtkTransform>::New();
+				vtk_transform->SetMatrix(transform.data());
+				vtk_transform->Inverse();
+
+				double worldPosition[3];
+				m_Picker->GetPickPosition(worldPosition);
+
+				double imagePosition[3];
+				vtk_transform->TransformPoint(worldPosition, imagePosition);
+
 				int dims[3];
-				double spacing[3], origin[3];
+				double spacing[3];
 				m_Input->GetDimensions(dims);
 				m_Input->GetSpacing(spacing);
-				m_Input->GetOrigin(origin);
+
 				// compute closest slice
-				int slice = static_cast<int>(std::round((world_position[2] - origin[2]) / spacing[2]));
+				int slice = static_cast<int>(std::round((imagePosition[2]) / spacing[2]));
 				slice = std::max(0, std::min(slice, dims[2] - 1));
 
 				if (action->data() == eActions::kMarkPoint)
 				{
 					Point p;
-					p.px = static_cast<int>(std::round((world_position[0] - origin[0]) / spacing[0]));
-					p.py = static_cast<int>(std::round((world_position[1] - origin[1]) / spacing[1]));
+					p.px = static_cast<int>(std::round((imagePosition[0]) / spacing[0]));
+					p.py = static_cast<int>(std::round((imagePosition[1]) / spacing[1]));
 
 					DataSelection data_selection;
 					data_selection.sliceNr = slice;

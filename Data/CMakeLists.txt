@@ -22,6 +22,7 @@ SET(SOURCES
 	LogApi.cpp
 	Property.cpp
 	SlicesHandlerITKInterface.cpp
+	TimeStamp.cpp
 	Transform.cpp
 )
 

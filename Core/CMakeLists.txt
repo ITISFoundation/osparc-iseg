@@ -32,6 +32,7 @@ SET(SOURCES
 	ImageWriter.cpp
 	IndexPriorityQueue.cpp
 	InitializeITKFactory.cpp
+	itkDICOMOrientation.cxx
 	KMeans.cpp
 	LoadPlugin.cpp
 	Log.cpp

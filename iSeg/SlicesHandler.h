@@ -79,6 +79,11 @@ public:
 	int ReadRTdose(const char* filename);
 	bool LoadSurface(const std::string& filename, bool overwrite_working, bool intersect);
 
+	bool ReadVolume(const std::string& file_path, bool tissue) override;
+	bool ReadVolumeOrient(const std::string& file_path, bool tissue, int orientation);
+	bool ExportMarkers(const char* filename);
+	bool ImportMarkers(const char* filename);
+
 	int LoadAllXdmf(const char* filename);
 	int LoadAllHDF(const char* filename);
 
@@ -311,7 +316,9 @@ public:
 
 	unsigned short ActiveSlice() const override;
 	boost::signals2::signal<void(unsigned short)> m_OnActiveSliceChanged;
+	boost::signals2::signal<void(bool)> m_OnVolumeChanged;
 	void SetActiveSlice(unsigned short slice, bool signal_change = false) override;
+	void SignalVolumeChange(bool update_tissues) override { m_OnVolumeChanged(update_tissues); }
 
 	Bmphandler* GetActivebmphandler();
 	tissuelayers_size_t ActiveTissuelayer() const override;

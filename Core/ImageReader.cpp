@@ -14,6 +14,8 @@
 #include "ImageReader.h"
 #include "VTIreader.h"
 
+#include "itkDICOMOrientImageFilter.h"
+
 #include <itkImage.h>
 #include <itkImageFileReader.h>
 #include <itkRGBPixel.h>
@@ -222,6 +224,98 @@ bool ImageReader::GetInfo(const std::string& filename, unsigned& width, unsigned
 		}
 	}
 	return false;
+}
+
+bool ImageReader::GetVolume(const std::string& filename, std::vector<float>& buffer, unsigned& width, unsigned& height, unsigned& nrslices, float spacing[3], Transform& transform, eOrientation orientation)
+{
+	using image_type = itk::Image<float, 3>;
+	using reader_type = itk::ImageFileReader<image_type>;
+
+	auto reader = reader_type::New();
+	reader->SetFileName(filename);
+	try
+	{
+		reader->UpdateLargestPossibleRegion();
+	}
+	catch (itk::ExceptionObject&)
+	{
+		return false;
+	}
+
+	const unsigned int num_dim = (reader->GetImageIO() != nullptr) ? reader->GetImageIO()->GetNumberOfDimensions() : 3;
+	typename reader_type::OutputImagePointer image = reader->GetOutput();
+
+	auto orient = itk::DICOMOrientImageFilter<image_type>::New();
+	if (orientation != eOrientation::noChange && num_dim == 3)
+	{
+		switch (orientation)
+		{
+		case eOrientation::RAS:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::RAS);
+			break;
+		case eOrientation::LPS:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::LPS);
+			break;
+		case eOrientation::LAS:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::LAS);
+			break;
+		case eOrientation::PSL:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::PSL);
+			break;
+		case eOrientation::RSP:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::RSP);
+			break;
+		default:
+			orient->SetDesiredCoordinateOrientation(itk::DICOMOrientation::OrientationEnum::RAS);
+			break;
+		}
+
+		orient->SetInput(reader->GetOutput());
+		orient->UpdateLargestPossibleRegion();
+		image = orient->GetOutput();
+	}
+
+	// copy dimension
+	const auto region = image->GetLargestPossibleRegion();
+	const itk::SizeValueType dims[3] = {region.GetSize()[0], region.GetSize()[1], region.GetSize()[2]};
+
+	width = static_cast<unsigned>(dims[0]);
+	height = static_cast<unsigned>(dims[1]);
+	nrslices = (num_dim == 3) ? static_cast<unsigned>(dims[2]) : 1;
+
+	// copy transform & spacing
+	transform.SetIdentity();
+	for (unsigned int r = 0; r < num_dim; r++)
+	{
+		spacing[r] = static_cast<float>(image->GetSpacing()[r]);
+		for (unsigned int c = 0; c < num_dim; c++)
+			transform[r][c] = image->GetDirection()[r][c];
+		transform[r][3] = image->GetOrigin()[r];
+	}
+
+	// copy buffer
+	auto container = image->GetPixelContainer();
+	const image_type::PixelType* import_buffer = container->GetImportPointer();
+	const auto buffer_length = region.GetNumberOfPixels();
+	buffer.assign(import_buffer, import_buffer + buffer_length);
+
+	return true;
+}
+
+bool ImageReader::CopySlices(const std::vector<float>& buffer, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height)
+{
+	for (size_t k = 0; k < nrslices; k++)
+	{
+		size_t pos3d = (k + startslice) * width * height, pos = 0;
+		for (unsigned j = 0; j < height; j++)
+		{
+			for (unsigned i = 0; i < width; i++, pos++, pos3d++)
+			{
+				slices[k][pos] = buffer[pos3d];
+			}
+		}
+	}
+	return true;
 }
 
 } // namespace iseg

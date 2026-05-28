@@ -19,6 +19,15 @@ namespace iseg {
 
 class Transform;
 
+enum class eOrientation {
+	noChange = 0, // don't permute axes, preserve file ordering
+	RAS,          // axial (Neurologist/Neuroimaging preferred)
+	LAS,          // axial, (Radiologist preferred)
+	LPS,          // ITK preferred
+	PSL,          // sagittal
+	RSP,          // coronal
+};
+
 /** \brief Image reader based on ITK image reader factory
 	*/
 class ISEG_CORE_API ImageReader
@@ -41,6 +50,15 @@ public:
 	/// loads image into pre-allocated memory
 	static bool GetVolume(const std::string& filename, float** slices, unsigned nrslices, unsigned width, unsigned height);
 	static bool GetVolume(const std::string& filename, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height);
+
+	/// loads image into buffer with optional orientation resampling
+	static bool GetVolume(const std::string& filename, std::vector<float>& buffer,
+			unsigned& width, unsigned& height, unsigned& nrslices,
+			float spacing[3], Transform& transform, eOrientation orient = eOrientation::noChange);
+
+	/// copies buffer to pre-allocated memory
+	static bool CopySlices(const std::vector<float>& buffer, float** slices,
+			unsigned startslice, unsigned nrslices, unsigned width, unsigned height);
 };
 
 } // namespace iseg
