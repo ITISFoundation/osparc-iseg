@@ -28,6 +28,7 @@
 #include "vtkImageExtractCompatibleMesher.h"
 
 #include "Data/ItkProgressObserver.h"
+#include "Data/ScopeExit.h"
 #include "Data/SlicesHandlerITKInterface.h"
 #include "Data/Transform.h"
 
@@ -71,12 +72,16 @@
 
 #include <itkConnectedComponentImageFilter.h>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProgressDialog>
+
+#include <fstream>
 
 #ifndef NO_OPENMP_SUPPORT
 #	include <omp.h>
@@ -726,6 +731,101 @@ int SlicesHandler::ReadImage(const char* filename)
 		return 1;
 	}
 	return 0;
+}
+
+bool SlicesHandler::ReadVolume(const std::string& file_path, bool tissue)
+{
+	if (!tissue)
+	{
+		UpdateColorLookupTable(nullptr);
+	}
+
+	unsigned w, h, nrofslices;
+	float spacing1[3];
+	Transform transform1;
+	if (ImageReader::GetInfo(file_path, w, h, nrofslices, spacing1, transform1))
+	{
+		m_Thickness = spacing1[2];
+		m_Dx = spacing1[0];
+		m_Dy = spacing1[1];
+		m_Transform = transform1;
+
+		// only re-allocate if size changed
+		if (w != m_Width || h != m_Height || nrofslices != m_Nrslices)
+		{
+			Newbmp(w, h, nrofslices);
+		}
+
+		std::vector<float*> slices(m_Nrslices);
+		for (unsigned i = 0; i < m_Nrslices; i++)
+		{
+			slices[i] = tissue ? m_ImageSlices[i].ReturnWork() : m_ImageSlices[i].ReturnBmp();
+		}
+
+		ImageReader::GetVolume(file_path, slices.data(), m_Nrslices, m_Width, m_Height);
+
+		if (tissue)
+		{
+			Work2tissueall();
+
+			tissues_size_t m;
+			GetRangetissue(&m);
+			Buildmissingtissues(m);
+
+			ClearWork();
+		}
+		m_Loaded = true;
+		return true;
+	}
+	return false;
+}
+
+bool SlicesHandler::ReadVolumeOrient(const std::string& file_path, bool tissue, int orientation)
+{
+	if (!tissue)
+	{
+		UpdateColorLookupTable(nullptr);
+	}
+
+	unsigned w, h, nrofslices;
+	float spacing1[3];
+	Transform transform1;
+	std::vector<float> buffer;
+	if (ImageReader::GetVolume(file_path, buffer, w, h, nrofslices, spacing1, transform1, static_cast<eOrientation>(orientation)))
+	{
+		m_Thickness = spacing1[2];
+		m_Dx = spacing1[0];
+		m_Dy = spacing1[1];
+		m_Transform = transform1;
+
+		// only re-allocate if size changed
+		if (w != m_Width || h != m_Height || nrofslices != m_Nrslices)
+		{
+			Newbmp(w, h, nrofslices);
+		}
+
+		std::vector<float*> slices(m_Nrslices);
+		for (unsigned i = 0; i < m_Nrslices; i++)
+		{
+			slices[i] = tissue ? m_ImageSlices[i].ReturnWork() : m_ImageSlices[i].ReturnBmp();
+		}
+
+		ImageReader::CopySlices(buffer, slices.data(), 0, m_Nrslices, m_Width, m_Height);
+
+		if (tissue)
+		{
+			Work2tissueall();
+
+			tissues_size_t m;
+			GetRangetissue(&m);
+			Buildmissingtissues(m);
+
+			ClearWork();
+		}
+		m_Loaded = true;
+		return true;
+	}
+	return false;
 }
 
 int SlicesHandler::ReadOverlay(const char* filename, unsigned short slicenr)
@@ -3092,6 +3192,139 @@ void SlicesHandler::GetLabels(std::vector<AugmentedMark>* labels)
 			labels->push_back(am);
 		}
 	}
+}
+
+bool SlicesHandler::ExportMarkers(const char* filename)
+{
+	const auto tx = ImageTransform();
+	const auto sp = Spacing();
+
+	std::vector<std::pair<Vec3, Mark>> points;
+
+	for (unsigned i = m_Startslice; i < m_Endslice; i++)
+	{
+		const std::vector<Mark>& marks = *(m_ImageSlices[i].ReturnMarks());
+		for (const auto& mark : marks)
+		{
+			const Vec3 p = {mark.p.px * sp[0], mark.p.py * sp[1], i * sp[2]};
+			points.push_back({tx.RigidTransformPoint(p), mark});
+		}
+	}
+
+	auto fp = fopen(filename, "w");
+	if (fp)
+	{
+		const auto ext = boost::filesystem::path(filename).extension().string();
+		if (ext == ".csv")
+		{
+			fprintf(fp, "# X, Y, Z, Label\n");
+			for (const auto& m : points)
+			{
+				fprintf(fp, "%g, %g, %g, %d\n", m.first[0], m.first[1], m.first[2], m.second.mark);
+			}
+		}
+		else // .pts format
+		{
+			fprintf(fp, "Version 1.0\n");
+			fprintf(fp, "%d\n", static_cast<int>(points.size()));
+			for (size_t idx = 0; idx < points.size(); ++idx)
+			{
+				const auto& m = points[idx];
+				auto name = m.second.name;
+				if (name.empty())
+				{
+					name = "Point " + std::to_string(idx + 1);
+				}
+				fprintf(fp, "%s %g %g %g\n", name.c_str(), m.first[0], m.first[1], m.first[2]);
+			}
+		}
+
+		fclose(fp);
+		return true;
+	}
+	return false;
+}
+
+bool SlicesHandler::ImportMarkers(const char* filename)
+{
+	namespace alg = boost::algorithm;
+	namespace fs = boost::filesystem;
+
+	std::vector<std::pair<std::string, Vec3>> landmarks;
+
+	const auto file_path = fs::path(filename).string();
+	std::ifstream ifs(file_path);
+	if (ifs.is_open())
+	{
+		auto ifs_guard = MakeScopeExit([&ifs]() { ifs.close(); });
+
+		try
+		{
+			int num_landmarks = 0;
+			std::string line;
+			for (size_t line_idx = 0; !ifs.eof(); ++line_idx)
+			{
+				std::getline(ifs, line);
+				alg::trim(line);
+
+				std::vector<std::string> tokens;
+				boost::split(tokens, line, boost::is_any_of("\t "), boost::token_compress_on);
+				if (line_idx == 0)
+				{
+					std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+					if (tokens.size() != 2 || !alg::starts_with(line, "version 1"))
+						throw std::runtime_error("Expecting 'Version 1.0' on first line");
+				}
+				else if (line_idx == 1)
+				{
+					if (tokens.size() != 1)
+						throw std::runtime_error("Second line should contain the number of landmarks");
+
+					num_landmarks = atoi(tokens[0].c_str());
+				}
+				else
+				{
+					if (tokens.size() >= 4)
+					{
+						const auto n = tokens.size();
+						const auto x = atof(tokens[n - 3].c_str());
+						const auto y = atof(tokens[n - 2].c_str());
+						const auto z = atof(tokens[n - 1].c_str());
+
+						tokens.resize(n - 3);
+						const auto name = boost::join(tokens, " ");
+
+						landmarks.push_back(std::make_pair(name, Vec3(x, y, z)));
+					}
+				}
+			}
+		}
+		catch (const std::exception& e)
+		{
+			ISEG_ERROR("Failed to load markers" << e.what());
+			return false;
+		}
+
+		const auto tx = ImageTransform();
+		const auto sp = Spacing();
+
+		auto m = tx.ToVector();
+		vtkNew<vtkTransform> inverse_transform;
+		inverse_transform->SetMatrix(m.data());
+		inverse_transform->Inverse();
+
+		for (const auto& p : landmarks)
+		{
+			const auto pt = inverse_transform->TransformFloatPoint(p.second.v);
+			const short idx[3] = {
+					static_cast<short>(std::min(static_cast<int>(Width()) - 1, std::max(0, static_cast<int>(std::round(pt[0] / sp[0]))))),
+					static_cast<short>(std::min(static_cast<int>(Height()) - 1, std::max(0, static_cast<int>(std::round(pt[1] / sp[1]))))),
+					static_cast<short>(std::min(static_cast<int>(NumSlices()) - 1, std::max(0, static_cast<int>(std::round(pt[2] / sp[2])))))};
+			AddMark({idx[0], idx[1]}, Mark::red, idx[2], p.first);
+		}
+		return true;
+	}
+	return false;
 }
 
 void SlicesHandler::AddVm(std::vector<Mark>* vm1)

@@ -70,4 +70,19 @@ bool Transform::operator!=(const Transform& other) const
 	return false;
 }
 
+bool Transform::HasFlip() const
+{
+	// determinant of rotation matrix is negative
+	float det = m_M[0][0] * (m_M[1][1] * m_M[2][2] - m_M[1][2] * m_M[2][1]) - m_M[0][1] * (m_M[1][0] * m_M[2][2] - m_M[1][2] * m_M[2][0]) + m_M[0][2] * (m_M[1][0] * m_M[2][1] - m_M[1][1] * m_M[2][0]);
+
+	return det < 0.0;
+}
+
+std::vector<double> Transform::ToVector() const
+{
+	auto& self = *this;
+	auto begin = static_cast<const float*>(self[0]);
+	return std::vector<double>(begin, begin + 16);
+}
+
 } // namespace iseg

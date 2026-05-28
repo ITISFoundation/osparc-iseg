@@ -13,6 +13,7 @@
 
 #include "ActiveSlicesConfigDialog.h"
 #include "AtlasWidget.h"
+#include "DataIteratorWidget.h"
 #include "EdgeWidget.h"
 #include "FastmarchingFuzzyWidget.h"
 #include "FeatureWidget.h"
@@ -361,6 +362,23 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 		SliceChanged();
 	});
 
+	m_Handler3D->m_OnVolumeChanged.connect([this](bool update_tissues) {
+		PixelsizeChanged();
+		SlicethicknessChanged();
+		ResetBrightnesscontrast();
+
+		if (update_tissues)
+		{
+			tissues_size_t m;
+			m_Handler3D->GetRangetissue(&m);
+			m_Handler3D->Buildmissingtissues(m);
+			m_TissueTreeWidget->UpdateTreeWidget();
+
+			tissues_size_t curr_tissue_type = m_TissueTreeWidget->GetCurrentType();
+			TissuenrChanged(curr_tissue_type - 1);
+		}
+	});
+
 	if (!m_Handler3D->Isloaded())
 	{
 		m_Handler3D->Newbmp(512, 512, 10);
@@ -669,6 +687,7 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	m_BitstackWidget = new BitsStack(m_Handler3D, this);
 	m_OverlayWidget = new ExtoverlayWidget(m_Handler3D, this);
 	m_MultidatasetWidget = new MultiDatasetWidget(m_Handler3D, this);
+	m_DataIteratorWidget = new DataIteratorWidget(m_Handler3D, this);
 
 	int height_max1 = height_max;
 
@@ -896,6 +915,12 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	multi_dataset_dock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 	multi_dataset_dock->setWidget(m_MultidatasetWidget);
 	addDockWidget(Qt::BottomDockWidgetArea, multi_dataset_dock);
+
+	auto data_iterator_dock = new QDockWidget(tr("Data Iterator"), this);
+	data_iterator_dock->setObjectName("Data Iterator");
+	data_iterator_dock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+	data_iterator_dock->setWidget(m_DataIteratorWidget);
+	addDockWidget(Qt::BottomDockWidgetArea, data_iterator_dock);
 
 	QDockWidget* overlaydock = new QDockWidget(tr("Overlay"), this);
 	overlaydock->setObjectName("Overlay");
@@ -1418,6 +1443,8 @@ MainWindow::MainWindow(SlicesHandler* hand3D, const QString& locationstring, con
 	QObject_connect(m_MultidatasetWidget, SIGNAL(DatasetChanged()), this, SLOT(DatasetChanged()));
 	QObject_connect(m_MultidatasetWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
 	QObject_connect(m_MultidatasetWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
+	QObject_connect(m_DataIteratorWidget, SIGNAL(BeginDatachange(DataSelection&,QWidget*,bool)), this, SLOT(HandleBeginDatachange(DataSelection&,QWidget*,bool)));
+	QObject_connect(m_DataIteratorWidget, SIGNAL(EndDatachange(QWidget*,eEndUndoAction)), this, SLOT(HandleEndDatachange(QWidget*,eEndUndoAction)));
 
 	QObject_connect(m_CbTissuelock, SIGNAL(clicked()), this, SLOT(TissuelockToggled()));
 

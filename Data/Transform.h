@@ -14,6 +14,7 @@
 #include "iSegData.h"
 
 #include <algorithm>
+#include <vector>
 
 namespace iseg {
 
@@ -66,10 +67,14 @@ public:
 	// for cropping, padding_lo[.] is negative
 	void PaddingUpdateTransform(const int padding_lo[3], const Vec3& spacing);
 
+	bool HasFlip() const;
+
 	float* operator[](size_t row) { return m_M[row]; }
 	const float* operator[](size_t row) const { return m_M[row]; }
 
 	bool operator!=(const Transform& other) const;
+
+	std::vector<double> ToVector() const;
 };
 
 template<typename TVec3>
