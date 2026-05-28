@@ -10878,7 +10878,7 @@ bool SlicesHandler::ComputeSplitTissues(tissues_size_t tissue, ProgressInfo* pro
 		if (!progress || !progress->WasCanceled())
 		{
 			// add tissue infos
-			auto n = filter->GetObjectCount();
+			size_t n = filter->GetObjectCount();
 			if (n > 1)
 			{
 				ISEG_INFO("Tissue has " << n << " regions");
@@ -10891,21 +10891,68 @@ bool SlicesHandler::ComputeSplitTissues(tissues_size_t tissue, ProgressInfo* pro
 					hist[it.Get()]++;
 				}
 				hist[0] = 0;
-				const size_t max_label = std::distance(hist.begin(), std::max_element(hist.begin(), hist.end()));
+
+				// sort: largest first
+				std::vector<std::pair<size_t, unsigned>> hist_labels;
+				for (unsigned i = 0, iN = static_cast<unsigned>(hist.size()); i < iN; ++i)
+				{
+					hist_labels.push_back(std::make_pair(hist[i], i));
+				}
+				std::sort(hist_labels.begin(), hist_labels.end(), std::greater<std::pair<size_t, unsigned>>());
+				const auto largest_object = hist_labels[0].second;
 
 				// mapping from object number to new tissue index
-				tissues_size_t ninitial = TissueInfos::GetTissueCount();
 				std::vector<tissues_size_t> object2index(n + 1, 0);
-				object2index[max_label] = tissue;
-				tissues_size_t idx = 1;
-				for (tissues_size_t i = 1; i <= n; ++i)
+				object2index[largest_object] = tissue;
+
+				const tissues_size_t ninitial = TissueInfos::GetTissueCount();
+
+				// check if name <tissue>_%d already exists
+				auto selected_name = TissueInfos::GetTissueName(tissue);
+				tissues_size_t max_existing_idx = 0;
+				for (tissues_size_t i = 0; i <= ninitial; ++i)
 				{
-					if (i != max_label)
+					auto tname = TissueInfos::GetTissueName(i);
+					if (tname.rfind(selected_name + "_", 0) == 0)
 					{
-						TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
-						info.m_Name += (boost::format("_%d") % static_cast<int>(idx)).str();
-						TissueInfos::AddTissue(info);
-						object2index.at(i) = ninitial + idx++;
+						try
+						{
+							tissues_size_t val = std::stoi(tname.substr(selected_name.length() + 1));
+							max_existing_idx = std::max(max_existing_idx, val);
+						}
+						catch (const std::exception&) {}
+					}
+				}
+
+				if (max_existing_idx)
+					ISEG_INFO("Found existing tissue: " << selected_name + "_" + std::to_string(max_existing_idx));
+
+				tissues_size_t MAX_NUM_REGIONS = 10;
+				tissues_size_t idx = 1;
+				for (const auto& p : hist_labels)
+				{
+					auto label = p.second;
+					auto object_size = p.first;
+
+					// skip empty objects, and largest object
+					if (object_size > 0 && label != largest_object)
+					{
+						object2index.at(label) = ninitial + std::min<tissues_size_t>(idx, MAX_NUM_REGIONS);
+
+						ISEG_INFO(label << " -> " << object2index.at(label));
+
+						// add at most MAX_NUM_REGIONS tissues
+						if (idx <= MAX_NUM_REGIONS)
+						{
+							TissueInfo info(*TissueInfos::GetTissueInfo(tissue));
+							info.m_Name += "_" + std::to_string(max_existing_idx + idx++);
+							if (TissueInfos::GetTissueType(info.m_Name))
+							{
+								ISEG_ERROR("Found existing tissue: " << info.m_Name);
+							}
+							TissueInfos::AddTissue(info);
+							ISEG_INFO("Adding tissue: " << info.m_Name);
+						}
 					}
 				}
 
