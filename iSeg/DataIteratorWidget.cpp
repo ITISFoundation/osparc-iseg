@@ -46,7 +46,7 @@ struct Orientation
 	eOrientation tag;
 };
 
-const std::array<Orientation, 4> _OrientationNames = {
+const std::array<Orientation, 4> kOrientationNames = {
 		Orientation{"no change", eOrientation::noChange},
 		Orientation{"Axial", eOrientation::RAS},
 		Orientation{"Sagittal", eOrientation::PSL},
@@ -113,7 +113,7 @@ DataIteratorWidget::DataIteratorWidget(iseg::SlicesHandler* hand3D, QWidget* par
 	m_LoadProcessed->setToolTip("Load labels from 'Processed Output' if it exists.");
 
 	m_Orientation = new QComboBox;
-	for (auto& o : _OrientationNames)
+	for (auto& o : kOrientationNames)
 	{
 		m_Orientation->addItem(QString::fromStdString(o.name));
 	}
@@ -252,7 +252,7 @@ void DataIteratorWidget::Load(int pair_idx)
 		}
 
 		//
-		const auto orientation = static_cast<int>(_OrientationNames.at(m_Orientation->currentIndex()).tag);
+		const auto orientation = static_cast<int>(kOrientationNames.at(m_Orientation->currentIndex()).tag);
 
 		iseg::DataSelection dataSelection;
 		dataSelection.allSlices = true;
@@ -263,17 +263,25 @@ void DataIteratorWidget::Load(int pair_idx)
 
 		// read labels
 		const auto load_processed = m_LoadProcessed->isChecked() && fs::exists(processed_path, ec);
-		m_Handler3D->ReadVolumeOrient(load_processed ? processed_path.string() : labels_path, true, orientation);
+		if (!m_Handler3D->ReadVolumeOrient(load_processed ? processed_path.string() : labels_path, true, orientation))
+		{
+			ISEG_WARNING("Failed to read labels");
+		}
 
 		// read target
 		if (!m_TargetDir->text().isEmpty() && fs::exists(target_path, ec))
 		{
-			m_Handler3D->ReadVolumeOrient(target_path.string(), false, orientation);
-			m_Handler3D->Bmp2workall();
+			if (m_Handler3D->ReadVolumeOrient(target_path.string(), false, orientation))
+			{
+				m_Handler3D->Bmp2workall();
+			}
 		}
 
 		// read image
-		m_Handler3D->ReadVolumeOrient(image_path, false, orientation);
+		if (!m_Handler3D->ReadVolumeOrient(image_path, false, orientation))
+		{
+			ISEG_WARNING("Failed to read image");
+		}
 
 		emit EndDatachange(this, iseg::ClearUndo);
 
@@ -337,7 +345,7 @@ void DataIteratorWidget::Save()
 
 		tissue_image_t::Pointer tissues = itk_handler.GetTissuesDeprecated(false);
 
-		const auto orientation = _OrientationNames.at(m_Orientation->currentIndex()).tag;
+		const auto orientation = kOrientationNames.at(m_Orientation->currentIndex()).tag;
 		if (orientation != eOrientation::noChange)
 		{
 			// load input orientation

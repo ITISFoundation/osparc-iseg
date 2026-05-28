@@ -231,7 +231,6 @@ void SurfaceViewerWidget::Load()
 	vtk_transform->SetMatrix(transform.data());
 
 	auto mirror = m_Hand3D->ImageTransform().HasFlip();
-	ISEG_INFO("The transform is mirrored: " << mirror);
 
 	size_t slice_size = static_cast<size_t>(m_Hand3D->Width()) * m_Hand3D->Height();
 

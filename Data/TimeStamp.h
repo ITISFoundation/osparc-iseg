@@ -29,12 +29,12 @@ public:
 		return m_ModifiedTime;
 	}
 
-	bool operator>(TimeStamp& ts) const
+	bool operator>(const TimeStamp& ts) const
 	{
 		return (m_ModifiedTime > ts.m_ModifiedTime);
 	}
 
-	bool operator<(TimeStamp& ts) const
+	bool operator<(const TimeStamp& ts) const
 	{
 		return (m_ModifiedTime < ts.m_ModifiedTime);
 	}
