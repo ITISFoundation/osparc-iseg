@@ -304,6 +304,12 @@ bool ImageReader::GetVolume(const std::string& filename, std::vector<float>& buf
 
 bool ImageReader::CopySlices(const std::vector<float>& buffer, float** slices, unsigned startslice, unsigned nrslices, unsigned width, unsigned height)
 {
+	const size_t required = static_cast<size_t>(startslice + nrslices) * width * height;
+	if (buffer.size() < required)
+	{
+		return false;
+	}
+
 	for (size_t k = 0; k < nrslices; k++)
 	{
 		size_t pos3d = (k + startslice) * width * height, pos = 0;
